@@ -1,21 +1,30 @@
 package com.stripe.android.common.configuration
 
+import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.CardBrandAcceptance
+import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.CustomPaymentMethod
+import com.stripe.android.elements.payment.GooglePayConfiguration
+import com.stripe.android.elements.payment.LinkConfiguration
+import com.stripe.android.elements.payment.PaymentMethodLayout
+import com.stripe.android.elements.payment.ShopPayConfiguration
+import com.stripe.android.elements.payment.WalletButtonsConfiguration
 import com.stripe.android.model.CardBrand
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 
 internal object ConfigurationDefaults {
     const val allowsDelayedPaymentMethods: Boolean = true
     const val allowsPaymentMethodsRequiringShippingAddress: Boolean = false
     const val allowsRemovalOfLastSavedPaymentMethod: Boolean = true
-    val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
-    val billingDetails: PaymentSheet.BillingDetails = PaymentSheet.BillingDetails()
-    val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
-        PaymentSheet.BillingDetailsCollectionConfiguration()
-    val customer: PaymentSheet.CustomerConfiguration? = null
-    val googlePay: PaymentSheet.GooglePayConfiguration? = null
-    val link: PaymentSheet.LinkConfiguration = PaymentSheet.LinkConfiguration()
+    val appearance: Appearance = Appearance()
+    val billingDetails: BillingDetails = BillingDetails()
+    val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
+        BillingDetailsCollectionConfiguration()
+    val customer: CustomerConfiguration? = null
+    val googlePay: GooglePayConfiguration? = null
+    val link: LinkConfiguration = LinkConfiguration()
     const val googlePayEnabled: Boolean = false
     val headerTextForSelectionScreen: String? = null
     val paymentMethodOrder: List<String> = emptyList()
@@ -24,10 +33,10 @@ internal object ConfigurationDefaults {
     val shippingDetails: AddressDetails? = null
     val externalPaymentMethods: List<String> = emptyList()
     val paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.Automatic
-    val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = PaymentSheet.CardBrandAcceptance.All
-    val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> = emptyList()
-    val walletButtons: PaymentSheet.WalletButtonsConfiguration = PaymentSheet.WalletButtonsConfiguration()
-    val shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = null
+    val cardBrandAcceptance: CardBrandAcceptance = CardBrandAcceptance.All
+    val customPaymentMethods: List<CustomPaymentMethod> = emptyList()
+    val walletButtons: WalletButtonsConfiguration = WalletButtonsConfiguration()
+    val shopPayConfiguration: ShopPayConfiguration? = null
     val googlePlacesApiKey: String? = null
 
     const val embeddedViewDisplaysMandateText: Boolean = true

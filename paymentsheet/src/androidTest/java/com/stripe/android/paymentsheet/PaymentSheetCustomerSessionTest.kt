@@ -1,6 +1,9 @@
 package com.stripe.android.paymentsheet
 
 import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -220,14 +223,14 @@ class PaymentSheetCustomerSessionTest {
         page.clickOnSaveForFutureUsage()
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     private fun PaymentSheetTestRunnerContext.presentWithPaymentIntent() {
         presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
                 configuration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    customer = CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
                         clientSecret = "cuss_1",
                     ),
@@ -236,14 +239,14 @@ class PaymentSheetCustomerSessionTest {
         }
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     private fun PaymentSheetTestRunnerContext.presentWithSetupIntent() {
         presentPaymentSheet {
             presentWithSetupIntent(
                 setupIntentClientSecret = "seti_example_secret_example",
                 configuration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    customer = CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
                         clientSecret = "cuss_1",
                     ),

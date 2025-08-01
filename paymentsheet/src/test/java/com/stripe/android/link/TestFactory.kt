@@ -3,6 +3,7 @@ package com.stripe.android.link
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
@@ -27,7 +28,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -213,7 +213,7 @@ internal object TestFactory {
         cardBrandFilter = DefaultCardBrandFilter,
         financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
         passthroughModeEnabled = false,
-        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
         defaultBillingDetails = null,
         useAttestationEndpointsForLink = false,
         suppress2faModal = false,
@@ -242,7 +242,7 @@ internal object TestFactory {
         amount = Amount(1000, "USD"),
         billingDetails = null,
         shippingDetails = null,
-        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
         hasIntentToSetup = false,
         paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
     )

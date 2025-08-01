@@ -3,17 +3,17 @@ package com.stripe.android.customersheet.data
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.customersheet.CustomerAdapter
-import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.CustomerPermissions
-import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.map
+import com.stripe.android.elements.customersheet.CustomerAdapter
+import com.stripe.android.elements.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
+import com.stripe.android.elements.customersheet.CustomerSheet
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -115,8 +115,8 @@ internal class CustomerAdapterDataSource @Inject constructor(
     private suspend fun fetchElementsSession(): Result<ElementsSession> {
         val paymentMethodTypes = createPaymentMethodTypes()
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-            PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
+            IntentConfiguration(
+                mode = IntentConfiguration.Mode.Setup(),
                 paymentMethodTypes = paymentMethodTypes,
             )
         )

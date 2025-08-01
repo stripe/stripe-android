@@ -1,8 +1,9 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
@@ -61,7 +62,7 @@ internal object CustomerSettingsDefinition :
         configurationBuilder.customer(playgroundState.customerConfig)
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     override fun configure(
         value: CustomerType,
         configurationBuilder: PaymentSheet.Configuration.Builder,
@@ -69,7 +70,7 @@ internal object CustomerSettingsDefinition :
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
     ) {
         configurationBuilder.customer(
-            PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+            CustomerConfiguration.createWithCustomerSession(
                 id = playgroundState.customerId,
                 clientSecret = playgroundState.customerSessionClientSecret
             )

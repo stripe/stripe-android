@@ -3,12 +3,12 @@ package com.stripe.android.paymentelement.embedded.content
 import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.Appearance
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
 import com.stripe.android.paymentelement.confirmation.assertSucceeded
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
@@ -44,7 +44,7 @@ class EmbeddedConfirmationStarterTest {
                 paymentMethod = PaymentMethodFactory.card(random = true),
             ),
             confirmationOption = FakeConfirmationOption(),
-            appearance = PaymentSheet.Appearance(),
+            appearance = Appearance(),
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123",
             ),

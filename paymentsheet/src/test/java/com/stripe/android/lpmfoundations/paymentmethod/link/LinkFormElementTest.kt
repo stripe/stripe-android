@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.Logger
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentDetails
@@ -29,7 +30,6 @@ import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.createComposeCleanupRule
@@ -152,7 +152,7 @@ class LinkFormElementTest {
             allowDefaultOptIn = false,
             disableRuxInFlowController = false,
             defaultBillingDetails = null,
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             allowUserEmailEdits = true,
             enableDisplayableDefaultValuesInEce = false,

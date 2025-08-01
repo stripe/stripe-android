@@ -14,6 +14,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.requireApplication
+import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkLaunchMode
@@ -317,7 +318,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         paymentMethodMetadata: PaymentMethodMetadata,
         customerStateHolder: CustomerStateHolder,
     ): List<PaymentSheetScreen> {
-        if (config.paymentMethodLayout != PaymentSheet.PaymentMethodLayout.Horizontal) {
+        if (config.paymentMethodLayout != PaymentMethodLayout.Horizontal) {
             return VerticalModeInitialScreenFactory.create(
                 viewModel = this,
                 paymentMethodMetadata = paymentMethodMetadata,

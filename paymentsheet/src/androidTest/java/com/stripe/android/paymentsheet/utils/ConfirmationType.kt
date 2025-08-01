@@ -8,8 +8,7 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentsheet.CreateIntentCallback
-import com.stripe.android.paymentsheet.CreateIntentResult
+import com.stripe.android.elements.payment.CreateIntentCallback
 
 internal sealed class ConfirmationType(
     val createIntentCallback: CreateIntentCallback?,
@@ -89,7 +88,7 @@ internal sealed class ConfirmationType(
 
     class DeferredClientSideConfirmation : ConfirmationType(
         createIntentCallback = { _, _ ->
-            CreateIntentResult.Success(clientSecret = "pi_example_secret_example")
+            CreateIntentCallback.Result.Success(clientSecret = "pi_example_secret_example")
         },
         isDeferredIntent = true,
     ) {

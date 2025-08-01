@@ -5,13 +5,17 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.payment.CustomPaymentMethod
+import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentelement.CustomPaymentMethodResult
-import com.stripe.android.paymentelement.CustomPaymentMethodResultHandler
+import com.stripe.android.elements.payment.CustomPaymentMethodResult
+import com.stripe.android.elements.payment.CustomPaymentMethodResultHandler
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.assertCompleted
@@ -43,14 +47,14 @@ internal class CustomPaymentMethodsTest {
         @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
         integrationType: ProductIntegrationType
     ) {
-        val customPaymentMethod = PaymentSheet.CustomPaymentMethod(
+        val customPaymentMethod = CustomPaymentMethod(
             id = "cpmt_123",
             subtitle = "Pay now",
             disableBillingDetailCollection = true,
         )
 
         var calledConfirmCallback = false
-        var confirmedCustomPaymentMethod: PaymentSheet.CustomPaymentMethod? = null
+        var confirmedCustomPaymentMethod: CustomPaymentMethod? = null
         var confirmedBillingDetails: PaymentMethod.BillingDetails? = null
 
         runProductIntegrationTest(
@@ -87,7 +91,7 @@ internal class CustomPaymentMethodsTest {
             context.launch(
                 configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
                     .customPaymentMethods(listOf(customPaymentMethod))
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                    .paymentMethodLayout(PaymentMethodLayout.Horizontal)
                     .paymentMethodOrder(listOf("cpmt_123", "card"))
                     .build()
             )
@@ -103,14 +107,14 @@ internal class CustomPaymentMethodsTest {
         @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
         integrationType: ProductIntegrationType
     ) {
-        val customPaymentMethod = PaymentSheet.CustomPaymentMethod(
+        val customPaymentMethod = CustomPaymentMethod(
             id = "cpmt_123",
             subtitle = "Pay now",
             disableBillingDetailCollection = false,
         )
 
         var calledConfirmCallback = false
-        var confirmedCustomPaymentMethod: PaymentSheet.CustomPaymentMethod? = null
+        var confirmedCustomPaymentMethod: CustomPaymentMethod? = null
         var confirmedBillingDetails: PaymentMethod.BillingDetails? = null
 
         runProductIntegrationTest(
@@ -157,14 +161,14 @@ internal class CustomPaymentMethodsTest {
                 configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
                     .customPaymentMethods(listOf(customPaymentMethod))
                     .billingDetailsCollectionConfiguration(
-                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+                        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                            name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                            phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                            email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
                         )
                     )
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                    .paymentMethodLayout(PaymentMethodLayout.Horizontal)
                     .paymentMethodOrder(listOf("cpmt_123", "card"))
                     .build()
             )
@@ -182,14 +186,14 @@ internal class CustomPaymentMethodsTest {
         @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
         integrationType: ProductIntegrationType
     ) {
-        val customPaymentMethod = PaymentSheet.CustomPaymentMethod(
+        val customPaymentMethod = CustomPaymentMethod(
             id = "cpmt_123",
             subtitle = "Pay now",
             disableBillingDetailCollection = true,
         )
 
         var calledConfirmCallback = false
-        var confirmedCustomPaymentMethod: PaymentSheet.CustomPaymentMethod? = null
+        var confirmedCustomPaymentMethod: CustomPaymentMethod? = null
         var confirmedBillingDetails: PaymentMethod.BillingDetails? = null
 
         runProductIntegrationTest(
@@ -227,14 +231,14 @@ internal class CustomPaymentMethodsTest {
                 configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
                     .customPaymentMethods(listOf(customPaymentMethod))
                     .billingDetailsCollectionConfiguration(
-                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+                        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                            name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                            phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                            email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
                         )
                     )
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                    .paymentMethodLayout(PaymentMethodLayout.Horizontal)
                     .paymentMethodOrder(listOf("cpmt_123", "card"))
                     .build()
             )
@@ -247,14 +251,14 @@ internal class CustomPaymentMethodsTest {
 
     @Test
     fun testSuccessfulWithEmbedded() {
-        val customPaymentMethod = PaymentSheet.CustomPaymentMethod(
+        val customPaymentMethod = CustomPaymentMethod(
             id = "cpmt_123",
             subtitle = "Pay now",
             disableBillingDetailCollection = true,
         )
 
         var calledConfirmCallback = false
-        var confirmedCustomPaymentMethod: PaymentSheet.CustomPaymentMethod? = null
+        var confirmedCustomPaymentMethod: CustomPaymentMethod? = null
         var confirmedBillingDetails: PaymentMethod.BillingDetails? = null
 
         runEmbeddedPaymentElementTest(

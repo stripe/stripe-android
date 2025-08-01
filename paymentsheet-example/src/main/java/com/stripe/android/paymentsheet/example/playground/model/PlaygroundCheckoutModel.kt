@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.model
 
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.CustomerSessionApiPreview
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -219,14 +219,14 @@ data class CheckoutResponse(
     @SerialName("paymentMethodTypes")
     val paymentMethodTypes: String? = null,
 ) {
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     fun makeCustomerConfig(
         customerKeyType: CheckoutRequest.CustomerKeyType?
     ) = customerId?.let { id ->
         when (customerKeyType) {
             CheckoutRequest.CustomerKeyType.CustomerSession -> {
                 customerSessionClientSecret?.let { clientSecret ->
-                    PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    CustomerConfiguration.createWithCustomerSession(
                         id = id,
                         clientSecret = clientSecret,
                     )
@@ -235,7 +235,7 @@ data class CheckoutResponse(
             CheckoutRequest.CustomerKeyType.Legacy,
             null -> {
                 customerEphemeralKeySecret?.let { ephemeralKeySecret ->
-                    PaymentSheet.CustomerConfiguration(
+                    CustomerConfiguration(
                         id = id,
                         ephemeralKeySecret = ephemeralKeySecret
                     )

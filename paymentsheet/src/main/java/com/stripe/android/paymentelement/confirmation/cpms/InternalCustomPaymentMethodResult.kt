@@ -7,7 +7,7 @@ import androidx.annotation.RestrictTo
 import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import com.stripe.android.core.exception.LocalStripeException
-import com.stripe.android.paymentelement.CustomPaymentMethodResult
+import com.stripe.android.elements.payment.CustomPaymentMethodResult
 import kotlinx.parcelize.Parcelize
 
 internal sealed class InternalCustomPaymentMethodResult : Parcelable {

@@ -9,13 +9,16 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.PaymentSheet
+import com.stripe.android.elements.payment.PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -89,10 +92,10 @@ class FlowControllerConfigurationHandlerTest {
 
         val configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
             .appearance(
-                PaymentSheet.Appearance.Builder()
+                Appearance.Builder()
                     .primaryButton(
-                        PaymentSheet.PrimaryButton(
-                            shape = PaymentSheet.PrimaryButtonShape(
+                        Appearance.PrimaryButton(
+                            shape = Appearance.PrimaryButton.Shape(
                                 heightDp = 80f
                             )
                         )
@@ -311,7 +314,7 @@ class FlowControllerConfigurationHandlerTest {
             ),
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
                 .customer(
-                    PaymentSheet.CustomerConfiguration(
+                    CustomerConfiguration(
                         id = " ",
                         ephemeralKeySecret = PaymentSheetFixtures.DEFAULT_EPHEMERAL_KEY,
                     )
@@ -337,7 +340,7 @@ class FlowControllerConfigurationHandlerTest {
             ),
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
                 .customer(
-                    PaymentSheet.CustomerConfiguration(
+                    CustomerConfiguration(
                         id = "customer_id",
                         ephemeralKeySecret = " ",
                         accessType = LegacyCustomerEphemeralKey(PaymentSheetFixtures.DEFAULT_EPHEMERAL_KEY),
@@ -397,8 +400,8 @@ class FlowControllerConfigurationHandlerTest {
             configurationHandler.configure(
                 scope = this,
                 initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    intentConfiguration = IntentConfiguration(
+                        mode = IntentConfiguration.Mode.Payment(
                             amount = amount,
                             currency = "cad",
                         )
@@ -512,8 +515,8 @@ class FlowControllerConfigurationHandlerTest {
         configurationHandler.configure(
             scope = this,
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1234,
                         currency = "cad",
                     ),
@@ -556,8 +559,8 @@ class FlowControllerConfigurationHandlerTest {
         configurationHandler.configure(
             scope = this,
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1234,
                         currency = "cad",
                     ),

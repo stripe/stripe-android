@@ -5,6 +5,12 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.CardBrandAcceptance
+import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.payment.CustomPaymentMethod
+import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.ui.inline.SignUpConsentAction
@@ -28,8 +34,6 @@ import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOptio
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
 import com.stripe.android.paymentelement.confirmation.shoppay.ShopPayConfirmationOption
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -230,8 +234,8 @@ class ConfirmationHandlerOptionKtxTest {
             PaymentSelection.GooglePay.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
                     .googlePay(
-                        PaymentSheet.GooglePayConfiguration(
-                            environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
+                        GooglePayConfiguration(
+                            environment = GooglePayConfiguration.Environment.Production,
                             countryCode = "US",
                             currencyCode = "USD",
                             amount = 5000,
@@ -245,15 +249,15 @@ class ConfirmationHandlerOptionKtxTest {
         ).isEqualTo(
             GooglePayConfirmationOption(
                 config = GooglePayConfirmationOption.Config(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
+                    environment = GooglePayConfiguration.Environment.Production,
                     merchantName = "Merchant, Inc.",
                     merchantCountryCode = "US",
                     merchantCurrencyCode = "USD",
                     customAmount = 5000,
                     customLabel = "Merchant Payments",
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
                     cardBrandFilter = PaymentSheetCardBrandFilter(
-                        cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.All
+                        cardBrandAcceptance = CardBrandAcceptance.All
                     )
                 )
             )
@@ -422,7 +426,7 @@ class ConfirmationHandlerOptionKtxTest {
             darkThemeIconUrl = null,
         )
 
-        val customPaymentMethod = PaymentSheet.CustomPaymentMethod(
+        val customPaymentMethod = CustomPaymentMethod(
             id = "cpmt_123",
             subtitle = "Pay now with PayPal".resolvableString,
             disableBillingDetailCollection = false,
@@ -466,7 +470,7 @@ class ConfirmationHandlerOptionKtxTest {
         ).isNull()
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `On ShopPay selection with config with shopPay config, should return expected option`() {
         assertThat(
@@ -474,7 +478,7 @@ class ConfirmationHandlerOptionKtxTest {
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER
                     .asCommonConfiguration()
                     .copy(
-                        customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                        customer = CustomerConfiguration.createWithCustomerSession(
                             id = "",
                             clientSecret = "css_test_123"
                         ),
@@ -612,7 +616,7 @@ class ConfirmationHandlerOptionKtxTest {
             linkMode = LinkMode.LinkPaymentMethod,
             allowDefaultOptIn = false,
             disableRuxInFlowController = false,
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
             defaultBillingDetails = null,
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             allowUserEmailEdits = true,

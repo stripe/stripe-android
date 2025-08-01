@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.example.playground
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentOption
 
 internal data class FlowControllerState(

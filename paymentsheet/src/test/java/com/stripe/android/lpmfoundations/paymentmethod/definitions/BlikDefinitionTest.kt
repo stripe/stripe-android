@@ -1,10 +1,10 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.SectionElement
 import org.junit.Test
 
@@ -28,11 +28,11 @@ class BlikDefinitionTest {
     fun `createFormElements returns billing address collection fields`() {
         val formElements = BlikDefinition.formElements(
             metadata = blikMetadata.copy(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                    phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                    name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 )
             )
         )

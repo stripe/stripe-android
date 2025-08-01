@@ -7,6 +7,16 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.Address
+import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.CardBrandAcceptance
+import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.payment.CustomPaymentMethod
+import com.stripe.android.elements.payment.GooglePayConfiguration
+import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
@@ -36,12 +46,9 @@ import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.ConfigFixtures
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.FakePrefsRepository
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.MERCHANT_DISPLAY_NAME
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeLogLinkHoldbackExperiment
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
@@ -153,7 +160,7 @@ internal class DefaultPaymentElementLoaderTest {
                     isGooglePayReady = true,
                     linkMode = null,
                     availableWallets = emptyList(),
-                    cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all()),
+                    cardBrandFilter = PaymentSheetCardBrandFilter(CardBrandAcceptance.all()),
                     hasCustomerConfiguration = true,
                     financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
                     customerMetadataPermissions = CustomerMetadata.Permissions(
@@ -610,7 +617,7 @@ internal class DefaultPaymentElementLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = mockConfiguration(
-                customer = PaymentSheet.CustomerConfiguration(
+                customer = CustomerConfiguration(
                     id = "some_id",
                     ephemeralKeySecret = "ek_123",
                 )
@@ -688,8 +695,8 @@ internal class DefaultPaymentElementLoaderTest {
     fun `Populates Link configuration correctly from billing details`() = runTest {
         val loader = createPaymentElementLoader()
 
-        val billingDetails = PaymentSheet.BillingDetails(
-            address = PaymentSheet.Address(country = "CA"),
+        val billingDetails = BillingDetails(
+            address = Address(country = "CA"),
             name = "Till",
         )
 
@@ -721,7 +728,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         val shippingDetails = AddressDetails(
             name = "Not Till",
-            address = PaymentSheet.Address(country = "US"),
+            address = Address(country = "US"),
             isCheckboxSelected = true,
         )
 
@@ -1035,10 +1042,10 @@ internal class DefaultPaymentElementLoaderTest {
     fun `Uses shipping address phone number if checkbox is selected`() = runTest {
         val loader = createPaymentElementLoader()
 
-        val billingDetails = PaymentSheet.BillingDetails(phone = "123-456-7890")
+        val billingDetails = BillingDetails(phone = "123-456-7890")
 
         val shippingDetails = AddressDetails(
-            address = PaymentSheet.Address(country = "US"),
+            address = Address(country = "US"),
             phoneNumber = "098-765-4321",
             isCheckboxSelected = true,
         )
@@ -1074,7 +1081,7 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(
-                customer = PaymentSheet.CustomerConfiguration(
+                customer = CustomerConfiguration(
                     id = "id",
                     ephemeralKeySecret = "ek_123",
                 ),
@@ -1101,7 +1108,7 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(
-                customer = PaymentSheet.CustomerConfiguration(
+                customer = CustomerConfiguration(
                     id = "id",
                     ephemeralKeySecret = "ek_123",
                 ),
@@ -1144,8 +1151,8 @@ internal class DefaultPaymentElementLoaderTest {
     fun `Returns failure if configuring deferred intent with negative amounts`() = runTest {
         assertFailsWith<IllegalArgumentException>("Payment IntentConfiguration requires a positive amount.") {
             PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = -1099,
                         currency = "USD"
                     ),
@@ -1158,8 +1165,8 @@ internal class DefaultPaymentElementLoaderTest {
     fun `Returns failure if configuring deferred intent with zero amounts`() = runTest {
         assertFailsWith<IllegalArgumentException>("Payment IntentConfiguration requires a positive amount.") {
             PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 0,
                         currency = "USD"
                     ),
@@ -1179,7 +1186,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializationMode = initializationMode,
             paymentSheetConfiguration = PaymentSheet.Configuration(
                 merchantDisplayName = "Some Name",
-                customer = PaymentSheet.CustomerConfiguration(
+                customer = CustomerConfiguration(
                     id = "cus_123",
                     ephemeralKeySecret = "ek_123",
                 ),
@@ -1203,7 +1210,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
-            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            linkDisplay = com.stripe.android.elements.payment.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null
@@ -1239,8 +1246,8 @@ internal class DefaultPaymentElementLoaderTest {
             linkSettings = createLinkSettings(passthroughModeEnabled = false),
         )
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+            intentConfiguration = IntentConfiguration(
+                mode = IntentConfiguration.Mode.Payment(
                     amount = 1234,
                     currency = "cad",
                 ),
@@ -1267,7 +1274,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
-            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            linkDisplay = com.stripe.android.elements.payment.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null
@@ -1298,8 +1305,8 @@ internal class DefaultPaymentElementLoaderTest {
 
         loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1234,
                         currency = "cad",
                     ),
@@ -1325,8 +1332,8 @@ internal class DefaultPaymentElementLoaderTest {
 
         loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1234,
                         currency = "cad",
                     ),
@@ -1477,7 +1484,7 @@ internal class DefaultPaymentElementLoaderTest {
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration(
                 merchantDisplayName = "Some Name",
-                customer = PaymentSheet.CustomerConfiguration(
+                customer = CustomerConfiguration(
                     id = "cus_123",
                     ephemeralKeySecret = "ek_123",
                 ),
@@ -1570,9 +1577,9 @@ internal class DefaultPaymentElementLoaderTest {
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration(
                 merchantDisplayName = "Some Name",
-                cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
+                cardBrandAcceptance = CardBrandAcceptance.disallowed(
                     listOf(
-                        PaymentSheet.CardBrandAcceptance.BrandCategory.Amex
+                        CardBrandAcceptance.BrandCategory.Amex
                     )
                 )
             ),
@@ -1617,17 +1624,17 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `When CPMs are requested and returned by elements session, CPMs are available`() = testCustomPaymentMethods(
         requestedCustomPaymentMethods = listOf(
-            PaymentSheet.CustomPaymentMethod(
+            CustomPaymentMethod(
                 id = "cpmt_123",
                 subtitle = "Pay now".resolvableString,
                 disableBillingDetailCollection = false,
             ),
-            PaymentSheet.CustomPaymentMethod(
+            CustomPaymentMethod(
                 id = "cpmt_456",
                 subtitle = "Pay later".resolvableString,
                 disableBillingDetailCollection = true,
             ),
-            PaymentSheet.CustomPaymentMethod(
+            CustomPaymentMethod(
                 id = "cpmt_789",
                 subtitle = "Pay later".resolvableString,
                 disableBillingDetailCollection = true,
@@ -1671,7 +1678,7 @@ internal class DefaultPaymentElementLoaderTest {
         ),
     )
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `When customer session configuration is provided, should pass it to 'ElementsSessionRepository'`() = runTest {
         val repository = FakeElementsSessionRepository(
@@ -1690,7 +1697,7 @@ internal class DefaultPaymentElementLoaderTest {
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration(
                 merchantDisplayName = "Merchant, Inc.",
-                customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                customer = CustomerConfiguration.createWithCustomerSession(
                     id = "cus_1",
                     clientSecret = "customer_client_secret",
                 ),
@@ -1701,14 +1708,14 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         assertThat(repository.lastParams?.customer).isEqualTo(
-            PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+            CustomerConfiguration.createWithCustomerSession(
                 id = "cus_1",
                 clientSecret = "customer_client_secret",
             )
         )
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `When 'CustomerSession' config is provided, should use payment methods from elements_session and not fetch`() =
         runTest {
@@ -1747,7 +1754,7 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    customer = CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
                         clientSecret = "customer_client_secret",
                     ),
@@ -1762,7 +1769,7 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.customer?.paymentMethods).isEqualTo(cards)
         }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `When 'elements_session' has remove permissions enabled, should enable remove permissions in customerMetadata`() =
         runTest {
@@ -1787,7 +1794,7 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    customer = CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
                         clientSecret = "customer_client_secret",
                     ),
@@ -1807,7 +1814,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
         }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `When 'elements_session' has remove permissions disabled, should disable remove permissions in customerMetadata`() =
         runTest {
@@ -1832,7 +1839,7 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    customer = CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
                         clientSecret = "customer_client_secret",
                     ),
@@ -1852,7 +1859,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
         }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `When 'elements_session' has Payment Sheet component disabled, should disable permissions in customerMetadata`() =
         runTest {
@@ -1877,7 +1884,7 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    customer = CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
                         clientSecret = "customer_client_secret",
                     ),
@@ -1897,7 +1904,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
         }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `customer session should have canUpdateFullPaymentMethodDetails permission enabled`() =
         runTest {
@@ -1922,7 +1929,7 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    customer = CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
                         clientSecret = "customer_client_secret",
                     ),
@@ -1953,7 +1960,7 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration(
+                    customer = CustomerConfiguration(
                         id = "cus_1",
                         ephemeralKeySecret = "ek_123",
                     ),
@@ -1973,7 +1980,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
         }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `When 'CustomerSession' config is provided but no customer object was returned in test mode, should report error and return error`() =
         runTest {
@@ -1992,7 +1999,7 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    customer = CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
                         clientSecret = "customer_client_secret",
                     ),
@@ -2013,7 +2020,7 @@ internal class DefaultPaymentElementLoaderTest {
                 )
         }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `When 'CustomerSession' config is provided but no customer object was returned in live mode, should report error and continue with loading without customer`() =
         runTest {
@@ -2032,7 +2039,7 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    customer = CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
                         clientSecret = "customer_client_secret",
                     ),
@@ -2078,7 +2085,7 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration(
+                    customer = CustomerConfiguration(
                         id = "cus_1",
                         ephemeralKeySecret = "ek_123",
                     ),
@@ -2093,7 +2100,7 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.customer?.paymentMethods).isEqualTo(cards)
         }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `When using 'CustomerSession', move last-used customer payment method to the front of the list`() = runTest {
         val paymentMethods = PaymentMethodFixtures.createCards(10)
@@ -2122,7 +2129,7 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(
-                customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                customer = CustomerConfiguration.createWithCustomerSession(
                     id = "id",
                     clientSecret = "cuss_1",
                 ),
@@ -2138,7 +2145,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `When using 'CustomerSession', payment methods should be filtered by supported saved payment methods`() =
         runTest {
@@ -2161,7 +2168,7 @@ internal class DefaultPaymentElementLoaderTest {
             val result = loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
                 paymentSheetConfiguration = mockConfiguration(
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    customer = CustomerConfiguration.createWithCustomerSession(
                         id = "id",
                         clientSecret = "cuss_1",
                     ),
@@ -2181,7 +2188,7 @@ internal class DefaultPaymentElementLoaderTest {
                 .containsExactlyElementsIn(expectedPaymentMethods)
         }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `When using 'CustomerSession' & no default billing details, customer email for Link config is fetched using 'elements_session' ephemeral key`() =
         runTest {
@@ -2217,7 +2224,7 @@ internal class DefaultPaymentElementLoaderTest {
             loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
                 paymentSheetConfiguration = mockConfiguration(
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    customer = CustomerConfiguration.createWithCustomerSession(
                         id = "id",
                         clientSecret = "cuss_1",
                     ),
@@ -2237,7 +2244,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
         }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `When using 'CustomerSession' & has a default saved Stripe payment method, should call 'ElementsSessionRepository' with default id`() =
         runTest {
@@ -2260,7 +2267,7 @@ internal class DefaultPaymentElementLoaderTest {
             loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
                 paymentSheetConfiguration = mockConfiguration(
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    customer = CustomerConfiguration.createWithCustomerSession(
                         id = "id",
                         clientSecret = "cuss_1",
                     ),
@@ -2274,7 +2281,7 @@ internal class DefaultPaymentElementLoaderTest {
                 .isEqualTo("pm_1234321")
         }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `When using 'CustomerSession' & has a default Google Pay payment method, should not call 'ElementsSessionRepository' with default id`() =
         runTest {
@@ -2293,7 +2300,7 @@ internal class DefaultPaymentElementLoaderTest {
             loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
                 paymentSheetConfiguration = mockConfiguration(
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    customer = CustomerConfiguration.createWithCustomerSession(
                         id = "id",
                         clientSecret = "cuss_1",
                     ),
@@ -2486,7 +2493,7 @@ internal class DefaultPaymentElementLoaderTest {
             loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
                 paymentSheetConfiguration = mockConfiguration(
-                    customer = PaymentSheet.CustomerConfiguration(
+                    customer = CustomerConfiguration(
                         id = "id",
                         ephemeralKeySecret = "ek_123",
                     ),
@@ -2526,7 +2533,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
-            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            linkDisplay = com.stripe.android.elements.payment.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null
@@ -2561,7 +2568,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
-            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            linkDisplay = com.stripe.android.elements.payment.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null
@@ -2596,7 +2603,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
-            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            linkDisplay = com.stripe.android.elements.payment.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null
@@ -2629,7 +2636,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = true,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
-            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            linkDisplay = com.stripe.android.elements.payment.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null
@@ -2644,8 +2651,8 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+            intentConfiguration = IntentConfiguration(
+                mode = IntentConfiguration.Mode.Payment(
                     amount = 100L,
                     currency = "usd"
                 ),
@@ -2672,7 +2679,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = true,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
-            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            linkDisplay = com.stripe.android.elements.payment.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null
@@ -2687,8 +2694,8 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+            intentConfiguration = IntentConfiguration(
+                mode = IntentConfiguration.Mode.Payment(
                     amount = 100L,
                     currency = "usd"
                 ),
@@ -2715,7 +2722,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
-            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            linkDisplay = com.stripe.android.elements.payment.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null
@@ -2747,8 +2754,8 @@ internal class DefaultPaymentElementLoaderTest {
 
         val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
             .cardBrandAcceptance(
-                PaymentSheet.CardBrandAcceptance.disallowed(
-                    listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Visa)
+                CardBrandAcceptance.disallowed(
+                    listOf(CardBrandAcceptance.BrandCategory.Visa)
                 )
             ).build()
 
@@ -2773,7 +2780,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `When using 'LegacyEphemeralKey',last PM permission should be true if config value is true`() =
         removeLastPaymentMethodTest(
-            customer = PaymentSheet.CustomerConfiguration(
+            customer = CustomerConfiguration(
                 id = "cus_1",
                 ephemeralKeySecret = "ek_123",
             ),
@@ -2782,11 +2789,11 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(permissions.canRemoveLastPaymentMethod).isTrue()
         }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `When using 'CustomerSession', last PM permission should be true if server & config value is true`() =
         removeLastPaymentMethodTest(
-            customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+            customer = CustomerConfiguration.createWithCustomerSession(
                 id = "cus_1",
                 clientSecret = "cuss_123",
             ),
@@ -2804,8 +2811,8 @@ internal class DefaultPaymentElementLoaderTest {
 
         val config = PaymentSheet.Configuration(
             merchantDisplayName = MERCHANT_DISPLAY_NAME,
-            link = PaymentSheet.LinkConfiguration(
-                display = PaymentSheet.LinkConfiguration.Display.Automatic,
+            link = com.stripe.android.elements.payment.LinkConfiguration(
+                display = com.stripe.android.elements.payment.LinkConfiguration.Display.Automatic,
             ),
         )
 
@@ -2831,8 +2838,8 @@ internal class DefaultPaymentElementLoaderTest {
 
         val config = PaymentSheet.Configuration(
             merchantDisplayName = MERCHANT_DISPLAY_NAME,
-            link = PaymentSheet.LinkConfiguration(
-                display = PaymentSheet.LinkConfiguration.Display.Automatic,
+            link = com.stripe.android.elements.payment.LinkConfiguration(
+                display = com.stripe.android.elements.payment.LinkConfiguration.Display.Automatic,
             ),
         )
 
@@ -2851,7 +2858,7 @@ internal class DefaultPaymentElementLoaderTest {
             linkEnabled = eq(true),
             linkMode = anyOrNull(),
             googlePaySupported = any(),
-            linkDisplay = eq(PaymentSheet.LinkConfiguration.Display.Automatic),
+            linkDisplay = eq(com.stripe.android.elements.payment.LinkConfiguration.Display.Automatic),
             currency = anyOrNull(),
             initializationMode = any(),
             financialConnectionsAvailability = anyOrNull(),
@@ -2872,8 +2879,8 @@ internal class DefaultPaymentElementLoaderTest {
 
         val config = PaymentSheet.Configuration(
             merchantDisplayName = MERCHANT_DISPLAY_NAME,
-            link = PaymentSheet.LinkConfiguration(
-                display = PaymentSheet.LinkConfiguration.Display.Never,
+            link = com.stripe.android.elements.payment.LinkConfiguration(
+                display = com.stripe.android.elements.payment.LinkConfiguration.Display.Never,
             ),
         )
 
@@ -2899,8 +2906,8 @@ internal class DefaultPaymentElementLoaderTest {
 
         val config = PaymentSheet.Configuration(
             merchantDisplayName = MERCHANT_DISPLAY_NAME,
-            link = PaymentSheet.LinkConfiguration(
-                display = PaymentSheet.LinkConfiguration.Display.Never,
+            link = com.stripe.android.elements.payment.LinkConfiguration(
+                display = com.stripe.android.elements.payment.LinkConfiguration.Display.Never,
             ),
         )
 
@@ -2919,7 +2926,7 @@ internal class DefaultPaymentElementLoaderTest {
             linkEnabled = eq(false),
             linkMode = anyOrNull(),
             googlePaySupported = any(),
-            linkDisplay = eq(PaymentSheet.LinkConfiguration.Display.Never),
+            linkDisplay = eq(com.stripe.android.elements.payment.LinkConfiguration.Display.Never),
             currency = anyOrNull(),
             initializationMode = any(),
             financialConnectionsAvailability = anyOrNull(),
@@ -3005,7 +3012,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     private fun removeLastPaymentMethodTest(
-        customer: PaymentSheet.CustomerConfiguration,
+        customer: CustomerConfiguration,
         shouldDisableMobilePaymentElement: Boolean = false,
         canRemoveLastPaymentMethodFromServer: Boolean = true,
         canRemoveLastPaymentMethodFromConfig: Boolean = true,
@@ -3123,7 +3130,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     private fun testCustomPaymentMethods(
-        requestedCustomPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
+        requestedCustomPaymentMethods: List<CustomPaymentMethod>,
         returnedCustomPaymentMethods: List<ElementsSession.CustomPaymentMethod>,
         expectedCustomPaymentMethods: List<DisplayableCustomPaymentMethod>,
         expectedLogMessages: List<String>,
@@ -3164,7 +3171,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializationMode = initializationMode,
             paymentSheetConfiguration = PaymentSheet.Configuration(
                 merchantDisplayName = "Some Name",
-                customer = PaymentSheet.CustomerConfiguration(
+                customer = CustomerConfiguration(
                     id = "cus_123",
                     ephemeralKeySecret = "ek_123",
                 ),
@@ -3186,7 +3193,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
-            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            linkDisplay = com.stripe.android.elements.payment.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null
@@ -3309,11 +3316,11 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     private fun mockConfiguration(
-        customer: PaymentSheet.CustomerConfiguration? = null,
+        customer: CustomerConfiguration? = null,
         isGooglePayEnabled: Boolean = true,
         allowsDelayedPaymentMethods: Boolean = false,
         shippingDetails: AddressDetails? = null,
-        defaultBillingDetails: PaymentSheet.BillingDetails? = null,
+        defaultBillingDetails: BillingDetails? = null,
     ): PaymentSheet.Configuration {
         return PaymentSheet.Configuration(
             merchantDisplayName = "Merchant",
@@ -3321,8 +3328,8 @@ internal class DefaultPaymentElementLoaderTest {
             shippingDetails = shippingDetails,
             defaultBillingDetails = defaultBillingDetails,
             allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
-            googlePay = PaymentSheet.GooglePayConfiguration(
-                environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+            googlePay = GooglePayConfiguration(
+                environment = GooglePayConfiguration.Environment.Test,
                 countryCode = CountryCode.US.value
             ).takeIf { isGooglePayEnabled }
         )
@@ -3333,7 +3340,7 @@ internal class DefaultPaymentElementLoaderTest {
             listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD) + PaymentMethodFixtures.createCards(5)
         private val DEFAULT_PAYMENT_SHEET_CONFIG = PaymentSheet.Configuration(
             merchantDisplayName = "Some Name",
-            customer = PaymentSheet.CustomerConfiguration(
+            customer = CustomerConfiguration(
                 id = "cus_123",
                 ephemeralKeySecret = "ek_123",
             ),
@@ -3367,7 +3374,7 @@ internal class DefaultPaymentElementLoaderTest {
         PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "d4", customerId = "dan")
     )
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     private suspend fun getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
         lastUsedPaymentMethod: PaymentMethod?,
         defaultPaymentMethod: PaymentMethod?,
@@ -3397,7 +3404,7 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(
-                customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                customer = CustomerConfiguration.createWithCustomerSession(
                     id = "id",
                     clientSecret = "cuss_1",
                 ),

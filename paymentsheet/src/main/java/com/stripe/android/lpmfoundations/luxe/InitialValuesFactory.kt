@@ -1,15 +1,15 @@
 package com.stripe.android.lpmfoundations.luxe
 
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.forms.convertToFormValuesMap
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.ParameterDestination
 
 internal object InitialValuesFactory {
     fun create(
-        defaultBillingDetails: PaymentSheet.BillingDetails?,
+        defaultBillingDetails: BillingDetails?,
         paymentMethodCreateParams: PaymentMethodCreateParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams?
     ): Map<IdentifierSpec, String?> {

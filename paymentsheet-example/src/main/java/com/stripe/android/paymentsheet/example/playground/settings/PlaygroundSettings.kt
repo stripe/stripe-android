@@ -7,10 +7,10 @@ import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.core.content.edit
 import com.stripe.android.core.utils.FeatureFlags
-import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.elements.customersheet.CustomerSheet
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.link.LinkController
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest

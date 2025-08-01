@@ -16,6 +16,14 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.Address
+import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.payment.FlowController
+import com.stripe.android.elements.payment.GooglePayConfiguration
+import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.PaymentSheet
+import com.stripe.android.elements.payment.WalletButtonsConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
@@ -63,13 +71,11 @@ import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
@@ -272,8 +278,8 @@ internal class DefaultFlowControllerTest {
                 eventReporter = eventReporter,
             ).apply {
                 configureWithIntentConfiguration(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    intentConfiguration = IntentConfiguration(
+                        mode = IntentConfiguration.Mode.Payment(
                             amount = 5000,
                             currency = "USD",
                         ),
@@ -999,7 +1005,7 @@ internal class DefaultFlowControllerTest {
             val linkConfiguration = TestFactory.LINK_CONFIGURATION.copy(
                 shippingDetails = AddressDetails(
                     name = "Test",
-                    address = PaymentSheet.Address(),
+                    address = Address(),
                 )
             )
 
@@ -1444,13 +1450,13 @@ internal class DefaultFlowControllerTest {
                 merchantDisplayName = "Example, Inc."
             )
                 .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    GooglePayConfiguration(
+                        environment = GooglePayConfiguration.Environment.Test,
                         countryCode = "US",
                     )
                 )
                 .walletButtons(
-                    PaymentSheet.WalletButtonsConfiguration(
+                    WalletButtonsConfiguration(
                         willDisplayExternally = true,
                         walletsToShow = listOf("google_pay", "shop_pay")
                     )
@@ -1483,13 +1489,13 @@ internal class DefaultFlowControllerTest {
                 merchantDisplayName = "Example, Inc."
             )
                 .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    GooglePayConfiguration(
+                        environment = GooglePayConfiguration.Environment.Test,
                         countryCode = "US",
                     )
                 )
                 .walletButtons(
-                    PaymentSheet.WalletButtonsConfiguration(
+                    WalletButtonsConfiguration(
                         willDisplayExternally = true,
                         walletsToShow = listOf("link", "shop_pay")
                     )
@@ -1522,13 +1528,13 @@ internal class DefaultFlowControllerTest {
                 merchantDisplayName = "Example, Inc."
             )
                 .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    GooglePayConfiguration(
+                        environment = GooglePayConfiguration.Environment.Test,
                         countryCode = "US",
                     )
                 )
                 .walletButtons(
-                    PaymentSheet.WalletButtonsConfiguration(
+                    WalletButtonsConfiguration(
                         willDisplayExternally = true,
                         walletsToShow = listOf("link", "google_pay")
                     )
@@ -1549,15 +1555,15 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `Calls confirmation handler with deferred intents`() = confirmationTest {
-        val intentConfiguration = PaymentSheet.IntentConfiguration(
-            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+        val intentConfiguration = IntentConfiguration(
+            mode = IntentConfiguration.Mode.Payment(
                 amount = 12345,
                 currency = "usd"
             )
         )
         val flowController = createAndConfigureFlowControllerForDeferredIntent(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+            intentConfiguration = IntentConfiguration(
+                mode = IntentConfiguration.Mode.Payment(
                     amount = 12345,
                     currency = "usd"
                 )
@@ -1874,8 +1880,8 @@ internal class DefaultFlowControllerTest {
 
         val config = PaymentSheet.Configuration(
             merchantDisplayName = "My merchant",
-            googlePay = PaymentSheet.GooglePayConfiguration(
-                environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+            googlePay = GooglePayConfiguration(
+                environment = GooglePayConfiguration.Environment.Test,
                 countryCode = "CA",
                 currencyCode = "CAD",
                 amount = expectedAmount,
@@ -1899,7 +1905,7 @@ internal class DefaultFlowControllerTest {
         assertThat(arguments.confirmationOption).isEqualTo(
             GooglePayConfirmationOption(
                 config = GooglePayConfirmationOption.Config(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    environment = GooglePayConfiguration.Environment.Test,
                     merchantCountryCode = "CA",
                     merchantCurrencyCode = "CAD",
                     customAmount = expectedAmount,
@@ -1916,8 +1922,8 @@ internal class DefaultFlowControllerTest {
     fun `Confirms Bacs with correct confirmation option`() = confirmationTest {
         val flowController = createFlowController()
 
-        val appearance = PaymentSheet.Appearance.Builder()
-            .colorsDark(PaymentSheet.Colors.defaultLight)
+        val appearance = Appearance.Builder()
+            .colorsDark(Appearance.Colors.defaultLight)
             .build()
 
         flowController.configureExpectingSuccess(
@@ -1982,8 +1988,8 @@ internal class DefaultFlowControllerTest {
     fun `On complete internal payment result with intent config in PI mode, should not save payment selection`() =
         selectionSavedTest(shouldSave = false) { flowController ->
             flowController.configureWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 10L,
                         currency = "USD"
                     )
@@ -1995,11 +2001,11 @@ internal class DefaultFlowControllerTest {
     fun `On complete internal payment result with intent config in PI+SFU mode, should save payment selection`() =
         selectionSavedTest { flowController ->
             flowController.configureWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 10L,
                         currency = "USD",
-                        setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+                        setupFutureUse = IntentConfiguration.SetupFutureUse.OffSession
                     )
                 )
             ) { _, _ -> }
@@ -2009,8 +2015,8 @@ internal class DefaultFlowControllerTest {
     fun `On complete internal payment result with intent config in SI mode, should save payment selection`() =
         selectionSavedTest { flowController ->
             flowController.configureWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Setup(
                         currency = "USD"
                     )
                 )
@@ -2188,7 +2194,7 @@ internal class DefaultFlowControllerTest {
         val shippingDetails = AddressDetails(
             name = "John Doe",
             phoneNumber = "11234567890",
-            address = PaymentSheet.Address(
+            address = Address(
                 line1 = "123 Apple Street",
                 line2 = "Unit 47",
                 city = "South San Francisco",
@@ -2288,7 +2294,7 @@ internal class DefaultFlowControllerTest {
         customerRequestedSave: PaymentSelection.CustomerRequestedSave =
             PaymentSelection.CustomerRequestedSave.NoRequest,
         shouldSave: Boolean = true,
-        configure: (PaymentSheet.FlowController) -> Unit
+        configure: (FlowController) -> Unit
     ) = confirmationTest {
         val paymentIntent = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!
         val flowController = createFlowController()
@@ -2357,8 +2363,8 @@ internal class DefaultFlowControllerTest {
 
     private suspend fun FakeConfirmationHandler.Scenario.createAndConfigureFlowControllerForDeferredIntent(
         paymentIntent: PaymentIntent = PaymentIntentFixtures.PI_SUCCEEDED,
-        intentConfiguration: PaymentSheet.IntentConfiguration = PaymentSheet.IntentConfiguration(
-            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+        intentConfiguration: IntentConfiguration = IntentConfiguration(
+            mode = IntentConfiguration.Mode.Payment(
                 amount = 12345,
                 currency = "usd"
             )
@@ -2582,7 +2588,7 @@ internal class DefaultFlowControllerTest {
     }
 }
 
-private suspend fun PaymentSheet.FlowController.configureExpectingSuccess(
+private suspend fun FlowController.configureExpectingSuccess(
     clientSecret: String = PaymentSheetFixtures.CLIENT_SECRET,
     configuration: PaymentSheet.Configuration? = null,
 ) {
@@ -2596,7 +2602,7 @@ private suspend fun PaymentSheet.FlowController.configureExpectingSuccess(
     assertThat(configureTurbine.awaitItem()).isNull()
 }
 
-private suspend fun PaymentSheet.FlowController.configureExpectingError(
+private suspend fun FlowController.configureExpectingError(
     clientSecret: String = PaymentSheetFixtures.CLIENT_SECRET,
     configuration: PaymentSheet.Configuration? = null,
 ) {

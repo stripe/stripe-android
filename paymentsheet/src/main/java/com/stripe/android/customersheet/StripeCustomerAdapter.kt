@@ -4,10 +4,14 @@ import android.content.Context
 import com.stripe.android.common.coroutines.CoalescingOrchestrator
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
+import com.stripe.android.elements.customersheet.CustomerAdapter
+import com.stripe.android.elements.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
+import com.stripe.android.elements.customersheet.CustomerEphemeralKey
+import com.stripe.android.elements.customersheet.CustomerEphemeralKeyProvider
+import com.stripe.android.elements.customersheet.SetupIntentClientSecretProvider
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.repositories.CustomerRepository

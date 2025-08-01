@@ -5,6 +5,8 @@ import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
@@ -13,7 +15,8 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentelement.AnalyticEvent
+import com.stripe.android.elements.payment.AnalyticEvent
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentelement.AnalyticEventRule
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentsheet.utils.AdvancedFraudSignalsTestRule
@@ -58,12 +61,12 @@ internal class PaymentSheetAnalyticsTest {
     private val card2 = CardPaymentMethodDetails("pm_67890", "5544")
 
     private val verticalModeConfiguration = PaymentSheet.Configuration.Builder("Example, Inc.")
-        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+        .paymentMethodLayout(PaymentMethodLayout.Vertical)
         .build()
 
     private val horizontalModeConfiguration = PaymentSheet.Configuration(
         merchantDisplayName = "Example, Inc.",
-        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        paymentMethodLayout = PaymentMethodLayout.Horizontal,
     )
 
     @Test
@@ -405,7 +408,7 @@ internal class PaymentSheetAnalyticsTest {
                 paymentIntentClientSecret = "pi_example_secret_example",
                 configuration = horizontalModeConfiguration.newBuilder()
                     .customer(
-                        PaymentSheet.CustomerConfiguration(
+                        CustomerConfiguration(
                             id = "cus_1",
                             ephemeralKeySecret = "ek_123",
                         )
@@ -465,7 +468,7 @@ internal class PaymentSheetAnalyticsTest {
                 paymentIntentClientSecret = "pi_example_secret_example",
                 configuration = horizontalModeConfiguration.newBuilder()
                     .customer(
-                        PaymentSheet.CustomerConfiguration(
+                        CustomerConfiguration(
                             id = "cus_1",
                             ephemeralKeySecret = "ek_123",
                         )
@@ -519,7 +522,7 @@ internal class PaymentSheetAnalyticsTest {
     ) {
         networkRule.validateAnalyticsRequest(
             eventName = eventName,
-            productUsage = setOf("PaymentSheet.FlowController"),
+            productUsage = setOf("FlowController"),
             *requestMatchers
         )
     }

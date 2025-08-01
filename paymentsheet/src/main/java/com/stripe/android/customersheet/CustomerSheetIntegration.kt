@@ -1,8 +1,10 @@
 package com.stripe.android.customersheet
 
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
+import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.customersheet.CustomerAdapter
+import com.stripe.android.elements.customersheet.CustomerSheet
 
-@OptIn(ExperimentalCustomerSessionApi::class)
+@OptIn(CustomerSessionApiPreview::class)
 internal sealed class CustomerSheetIntegration(val type: Type) {
     enum class Type(val analyticsValue: String) {
         CustomerAdapter("customer_adapter"),

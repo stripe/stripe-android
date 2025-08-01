@@ -7,6 +7,9 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
@@ -22,7 +25,6 @@ import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedLinkHelper
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.allowedWalletTypes
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerViewModel
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
@@ -83,8 +85,8 @@ internal interface WalletButtonsInteractor {
             val cardBrandFilter: CardBrandFilter,
         ) : WalletButton {
             constructor(
-                buttonType: PaymentSheet.GooglePayConfiguration.ButtonType?,
-                billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+                buttonType: GooglePayConfiguration.ButtonType?,
+                billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
                 allowCreditCards: Boolean,
                 cardBrandFilter: CardBrandFilter,
             ) : this(
@@ -262,7 +264,7 @@ internal class DefaultWalletButtonsInteractor(
         val linkEmail: String?,
         val paymentMethodMetadata: PaymentMethodMetadata,
         val configuration: CommonConfiguration,
-        val appearance: PaymentSheet.Appearance,
+        val appearance: Appearance,
         val initializationMode: PaymentElementLoader.InitializationMode,
         val walletsAllowedByMerchant: List<WalletType>,
     )

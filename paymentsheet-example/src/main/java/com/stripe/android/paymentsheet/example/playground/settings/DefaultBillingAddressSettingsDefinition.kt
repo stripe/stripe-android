@@ -1,9 +1,11 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
-import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.elements.Address
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.customersheet.CustomerSheet
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.link.LinkController
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import java.util.UUID
 
@@ -82,7 +84,7 @@ internal object DefaultBillingAddressSettingsDefinition :
         }
     }
 
-    private fun createBillingDetails(value: DefaultBillingAddress): PaymentSheet.BillingDetails? {
+    private fun createBillingDetails(value: DefaultBillingAddress): BillingDetails? {
         val email = when (value) {
             DefaultBillingAddress.On -> "email@email.com"
             DefaultBillingAddress.OnWithRandomEmail -> "email_${UUID.randomUUID()}@email.com"
@@ -90,8 +92,8 @@ internal object DefaultBillingAddressSettingsDefinition :
         }
 
         return email?.let {
-            PaymentSheet.BillingDetails(
-                address = PaymentSheet.Address(
+            BillingDetails(
+                address = Address(
                     line1 = "354 Oyster Point Blvd",
                     line2 = null,
                     city = "South San Francisco",

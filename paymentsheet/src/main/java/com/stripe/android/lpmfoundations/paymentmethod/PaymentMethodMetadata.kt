@@ -4,7 +4,11 @@ import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
-import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.customersheet.CustomerSheet
+import com.stripe.android.elements.payment.ShopPayConfiguration
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.utils.effectiveBillingDetails
@@ -23,8 +27,6 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.toPaymentMethodIncentive
@@ -45,7 +47,7 @@ internal const val IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE = fals
 @Parcelize
 internal data class PaymentMethodMetadata(
     val stripeIntent: StripeIntent,
-    val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+    val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
     val allowsDelayedPaymentMethods: Boolean,
     val allowsPaymentMethodsRequiringShippingAddress: Boolean,
     val allowsLinkInSavedPaymentMethods: Boolean,
@@ -53,14 +55,14 @@ internal data class PaymentMethodMetadata(
     val paymentMethodOrder: List<String>,
     val cbcEligibility: CardBrandChoiceEligibility,
     val merchantName: String,
-    val defaultBillingDetails: PaymentSheet.BillingDetails?,
+    val defaultBillingDetails: BillingDetails?,
     val shippingDetails: AddressDetails?,
     val sharedDataSpecs: List<SharedDataSpec>,
     val displayableCustomPaymentMethods: List<DisplayableCustomPaymentMethod>,
     val externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
     val customerMetadata: CustomerMetadata?,
     val isGooglePayReady: Boolean,
-    val linkConfiguration: PaymentSheet.LinkConfiguration,
+    val linkConfiguration: com.stripe.android.elements.payment.LinkConfiguration,
     val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
     val linkMode: LinkMode?,
     val linkState: LinkState?,
@@ -68,7 +70,7 @@ internal data class PaymentMethodMetadata(
     val financialConnectionsAvailability: FinancialConnectionsAvailability?,
     val cardBrandFilter: CardBrandFilter,
     val elementsSessionId: String,
-    val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?
+    val shopPayConfiguration: ShopPayConfiguration?
 ) : Parcelable {
     fun hasIntentToSetup(code: PaymentMethodCode): Boolean {
         return when (stripeIntent) {
@@ -360,7 +362,7 @@ internal data class PaymentMethodMetadata(
                 sharedDataSpecs = sharedDataSpecs,
                 isGooglePayReady = isGooglePayReady,
                 paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
-                linkConfiguration = PaymentSheet.LinkConfiguration(),
+                linkConfiguration = com.stripe.android.elements.payment.LinkConfiguration(),
                 linkMode = elementsSession.linkSettings?.linkMode,
                 linkState = null,
                 paymentMethodIncentive = null,
@@ -406,7 +408,7 @@ internal data class PaymentMethodMetadata(
                 sharedDataSpecs = emptyList(),
                 externalPaymentMethodSpecs = emptyList(),
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(null),
-                linkConfiguration = PaymentSheet.LinkConfiguration(),
+                linkConfiguration = com.stripe.android.elements.payment.LinkConfiguration(),
                 linkMode = null,
                 linkState = null,
                 paymentMethodIncentive = null,

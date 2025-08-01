@@ -13,6 +13,10 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
+import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration.CollectionMode
+import com.stripe.android.elements.toIdentifierMap
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
@@ -31,12 +35,7 @@ import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountForI
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.getSetupFutureUseValue
@@ -842,7 +841,7 @@ internal fun Address.Companion.fromFormFieldValues(formFieldValues: Map<Identifi
         postalCode = formFieldValues[IdentifierSpec.PostalCode],
     )
 
-internal fun PaymentSheet.Address.asAddressModel() =
+internal fun com.stripe.android.elements.Address.asAddressModel() =
     Address(
         line1 = line1,
         line2 = line2,

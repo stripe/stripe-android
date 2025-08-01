@@ -1,18 +1,18 @@
 package com.stripe.android.paymentelement.callbacks
 
 import com.stripe.android.SharedPaymentTokenSessionPreview
-import com.stripe.android.paymentelement.AnalyticEventCallback
-import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.EmbeddedPaymentElement.RowSelectionBehavior.Companion.getInternalRowSelectionCallback
+import com.stripe.android.elements.payment.AnalyticEventCallback
+import com.stripe.android.elements.payment.ConfirmCustomPaymentMethodCallback
+import com.stripe.android.elements.payment.CreateIntentCallback
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.EmbeddedPaymentElement.RowSelectionBehavior.Companion.getInternalRowSelectionCallback
+import com.stripe.android.elements.payment.ExternalPaymentMethodConfirmHandler
+import com.stripe.android.elements.payment.PreparePaymentMethodHandler
+import com.stripe.android.elements.payment.ShopPayHandlers
+import com.stripe.android.elements.payment.ShopPayPreview
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
-import com.stripe.android.paymentelement.PreparePaymentMethodHandler
-import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
-import com.stripe.android.paymentsheet.CreateIntentCallback
-import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
-import com.stripe.android.paymentsheet.ShopPayHandlers
 
 @OptIn(
     ExperimentalCustomPaymentMethodsApi::class,

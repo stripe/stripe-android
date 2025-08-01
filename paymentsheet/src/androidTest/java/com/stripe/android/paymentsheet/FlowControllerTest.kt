@@ -19,6 +19,14 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.payment.CreateIntentCallback
+import com.stripe.android.elements.payment.DelicatePaymentSheetApi
+import com.stripe.android.elements.payment.GooglePayConfiguration
+import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.PaymentMethodLayout
+import com.stripe.android.elements.payment.WalletButtonsConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -30,7 +38,8 @@ import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.WalletButtonsPage
 import com.stripe.android.paymentelement.WalletButtonsPreview
-import com.stripe.android.paymentsheet.PaymentSheet.FlowController
+import com.stripe.android.elements.payment.FlowController
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.ActivityLaunchObserver
@@ -65,7 +74,7 @@ internal class FlowControllerTest {
     private val walletButtonsPage = WalletButtonsPage(testRules.compose)
 
     private val defaultConfiguration = PaymentSheet.Configuration.Builder("Example, Inc.")
-        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+        .paymentMethodLayout(PaymentMethodLayout.Horizontal)
         .build()
 
     @After
@@ -133,7 +142,7 @@ internal class FlowControllerTest {
             configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
                 configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                    .paymentMethodLayout(PaymentMethodLayout.Vertical)
                     .build(),
                 callback = { success, error ->
                     assertThat(success).isTrue()
@@ -179,7 +188,7 @@ internal class FlowControllerTest {
                 configureWithPaymentIntent(
                     paymentIntentClientSecret = "pi_example_secret_example",
                     configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
-                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                        .paymentMethodLayout(PaymentMethodLayout.Vertical)
                         .build(),
                     callback = { success, error ->
                         assertThat(success).isTrue()
@@ -224,7 +233,7 @@ internal class FlowControllerTest {
                 configureWithPaymentIntent(
                     paymentIntentClientSecret = "pi_example_secret_example",
                     configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
-                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                        .paymentMethodLayout(PaymentMethodLayout.Vertical)
                         .build(),
                     callback = { success, error ->
                         assertThat(success).isTrue()
@@ -269,11 +278,11 @@ internal class FlowControllerTest {
 
             testContext.configureFlowController {
                 configureWithIntentConfiguration(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    intentConfiguration = IntentConfiguration(
+                        mode = IntentConfiguration.Mode.Payment(
                             amount = 5099,
                             currency = "usd",
-                            setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+                            setupFutureUse = IntentConfiguration.SetupFutureUse.OffSession
                         )
                     ),
                     configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
@@ -405,7 +414,7 @@ internal class FlowControllerTest {
 
         val paymentOptionCallbackCountDownLatch = CountDownLatch(1)
         val scenario = ActivityScenario.launch(MainActivity::class.java)
-        lateinit var flowController: PaymentSheet.FlowController
+        lateinit var flowController: FlowController
 
         fun initializeActivity() {
             scenario.moveToState(Lifecycle.State.CREATED)
@@ -472,7 +481,7 @@ internal class FlowControllerTest {
     @Test
     fun testCallsElementsSessionsForSeparateConfiguredClientSecrets() {
         val scenario = ActivityScenario.launch(MainActivity::class.java)
-        lateinit var flowController: PaymentSheet.FlowController
+        lateinit var flowController: FlowController
 
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
@@ -533,7 +542,7 @@ internal class FlowControllerTest {
         integrationType = integrationType,
         builder = {
             createIntentCallback { _, _ ->
-                CreateIntentResult.Success("pi_example_secret_example")
+                CreateIntentCallback.Result.Success("pi_example_secret_example")
             }
         },
         resultCallback = ::assertCompleted,
@@ -547,8 +556,8 @@ internal class FlowControllerTest {
 
         testContext.configureFlowController {
             configureWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 5099,
                         currency = "usd"
                     )
@@ -607,7 +616,7 @@ internal class FlowControllerTest {
     ) = runMultipleFlowControllerInstancesTest(
         networkRule = networkRule,
         testType = testType,
-        createIntentCallback = { _, _ -> CreateIntentResult.Success("pi_example_secret_example") },
+        createIntentCallback = { _, _ -> CreateIntentCallback.Result.Success("pi_example_secret_example") },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -619,8 +628,8 @@ internal class FlowControllerTest {
 
         testContext.configureFlowController {
             configureWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 5099,
                         currency = "usd"
                     )
@@ -670,7 +679,7 @@ internal class FlowControllerTest {
         integrationType = integrationType,
         builder = {
             createIntentCallback { _, _ ->
-                CreateIntentResult.Failure(
+                CreateIntentCallback.Result.Failure(
                     cause = Exception("We don't accept visa"),
                     displayMessage = "We don't accept visa"
                 )
@@ -691,8 +700,8 @@ internal class FlowControllerTest {
 
         testContext.configureFlowController {
             configureWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 5099,
                         currency = "usd"
                     )
@@ -733,7 +742,7 @@ internal class FlowControllerTest {
         integrationType = integrationType,
         builder = {
             createIntentCallback { _, _ ->
-                CreateIntentResult.Success(PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
+                CreateIntentCallback.Result.Success(IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
             }
         },
         resultCallback = ::assertCompleted,
@@ -747,8 +756,8 @@ internal class FlowControllerTest {
 
         testContext.configureFlowController {
             configureWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 2000,
                         currency = "usd"
                     )
@@ -788,7 +797,7 @@ internal class FlowControllerTest {
         integrationType = integrationType,
         builder = {
             createIntentCallback { _, _ ->
-                CreateIntentResult.Success("pi_example_secret_example")
+                CreateIntentCallback.Result.Success("pi_example_secret_example")
             }
         },
         resultCallback = { result ->
@@ -808,8 +817,8 @@ internal class FlowControllerTest {
 
         testContext.configureFlowController {
             configureWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         // This currency is different from USD in the created intent, which
                         // will cause the validator to fail this transaction.
                         amount = 5099,
@@ -879,11 +888,11 @@ internal class FlowControllerTest {
                 paymentIntentClientSecret = "pi_example_secret_example",
                 configuration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration(
+                    customer = CustomerConfiguration(
                         id = "cus_1",
                         ephemeralKeySecret = "ek_123",
                     ),
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    paymentMethodLayout = PaymentMethodLayout.Horizontal,
                     allowsDelayedPaymentMethods = false,
                 ),
                 callback = { success, error ->
@@ -948,12 +957,12 @@ internal class FlowControllerTest {
                 paymentIntentClientSecret = "pi_example_secret_example",
                 configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
                     .customer(
-                        PaymentSheet.CustomerConfiguration(
+                        CustomerConfiguration(
                             id = "cus_1",
                             ephemeralKeySecret = "ek_123",
                         )
                     )
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                    .paymentMethodLayout(PaymentMethodLayout.Vertical)
                     .allowsDelayedPaymentMethods(false)
                     .build(),
                 callback = { success, error ->
@@ -1027,7 +1036,7 @@ internal class FlowControllerTest {
                 configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
                     .allowsDelayedPaymentMethods(true)
                     .allowsPaymentMethodsRequiringShippingAddress(true)
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                    .paymentMethodLayout(PaymentMethodLayout.Horizontal)
                     .build(),
                 callback = { success, error ->
                     assertThat(success).isTrue()
@@ -1059,7 +1068,7 @@ internal class FlowControllerTest {
         testContext.markTestSucceeded()
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun testWalletButtonsShown() = runFlowControllerTest(
         networkRule = networkRule,
@@ -1107,14 +1116,14 @@ internal class FlowControllerTest {
                 merchantDisplayName = "Example, Inc."
             )
                 .customer(
-                    PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
                         clientSecret = "cuss_123",
                     )
                 )
                 .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    GooglePayConfiguration(
+                        environment = GooglePayConfiguration.Environment.Test,
                         countryCode = "US",
                     )
                 )
@@ -1132,7 +1141,7 @@ internal class FlowControllerTest {
         testContext.markTestSucceeded()
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class, WalletButtonsPreview::class)
+    @OptIn(CustomerSessionApiPreview::class, WalletButtonsPreview::class)
     @Test
     fun testWalletsShownInExpectedScreensWhenFilteringWalletButtons() = runFlowControllerTest(
         networkRule = networkRule,
@@ -1184,19 +1193,19 @@ internal class FlowControllerTest {
                     merchantDisplayName = "Example, Inc."
                 )
                     .customer(
-                        PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                        CustomerConfiguration.createWithCustomerSession(
                             id = "cus_1",
                             clientSecret = "cuss_123",
                         )
                     )
                     .googlePay(
-                        PaymentSheet.GooglePayConfiguration(
-                            environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                        GooglePayConfiguration(
+                            environment = GooglePayConfiguration.Environment.Test,
                             countryCode = "US",
                         )
                     )
                     .walletButtons(
-                        PaymentSheet.WalletButtonsConfiguration(
+                        WalletButtonsConfiguration(
                             willDisplayExternally = true,
                             walletsToShow = listOf("link"),
                         )

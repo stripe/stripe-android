@@ -4,6 +4,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.core.graphics.toColorInt
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.Address
+import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.CustomPaymentMethod
+import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.PaymentMethodLayout
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
@@ -12,7 +22,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.BILLING_DETAILS
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -45,48 +54,52 @@ internal object PaymentSheetFixtures {
 
     internal val CONFIG_MINIMUM = PaymentSheet.Configuration(
         merchantDisplayName = MERCHANT_DISPLAY_NAME,
-        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        paymentMethodLayout = PaymentMethodLayout.Horizontal,
     )
 
     internal val CONFIG_WITH_EVERYTHING = PaymentSheet.Configuration(
         merchantDisplayName = MERCHANT_DISPLAY_NAME,
-        customer = PaymentSheet.CustomerConfiguration(
+        customer = CustomerConfiguration(
             "customer_id",
             "ek_123"
         ),
         googlePay = ConfigFixtures.GOOGLE_PAY,
-        defaultBillingDetails = PaymentSheet.BillingDetails(name = "Skyler"),
+        defaultBillingDetails = BillingDetails(name = "Skyler"),
         allowsDelayedPaymentMethods = true,
         allowsPaymentMethodsRequiringShippingAddress = true,
         allowsRemovalOfLastSavedPaymentMethod = false,
         paymentMethodOrder = listOf("klarna", "afterpay", "card"),
-        appearance = PaymentSheet.Appearance(
-            colorsLight = PaymentSheet.Colors.configureDefaultLight(primary = Color(0)),
-            colorsDark = PaymentSheet.Colors.configureDefaultDark(primary = Color(0)),
-            shapes = PaymentSheet.Shapes(
+        appearance = Appearance(
+            colorsLight = Appearance.Colors.configureDefaultLight(primary = Color(0)),
+            colorsDark = Appearance.Colors.configureDefaultDark(primary = Color(0)),
+            shapes = Appearance.Shapes(
                 cornerRadiusDp = 0.0f,
                 borderStrokeWidthDp = 0.0f
             ),
-            typography = PaymentSheet.Typography(
+            typography = Appearance.Typography(
                 sizeScaleFactor = 1.1f,
                 fontResId = 0
             ),
-            primaryButton = PaymentSheet.PrimaryButton(
-                colorsLight = PaymentSheet.PrimaryButtonColors(background = 0, onBackground = 0, border = 0),
-                colorsDark = PaymentSheet.PrimaryButtonColors(background = 0, onBackground = 0, border = 0),
-                shape = PaymentSheet.PrimaryButtonShape(
+            primaryButton = Appearance.PrimaryButton(
+                colorsLight = Appearance.PrimaryButton.Colors(
+                    background = 0,
+                    onBackground = 0,
+                    border = 0
+                ),
+                colorsDark = Appearance.PrimaryButton.Colors(background = 0, onBackground = 0, border = 0),
+                shape = Appearance.PrimaryButton.Shape(
                     cornerRadiusDp = 0.0f,
                     borderStrokeWidthDp = 20.0f
                 ),
-                typography = PaymentSheet.PrimaryButtonTypography(
+                typography = Appearance.PrimaryButton.Typography(
                     fontResId = 0
                 )
             )
         ),
-        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+            name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
             address = AddressCollectionMode.Full,
             attachDefaultsToPaymentMethod = true,
         )
@@ -94,7 +107,7 @@ internal object PaymentSheetFixtures {
 
     const val DEFAULT_EPHEMERAL_KEY = "ek_6bpdbs8volf6ods1y6tf8oy9p9g64ehr"
 
-    private val defaultCustomerConfig = PaymentSheet.CustomerConfiguration(
+    private val defaultCustomerConfig = CustomerConfiguration(
         id = "customer_id",
         ephemeralKeySecret = DEFAULT_EPHEMERAL_KEY
     )
@@ -102,7 +115,7 @@ internal object PaymentSheetFixtures {
     internal val CONFIG_CUSTOMER = PaymentSheet.Configuration(
         merchantDisplayName = MERCHANT_DISPLAY_NAME,
         customer = defaultCustomerConfig,
-        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        paymentMethodLayout = PaymentMethodLayout.Horizontal,
     )
 
     internal val EMPTY_CUSTOMER_STATE = CustomerState(
@@ -117,7 +130,7 @@ internal object PaymentSheetFixtures {
         get() = PaymentSheet.Configuration(
             merchantDisplayName = MERCHANT_DISPLAY_NAME,
             googlePay = ConfigFixtures.GOOGLE_PAY,
-            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            paymentMethodLayout = PaymentMethodLayout.Horizontal,
         )
 
     internal val CONFIG_CUSTOMER_WITH_GOOGLEPAY
@@ -135,12 +148,12 @@ internal object PaymentSheetFixtures {
         get() = CONFIG_CUSTOMER.newBuilder()
             .customPaymentMethods(
                 listOf(
-                    PaymentSheet.CustomPaymentMethod(
+                    CustomPaymentMethod(
                         id = "cpmt_123",
                         subtitle = "Pay now with BuFoPay".resolvableString,
                         disableBillingDetailCollection = false,
                     ),
-                    PaymentSheet.CustomPaymentMethod(
+                    CustomPaymentMethod(
                         id = "cpmt_456",
                         subtitle = "Pay now with PayPal".resolvableString,
                         disableBillingDetailCollection = true,
@@ -151,10 +164,10 @@ internal object PaymentSheetFixtures {
 
     internal val CONFIG_BILLING_DETAILS_COLLECTION = PaymentSheet.Configuration(
         merchantDisplayName = MERCHANT_DISPLAY_NAME,
-        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+            name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
             address = AddressCollectionMode.Full,
             attachDefaultsToPaymentMethod = true,
         )
@@ -243,8 +256,8 @@ internal object PaymentSheetFixtures {
     internal val ARGS_DEFERRED_INTENT
         get() = PaymentSheetContract.Args(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 10L,
                         currency = "USD"
                     )
@@ -259,8 +272,8 @@ internal object PaymentSheetFixtures {
         get() = FormArguments(
             PaymentMethod.Type.Bancontact.code,
             merchantName = "Merchant, Inc.",
-            billingDetails = PaymentSheet.BillingDetails(
-                address = PaymentSheet.Address(
+            billingDetails = BillingDetails(
+                address = Address(
                     line1 = "123 Main Street",
                     line2 = null,
                     city = "San Francisco",

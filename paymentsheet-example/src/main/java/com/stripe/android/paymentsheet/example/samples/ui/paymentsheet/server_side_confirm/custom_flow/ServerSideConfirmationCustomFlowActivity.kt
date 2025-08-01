@@ -21,7 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.google.android.material.snackbar.Snackbar
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.model.toIntentConfiguration
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowViewModel.ConfigureResult
@@ -55,7 +55,7 @@ internal class ServerSideConfirmationCustomFlowActivity : AppCompatActivity() {
                     viewModel::handlePaymentOptionChanged,
                     viewModel::handlePaymentSheetResult
                 ) {
-                    PaymentSheet.FlowController.Builder(
+                    FlowController.Builder(
                         resultCallback = viewModel::handlePaymentSheetResult,
                         paymentOptionCallback = viewModel::handlePaymentOptionChanged
                     )
@@ -125,7 +125,7 @@ internal class ServerSideConfirmationCustomFlowActivity : AppCompatActivity() {
 
     @Composable
     fun AttachFlowControllerToViewModel(
-        flowController: PaymentSheet.FlowController,
+        flowController: FlowController,
         uiState: ServerSideConfirmationCustomFlowViewState,
     ) {
         DisposableEffect(Unit) {

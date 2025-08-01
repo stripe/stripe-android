@@ -5,6 +5,14 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.LinkConfiguration
+import com.stripe.android.elements.payment.PaymentMethodLayout
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
@@ -13,10 +21,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
 import com.stripe.android.model.PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -145,7 +150,7 @@ class PaymentSheetEventTest {
     @Test
     fun `Init event with vertical mode should return expected params`() {
         val config = PaymentSheetFixtures.CONFIG_CUSTOMER.newBuilder()
-            .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+            .paymentMethodLayout(PaymentMethodLayout.Vertical)
             .build()
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
@@ -256,7 +261,7 @@ class PaymentSheetEventTest {
         val event = createInitEvent(
             configuration = PaymentSheetFixtures.CONFIG_MINIMUM.newBuilder()
                 .customer(
-                    PaymentSheet.CustomerConfiguration(
+                    CustomerConfiguration(
                         id = "cus_1",
                         ephemeralKeySecret = "ek_123"
                     )
@@ -269,13 +274,13 @@ class PaymentSheetEventTest {
         assertThat(config).containsEntry("customer_access_provider", "legacy")
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `Init with customer session enabled customer has expected keys`() {
         val event = createInitEvent(
             configuration = PaymentSheetFixtures.CONFIG_MINIMUM.newBuilder()
                 .customer(
-                    PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
                         clientSecret = "ek_123",
                     )
@@ -292,9 +297,9 @@ class PaymentSheetEventTest {
     fun `Init event with embedded appearance should return expected params`() {
         val config = EmbeddedPaymentElement.Configuration.Builder("Example, Inc")
             .appearance(
-                PaymentSheet.Appearance(
-                    embeddedAppearance = PaymentSheet.Appearance.Embedded(
-                        style = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.default
+                Appearance(
+                    embeddedAppearance = Appearance.Embedded(
+                        style = Appearance.Embedded.RowStyle.FlatWithCheckmark.default
                     )
                 )
             )
@@ -352,9 +357,9 @@ class PaymentSheetEventTest {
     fun `Init event with embedded should return expected params`() {
         val config = EmbeddedPaymentElement.Configuration.Builder("Example, Inc")
             .appearance(
-                PaymentSheet.Appearance(
-                    embeddedAppearance = PaymentSheet.Appearance.Embedded(
-                        style = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.default
+                Appearance(
+                    embeddedAppearance = Appearance.Embedded(
+                        style = Appearance.Embedded.RowStyle.FlatWithCheckmark.default
                     )
                 )
             )
@@ -412,9 +417,9 @@ class PaymentSheetEventTest {
     fun `Init event with embedded immediateRowSelectionBehavior should return expected params`() {
         val config = EmbeddedPaymentElement.Configuration.Builder("Example, Inc")
             .appearance(
-                PaymentSheet.Appearance(
-                    embeddedAppearance = PaymentSheet.Appearance.Embedded(
-                        style = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.default
+                Appearance(
+                    embeddedAppearance = Appearance.Embedded(
+                        style = Appearance.Embedded.RowStyle.FlatWithCheckmark.default
                     )
                 )
             )
@@ -608,8 +613,8 @@ class PaymentSheetEventTest {
     fun `LoadSucceeded initialization mode is correct for deferred setup intents`() {
         val event = createLoadSucceededEvent(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Setup()
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Setup()
                 )
             )
         )
@@ -621,8 +626,8 @@ class PaymentSheetEventTest {
     fun `LoadSucceeded initialization mode is correct for deferred payment intents`() {
         val event = createLoadSucceededEvent(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 50,
                         currency = "usd",
                     )
@@ -1967,7 +1972,7 @@ class PaymentSheetEventTest {
         hasDefaultPaymentMethod: Boolean? = null,
         setAsDefaultEnabled: Boolean? = null,
         financialConnectionsAvailability: FinancialConnectionsAvailability = FinancialConnectionsAvailability.Full,
-        linkDisplay: PaymentSheet.LinkConfiguration.Display = PaymentSheet.LinkConfiguration.Display.Automatic,
+        linkDisplay: LinkConfiguration.Display = LinkConfiguration.Display.Automatic,
         paymentMethodOptionsSetupfutureUsage: Boolean = false,
         setupFutureUsage: StripeIntent.Usage? = null
     ): PaymentSheetEvent.LoadSucceeded {

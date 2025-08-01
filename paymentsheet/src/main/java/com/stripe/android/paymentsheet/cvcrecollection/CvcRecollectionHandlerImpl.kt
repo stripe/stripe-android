@@ -1,11 +1,11 @@
 package com.stripe.android.paymentsheet.cvcrecollection
 
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionData
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 
@@ -26,7 +26,7 @@ internal class CvcRecollectionHandlerImpl : CvcRecollectionHandler {
         return when (initializationMode) {
             is PaymentElementLoader.InitializationMode.DeferredIntent -> {
                 initializationMode.intentConfiguration.requireCvcRecollection &&
-                    initializationMode.intentConfiguration.mode is PaymentSheet.IntentConfiguration.Mode.Payment
+                    initializationMode.intentConfiguration.mode is IntentConfiguration.Mode.Payment
             }
             is PaymentElementLoader.InitializationMode.PaymentIntent -> stripeIntent.supportsCvcRecollection()
             is PaymentElementLoader.InitializationMode.SetupIntent -> false

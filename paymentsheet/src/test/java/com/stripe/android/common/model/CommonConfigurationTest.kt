@@ -1,7 +1,9 @@
 package com.stripe.android.common.model
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.CardBrandAcceptance
 import org.junit.Test
 
 internal class CommonConfigurationTest {
@@ -19,15 +21,15 @@ internal class CommonConfigurationTest {
     @Test
     fun `'containVolatileDifferences' should return true when volatile differences are found`() {
         val configWithCardBrandAcceptanceChanges = configuration.copy(
-            cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
-                listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Visa)
+            cardBrandAcceptance = CardBrandAcceptance.disallowed(
+                listOf(CardBrandAcceptance.BrandCategory.Visa)
             )
         )
 
         assertThat(configuration.containsVolatileDifferences(configWithCardBrandAcceptanceChanges)).isTrue()
 
         val configWithBillingDetailsChanges = configuration.copy(
-            defaultBillingDetails = PaymentSheet.BillingDetails(
+            defaultBillingDetails = BillingDetails(
                 name = "Jenny Richards",
             ),
         )
@@ -35,8 +37,8 @@ internal class CommonConfigurationTest {
         assertThat(configuration.containsVolatileDifferences(configWithBillingDetailsChanges)).isTrue()
 
         val configWithBillingConfigChanges = configuration.copy(
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                name = BillingDetailsCollectionConfiguration.CollectionMode.Never,
             ),
         )
 

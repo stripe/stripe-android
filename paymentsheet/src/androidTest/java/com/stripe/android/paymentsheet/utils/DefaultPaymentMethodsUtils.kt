@@ -2,13 +2,15 @@ package com.stripe.android.paymentsheet.utils
 
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.payment.PaymentMethodLayout
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG
 import com.stripe.android.testing.PaymentMethodFactory
 import org.json.JSONArray
@@ -53,11 +55,11 @@ internal object DefaultPaymentMethodsUtils {
         }
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     fun launch(
         testContext: ProductIntegrationTestRunnerContext,
         composeTestRule: ComposeTestRule,
-        paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
+        paymentMethodLayout: PaymentMethodLayout,
         paymentMethodType: PaymentMethodType = PaymentMethodType.Card,
         hasSavedPaymentMethods: Boolean = true,
         isDeferredIntent: Boolean = false,
@@ -68,7 +70,7 @@ internal object DefaultPaymentMethodsUtils {
             configuration = PaymentSheet.Configuration(
                 merchantDisplayName = "Example, Inc.",
                 paymentMethodLayout = paymentMethodLayout,
-                customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                customer = CustomerConfiguration.createWithCustomerSession(
                     id = "cus_1",
                     clientSecret = "cuss_1",
                 ),
@@ -77,7 +79,7 @@ internal object DefaultPaymentMethodsUtils {
             isDeferredIntent = isDeferredIntent,
         )
 
-        if (paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Horizontal && hasSavedPaymentMethods) {
+        if (paymentMethodLayout == PaymentMethodLayout.Horizontal && hasSavedPaymentMethods) {
             composeTestRule.waitUntil(timeoutMillis = 5_000) {
                 composeTestRule.onAllNodes(hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG)).fetchSemanticsNodes()
                     .isNotEmpty()

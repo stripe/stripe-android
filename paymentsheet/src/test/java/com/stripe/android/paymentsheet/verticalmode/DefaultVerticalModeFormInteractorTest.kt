@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.verticalmode
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
@@ -11,7 +12,6 @@ import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationSt
 import com.stripe.android.paymentelement.embedded.form.DefaultFormActivityStateHelper
 import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
 import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -149,8 +149,8 @@ internal class DefaultVerticalModeFormInteractorTest {
         block: (SaveForFutureUseElement?, SetAsDefaultPaymentMethodElement?) -> Unit
     ) {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
             ),
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
             hasCustomerConfiguration = true,

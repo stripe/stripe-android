@@ -4,7 +4,14 @@ import android.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.payment.GooglePayConfiguration
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.uicore.StripeThemeDefaults
 import org.junit.Test
 import kotlin.test.assertFailsWith
@@ -14,7 +21,7 @@ class PaymentSheetConfigurationKtxTest {
     fun `'validate' should fail when ephemeral key secret is blank`() {
         val configWithBlankEphemeralKeySecret = configuration.newBuilder()
             .customer(
-                PaymentSheet.CustomerConfiguration(
+                CustomerConfiguration(
                     id = "cus_1",
                     ephemeralKeySecret = "   "
                 )
@@ -34,7 +41,7 @@ class PaymentSheetConfigurationKtxTest {
     private fun getConfig(eKey: String): CommonConfiguration {
         return configuration.newBuilder()
             .customer(
-                PaymentSheet.CustomerConfiguration(
+                CustomerConfiguration(
                     id = "cus_1",
                     ephemeralKeySecret = eKey
                 ),
@@ -66,12 +73,12 @@ class PaymentSheetConfigurationKtxTest {
         assertFailsWithEphemeralKeySecret("eeek_aldkfjalskdjflkasjbvdkjds")
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `'validate' should fail when customer client secret key is secret is blank`() {
         val configWithBlankCustomerSessionClientSecret = configuration.newBuilder()
             .customer(
-                PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                CustomerConfiguration.createWithCustomerSession(
                     id = "cus_1",
                     clientSecret = "   "
                 ),
@@ -86,12 +93,12 @@ class PaymentSheetConfigurationKtxTest {
         }
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `'validate' should fail when provided argument has an ephemeral key secret format`() {
         val configWithEphemeralKeySecretAsCustomerSessionClientSecret = configuration.newBuilder()
             .customer(
-                PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                CustomerConfiguration.createWithCustomerSession(
                     id = "cus_1",
                     clientSecret = "ek_12345"
                 ),
@@ -106,12 +113,12 @@ class PaymentSheetConfigurationKtxTest {
         }
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `'validate' should fail when provided argument is not a recognized customer session client secret format`() {
         val configWithInvalidCustomerSessionClientSecret = configuration.newBuilder()
             .customer(
-                PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                CustomerConfiguration.createWithCustomerSession(
                     id = "cus_1",
                     clientSecret = "total_12345"
                 ),
@@ -198,41 +205,41 @@ class PaymentSheetConfigurationKtxTest {
     private companion object {
         val configuration = PaymentSheet.Configuration(
             merchantDisplayName = "Merchant, Inc.",
-            customer = PaymentSheet.CustomerConfiguration(
+            customer = CustomerConfiguration(
                 id = "1",
                 ephemeralKeySecret = "ek_123",
             ),
-            googlePay = PaymentSheet.GooglePayConfiguration(
-                environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+            googlePay = GooglePayConfiguration(
+                environment = GooglePayConfiguration.Environment.Test,
                 countryCode = "CA",
                 currencyCode = "CAD",
                 amount = 5099,
                 label = "Merchant, Inc.",
-                buttonType = PaymentSheet.GooglePayConfiguration.ButtonType.Checkout,
+                buttonType = GooglePayConfiguration.ButtonType.Checkout,
             ),
-            appearance = PaymentSheet.Appearance(
-                primaryButton = PaymentSheet.PrimaryButton(
-                    colorsLight = PaymentSheet.PrimaryButtonColors(
+            appearance = Appearance(
+                primaryButton = Appearance.PrimaryButton(
+                    colorsLight = Appearance.PrimaryButton.Colors(
                         background = Color.BLUE,
                         onBackground = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
                         border = StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb(),
                     ),
-                    colorsDark = PaymentSheet.PrimaryButtonColors(
+                    colorsDark = Appearance.PrimaryButton.Colors(
                         background = Color.BLUE,
                         onBackground = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
                         border = StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb(),
                     )
                 ),
             ),
-            defaultBillingDetails = PaymentSheet.BillingDetails(
+            defaultBillingDetails = BillingDetails(
                 name = "Jenny Rosen",
             ),
             shippingDetails = AddressDetails(
                 name = "Jenny Rosen",
             ),
             primaryButtonLabel = "Buy",
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
             ),
         )
     }

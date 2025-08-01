@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentMethod
@@ -12,9 +13,10 @@ import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentsheet.CreateIntentResult
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.payment.CreateIntentCallback
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
 import com.stripe.paymentelementnetwork.setupPaymentMethodDetachResponse
@@ -52,7 +54,7 @@ internal class EmbeddedPaymentElementTest {
         networkRule = networkRule,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
-            CreateIntentResult.Success("pi_example_secret_12345")
+            CreateIntentCallback.Result.Success("pi_example_secret_12345")
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -82,7 +84,7 @@ internal class EmbeddedPaymentElementTest {
         networkRule = networkRule,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
-            CreateIntentResult.Success("pi_example_secret_12345")
+            CreateIntentCallback.Result.Success("pi_example_secret_12345")
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -118,7 +120,7 @@ internal class EmbeddedPaymentElementTest {
         networkRule = networkRule,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
-            CreateIntentResult.Success("pi_example_secret_12345")
+            CreateIntentCallback.Result.Success("pi_example_secret_12345")
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -132,7 +134,7 @@ internal class EmbeddedPaymentElementTest {
         networkRule.setupV1PaymentMethodsResponse(card1, card2)
 
         testContext.configure {
-            customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+            customer(CustomerConfiguration("cus_123", "ek_test"))
         }
 
         embeddedContentPage.clickViewMore()
@@ -157,7 +159,7 @@ internal class EmbeddedPaymentElementTest {
         networkRule = networkRule,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
-            CreateIntentResult.Success("pi_example_secret_12345")
+            CreateIntentCallback.Result.Success("pi_example_secret_12345")
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -171,7 +173,7 @@ internal class EmbeddedPaymentElementTest {
         networkRule.setupV1PaymentMethodsResponse(card1)
 
         testContext.configure {
-            customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+            customer(CustomerConfiguration("cus_123", "ek_test"))
         }
 
         embeddedContentPage.clickOnLpm("cashapp")
@@ -198,7 +200,7 @@ internal class EmbeddedPaymentElementTest {
             networkRule = networkRule,
             createIntentCallback = { _, shouldSavePaymentMethod ->
                 assertThat(shouldSavePaymentMethod).isFalse()
-                CreateIntentResult.Success("pi_example_secret_12345")
+                CreateIntentCallback.Result.Success("pi_example_secret_12345")
             },
             resultCallback = ::assertCompleted,
         ) { testContext ->
@@ -212,7 +214,7 @@ internal class EmbeddedPaymentElementTest {
             networkRule.setupV1PaymentMethodsResponse(card1, card2)
 
             testContext.configure {
-                customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+                customer(CustomerConfiguration("cus_123", "ek_test"))
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
 
@@ -227,7 +229,7 @@ internal class EmbeddedPaymentElementTest {
             networkRule = networkRule,
             createIntentCallback = { _, shouldSavePaymentMethod ->
                 assertThat(shouldSavePaymentMethod).isFalse()
-                CreateIntentResult.Success("pi_example_secret_12345")
+                CreateIntentCallback.Result.Success("pi_example_secret_12345")
             },
             resultCallback = ::assertCompleted,
         ) { testContext ->
@@ -246,14 +248,14 @@ internal class EmbeddedPaymentElementTest {
         }
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun testWalletButtonsShown() = runEmbeddedPaymentElementTest(
         networkRule = networkRule,
         showWalletButtons = true,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
-            CreateIntentResult.Success("pi_example_secret_12345")
+            CreateIntentCallback.Result.Success("pi_example_secret_12345")
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -292,15 +294,15 @@ internal class EmbeddedPaymentElementTest {
 
         testContext.configure {
             customer(
-                PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                CustomerConfiguration.createWithCustomerSession(
                     id = "cus_1",
                     clientSecret = "cuss_123",
                 )
             )
 
             googlePay(
-                PaymentSheet.GooglePayConfiguration(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                GooglePayConfiguration(
+                    environment = GooglePayConfiguration.Environment.Test,
                     countryCode = "US",
                 )
             )

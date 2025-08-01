@@ -1,7 +1,7 @@
 package com.stripe.android.paymentelement.embedded.content
 
 import com.stripe.android.core.injection.ViewModelScope
-import com.stripe.android.paymentelement.EmbeddedPaymentElement.PaymentOptionDisplayData
+import com.stripe.android.elements.payment.EmbeddedPaymentElement.PaymentOptionDisplayData
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow

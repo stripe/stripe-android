@@ -16,6 +16,10 @@ import com.stripe.android.core.networking.toMap
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.elements.payment.AnalyticEvent
+import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.LinkConfiguration
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK
 import com.stripe.android.model.LinkMode
@@ -25,10 +29,8 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -1143,8 +1145,8 @@ class DefaultEventReporterTest {
 
     @Test
     fun `is_spt is false for all requests after load succeeded event`() = isSptTest(
-        intentConfiguration = PaymentSheet.IntentConfiguration(
-            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+        intentConfiguration = IntentConfiguration(
+            mode = IntentConfiguration.Mode.Payment(
                 amount = 5000L,
                 currency = "CAD",
             ),
@@ -1155,12 +1157,12 @@ class DefaultEventReporterTest {
     @OptIn(SharedPaymentTokenSessionPreview::class)
     @Test
     fun `is_spt is true for all requests after load succeeded event`() = isSptTest(
-        intentConfiguration = PaymentSheet.IntentConfiguration(
-            sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+        intentConfiguration = IntentConfiguration(
+            sharedPaymentTokenSessionWithMode = IntentConfiguration.Mode.Payment(
                 amount = 5000L,
                 currency = "CAD",
             ),
-            sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+            sellerDetails = IntentConfiguration.SellerDetails(
                 networkId = "network_id",
                 externalId = "external_id",
             ),
@@ -1169,7 +1171,7 @@ class DefaultEventReporterTest {
     )
 
     private fun isSptTest(
-        intentConfiguration: PaymentSheet.IntentConfiguration,
+        intentConfiguration: IntentConfiguration,
         expectedIsSptValue: Boolean,
     ) {
         analyticEventCallbackRule.setCallback(null)
@@ -1284,7 +1286,7 @@ class DefaultEventReporterTest {
         hasDefaultPaymentMethod: Boolean? = null,
         setAsDefaultEnabled: Boolean? = null,
         financialConnectionsAvailability: FinancialConnectionsAvailability = FinancialConnectionsAvailability.Full,
-        linkDisplay: PaymentSheet.LinkConfiguration.Display = PaymentSheet.LinkConfiguration.Display.Automatic,
+        linkDisplay: LinkConfiguration.Display = LinkConfiguration.Display.Automatic,
         paymentMethodOptionsSetupFutureUsage: Boolean = false,
         setupFutureUsage: StripeIntent.Usage? = null
     ) {

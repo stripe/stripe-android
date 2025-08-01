@@ -8,6 +8,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.stripe.android.elements.AddressDetails
 import kotlin.math.min
 
 // https://gist.github.com/ademar111190/34d3de41308389a0d0d8

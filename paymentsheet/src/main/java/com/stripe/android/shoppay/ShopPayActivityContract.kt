@@ -5,8 +5,8 @@ import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.elements.payment.ShopPayConfiguration
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
-import com.stripe.android.paymentsheet.PaymentSheet
 import javax.inject.Inject
 
 internal class ShopPayActivityContract @Inject constructor(
@@ -37,7 +37,7 @@ internal class ShopPayActivityContract @Inject constructor(
     }
 
     data class Args(
-        val shopPayConfiguration: PaymentSheet.ShopPayConfiguration,
+        val shopPayConfiguration: ShopPayConfiguration,
         val customerSessionClientSecret: String,
         val businessName: String
     )

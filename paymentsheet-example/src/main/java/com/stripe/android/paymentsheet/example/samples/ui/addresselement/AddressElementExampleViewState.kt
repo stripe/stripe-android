@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.example.samples.ui.addresselement
 
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.elements.AddressDetails
 
 sealed interface AddressElementExampleViewState {
 

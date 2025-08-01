@@ -7,17 +7,20 @@ import com.stripe.android.common.analytics.toAnalyticsMap
 import com.stripe.android.common.analytics.toAnalyticsValue
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
+import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.LinkConfiguration
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.analyticsValue
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel.AnalyticsEvent.Finished
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -93,7 +96,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val isDeferred: Boolean,
         override val isSpt: Boolean,
         override val googlePaySupported: Boolean,
-        linkDisplay: PaymentSheet.LinkConfiguration.Display,
+        linkDisplay: LinkConfiguration.Display,
         financialConnectionsAvailability: FinancialConnectionsAvailability?,
         requireCvcRecollection: Boolean = false,
         hasDefaultPaymentMethod: Boolean? = null,
@@ -135,8 +138,8 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             get() = when (this) {
                 is PaymentElementLoader.InitializationMode.DeferredIntent -> {
                     when (this.intentConfiguration.mode) {
-                        is PaymentSheet.IntentConfiguration.Mode.Payment -> "deferred_payment_intent"
-                        is PaymentSheet.IntentConfiguration.Mode.Setup -> "deferred_setup_intent"
+                        is IntentConfiguration.Mode.Payment -> "deferred_payment_intent"
+                        is IntentConfiguration.Mode.Setup -> "deferred_setup_intent"
                     }
                 }
                 is PaymentElementLoader.InitializationMode.PaymentIntent -> "payment_intent"
@@ -175,7 +178,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     class Init(
         private val mode: EventReporter.Mode,
         private val configuration: CommonConfiguration,
-        private val appearance: PaymentSheet.Appearance,
+        private val appearance: Appearance,
         private val primaryButtonColor: Boolean?,
         private val configurationSpecificPayload: ConfigurationSpecificPayload,
         override val linkEnabled: Boolean,

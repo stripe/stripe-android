@@ -5,7 +5,16 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.elements.Address
+import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.CardBrandAcceptance
+import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.customersheet.CustomerSheet
+import com.stripe.android.elements.payment.CustomPaymentMethod
+import com.stripe.android.elements.payment.PaymentSheet
+import com.stripe.android.elements.payment.ShopPayConfiguration
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.LinkAccount
@@ -23,9 +32,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
@@ -436,11 +443,11 @@ internal class PaymentMethodMetadataTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "bancontact")
             ),
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 attachDefaultsToPaymentMethod = false,
             )
         )
@@ -525,11 +532,11 @@ internal class PaymentMethodMetadataTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "bancontact")
             ),
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 attachDefaultsToPaymentMethod = false,
             ),
             externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
@@ -574,7 +581,7 @@ internal class PaymentMethodMetadataTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "bancontact")
             ),
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
             externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
         )
         val formElement = metadata.formElementsForCode(
@@ -591,11 +598,11 @@ internal class PaymentMethodMetadataTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "klarna")
             ),
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 attachDefaultsToPaymentMethod = false,
             )
         )
@@ -1025,25 +1032,25 @@ internal class PaymentMethodMetadataTest {
     @Test
     fun `should create metadata properly with elements session response, payment sheet config, and data specs`() {
         val billingDetailsCollectionConfiguration = createBillingDetailsCollectionConfiguration()
-        val defaultBillingDetails = PaymentSheet.BillingDetails(
-            address = PaymentSheet.Address(line1 = "123 Apple Street")
+        val defaultBillingDetails = BillingDetails(
+            address = Address(line1 = "123 Apple Street")
         )
-        val shippingDetails = AddressDetails(address = PaymentSheet.Address(line1 = "123 Pear Street"))
-        val cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.allowed(
-            listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Amex)
+        val shippingDetails = AddressDetails(address = Address(line1 = "123 Pear Street"))
+        val cardBrandAcceptance = CardBrandAcceptance.allowed(
+            listOf(CardBrandAcceptance.BrandCategory.Amex)
         )
         val customPaymentMethods = listOf(
-            PaymentSheet.CustomPaymentMethod(
+            CustomPaymentMethod(
                 id = "cpmt_123",
                 subtitle = "Pay now".resolvableString,
                 disableBillingDetailCollection = true,
             ),
-            PaymentSheet.CustomPaymentMethod(
+            CustomPaymentMethod(
                 id = "cpmt_456",
                 subtitle = "Pay later".resolvableString,
                 disableBillingDetailCollection = false,
             ),
-            PaymentSheet.CustomPaymentMethod(
+            CustomPaymentMethod(
                 id = "cpmt_789",
                 subtitle = "Pay never".resolvableString,
                 disableBillingDetailCollection = false,
@@ -1137,7 +1144,7 @@ internal class PaymentMethodMetadataTest {
             ),
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             isGooglePayReady = false,
-            linkConfiguration = PaymentSheet.LinkConfiguration(),
+            linkConfiguration = com.stripe.android.elements.payment.LinkConfiguration(),
             linkMode = null,
             linkState = LinkState(
                 signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
@@ -1158,11 +1165,11 @@ internal class PaymentMethodMetadataTest {
     @Test
     fun `should create metadata properly with elements session response, customer sheet config, and data specs`() {
         val billingDetailsCollectionConfiguration = createBillingDetailsCollectionConfiguration()
-        val defaultBillingDetails = PaymentSheet.BillingDetails(
-            address = PaymentSheet.Address(line1 = "123 Apple Street")
+        val defaultBillingDetails = BillingDetails(
+            address = Address(line1 = "123 Apple Street")
         )
-        val cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.allowed(
-            listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Amex)
+        val cardBrandAcceptance = CardBrandAcceptance.allowed(
+            listOf(CardBrandAcceptance.BrandCategory.Amex)
         )
 
         val configuration = createCustomerSheetConfiguration(
@@ -1214,7 +1221,7 @@ internal class PaymentMethodMetadataTest {
             ),
             isGooglePayReady = true,
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
-            linkConfiguration = PaymentSheet.LinkConfiguration(),
+            linkConfiguration = com.stripe.android.elements.payment.LinkConfiguration(),
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             linkMode = null,
             linkState = null,
@@ -1889,11 +1896,11 @@ internal class PaymentMethodMetadataTest {
         }
 
         val configuration = createPaymentSheetConfiguration(
-            defaultBillingDetails = PaymentSheet.BillingDetails(),
+            defaultBillingDetails = BillingDetails(),
             shippingDetails = AddressDetails(),
             billingDetailsCollectionConfiguration = createBillingDetailsCollectionConfiguration(),
             customPaymentMethods = listOf(),
-            cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all(),
+            cardBrandAcceptance = CardBrandAcceptance.all(),
             shopPayConfiguration = shopPayConfiguration,
         )
 
@@ -1922,7 +1929,7 @@ internal class PaymentMethodMetadataTest {
 
     fun `Passes CBF along to Link`() {
         val linkConfiguration = LinkTestUtils.createLinkConfiguration(
-            cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all())
+            cardBrandFilter = PaymentSheetCardBrandFilter(CardBrandAcceptance.all())
         )
 
         val metadata = PaymentMethodMetadata.createForNativeLink(
@@ -1960,7 +1967,7 @@ internal class PaymentMethodMetadataTest {
             linkMode = LinkMode.LinkPaymentMethod,
             allowDefaultOptIn = false,
             disableRuxInFlowController = false,
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
             defaultBillingDetails = null,
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             allowUserEmailEdits = true,
@@ -1974,18 +1981,18 @@ internal class PaymentMethodMetadataTest {
     )
 
     private fun createBillingDetailsCollectionConfiguration() =
-        PaymentSheet.BillingDetailsCollectionConfiguration(
-            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
-            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
-            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+        BillingDetailsCollectionConfiguration(
+            name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            phone = BillingDetailsCollectionConfiguration.CollectionMode.Never,
+            email = BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             attachDefaultsToPaymentMethod = true,
         )
 
     private fun createCustomerSheetConfiguration(
-        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
-        defaultBillingDetails: PaymentSheet.BillingDetails,
-        cardBrandAcceptance: PaymentSheet.CardBrandAcceptance
+        billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
+        defaultBillingDetails: BillingDetails,
+        cardBrandAcceptance: CardBrandAcceptance
     ) = CustomerSheet.Configuration.builder(merchantDisplayName = "Merchant Inc.")
         .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
         .defaultBillingDetails(defaultBillingDetails)
@@ -1995,19 +2002,19 @@ internal class PaymentMethodMetadataTest {
         .build()
 
     private fun createPaymentSheetConfiguration(
-        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
-        defaultBillingDetails: PaymentSheet.BillingDetails,
+        billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
+        defaultBillingDetails: BillingDetails,
         shippingDetails: AddressDetails,
-        customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
-        cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
-        shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = null
+        customPaymentMethods: List<CustomPaymentMethod>,
+        cardBrandAcceptance: CardBrandAcceptance,
+        shopPayConfiguration: ShopPayConfiguration? = null
     ) = PaymentSheet.Configuration(
         merchantDisplayName = "Merchant Inc.",
         allowsDelayedPaymentMethods = true,
         allowsPaymentMethodsRequiringShippingAddress = false,
         paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
         billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_1"),
+        customer = CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_1"),
         defaultBillingDetails = defaultBillingDetails,
         shippingDetails = shippingDetails,
         preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa),

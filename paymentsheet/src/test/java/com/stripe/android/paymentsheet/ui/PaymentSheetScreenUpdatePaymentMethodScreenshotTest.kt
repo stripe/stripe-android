@@ -2,11 +2,12 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.runtime.Composable
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.PaymentMethodFactory
@@ -128,7 +129,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
                 canRemove = true,
                 shouldShowSetAsDefaultCheckbox = true,
                 canUpdateFullPaymentMethodDetails = true,
-                addressCollectionMode = AddressCollectionMode.Automatic
+                addressCollectionMode = BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
             )
         }
     }

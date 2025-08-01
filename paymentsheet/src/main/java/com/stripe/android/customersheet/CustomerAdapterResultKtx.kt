@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet
 
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.elements.customersheet.CustomerAdapter
 
 internal fun <T> CustomerAdapter.Result<T>.getOrNull(): T? =
     when (this) {

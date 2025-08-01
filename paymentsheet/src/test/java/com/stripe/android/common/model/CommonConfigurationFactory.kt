@@ -1,28 +1,35 @@
 package com.stripe.android.common.model
 
+import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.CardBrandAcceptance
+import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.CustomPaymentMethod
+import com.stripe.android.elements.payment.GooglePayConfiguration
+import com.stripe.android.elements.payment.LinkConfiguration
+import com.stripe.android.elements.payment.ShopPayConfiguration
 import com.stripe.android.model.CardBrand
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 
 internal object CommonConfigurationFactory {
     fun create(
         merchantDisplayName: String = "Example, Inc.",
-        customer: PaymentSheet.CustomerConfiguration? = null,
-        googlePay: PaymentSheet.GooglePayConfiguration? = null,
-        defaultBillingDetails: PaymentSheet.BillingDetails? = null,
+        customer: CustomerConfiguration? = null,
+        googlePay: GooglePayConfiguration? = null,
+        defaultBillingDetails: BillingDetails? = null,
         shippingDetails: AddressDetails? = null,
         allowsDelayedPaymentMethods: Boolean = true,
         allowsPaymentMethodsRequiringShippingAddress: Boolean = true,
-        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
-            PaymentSheet.BillingDetailsCollectionConfiguration(),
+        billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
+            BillingDetailsCollectionConfiguration(),
         preferredNetworks: List<CardBrand> = emptyList(),
         allowsRemovalOfLastSavedPaymentMethod: Boolean = true,
         paymentMethodOrder: List<String> = emptyList(),
         externalPaymentMethods: List<String> = emptyList(),
-        customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> = emptyList(),
-        cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all(),
-        link: PaymentSheet.LinkConfiguration = PaymentSheet.LinkConfiguration(),
-        shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = null,
+        customPaymentMethods: List<CustomPaymentMethod> = emptyList(),
+        cardBrandAcceptance: CardBrandAcceptance = CardBrandAcceptance.all(),
+        link: LinkConfiguration = LinkConfiguration(),
+        shopPayConfiguration: ShopPayConfiguration? = null,
         googlePlacesApiKey: String? = null,
     ): CommonConfiguration = CommonConfiguration(
         merchantDisplayName = merchantDisplayName,

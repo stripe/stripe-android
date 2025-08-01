@@ -2,6 +2,7 @@ package com.stripe.android.link.confirmation
 
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.Appearance
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.model.LinkAccount
@@ -16,7 +17,6 @@ import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationOption
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import javax.inject.Inject
 
@@ -145,7 +145,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         return ConfirmationHandler.Args(
             intent = configuration.stripeIntent,
             confirmationOption = confirmationOption,
-            appearance = PaymentSheet.Appearance(),
+            appearance = Appearance(),
             initializationMode = configuration.initializationMode,
             shippingDetails = configuration.shippingDetails
         )
@@ -176,7 +176,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                     }
                 )
             ),
-            appearance = PaymentSheet.Appearance(),
+            appearance = Appearance(),
             initializationMode = configuration.initializationMode,
             shippingDetails = configuration.shippingDetails
         )

@@ -3,9 +3,12 @@ package com.stripe.android.paymentsheet.addresselement
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.Address
+import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.AddressLauncher
+import com.stripe.android.elements.AddressLauncher.AddressElementSameAsBillingPreview
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.isInstanceOf
-import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
@@ -60,7 +63,7 @@ class InputAddressViewModelTest {
 
     @Test
     fun `autocomplete address passed is collected to start`() = runTest(UnconfinedTestDispatcher()) {
-        val expectedAddress = AddressDetails(name = "skyler", address = PaymentSheet.Address(country = "US"))
+        val expectedAddress = AddressDetails(name = "skyler", address = Address(country = "US"))
         val flow = MutableStateFlow<AddressElementNavigator.AutocompleteEvent?>(
             AddressElementNavigator.AutocompleteEvent.OnBack(expectedAddress)
         )
@@ -76,7 +79,7 @@ class InputAddressViewModelTest {
 
     @Test
     fun `takes only fields in new address`() = runTest(UnconfinedTestDispatcher()) {
-        val usAddress = AddressDetails(name = "skyler", address = PaymentSheet.Address(country = "US"))
+        val usAddress = AddressDetails(name = "skyler", address = Address(country = "US"))
         val flow = MutableStateFlow<AddressElementNavigator.AutocompleteEvent?>(
             AddressElementNavigator.AutocompleteEvent.OnBack(usAddress)
         )
@@ -91,7 +94,7 @@ class InputAddressViewModelTest {
 
         val expectedAddress = AddressDetails(
             name = "skyler",
-            address = PaymentSheet.Address(country = "CAN", line1 = "foobar")
+            address = Address(country = "CAN", line1 = "foobar")
         )
         flow.tryEmit(AddressElementNavigator.AutocompleteEvent.OnBack(expectedAddress))
         assertThat(viewModel.collectedAddress.value).isEqualTo(expectedAddress)
@@ -99,7 +102,7 @@ class InputAddressViewModelTest {
 
     @Test
     fun `default address from merchant is parsed`() = runTest(UnconfinedTestDispatcher()) {
-        val expectedAddress = AddressDetails(name = "skyler", address = PaymentSheet.Address(country = "US"))
+        val expectedAddress = AddressDetails(name = "skyler", address = Address(country = "US"))
 
         val viewModel = createViewModel(expectedAddress)
         assertThat(viewModel.collectedAddress.value).isEqualTo(expectedAddress)
@@ -109,7 +112,7 @@ class InputAddressViewModelTest {
     fun `viewModel emits onComplete event`() = runTest(UnconfinedTestDispatcher()) {
         val viewModel = createViewModel(
             AddressDetails(
-                address = PaymentSheet.Address(
+                address = Address(
                     line1 = "99 Broadway St",
                     city = "Seattle",
                     country = "US"
@@ -118,7 +121,7 @@ class InputAddressViewModelTest {
         )
         viewModel.dismissWithAddress(
             AddressDetails(
-                address = PaymentSheet.Address(
+                address = Address(
                     line1 = "99 Broadway St",
                     city = "Seattle",
                     country = "US"
@@ -177,9 +180,9 @@ class InputAddressViewModelTest {
     @Test
     fun `If default address country not in allowed countries, state should be 'Hide'`() =
         billingSameAsShippingInitialValueTest(
-            billingAddress = PaymentSheet.BillingDetails(
+            billingAddress = BillingDetails(
                 name = "John Doe",
-                address = PaymentSheet.Address(
+                address = Address(
                     country = "CA"
                 )
             ),
@@ -200,9 +203,9 @@ class InputAddressViewModelTest {
     @Test
     fun `If default address supported in allowed countries & checkbox enabled, state should be 'Show' & checked`() =
         billingSameAsShippingInitialValueTest(
-            billingAddress = PaymentSheet.BillingDetails(
+            billingAddress = BillingDetails(
                 name = "John Doe",
-                address = PaymentSheet.Address(
+                address = Address(
                     line1 = "123 Apple Street",
                     city = "San Francisco",
                     country = "US",
@@ -220,9 +223,9 @@ class InputAddressViewModelTest {
     @Test
     fun `If default address has no country & checkbox enabled, state should be 'Show' & checked`() =
         billingSameAsShippingInitialValueTest(
-            billingAddress = PaymentSheet.BillingDetails(
+            billingAddress = BillingDetails(
                 name = "John Doe",
-                address = PaymentSheet.Address(
+                address = Address(
                     line1 = "123 Apple Street",
                     city = "San Francisco",
                     postalCode = "99999"
@@ -238,9 +241,9 @@ class InputAddressViewModelTest {
     @Test
     fun `If empty allowed countries, state should be 'Show' & checked since default countries are used`() =
         billingSameAsShippingInitialValueTest(
-            billingAddress = PaymentSheet.BillingDetails(
+            billingAddress = BillingDetails(
                 name = "John Doe",
-                address = PaymentSheet.Address(
+                address = Address(
                     line1 = "123 Apple Street",
                     city = "San Francisco",
                     country = "US",
@@ -258,9 +261,9 @@ class InputAddressViewModelTest {
     @Test
     fun `If shipping address provided with billing, state should be 'Show' but not checked`() =
         billingSameAsShippingInitialValueTest(
-            billingAddress = PaymentSheet.BillingDetails(
+            billingAddress = BillingDetails(
                 name = "John Doe",
-                address = PaymentSheet.Address(
+                address = Address(
                     line1 = "123 Apple Street",
                     city = "San Francisco",
                     country = "US",
@@ -271,7 +274,7 @@ class InputAddressViewModelTest {
             allowedCountries = emptySet(),
             address = AddressDetails(
                 name = "Jane Doe",
-                address = PaymentSheet.Address(
+                address = Address(
                     line1 = "123 Pear Street",
                     city = "San Jose",
                     country = "US",
@@ -291,9 +294,9 @@ class InputAddressViewModelTest {
             config = AddressLauncher.Configuration.Builder()
                 .allowedCountries(setOf("US"))
                 .billingAddress(
-                    PaymentSheet.BillingDetails(
+                    BillingDetails(
                         name = "John Doe",
-                        address = PaymentSheet.Address(
+                        address = Address(
                             line1 = "123 Apple Street",
                             city = "San Francisco",
                             country = "US",
@@ -451,7 +454,7 @@ class InputAddressViewModelTest {
                 .address(
                     AddressDetails(
                         name = "Jane Doe",
-                        address = PaymentSheet.Address(
+                        address = Address(
                             line1 = "123 Coffee Street",
                             city = "San Jose",
                             country = "US",
@@ -461,9 +464,9 @@ class InputAddressViewModelTest {
                     )
                 )
                 .billingAddress(
-                    PaymentSheet.BillingDetails(
+                    BillingDetails(
                         name = "John Doe",
-                        address = PaymentSheet.Address(
+                        address = Address(
                             line1 = "123 Apple Street",
                             city = "San Francisco",
                             country = "US",
@@ -539,7 +542,7 @@ class InputAddressViewModelTest {
     private fun billingSameAsShippingInitialValueTest(
         address: AddressDetails?,
         allowedCountries: Set<String>,
-        billingAddress: PaymentSheet.BillingDetails?,
+        billingAddress: BillingDetails?,
         expectedShippingSameAsBillingState: InputAddressViewModel.ShippingSameAsBillingState,
     ) = runTest {
         val viewModel = createViewModel(

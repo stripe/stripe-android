@@ -1,8 +1,9 @@
 package com.stripe.android.utils
 
+import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.CustomPaymentMethod
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 
@@ -19,8 +20,8 @@ internal class FakeElementsSessionRepository(
 ) : ElementsSessionRepository {
     data class Params(
         val initializationMode: PaymentElementLoader.InitializationMode,
-        val customer: PaymentSheet.CustomerConfiguration?,
-        val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
+        val customer: CustomerConfiguration?,
+        val customPaymentMethods: List<CustomPaymentMethod>,
         val externalPaymentMethods: List<String>,
         val savedPaymentMethodSelectionId: String?
     )
@@ -29,8 +30,8 @@ internal class FakeElementsSessionRepository(
 
     override suspend fun get(
         initializationMode: PaymentElementLoader.InitializationMode,
-        customer: PaymentSheet.CustomerConfiguration?,
-        customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
+        customer: CustomerConfiguration?,
+        customPaymentMethods: List<CustomPaymentMethod>,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
     ): Result<ElementsSession> {

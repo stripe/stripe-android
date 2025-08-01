@@ -6,6 +6,10 @@ import com.stripe.android.common.di.APPLICATION_ID
 import com.stripe.android.common.di.MOBILE_SESSION_ID
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.CustomPaymentMethod
+import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
@@ -14,7 +18,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.toDeferredIntentParams
 import kotlinx.coroutines.withContext
@@ -27,8 +30,8 @@ import kotlin.coroutines.CoroutineContext
 internal interface ElementsSessionRepository {
     suspend fun get(
         initializationMode: PaymentElementLoader.InitializationMode,
-        customer: PaymentSheet.CustomerConfiguration?,
-        customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
+        customer: CustomerConfiguration?,
+        customPaymentMethods: List<CustomPaymentMethod>,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
     ): Result<ElementsSession>
@@ -55,8 +58,8 @@ internal class RealElementsSessionRepository @Inject constructor(
 
     override suspend fun get(
         initializationMode: PaymentElementLoader.InitializationMode,
-        customer: PaymentSheet.CustomerConfiguration?,
-        customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
+        customer: CustomerConfiguration?,
+        customPaymentMethods: List<CustomPaymentMethod>,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
     ): Result<ElementsSession> {
@@ -122,8 +125,8 @@ private fun StripeIntent.withoutWeChatPay(): StripeIntent {
 }
 
 internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
-    customer: PaymentSheet.CustomerConfiguration?,
-    customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
+    customer: CustomerConfiguration?,
+    customPaymentMethods: List<CustomPaymentMethod>,
     externalPaymentMethods: List<String>,
     savedPaymentMethodSelectionId: String?,
     mobileSessionId: String,
@@ -176,32 +179,32 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
     }
 }
 
-private fun List<PaymentSheet.CustomPaymentMethod>.toElementSessionParam(): List<String> {
+private fun List<CustomPaymentMethod>.toElementSessionParam(): List<String> {
     return map { customPaymentMethod ->
         customPaymentMethod.id
     }
 }
 
 @OptIn(SharedPaymentTokenSessionPreview::class)
-private fun PaymentSheet.IntentConfiguration.toSellerDetails(): ElementsSessionParams.SellerDetails? {
+private fun IntentConfiguration.toSellerDetails(): ElementsSessionParams.SellerDetails? {
     return when (intentBehavior) {
-        is PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken -> intentBehavior.sellerDetails?.run {
+        is IntentConfiguration.IntentBehavior.SharedPaymentToken -> intentBehavior.sellerDetails?.run {
             ElementsSessionParams.SellerDetails(
                 externalId = externalId,
                 networkId = networkId,
             )
         }
-        is PaymentSheet.IntentConfiguration.IntentBehavior.Default -> null
+        is IntentConfiguration.IntentBehavior.Default -> null
     }
 }
 
-private val PaymentSheet.CustomerConfiguration.customerSessionClientSecret: String?
+private val CustomerConfiguration.customerSessionClientSecret: String?
     get() = when (accessType) {
         is PaymentSheet.CustomerAccessType.CustomerSession -> accessType.customerSessionClientSecret
         is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> null
     }
 
-private val PaymentSheet.CustomerConfiguration.legacyCustomerEphemeralKey: String?
+private val CustomerConfiguration.legacyCustomerEphemeralKey: String?
     get() = when (accessType) {
         is PaymentSheet.CustomerAccessType.CustomerSession -> null
         is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> accessType.ephemeralKeySecret

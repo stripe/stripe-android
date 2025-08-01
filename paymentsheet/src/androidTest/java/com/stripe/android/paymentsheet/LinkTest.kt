@@ -5,6 +5,11 @@ import androidx.test.espresso.Espresso.closeSoftKeyboard
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.payment.PaymentMethodLayout
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
@@ -166,11 +171,11 @@ internal class LinkTest {
             testContext.launch(
                 configuration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration(
+                    customer = CustomerConfiguration(
                         id = "cus_1",
                         ephemeralKeySecret = "ek_123"
                     ),
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    paymentMethodLayout = PaymentMethodLayout.Horizontal,
                     allowsDelayedPaymentMethods = false,
                 )
             )
@@ -454,11 +459,11 @@ internal class LinkTest {
             testContext.launch(
                 configuration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration(
+                    customer = CustomerConfiguration(
                         id = "cus_1",
                         ephemeralKeySecret = "ek_123"
                     ),
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    paymentMethodLayout = PaymentMethodLayout.Horizontal,
                     allowsDelayedPaymentMethods = false,
                 )
             )
@@ -943,11 +948,11 @@ internal class LinkTest {
 
         val configuration = PaymentSheet.Configuration(
             merchantDisplayName = "Merchant, Inc.",
-            defaultBillingDetails = PaymentSheet.BillingDetails(
+            defaultBillingDetails = BillingDetails(
                 email = "test-${UUID.randomUUID()}@email.com",
                 phone = "+15555555555",
             ),
-            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            paymentMethodLayout = PaymentMethodLayout.Horizontal,
         )
 
         testContext.launch(configuration)
@@ -1074,7 +1079,7 @@ internal class LinkTest {
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun testSuccessfulCardPaymentWithCustomerSessionInPassthroughMode() = runProductIntegrationTest(
         networkRule = networkRule,
@@ -1107,11 +1112,11 @@ internal class LinkTest {
         testContext.launch(
             configuration = PaymentSheet.Configuration(
                 merchantDisplayName = "Merchant, Inc.",
-                customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                customer = CustomerConfiguration.createWithCustomerSession(
                     id = "cus_1",
                     clientSecret = "cuss_654321",
                 ),
-                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                paymentMethodLayout = PaymentMethodLayout.Horizontal,
             )
         )
 

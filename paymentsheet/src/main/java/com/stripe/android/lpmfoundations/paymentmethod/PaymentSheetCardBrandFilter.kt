@@ -1,28 +1,28 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class PaymentSheetCardBrandFilter(
-    private val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance
+    private val cardBrandAcceptance: CardBrandAcceptance
 ) : CardBrandFilter {
 
     override fun isAccepted(cardBrand: CardBrand): Boolean {
         val brandCategory = cardBrand.toBrandCategory()
 
         return when (cardBrandAcceptance) {
-            is PaymentSheet.CardBrandAcceptance.All -> true
+            is CardBrandAcceptance.All -> true
 
-            is PaymentSheet.CardBrandAcceptance.Allowed -> {
+            is CardBrandAcceptance.Allowed -> {
                 val isAllowed = brandCategory != null && cardBrandAcceptance.brands.contains(brandCategory)
                 isAllowed
             }
 
-            is PaymentSheet.CardBrandAcceptance.Disallowed -> {
+            is CardBrandAcceptance.Disallowed -> {
                 val isDisallowed = brandCategory != null && cardBrandAcceptance.brands.contains(brandCategory)
                 !isDisallowed
             }
@@ -40,15 +40,15 @@ internal data class PaymentSheetCardBrandFilter(
 }
 
 // Extension function to map CardBrand to BrandCategory
-internal fun CardBrand.toBrandCategory(): PaymentSheet.CardBrandAcceptance.BrandCategory? {
+internal fun CardBrand.toBrandCategory(): CardBrandAcceptance.BrandCategory? {
     return when (this) {
-        CardBrand.Visa -> PaymentSheet.CardBrandAcceptance.BrandCategory.Visa
-        CardBrand.MasterCard -> PaymentSheet.CardBrandAcceptance.BrandCategory.Mastercard
-        CardBrand.AmericanExpress -> PaymentSheet.CardBrandAcceptance.BrandCategory.Amex
+        CardBrand.Visa -> CardBrandAcceptance.BrandCategory.Visa
+        CardBrand.MasterCard -> CardBrandAcceptance.BrandCategory.Mastercard
+        CardBrand.AmericanExpress -> CardBrandAcceptance.BrandCategory.Amex
         CardBrand.Discover,
         CardBrand.DinersClub,
         CardBrand.JCB,
-        CardBrand.UnionPay -> PaymentSheet.CardBrandAcceptance.BrandCategory.Discover
+        CardBrand.UnionPay -> CardBrandAcceptance.BrandCategory.Discover
         else -> null
     }
 }

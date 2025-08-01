@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.cvc
 
 import androidx.activity.result.ActivityResultCallback
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.Appearance
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -14,7 +15,6 @@ import com.stripe.android.paymentelement.confirmation.asCanceled
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.paymentelement.confirmation.asSaved
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionLauncher
@@ -315,8 +315,8 @@ class CvcRecollectionConfirmationDefinitionTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123",
             ),
-            appearance = PaymentSheet.Appearance.Builder()
-                .colorsDark(PaymentSheet.Colors.defaultLight)
+            appearance = Appearance.Builder()
+                .colorsDark(Appearance.Colors.defaultLight)
                 .build(),
             shippingDetails = null,
         )

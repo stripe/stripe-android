@@ -3,7 +3,7 @@ package com.stripe.android.paymentelement.confirmation.cpms
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.common.exception.stripeErrorMessage
-import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
+import com.stripe.android.elements.payment.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition

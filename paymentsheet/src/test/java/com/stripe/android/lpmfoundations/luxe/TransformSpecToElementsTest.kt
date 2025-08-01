@@ -7,10 +7,10 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -212,8 +212,8 @@ internal class TransformSpecToElementsTest {
             field = PlaceholderSpec.PlaceholderField.BillingAddress,
         )
         val formElement = TransformSpecToElementsFactory.create(
-            PaymentSheet.BillingDetailsCollectionConfiguration(
-                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+            BillingDetailsCollectionConfiguration(
+                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
             )
         ).transform(
             PaymentMethodMetadataFactory.create(),
@@ -234,8 +234,8 @@ internal class TransformSpecToElementsTest {
             field = PlaceholderSpec.PlaceholderField.Phone,
         )
         val formElement = TransformSpecToElementsFactory.create(
-            PaymentSheet.BillingDetailsCollectionConfiguration(
-                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            BillingDetailsCollectionConfiguration(
+                phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
             )
         ).transform(
             PaymentMethodMetadataFactory.create(),
@@ -256,8 +256,8 @@ internal class TransformSpecToElementsTest {
             field = PlaceholderSpec.PlaceholderField.Name,
         )
         val formElement = TransformSpecToElementsFactory.create(
-            PaymentSheet.BillingDetailsCollectionConfiguration(
-                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            BillingDetailsCollectionConfiguration(
+                name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
             )
         ).transform(
             PaymentMethodMetadataFactory.create(),
@@ -278,8 +278,8 @@ internal class TransformSpecToElementsTest {
             field = PlaceholderSpec.PlaceholderField.Email,
         )
         val formElement = TransformSpecToElementsFactory.create(
-            PaymentSheet.BillingDetailsCollectionConfiguration(
-                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            BillingDetailsCollectionConfiguration(
+                email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
             )
         ).transform(
             PaymentMethodMetadataFactory.create(),
@@ -412,8 +412,8 @@ internal class TransformSpecToElementsTest {
 
 private object TransformSpecToElementsFactory {
     fun create(
-        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
-            PaymentSheet.BillingDetailsCollectionConfiguration(),
+        billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
+            BillingDetailsCollectionConfiguration(),
         requiresMandate: Boolean = false,
         autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
     ): TransformSpecToElements {

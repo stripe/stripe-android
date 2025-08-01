@@ -9,6 +9,9 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.payment.ExternalPaymentMethodConfirmHandler
+import com.stripe.android.elements.payment.ExternalPaymentMethodResult
+import com.stripe.android.elements.payment.ExternalPaymentMethodResultHandler
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences

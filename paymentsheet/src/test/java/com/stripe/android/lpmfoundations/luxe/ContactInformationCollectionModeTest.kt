@@ -1,7 +1,7 @@
 package com.stripe.android.lpmfoundations.luxe
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.uicore.elements.SectionElement
 import org.junit.Test
 
@@ -9,11 +9,11 @@ class ContactInformationCollectionModeTest {
     @Test
     fun `name collectionMode comes from name in BillingDetailsCollectionConfiguration`() {
         val collectionMode = ContactInformationCollectionMode.Name.collectionMode(
-            PaymentSheet.BillingDetailsCollectionConfiguration(
-                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+            BillingDetailsCollectionConfiguration(
+                name = BillingDetailsCollectionConfiguration.CollectionMode.Always
             )
         )
-        assertThat(collectionMode).isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always)
+        assertThat(collectionMode).isEqualTo(BillingDetailsCollectionConfiguration.CollectionMode.Always)
     }
 
     @Test
@@ -26,11 +26,11 @@ class ContactInformationCollectionModeTest {
     @Test
     fun `phone collectionMode comes from phone in BillingDetailsCollectionConfiguration`() {
         val collectionMode = ContactInformationCollectionMode.Phone.collectionMode(
-            PaymentSheet.BillingDetailsCollectionConfiguration(
-                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+            BillingDetailsCollectionConfiguration(
+                phone = BillingDetailsCollectionConfiguration.CollectionMode.Always
             )
         )
-        assertThat(collectionMode).isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always)
+        assertThat(collectionMode).isEqualTo(BillingDetailsCollectionConfiguration.CollectionMode.Always)
     }
 
     @Test
@@ -43,11 +43,11 @@ class ContactInformationCollectionModeTest {
     @Test
     fun `email collectionMode comes from email in BillingDetailsCollectionConfiguration`() {
         val collectionMode = ContactInformationCollectionMode.Email.collectionMode(
-            PaymentSheet.BillingDetailsCollectionConfiguration(
-                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+            BillingDetailsCollectionConfiguration(
+                email = BillingDetailsCollectionConfiguration.CollectionMode.Always
             )
         )
-        assertThat(collectionMode).isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always)
+        assertThat(collectionMode).isEqualTo(BillingDetailsCollectionConfiguration.CollectionMode.Always)
     }
 
     @Test
@@ -59,14 +59,14 @@ class ContactInformationCollectionModeTest {
 
     @Test
     fun `isAllowed functions correctly`() {
-        val emailRequiredConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+        val emailRequiredConfiguration = BillingDetailsCollectionConfiguration(
+            email = BillingDetailsCollectionConfiguration.CollectionMode.Always
         )
-        val emailAutomaticConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic
+        val emailAutomaticConfiguration = BillingDetailsCollectionConfiguration(
+            email = BillingDetailsCollectionConfiguration.CollectionMode.Automatic
         )
-        val emailNeverConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never
+        val emailNeverConfiguration = BillingDetailsCollectionConfiguration(
+            email = BillingDetailsCollectionConfiguration.CollectionMode.Never
         )
         assertThat(ContactInformationCollectionMode.Email.isAllowed(emailRequiredConfiguration)).isTrue()
         assertThat(ContactInformationCollectionMode.Email.isAllowed(emailAutomaticConfiguration)).isTrue()
@@ -75,14 +75,14 @@ class ContactInformationCollectionModeTest {
 
     @Test
     fun `isRequired functions correctly`() {
-        val emailRequiredConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+        val emailRequiredConfiguration = BillingDetailsCollectionConfiguration(
+            email = BillingDetailsCollectionConfiguration.CollectionMode.Always
         )
-        val emailAutomaticConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic
+        val emailAutomaticConfiguration = BillingDetailsCollectionConfiguration(
+            email = BillingDetailsCollectionConfiguration.CollectionMode.Automatic
         )
-        val emailNeverConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never
+        val emailNeverConfiguration = BillingDetailsCollectionConfiguration(
+            email = BillingDetailsCollectionConfiguration.CollectionMode.Never
         )
         assertThat(ContactInformationCollectionMode.Email.isRequired(emailRequiredConfiguration)).isTrue()
         assertThat(ContactInformationCollectionMode.Email.isRequired(emailAutomaticConfiguration)).isFalse()

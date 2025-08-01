@@ -18,7 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.google.android.material.snackbar.Snackbar
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.model.toIntentConfiguration
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CompletedPaymentAlertDialog

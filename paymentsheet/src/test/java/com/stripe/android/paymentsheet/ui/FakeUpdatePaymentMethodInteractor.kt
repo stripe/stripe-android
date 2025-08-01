@@ -3,11 +3,11 @@ package com.stripe.android.paymentsheet.ui
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -56,7 +56,7 @@ internal class FakeUpdatePaymentMethodInteractor(
                 card = displayableSavedPaymentMethod.paymentMethod.card!!,
                 billingDetails = PaymentMethodFixtures.BILLING_DETAILS,
             ),
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                 address = addressCollectionMode
             ),
             onBrandChoiceChanged = {},

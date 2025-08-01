@@ -6,6 +6,11 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.payment.GooglePayConfiguration
+import com.stripe.android.elements.payment.PaymentSheet
+import com.stripe.android.elements.payment.WalletButtonsConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -14,7 +19,6 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentelement.WalletButtonsPreview
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
@@ -341,24 +345,24 @@ class PaymentSelectionUpdaterTest {
         val newConfig = defaultPaymentSheetConfiguration.newBuilder()
             .merchantDisplayName("Some other change")
             .googlePay(
-                PaymentSheet.GooglePayConfiguration(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                GooglePayConfiguration(
+                    environment = GooglePayConfiguration.Environment.Test,
                     countryCode = CountryCode.US.value,
                     amount = 5099,
                     currencyCode = "USD",
                     label = "Some product",
-                    buttonType = PaymentSheet.GooglePayConfiguration.ButtonType.Checkout,
+                    buttonType = GooglePayConfiguration.ButtonType.Checkout,
                 )
             ).appearance(
-                PaymentSheet.Appearance(
-                    colorsLight = PaymentSheet.Colors.defaultDark,
-                    primaryButton = PaymentSheet.PrimaryButton(
-                        colorsLight = PaymentSheet.PrimaryButtonColors(
+                Appearance(
+                    colorsLight = Appearance.Colors.defaultDark,
+                    primaryButton = Appearance.PrimaryButton(
+                        colorsLight = Appearance.PrimaryButton.Colors(
                             background = Color.BLACK,
                             onBackground = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
                             border = StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb(),
                         ),
-                        colorsDark = PaymentSheet.PrimaryButtonColors(
+                        colorsDark = Appearance.PrimaryButton.Colors(
                             background = Color.BLACK,
                             onBackground = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
                             border = StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb(),
@@ -377,13 +381,13 @@ class PaymentSelectionUpdaterTest {
             currentSelection = existingSelection,
             previousConfig = defaultPaymentSheetConfiguration.newBuilder()
                 .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    GooglePayConfiguration(
+                        environment = GooglePayConfiguration.Environment.Test,
                         countryCode = CountryCode.US.value,
                         amount = 5099,
                         currencyCode = "USD",
                         label = "A product",
-                        buttonType = PaymentSheet.GooglePayConfiguration.ButtonType.Plain,
+                        buttonType = GooglePayConfiguration.ButtonType.Plain,
                     )
                 ).build(),
             newState = newState,
@@ -399,7 +403,7 @@ class PaymentSelectionUpdaterTest {
         val existingSelection = PaymentSelection.GooglePay
 
         val newConfig = defaultPaymentSheetConfiguration.newBuilder()
-            .defaultBillingDetails(PaymentSheet.BillingDetails(email = "hi-jay@example.com"))
+            .defaultBillingDetails(BillingDetails(email = "hi-jay@example.com"))
             .build()
         val newState = mockPaymentSheetStateWithPaymentIntent(
             config = newConfig
@@ -459,7 +463,7 @@ class PaymentSelectionUpdaterTest {
             newState = mockPaymentSheetStateWithPaymentIntent(),
             newConfig = defaultPaymentSheetConfiguration.newBuilder()
                 .walletButtons(
-                    PaymentSheet.WalletButtonsConfiguration(
+                    WalletButtonsConfiguration(
                         willDisplayExternally = true,
                     ),
                 ).build(),
@@ -480,7 +484,7 @@ class PaymentSelectionUpdaterTest {
             newState = mockPaymentSheetStateWithPaymentIntent(),
             newConfig = defaultPaymentSheetConfiguration.newBuilder()
                 .walletButtons(
-                    PaymentSheet.WalletButtonsConfiguration(
+                    WalletButtonsConfiguration(
                         willDisplayExternally = true,
                     ),
                 ).build(),
@@ -501,7 +505,7 @@ class PaymentSelectionUpdaterTest {
             newState = mockPaymentSheetStateWithPaymentIntent(),
             newConfig = defaultPaymentSheetConfiguration.newBuilder()
                 .walletButtons(
-                    PaymentSheet.WalletButtonsConfiguration(
+                    WalletButtonsConfiguration(
                         willDisplayExternally = true,
                         walletsToShow = listOf("google_pay"),
                     ),
@@ -523,7 +527,7 @@ class PaymentSelectionUpdaterTest {
             newState = mockPaymentSheetStateWithPaymentIntent(),
             newConfig = defaultPaymentSheetConfiguration.newBuilder()
                 .walletButtons(
-                    PaymentSheet.WalletButtonsConfiguration(
+                    WalletButtonsConfiguration(
                         willDisplayExternally = true,
                         walletsToShow = listOf("link"),
                     ),

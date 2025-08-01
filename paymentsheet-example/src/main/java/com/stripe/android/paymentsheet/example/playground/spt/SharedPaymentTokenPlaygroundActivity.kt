@@ -48,14 +48,14 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.elements.payment.FlowController
+import com.stripe.android.elements.payment.PreparePaymentMethodHandler
+import com.stripe.android.elements.payment.ShopPayPreview
 import com.stripe.android.paymentelement.ExtendedLabelsInPaymentOptionPreview
-import com.stripe.android.paymentelement.PreparePaymentMethodHandler
-import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.rememberPaymentLauncher
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.data.ShopPayData
 import com.stripe.android.paymentsheet.example.playground.network.SharedPaymentTokenPlaygroundRequester
@@ -193,9 +193,9 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
     private fun rememberFlowControllerBuilder(
         preparePaymentMethodHandler: PreparePaymentMethodHandler,
         onPaymentOptionChanged: (PaymentOption?) -> Unit
-    ): PaymentSheet.FlowController.Builder {
+    ): FlowController.Builder {
         return remember {
-            PaymentSheet.FlowController.Builder(
+            FlowController.Builder(
                 paymentOptionCallback = { result ->
                     onPaymentOptionChanged(result)
                 },
@@ -227,7 +227,7 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
                             } ?: run {
                                 onConfirmingChanged(false)
 
-                                setResult(Activity.RESULT_OK)
+                                setResult(RESULT_OK)
                                 finish()
                             }
                         }.onFailure {
@@ -239,7 +239,7 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
                                 Toast.LENGTH_LONG
                             ).show()
 
-                            setResult(Activity.RESULT_OK)
+                            setResult(RESULT_OK)
                             finish()
                         }
                     }
@@ -418,7 +418,7 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
         class Parameters(
             val confirming: Boolean,
             val paymentOption: PaymentOption?,
-            val flowController: PaymentSheet.FlowController,
+            val flowController: FlowController,
             val showWalletButtons: Boolean,
             val confirm: () -> Unit,
             val retry: () -> Unit,

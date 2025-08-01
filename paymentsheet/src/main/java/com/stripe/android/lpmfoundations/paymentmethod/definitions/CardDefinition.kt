@@ -14,7 +14,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkFormElement
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
@@ -155,7 +154,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
 
     private fun MutableList<FormElement>.addContactInformationElement(
         arguments: UiDefinitionFactory.Arguments,
-        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+        billingDetailsCollectionConfiguration: com.stripe.android.elements.BillingDetailsCollectionConfiguration,
     ): Boolean {
         val contactInformationElement = contactInformationElement(
             initialValues = arguments.initialValues,
@@ -172,10 +171,10 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
 
     private fun MutableList<FormElement>.addCardBillingElements(
         arguments: UiDefinitionFactory.Arguments,
-        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+        billingDetailsCollectionConfiguration: com.stripe.android.elements.BillingDetailsCollectionConfiguration,
     ): Boolean {
         return if (billingDetailsCollectionConfiguration.address
-            != PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+            != com.stripe.android.elements.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
         ) {
             addAll(
                 cardBillingElements(
@@ -191,17 +190,18 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
     }
 }
 
-internal fun PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.toInternal(): BillingDetailsCollectionConfiguration.AddressCollectionMode {
+internal fun com.stripe.android.elements.BillingDetailsCollectionConfiguration.AddressCollectionMode.toInternal():
+    BillingDetailsCollectionConfiguration.AddressCollectionMode {
     return when (this) {
-        PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
+        com.stripe.android.elements.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
             BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
         }
 
-        PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> {
+        com.stripe.android.elements.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> {
             BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
         }
 
-        PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> {
+        com.stripe.android.elements.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> {
             BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
         }
     }

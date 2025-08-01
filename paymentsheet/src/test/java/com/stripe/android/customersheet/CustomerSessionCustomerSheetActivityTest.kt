@@ -12,6 +12,10 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.customersheet.util.CustomerSheetHacks
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
@@ -21,9 +25,6 @@ import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.RemoveDialog
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
@@ -44,7 +45,7 @@ import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-@OptIn(ExperimentalCustomerSessionApi::class)
+@OptIn(CustomerSessionApiPreview::class)
 @RunWith(AndroidJUnit4::class)
 class CustomerSessionCustomerSheetActivityTest {
     private val application = ApplicationProvider.getApplicationContext<Application>()
@@ -343,7 +344,7 @@ class CustomerSessionCustomerSheetActivityTest {
             savedPaymentMethodsPage.onSavedPaymentMethod(last4 = "1001").assertExists()
         }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     private fun runTest(
         cards: List<PaymentMethod> = listOf(),
         isPaymentMethodRemoveEnabled: Boolean = true,
@@ -400,7 +401,7 @@ class CustomerSessionCustomerSheetActivityTest {
                         merchantDisplayName = "Merchant, Inc.",
                         allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
                         preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa),
-                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                             address = addressCollectionMode
                         )
                     ),

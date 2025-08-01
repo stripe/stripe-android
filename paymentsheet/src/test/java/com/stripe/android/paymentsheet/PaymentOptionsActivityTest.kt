@@ -27,6 +27,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.gate.FakeLinkGate
@@ -297,15 +299,15 @@ internal class PaymentOptionsActivityTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
             config = PaymentSheetFixtures.CONFIG_MINIMUM.newBuilder()
                 .appearance(
-                    PaymentSheet.Appearance(
-                        primaryButton = PaymentSheet.PrimaryButton(
-                            colorsLight = PaymentSheet.PrimaryButtonColors(
+                    Appearance(
+                        primaryButton = Appearance.PrimaryButton(
+                            colorsLight = Appearance.PrimaryButton.Colors(
                                 background = Color.Magenta,
                                 onBackground = Color.Magenta,
                                 border = Color.Magenta
                             ),
-                            shape = PaymentSheet.PrimaryButtonShape(),
-                            typography = PaymentSheet.PrimaryButtonTypography()
+                            shape = Appearance.PrimaryButton.Shape(),
+                            typography = Appearance.PrimaryButton.Typography()
                         )
                     )
                 ).build(),
@@ -414,7 +416,7 @@ internal class PaymentOptionsActivityTest {
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
             paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
             config = PAYMENT_OPTIONS_CONTRACT_ARGS.configuration.newBuilder()
-                .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                .paymentMethodLayout(PaymentMethodLayout.Vertical)
                 .build(),
         )
         runActivityScenario(args) { scenario ->

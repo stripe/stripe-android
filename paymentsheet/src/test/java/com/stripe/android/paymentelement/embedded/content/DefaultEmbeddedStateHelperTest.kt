@@ -5,15 +5,18 @@ import android.os.Bundle
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.Appearance.Embedded
+import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.GooglePayConfiguration
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.CustomerStateHolder
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.parseAppearance
@@ -34,7 +37,7 @@ internal class DefaultEmbeddedStateHelperTest {
     fun `setting state correctly sets appearance`() = testScenario {
         setState {
             appearance(
-                PaymentSheet.Appearance(
+                Appearance(
                     embeddedAppearance = Embedded(
                         Embedded.RowStyle.FlatWithRadio.default
                     )
@@ -55,7 +58,7 @@ internal class DefaultEmbeddedStateHelperTest {
 
         setState {
             appearance(
-                PaymentSheet.Appearance(
+                Appearance(
                     colorsLight = PaymentSheetAppearance.CrazyAppearance.appearance.colorsLight,
                 )
             )
@@ -69,7 +72,7 @@ internal class DefaultEmbeddedStateHelperTest {
             )
 
         // Reset appearance
-        PaymentSheet.Appearance().parseAppearance()
+        Appearance().parseAppearance()
         embeddedContentHelper.dataLoadedTurbine.awaitItem()
     }
 
@@ -119,12 +122,12 @@ internal class DefaultEmbeddedStateHelperTest {
     ) {
         setState {
             googlePay(
-                PaymentSheet.GooglePayConfiguration(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                GooglePayConfiguration(
+                    environment = GooglePayConfiguration.Environment.Test,
                     countryCode = "US",
                 )
             )
-            customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+            customer(CustomerConfiguration("cus_123", "ek_test"))
             formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
         }
 
@@ -137,12 +140,12 @@ internal class DefaultEmbeddedStateHelperTest {
     ) {
         setState {
             googlePay(
-                PaymentSheet.GooglePayConfiguration(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                GooglePayConfiguration(
+                    environment = GooglePayConfiguration.Environment.Test,
                     countryCode = "US",
                 )
             )
-            customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+            customer(CustomerConfiguration("cus_123", "ek_test"))
             formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             embeddedViewDisplaysMandateText(false)
         }
@@ -160,7 +163,7 @@ internal class DefaultEmbeddedStateHelperTest {
                 "Use RowSelectionBehavior.Default or disable Google Pay and saved payment methods."
         ) {
             setState {
-                customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+                customer(CustomerConfiguration("cus_123", "ek_test"))
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
             }
         }
@@ -177,8 +180,8 @@ internal class DefaultEmbeddedStateHelperTest {
         ) {
             setState {
                 googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    GooglePayConfiguration(
+                        environment = GooglePayConfiguration.Environment.Test,
                         countryCode = "USD",
                     )
                 )
@@ -262,8 +265,8 @@ internal class DefaultEmbeddedStateHelperTest {
                     paymentMethodMetadata = paymentMethodMetadata,
                     selection = selection,
                     initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                        intentConfiguration = PaymentSheet.IntentConfiguration(
-                            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        intentConfiguration = IntentConfiguration(
+                            mode = IntentConfiguration.Mode.Payment(
                                 amount = 5050,
                                 currency = "USD"
                             )

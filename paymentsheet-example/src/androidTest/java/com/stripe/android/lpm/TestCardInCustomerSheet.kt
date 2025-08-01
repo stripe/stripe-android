@@ -2,7 +2,7 @@ package com.stripe.android.lpm
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.example.playground.settings.CollectAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectEmailSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectNameSettingsDefinition
@@ -108,13 +108,13 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
                 settings[CountrySettingsDefinition] = Country.US
                 settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.Off
                 settings[CollectNameSettingsDefinition] =
-                    PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+                    BillingDetailsCollectionConfiguration.CollectionMode.Always
                 settings[CollectEmailSettingsDefinition] =
-                    PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+                    BillingDetailsCollectionConfiguration.CollectionMode.Always
                 settings[CollectPhoneSettingsDefinition] =
-                    PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+                    BillingDetailsCollectionConfiguration.CollectionMode.Always
                 settings[CollectAddressSettingsDefinition] =
-                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+                    BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
             },
             populateCustomLpmFields = {
                 populateCardDetails()
@@ -134,13 +134,13 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
                 settings[CountrySettingsDefinition] = Country.US
                 settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On
                 settings[CollectNameSettingsDefinition] =
-                    PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+                    BillingDetailsCollectionConfiguration.CollectionMode.Always
                 settings[CollectEmailSettingsDefinition] =
-                    PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+                    BillingDetailsCollectionConfiguration.CollectionMode.Always
                 settings[CollectPhoneSettingsDefinition] =
-                    PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+                    BillingDetailsCollectionConfiguration.CollectionMode.Always
                 settings[CollectAddressSettingsDefinition] =
-                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+                    BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
             },
             populateCustomLpmFields = {
                 populateCardDetails()

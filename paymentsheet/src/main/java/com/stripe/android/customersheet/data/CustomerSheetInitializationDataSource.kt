@@ -1,6 +1,6 @@
 package com.stripe.android.customersheet.data
 
-import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.elements.customersheet.CustomerSheet
 
 internal interface CustomerSheetInitializationDataSource {
     suspend fun loadCustomerSheetSession(

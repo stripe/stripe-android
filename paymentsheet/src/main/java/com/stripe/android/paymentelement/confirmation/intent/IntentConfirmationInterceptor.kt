@@ -9,6 +9,11 @@ import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.Address
+import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.payment.CreateIntentCallback
+import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.PreparePaymentMethodHandler
 import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -21,16 +26,11 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.setupFutureUsage
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor.NextStep
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.CreateIntentCallback
-import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DeferredIntentValidator
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
@@ -259,7 +259,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     }
 
     private suspend fun handleDeferred(
-        intentConfiguration: PaymentSheet.IntentConfiguration,
+        intentConfiguration: IntentConfiguration,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams?,
@@ -299,7 +299,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     }
 
     private suspend fun handleDeferred(
-        intentConfiguration: PaymentSheet.IntentConfiguration,
+        intentConfiguration: IntentConfiguration,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams?,
@@ -307,7 +307,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         shouldSavePaymentMethod: Boolean,
     ): NextStep {
         return when (intentConfiguration.intentBehavior) {
-            is PaymentSheet.IntentConfiguration.IntentBehavior.Default -> handleDeferredIntent(
+            is IntentConfiguration.IntentBehavior.Default -> handleDeferredIntent(
                 intentConfiguration = intentConfiguration,
                 paymentMethod = paymentMethod,
                 paymentMethodOptionsParams = paymentMethodOptionsParams,
@@ -315,7 +315,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 shippingValues = shippingValues,
                 shouldSavePaymentMethod = shouldSavePaymentMethod,
             )
-            is PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken -> handlePreparePaymentMethod(
+            is IntentConfiguration.IntentBehavior.SharedPaymentToken -> handlePreparePaymentMethod(
                 paymentMethod = paymentMethod,
                 shippingValues = shippingValues,
             )
@@ -323,7 +323,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     }
 
     private suspend fun handleDeferredIntent(
-        intentConfiguration: PaymentSheet.IntentConfiguration,
+        intentConfiguration: IntentConfiguration,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams?,
@@ -420,7 +420,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
 
     private suspend fun createPaymentMethod(
         params: PaymentMethodCreateParams,
-    ): Result<PaymentMethod> {
+    ): kotlin.Result<PaymentMethod> {
         return stripeRepository.createPaymentMethod(
             paymentMethodCreateParams = params,
             options = requestOptions,
@@ -479,7 +479,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
 
     private suspend fun handleDeferredIntentCreationFromPaymentMethod(
         createIntentCallback: CreateIntentCallback,
-        intentConfiguration: PaymentSheet.IntentConfiguration,
+        intentConfiguration: IntentConfiguration,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams?,
@@ -492,7 +492,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         )
 
         return when (result) {
-            is CreateIntentResult.Success -> {
+            is CreateIntentCallback.Result.Success -> {
                 if (result.clientSecret == IntentConfirmationInterceptor.COMPLETE_WITHOUT_CONFIRMING_INTENT) {
                     NextStep.Complete(isForceSuccess = true)
                 } else {
@@ -507,7 +507,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 }
             }
 
-            is CreateIntentResult.Failure -> {
+            is CreateIntentCallback.Result.Failure -> {
                 NextStep.Fail(
                     cause = CreateIntentCallbackFailureException(result.cause),
                     message = result.displayMessage?.resolvableString
@@ -519,7 +519,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
 
     private suspend fun handleDeferredIntentCreationSuccess(
         clientSecret: String,
-        intentConfiguration: PaymentSheet.IntentConfiguration,
+        intentConfiguration: IntentConfiguration,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams?,
@@ -567,7 +567,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         }
     }
 
-    private suspend fun retrieveStripeIntent(clientSecret: String): Result<StripeIntent> {
+    private suspend fun retrieveStripeIntent(clientSecret: String): kotlin.Result<StripeIntent> {
         return stripeRepository.retrieveStripeIntent(
             clientSecret = clientSecret,
             options = requestOptions,
@@ -676,7 +676,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             name = getName(),
             phoneNumber = getPhone(),
             address = getAddress().run {
-                PaymentSheet.Address(
+                Address(
                     line1 = line1,
                     line2 = line2,
                     city = city,

@@ -51,22 +51,23 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.CustomerSheetResult
-import com.stripe.android.customersheet.rememberCustomerSheet
+import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.AddressLauncher
+import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.customersheet.CustomerSheet
+import com.stripe.android.elements.customersheet.rememberCustomerSheet
+import com.stripe.android.elements.payment.ConfirmCustomPaymentMethodCallback
+import com.stripe.android.elements.payment.CustomPaymentMethod
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.ExternalPaymentMethodConfirmHandler
+import com.stripe.android.elements.payment.FlowController
+import com.stripe.android.elements.payment.PaymentSheet
+import com.stripe.android.elements.payment.rememberEmbeddedPaymentElement
+import com.stripe.android.elements.rememberAddressLauncher
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
-import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
-import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.addresselement.AddressLauncher
-import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
@@ -144,7 +145,7 @@ internal class PaymentSheetPlaygroundActivity :
     }
 
     @OptIn(
-        ExperimentalCustomerSessionApi::class,
+        CustomerSessionApiPreview::class,
         ExperimentalAnalyticEventCallbackApi::class,
     )
     @Suppress("LongMethod")
@@ -166,7 +167,7 @@ internal class PaymentSheetPlaygroundActivity :
             }
                 .build()
             val flowController = remember {
-                PaymentSheet.FlowController.Builder(
+                FlowController.Builder(
                     viewModel::onPaymentSheetResult,
                     viewModel::onPaymentOptionSelected
                 )
@@ -392,7 +393,7 @@ internal class PaymentSheetPlaygroundActivity :
     private fun PlaygroundStateUi(
         playgroundState: PlaygroundState?,
         paymentSheet: PaymentSheet,
-        flowController: PaymentSheet.FlowController,
+        flowController: FlowController,
         customerSheet: CustomerSheet,
         addressLauncher: AddressLauncher
     ) {
@@ -466,7 +467,7 @@ internal class PaymentSheetPlaygroundActivity :
 
     @Composable
     fun FlowControllerUi(
-        flowController: PaymentSheet.FlowController,
+        flowController: FlowController,
         playgroundState: PlaygroundState.Payment,
     ) {
         LaunchedEffect(playgroundState) {
@@ -675,7 +676,7 @@ internal class PaymentSheetPlaygroundActivity :
     }
 
     private fun configureFlowController(
-        flowController: PaymentSheet.FlowController,
+        flowController: FlowController,
         playgroundState: PlaygroundState.Payment,
     ) {
         if (playgroundState.initializationType == InitializationType.Normal) {
@@ -703,11 +704,11 @@ internal class PaymentSheetPlaygroundActivity :
 
     private suspend fun fetchOption(
         customerSheet: CustomerSheet
-    ): Result<PaymentOption?> = withContext(Dispatchers.IO) {
+    ): kotlin.Result<PaymentOption?> = withContext(Dispatchers.IO) {
         when (val result = customerSheet.retrievePaymentOptionSelection()) {
-            is CustomerSheetResult.Selected -> Result.success(result.selection?.paymentOption)
-            is CustomerSheetResult.Failed -> Result.failure(result.exception)
-            is CustomerSheetResult.Canceled -> Result.success(null)
+            is CustomerSheet.Result.Selected -> kotlin.Result.success(result.selection?.paymentOption)
+            is CustomerSheet.Result.Failed -> kotlin.Result.failure(result.exception)
+            is CustomerSheet.Result.Canceled -> kotlin.Result.success(null)
         }
     }
 
@@ -726,7 +727,7 @@ internal class PaymentSheetPlaygroundActivity :
     }
 
     override fun onConfirmCustomPaymentMethod(
-        customPaymentMethod: PaymentSheet.CustomPaymentMethod,
+        customPaymentMethod: CustomPaymentMethod,
         billingDetails: PaymentMethod.BillingDetails
     ) {
         startActivity(
