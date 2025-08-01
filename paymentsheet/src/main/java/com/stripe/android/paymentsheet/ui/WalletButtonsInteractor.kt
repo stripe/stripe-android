@@ -230,7 +230,7 @@ internal class DefaultWalletButtonsInteractor(
                 configuration = linkConfiguration,
                 linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                 launchMode = LinkLaunchMode.PaymentMethodSelection(null),
-                useLinkExpress = true,
+                useLinkExpress = true
             )
         } else {
             handleButtonPressed(

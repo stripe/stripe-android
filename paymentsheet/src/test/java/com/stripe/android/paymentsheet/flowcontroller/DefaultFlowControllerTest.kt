@@ -559,7 +559,7 @@ internal class DefaultFlowControllerTest {
             configuration = any(),
             linkAccountInfo = anyOrNull(),
             launchMode = any(),
-            useLinkExpress = any(),
+            useLinkExpress = any()
         )
 
         // Simulate user dismissing 2FA with back press
