@@ -2,6 +2,7 @@ package com.stripe.android.link.repositories
 
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.FakeConsumersApiService
 import com.stripe.android.link.LinkPaymentDetails
@@ -17,6 +18,7 @@ import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.VerificationType
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -486,7 +488,7 @@ class LinkApiRepositoryTest {
                 extraParams = anyOrNull(),
                 requestOptions = any(),
             )
-        ).thenReturn(Result.success("pm_123"))
+        ).thenReturn(Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
 
         val result = linkRepository.shareCardPaymentDetails(
             paymentMethodCreateParams = cardPaymentMethodCreateParams,
@@ -500,7 +502,10 @@ class LinkApiRepositoryTest {
         verify(stripeRepository).sharePaymentDetails(
             consumerSessionClientSecret = consumerSessionSecret,
             id = paymentDetailsId,
-            extraParams = mapOf("payment_method_options" to mapOf("card" to mapOf("cvc" to "123"))),
+            extraParams = mapOf(
+                "payment_method_options" to mapOf("card" to mapOf("cvc" to "123")),
+                "expand" to listOf("payment_method")
+            ),
             requestOptions = ApiRequest.Options(apiKey = PUBLISHABLE_KEY, stripeAccount = STRIPE_ACCOUNT_ID)
         )
         assertThat(savedLinkPaymentDetails.paymentDetails)
@@ -508,13 +513,23 @@ class LinkApiRepositoryTest {
                 ConsumerPaymentDetails.Passthrough(
                     id = paymentDetailsId,
                     last4 = cardPaymentMethodCreateParams.cardLast4().orEmpty(),
-                    paymentMethodId = "pm_123"
+                    paymentMethodId = PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!,
+                    billingEmailAddress = "jenny.rosen@example.com",
+                    billingAddress = ConsumerPaymentDetails.BillingAddress(
+                        name = "Jenny Rosen",
+                        line1 = "1234 Main Street",
+                        line2 = null,
+                        administrativeArea = "CA",
+                        locality = "San Francisco",
+                        postalCode = "94111",
+                        countryCode = CountryCode.create("US")
+                    )
                 )
             )
         assertThat(savedLinkPaymentDetails.paymentMethodCreateParams)
             .isEqualTo(
                 PaymentMethodCreateParams.createLink(
-                    "pm_123",
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!,
                     consumerSessionSecret,
                     mapOf("card" to mapOf("cvc" to "123"))
                 )
@@ -771,7 +786,7 @@ class LinkApiRepositoryTest {
                 extraParams = anyOrNull(),
                 requestOptions = any(),
             )
-        ).thenReturn(Result.success("pm_123"))
+        ).thenReturn(Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
 
         val result = linkRepository.shareCardPaymentDetails(
             paymentMethodCreateParams = cardPaymentMethodCreateParams.copy(allowRedisplay = allowRedisplay),
