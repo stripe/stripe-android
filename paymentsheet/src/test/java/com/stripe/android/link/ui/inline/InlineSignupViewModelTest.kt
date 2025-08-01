@@ -485,7 +485,7 @@ class InlineSignupViewModelTest {
         }
 
     @Test
-    fun `When signup opt-in feature enabled and toggle is checked, automatically creates user input from billing email`() =
+    fun `When signup opt-in feature enabled and toggle is checked, creates user input from billing email`() =
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel(
                 countryCode = CountryCode.US,

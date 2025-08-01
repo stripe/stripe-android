@@ -340,18 +340,8 @@ internal class InlineSignupViewModel(
             }
             LinkSignupMode.InsteadOfSaveForFutureUse -> {
                 when {
-                    linkSignUpOptInFeatureEnabled -> {
-                        SignUpConsentAction.SignUpOptInMobileChecked
-                    }
-                    defaultOptIn -> {
-                        if (hasPrefilledEmail && hasPrefilledPhone) {
-                            SignUpConsentAction.DefaultOptInWithAllPrefilled
-                        } else if (hasPrefilledEmail || hasPrefilledPhone) {
-                            SignUpConsentAction.DefaultOptInWithSomePrefilled
-                        } else {
-                            SignUpConsentAction.DefaultOptInWithNonePrefilled
-                        }
-                    }
+                    linkSignUpOptInFeatureEnabled -> SignUpConsentAction.SignUpOptInMobileChecked
+                    defaultOptIn -> getDefaultOptInConsentAction(hasPrefilledEmail, hasPrefilledPhone)
                     hasPrefilledEmail && hasPrefilledPhone ->
                         SignUpConsentAction.CheckboxWithPrefilledEmailAndPhone
                     hasPrefilledEmail ->
@@ -361,6 +351,17 @@ internal class InlineSignupViewModel(
                 }
             }
         }
+    }
+
+    private fun getDefaultOptInConsentAction(
+        hasPrefilledEmail: Boolean,
+        hasPrefilledPhone: Boolean
+    ): SignUpConsentAction = if (hasPrefilledEmail && hasPrefilledPhone) {
+        SignUpConsentAction.DefaultOptInWithAllPrefilled
+    } else if (hasPrefilledEmail || hasPrefilledPhone) {
+        SignUpConsentAction.DefaultOptInWithSomePrefilled
+    } else {
+        SignUpConsentAction.DefaultOptInWithNonePrefilled
     }
 
     internal class Factory(
