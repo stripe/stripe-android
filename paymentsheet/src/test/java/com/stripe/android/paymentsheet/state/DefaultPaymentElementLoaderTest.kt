@@ -751,7 +751,8 @@ internal class DefaultPaymentElementLoaderTest {
                 suppress2faModal = false,
                 disableLinkRuxInFlowController = false,
                 linkEnableDisplayableDefaultValuesInEce = false,
-                linkSignUpOptInFeatureEnabled = false
+                linkSignUpOptInFeatureEnabled = false,
+                linkSignUpOptInInitialValue = false
             )
         )
 
@@ -790,7 +791,8 @@ internal class DefaultPaymentElementLoaderTest {
                 suppress2faModal = false,
                 disableLinkRuxInFlowController = false,
                 linkEnableDisplayableDefaultValuesInEce = false,
-                linkSignUpOptInFeatureEnabled = false
+                linkSignUpOptInFeatureEnabled = false,
+                linkSignUpOptInInitialValue = false
             )
         )
 
@@ -877,7 +879,8 @@ internal class DefaultPaymentElementLoaderTest {
                 suppress2faModal = false,
                 disableLinkRuxInFlowController = false,
                 linkEnableDisplayableDefaultValuesInEce = false,
-                linkSignUpOptInFeatureEnabled = false
+                linkSignUpOptInFeatureEnabled = false,
+                linkSignUpOptInInitialValue = false
             ),
             linkStore = mock {
                 on { hasUsedLink() } doReturn true
@@ -910,7 +913,8 @@ internal class DefaultPaymentElementLoaderTest {
                 suppress2faModal = false,
                 disableLinkRuxInFlowController = false,
                 linkEnableDisplayableDefaultValuesInEce = false,
-                linkSignUpOptInFeatureEnabled = false
+                linkSignUpOptInFeatureEnabled = false,
+                linkSignUpOptInInitialValue = false
             )
         )
 
@@ -1431,7 +1435,8 @@ internal class DefaultPaymentElementLoaderTest {
                 suppress2faModal = false,
                 disableLinkRuxInFlowController = false,
                 linkEnableDisplayableDefaultValuesInEce = false,
-                linkSignUpOptInFeatureEnabled = false
+                linkSignUpOptInFeatureEnabled = false,
+                linkSignUpOptInInitialValue = false
             ),
             linkStore = linkStore,
         )
@@ -3310,6 +3315,7 @@ internal class DefaultPaymentElementLoaderTest {
             disableLinkRuxInFlowController = false,
             linkEnableDisplayableDefaultValuesInEce = false,
             linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
+            linkSignUpOptInInitialValue = false,
         )
     }
 

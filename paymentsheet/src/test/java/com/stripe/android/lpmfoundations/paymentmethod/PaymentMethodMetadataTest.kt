@@ -1967,6 +1967,7 @@ internal class PaymentMethodMetadataTest {
             allowUserEmailEdits = true,
             enableDisplayableDefaultValuesInEce = false,
             linkSignUpOptInFeatureEnabled = false,
+            linkSignUpOptInInitialValue = false,
             customerId = null
         )
     }

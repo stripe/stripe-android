@@ -157,6 +157,7 @@ class LinkFormElementTest {
             allowUserEmailEdits = true,
             enableDisplayableDefaultValuesInEce = false,
             linkSignUpOptInFeatureEnabled = false,
+            linkSignUpOptInInitialValue = false,
             customerId = null
         )
     }

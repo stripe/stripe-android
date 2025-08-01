@@ -226,6 +226,7 @@ internal object TestFactory {
         allowUserEmailEdits = true,
         enableDisplayableDefaultValuesInEce = false,
         linkSignUpOptInFeatureEnabled = false,
+        linkSignUpOptInInitialValue = false,
         customerId = null
     )
 

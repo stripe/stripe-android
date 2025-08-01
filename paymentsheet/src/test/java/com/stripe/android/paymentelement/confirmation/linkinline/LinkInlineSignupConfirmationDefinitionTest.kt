@@ -700,6 +700,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 allowUserEmailEdits = true,
                 enableDisplayableDefaultValuesInEce = false,
                 linkSignUpOptInFeatureEnabled = false,
+                linkSignUpOptInInitialValue = false,
                 customerId = null
             ),
             userInput = userInput,
