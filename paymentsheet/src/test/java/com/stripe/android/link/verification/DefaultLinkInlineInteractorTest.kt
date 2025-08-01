@@ -215,7 +215,7 @@ class DefaultLinkInlineInteractorTest {
 
         val verificationState = Render2FA(
             linkConfiguration = TestFactory.LINK_CONFIGURATION,
-            viewState = initialViewState
+            viewState = initialViewState,
         )
 
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(
@@ -253,7 +253,7 @@ class DefaultLinkInlineInteractorTest {
 
         val verificationState = Render2FA(
             linkConfiguration = TestFactory.LINK_CONFIGURATION,
-            viewState = initialViewState
+            viewState = initialViewState,
         )
 
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(
@@ -300,7 +300,7 @@ class DefaultLinkInlineInteractorTest {
 
         val verificationState = Render2FA(
             linkConfiguration = TestFactory.LINK_CONFIGURATION,
-            viewState = initialViewState
+            viewState = initialViewState,
         )
 
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(
@@ -356,7 +356,7 @@ class DefaultLinkInlineInteractorTest {
 
         val verificationState = Render2FA(
             linkConfiguration = TestFactory.LINK_CONFIGURATION,
-            viewState = initialViewState
+            viewState = initialViewState,
         )
 
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(
@@ -402,7 +402,7 @@ class DefaultLinkInlineInteractorTest {
 
         val verificationState = Render2FA(
             linkConfiguration = TestFactory.LINK_CONFIGURATION,
-            viewState = initialViewState
+            viewState = initialViewState,
         )
 
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(
@@ -447,7 +447,7 @@ class DefaultLinkInlineInteractorTest {
 
         val verificationState = Render2FA(
             linkConfiguration = TestFactory.LINK_CONFIGURATION,
-            viewState = initialViewState
+            viewState = initialViewState,
         )
 
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(
