@@ -20,6 +20,7 @@ import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SharePaymentDetails
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,6 +66,9 @@ internal open class FakeLinkAccountManager(
     )
     var createLinkAccountSessionResult: Result<LinkAccountSession> = Result.success(
         value = TestFactory.LINK_ACCOUNT_SESSION
+    )
+    var createPaymentMethodResult: Result<com.stripe.android.model.PaymentMethod> = Result.success(
+        value = PaymentMethodFixtures.CARD_PAYMENT_METHOD
     )
     var sharePaymentDetails: Result<SharePaymentDetails> = Result.success(TestFactory.LINK_SHARE_PAYMENT_DETAILS)
     var updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
@@ -232,6 +236,12 @@ internal open class FakeLinkAccountManager(
     override suspend fun createLinkAccountSession(): Result<LinkAccountSession> {
         yield()
         return createLinkAccountSessionResult
+    }
+
+    override suspend fun createPaymentMethod(
+        linkPaymentMethod: LinkPaymentMethod
+    ): Result<com.stripe.android.model.PaymentMethod> {
+        return createPaymentMethodResult
     }
 
     override suspend fun startVerification(): Result<LinkAccount> {

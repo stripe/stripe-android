@@ -3,6 +3,7 @@ package com.stripe.android.link.account
 import com.stripe.android.link.ConsumerState
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.SignUpConsentAction
@@ -14,6 +15,7 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.LinkAccountSession
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
 import kotlinx.coroutines.flow.Flow
@@ -102,6 +104,10 @@ internal interface LinkAccountManager {
     ): Result<LinkAccount>
 
     suspend fun logOut(): Result<ConsumerSession>
+
+    suspend fun createPaymentMethod(
+        linkPaymentMethod: LinkPaymentMethod
+    ): Result<PaymentMethod>
 
     suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams
