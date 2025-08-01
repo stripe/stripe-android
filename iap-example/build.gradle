@@ -1,0 +1,37 @@
+apply from: configs.androidApplication
+
+apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
+
+android {
+    defaultConfig {
+        applicationId "com.stripe.android.iap.example"
+        versionCode 20
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildFeatures {
+        compose true
+    }
+}
+
+dependencies {
+    implementation project(':iap')
+
+    implementation libs.accompanist.materialThemeAdapter
+    implementation libs.androidx.appCompat
+    implementation libs.androidx.coreKtx
+    implementation libs.androidx.lifecycleCompose
+    implementation libs.compose.activity
+    implementation libs.compose.material
+    implementation libs.compose.materialIcons
+    implementation libs.compose.ui
+    implementation libs.compose.viewModels
+    implementation libs.kotlin.serialization
+    implementation libs.material
+
+    implementation libs.okhttp
+    implementation libs.retrofit
+    implementation libs.retrofitKotlinSerializationConverter
+}
