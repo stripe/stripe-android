@@ -159,7 +159,7 @@ class DefaultLinkInlineInteractorTest {
                 configuration = any(),
                 linkAccountInfo = any(),
                 launchMode = eq(LinkLaunchMode.PaymentMethodSelection(null)),
-                useLinkExpress = any()
+                useLinkExpress = any(),
             )
         }
 
@@ -214,7 +214,7 @@ class DefaultLinkInlineInteractorTest {
 
         val verificationState = Render2FA(
             linkConfiguration = TestFactory.LINK_CONFIGURATION,
-            viewState = initialViewState
+            viewState = initialViewState,
         )
 
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(
@@ -251,7 +251,7 @@ class DefaultLinkInlineInteractorTest {
 
         val verificationState = Render2FA(
             linkConfiguration = TestFactory.LINK_CONFIGURATION,
-            viewState = initialViewState
+            viewState = initialViewState,
         )
 
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(
@@ -297,7 +297,7 @@ class DefaultLinkInlineInteractorTest {
 
         val verificationState = Render2FA(
             linkConfiguration = TestFactory.LINK_CONFIGURATION,
-            viewState = initialViewState
+            viewState = initialViewState,
         )
 
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(
@@ -352,7 +352,7 @@ class DefaultLinkInlineInteractorTest {
 
         val verificationState = Render2FA(
             linkConfiguration = TestFactory.LINK_CONFIGURATION,
-            viewState = initialViewState
+            viewState = initialViewState,
         )
 
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(
@@ -397,7 +397,7 @@ class DefaultLinkInlineInteractorTest {
 
         val verificationState = Render2FA(
             linkConfiguration = TestFactory.LINK_CONFIGURATION,
-            viewState = initialViewState
+            viewState = initialViewState,
         )
 
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(
@@ -441,7 +441,7 @@ class DefaultLinkInlineInteractorTest {
 
         val verificationState = Render2FA(
             linkConfiguration = TestFactory.LINK_CONFIGURATION,
-            viewState = initialViewState
+            viewState = initialViewState,
         )
 
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(

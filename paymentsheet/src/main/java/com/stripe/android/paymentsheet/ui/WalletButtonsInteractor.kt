@@ -230,7 +230,7 @@ internal class DefaultWalletButtonsInteractor(
                 configuration = linkConfiguration,
                 linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                 launchMode = LinkLaunchMode.PaymentMethodSelection(null),
-                useLinkExpress = true
+                useLinkExpress = true,
             )
         } else {
             handleButtonPressed(
@@ -261,6 +261,7 @@ internal class DefaultWalletButtonsInteractor(
         val confirmationOption = selection.toConfirmationOption(
             configuration = arguments.configuration,
             linkConfiguration = arguments.paymentMethodMetadata.linkState?.configuration,
+            passiveCaptchaParams = arguments.paymentMethodMetadata.passiveCaptchaParams,
         ) ?: return null
 
         return ConfirmationHandler.Args(

@@ -16,6 +16,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.LinkCardBrand
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -68,7 +69,8 @@ internal data class PaymentMethodMetadata(
     val financialConnectionsAvailability: FinancialConnectionsAvailability?,
     val cardBrandFilter: CardBrandFilter,
     val elementsSessionId: String,
-    val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?
+    val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
+    val passiveCaptchaParams: PassiveCaptchaParams?
 ) : Parcelable {
     fun hasIntentToSetup(code: PaymentMethodCode): Boolean {
         return when (stripeIntent) {
@@ -324,7 +326,8 @@ internal data class PaymentMethodMetadata(
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession),
                 elementsSessionId = elementsSession.elementsSessionId,
-                shopPayConfiguration = configuration.shopPayConfiguration
+                shopPayConfiguration = configuration.shopPayConfiguration,
+                passiveCaptchaParams = elementsSession.passiveCaptchaParams
             )
         }
 
@@ -369,13 +372,15 @@ internal data class PaymentMethodMetadata(
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
                 elementsSessionId = elementsSession.elementsSessionId,
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession),
-                shopPayConfiguration = null
+                shopPayConfiguration = null,
+                passiveCaptchaParams = elementsSession.passiveCaptchaParams
             )
         }
 
         internal fun createForNativeLink(
             configuration: LinkConfiguration,
             linkAccount: LinkAccount,
+            passiveCaptchaParams: PassiveCaptchaParams?
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
                 stripeIntent = configuration.stripeIntent,
@@ -415,7 +420,8 @@ internal data class PaymentMethodMetadata(
                 cardBrandFilter = configuration.cardBrandFilter,
                 elementsSessionId = configuration.elementsSessionId,
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),
-                shopPayConfiguration = null
+                shopPayConfiguration = null,
+                passiveCaptchaParams = passiveCaptchaParams
             )
         }
     }
