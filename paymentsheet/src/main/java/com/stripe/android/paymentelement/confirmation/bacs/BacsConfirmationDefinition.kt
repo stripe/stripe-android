@@ -85,6 +85,7 @@ internal class BacsConfirmationDefinition @Inject constructor(
                     optionsParams = null,
                     extraParams = null,
                     shouldSave = false,
+                    passiveCaptchaParams = confirmationOption.passiveCaptchaParams
                 )
 
                 ConfirmationDefinition.Result.NextStep(

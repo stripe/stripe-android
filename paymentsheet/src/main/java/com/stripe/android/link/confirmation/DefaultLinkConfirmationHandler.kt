@@ -154,7 +154,8 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                 ),
                 extraParams = null,
                 optionsParams = null,
-                shouldSave = false
+                shouldSave = false,
+                passiveCaptchaParams = null
             )
         }
 

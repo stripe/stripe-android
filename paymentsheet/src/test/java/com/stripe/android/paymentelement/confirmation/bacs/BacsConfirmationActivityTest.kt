@@ -13,6 +13,7 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.intent.rule.IntentsRule
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -81,6 +82,7 @@ internal class BacsConfirmationActivityTest {
                         optionsParams = CONFIRMATION_OPTION.optionsParams,
                         shouldSave = false,
                         extraParams = null,
+                        passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
                     )
                 )
 
@@ -208,6 +210,7 @@ internal class BacsConfirmationActivityTest {
                 )
             ),
             optionsParams = null,
+            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
         )
 
         val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(

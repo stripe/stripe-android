@@ -71,6 +71,7 @@ class IntentConfirmationDefinitionTest {
                     optionsParams = null,
                     shouldSave = true,
                     extraParams = null,
+                    passiveCaptchaParams = null
                 ),
                 confirmationParameters = CONFIRMATION_PARAMETERS,
             )

@@ -4,6 +4,7 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
 import com.stripe.android.paymentelement.confirmation.cpms.CustomPaymentMethodConfirmationOption
@@ -18,14 +19,15 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 internal fun PaymentSelection.toConfirmationOption(
     configuration: CommonConfiguration,
     linkConfiguration: LinkConfiguration?,
+    passiveCaptchaParams: PassiveCaptchaParams?
 ): ConfirmationHandler.Option? {
     return when (this) {
         is PaymentSelection.Saved -> toConfirmationOption()
         is PaymentSelection.ExternalPaymentMethod -> toConfirmationOption()
         is PaymentSelection.CustomPaymentMethod -> toConfirmationOption(configuration)
-        is PaymentSelection.New.USBankAccount -> toConfirmationOption()
+        is PaymentSelection.New.USBankAccount -> toConfirmationOption(passiveCaptchaParams)
         is PaymentSelection.New.LinkInline -> toConfirmationOption(linkConfiguration)
-        is PaymentSelection.New -> toConfirmationOption()
+        is PaymentSelection.New -> toConfirmationOption(passiveCaptchaParams)
         is PaymentSelection.GooglePay -> toConfirmationOption(configuration)
         is PaymentSelection.Link -> toConfirmationOption(linkConfiguration)
         is PaymentSelection.ShopPay -> toConfirmationOption(configuration)
@@ -46,7 +48,9 @@ private fun PaymentSelection.ExternalPaymentMethod.toConfirmationOption(): Exter
     )
 }
 
-private fun PaymentSelection.New.USBankAccount.toConfirmationOption(): PaymentMethodConfirmationOption {
+private fun PaymentSelection.New.USBankAccount.toConfirmationOption(
+    passiveCaptchaParams: PassiveCaptchaParams?
+): PaymentMethodConfirmationOption {
     return if (instantDebits != null) {
         // For Instant Debits, we create the PaymentMethod inside the bank auth flow. Therefore,
         // we can just use the already created object here.
@@ -60,6 +64,7 @@ private fun PaymentSelection.New.USBankAccount.toConfirmationOption(): PaymentMe
             optionsParams = paymentMethodOptionsParams,
             extraParams = paymentMethodExtraParams,
             shouldSave = customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse,
+            passiveCaptchaParams = passiveCaptchaParams
         )
     }
 }
@@ -86,11 +91,14 @@ private fun PaymentSelection.New.LinkInline.toConfirmationOption(
     }
 }
 
-private fun PaymentSelection.New.toConfirmationOption(): ConfirmationHandler.Option {
+private fun PaymentSelection.New.toConfirmationOption(
+    passiveCaptchaParams: PassiveCaptchaParams?
+): ConfirmationHandler.Option {
     return if (paymentMethodCreateParams.typeCode == PaymentMethod.Type.BacsDebit.code) {
         BacsConfirmationOption(
             createParams = paymentMethodCreateParams,
             optionsParams = paymentMethodOptionsParams,
+            passiveCaptchaParams = passiveCaptchaParams
         )
     } else {
         PaymentMethodConfirmationOption.New(
@@ -98,6 +106,7 @@ private fun PaymentSelection.New.toConfirmationOption(): ConfirmationHandler.Opt
             optionsParams = paymentMethodOptionsParams,
             extraParams = paymentMethodExtraParams,
             shouldSave = customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse,
+            passiveCaptchaParams = passiveCaptchaParams
         )
     }
 }
