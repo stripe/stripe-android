@@ -132,7 +132,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         )
 
         viewModel.paymentSelection = paymentSelectionUpdater(
-            existingSelection = viewModel.paymentSelection,
+            selection = viewModel.paymentSelection,
             previousConfig = viewModel.state?.config,
             newState = state,
             newConfig = configuration,

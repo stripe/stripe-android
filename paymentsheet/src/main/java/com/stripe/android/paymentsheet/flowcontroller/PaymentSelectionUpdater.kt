@@ -12,7 +12,7 @@ import javax.inject.Inject
 
 internal fun interface PaymentSelectionUpdater {
     operator fun invoke(
-        existingSelection: PaymentSelection?,
+        selection: PaymentSelection?,
         previousConfig: PaymentSheet.Configuration?,
         newState: PaymentSheetState.Full,
         newConfig: PaymentSheet.Configuration,
@@ -23,7 +23,7 @@ internal fun interface PaymentSelectionUpdater {
 internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSelectionUpdater {
 
     override operator fun invoke(
-        existingSelection: PaymentSelection?,
+        selection: PaymentSelection?,
         previousConfig: PaymentSheet.Configuration?,
         newState: PaymentSheetState.Full,
         newConfig: PaymentSheet.Configuration,
@@ -34,10 +34,10 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
         // 2. Previously saved selection from local storage/preferences (Google Pay, Link, or saved PM)
         // 3. First available customer payment method
         // 4. Google Pay (if available as fallback)
-        val candidateSelection = existingSelection ?: newState.paymentSelection
+        val potentialSelection = selection ?: newState.paymentSelection
 
-        return candidateSelection?.takeIf { selectionToValidate ->
-            canUseSelection(selectionToValidate, newState, newConfig, walletButtonsAlreadyShown, existingSelection) &&
+        return potentialSelection?.takeIf {
+            canUseSelection(it, newState, newConfig, walletButtonsAlreadyShown, selection) &&
                 previousConfig?.let { previousConfig ->
                     !previousConfig.asCommonConfiguration()
                         .containsVolatileDifferences(newConfig.asCommonConfiguration())
@@ -46,42 +46,42 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
     }
 
     private fun canUseSelection(
-        selectionToValidate: PaymentSelection,
+        potentialSelection: PaymentSelection,
         state: PaymentSheetState.Full,
         configuration: PaymentSheet.Configuration,
         walletButtonsAlreadyShown: Boolean,
-        existingSelection: PaymentSelection?,
+        selection: PaymentSelection?,
     ): Boolean {
         // The types that are allowed for this intent, as returned by the backend
         val allowedTypes = state.paymentMethodMetadata.supportedPaymentMethodTypes()
 
-        return when (selectionToValidate) {
+        return when (potentialSelection) {
             is PaymentSelection.New -> {
                 val requiresMandate = shouldAskForMandate(
-                    currentSelection = selectionToValidate,
+                    currentSelection = potentialSelection,
                     metadata = state.paymentMethodMetadata,
                 )
-                val code = selectionToValidate.paymentMethodCreateParams.typeCode
+                val code = potentialSelection.paymentMethodCreateParams.typeCode
                 code in allowedTypes && !requiresMandate
             }
             is PaymentSelection.Saved -> {
-                val paymentMethod = selectionToValidate.paymentMethod
+                val paymentMethod = potentialSelection.paymentMethod
                 val code = paymentMethod.type?.code
                 code in allowedTypes && paymentMethod in (state.customer?.paymentMethods ?: emptyList())
             }
             is PaymentSelection.GooglePay -> {
                 state.paymentMethodMetadata.isGooglePayReady &&
-                    walletCanBeUsed(selectionToValidate, configuration, walletButtonsAlreadyShown, existingSelection)
+                    walletCanBeUsed(potentialSelection, configuration, walletButtonsAlreadyShown, selection)
             }
             is PaymentSelection.Link -> {
                 state.paymentMethodMetadata.linkState != null &&
-                    walletCanBeUsed(selectionToValidate, configuration, walletButtonsAlreadyShown, existingSelection)
+                    walletCanBeUsed(potentialSelection, configuration, walletButtonsAlreadyShown, selection)
             }
             is PaymentSelection.ExternalPaymentMethod -> {
-                state.paymentMethodMetadata.isExternalPaymentMethod(selectionToValidate.type)
+                state.paymentMethodMetadata.isExternalPaymentMethod(potentialSelection.type)
             }
             is PaymentSelection.CustomPaymentMethod -> {
-                state.paymentMethodMetadata.isCustomPaymentMethod(selectionToValidate.id)
+                state.paymentMethodMetadata.isCustomPaymentMethod(potentialSelection.id)
             }
             is PaymentSelection.ShopPay -> {
                 false
@@ -90,10 +90,10 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
     }
 
     private fun walletCanBeUsed(
-        selectionToValidate: PaymentSelection,
+        potentialSelection: PaymentSelection,
         configuration: PaymentSheet.Configuration,
         walletButtonsAlreadyShown: Boolean,
-        existingSelection: PaymentSelection?
+        selection: PaymentSelection?
     ): Boolean {
         if (!configuration.walletButtons.willDisplayExternally && !walletButtonsAlreadyShown) {
             return true
@@ -101,7 +101,7 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
 
         val walletTypesDisplayedExternally = configuration.walletButtons.allowedWalletTypes
 
-        val walletType = when (selectionToValidate) {
+        val walletType = when (potentialSelection) {
             is PaymentSelection.GooglePay -> WalletType.GooglePay
             is PaymentSelection.Link -> WalletType.Link
             else -> null
@@ -109,7 +109,7 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
 
         // If this selection is the existing selection (likely selected externally)
         // AND specific wallets are configured externally, preserve it
-        if (selectionToValidate == existingSelection && walletType in walletTypesDisplayedExternally) {
+        if (potentialSelection == selection && walletType in walletTypesDisplayedExternally) {
             return true
         }
 
