@@ -45,8 +45,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up">Agree and continue</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">Fast, secure, 1⁠-⁠click checkout</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">Fast, secure checkout</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Save your payment information with Link, and securely check out in 1-click on Link-supported sites.</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">Pay faster everywhere Link is accepted.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[By continuing you agree to the <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
