@@ -51,7 +51,7 @@ internal class ConsumerPaymentDetailsShareJsonParserTest {
                 code = "card"
             )
         )
-        
+
         assertThat(
             ConsumerPaymentDetailsShareJsonParser
                 .parse(ConsumerFixtures.PAYMENT_DETAILS_SHARE_JSON)
