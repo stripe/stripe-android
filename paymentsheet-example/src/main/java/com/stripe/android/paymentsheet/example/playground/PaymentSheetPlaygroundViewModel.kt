@@ -674,7 +674,7 @@ internal class PaymentSheetPlaygroundViewModel(
         }
     }
 
-    private fun updatePaymentOptionForCustomerSheet(paymentOption: PaymentOption?) {
+    private fun updatePaymentOptionForCustomerSheet(paymentOption: CustomerSheet.PaymentOptionDisplayData?) {
         customerSheetState.update { existingState ->
             existingState?.copy(
                 selectedPaymentOption = paymentOption,

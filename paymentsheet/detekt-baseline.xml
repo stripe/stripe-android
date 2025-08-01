@@ -3,6 +3,8 @@
   <ManuallySuppressedIssues/>
   <CurrentIssues>
     <ID>ConstructorParameterNaming:BankFormScreenState.kt$BankFormScreenState$private val _isProcessing: Boolean = false</ID>
+    <ID>ConstructorParameterNaming:CustomerSheet.kt$CustomerSheet.PaymentOptionDisplayData$private val _labels: Labels</ID>
+    <ID>ConstructorParameterNaming:CustomerSheet.kt$CustomerSheet.PaymentOptionDisplayData$private val _shippingDetails: AddressDetails?</ID>
     <ID>ConstructorParameterNaming:EmbeddedPaymentElement.kt$EmbeddedPaymentElement.PaymentOptionDisplayData$private val _shippingDetails: AddressDetails?</ID>
     <ID>ConstructorParameterNaming:PaymentOption.kt$PaymentOption$private val _labels: Labels</ID>
     <ID>ConstructorParameterNaming:PaymentOption.kt$PaymentOption$private val _shippingDetails: AddressDetails?</ID>

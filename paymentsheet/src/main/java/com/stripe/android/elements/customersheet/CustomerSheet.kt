@@ -1,10 +1,13 @@
 package com.stripe.android.elements.customersheet
 
 import android.app.Application
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistryOwner
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -13,12 +16,15 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.common.configuration.ConfigurationDefaults
+import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.customersheet.CustomerSheetConfigViewModel
 import com.stripe.android.customersheet.CustomerSheetConfigureRequest
 import com.stripe.android.customersheet.CustomerSheetContract
 import com.stripe.android.customersheet.CustomerSheetIntegration
+import com.stripe.android.customersheet.CustomerSheetPaymentOptionFactory
 import com.stripe.android.customersheet.InternalCustomerSheetResult
 import com.stripe.android.customersheet.util.CustomerSheetHacks
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.AllowsRemovalOfLastSavedPaymentMethodPreview
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.BillingDetails
@@ -27,10 +33,11 @@ import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.elements.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.model.CardBrand
-import com.stripe.android.paymentsheet.model.PaymentOption
-import com.stripe.android.paymentsheet.model.PaymentOptionFactory
+import com.stripe.android.paymentelement.ExtendedLabelsInPaymentOptionPreview
+import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.image.rememberDrawablePainter
 import com.stripe.android.uicore.utils.AnimationConstants
 import com.stripe.android.view.ActivityStarter
 import dev.drewhamilton.poko.Poko
@@ -47,7 +54,7 @@ class CustomerSheet internal constructor(
     activityResultRegistryOwner: ActivityResultRegistryOwner,
     viewModelStoreOwner: ViewModelStoreOwner,
     private val integrationType: CustomerSheetIntegration.Type,
-    private val paymentOptionFactory: PaymentOptionFactory,
+    private val displayDataFactory: CustomerSheetPaymentOptionFactory,
     private val callback: ResultCallback,
     private val statusBarColor: () -> Int?,
 ) {
@@ -160,7 +167,7 @@ class CustomerSheet internal constructor(
                     paymentMethods.getOrNull()?.find {
                         it.id == paymentOption.id
                     }
-                }?.toPaymentOptionSelection(paymentOptionFactory, request.configuration.googlePayEnabled)
+                }?.toPaymentOptionSelection(displayDataFactory, request.configuration.googlePayEnabled)
             }
 
             selection.fold(
@@ -176,7 +183,7 @@ class CustomerSheet internal constructor(
 
     private fun onCustomerSheetResult(result: InternalCustomerSheetResult) {
         callback.onCustomerSheetResult(
-            result.toPublicResult(paymentOptionFactory)
+            result.toPublicResult(displayDataFactory)
         )
     }
 
@@ -580,7 +587,7 @@ class CustomerSheet internal constructor(
                 lifecycleOwner = lifecycleOwner,
                 activityResultRegistryOwner = activityResultRegistryOwner,
                 integrationType = integration.type,
-                paymentOptionFactory = PaymentOptionFactory(
+                displayDataFactory = CustomerSheetPaymentOptionFactory(
                     iconLoader = PaymentSelection.IconLoader(
                         resources = application.resources,
                         imageLoader = StripeImageLoader(application),
@@ -593,13 +600,13 @@ class CustomerSheet internal constructor(
         }
 
         internal fun PaymentSelection?.toPaymentOptionSelection(
-            paymentOptionFactory: PaymentOptionFactory,
+            paymentOptionDisplayDataFactory: CustomerSheetPaymentOptionFactory,
             canUseGooglePay: Boolean,
         ): PaymentOptionSelection? {
             return when (this) {
                 is PaymentSelection.GooglePay -> {
                     PaymentOptionSelection.GooglePay(
-                        paymentOption = paymentOptionFactory.create(this),
+                        paymentOption = paymentOptionDisplayDataFactory.create(this),
                     ).takeIf {
                         canUseGooglePay
                     }
@@ -607,7 +614,7 @@ class CustomerSheet internal constructor(
                 is PaymentSelection.Saved -> {
                     PaymentOptionSelection.PaymentMethod(
                         paymentMethod = this.paymentMethod,
-                        paymentOption = paymentOptionFactory.create(this)
+                        paymentOption = paymentOptionDisplayDataFactory.create(this)
                     )
                 }
                 else -> null
@@ -654,6 +661,89 @@ class CustomerSheet internal constructor(
     fun interface ResultCallback {
         fun onCustomerSheetResult(result: Result)
     }
+
+    /**
+     * The customer's selected payment option.
+     */
+    @Poko
+    class PaymentOptionDisplayData internal constructor(
+        /**
+         * The drawable resource id of the icon that represents the payment option.
+         */
+        internal val drawableResourceId: Int,
+        /**
+         * A label that describes the payment option.
+         *
+         * For example, "···· 4242" for a Visa ending in 4242.
+         */
+        val label: String,
+        /**
+         * A string representation of the customer's desired payment method:
+         * - If this is a Stripe payment method, see
+         *      https://stripe.com/docs/api/payment_methods/object#payment_method_object-type for possible values.
+         * - If this is an external payment method, see
+         *      https://docs.stripe.com/payments/mobile/external-payment-methods?platform=android
+         *      for possible values.
+         * - If this is Google Pay, the value is "google_pay".
+         */
+        val paymentMethodType: String,
+
+        /**
+         * The billing details associated with the customer's desired payment method.
+         */
+        val billingDetails: BillingDetails?,
+        private val imageLoader: suspend () -> Drawable,
+
+        private val _shippingDetails: AddressDetails?,
+        private val _labels: Labels,
+    ) {
+        @Poko
+        class Labels internal constructor(
+            /**
+             * Primary label for the payment option.
+             * This will primarily describe the type of the payment option being used.
+             * For cards, this could be `Mastercard`, 'Visa', or others.
+             * For other payment methods, this is typically the payment method name.
+             */
+            val label: String,
+            /**
+             * Secondary optional label for the payment option.
+             * This will primarily describe any expanded details about the payment option such as
+             * the last four digits of a card or bank account.
+             */
+            val sublabel: String? = null,
+        )
+
+        /**
+         * Labels containing additional information about the payment option.
+         */
+        @ExtendedLabelsInPaymentOptionPreview
+        val labels: Labels
+            get() = _labels
+
+        /**
+         * A shipping address that the user provided during checkout.
+         */
+        @ShippingDetailsInPaymentOptionPreview
+        val shippingDetails: AddressDetails?
+            get() = _shippingDetails
+
+        /**
+         * A [Painter] to draw the icon associated with this [PaymentOptionDisplayData].
+         */
+        val iconPainter: Painter
+            @Composable
+            get() = rememberDrawablePainter(icon())
+
+        /**
+         * Fetches the icon associated with this [PaymentOptionDisplayData].
+         */
+        fun icon(): Drawable {
+            return DelegateDrawable(
+                imageLoader = imageLoader,
+            )
+        }
+    }
 }
 
 /**
@@ -661,7 +751,7 @@ class CustomerSheet internal constructor(
  * @param paymentOption, contains the drawable and label to display
  */
 sealed class PaymentOptionSelection private constructor(
-    open val paymentOption: PaymentOption
+    open val paymentOption: CustomerSheet.PaymentOptionDisplayData
 ) {
 
     /**
@@ -669,13 +759,13 @@ sealed class PaymentOptionSelection private constructor(
      */
     class PaymentMethod internal constructor(
         val paymentMethod: com.stripe.android.model.PaymentMethod,
-        override val paymentOption: PaymentOption,
+        override val paymentOption: CustomerSheet.PaymentOptionDisplayData,
     ) : PaymentOptionSelection(paymentOption)
 
     /**
      * Google Pay is the selected payment option.
      */
     class GooglePay internal constructor(
-        override val paymentOption: PaymentOption,
+        override val paymentOption: CustomerSheet.PaymentOptionDisplayData,
     ) : PaymentOptionSelection(paymentOption)
 }

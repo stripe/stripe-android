@@ -88,7 +88,6 @@ import com.stripe.android.paymentsheet.example.playground.spt.SharedPaymentToken
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
-import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
@@ -704,7 +703,7 @@ internal class PaymentSheetPlaygroundActivity :
 
     private suspend fun fetchOption(
         customerSheet: CustomerSheet
-    ): kotlin.Result<PaymentOption?> = withContext(Dispatchers.IO) {
+    ): kotlin.Result<CustomerSheet.PaymentOptionDisplayData?> = withContext(Dispatchers.IO) {
         when (val result = customerSheet.retrievePaymentOptionSelection()) {
             is CustomerSheet.Result.Selected -> kotlin.Result.success(result.selection?.paymentOption)
             is CustomerSheet.Result.Failed -> kotlin.Result.failure(result.exception)

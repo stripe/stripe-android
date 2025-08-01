@@ -1135,6 +1135,29 @@ public final class com/stripe/android/elements/customersheet/CustomerSheet$Inten
 	public final fun paymentMethodTypes (Ljava/util/List;)Lcom/stripe/android/elements/customersheet/CustomerSheet$IntentConfiguration$Builder;
 }
 
+public final class com/stripe/android/elements/customersheet/CustomerSheet$PaymentOptionDisplayData {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBillingDetails ()Lcom/stripe/android/elements/BillingDetails;
+	public final fun getIconPainter (Landroidx/compose/runtime/Composer;I)Landroidx/compose/ui/graphics/painter/Painter;
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getLabels ()Lcom/stripe/android/elements/customersheet/CustomerSheet$PaymentOptionDisplayData$Labels;
+	public final fun getPaymentMethodType ()Ljava/lang/String;
+	public final fun getShippingDetails ()Lcom/stripe/android/elements/AddressDetails;
+	public fun hashCode ()I
+	public final fun icon ()Landroid/graphics/drawable/Drawable;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/elements/customersheet/CustomerSheet$PaymentOptionDisplayData$Labels {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getSublabel ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract class com/stripe/android/elements/customersheet/CustomerSheet$Result {
 	public static final field $stable I
 }
@@ -1165,19 +1188,19 @@ public final class com/stripe/android/elements/customersheet/CustomerSheetCompos
 
 public abstract class com/stripe/android/elements/customersheet/PaymentOptionSelection {
 	public static final field $stable I
-	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/model/PaymentOption;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun getPaymentOption ()Lcom/stripe/android/paymentsheet/model/PaymentOption;
+	public synthetic fun <init> (Lcom/stripe/android/elements/customersheet/CustomerSheet$PaymentOptionDisplayData;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getPaymentOption ()Lcom/stripe/android/elements/customersheet/CustomerSheet$PaymentOptionDisplayData;
 }
 
 public final class com/stripe/android/elements/customersheet/PaymentOptionSelection$GooglePay : com/stripe/android/elements/customersheet/PaymentOptionSelection {
 	public static final field $stable I
-	public fun getPaymentOption ()Lcom/stripe/android/paymentsheet/model/PaymentOption;
+	public fun getPaymentOption ()Lcom/stripe/android/elements/customersheet/CustomerSheet$PaymentOptionDisplayData;
 }
 
 public final class com/stripe/android/elements/customersheet/PaymentOptionSelection$PaymentMethod : com/stripe/android/elements/customersheet/PaymentOptionSelection {
 	public static final field $stable I
 	public final fun getPaymentMethod ()Lcom/stripe/android/model/PaymentMethod;
-	public fun getPaymentOption ()Lcom/stripe/android/paymentsheet/model/PaymentOption;
+	public fun getPaymentOption ()Lcom/stripe/android/elements/customersheet/CustomerSheet$PaymentOptionDisplayData;
 }
 
 public abstract interface class com/stripe/android/elements/customersheet/SetupIntentClientSecretProvider {
