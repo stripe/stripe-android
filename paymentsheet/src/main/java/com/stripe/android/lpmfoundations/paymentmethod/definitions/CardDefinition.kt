@@ -28,6 +28,7 @@ import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.Mandate
+import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.RenderableFormElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
@@ -146,15 +147,31 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
             }
 
             if (metadata.hasIntentToSetup(CardDefinition.type.code)) {
-                add(
-                    CardMandateTextElement(
-                        identifier = IdentifierSpec.Generic("card_mandate"),
-                        merchantName = metadata.merchantName,
-                        signupMode = signupMode,
-                        canChangeSaveForFutureUse = canChangeSaveForFutureUsage,
-                        linkSignupStateFlow = arguments.linkInlineHandler?.linkInlineState ?: stateFlowOf(null)
+                if (linkSignupOptInEnabled) {
+                    add(
+                        CombinedLinkMandateElement(
+                            identifier = IdentifierSpec.Generic("card_mandate"),
+                            merchantName = metadata.merchantName,
+                            signupMode = signupMode,
+                            canChangeSaveForFutureUse = canChangeSaveForFutureUsage,
+                            linkSignupStateFlow = arguments.linkInlineHandler?.linkInlineState ?: stateFlowOf(null)
+                        )
                     )
-                )
+                } else {
+                    add(
+                        MandateTextElement(
+                            identifier = IdentifierSpec.Generic("card_mandate"),
+                            stringResId = PaymentSheetR.string.stripe_paymentsheet_card_mandate,
+                            topPadding = when {
+                                signupMode == LinkSignupMode.AlongsideSaveForFutureUse -> 0.dp
+                                signupMode == LinkSignupMode.InsteadOfSaveForFutureUse -> 4.dp
+                                canChangeSaveForFutureUsage -> 6.dp
+                                else -> 2.dp
+                            },
+                            args = listOf(metadata.merchantName),
+                        )
+                    )
+                }
             }
         }
     }
@@ -272,7 +289,7 @@ private fun contactInformationElement(
     )
 }
 
-internal class CardMandateTextElement(
+internal class CombinedLinkMandateElement(
     identifier: IdentifierSpec,
     signupMode: LinkSignupMode?,
     canChangeSaveForFutureUse: Boolean,
@@ -295,22 +312,16 @@ internal class CardMandateTextElement(
     override fun ComposeUI(enabled: Boolean) {
         val linkState by linkSignupStateFlow.collectAsState()
         Mandate(
-            mandateText = when (linkState?.linkSignUpOptInFeatureEnabled) {
-                true -> if (linkState?.isExpanded == true) {
-                    stringResource(
-                        id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_on,
-                        formatArgs = arrayOf(merchantName)
-                    ).replaceHyperlinks()
-                } else {
-                    stringResource(
-                        id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_off,
-                        formatArgs = arrayOf(merchantName)
-                    ).replaceHyperlinks()
-                }
-                else -> stringResource(
-                    id = PaymentSheetR.string.stripe_paymentsheet_card_mandate,
+            mandateText = if (linkState?.isExpanded == true) {
+                stringResource(
+                    id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_on,
                     formatArgs = arrayOf(merchantName)
-                )
+                ).replaceHyperlinks()
+            } else {
+                stringResource(
+                    id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_off,
+                    formatArgs = arrayOf(merchantName)
+                ).replaceHyperlinks()
             },
             modifier = Modifier.padding(top = topPadding)
         )

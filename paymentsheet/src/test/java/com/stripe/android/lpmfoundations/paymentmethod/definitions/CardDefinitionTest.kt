@@ -314,7 +314,7 @@ class CardDefinitionTest {
 
     private fun testMandateElement(formElement: FormElement) {
         assertThat(formElement.identifier.v1).isEqualTo("card_mandate")
-        assertThat(formElement).isInstanceOf(CardMandateTextElement::class.java)
+        assertThat(formElement).isInstanceOf(CombinedLinkMandateElement::class.java)
     }
 
     private fun testSetAsDefaultElements(
