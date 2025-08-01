@@ -4,7 +4,7 @@ import android.webkit.JavascriptInterface
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.model.parsers.ModelJsonParser
-import com.stripe.android.elements.payment.PaymentSheet
+import com.stripe.android.elements.payment.ShopPayConfiguration
 import com.stripe.android.elements.payment.ShopPayHandlers
 import com.stripe.android.elements.payment.ShopPayPreview
 import com.stripe.android.shoppay.ShopPayArgs
@@ -119,7 +119,7 @@ internal class DefaultShopPayBridgeHandler @Inject constructor(
 
         val rate = calculateShippingRateChangeRequest.shippingRate
         val selectedShippingRate = ShopPayHandlers.SelectedShippingRate(
-            shippingRate = PaymentSheet.ShopPayConfiguration.ShippingRate(
+            shippingRate = ShopPayConfiguration.ShippingRate(
                 id = rate.id,
                 displayName = rate.displayName,
                 amount = rate.amount,

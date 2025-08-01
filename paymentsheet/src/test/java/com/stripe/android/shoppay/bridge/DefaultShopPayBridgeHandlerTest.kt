@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.common.model.shopPayConfiguration
 import com.stripe.android.core.model.parsers.ModelJsonParser
-import com.stripe.android.elements.payment.PaymentSheet
+import com.stripe.android.elements.payment.ShopPayConfiguration
 import com.stripe.android.elements.payment.ShopPayHandlers
 import com.stripe.android.elements.payment.ShopPayPreview
 import com.stripe.android.shoppay.ShopPayArgs
@@ -431,13 +431,13 @@ internal class DefaultShopPayBridgeHandlerTest {
             return if (shouldReturnUpdate) {
                 ShopPayHandlers.ShippingContactUpdate(
                     lineItems = listOf(
-                        PaymentSheet.ShopPayConfiguration.LineItem(
+                        ShopPayConfiguration.LineItem(
                             name = "Test Item",
                             amount = 100
                         )
                     ),
                     shippingRates = listOf(
-                        PaymentSheet.ShopPayConfiguration.ShippingRate(
+                        ShopPayConfiguration.ShippingRate(
                             id = "test",
                             displayName = "Test Rate",
                             amount = 0,
@@ -460,13 +460,13 @@ internal class DefaultShopPayBridgeHandlerTest {
             return if (shouldReturnUpdate) {
                 ShopPayHandlers.ShippingRateUpdate(
                     lineItems = listOf(
-                        PaymentSheet.ShopPayConfiguration.LineItem(
+                        ShopPayConfiguration.LineItem(
                             name = "Test Item",
                             amount = 100
                         )
                     ),
                     shippingRates = listOf(
-                        PaymentSheet.ShopPayConfiguration.ShippingRate(
+                        ShopPayConfiguration.ShippingRate(
                             id = "test",
                             displayName = "Test Rate",
                             amount = 0,

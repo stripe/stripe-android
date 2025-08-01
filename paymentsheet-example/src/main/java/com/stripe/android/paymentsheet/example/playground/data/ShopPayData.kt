@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.data
 
-import com.stripe.android.elements.payment.PaymentSheet
+import com.stripe.android.elements.payment.ShopPayConfiguration
 import com.stripe.android.elements.payment.ShopPayHandlers
 import com.stripe.android.elements.payment.ShopPayHandlers.ShippingContactUpdate
 import com.stripe.android.elements.payment.ShopPayHandlers.ShippingRateUpdate
@@ -9,60 +9,60 @@ import com.stripe.android.elements.payment.ShopPayPreview
 @OptIn(ShopPayPreview::class)
 internal object ShopPayData {
 
-    private val singleBusinessDay = PaymentSheet.ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit(
+    private val singleBusinessDay = ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit(
         value = 1,
-        unit = PaymentSheet.ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit.TimeUnit.BUSINESS_DAY
+        unit = ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit.TimeUnit.BUSINESS_DAY
     )
-    private val fiveBusinessDays = PaymentSheet.ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit(
+    private val fiveBusinessDays = ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit(
         value = 5,
-        unit = PaymentSheet.ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit.TimeUnit.BUSINESS_DAY
+        unit = ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit.TimeUnit.BUSINESS_DAY
     )
-    private val sevenBusinessDays = PaymentSheet.ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit(
+    private val sevenBusinessDays = ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit(
         value = 7,
-        unit = PaymentSheet.ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit.TimeUnit.BUSINESS_DAY
+        unit = ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit.TimeUnit.BUSINESS_DAY
     )
 
     private val shippingRates = listOf(
-        PaymentSheet.ShopPayConfiguration.ShippingRate(
+        ShopPayConfiguration.ShippingRate(
             id = "express",
             amount = 1099,
             displayName = "Overnight",
-            deliveryEstimate = PaymentSheet.ShopPayConfiguration.DeliveryEstimate.Range(
+            deliveryEstimate = ShopPayConfiguration.DeliveryEstimate.Range(
                 maximum = singleBusinessDay,
                 minimum = singleBusinessDay
             )
         ),
-        PaymentSheet.ShopPayConfiguration.ShippingRate(
+        ShopPayConfiguration.ShippingRate(
             id = "standard",
             amount = 0,
             displayName = "Free",
-            deliveryEstimate = PaymentSheet.ShopPayConfiguration.DeliveryEstimate.Range(
+            deliveryEstimate = ShopPayConfiguration.DeliveryEstimate.Range(
                 maximum = sevenBusinessDays,
                 minimum = fiveBusinessDays
             )
         ),
     )
 
-    internal fun shopPayConfiguration(): PaymentSheet.ShopPayConfiguration {
-        return PaymentSheet.ShopPayConfiguration(
+    internal fun shopPayConfiguration(): ShopPayConfiguration {
+        return ShopPayConfiguration(
             shopId = "92917334038",
             billingAddressRequired = true,
             emailRequired = true,
             shippingAddressRequired = true,
             lineItems = listOf(
-                PaymentSheet.ShopPayConfiguration.LineItem(
+                ShopPayConfiguration.LineItem(
                     name = "Golden Potato",
                     amount = 500
                 ),
-                PaymentSheet.ShopPayConfiguration.LineItem(
+                ShopPayConfiguration.LineItem(
                     name = "Silver Potato",
                     amount = 345
                 ),
-                PaymentSheet.ShopPayConfiguration.LineItem(
+                ShopPayConfiguration.LineItem(
                     name = "Tax",
                     amount = 200
                 ),
-                PaymentSheet.ShopPayConfiguration.LineItem(
+                ShopPayConfiguration.LineItem(
                     name = "Shipping",
                     amount = shippingRates.first().amount
                 ),
@@ -88,19 +88,19 @@ internal object ShopPayData {
     ): ShippingRateUpdate {
         return ShippingRateUpdate(
             lineItems = listOf(
-                PaymentSheet.ShopPayConfiguration.LineItem(
+                ShopPayConfiguration.LineItem(
                     name = "Golden Potato",
                     amount = 500
                 ),
-                PaymentSheet.ShopPayConfiguration.LineItem(
+                ShopPayConfiguration.LineItem(
                     name = "Silver Potato",
                     amount = 345
                 ),
-                PaymentSheet.ShopPayConfiguration.LineItem(
+                ShopPayConfiguration.LineItem(
                     name = "Tax",
                     amount = 200
                 ),
-                PaymentSheet.ShopPayConfiguration.LineItem(
+                ShopPayConfiguration.LineItem(
                     name = "Shipping",
                     amount = selectedRate.shippingRate.amount
                 ),
@@ -112,19 +112,19 @@ internal object ShopPayData {
     private fun shippingContactHandler(): ShippingContactUpdate? {
         return ShippingContactUpdate(
             lineItems = listOf(
-                PaymentSheet.ShopPayConfiguration.LineItem(
+                ShopPayConfiguration.LineItem(
                     name = "Golden Potato",
                     amount = 500
                 ),
-                PaymentSheet.ShopPayConfiguration.LineItem(
+                ShopPayConfiguration.LineItem(
                     name = "Silver Potato",
                     amount = 345
                 ),
-                PaymentSheet.ShopPayConfiguration.LineItem(
+                ShopPayConfiguration.LineItem(
                     name = "Tax",
                     amount = 200
                 ),
-                PaymentSheet.ShopPayConfiguration.LineItem(
+                ShopPayConfiguration.LineItem(
                     name = "Shipping",
                     amount = shippingRates.first().amount
                 ),

@@ -1,7 +1,7 @@
 package com.stripe.android.shoppay.bridge
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.elements.payment.PaymentSheet
+import com.stripe.android.elements.payment.ShopPayConfiguration
 import org.json.JSONObject
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -12,7 +12,7 @@ internal class ShopPayMapperTest {
 
     @Test
     fun `LineItem toJSON should convert name and amount correctly`() {
-        val lineItem = PaymentSheet.ShopPayConfiguration.LineItem(
+        val lineItem = ShopPayConfiguration.LineItem(
             name = "Test Product",
             amount = 1050
         )
@@ -25,8 +25,8 @@ internal class ShopPayMapperTest {
 
     @Test
     fun `ShippingRate toJSON should convert all fields correctly with deliveryEstimate`() {
-        val deliveryEstimate = PaymentSheet.ShopPayConfiguration.DeliveryEstimate.Text("2-3 business days")
-        val shippingRate = PaymentSheet.ShopPayConfiguration.ShippingRate(
+        val deliveryEstimate = ShopPayConfiguration.DeliveryEstimate.Text("2-3 business days")
+        val shippingRate = ShopPayConfiguration.ShippingRate(
             id = "express_shipping",
             amount = 1299,
             displayName = "Express Shipping",
@@ -43,7 +43,7 @@ internal class ShopPayMapperTest {
 
     @Test
     fun `ShippingRate toJSON should handle null deliveryEstimate`() {
-        val shippingRate = PaymentSheet.ShopPayConfiguration.ShippingRate(
+        val shippingRate = ShopPayConfiguration.ShippingRate(
             id = "standard",
             amount = 0,
             displayName = "Free Shipping",
@@ -60,7 +60,7 @@ internal class ShopPayMapperTest {
 
     @Test
     fun `DeliveryEstimate Text toJSON should return string value`() {
-        val estimate = PaymentSheet.ShopPayConfiguration.DeliveryEstimate.Text("Next day delivery")
+        val estimate = ShopPayConfiguration.DeliveryEstimate.Text("Next day delivery")
 
         val result = estimate.toJSON()
 
@@ -69,15 +69,15 @@ internal class ShopPayMapperTest {
 
     @Test
     fun `DeliveryEstimate Range toJSON should convert both minimum and maximum`() {
-        val minUnit = PaymentSheet.ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit(
+        val minUnit = ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit(
             value = 2,
-            unit = PaymentSheet.ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit.TimeUnit.DAY
+            unit = ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit.TimeUnit.DAY
         )
-        val maxUnit = PaymentSheet.ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit(
+        val maxUnit = ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit(
             value = 5,
-            unit = PaymentSheet.ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit.TimeUnit.DAY
+            unit = ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit.TimeUnit.DAY
         )
-        val estimate = PaymentSheet.ShopPayConfiguration.DeliveryEstimate.Range(
+        val estimate = ShopPayConfiguration.DeliveryEstimate.Range(
             minimum = minUnit,
             maximum = maxUnit
         )

@@ -10,7 +10,7 @@ import com.stripe.android.elements.payment.CustomPaymentMethod
 import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.elements.payment.LinkConfiguration
 import com.stripe.android.elements.payment.PaymentMethodLayout
-import com.stripe.android.elements.payment.PaymentSheet
+import com.stripe.android.elements.payment.ShopPayConfiguration
 import com.stripe.android.elements.payment.WalletButtonsConfiguration
 import com.stripe.android.model.CardBrand
 
@@ -36,7 +36,7 @@ internal object ConfigurationDefaults {
     val cardBrandAcceptance: CardBrandAcceptance = CardBrandAcceptance.All
     val customPaymentMethods: List<CustomPaymentMethod> = emptyList()
     val walletButtons: WalletButtonsConfiguration = WalletButtonsConfiguration()
-    val shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = null
+    val shopPayConfiguration: ShopPayConfiguration? = null
     val googlePlacesApiKey: String? = null
 
     const val embeddedViewDisplaysMandateText: Boolean = true

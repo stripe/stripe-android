@@ -1,7 +1,7 @@
 package com.stripe.android.shoppay.bridge
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.elements.payment.PaymentSheet
+import com.stripe.android.elements.payment.ShopPayConfiguration
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -12,14 +12,14 @@ internal class HandleClickResponseTest {
     @Test
     fun `toJson should handle multiple line items and shipping rates`() {
         val paymentSheetLineItems = listOf(
-            PaymentSheet.ShopPayConfiguration.LineItem("Item 1", 1000),
-            PaymentSheet.ShopPayConfiguration.LineItem("Item 2", 2000),
-            PaymentSheet.ShopPayConfiguration.LineItem("Discount", -500)
+            ShopPayConfiguration.LineItem("Item 1", 1000),
+            ShopPayConfiguration.LineItem("Item 2", 2000),
+            ShopPayConfiguration.LineItem("Discount", -500)
         )
 
         val paymentSheetShippingRates = listOf(
-            PaymentSheet.ShopPayConfiguration.ShippingRate("rate_1", 500, "Express", null),
-            PaymentSheet.ShopPayConfiguration.ShippingRate("rate_2", 0, "Free", null)
+            ShopPayConfiguration.ShippingRate("rate_1", 500, "Express", null),
+            ShopPayConfiguration.ShippingRate("rate_2", 0, "Free", null)
         )
 
         val response = HandleClickResponse(

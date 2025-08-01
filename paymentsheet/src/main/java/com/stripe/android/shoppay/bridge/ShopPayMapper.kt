@@ -1,8 +1,8 @@
 package com.stripe.android.shoppay.bridge
 
-import com.stripe.android.elements.payment.PaymentSheet.ShopPayConfiguration.DeliveryEstimate
-import com.stripe.android.elements.payment.PaymentSheet.ShopPayConfiguration.LineItem
-import com.stripe.android.elements.payment.PaymentSheet.ShopPayConfiguration.ShippingRate
+import com.stripe.android.elements.payment.ShopPayConfiguration.DeliveryEstimate
+import com.stripe.android.elements.payment.ShopPayConfiguration.LineItem
+import com.stripe.android.elements.payment.ShopPayConfiguration.ShippingRate
 import org.json.JSONObject
 
 internal fun LineItem.toJSON(): JSONObject {
@@ -44,7 +44,7 @@ internal fun DeliveryEstimate.DeliveryEstimateUnit.toJSON(): JSONObject {
     }
 }
 
-// Mapper functions to convert PaymentSheet.ShopPayConfiguration types to ECE types
+// Mapper functions to convert ShopPayConfiguration types to ECE types
 
 internal fun LineItem.toECELineItem(): ECELineItem {
     return ECELineItem(

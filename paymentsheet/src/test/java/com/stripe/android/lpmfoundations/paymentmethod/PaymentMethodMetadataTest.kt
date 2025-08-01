@@ -14,6 +14,7 @@ import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.elements.payment.CustomPaymentMethod
 import com.stripe.android.elements.payment.PaymentSheet
+import com.stripe.android.elements.payment.ShopPayConfiguration
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.LinkAccount
@@ -2006,7 +2007,7 @@ internal class PaymentMethodMetadataTest {
         shippingDetails: AddressDetails,
         customPaymentMethods: List<CustomPaymentMethod>,
         cardBrandAcceptance: CardBrandAcceptance,
-        shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = null
+        shopPayConfiguration: ShopPayConfiguration? = null
     ) = PaymentSheet.Configuration(
         merchantDisplayName = "Merchant Inc.",
         allowsDelayedPaymentMethods = true,

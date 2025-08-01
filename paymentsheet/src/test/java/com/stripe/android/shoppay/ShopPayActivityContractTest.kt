@@ -7,7 +7,7 @@ import androidx.core.os.bundleOf
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.elements.payment.PaymentSheet
+import com.stripe.android.elements.payment.ShopPayConfiguration
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -31,7 +31,7 @@ internal class ShopPayActivityContractTest {
 
     @Test
     fun `intent is created correctly`() {
-        val shopPayConfiguration: PaymentSheet.ShopPayConfiguration = mock()
+        val shopPayConfiguration: ShopPayConfiguration = mock()
         val args = ShopPayActivityContract.Args(
             shopPayConfiguration = shopPayConfiguration,
             customerSessionClientSecret = "customer_secret",

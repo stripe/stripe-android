@@ -13,6 +13,7 @@ import com.stripe.android.elements.payment.EmbeddedPaymentElement
 import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.elements.payment.LinkConfiguration
 import com.stripe.android.elements.payment.PaymentSheet
+import com.stripe.android.elements.payment.ShopPayConfiguration
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.CardBrand
 import kotlinx.parcelize.Parcelize
@@ -34,7 +35,7 @@ internal data class CommonConfiguration(
     val externalPaymentMethods: List<String>,
     val cardBrandAcceptance: CardBrandAcceptance,
     val customPaymentMethods: List<CustomPaymentMethod>,
-    val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
+    val shopPayConfiguration: ShopPayConfiguration?,
     val googlePlacesApiKey: String?,
 ) : Parcelable {
 

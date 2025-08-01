@@ -1937,7 +1937,7 @@ public final class com/stripe/android/elements/payment/PaymentSheet$Configuratio
 	public final fun preferredNetworks (Ljava/util/List;)Lcom/stripe/android/elements/payment/PaymentSheet$Configuration$Builder;
 	public final fun primaryButtonLabel (Ljava/lang/String;)Lcom/stripe/android/elements/payment/PaymentSheet$Configuration$Builder;
 	public final fun shippingDetails (Lcom/stripe/android/elements/AddressDetails;)Lcom/stripe/android/elements/payment/PaymentSheet$Configuration$Builder;
-	public final fun shopPayConfiguration (Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration;)Lcom/stripe/android/elements/payment/PaymentSheet$Configuration$Builder;
+	public final fun shopPayConfiguration (Lcom/stripe/android/elements/payment/ShopPayConfiguration;)Lcom/stripe/android/elements/payment/PaymentSheet$Configuration$Builder;
 	public final fun walletButtons (Lcom/stripe/android/elements/payment/WalletButtonsConfiguration;)Lcom/stripe/android/elements/payment/PaymentSheet$Configuration$Builder;
 }
 
@@ -1965,7 +1965,11 @@ public final class com/stripe/android/elements/payment/PaymentSheet$CustomerAcce
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration : android/os/Parcelable {
+public abstract interface class com/stripe/android/elements/payment/PreparePaymentMethodHandler {
+	public abstract fun onPreparePaymentMethod (Lcom/stripe/android/model/PaymentMethod;Lcom/stripe/android/elements/AddressDetails;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/stripe/android/elements/payment/ShopPayConfiguration : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> (Ljava/lang/String;ZZZLjava/util/List;Ljava/util/List;Ljava/util/List;)V
@@ -1984,71 +1988,71 @@ public final class com/stripe/android/elements/payment/PaymentSheet$ShopPayConfi
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/elements/payment/ShopPayConfiguration$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/payment/ShopPayConfiguration;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration;
+	public final fun newArray (I)[Lcom/stripe/android/elements/payment/ShopPayConfiguration;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public abstract interface class com/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate : android/os/Parcelable {
+public abstract interface class com/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate : android/os/Parcelable {
 }
 
-public final class com/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit : android/os/Parcelable {
+public final class com/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit$TimeUnit;I)V
+	public fun <init> (Lcom/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit$TimeUnit;I)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getUnit ()Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit$TimeUnit;
+	public final fun getUnit ()Lcom/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit$TimeUnit;
 	public final fun getValue ()I
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit;
+	public final fun newArray (I)[Lcom/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit$TimeUnit : java/lang/Enum {
-	public static final field BUSINESS_DAY Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit$TimeUnit;
-	public static final field DAY Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit$TimeUnit;
-	public static final field HOUR Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit$TimeUnit;
-	public static final field MONTH Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit$TimeUnit;
-	public static final field WEEK Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit$TimeUnit;
+public final class com/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit$TimeUnit : java/lang/Enum {
+	public static final field BUSINESS_DAY Lcom/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit$TimeUnit;
+	public static final field DAY Lcom/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit$TimeUnit;
+	public static final field HOUR Lcom/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit$TimeUnit;
+	public static final field MONTH Lcom/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit$TimeUnit;
+	public static final field WEEK Lcom/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit$TimeUnit;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit$TimeUnit;
-	public static fun values ()[Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit$TimeUnit;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit$TimeUnit;
+	public static fun values ()[Lcom/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit$TimeUnit;
 }
 
-public final class com/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate$Range : com/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate {
+public final class com/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate$Range : com/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit;Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit;)V
+	public fun <init> (Lcom/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit;Lcom/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getMaximum ()Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit;
-	public final fun getMinimum ()Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit;
+	public final fun getMaximum ()Lcom/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit;
+	public final fun getMinimum ()Lcom/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate$DeliveryEstimateUnit;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate$Range$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate$Range$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate$Range;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate$Range;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate$Range;
+	public final fun newArray (I)[Lcom/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate$Range;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate$Text : com/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate {
+public final class com/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate$Text : com/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> (Ljava/lang/String;)V
@@ -2060,15 +2064,15 @@ public final class com/stripe/android/elements/payment/PaymentSheet$ShopPayConfi
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate$Text$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate$Text$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate$Text;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate$Text;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate$Text;
+	public final fun newArray (I)[Lcom/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate$Text;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$LineItem : android/os/Parcelable {
+public final class com/stripe/android/elements/payment/ShopPayConfiguration$LineItem : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> (Ljava/lang/String;I)V
@@ -2081,22 +2085,22 @@ public final class com/stripe/android/elements/payment/PaymentSheet$ShopPayConfi
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$LineItem$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/elements/payment/ShopPayConfiguration$LineItem$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$LineItem;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/payment/ShopPayConfiguration$LineItem;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$LineItem;
+	public final fun newArray (I)[Lcom/stripe/android/elements/payment/ShopPayConfiguration$LineItem;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$ShippingRate : android/os/Parcelable {
+public final class com/stripe/android/elements/payment/ShopPayConfiguration$ShippingRate : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Ljava/lang/String;ILjava/lang/String;Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate;)V
+	public fun <init> (Ljava/lang/String;ILjava/lang/String;Lcom/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAmount ()I
-	public final fun getDeliveryEstimate ()Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$DeliveryEstimate;
+	public final fun getDeliveryEstimate ()Lcom/stripe/android/elements/payment/ShopPayConfiguration$DeliveryEstimate;
 	public final fun getDisplayName ()Ljava/lang/String;
 	public final fun getId ()Ljava/lang/String;
 	public fun hashCode ()I
@@ -2104,16 +2108,12 @@ public final class com/stripe/android/elements/payment/PaymentSheet$ShopPayConfi
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$ShippingRate$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/elements/payment/ShopPayConfiguration$ShippingRate$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$ShippingRate;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/payment/ShopPayConfiguration$ShippingRate;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$ShippingRate;
+	public final fun newArray (I)[Lcom/stripe/android/elements/payment/ShopPayConfiguration$ShippingRate;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public abstract interface class com/stripe/android/elements/payment/PreparePaymentMethodHandler {
-	public abstract fun onPreparePaymentMethod (Lcom/stripe/android/model/PaymentMethod;Lcom/stripe/android/elements/AddressDetails;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class com/stripe/android/elements/payment/ShopPayHandlers {
@@ -2149,10 +2149,10 @@ public final class com/stripe/android/elements/payment/ShopPayHandlers$SelectedA
 public final class com/stripe/android/elements/payment/ShopPayHandlers$SelectedShippingRate : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$ShippingRate;)V
+	public fun <init> (Lcom/stripe/android/elements/payment/ShopPayConfiguration$ShippingRate;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getShippingRate ()Lcom/stripe/android/elements/payment/PaymentSheet$ShopPayConfiguration$ShippingRate;
+	public final fun getShippingRate ()Lcom/stripe/android/elements/payment/ShopPayConfiguration$ShippingRate;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
