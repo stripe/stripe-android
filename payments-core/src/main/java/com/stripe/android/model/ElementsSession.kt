@@ -68,6 +68,9 @@ data class ElementsSession(
     val linkSignUpOptInFeatureEnabled: Boolean
         get() = linkSettings?.linkSignUpOptInFeatureEnabled ?: false
 
+    val linkSignUpOptInInitialValue: Boolean
+        get() = linkSettings?.linkSignUpOptInInitialValue ?: false
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class LinkSettings(
@@ -81,7 +84,8 @@ data class ElementsSession(
         val suppress2faModal: Boolean,
         val disableLinkRuxInFlowController: Boolean,
         val linkEnableDisplayableDefaultValuesInEce: Boolean,
-        val linkSignUpOptInFeatureEnabled: Boolean
+        val linkSignUpOptInFeatureEnabled: Boolean,
+        val linkSignUpOptInInitialValue: Boolean
     ) : StripeModel
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

@@ -534,5 +534,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 ConsumerSignUpConsentAction.PrecheckedOptInBoxPrefilledNone
             SignUpConsentAction.SignUpOptInMobileChecked ->
                 ConsumerSignUpConsentAction.SignUpOptInMobileChecked
+            SignUpConsentAction.SignUpOptInMobilePrechecked ->
+                ConsumerSignUpConsentAction.SignUpOptInMobilePrechecked
         }
 }

@@ -74,7 +74,11 @@ internal class InlineSignupViewModel(
         config = config,
         initialEmail = initialEmail,
         initialPhone = initialPhone,
-        isExpanded = hasInitialUserInput,
+        isExpanded = if (config.linkSignUpOptInFeatureEnabled) {
+            config.linkSignUpOptInInitialValue
+        } else {
+            hasInitialUserInput
+        },
     )
     private val _viewState = MutableStateFlow(initialViewState)
     val viewState: StateFlow<InlineSignupViewState> = _viewState
@@ -134,7 +138,11 @@ internal class InlineSignupViewModel(
     val requiresNameCollection: Boolean
         get() = Name in initialViewState.fields
 
-    private var hasExpanded = hasInitialUserInput
+    private var hasExpanded = if (config.linkSignUpOptInFeatureEnabled) {
+        config.linkSignUpOptInInitialValue
+    } else {
+        hasInitialUserInput
+    }
 
     init {
         watchUserInput()
@@ -340,7 +348,13 @@ internal class InlineSignupViewModel(
             }
             LinkSignupMode.InsteadOfSaveForFutureUse -> {
                 when {
-                    linkSignUpOptInFeatureEnabled -> SignUpConsentAction.SignUpOptInMobileChecked
+                    linkSignUpOptInFeatureEnabled -> {
+                        if (config.linkSignUpOptInInitialValue) {
+                            SignUpConsentAction.SignUpOptInMobilePrechecked
+                        } else {
+                            SignUpConsentAction.SignUpOptInMobileChecked
+                        }
+                    }
                     defaultOptIn -> getDefaultOptInConsentAction(hasPrefilledEmail, hasPrefilledPhone)
                     hasPrefilledEmail && hasPrefilledPhone ->
                         SignUpConsentAction.CheckboxWithPrefilledEmailAndPhone

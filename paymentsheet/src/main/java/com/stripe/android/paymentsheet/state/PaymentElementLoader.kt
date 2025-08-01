@@ -599,6 +599,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             disableRuxInFlowController = elementsSession.disableRuxInFlowController,
             enableDisplayableDefaultValuesInEce = elementsSession.linkEnableDisplayableDefaultValuesInEce,
             linkSignUpOptInFeatureEnabled = elementsSession.linkSignUpOptInFeatureEnabled,
+            linkSignUpOptInInitialValue = elementsSession.linkSignUpOptInInitialValue,
             elementsSessionId = elementsSession.elementsSessionId,
             initializationMode = initializationMode,
             linkMode = elementsSession.linkSettings?.linkMode,
