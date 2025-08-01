@@ -19,6 +19,8 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
+import com.stripe.android.link.ui.oauth.OAuthConsentViewModel
+import com.stripe.android.link.ui.oauth.OAuthConsentViewModelComponent
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationModule
@@ -65,6 +67,7 @@ internal interface NativeLinkComponent {
     val dismissalCoordinator: LinkDismissalCoordinator
     val linkLaunchMode: LinkLaunchMode
     val autocompleteLauncher: AutocompleteLauncher
+    val oAuthConsentViewModelComponentFactory: OAuthConsentViewModelComponent.Factory
 
     @Component.Builder
     interface Builder {

@@ -6,7 +6,6 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.stripe.android.link.LinkScreen.UpdateCard.BillingDetailsUpdateFlow
-import kotlin.collections.List
 
 internal sealed class LinkScreen(
     protected val baseRoute: String,
@@ -23,6 +22,7 @@ internal sealed class LinkScreen(
     data object Wallet : LinkScreen("wallet")
     data object PaymentMethod : LinkScreen("paymentMethod")
     data object SignUp : LinkScreen("signUp")
+    data object OAuthConsent : LinkScreen("oauthConsent")
 
     data object UpdateCard : LinkScreen(
         baseRoute = "updateCard",

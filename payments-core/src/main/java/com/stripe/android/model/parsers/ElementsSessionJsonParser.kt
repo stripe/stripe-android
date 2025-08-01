@@ -80,7 +80,7 @@ internal class ElementsSessionJsonParser(
         val googlePayPreference = json.optString(FIELD_GOOGLE_PAY_PREFERENCE)
 
         val merchantCountry = json.optString(FIELD_MERCHANT_COUNTRY)
-        val merchantLogoUrl = json.optString(FIELD_MERCHANT_LOGO_URL)
+        val merchantLogoUrl = StripeJsonUtils.optString(json, FIELD_MERCHANT_LOGO_URL)
 
         val passiveCaptcha = json.optJSONObject(FIELD_PASSIVE_CAPTCHA)?.let {
             PassiveCaptchaJsonParser().parse(it)

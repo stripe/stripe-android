@@ -18,11 +18,14 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.ColorPainter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -30,8 +33,10 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.image.LocalStripeImageLoader
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.utils.collectAsState
 
 internal data class ConsentPane(
     val title: String,
@@ -60,8 +65,24 @@ internal data class ConsentPane(
 
 @Composable
 internal fun OAuthConsentScreen(
+    viewModel: OAuthConsentViewModel,
+) {
+    val viewState by viewModel.viewState.collectAsState()
+    val consentPane = viewState.consentPane ?: return // TODO
+    OAuthConsentScreen(
+        merchantLogoUrl = viewState.merchantLogoUrl,
+        pane = consentPane,
+        onAllowClick = viewModel::onAllowClick,
+        onDenyClick = viewModel::onDenyClick,
+    )
+}
+
+@Composable
+internal fun OAuthConsentScreen(
     merchantLogoUrl: String?,
     pane: ConsentPane,
+    onAllowClick: () -> Unit,
+    onDenyClick: (() -> Unit)? = null,
 ) {
     ScrollableTopLevelColumn {
         MerchantLogo(merchantLogoUrl)
@@ -77,8 +98,8 @@ internal fun OAuthConsentScreen(
         ActionButtons(
             denyButtonLabel = pane.denyButtonLabel,
             allowButtonLabel = pane.allowButtonLabel,
-            onAllow = {},
-            onDeny = {},
+            onAllowClick = onAllowClick,
+            onDenyClick = onDenyClick
         )
     }
 }
@@ -100,6 +121,9 @@ private fun MerchantLogo(
             debugPainter = ColorPainter(LinkTheme.colors.iconBrand),
             imageLoader = imageLoader,
             contentDescription = null,
+            errorContent = {
+                Box(modifier.background(Color.Red)) // TODO.
+            }
         )
     }
 }
@@ -127,14 +151,18 @@ private fun UserSection(section: ConsentPane.UserSection) {
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        val modifier = Modifier
+            .clip(CircleShape)
+            .size(24.dp)
         StripeImage(
-            modifier = Modifier
-                .clip(CircleShape)
-                .size(24.dp),
+            modifier = modifier,
             url = section.iconUrl,
             debugPainter = ColorPainter(LinkTheme.colors.iconBrand),
             imageLoader = imageLoader,
             contentDescription = null,
+            errorContent = {
+                Box(modifier.background(LinkTheme.colors.iconBrand)) // TODO.
+            }
         )
         Text(
             modifier = Modifier.padding(horizontal = 8.dp),
@@ -184,16 +212,22 @@ private fun ScopeItem(
 ) {
     Row(
         modifier = Modifier,
-        verticalAlignment = Alignment.CenterVertically,
     ) {
+        val modifier = Modifier
+            .padding(top = 2.dp)
+            .size(16.dp)
+        // TODO: Center align with top row.
         StripeImage(
-            modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .size(32.dp),
+            modifier = modifier,
             url = iconUrl,
-            debugPainter = ColorPainter(LinkTheme.colors.surfaceTertiary),
+            debugPainter = painterResource(com.stripe.android.ui.core.R.drawable.stripe_ic_lock),
             imageLoader = imageLoader,
             contentDescription = null,
+            disableAnimations = true,
+            colorFilter = ColorFilter.tint(LinkTheme.colors.iconPrimary),
+            errorContent = {
+                Box(modifier) // TODO.
+            }
         )
         Column(modifier = Modifier.weight(1f)) {
             if (header != null) {
@@ -228,26 +262,26 @@ internal fun Disclaimer(disclaimer: String) {
 private fun ActionButtons(
     denyButtonLabel: String?,
     allowButtonLabel: String,
-    onAllow: () -> Unit,
-    onDeny: (() -> Unit)? = null,
+    onAllowClick: () -> Unit,
+    onDenyClick: (() -> Unit)? = null,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        if (denyButtonLabel != null && onDeny != null) {
+        if (denyButtonLabel != null && onDenyClick != null) {
             ActionButton(
                 modifier = Modifier.weight(1f),
                 type = ActionButtonType.Secondary,
                 label = denyButtonLabel,
-                onClick = onDeny,
+                onClick = onDenyClick,
             )
         }
         ActionButton(
             modifier = Modifier.weight(1f),
             type = ActionButtonType.Primary,
             label = allowButtonLabel,
-            onClick = onAllow,
+            onClick = onAllowClick,
         )
     }
 }
@@ -287,48 +321,79 @@ private enum class ActionButtonType {
     Primary,
 }
 
+@Composable
+private fun OAuthConsentScreenPreview(
+    merchantLogoUrl: String?,
+    pane: ConsentPane,
+) {
+    ScrollableTopLevelColumn {
+        MerchantLogo(merchantLogoUrl)
+        Title(pane.title)
+        UserSection(pane.userSection)
+        ScopesSection(pane.scopesSection)
+
+        if (pane.disclaimer != null) {
+            Spacer(Modifier.height(24.dp))
+            Disclaimer(pane.disclaimer)
+        }
+        Spacer(Modifier.height(16.dp))
+        ActionButtons(
+            denyButtonLabel = pane.denyButtonLabel,
+            allowButtonLabel = pane.allowButtonLabel,
+            onAllowClick = {},
+            onDenyClick = {},
+        )
+    }
+}
+
 @PreviewLightDark
 @Composable
-private fun OAuthConsentScreenPreview() {
+private fun OAuthConsentScreenPreviewWrapper() {
     DefaultLinkTheme {
         Surface(
             modifier = Modifier.fillMaxWidth(),
             color = LinkTheme.colors.surfacePrimary,
         ) {
-            OAuthConsentScreen(
+            OAuthConsentScreenPreview(
                 merchantLogoUrl = null,
-                ConsentPane(
-                    title = "Connect Powdur\nwith Link",
-                    userSection = ConsentPane.UserSection(
-                        iconUrl = "",
-                        label = "jane.diaz@example.com",
-                    ),
-                    scopesSection = ConsentPane.ScopesSection(
-                        header = "Powdur will have access to:",
-                        scopes = listOf(
-                            ConsentPane.ScopesSection.Scope(
-                                iconUrl = "",
-                                header = "Account info",
-                                description = "Name, email, and profile picture",
-                            ),
-                            ConsentPane.ScopesSection.Scope(
-                                iconUrl = "",
-                                header = "Addresses",
-                                description = "Shipping addresses",
-                            ),
-                            ConsentPane.ScopesSection.Scope(
-                                iconUrl = "",
-                                header = "Wallet",
-                                description = "Cards, bank accounts",
-                            ),
-                        ),
-                    ),
-                    denyButtonLabel = "Cancel",
-                    allowButtonLabel = "Allow",
-                    disclaimer = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " +
-                        "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-                )
+                pane = consentPanePreview
             )
         }
     }
+}
+
+internal val consentPanePreview = run {
+    val scopeIconUrl =
+        "https://b.stripecdn.com/connections-statics-srv/assets/SailIcon--lock-primary-3x.png"
+    ConsentPane(
+        title = "Connect Powdur\nwith Link",
+        userSection = ConsentPane.UserSection(
+            iconUrl = "",
+            label = "jane.diaz@example.com",
+        ),
+        scopesSection = ConsentPane.ScopesSection(
+            header = "Powdur will have access to:",
+            scopes = listOf(
+                ConsentPane.ScopesSection.Scope(
+                    iconUrl = scopeIconUrl,
+                    header = "Account info",
+                    description = "Name, email, and profile picture",
+                ),
+                ConsentPane.ScopesSection.Scope(
+                    iconUrl = scopeIconUrl,
+                    header = "Addresses",
+                    description = "Shipping addresses",
+                ),
+                ConsentPane.ScopesSection.Scope(
+                    iconUrl = scopeIconUrl,
+                    header = "Wallet",
+                    description = "Cards, bank accounts",
+                ),
+            ),
+        ),
+        denyButtonLabel = "Cancel",
+        allowButtonLabel = "Allow",
+        disclaimer = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " +
+            "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    )
 }
