@@ -766,6 +766,52 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun handleViewAction_PaymentMethodSelected_launchesFormWhenDisplaysMandatesInFormScreen() {
+        var reportFormShownCalled = false
+        runScenario(
+            reportPaymentMethodTypeSelected = {},
+            reportFormShown = {
+                reportFormShownCalled = true
+            },
+            transitionToFormScreen = {},
+            invokeRowSelectionCallback = { /* Shouldn't be null to match production behavior */ },
+            formTypeForCode = { FormHelper.FormType.MandateOnly("This is a fake mandate".resolvableString) },
+            displaysMandatesInFormScreen = true,
+        ) {
+            interactor.state.test {
+                assertThat(awaitItem().mandate).isNull()
+                interactor.handleViewAction(ViewAction.PaymentMethodSelected("cashapp"))
+                assertThat(reportFormShownCalled).isTrue()
+            }
+        }
+    }
+
+    @Test
+    fun handleViewAction_PaymentMethodSelected_doesNotLaunchFormWhenMandateDoesNotExist() {
+        var onFormFieldValuesChangedCalled = false
+        runScenario(
+            reportPaymentMethodTypeSelected = {},
+            invokeRowSelectionCallback = { /* Shouldn't be null to match production behavior */ },
+            formTypeForCode = { FormHelper.FormType.Empty },
+            displaysMandatesInFormScreen = true,
+            onFormFieldValuesChanged = { fieldValues, selectedPaymentMethodCode ->
+                fieldValues.run {
+                    assertThat(fieldValuePairs).isEmpty()
+                    assertThat(userRequestedReuse).isEqualTo(PaymentSelection.CustomerRequestedSave.NoRequest)
+                }
+                assertThat(selectedPaymentMethodCode).isEqualTo("cashapp")
+                onFormFieldValuesChangedCalled = true
+            },
+        ) {
+            interactor.state.test {
+                assertThat(awaitItem().selection).isNull()
+                interactor.handleViewAction(ViewAction.PaymentMethodSelected("cashapp"))
+                assertThat(onFormFieldValuesChangedCalled).isTrue()
+            }
+        }
+    }
+
+    @Test
     fun handleViewAction_PaymentMethodSelected_callsOnFormFieldValuesChanged() {
         var onFormFieldValuesChangedCalled = false
         val paymentMethodTypes = listOf("card", "cashapp")
@@ -1525,6 +1571,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         },
         invokeRowSelectionCallback: (() -> Unit)? = null,
         initialWalletsState: WalletsState? = null,
+        displaysMandatesInFormScreen: Boolean = false,
         testBlock: suspend TestParams.() -> Unit
     ) {
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(initialProcessing)
@@ -1570,6 +1617,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             dispatcher = UnconfinedTestDispatcher(),
             mainDispatcher = UnconfinedTestDispatcher(),
             invokeRowSelectionCallback = invokeRowSelectionCallback,
+            displaysMandatesInFormScreen = displaysMandatesInFormScreen,
         )
 
         TestParams(

@@ -23,7 +23,6 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -107,6 +106,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val shouldUpdateVerticalModeSelection: (String?) -> Boolean,
     private val invokeRowSelectionCallback: (() -> Unit)? = null,
+    private val displaysMandatesInFormScreen: Boolean,
     dispatcher: CoroutineContext = Dispatchers.Default,
     mainDispatcher: CoroutineContext = Dispatchers.Main.immediate,
 ) : PaymentMethodVerticalLayoutInteractor {
@@ -176,7 +176,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     val requiresFormScreen = paymentMethodCode != null &&
                         formHelper.formTypeForCode(paymentMethodCode) == FormType.UserInteractionRequired
                     !requiresFormScreen
-                }
+                },
+                displaysMandatesInFormScreen = false,
             ).also { interactor ->
                 viewModel.viewModelScope.launch {
                     interactor.state.collect { state ->
@@ -439,7 +440,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 reportPaymentMethodTypeSelected(viewAction.selectedPaymentMethodCode)
 
                 val formType = formTypeForCode(viewAction.selectedPaymentMethodCode)
-                if (formType == FormType.UserInteractionRequired) {
+                val displayFormForMandate = displaysMandatesInFormScreen && formType is FormType.MandateOnly
+                if (formType == FormType.UserInteractionRequired || displayFormForMandate) {
                     reportFormShown(viewAction.selectedPaymentMethodCode)
                     transitionToFormScreen(viewAction.selectedPaymentMethodCode)
                 } else {
@@ -465,14 +467,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         val formArguments = FormArgumentsFactory.create(selectedPaymentMethodCode, paymentMethodMetadata)
 
         onFormFieldValuesChanged(
-            FormFieldValues(
-                fieldValuePairs = formArguments.defaultFormValues.mapValues {
-                    FormFieldEntry(it.value, isComplete = true)
-                },
-                // userRequestedReuse only changes based on `SaveForFutureUse`, which won't ever hit this
-                // code path.
-                userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest
-            ),
+            formArguments.noUserInteractionFormFieldValues(),
             selectedPaymentMethodCode,
         )
     }
@@ -480,7 +475,11 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private fun getMandate(temporarySelectionCode: String?, selection: PaymentSelection?): ResolvableString? {
         val selectionCode = temporarySelectionCode ?: (selection as? PaymentSelection.New)?.code()
         return if (selectionCode != null) {
-            (formTypeForCode(selectionCode) as? FormType.MandateOnly)?.mandate
+            if (displaysMandatesInFormScreen) {
+                null
+            } else {
+                (formTypeForCode(selectionCode) as? FormType.MandateOnly)?.mandate
+            }
         } else {
             val savedSelection = selection as? PaymentSelection.Saved?
             savedSelection?.mandateTextFromPaymentMethodMetadata(paymentMethodMetadata)
