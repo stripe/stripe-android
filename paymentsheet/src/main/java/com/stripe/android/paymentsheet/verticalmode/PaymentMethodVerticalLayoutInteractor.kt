@@ -467,7 +467,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         val formArguments = FormArgumentsFactory.create(selectedPaymentMethodCode, paymentMethodMetadata)
 
         onFormFieldValuesChanged(
-            formArguments.mandateOnlyFormFieldValues(),
+            formArguments.noUserInteractionFormFieldValues(),
             selectedPaymentMethodCode,
         )
     }

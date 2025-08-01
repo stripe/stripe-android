@@ -41,7 +41,7 @@ internal data class FormArguments(
         }.toMap()
     }
 
-    fun mandateOnlyFormFieldValues(): FormFieldValues {
+    fun noUserInteractionFormFieldValues(): FormFieldValues {
         return FormFieldValues(
             fieldValuePairs = defaultFormValues.mapValues {
                 FormFieldEntry(it.value, isComplete = true)

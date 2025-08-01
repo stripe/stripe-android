@@ -58,7 +58,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
         val formArguments = formHelper.createFormArguments(paymentMethodCode)
         if (formType is FormHelper.FormType.MandateOnly) {
             embeddedSelectionHolder.set(
-                formArguments.mandateOnlyFormFieldValues().transformToPaymentSelection(
+                formArguments.noUserInteractionFormFieldValues().transformToPaymentSelection(
                     paymentMethod = requireNotNull(
                         paymentMethodMetadata.supportedPaymentMethodForCode(code = paymentMethodCode)
                     ),
