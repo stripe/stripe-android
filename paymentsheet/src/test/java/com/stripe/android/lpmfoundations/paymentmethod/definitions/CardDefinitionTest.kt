@@ -5,7 +5,6 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.inline.LinkSignupMode
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkFormElement
@@ -15,12 +14,10 @@ import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
-import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.AutocompleteAddressController
@@ -237,7 +234,7 @@ class CardDefinitionTest {
 
         assertThat(formElements).hasSize(3)
 
-        testMandateElement(metadata, formElements[2])
+        testMandateElement(formElements[2])
     }
 
     @Test
@@ -284,7 +281,7 @@ class CardDefinitionTest {
         assertThat(formElements).hasSize(4)
         assertThat(formElements[2].identifier.v1).isEqualTo("link_form")
 
-        testMandateElement(metadata, formElements[3])
+        testMandateElement(formElements[3])
     }
 
     @Test
@@ -315,18 +312,9 @@ class CardDefinitionTest {
         )
     }
 
-    private fun testMandateElement(metadata: PaymentMethodMetadata, formElement: FormElement) {
+    private fun testMandateElement(formElement: FormElement) {
         assertThat(formElement.identifier.v1).isEqualTo("card_mandate")
-        assertThat(formElement).isInstanceOf(MandateTextElement::class.java)
-
-        val mandateElement = formElement.asMandateTextElement()
-
-        assertThat(mandateElement.stringResId).isEqualTo(R.string.stripe_paymentsheet_card_mandate)
-        assertThat(mandateElement.args).containsExactly(metadata.merchantName)
-    }
-
-    private fun FormElement.asMandateTextElement(): MandateTextElement {
-        return this as MandateTextElement
+        assertThat(formElement).isInstanceOf(CardMandateTextElement::class.java)
     }
 
     private fun testSetAsDefaultElements(

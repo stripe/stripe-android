@@ -2,7 +2,6 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -39,6 +38,7 @@ import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 import com.stripe.android.paymentsheet.R as PaymentSheetR
@@ -117,10 +117,10 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
             )
 
             val linkSignupOptInEnabled =
-                metadata.linkState?.configuration?.linkSignUpOptInFeatureEnabled == false
+                metadata.linkState?.configuration?.linkSignUpOptInFeatureEnabled == true
 
             // sign up opt in combines save for future usage and link signup acceptance
-            if (canChangeSaveForFutureUsage && linkSignupOptInEnabled) {
+            if (canChangeSaveForFutureUsage && linkSignupOptInEnabled.not()) {
                 addSavePaymentOptionElements(
                     metadata = metadata,
                     arguments = arguments,
@@ -147,7 +147,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
 
             if (metadata.hasIntentToSetup(CardDefinition.type.code)) {
                 add(
-                    MandateTextElement(
+                    CardMandateTextElement(
                         identifier = IdentifierSpec.Generic("card_mandate"),
                         merchantName = metadata.merchantName,
                         signupMode = signupMode,
@@ -272,7 +272,7 @@ private fun contactInformationElement(
     )
 }
 
-private class MandateTextElement(
+internal class CardMandateTextElement(
     identifier: IdentifierSpec,
     signupMode: LinkSignupMode?,
     canChangeSaveForFutureUse: Boolean,
