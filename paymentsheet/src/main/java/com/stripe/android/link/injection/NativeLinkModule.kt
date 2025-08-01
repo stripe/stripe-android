@@ -36,6 +36,7 @@ import com.stripe.android.link.gate.DefaultLinkGate
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.repositories.LinkApiRepository
 import com.stripe.android.link.repositories.LinkRepository
+import com.stripe.android.link.ui.oauth.OAuthConsentViewModelComponent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
@@ -70,6 +71,9 @@ import kotlin.coroutines.CoroutineContext
     includes = [
         StripeRepositoryModule::class,
         PaymentsIntegrityModule::class
+    ],
+    subcomponents = [
+        OAuthConsentViewModelComponent::class,
     ]
 )
 internal interface NativeLinkModule {
