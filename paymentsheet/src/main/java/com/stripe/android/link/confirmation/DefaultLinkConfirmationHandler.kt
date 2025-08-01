@@ -5,6 +5,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.LinkMode
@@ -205,6 +206,17 @@ internal fun createPaymentMethodCreateParams(
         paymentDetailsId = selectedPaymentDetails.id,
         consumerSessionClientSecret = consumerSessionClientSecret,
         extraParams = cvc?.let { mapOf("card" to mapOf("cvc" to cvc)) },
+        billingDetails = selectedPaymentDetails.billingAddress?.let {
+            PaymentMethod.BillingDetails(
+                address = Address(
+                    city = it.locality,
+                    country = it.countryCode?.value,
+                    line1 = it.line1,
+                    line2 = it.line2,
+                    postalCode = it.postalCode,
+                )
+            )
+        }
     )
 }
 

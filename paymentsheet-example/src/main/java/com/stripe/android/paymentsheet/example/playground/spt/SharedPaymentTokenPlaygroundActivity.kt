@@ -217,7 +217,7 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
         val context = LocalContext.current
         return rememberUpdatedState(
             remember(coroutineScope, requester, context) {
-                PreparePaymentMethodHandler { paymentMethod, _ ->
+                PreparePaymentMethodHandler { paymentMethod, address ->
                     onConfirmingChanged(false)
 
                     coroutineScope.launch {

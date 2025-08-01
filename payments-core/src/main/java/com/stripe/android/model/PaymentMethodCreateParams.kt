@@ -1339,6 +1339,7 @@ constructor(
             consumerSessionClientSecret: String,
             extraParams: Map<String, @RawValue Any>? = null,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+            billingDetails: PaymentMethod.BillingDetails? = null
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.Link,
@@ -1348,6 +1349,7 @@ constructor(
                     extraParams = extraParams
                 ),
                 allowRedisplay = allowRedisplay,
+                billingDetails = billingDetails
             )
         }
 
