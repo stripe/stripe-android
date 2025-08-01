@@ -409,6 +409,7 @@ class LinkApiRepositoryTest {
                 PaymentMethodCreateParams.createLink(
                     paymentDetails.paymentDetails.first().id,
                     consumerSessionSecret,
+                    null,
                     mapOf("card" to mapOf("cvc" to "123"))
                 )
             )
@@ -531,6 +532,7 @@ class LinkApiRepositoryTest {
                 PaymentMethodCreateParams.createLink(
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!,
                     consumerSessionSecret,
+                    null,
                     mapOf("card" to mapOf("cvc" to "123"))
                 )
             )
