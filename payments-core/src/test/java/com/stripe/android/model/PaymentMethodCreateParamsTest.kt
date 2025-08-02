@@ -236,6 +236,19 @@ class PaymentMethodCreateParamsTest {
     fun `createLink correctly set parameters`() {
         val paymentDetailsId = "payment_details_123"
         val consumerSessionClientSecret = "client_secret_123"
+        val billingDetails = PaymentMethod.BillingDetails(
+            address = Address(
+                line1 = "123 Main Street",
+                line2 = null,
+                postalCode = "12345",
+                city = "Smalltown",
+                state = "CA",
+                country = "US",
+            ),
+            email = "john@doe.com",
+            name = "John Doe",
+            phone = "+15555555555",
+        )
         val extraParams = mapOf(
             "card" to mapOf(
                 "cvc" to "123"
@@ -246,6 +259,7 @@ class PaymentMethodCreateParamsTest {
             PaymentMethodCreateParams.createLink(
                 paymentDetailsId,
                 consumerSessionClientSecret,
+                billingDetails,
                 extraParams
             ).toParamMap()
         ).isEqualTo(
@@ -258,8 +272,20 @@ class PaymentMethodCreateParamsTest {
                     ),
                     "card" to mapOf(
                         "cvc" to "123"
-                    )
-                )
+                    ),
+                ),
+                "billing_details" to mapOf(
+                    "address" to mapOf(
+                        "line1" to "123 Main Street",
+                        "postal_code" to "12345",
+                        "city" to "Smalltown",
+                        "state" to "CA",
+                        "country" to "US",
+                    ),
+                    "name" to "John Doe",
+                    "email" to "john@doe.com",
+                    "phone" to "+15555555555",
+                ),
             )
         )
     }
