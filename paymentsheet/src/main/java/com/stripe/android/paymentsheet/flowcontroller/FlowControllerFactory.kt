@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
+import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
@@ -28,7 +29,7 @@ internal class FlowControllerFactory(
         viewModelStoreOwner = activity,
         lifecycleOwner = activity,
         activityResultRegistryOwner = activity,
-        statusBarColor = { activity.window.statusBarColor },
+        statusBarColor = { StatusBarCompat.color(activity) },
         paymentOptionCallback = paymentOptionCallback,
         paymentResultCallback = paymentResultCallback,
     )
@@ -41,7 +42,7 @@ internal class FlowControllerFactory(
         viewModelStoreOwner = fragment,
         lifecycleOwner = fragment,
         activityResultRegistryOwner = (fragment.host as? ActivityResultRegistryOwner) ?: fragment.requireActivity(),
-        statusBarColor = { fragment.activity?.window?.statusBarColor },
+        statusBarColor = { StatusBarCompat.color(fragment.requireActivity()) },
         paymentOptionCallback = paymentOptionCallback,
         paymentResultCallback = paymentResultCallback,
     )
