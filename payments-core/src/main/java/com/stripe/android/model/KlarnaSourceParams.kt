@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import com.stripe.android.model.KlarnaSourceParams.LineItem
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -18,7 +19,8 @@ import kotlinx.parcelize.Parcelize
  * Klarna may reject the transaction without giving the customer a chance to correct it.
  */
 @Parcelize
-data class KlarnaSourceParams @JvmOverloads constructor(
+@Poko
+class KlarnaSourceParams @JvmOverloads constructor(
     /**
      * The URL the customer should be redirected to after they have successfully verified the
      * payment.
@@ -124,7 +126,8 @@ data class KlarnaSourceParams @JvmOverloads constructor(
     }
 
     @Parcelize
-    data class LineItem @JvmOverloads constructor(
+    @Poko
+    class LineItem @JvmOverloads constructor(
         /**
          * The line item's type. One of `sku` (for a product), `tax` (for taxes),
          * or `shipping` (for shipping costs).
@@ -172,7 +175,8 @@ data class KlarnaSourceParams @JvmOverloads constructor(
      * for more information.
      */
     @Parcelize
-    data class PaymentPageOptions(
+    @Poko
+    class PaymentPageOptions(
         /**
          * A public URL for your businesses logo, must be served over HTTPS.
          */
