@@ -184,6 +184,7 @@ internal class InlineSignupViewModel(
                 consumerEmail,
                 consumerPhoneNumber,
                 consumerName,
+                _viewState.mapAsStateFlow { it.userHasInteracted },
                 this@InlineSignupViewModel::mapToUserInput
             ).collect {
                 _viewState.update { oldState ->
@@ -212,7 +213,8 @@ internal class InlineSignupViewModel(
                             mapToUserInput(
                                 email = consumerEmail.value,
                                 phoneNumber = consumerPhoneNumber.value,
-                                name = consumerName.value
+                                name = consumerName.value,
+                                userHasInteracted = oldState.userHasInteracted
                             )
                     }
                 )
@@ -235,7 +237,8 @@ internal class InlineSignupViewModel(
     private fun mapToUserInput(
         email: String?,
         phoneNumber: String?,
-        name: String?
+        name: String?,
+        userHasInteracted: Boolean
     ): UserInput? {
         val signUpMode = initialViewState.signupMode
         val meetsPhoneNumberCriteria = initialViewState.linkSignUpOptInFeatureEnabled ||
@@ -254,7 +257,7 @@ internal class InlineSignupViewModel(
                     defaultOptIn = initialViewState.allowsDefaultOptIn,
                     linkSignUpOptInFeatureEnabled = initialViewState.linkSignUpOptInFeatureEnabled,
                     linkSignUpInitialValue = config.linkSignUpOptInInitialValue,
-                    userHasInteracted = _viewState.value.userHasInteracted
+                    userHasInteracted = userHasInteracted
                 )
             ).takeIf { isNameValid }
         } else {
