@@ -7,24 +7,24 @@ import androidx.core.content.withStyledAttributes
 import com.stripe.android.connect.webview.StripeConnectWebViewContainer
 
 @PrivateBetaConnectSDK
-class PayoutsView internal constructor(
+class PaymentsView internal constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
     embeddedComponentManager: EmbeddedComponentManager?,
-    listener: PayoutsListener?,
+    listener: PaymentsListener?,
     cacheKey: String?,
 ) :
-    StripeComponentView<PayoutsListener, EmptyProps>(
+    StripeComponentView<PaymentsListener, EmptyProps>(
         context = context,
         attrs = attrs,
         defStyleAttr = defStyleAttr,
-        embeddedComponent = StripeEmbeddedComponent.PAYOUTS,
+        embeddedComponent = StripeEmbeddedComponent.PAYMENTS,
         embeddedComponentManager = embeddedComponentManager,
         listener = listener,
         props = EmptyProps,
     ),
-    StripeConnectWebViewContainer<PayoutsListener, EmptyProps> {
+    StripeConnectWebViewContainer<PaymentsListener, EmptyProps> {
 
     @JvmOverloads
     constructor(
@@ -51,4 +51,4 @@ class PayoutsView internal constructor(
 
 @PrivateBetaConnectSDK
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface PayoutsListener : StripeEmbeddedComponentListener
+interface PaymentsListener : StripeEmbeddedComponentListener
