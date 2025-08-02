@@ -146,7 +146,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                 null
             }
 
-            if (linkSignupOptInEnabled) {
+            if (linkSignupOptInEnabled && signupMode != null) {
                 add(
                     CombinedLinkMandateElement(
                         identifier = IdentifierSpec.Generic("card_mandate"),

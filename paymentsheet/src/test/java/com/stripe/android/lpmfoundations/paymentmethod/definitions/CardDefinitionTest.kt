@@ -246,6 +246,34 @@ class CardDefinitionTest {
     }
 
     @Test
+    fun `createFormElements returns no mandate if linkSignUpOptInFeatureEnabled but no email passed in`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            linkState = LinkState(
+                signupMode = null,
+                configuration = createLinkConfiguration().copy(
+                    linkSignUpOptInFeatureEnabled = true,
+                    customerInfo = LinkConfiguration.CustomerInfo(
+                        name = null,
+                        email = null,
+                        phone = null,
+                        billingCountryCode = null,
+                    ),
+                ),
+                loginState = LinkState.LoginState.LoggedOut,
+            ),
+        )
+
+        val formElements = CardDefinition.formElements(
+            metadata,
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+        )
+
+        assertThat(formElements).hasSize(2)
+        assertThat(formElements.filterIsInstance<CombinedLinkMandateElement>()).isEmpty()
+    }
+
+    @Test
     fun `createFormElements returns static mandate when signup toggle feature is disabled`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,

@@ -512,7 +512,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         val linkSignupMode = when {
             // If signup toggle enabled, we show a future usage + link combined toggle
-            signupToggleEnabled -> LinkSignupMode.InsteadOfSaveForFutureUse
+            signupToggleEnabled && linkConfiguration.customerInfo.email != null -> LinkSignupMode.InsteadOfSaveForFutureUse
             // If inline signup is disabled or user has used Link, we don't show inline signup
             linkSignUpDisabled || hasUsedLink -> null
             // If inline signup and save for future use, we show it alongside save for future use
