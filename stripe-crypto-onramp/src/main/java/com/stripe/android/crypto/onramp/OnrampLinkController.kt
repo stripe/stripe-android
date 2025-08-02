@@ -19,16 +19,16 @@ internal class OnrampLinkController @Inject constructor(
     private val viewModel: OnrampCoordinatorViewModel,
     private val lifecycleOwner: LifecycleOwner
 ) {
-    private val linkController: LinkController by lazy {
-        LinkController.create(
-            activity = activity,
-            presentPaymentMethodsCallback = { /* No-op for now */ },
-            lookupConsumerCallback = viewModel::handleConsumerLookupResult,
-            createPaymentMethodCallback = { /* No-op for now */ },
-            authenticationCallback = viewModel::handleAuthenticationResult,
-            registerConsumerCallback = viewModel::handleRegisterNewUserResult,
-        )
-    }
+//    private val linkController: LinkController by lazy {
+//        LinkController.create(
+//            activity = activity,
+//            presentPaymentMethodsCallback = { /* No-op for now */ },
+//            lookupConsumerCallback = viewModel::handleConsumerLookupResult,
+//            createPaymentMethodCallback = { /* No-op for now */ },
+//            authenticationCallback = viewModel::handleAuthenticationResult,
+//            registerConsumerCallback = viewModel::handleRegisterNewUserResult,
+//        )
+//    }
 
     init {
         check(lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.INITIALIZED))
@@ -41,33 +41,33 @@ internal class OnrampLinkController @Inject constructor(
                 }
 
                 launch {
-                    linkController.state
-                        .collect(viewModel::onLinkControllerState)
+//                    linkController.state
+//                        .collect(viewModel::onLinkControllerState)
                 }
             }
         }
     }
 
     private suspend fun configureLinkController(configuration: LinkController.Configuration) {
-        val result = linkController.configure(configuration)
-
-        viewModel.onLinkControllerConfigureResult(result)
+//        val result = linkController.configure(configuration)
+//
+//        viewModel.onLinkControllerConfigureResult(result)
     }
 
     fun isLinkUser(email: String) {
-        linkController.lookupConsumer(email)
+//        linkController.lookupConsumer(email)
     }
 
     fun authenticateExistingUser(email: String) {
-        linkController.authenticateExistingConsumer(email)
+//        linkController.authenticateExistingConsumer(email)
     }
 
     fun registerNewUser(info: LinkUserInfo) {
-        linkController.registerConsumer(
-            email = info.email,
-            phone = info.phone,
-            country = info.country,
-            name = info.fullName,
-        )
+//        linkController.registerConsumer(
+//            email = info.email,
+//            phone = info.phone,
+//            country = info.country,
+//            name = info.fullName,
+//        )
     }
 }
