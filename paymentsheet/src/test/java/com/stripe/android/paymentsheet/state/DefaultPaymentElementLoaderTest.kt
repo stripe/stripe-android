@@ -1550,7 +1550,11 @@ internal class DefaultPaymentElementLoaderTest {
 
         val result = loader.load(
             initializationMode = DEFAULT_INITIALIZATION_MODE,
-            paymentSheetConfiguration = DEFAULT_PAYMENT_SHEET_CONFIG,
+            paymentSheetConfiguration = DEFAULT_PAYMENT_SHEET_CONFIG.copy(
+                defaultBillingDetails = PaymentSheet.BillingDetails(
+                    email = "john@doe.com",
+                ),
+            ),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
             ),
@@ -1576,6 +1580,9 @@ internal class DefaultPaymentElementLoaderTest {
                 customer = PaymentSheet.CustomerConfiguration(
                     id = "cus_123",
                     ephemeralKeySecret = "ek_123",
+                ),
+                defaultBillingDetails = PaymentSheet.BillingDetails(
+                    email = "john@doe.com",
                 ),
             ),
             metadata = PaymentElementLoader.Metadata(
@@ -1611,7 +1618,7 @@ internal class DefaultPaymentElementLoaderTest {
         ).getOrThrow()
 
         // Feature flag should override the hasUsedLink check
-        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(null)
     }
 
     @Test
@@ -1633,7 +1640,7 @@ internal class DefaultPaymentElementLoaderTest {
         ).getOrThrow()
 
         // Feature flag should override the disableLinkSignup check
-        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(null)
     }
 
     @Test

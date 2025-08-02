@@ -242,7 +242,7 @@ class CardDefinitionTest {
 
         assertThat(formElements).hasSize(3)
 
-        testCombinedLinkMandateElement(formElements[2])
+        testStaticMandateElement(metadata, formElements[2])
     }
 
     @Test
