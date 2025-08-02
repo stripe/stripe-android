@@ -12,7 +12,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class PaymentOptionLabelsFactoryTest {
+class PaymentOptionDisplayDataLabelsFactoryTest {
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
 

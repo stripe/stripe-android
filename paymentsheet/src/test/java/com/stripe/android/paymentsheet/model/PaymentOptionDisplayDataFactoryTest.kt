@@ -20,7 +20,7 @@ import kotlin.test.Test
 
 @Suppress("DEPRECATION")
 @RunWith(RobolectricTestRunner::class)
-class PaymentOptionFactoryTest {
+class PaymentOptionDisplayDataFactoryTest {
 
     private val factory = PaymentOptionFactory(
         iconLoader = PaymentSelection.IconLoader(

@@ -49,6 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.elements.payment.FlowController
+import com.stripe.android.elements.payment.FlowController.PaymentOptionDisplayData
 import com.stripe.android.elements.payment.PreparePaymentMethodHandler
 import com.stripe.android.elements.payment.ShopPayPreview
 import com.stripe.android.paymentelement.ExtendedLabelsInPaymentOptionPreview
@@ -61,7 +62,6 @@ import com.stripe.android.paymentsheet.example.playground.data.ShopPayData
 import com.stripe.android.paymentsheet.example.playground.network.SharedPaymentTokenPlaygroundRequester
 import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsPlaygroundType
 import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsSettingsDefinition
-import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.getBorderStrokeColor
@@ -82,7 +82,7 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
         setContent {
             var confirming by remember { mutableStateOf(false) }
             var screenContent by remember { mutableStateOf(ScreenContent.Loading) }
-            var paymentOption by remember { mutableStateOf<PaymentOption?>(null) }
+            var paymentOption by remember { mutableStateOf<PaymentOptionDisplayData?>(null) }
 
             val requester = remember {
                 SharedPaymentTokenPlaygroundRequester(
@@ -192,7 +192,7 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
     @Composable
     private fun rememberFlowControllerBuilder(
         preparePaymentMethodHandler: PreparePaymentMethodHandler,
-        onPaymentOptionChanged: (PaymentOption?) -> Unit
+        onPaymentOptionChanged: (PaymentOptionDisplayData?) -> Unit
     ): FlowController.Builder {
         return remember {
             FlowController.Builder(
@@ -364,7 +364,7 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
             @OptIn(ExtendedLabelsInPaymentOptionPreview::class)
             @Composable
             private fun Summary(
-                option: PaymentOption,
+                option: PaymentOptionDisplayData,
                 modifier: Modifier = Modifier,
             ) {
                 Row(
@@ -417,7 +417,7 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
         @Immutable
         class Parameters(
             val confirming: Boolean,
-            val paymentOption: PaymentOption?,
+            val paymentOption: PaymentOptionDisplayData?,
             val flowController: FlowController,
             val showWalletButtons: Boolean,
             val confirm: () -> Unit,

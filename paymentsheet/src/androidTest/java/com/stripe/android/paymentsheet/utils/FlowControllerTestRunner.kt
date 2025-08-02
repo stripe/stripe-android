@@ -14,7 +14,7 @@ import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
-import com.stripe.android.paymentsheet.model.PaymentOption
+import com.stripe.android.elements.payment.FlowController.PaymentOptionDisplayData
 import kotlinx.coroutines.test.runTest
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit
 internal class FlowControllerTestRunnerContext(
     val scenario: ActivityScenario<MainActivity>,
     val flowController: FlowController,
-    val configureCallbackTurbine: Turbine<PaymentOption?>,
+    val configureCallbackTurbine: Turbine<PaymentOptionDisplayData?>,
     private val countDownLatch: CountDownLatch,
 ) {
 
@@ -64,7 +64,7 @@ internal fun runFlowControllerTest(
     block: suspend (FlowControllerTestRunnerContext) -> Unit,
 ) {
     val countDownLatch = CountDownLatch(1)
-    val configureCallbackTurbine = Turbine<PaymentOption?>()
+    val configureCallbackTurbine = Turbine<PaymentOptionDisplayData?>()
 
     val factory = FlowControllerTestFactory(
         callConfirmOnPaymentOptionCallback = callConfirmOnPaymentOptionCallback,
@@ -135,7 +135,7 @@ internal fun runMultipleFlowControllerInstancesTest(
     var secondCreateIntentCallbackCalled = false
 
     val countDownLatch = CountDownLatch(1)
-    val configureCallbackTurbine = Turbine<PaymentOption?>()
+    val configureCallbackTurbine = Turbine<PaymentOptionDisplayData?>()
 
     val firstFlowControllerFactory = FlowControllerTestFactory(
         callConfirmOnPaymentOptionCallback = callConfirmOnPaymentOptionCallback,

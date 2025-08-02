@@ -11,6 +11,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.payment.CreateIntentCallback
 import com.stripe.android.elements.payment.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.elements.payment.FlowController
+import com.stripe.android.elements.payment.FlowController.PaymentOptionDisplayData
 import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import kotlinx.coroutines.test.runTest
@@ -333,8 +334,8 @@ internal class PaymentElementBuilderTest {
         }
     }
 
-    private fun newPaymentOptionCallback(): PaymentOptionCallback {
-        return PaymentOptionCallback { _ ->
+    private fun newPaymentOptionCallback(): PaymentOptionDisplayData.Callback {
+        return PaymentOptionDisplayData.Callback { _ ->
             error("Should not be called!")
         }
     }

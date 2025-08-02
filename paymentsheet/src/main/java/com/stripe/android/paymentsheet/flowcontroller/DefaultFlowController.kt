@@ -21,6 +21,7 @@ import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.payment.FlowController
+import com.stripe.android.elements.payment.FlowController.PaymentOptionDisplayData
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.link.LinkAccountUpdate
@@ -50,7 +51,6 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.InitializedViaCompose
 import com.stripe.android.paymentsheet.LinkHandler
-import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
 import com.stripe.android.paymentsheet.PaymentSheetResult
@@ -59,7 +59,6 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.allowedWalletTypes
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
-import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.Link
@@ -86,7 +85,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val viewModelScope: CoroutineScope,
     private val lifecycleOwner: LifecycleOwner,
     private val paymentOptionFactory: PaymentOptionFactory,
-    private val paymentOptionCallback: PaymentOptionCallback,
+    private val paymentOptionCallback: PaymentOptionDisplayData.Callback,
     private val paymentResultCallback: PaymentSheetResultCallback,
     private val prefsRepositoryFactory: @JvmSuppressWildcards (CustomerConfiguration?) -> PrefsRepository,
     activityResultCaller: ActivityResultCaller,
@@ -236,7 +235,7 @@ internal class DefaultFlowController @Inject internal constructor(
         )
     }
 
-    override fun getPaymentOption(): PaymentOption? {
+    override fun getPaymentOption(): PaymentOptionDisplayData? {
         return viewModel.paymentSelection?.let {
             paymentOptionFactory.create(it)
         }
@@ -778,7 +777,7 @@ internal class DefaultFlowController @Inject internal constructor(
             lifecycleOwner: LifecycleOwner,
             activityResultCaller: ActivityResultCaller,
             statusBarColor: () -> Int?,
-            paymentOptionCallback: PaymentOptionCallback,
+            paymentOptionCallback: PaymentOptionDisplayData.Callback,
             paymentResultCallback: PaymentSheetResultCallback,
             paymentElementCallbackIdentifier: String,
             initializedViaCompose: Boolean,

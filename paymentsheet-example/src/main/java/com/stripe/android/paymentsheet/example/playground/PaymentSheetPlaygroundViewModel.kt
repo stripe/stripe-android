@@ -24,6 +24,7 @@ import com.stripe.android.elements.payment.AnalyticEventCallbackPreview
 import com.stripe.android.elements.payment.CreateIntentCallback
 import com.stripe.android.elements.payment.DelicatePaymentSheetApi
 import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
@@ -47,7 +48,6 @@ import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSet
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.ShippingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
-import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -378,7 +378,7 @@ internal class PaymentSheetPlaygroundViewModel(
     }
 
     @OptIn(ShippingDetailsInPaymentOptionPreview::class)
-    fun onPaymentOptionSelected(paymentOption: PaymentOption?) {
+    fun onPaymentOptionSelected(paymentOption: FlowController.PaymentOptionDisplayData?) {
         flowControllerState.update { existingState ->
             existingState?.copy(
                 selectedPaymentOption = paymentOption,

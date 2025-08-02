@@ -7,13 +7,13 @@ import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.elements.payment.FlowController.PaymentOptionDisplayData
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.samples.model.CartState
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutRequest
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutResponse
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
 import com.stripe.android.paymentsheet.example.samples.networking.toCheckoutRequest
-import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -60,7 +60,7 @@ internal class CustomFlowViewModel(
         }
     }
 
-    fun handlePaymentOptionChanged(paymentOption: PaymentOption?) {
+    fun handlePaymentOptionChanged(paymentOption: PaymentOptionDisplayData?) {
         viewModelScope.launch {
             _state.update {
                 it.copy(paymentOption = paymentOption,)

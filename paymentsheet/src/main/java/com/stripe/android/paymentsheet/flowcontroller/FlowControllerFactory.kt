@@ -7,7 +7,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.elements.payment.FlowController
-import com.stripe.android.paymentsheet.PaymentOptionCallback
+import com.stripe.android.elements.payment.FlowController.PaymentOptionDisplayData
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 
 internal class FlowControllerFactory(
@@ -15,14 +15,14 @@ internal class FlowControllerFactory(
     private val lifecycleOwner: LifecycleOwner,
     private val activityResultRegistryOwner: ActivityResultRegistryOwner,
     private val statusBarColor: () -> Int?,
-    private val paymentOptionCallback: PaymentOptionCallback,
+    private val paymentOptionCallback: PaymentOptionDisplayData.Callback,
     private val paymentResultCallback: PaymentSheetResultCallback,
     private val paymentElementCallbackIdentifier: String = "FlowController",
     private val initializedViaCompose: Boolean = false,
 ) {
     constructor(
         activity: ComponentActivity,
-        paymentOptionCallback: PaymentOptionCallback,
+        paymentOptionCallback: PaymentOptionDisplayData.Callback,
         paymentResultCallback: PaymentSheetResultCallback
     ) : this(
         viewModelStoreOwner = activity,
@@ -35,7 +35,7 @@ internal class FlowControllerFactory(
 
     constructor(
         fragment: Fragment,
-        paymentOptionCallback: PaymentOptionCallback,
+        paymentOptionCallback: PaymentOptionDisplayData.Callback,
         paymentResultCallback: PaymentSheetResultCallback
     ) : this(
         viewModelStoreOwner = fragment,

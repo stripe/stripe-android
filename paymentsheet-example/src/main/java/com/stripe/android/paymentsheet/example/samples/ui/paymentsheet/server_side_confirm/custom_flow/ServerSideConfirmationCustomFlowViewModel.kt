@@ -8,6 +8,7 @@ import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.elements.payment.CreateIntentCallback
+import com.stripe.android.elements.payment.FlowController.PaymentOptionDisplayData
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.samples.model.CartProduct
@@ -25,7 +26,6 @@ import com.stripe.android.paymentsheet.example.samples.networking.toCheckoutRequ
 import com.stripe.android.paymentsheet.example.samples.networking.toCreateIntentRequest
 import com.stripe.android.paymentsheet.example.samples.networking.toUpdateRequest
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowViewModel.ConfigureResult
-import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -81,7 +81,7 @@ internal class ServerSideConfirmationCustomFlowViewModel(
         }
     }
 
-    fun handlePaymentOptionChanged(paymentOption: PaymentOption?) {
+    fun handlePaymentOptionChanged(paymentOption: PaymentOptionDisplayData?) {
         viewModelScope.launch {
             _state.update {
                 it.copy(paymentOption = paymentOption)
@@ -300,7 +300,7 @@ internal class ServerSideConfirmationCustomFlowViewModel(
     }
 
     data class ConfigureResult(
-        val paymentOption: PaymentOption?,
+        val paymentOption: PaymentOptionDisplayData?,
         val error: Throwable?,
     )
 

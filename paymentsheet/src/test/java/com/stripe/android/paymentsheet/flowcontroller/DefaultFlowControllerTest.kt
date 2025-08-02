@@ -20,6 +20,7 @@ import com.stripe.android.elements.Address
 import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.payment.FlowController
+import com.stripe.android.elements.payment.FlowController.PaymentOptionDisplayData
 import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.elements.payment.PaymentSheet
@@ -68,7 +69,6 @@ import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignu
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.FakePrefsRepository
-import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -125,7 +125,7 @@ internal class DefaultFlowControllerTest {
     @get:Rule
     val paymentElemntCallbackTestRule = PaymentElementCallbackTestRule()
 
-    private val paymentOptionCallback = mock<PaymentOptionCallback>()
+    private val paymentOptionCallback = mock<PaymentOptionDisplayData.Callback>()
     private val paymentResultCallback = mock<PaymentSheetResultCallback>()
     private val eventReporter = mock<EventReporter>()
 
