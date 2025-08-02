@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.example.playground
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -16,12 +15,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.stripe.android.link.LinkController
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
 @Suppress("LongMethod")
 internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
     private val viewModel: LinkControllerPlaygroundViewModel by viewModels()
+    private val linkController get() = viewModel.linkController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,25 +34,19 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
             return
         }
 
+        viewModel.configureLinkController(linkControllerConfig)
+
         setContent {
-            val linkController = remember {
-                LinkController.create(
+            val linkControllerPresenter = remember {
+                viewModel.linkController.createPresenter(
                     activity = this,
                     presentPaymentMethodsCallback = viewModel::onLinkControllerPresentPaymentMethod,
-                    lookupConsumerCallback = viewModel::onLinkControllerLookupConsumer,
-                    createPaymentMethodCallback = viewModel::onLinkControllerCreatePaymentMethod,
                     authenticationCallback = viewModel::onLinkControllerAuthentication,
-                    registerConsumerCallback = viewModel::onRegisterConsumer,
-                )
-            }
-            LaunchedEffect(Unit) {
-                viewModel.onConfigureResult(
-                    result = linkController.configure(linkControllerConfig)
                 )
             }
 
             val linkControllerPlaygroundState by viewModel.linkControllerState.collectAsState()
-            val linkControllerState by linkController.state.collectAsState()
+            val linkControllerState by linkController.state(this).collectAsState()
 
             PaymentSheetExampleTheme {
                 Scaffold { paddingValues ->
@@ -61,33 +54,22 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
                         modifier = Modifier.padding(paddingValues),
                         controllerState = linkControllerState,
                         playgroundState = linkControllerPlaygroundState,
-                        onEmailChange = { email ->
-                            if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                                linkController.lookupConsumer(email)
-                            }
-                        },
+                        onEmailChange = viewModel::onEmailChange,
                         onPaymentMethodButtonClick = { email ->
-                            linkController.paymentSelectionHint =
+                            linkControllerPresenter.paymentSelectionHint =
                                 "Lorem ipsum dolor sit amet consectetur adipiscing elit."
-                            linkController.presentPaymentMethods(email = email.takeIf { it.isNotBlank() })
+                            linkControllerPresenter.presentPaymentMethods(email = email.takeIf { it.isNotBlank() })
                         },
-                        onCreatePaymentMethodClick = linkController::createPaymentMethod,
+                        onCreatePaymentMethodClick = viewModel::onCreatePaymentMethodClick,
                         onAuthenticationClick = { email, existingOnly ->
                             val cleanedEmail = email.takeIf { it.isNotBlank() } ?: ""
                             if (existingOnly) {
-                                linkController.authenticateExistingConsumer(cleanedEmail)
+                                linkControllerPresenter.authenticateExistingConsumer(cleanedEmail)
                             } else {
-                                linkController.authenticate(cleanedEmail)
+                                linkControllerPresenter.authenticate(cleanedEmail)
                             }
                         },
-                        onRegisterConsumerClick = { email, phone, country, name ->
-                            linkController.registerConsumer(
-                                email = email,
-                                phone = phone,
-                                country = country,
-                                name = name,
-                            )
-                        },
+                        onRegisterConsumerClick = viewModel::onRegisterConsumerClick,
                         onErrorMessage = { viewModel.status.value = StatusMessage(it) },
                     )
                 }

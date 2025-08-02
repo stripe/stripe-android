@@ -1,35 +1,33 @@
 package com.stripe.android.link
 
-import android.app.Activity
+import android.app.Application
 import android.content.Context
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.configuration.ConfigurationDefaults
-import com.stripe.android.link.injection.LinkControllerScope
+import com.stripe.android.link.injection.DaggerLinkControllerComponent
+import com.stripe.android.link.injection.LinkControllerPresenterComponent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * A controller to perform various Link operations.
  */
-@LinkControllerScope
+@Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class LinkController @Inject internal constructor(
-    activity: Activity,
-    private val linkControllerCoordinator: LinkControllerCoordinator,
-    private val viewModel: LinkControllerViewModel,
+    private val interactor: LinkControllerInteractor,
+    private val linkControllerPresenterComponentFactory: LinkControllerPresenterComponent.Factory
 ) {
-    val state: StateFlow<State> = viewModel.state(activity)
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    var paymentSelectionHint: String? = null
+    fun state(context: Context): StateFlow<State> = interactor.state(context)
 
     /**
      * Configure the controller with a [Configuration].
@@ -40,28 +38,7 @@ class LinkController @Inject internal constructor(
      * @return The result of the configuration.
      */
     suspend fun configure(configuration: Configuration): ConfigureResult {
-        return viewModel.configure(configuration)
-    }
-
-    /**
-     * Present the Link payment methods selection screen.
-     *
-     * This will launch the Link activity where users can select from their saved payment methods
-     * or add new ones. The result will be communicated through the [PresentPaymentMethodsCallback]
-     * provided during controller creation.
-     *
-     * If a presentation is already in progress, this call will be ignored.
-     *
-     * @param email The email address to use for Link account lookup. If provided and the email
-     * matches an existing Link account, the account's payment methods will be available for selection.
-     * If null, the user will need to sign in or create a Link account.
-     */
-    fun presentPaymentMethods(email: String?) {
-        viewModel.onPresentPaymentMethods(
-            launcher = linkControllerCoordinator.linkActivityResultLauncher,
-            email = email,
-            hint = paymentSelectionHint,
-        )
+        return interactor.configure(configuration)
     }
 
     /**
@@ -74,8 +51,8 @@ class LinkController @Inject internal constructor(
      * **Note**: This requires a payment method to be selected via [presentPaymentMethods] first,
      * and a valid Link configuration and account. If these requirements are not met, the operation will fail.
      */
-    fun createPaymentMethod() {
-        viewModel.onCreatePaymentMethod()
+    suspend fun createPaymentMethod(): CreatePaymentMethodResult {
+        return interactor.createPaymentMethod()
     }
 
     /**
@@ -88,58 +65,27 @@ class LinkController @Inject internal constructor(
      *
      * @param email The email address to check for an existing Link consumer account.
      */
-    fun lookupConsumer(email: String) {
-        viewModel.onLookupConsumer(email)
+    suspend fun lookupConsumer(email: String): LookupConsumerResult {
+        return interactor.lookupConsumer(email)
+    }
+
+    fun createPresenter(
+        activity: ComponentActivity,
+        presentPaymentMethodsCallback: PresentPaymentMethodsCallback,
+        authenticationCallback: AuthenticationCallback,
+    ): Presenter {
+        return linkControllerPresenterComponentFactory
+            .build(
+                activity = activity,
+                lifecycleOwner = activity,
+                activityResultRegistryOwner = activity,
+                presentPaymentMethodsCallback = presentPaymentMethodsCallback,
+                authenticationCallback = authenticationCallback,
+            )
+            .presenter
     }
 
     // Crypto Onramp specific methods
-
-    /**
-     * [CRYPTO ONRAMP ONLY] Authenticate with Link.
-     *
-     * This will launch the Link activity where users can authenticate with their Link account.
-     * The authentication flow will close after successful authentication instead of continuing
-     * to payment selection. The result will be communicated through the [AuthenticationCallback]
-     * provided during controller creation.
-     *
-     * If authentication is already in progress, this call will be ignored.
-     *
-     * @param email The email address to use for Link account lookup. If provided and the email
-     * matches an existing Link account, the user will be able to authenticate with that account.
-     * If null, the user will need to sign in or create a Link account.
-     */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun authenticate(email: String?) {
-        viewModel.onAuthenticate(
-            launcher = linkControllerCoordinator.linkActivityResultLauncher,
-            email = email
-        )
-    }
-
-    /**
-     * [CRYPTO ONRAMP ONLY] Authenticate with Link for existing consumers only.
-     *
-     * This will launch the Link activity where users can authenticate with their Link account.
-     * Unlike [authenticate], this method will fail with [NoLinkAccountFoundException] if the
-     * provided email is not associated with an existing Link consumer account, rather than
-     * allowing the user to sign up for a new account.
-     *
-     * The authentication flow will close after successful authentication instead of continuing
-     * to payment selection. The result will be communicated through the [AuthenticationCallback]
-     * provided during controller creation.
-     *
-     * If authentication is already in progress, this call will be ignored.
-     *
-     * @param email The email address to use for Link account lookup. Must be associated with
-     * an existing Link consumer account, otherwise the authentication will fail.
-     */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun authenticateExistingConsumer(email: String) {
-        viewModel.onAuthenticateExistingConsumer(
-            launcher = linkControllerCoordinator.linkActivityResultLauncher,
-            email = email
-        )
-    }
 
     /**
      * [CRYPTO ONRAMP ONLY] Register a new Link consumer account.
@@ -150,13 +96,13 @@ class LinkController @Inject internal constructor(
      * @param name The name of the consumer. Optional, can be null.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun registerConsumer(
+    suspend fun registerConsumer(
         email: String,
         phone: String,
         country: String,
         name: String?,
-    ) {
-        viewModel.onRegisterConsumer(
+    ): RegisterConsumerResult {
+        return interactor.registerConsumer(
             email = email,
             phone = phone,
             country = country,
@@ -289,6 +235,82 @@ class LinkController @Inject internal constructor(
          */
         val isConsumerVerified: Boolean?
             get() = internalLinkAccount?.sessionState?.let { it == SessionState.LoggedIn }
+    }
+
+    class Presenter @Inject internal constructor(
+        private val linkControllerCoordinator: LinkControllerCoordinator,
+        private val viewModel: LinkControllerInteractor,
+    ) {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        var paymentSelectionHint: String? = null
+
+        /**
+         * Present the Link payment methods selection screen.
+         *
+         * This will launch the Link activity where users can select from their saved payment methods
+         * or add new ones. The result will be communicated through the [PresentPaymentMethodsCallback]
+         * provided during controller creation.
+         *
+         * If a presentation is already in progress, this call will be ignored.
+         *
+         * @param email The email address to use for Link account lookup. If provided and the email
+         * matches an existing Link account, the account's payment methods will be available for selection.
+         * If null, the user will need to sign in or create a Link account.
+         */
+        fun presentPaymentMethods(email: String?) {
+            viewModel.presentPaymentMethods(
+                launcher = linkControllerCoordinator.linkActivityResultLauncher,
+                email = email,
+                hint = paymentSelectionHint,
+            )
+        }
+
+        /**
+         * [CRYPTO ONRAMP ONLY] Authenticate with Link.
+         *
+         * This will launch the Link activity where users can authenticate with their Link account.
+         * The authentication flow will close after successful authentication instead of continuing
+         * to payment selection. The result will be communicated through the [AuthenticationCallback]
+         * provided during controller creation.
+         *
+         * If authentication is already in progress, this call will be ignored.
+         *
+         * @param email The email address to use for Link account lookup. If provided and the email
+         * matches an existing Link account, the user will be able to authenticate with that account.
+         * If null, the user will need to sign in or create a Link account.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun authenticate(email: String?) {
+            viewModel.authenticate(
+                launcher = linkControllerCoordinator.linkActivityResultLauncher,
+                email = email
+            )
+        }
+
+        /**
+         * [CRYPTO ONRAMP ONLY] Authenticate with Link for existing consumers only.
+         *
+         * This will launch the Link activity where users can authenticate with their Link account.
+         * Unlike [authenticate], this method will fail with [NoLinkAccountFoundException] if the
+         * provided email is not associated with an existing Link consumer account, rather than
+         * allowing the user to sign up for a new account.
+         *
+         * The authentication flow will close after successful authentication instead of continuing
+         * to payment selection. The result will be communicated through the [AuthenticationCallback]
+         * provided during controller creation.
+         *
+         * If authentication is already in progress, this call will be ignored.
+         *
+         * @param email The email address to use for Link account lookup. Must be associated with
+         * an existing Link consumer account, otherwise the authentication will fail.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun authenticateExistingConsumer(email: String) {
+            viewModel.authenticateExistingConsumer(
+                launcher = linkControllerCoordinator.linkActivityResultLauncher,
+                email = email
+            )
+        }
     }
 
     /**
@@ -448,35 +470,11 @@ class LinkController @Inject internal constructor(
     }
 
     /**
-     * Callback for receiving results from [lookupConsumer].
-     */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun interface LookupConsumerCallback {
-        fun onLookupConsumerResult(result: LookupConsumerResult)
-    }
-
-    /**
-     * Callback for receiving results from [createPaymentMethod].
-     */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun interface CreatePaymentMethodCallback {
-        fun onCreatePaymentMethodResult(result: CreatePaymentMethodResult)
-    }
-
-    /**
      * [CRYPTO ONRAMP ONLY] Callback for receiving results from [authenticate] and [authenticateExistingConsumer].
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun interface AuthenticationCallback {
         fun onAuthenticationResult(result: AuthenticationResult)
-    }
-
-    /**
-     * [CRYPTO ONRAMP ONLY] Callback for receiving results from [registerConsumer].
-     */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun interface RegisterConsumerCallback {
-        fun onRegisterConsumerResult(result: RegisterConsumerResult)
     }
 
     /**
@@ -530,73 +528,19 @@ class LinkController @Inject internal constructor(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
-        /**
-         * Create a [LinkController] instance.
-         *
-         * @param activity The Activity that will present Link-related UI.
-         * @param presentPaymentMethodsCallback Called with the result when [presentPaymentMethods] completes.
-         * @param lookupConsumerCallback Called with the result when [lookupConsumer] completes.
-         * @param createPaymentMethodCallback Called with the result when [createPaymentMethod] completes.
-         *
-         * @return A configured [LinkController] instance.
-         */
-        @JvmStatic
-        fun create(
-            activity: ComponentActivity,
-            presentPaymentMethodsCallback: PresentPaymentMethodsCallback,
-            lookupConsumerCallback: LookupConsumerCallback,
-            createPaymentMethodCallback: CreatePaymentMethodCallback,
-        ): LinkController {
-            return create(
-                activity = activity,
-                presentPaymentMethodsCallback = presentPaymentMethodsCallback,
-                lookupConsumerCallback = lookupConsumerCallback,
-                createPaymentMethodCallback = createPaymentMethodCallback,
-                // Only for crypto onramp flows
-                authenticationCallback = {},
-                registerConsumerCallback = {},
-            )
-        }
-
-        /**
-         * [CRYPTO ONRAMP ONLY] Create a [LinkController] instance.
-         *
-         * @param activity The Activity that will present Link-related UI.
-         * @param presentPaymentMethodsCallback Called with the result when [presentPaymentMethods] completes.
-         * @param lookupConsumerCallback Called with the result when [lookupConsumer] completes.
-         * @param createPaymentMethodCallback Called with the result when [createPaymentMethod] completes.
-         * @param authenticationCallback Called with the result when authentication methods complete.
-         * @param registerConsumerCallback Called with the result when [registerConsumer] completes.
-         *
-         * @return A configured [LinkController] instance.
-         */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @JvmStatic
         fun create(
-            activity: ComponentActivity,
-            presentPaymentMethodsCallback: PresentPaymentMethodsCallback,
-            lookupConsumerCallback: LookupConsumerCallback,
-            createPaymentMethodCallback: CreatePaymentMethodCallback,
-            authenticationCallback: AuthenticationCallback,
-            registerConsumerCallback: RegisterConsumerCallback
+            application: Application,
+            savedStateHandle: SavedStateHandle
         ): LinkController {
-            val viewModelProvider = ViewModelProvider(
-                owner = activity,
-                factory = LinkControllerViewModel.Factory()
-            )
-            val viewModel = viewModelProvider[LinkControllerViewModel::class.java]
-            return viewModel
-                .controllerComponentFactory.build(
-                    activity = activity,
-                    lifecycleOwner = activity,
-                    activityResultRegistryOwner = activity,
-                    presentPaymentMethodsCallback = presentPaymentMethodsCallback,
-                    lookupConsumerCallback = lookupConsumerCallback,
-                    createPaymentMethodCallback = createPaymentMethodCallback,
-                    authenticationCallback = authenticationCallback,
-                    registerConsumerCallback = registerConsumerCallback,
+            return DaggerLinkControllerComponent.factory()
+                .build(
+                    application = application,
+                    savedStateHandle = savedStateHandle,
+                    paymentElementCallbackIdentifier = "LinkController",
                 )
-                .controller
+                .linkController
         }
     }
 }

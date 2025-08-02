@@ -4,4 +4,4 @@ import javax.inject.Scope
 
 @Scope
 @Retention(AnnotationRetention.RUNTIME)
-internal annotation class LinkControllerScope
+internal annotation class LinkControllerPresenterScope

@@ -38,7 +38,7 @@ import javax.inject.Singleton
         LinkHoldbackExposureModule::class
     ],
     subcomponents = [
-        LinkControllerComponent::class,
+        LinkControllerPresenterComponent::class,
         LinkComponent::class,
     ]
 )

@@ -35,7 +35,7 @@ internal class LinkControllerCoordinatorTest {
     private val authenticationResultFlow = MutableSharedFlow<LinkController.AuthenticationResult>()
     private val registerConsumerResultFlow = MutableSharedFlow<LinkController.RegisterConsumerResult>()
 
-    private val viewModel: LinkControllerViewModel = mock {
+    private val viewModel: LinkControllerInteractor = mock {
         on { presentPaymentMethodsResultFlow } doReturn presentPaymentMethodsResultFlow
         on { lookupConsumerResultFlow } doReturn lookupConsumerResultFlow
         on { createPaymentMethodResultFlow } doReturn createPaymentMethodResultFlow
