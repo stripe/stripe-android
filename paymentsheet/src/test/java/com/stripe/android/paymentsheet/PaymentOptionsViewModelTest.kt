@@ -29,6 +29,7 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -1150,7 +1151,8 @@ internal class PaymentOptionsViewModelTest {
             args = args.copy(
                 state = args.state.copy(
                     paymentMethodMetadata = args.state.paymentMethodMetadata.copy(
-                        linkState = linkState
+                        linkState = linkState,
+                        passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
                     )
                 )
             ),

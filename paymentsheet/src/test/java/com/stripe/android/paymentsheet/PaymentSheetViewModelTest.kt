@@ -33,6 +33,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilt
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -572,6 +573,7 @@ internal class PaymentSheetViewModelTest {
                 ),
                 extraParams = null,
                 shouldSave = true,
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             )
         )
         assertThat(arguments.intent).isEqualTo(stripeIntent)
@@ -617,6 +619,7 @@ internal class PaymentSheetViewModelTest {
                 optionsParams = optionsParams,
                 extraParams = null,
                 shouldSave = true,
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
         )
         assertThat(arguments.intent).isEqualTo(stripeIntent)
@@ -1074,6 +1077,7 @@ internal class PaymentSheetViewModelTest {
                 optionsParams = null,
                 extraParams = null,
                 shouldSave = true,
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
         )
 
@@ -2506,6 +2510,7 @@ internal class PaymentSheetViewModelTest {
             BacsConfirmationOption(
                 createParams = bacsPaymentSelection.paymentMethodCreateParams,
                 optionsParams = bacsPaymentSelection.paymentMethodOptionsParams,
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
         )
     }
@@ -3527,6 +3532,7 @@ internal class PaymentSheetViewModelTest {
                 createParams = createParams,
                 optionsParams = null,
                 extraParams = null,
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
         )
 
