@@ -53,11 +53,6 @@ internal interface NextActionHandlerComponent {
         fun uiContext(@UIContext uiContext: CoroutineContext): Builder
 
         @BindsInstance
-        fun threeDs1IntentReturnUrlMap(
-            threeDs1IntentReturnUrlMap: MutableMap<String, String>
-        ): Builder
-
-        @BindsInstance
         fun publishableKeyProvider(
             @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String
         ): Builder
