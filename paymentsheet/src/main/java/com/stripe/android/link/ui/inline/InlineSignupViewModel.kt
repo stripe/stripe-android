@@ -150,8 +150,12 @@ internal class InlineSignupViewModel(
 
     fun toggleExpanded() {
         _viewState.update { oldState ->
-            oldState.copy(isExpanded = !oldState.isExpanded)
+            oldState.copy(
+                isExpanded = !oldState.isExpanded,
+                userHasInteracted = true
+            )
         }
+
         // First time user checks the box, start listening to inputs
         if (_viewState.value.isExpanded && !hasExpanded) {
             hasExpanded = true
@@ -248,7 +252,9 @@ internal class InlineSignupViewModel(
                     hasPrefilledEmail = prefilledEmail != null,
                     hasPrefilledPhone = prefilledPhone.isNotBlank(),
                     defaultOptIn = initialViewState.allowsDefaultOptIn,
-                    linkSignUpOptInFeatureEnabled = initialViewState.linkSignUpOptInFeatureEnabled
+                    linkSignUpOptInFeatureEnabled = initialViewState.linkSignUpOptInFeatureEnabled,
+                    linkSignUpInitialValue = config.linkSignUpOptInInitialValue,
+                    userHasInteracted = _viewState.value.userHasInteracted
                 )
             ).takeIf { isNameValid }
         } else {
@@ -337,7 +343,9 @@ internal class InlineSignupViewModel(
         hasPrefilledEmail: Boolean,
         hasPrefilledPhone: Boolean,
         defaultOptIn: Boolean,
-        linkSignUpOptInFeatureEnabled: Boolean
+        linkSignUpOptInFeatureEnabled: Boolean,
+        userHasInteracted: Boolean,
+        linkSignUpInitialValue: Boolean
     ): SignUpConsentAction {
         return when (this) {
             LinkSignupMode.AlongsideSaveForFutureUse -> {
@@ -349,7 +357,7 @@ internal class InlineSignupViewModel(
             LinkSignupMode.InsteadOfSaveForFutureUse -> {
                 when {
                     linkSignUpOptInFeatureEnabled -> {
-                        if (config.linkSignUpOptInInitialValue) {
+                        if (linkSignUpInitialValue && !userHasInteracted) {
                             SignUpConsentAction.SignUpOptInMobilePrechecked
                         } else {
                             SignUpConsentAction.SignUpOptInMobileChecked

@@ -28,6 +28,7 @@ constructor(
     internal val isExpanded: Boolean = false,
     internal val apiFailed: Boolean = false,
     internal val signUpState: SignUpState = SignUpState.InputtingPrimaryField,
+    internal val userHasInteracted: Boolean = false,
 ) {
 
     val isShowingPhoneFirst: Boolean

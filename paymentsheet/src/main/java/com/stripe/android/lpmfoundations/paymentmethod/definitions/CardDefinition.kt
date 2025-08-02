@@ -146,32 +146,30 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                 null
             }
 
-            if (metadata.hasIntentToSetup(CardDefinition.type.code)) {
-                if (linkSignupOptInEnabled) {
-                    add(
-                        CombinedLinkMandateElement(
-                            identifier = IdentifierSpec.Generic("card_mandate"),
-                            merchantName = metadata.merchantName,
-                            signupMode = signupMode,
-                            canChangeSaveForFutureUse = canChangeSaveForFutureUsage,
-                            linkSignupStateFlow = arguments.linkInlineHandler?.linkInlineState ?: stateFlowOf(null)
-                        )
+            if (linkSignupOptInEnabled) {
+                add(
+                    CombinedLinkMandateElement(
+                        identifier = IdentifierSpec.Generic("card_mandate"),
+                        merchantName = metadata.merchantName,
+                        signupMode = signupMode,
+                        canChangeSaveForFutureUse = canChangeSaveForFutureUsage,
+                        linkSignupStateFlow = arguments.linkInlineHandler?.linkInlineState ?: stateFlowOf(null)
                     )
-                } else {
-                    add(
-                        MandateTextElement(
-                            identifier = IdentifierSpec.Generic("card_mandate"),
-                            stringResId = PaymentSheetR.string.stripe_paymentsheet_card_mandate,
-                            topPadding = when {
-                                signupMode == LinkSignupMode.AlongsideSaveForFutureUse -> 0.dp
-                                signupMode == LinkSignupMode.InsteadOfSaveForFutureUse -> 4.dp
-                                canChangeSaveForFutureUsage -> 6.dp
-                                else -> 2.dp
-                            },
-                            args = listOf(metadata.merchantName),
-                        )
+                )
+            } else if (metadata.hasIntentToSetup(CardDefinition.type.code)) {
+                add(
+                    MandateTextElement(
+                        identifier = IdentifierSpec.Generic("card_mandate"),
+                        stringResId = PaymentSheetR.string.stripe_paymentsheet_card_mandate,
+                        topPadding = when {
+                            signupMode == LinkSignupMode.AlongsideSaveForFutureUse -> 0.dp
+                            signupMode == LinkSignupMode.InsteadOfSaveForFutureUse -> 4.dp
+                            canChangeSaveForFutureUsage -> 6.dp
+                            else -> 2.dp
+                        },
+                        args = listOf(metadata.merchantName),
                     )
-                }
+                )
             }
         }
     }
