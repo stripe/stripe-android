@@ -368,6 +368,11 @@ public final class com/stripe/android/link/LinkController$PaymentMethodPreview$C
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/link/LinkController$Presenter {
+	public static final field $stable I
+	public final fun presentPaymentMethods (Ljava/lang/String;)V
+}
+
 public final class com/stripe/android/link/LinkController$State$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/LinkController$State;
