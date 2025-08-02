@@ -228,6 +228,11 @@ class CardDefinitionTest {
     fun `createFormElements returns mandate when has intent to setup`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+            linkState = LinkState(
+                signupMode = null,
+                configuration = createLinkConfiguration().copy(linkSignUpOptInFeatureEnabled = true),
+                loginState = LinkState.LoginState.LoggedOut,
+            ),
         )
 
         val formElements = CardDefinition.formElements(
@@ -237,7 +242,51 @@ class CardDefinitionTest {
 
         assertThat(formElements).hasSize(3)
 
-        testMandateElement(metadata, formElements[2])
+        testStaticMandateElement(metadata, formElements[2])
+    }
+
+    @Test
+    fun `createFormElements returns no mandate if linkSignUpOptInFeatureEnabled but no email passed in`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            linkState = LinkState(
+                signupMode = null,
+                configuration = createLinkConfiguration().copy(
+                    linkSignUpOptInFeatureEnabled = true,
+                    customerInfo = LinkConfiguration.CustomerInfo(
+                        name = null,
+                        email = null,
+                        phone = null,
+                        billingCountryCode = null,
+                    ),
+                ),
+                loginState = LinkState.LoginState.LoggedOut,
+            ),
+        )
+
+        val formElements = CardDefinition.formElements(
+            metadata,
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+        )
+
+        assertThat(formElements).hasSize(2)
+        assertThat(formElements.filterIsInstance<CombinedLinkMandateElement>()).isEmpty()
+    }
+
+    @Test
+    fun `createFormElements returns static mandate when signup toggle feature is disabled`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+        )
+
+        val formElements = CardDefinition.formElements(
+            metadata,
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+        )
+
+        assertThat(formElements).hasSize(3)
+
+        testStaticMandateElement(metadata, formElements[2])
     }
 
     @Test
@@ -264,27 +313,20 @@ class CardDefinitionTest {
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
             linkState = LinkState(
                 signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
-                configuration = createLinkConfiguration(),
+                configuration = createLinkConfiguration().copy(linkSignUpOptInFeatureEnabled = true),
                 loginState = LinkState.LoginState.LoggedOut,
             ),
         )
 
         val formElements = CardDefinition.formElements(
-            PaymentMethodMetadataFactory.create(
-                stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
-                linkState = LinkState(
-                    signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
-                    configuration = createLinkConfiguration(),
-                    loginState = LinkState.LoginState.LoggedOut,
-                ),
-            ),
+            metadata,
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
         )
 
         assertThat(formElements).hasSize(4)
         assertThat(formElements[2].identifier.v1).isEqualTo("link_form")
 
-        testMandateElement(metadata, formElements[3])
+        testCombinedLinkMandateElement(formElements[3])
     }
 
     @Test
@@ -315,7 +357,12 @@ class CardDefinitionTest {
         )
     }
 
-    private fun testMandateElement(metadata: PaymentMethodMetadata, formElement: FormElement) {
+    private fun testCombinedLinkMandateElement(formElement: FormElement) {
+        assertThat(formElement.identifier.v1).isEqualTo("card_mandate")
+        assertThat(formElement).isInstanceOf(CombinedLinkMandateElement::class.java)
+    }
+
+    private fun testStaticMandateElement(metadata: PaymentMethodMetadata, formElement: FormElement) {
         assertThat(formElement.identifier.v1).isEqualTo("card_mandate")
         assertThat(formElement).isInstanceOf(MandateTextElement::class.java)
 

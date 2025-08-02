@@ -23,10 +23,12 @@ constructor(
     val fields: List<LinkSignupField>,
     val prefillEligibleFields: Set<LinkSignupField>,
     val allowsDefaultOptIn: Boolean,
+    val linkSignUpOptInFeatureEnabled: Boolean,
     val didAskToChangeSignupDetails: Boolean = false,
     internal val isExpanded: Boolean = false,
     internal val apiFailed: Boolean = false,
     internal val signUpState: SignUpState = SignUpState.InputtingPrimaryField,
+    internal val userHasInteracted: Boolean = false,
 ) {
 
     val isShowingPhoneFirst: Boolean
@@ -46,12 +48,10 @@ constructor(
 
             return when (signupMode) {
                 LinkSignupMode.AlongsideSaveForFutureUse -> userInput != null
-                LinkSignupMode.InsteadOfSaveForFutureUse -> {
-                    if (allowsDefaultOptIn) {
-                        userInput != null
-                    } else {
-                        isExpanded
-                    }
+                LinkSignupMode.InsteadOfSaveForFutureUse -> when {
+                    linkSignUpOptInFeatureEnabled -> userInput != null && isExpanded
+                    allowsDefaultOptIn -> userInput != null
+                    else -> isExpanded
                 }
                 null -> false
             }
@@ -99,10 +99,7 @@ constructor(
                 }
             }
 
-            val allowsDefaultOptIn = config.allowDefaultOptIn &&
-                config.stripeIntent.countryCode == "US" &&
-                signupMode == LinkSignupMode.InsteadOfSaveForFutureUse
-
+            val allowsDefaultOptIn = allowsDefaultOptIn(config, signupMode)
             val missingDataForDefaultOptIn = initialEmail.isNullOrBlank() || initialPhone.isNullOrBlank()
 
             val signupState = if (allowsDefaultOptIn && missingDataForDefaultOptIn) {
@@ -118,10 +115,26 @@ constructor(
                 fields = fields,
                 prefillEligibleFields = prefillEligibleFields,
                 isExpanded = isExpanded || allowsDefaultOptIn,
-                allowsDefaultOptIn = allowsDefaultOptIn,
+                allowsDefaultOptIn = allowsDefaultOptIn(config, signupMode),
+                linkSignUpOptInFeatureEnabled = linkSignupOptInFeatureEnabled(config, signupMode),
                 signUpState = signupState,
             )
         }
+
+        private fun allowsDefaultOptIn(
+            config: LinkConfiguration,
+            signupMode: LinkSignupMode
+        ): Boolean = config.allowDefaultOptIn &&
+            config.stripeIntent.countryCode == "US" &&
+            signupMode == LinkSignupMode.InsteadOfSaveForFutureUse
+
+        private fun linkSignupOptInFeatureEnabled(
+            config: LinkConfiguration,
+            signupMode: LinkSignupMode
+        ): Boolean = config.linkSignUpOptInFeatureEnabled &&
+            // We only allow the opt-in feature if the user has provided an email address.
+            config.customerInfo.email.isNullOrBlank().not() &&
+            signupMode == LinkSignupMode.InsteadOfSaveForFutureUse
     }
 }
 

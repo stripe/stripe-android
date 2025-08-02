@@ -508,13 +508,19 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             hasCustomerConfiguration = configuration.customer != null,
         )
         val hasUsedLink = linkStore.hasUsedLink()
+        val signupToggleEnabled = elementsSession.linkSignUpOptInFeatureEnabled
 
-        val linkSignupMode = if (hasUsedLink || linkSignUpDisabled) {
-            null
-        } else if (isSaveForFutureUseValueChangeable) {
-            LinkSignupMode.AlongsideSaveForFutureUse
-        } else {
-            LinkSignupMode.InsteadOfSaveForFutureUse
+        val linkSignupMode = when {
+            // If signup toggle enabled, we show a future usage + link combined toggle
+            signupToggleEnabled && !linkConfiguration.customerInfo.email.isNullOrBlank() -> {
+                LinkSignupMode.InsteadOfSaveForFutureUse
+            }
+            // If inline signup is disabled or user has used Link, we don't show inline signup
+            linkSignUpDisabled || hasUsedLink -> null
+            // If inline signup and save for future use, we show it alongside save for future use
+            isSaveForFutureUseValueChangeable -> LinkSignupMode.AlongsideSaveForFutureUse
+            // If inline signup and save for future usage is not displayed, only show link signup
+            else -> LinkSignupMode.InsteadOfSaveForFutureUse
         }
 
         return LinkState(
@@ -594,6 +600,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             suppress2faModal = elementsSession.suppressLink2faModal,
             disableRuxInFlowController = elementsSession.disableRuxInFlowController,
             enableDisplayableDefaultValuesInEce = elementsSession.linkEnableDisplayableDefaultValuesInEce,
+            linkSignUpOptInFeatureEnabled = elementsSession.linkSignUpOptInFeatureEnabled,
+            linkSignUpOptInInitialValue = elementsSession.linkSignUpOptInInitialValue,
             elementsSessionId = elementsSession.elementsSessionId,
             initializationMode = initializationMode,
             linkMode = elementsSession.linkSettings?.linkMode,

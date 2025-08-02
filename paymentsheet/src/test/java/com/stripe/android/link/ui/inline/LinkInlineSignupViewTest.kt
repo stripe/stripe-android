@@ -156,6 +156,7 @@ internal class LinkInlineSignupViewTest {
                     expanded,
                     requiresNameCollection,
                     allowsDefaultOptIn,
+                    linkSignUpOptInFeatureEnabled = false,
                     didAskToChangeSignupDetails,
                     errorMessage,
                     toggleExpanded,
