@@ -389,7 +389,7 @@ class ShippingInfoWidget @JvmOverloads constructor(
 
         postalCodeEditText.setErrorMessage(
             resources.getString(
-                R.string.stripe_address_postal_code_invalid
+                UiCoreR.string.stripe_address_postal_code_invalid
             )
         )
         stateEditText.setErrorMessage(
@@ -425,7 +425,7 @@ class ShippingInfoWidget @JvmOverloads constructor(
 
         postalCodeEditText.setErrorMessage(
             resources.getString(
-                UiCoreR.string.stripe_address_zip_postal_invalid
+                UiCoreR.string.stripe_address_zip_or_postal_invalid
             )
         )
         stateEditText.setErrorMessage(
