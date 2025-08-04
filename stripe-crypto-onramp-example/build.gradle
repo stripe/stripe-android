@@ -1,0 +1,82 @@
+apply from: configs.androidApplication
+
+apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
+
+android {
+    defaultConfig {
+        applicationId "com.stripe.android.crypto.onramp.example"
+        versionCode 11
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField "boolean", "IS_RUNNING_IN_CI", "$gradle.ext.isCi"
+        buildConfigField "boolean", "IS_NIGHTLY_BUILD", "$gradle.ext.isNightlyBuild"
+        buildConfigField "boolean", "IS_BROWSERSTACK_BUILD", "$gradle.ext.isBrowserstackBuild"
+    }
+
+    buildFeatures {
+        viewBinding true
+        compose true
+    }
+}
+
+dependencies {
+    implementation project(':stripe-crypto-onramp')
+    implementation project(':payments')
+
+    implementation libs.androidx.activity
+    implementation libs.androidx.appCompat
+    implementation libs.androidx.constraintLayout
+    implementation libs.androidx.coreKtx
+    implementation libs.androidx.liveDataKtx
+    implementation libs.androidx.navigationFragment
+    implementation libs.androidx.navigationUi
+    implementation libs.androidx.preference
+    implementation libs.androidx.viewModel
+    implementation libs.compose.activity
+    implementation libs.compose.foundation
+    implementation libs.compose.liveData
+    implementation libs.compose.material
+    implementation libs.compose.materialIcons
+    implementation libs.compose.materialIconsExtended
+    implementation libs.compose.ui
+    implementation libs.compose.uiTooling
+    implementation libs.compose.viewModels
+
+    implementation libs.fuel
+    implementation libs.kotlin.serialization
+    implementation libs.loggingInterceptor
+    implementation libs.material
+    implementation libs.okio
+    implementation libs.places
+    implementation libs.retrofitKotlinSerializationConverter
+
+    androidTestImplementation project(':payments-ui-core')
+    androidTestImplementation project(':payments-core-testing')
+    androidTestImplementation libs.playServicesWallet
+    androidTestImplementation testLibs.androidx.archCore
+    androidTestImplementation testLibs.androidx.composeUi
+    androidTestImplementation testLibs.androidx.core
+    androidTestImplementation testLibs.androidx.coreKtx
+    androidTestImplementation testLibs.androidx.junit
+    androidTestImplementation testLibs.androidx.testRules
+    androidTestImplementation testLibs.androidx.testRunner
+    androidTestImplementation testLibs.androidx.truth
+    androidTestImplementation testLibs.androidx.uiAutomator
+    androidTestImplementation(testLibs.espresso.accessibility) {
+        exclude group: 'org.checkerframework', module: 'checker'
+    }
+    androidTestImplementation(testLibs.espresso.contrib) {
+        exclude group: 'org.checkerframework', module: 'checker'
+    }
+    androidTestImplementation testLibs.espresso.core
+    androidTestImplementation testLibs.espresso.intents
+    androidTestImplementation testLibs.espresso.web
+    androidTestImplementation testLibs.leakCanaryInstrumentation
+    androidTestImplementation testLibs.truth
+
+    debugImplementation libs.compose.uiTestManifest
+    debugImplementation libs.leakCanary
+}
