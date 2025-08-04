@@ -36,6 +36,7 @@ internal class FakeVerticalModeFormInteractor private constructor(
             val uiDefinitionArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 linkConfigurationCoordinator = null,
+                linkInlineHandler = null,
                 onLinkInlineSignupStateChanged = { throw AssertionError("Not expected") },
                 autocompleteAddressInteractorFactory = null,
             )

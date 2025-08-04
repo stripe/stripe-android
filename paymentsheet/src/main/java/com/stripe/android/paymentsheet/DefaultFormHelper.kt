@@ -150,6 +150,7 @@ internal class DefaultFormHelper(
             uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
                 cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
                 linkConfigurationCoordinator = linkConfigurationCoordinator,
+                linkInlineHandler = linkInlineHandler,
                 onLinkInlineSignupStateChanged = linkInlineHandler::onStateUpdated,
                 paymentMethodCreateParams = currentSelection?.getPaymentMethodCreateParams(),
                 paymentMethodOptionsParams = currentSelection?.getPaymentMethodOptionParams(),

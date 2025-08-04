@@ -11,6 +11,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.confirmation.createPaymentMethodCreateParams
+import com.stripe.android.link.utils.toConsumerBillingAddress
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams.Card.Companion.extraConfirmationParams
@@ -118,8 +119,8 @@ internal class LinkApiRepository @Inject constructor(
 
     override suspend fun consumerSignUp(
         email: String,
-        phone: String,
-        country: String,
+        phone: String?,
+        country: String?,
         name: String?,
         consentAction: ConsumerSignUpConsentAction
     ): Result<ConsumerSessionSignup> = withContext(workContext) {
@@ -249,24 +250,29 @@ internal class LinkApiRepository @Inject constructor(
             mapOf("billing_phone" to it)
         } ?: emptyMap()
 
+        val paymentMethodParams = mapOf("expand" to listOf("payment_method"))
+
         stripeRepository.sharePaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             id = id,
             extraParams = mapOf(
                 "payment_method_options" to extraConfirmationParams(paymentMethodCreateParams.toParamMap()),
-            ) + allowRedisplay + billingPhone,
+            ) + allowRedisplay + billingPhone + paymentMethodParams,
             requestOptions = buildRequestOptions(),
         ).onFailure {
             errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_SHARE_CARD_FAILURE, StripeException.create(it))
-        }.map { passthroughModePaymentMethodId ->
+        }.map { paymentMethod ->
+            val paymentMethodId = requireNotNull(paymentMethod.id)
             LinkPaymentDetails.Saved(
                 paymentDetails = ConsumerPaymentDetails.Passthrough(
                     id = id,
                     last4 = paymentMethodCreateParams.cardLast4().orEmpty(),
-                    paymentMethodId = passthroughModePaymentMethodId,
+                    paymentMethodId = paymentMethodId,
+                    billingEmailAddress = paymentMethod.billingDetails?.email,
+                    billingAddress = paymentMethod.billingDetails?.toConsumerBillingAddress(),
                 ),
                 paymentMethodCreateParams = PaymentMethodCreateParams.createLink(
-                    paymentDetailsId = passthroughModePaymentMethodId,
+                    paymentDetailsId = paymentMethodId,
                     consumerSessionClientSecret = consumerSessionClientSecret,
                     extraParams = extraConfirmationParams(paymentMethodCreateParams.toParamMap())
                 ),
@@ -306,6 +312,7 @@ internal class LinkApiRepository @Inject constructor(
             selectedPaymentDetails = paymentMethod.details,
             consumerSessionClientSecret = consumerSessionClientSecret,
             cvc = paymentMethod.collectedCvc,
+            billingPhone = paymentMethod.billingPhone,
         )
         stripeRepository.createPaymentMethod(
             paymentMethodCreateParams = params,

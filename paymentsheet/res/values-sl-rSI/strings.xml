@@ -45,8 +45,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up">Strinjam se in nadaljuj</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">Hitra in varna izvedba plačila z enim klikom</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">Hitra in varna izvedba plačil</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Shranite svoje podatke o plačilu v storitev Link za varno izvedbo plačila z enim klikom na spletnih mestih, ki podpirajo Link.</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">Plačujte hitreje povsod, kjer je sprejeta storitev Link.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Če nadaljujete postopek, se strinjate s <terms>pogoji</terms> in <privacy>pravilnikom o zasebnosti</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -105,6 +109,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Podrobnosti kartice ni mogoče spremeniti.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">S posredovanjem podatkov o svoji kartici dovoljujete, da %s bremeni vašo kartico za prihodnja plačila v skladu z njihovimi pogoji.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Z nadaljevanjem se strinjate, da se vaši podatki shranijo za prihodnje nakupe pri %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Z nadaljevanjem se strinjate, da se vaši podatki shranijo za prihodnje nakupe pri %s in <link>Link</link>. Strinjate se tudi s <terms>Pogoji</terms> in <privacy>Politiko zasebnosti</privacy> Link.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Kartica ni bila posodobljena. Poskusite znova.</string>
   <!-- Title shown above a carousel containing available payment methods -->

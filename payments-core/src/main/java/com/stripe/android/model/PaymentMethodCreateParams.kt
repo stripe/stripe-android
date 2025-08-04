@@ -1337,6 +1337,7 @@ constructor(
         fun createLink(
             paymentDetailsId: String,
             consumerSessionClientSecret: String,
+            billingDetails: PaymentMethod.BillingDetails? = null,
             extraParams: Map<String, @RawValue Any>? = null,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
@@ -1348,6 +1349,7 @@ constructor(
                     extraParams = extraParams
                 ),
                 allowRedisplay = allowRedisplay,
+                billingDetails = billingDetails,
             )
         }
 

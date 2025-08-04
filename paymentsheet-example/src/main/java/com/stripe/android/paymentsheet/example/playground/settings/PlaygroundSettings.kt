@@ -534,6 +534,10 @@ internal class PlaygroundSettings private constructor(
             ),
             ShopPaySettingsDefinition,
             LinkControllerAllowUserEmailEditsSettingsDefinition,
+            FeatureFlagSettingsDefinition(
+                FeatureFlags.forceEnableLinkPaymentSelectionHint,
+                listOf(PlaygroundConfigurationData.IntegrationType.LinkController)
+            ),
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(

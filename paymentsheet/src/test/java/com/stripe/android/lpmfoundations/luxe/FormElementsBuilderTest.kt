@@ -175,6 +175,7 @@ class FormElementsBuilderTest {
             cardBrandFilter = DefaultCardBrandFilter,
             setAsDefaultMatchesSaveForFutureUse = false,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+            linkInlineHandler = null,
         )
     }
 }

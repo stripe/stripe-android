@@ -69,7 +69,6 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
             updateState { it.copy(verificationState = VerificationState.RenderButton) }
             return
         }
-
         updateState { it.copy(verificationState = linkAccount.initial2FAState(linkConfiguration)) }
         observeOtp(linkAccountManager)
         startVerification()
@@ -120,7 +119,9 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
             }
     }
 
-    private fun LinkAccount.initial2FAState(linkConfiguration: LinkConfiguration) = Render2FA(
+    private fun LinkAccount.initial2FAState(
+        linkConfiguration: LinkConfiguration
+    ) = Render2FA(
         linkConfiguration = linkConfiguration,
         viewState = VerificationViewState(
             email = email,

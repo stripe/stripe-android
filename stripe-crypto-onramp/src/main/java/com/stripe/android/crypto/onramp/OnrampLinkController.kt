@@ -8,7 +8,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.viewmodels.OnrampCoordinatorViewModel
 import com.stripe.android.link.LinkController
-import com.stripe.android.model.ConsumerSignUpConsentAction
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -69,7 +68,6 @@ internal class OnrampLinkController @Inject constructor(
             phone = info.phone,
             country = info.country,
             name = info.fullName,
-            consentAction = ConsumerSignUpConsentAction.Implied
         )
     }
 }

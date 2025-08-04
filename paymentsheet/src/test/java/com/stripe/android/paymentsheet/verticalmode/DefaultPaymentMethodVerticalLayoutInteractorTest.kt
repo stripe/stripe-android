@@ -5,6 +5,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
@@ -481,7 +482,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         canShowWalletsInline = false,
     ) {
         walletsState.value = WalletsState(
-            link = WalletsState.Link("email@email.com"),
+            link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
             googlePay = WalletsState.GooglePay(
                 buttonType = GooglePayButtonType.Pay,
                 allowCreditCards = true,
@@ -512,7 +513,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         canShowWalletsInline = true,
     ) {
         walletsState.value = WalletsState(
-            link = WalletsState.Link("email@email.com"),
+            link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
             googlePay = WalletsState.GooglePay(
                 buttonType = GooglePayButtonType.Pay,
                 allowCreditCards = true,
@@ -545,7 +546,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             canShowWalletsInline = true,
         ) {
             walletsState.value = WalletsState(
-                link = WalletsState.Link("email@email.com"),
+                link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
                 googlePay = WalletsState.GooglePay(
                     buttonType = GooglePayButtonType.Pay,
                     allowCreditCards = true,
@@ -614,7 +615,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         canShowWalletsInline = true,
     ) {
         walletsState.value = WalletsState(
-            link = WalletsState.Link("email@email.com"),
+            link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
             googlePay = null,
             buttonsEnabled = true,
             dividerTextResource = 0,
@@ -675,7 +676,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         canShowWalletButtons = false,
     ) {
         walletsState.value = WalletsState(
-            link = WalletsState.Link("email@email.com"),
+            link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
             googlePay = null,
             buttonsEnabled = true,
             dividerTextResource = 0,
@@ -761,6 +762,52 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             interactor.handleViewAction(ViewAction.PaymentMethodSelected("cashapp"))
             assertThat(onFormFieldValuesChangedCalled).isTrue()
             assertThat(reportedSelectedPaymentMethodType).isEqualTo("cashapp")
+        }
+    }
+
+    @Test
+    fun handleViewAction_PaymentMethodSelected_launchesFormWhenDisplaysMandatesInFormScreen() {
+        var reportFormShownCalled = false
+        runScenario(
+            reportPaymentMethodTypeSelected = {},
+            reportFormShown = {
+                reportFormShownCalled = true
+            },
+            transitionToFormScreen = {},
+            invokeRowSelectionCallback = { /* Shouldn't be null to match production behavior */ },
+            formTypeForCode = { FormHelper.FormType.MandateOnly("This is a fake mandate".resolvableString) },
+            displaysMandatesInFormScreen = true,
+        ) {
+            interactor.state.test {
+                assertThat(awaitItem().mandate).isNull()
+                interactor.handleViewAction(ViewAction.PaymentMethodSelected("cashapp"))
+                assertThat(reportFormShownCalled).isTrue()
+            }
+        }
+    }
+
+    @Test
+    fun handleViewAction_PaymentMethodSelected_doesNotLaunchFormWhenMandateDoesNotExist() {
+        var onFormFieldValuesChangedCalled = false
+        runScenario(
+            reportPaymentMethodTypeSelected = {},
+            invokeRowSelectionCallback = { /* Shouldn't be null to match production behavior */ },
+            formTypeForCode = { FormHelper.FormType.Empty },
+            displaysMandatesInFormScreen = true,
+            onFormFieldValuesChanged = { fieldValues, selectedPaymentMethodCode ->
+                fieldValues.run {
+                    assertThat(fieldValuePairs).isEmpty()
+                    assertThat(userRequestedReuse).isEqualTo(PaymentSelection.CustomerRequestedSave.NoRequest)
+                }
+                assertThat(selectedPaymentMethodCode).isEqualTo("cashapp")
+                onFormFieldValuesChangedCalled = true
+            },
+        ) {
+            interactor.state.test {
+                assertThat(awaitItem().selection).isNull()
+                interactor.handleViewAction(ViewAction.PaymentMethodSelected("cashapp"))
+                assertThat(onFormFieldValuesChangedCalled).isTrue()
+            }
         }
     }
 
@@ -1473,7 +1520,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
 
     private val linkAndGooglePayWalletState = WalletsState(
-        link = WalletsState.Link("email@email.com"),
+        link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
         googlePay = WalletsState.GooglePay(
             buttonType = GooglePayButtonType.Pay,
             allowCreditCards = true,
@@ -1524,6 +1571,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         },
         invokeRowSelectionCallback: (() -> Unit)? = null,
         initialWalletsState: WalletsState? = null,
+        displaysMandatesInFormScreen: Boolean = false,
         testBlock: suspend TestParams.() -> Unit
     ) {
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(initialProcessing)
@@ -1569,6 +1617,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             dispatcher = UnconfinedTestDispatcher(),
             mainDispatcher = UnconfinedTestDispatcher(),
             invokeRowSelectionCallback = invokeRowSelectionCallback,
+            displaysMandatesInFormScreen = displaysMandatesInFormScreen,
         )
 
         TestParams(

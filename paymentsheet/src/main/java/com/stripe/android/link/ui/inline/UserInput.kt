@@ -21,8 +21,8 @@ internal sealed class UserInput : Parcelable {
     @Parcelize
     data class SignUp(
         val email: String,
-        val phone: String,
-        val country: String,
+        val phone: String?,
+        val country: String?,
         val name: String?,
         val consentAction: SignUpConsentAction
     ) : UserInput()

@@ -45,8 +45,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up">Súhlasiť a pokračovať</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">Rýchla, bezpečná platba jedným kliknutím</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">Rýchla, bezpečná platba</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Uložte si svoje platobné údaje pomocou služby Link a bezpečne plaťte jedným kliknutím na stránkach podporovaných službou Link.</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">Plaťte rýchlejšie všade tam, kde je akceptovaná služba Link.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Pokračovaním súhlasíte s <terms>podmienkami</terms> a <privacy>zásadami ochrany osobných údajov</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -105,6 +109,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Informácie o karte nie je možné meniť.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Poskytnutím informácií o karte povolíte spoločnosti %s účtovať na vašej karte budúce platby v súlade s ich podmienkami.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Pokračovaním súhlasíte s uložením svojich údajov pre budúce nákupy v spoločnosti %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Pokračovaním súhlasíte s uložením svojich údajov pre budúce nákupy v spoločnosti %s a <link>službe Link</link>Súhlasíte aj s <terms>podmienkami</terms> a <privacy>zásadami ochrany osobných údajov</privacy> služby Link.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Karta nebola aktualizovaná. Skúste to znova.</string>
   <!-- Title shown above a carousel containing available payment methods -->

@@ -45,8 +45,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up">Confirmare și continuare</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">Finalizare a comenzii sigură și rapidă cu un singur clic</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">Finalizare comandă rapidă și sigură</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Salvați-vă informațiile privind plata cu Link și finalizați comanda în siguranță cu un singur clic pe site-urile acceptate de Link.</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">Plătiți mai repede oriunde este acceptat Link.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Continuând, sunteți de acord cu <terms>Termenii</terms> și <privacy>Politica de confidențialitate</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -105,6 +109,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Detaliile cardului nu pot fi modificate.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Prin furnizarea informațiilor despre cardul dvs., permiteți %s să vă taxeze cardul pentru plățile viitoare în conformitate cu termenii acesteia.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Continuând, sunteți de acord să vă salvați informațiile pentru achiziții viitoare cu %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Continuând, sunteți de acord să vă salvați informațiile pentru achiziții viitoare cu %s și <link>Link</link>. De asemenea, sunteți de acord cu <terms>Termenii</terms> și <privacy>Confidențialitatea</privacy> Link.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Cardul nu a fost actualizat. Te rugăm să încerci din nou.</string>
   <!-- Title shown above a carousel containing available payment methods -->

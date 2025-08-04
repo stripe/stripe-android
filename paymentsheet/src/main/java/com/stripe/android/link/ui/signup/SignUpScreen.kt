@@ -95,7 +95,7 @@ internal fun SignUpBody(
 
     ScrollableTopLevelColumn {
         Text(
-            text = stringResource(R.string.stripe_link_sign_up_header),
+            text = stringResource(R.string.stripe_link_sign_up_header_v2),
             modifier = Modifier
                 .testTag(SIGN_UP_HEADER_TAG)
                 .padding(vertical = 4.dp),
@@ -104,7 +104,7 @@ internal fun SignUpBody(
             color = LinkTheme.colors.textPrimary
         )
         Text(
-            text = stringResource(R.string.stripe_link_sign_up_message),
+            text = stringResource(R.string.stripe_link_sign_up_message_v2),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 4.dp, bottom = 30.dp),

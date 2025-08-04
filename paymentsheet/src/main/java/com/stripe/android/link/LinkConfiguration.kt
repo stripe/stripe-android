@@ -36,12 +36,17 @@ internal data class LinkConfiguration(
     val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
     val allowUserEmailEdits: Boolean,
     val enableDisplayableDefaultValuesInEce: Boolean,
-    private val customerId: String?,
     val linkAppearance: LinkAppearance?
+    val linkSignUpOptInFeatureEnabled: Boolean,
+    val linkSignUpOptInIni stialValue: Boolean,
+    private val customerId: String?
 ) : Parcelable {
 
     val customerIdForEceDefaultValues: String?
         get() = if (enableDisplayableDefaultValuesInEce) customerId else null
+
+    val enableLinkPaymentSelectionHint: Boolean
+        get() = flags["link_mobile_enable_payment_selection_hint"] == true
 
     @Parcelize
     data class CustomerInfo(

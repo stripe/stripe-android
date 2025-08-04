@@ -1334,7 +1334,8 @@ internal class PaymentMethodMetadataTest {
             elementsSessionId = "session_1234",
             flags = emptyMap(),
             orderedPaymentMethodTypesAndWallets = orderedPaymentMethodTypesAndWallets,
-            experimentsData = null
+            experimentsData = null,
+            passiveCaptcha = null
         )
     }
 
@@ -1965,8 +1966,10 @@ internal class PaymentMethodMetadataTest {
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             allowUserEmailEdits = true,
             enableDisplayableDefaultValuesInEce = false,
-            customerId = null,
             linkAppearance = null
+            linkSignUpOptInFeatureEnabled = false,
+            linkSignUpOptInInitialValue = false,
+            customerId = null
         )
     }
 

@@ -460,6 +460,7 @@ internal class CustomerSheetViewModel(
                          * `CustomerSheet` does not implement `Link` so we don't need a coordinator or callback.
                          */
                         linkConfigurationCoordinator = null,
+                        linkInlineHandler = null,
                         onLinkInlineSignupStateChanged = {
                             throw IllegalStateException(
                                 "`CustomerSheet` does not implement `Link` and should not " +
@@ -806,6 +807,7 @@ internal class CustomerSheetViewModel(
                  * `CustomerSheet` does not implement `Link` so we don't need a coordinator or callback.
                  */
                 linkConfigurationCoordinator = null,
+                linkInlineHandler = null,
                 onLinkInlineSignupStateChanged = {
                     throw IllegalStateException(
                         "`CustomerSheet` does not implement `Link` and should not " +

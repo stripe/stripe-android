@@ -2,14 +2,17 @@ package com.stripe.android.link.confirmation
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.model.Address
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -70,7 +73,13 @@ internal class DefaultLinkConfirmationHandlerTest {
             configuration = configuration,
             linkAccount = TestFactory.LINK_ACCOUNT,
             paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
-            cvc = CVC
+            cvc = CVC,
+            billingDetails = PaymentMethod.BillingDetails(
+                address = Address(
+                    postalCode = "12312",
+                    country = "US",
+                ),
+            ),
         )
     }
 
@@ -104,7 +113,13 @@ internal class DefaultLinkConfirmationHandlerTest {
             configuration = configuration,
             linkAccount = TestFactory.LINK_ACCOUNT,
             paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
-            cvc = null
+            cvc = null,
+            billingDetails = PaymentMethod.BillingDetails(
+                address = Address(
+                    postalCode = "12312",
+                    country = "US",
+                ),
+            ),
         )
     }
 
@@ -212,7 +227,13 @@ internal class DefaultLinkConfirmationHandlerTest {
             configuration = configuration,
             linkAccount = TestFactory.LINK_ACCOUNT,
             paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
-            cvc = CVC
+            cvc = CVC,
+            billingDetails = PaymentMethod.BillingDetails(
+                address = Address(
+                    postalCode = "12312",
+                    country = "US",
+                ),
+            ),
         )
     }
 
@@ -429,11 +450,72 @@ internal class DefaultLinkConfirmationHandlerTest {
             assertThat(option.expectedPaymentMethodType).isEqualTo(ConsumerPaymentDetails.Card.TYPE)
         }
 
+    @Test
+    fun `confirm with passthrough payment details in payment method mode includes billing details`() =
+        runTest(dispatcher) {
+            val configuration = TestFactory.LINK_CONFIGURATION.copy(passthroughModeEnabled = false)
+            val confirmationHandler = FakeConfirmationHandler()
+            val handler = createHandler(
+                confirmationHandler = confirmationHandler,
+                configuration = configuration
+            )
+
+            confirmationHandler.awaitResultTurbine.add(
+                item = ConfirmationHandler.Result.Succeeded(
+                    intent = configuration.stripeIntent,
+                    deferredIntentConfirmationType = null
+                )
+            )
+
+            val passthroughDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH.copy(
+                billingEmailAddress = "john@doe.com",
+                billingAddress = ConsumerPaymentDetails.BillingAddress(
+                    name = "John Doe",
+                    line1 = "123 Main Street",
+                    line2 = null,
+                    postalCode = "12345",
+                    locality = "Smalltown",
+                    administrativeArea = "CA",
+                    countryCode = CountryCode.US,
+                )
+            )
+
+            val result = handler.confirm(
+                paymentDetails = passthroughDetails,
+                linkAccount = TestFactory.LINK_ACCOUNT,
+                cvc = null,
+                billingPhone = "+15555555555",
+            )
+
+            assertThat(result).isEqualTo(Result.Succeeded)
+
+            val args = confirmationHandler.startTurbine.awaitItem()
+            assertThat(args.intent).isEqualTo(configuration.stripeIntent)
+
+            val option = args.confirmationOption as PaymentMethodConfirmationOption.New
+            assertThat(option.createParams.billingDetails).isEqualTo(
+                PaymentMethod.BillingDetails(
+                    address = Address(
+                        line1 = "123 Main Street",
+                        line2 = null,
+                        postalCode = "12345",
+                        city = "Smalltown",
+                        state = "CA",
+                        country = "US",
+                    ),
+                    email = "john@doe.com",
+                    name = "John Doe",
+                    phone = "+15555555555",
+                )
+            )
+        }
+
     private fun ConfirmationHandler.Args.assertConfirmationArgs(
         configuration: LinkConfiguration,
         paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         linkAccount: LinkAccount,
         cvc: String?,
+        billingDetails: PaymentMethod.BillingDetails?,
     ) {
         assertThat(intent).isEqualTo(configuration.stripeIntent)
         val option = confirmationOption as PaymentMethodConfirmationOption.New
@@ -442,6 +524,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                 paymentDetailsId = paymentDetails.id,
                 consumerSessionClientSecret = linkAccount.clientSecret,
                 extraParams = cvc?.let { mapOf("card" to mapOf("cvc" to cvc)) },
+                billingDetails = billingDetails,
             )
         )
         assertThat(shippingDetails).isEqualTo(configuration.shippingDetails)

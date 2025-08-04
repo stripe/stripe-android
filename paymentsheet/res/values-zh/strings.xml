@@ -45,8 +45,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up">同意并继续</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">快速安全地一键结账</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">快速、安全的结账</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">用 Link 保存您的支付信息，并在支持 Link 的网站上一键安全结账。</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">在接受 Link 的任何地方更快支付。</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[继续即表示您同意<terms>条款</terms>和<privacy>隐私政策</privacy>。]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -105,6 +109,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">无法更改银行卡详情。</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">提供您的银行卡信息，即表示您允许 %s 按照他们的条款从您的银行卡收取未来款项。</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">继续操作则表示您同意保存您的信息，以便将来在%s购物。</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[继续操作则表示您同意保存您的信息，以便将来在%s购物以及 <link>使用 Link</link>您也同意遵守 Link 的<terms>条款</terms>和<privacy>隐私政策</privacy>。]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">卡未更新，请重试。</string>
   <!-- Title shown above a carousel containing available payment methods -->

@@ -40,8 +40,12 @@
   <string name="stripe_address_label_suburb">Suburbie</string>
   <!-- Used to describe an address field. -->
   <string name="stripe_address_label_village_township">Sat sau comună</string>
+  <!-- Error message for when postal code in form is incomplete -->
+  <string name="stripe_address_postal_code_incomplete">Codul dvs. poștal nu este complet.</string>
   <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
   <string name="stripe_address_search_content_description">Căutare</string>
+  <!-- Error message for when ZIP code in form is incomplete (US only) -->
+  <string name="stripe_address_zip_incomplete">Codul dvs. poștal este incomplet.</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
   <string name="stripe_address_zip_invalid">Codul dvs. poștal nu este valid.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->

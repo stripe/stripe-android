@@ -30,6 +30,9 @@ class LinkController @Inject internal constructor(
 ) {
     val state: StateFlow<State> = viewModel.state(activity)
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    var paymentSelectionHint: String? = null
+
     /**
      * Configure the controller with a [Configuration].
      *
@@ -58,7 +61,8 @@ class LinkController @Inject internal constructor(
     fun presentPaymentMethods(email: String?) {
         viewModel.onPresentPaymentMethods(
             launcher = linkControllerCoordinator.linkActivityResultLauncher,
-            email = email
+            email = email,
+            hint = paymentSelectionHint,
         )
     }
 
@@ -146,7 +150,6 @@ class LinkController @Inject internal constructor(
      * @param phone The phone number associated with the new account.
      * @param country The country code for the new account, in ISO 3166-1 alpha-2 format.
      * @param name The name of the consumer. Optional, can be null.
-     * @param consentAction How the user provided consent for the Link account.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun registerConsumer(
@@ -154,14 +157,12 @@ class LinkController @Inject internal constructor(
         phone: String,
         country: String,
         name: String?,
-        consentAction: ConsumerSignUpConsentAction
     ) {
         viewModel.onRegisterConsumer(
             email = email,
             phone = phone,
             country = country,
             name = name,
-            consentAction = consentAction
         )
     }
 
