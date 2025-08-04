@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 @LinkControllerPresenterScope
 internal class LinkControllerCoordinator @Inject constructor(
-    private val viewModel: LinkControllerInteractor,
+    private val interactor: LinkControllerInteractor,
     private val lifecycleOwner: LifecycleOwner,
     activityResultRegistryOwner: ActivityResultRegistryOwner,
     linkActivityContract: NativeLinkActivityContract,
@@ -29,17 +29,17 @@ internal class LinkControllerCoordinator @Inject constructor(
             key = "LinkController_LinkActivityResultLauncher",
             contract = linkActivityContract,
         ) { result ->
-            viewModel.onLinkActivityResult(result)
+            interactor.onLinkActivityResult(result)
         }
 
         lifecycleOwner.lifecycleScope.launch {
             lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    viewModel.presentPaymentMethodsResultFlow
+                    interactor.presentPaymentMethodsResultFlow
                         .collect(selectedPaymentMethodCallback::onPresentPaymentMethodsResult)
                 }
                 launch {
-                    viewModel.authenticationResultFlow
+                    interactor.authenticationResultFlow
                         .collect(authenticationCallback::onAuthenticationResult)
                 }
             }

@@ -2,8 +2,10 @@ package com.stripe.android.paymentsheet.example.playground
 
 import android.app.Application
 import android.util.Patterns
+import androidx.activity.ComponentActivity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.link.LinkController
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,27 +17,46 @@ internal class LinkControllerPlaygroundViewModel(
     savedStateHandle: SavedStateHandle,
 ) : AndroidViewModel(application) {
 
-    val linkController = LinkController.create(application, savedStateHandle)
+    private val linkController = LinkController.create(application, savedStateHandle)
+    private var linkControllerPresenter: LinkController.Presenter? = null
 
     val status = MutableStateFlow<StatusMessage?>(null)
-    val linkControllerState = MutableStateFlow(LinkControllerPlaygroundState())
+
+    val state = MutableStateFlow(LinkControllerPlaygroundState())
+
+    fun onCreateActivity(activity: ComponentActivity) {
+        linkControllerPresenter = linkController.createPresenter(
+            activity = activity,
+            presentPaymentMethodsCallback = this::onLinkControllerPresentPaymentMethod,
+            authenticationCallback = this::onLinkControllerAuthentication,
+        )
+        activity.lifecycleScope.launch {
+            linkController.state(activity).collect { controllerState ->
+                state.update { it.copy(controllerState = controllerState) }
+            }
+        }
+    }
+
+    fun onDestroyActivity() {
+        linkControllerPresenter = null
+    }
 
     fun configureLinkController(config: LinkController.Configuration) {
         viewModelScope.launch {
             val result = linkController.configure(config)
-            linkControllerState.update { it.copy(configureResult = result) }
+            state.update { it.copy(configureResult = result) }
         }
     }
 
-    fun onLinkControllerPresentPaymentMethod(result: LinkController.PresentPaymentMethodsResult) {
-        linkControllerState.update { it.copy(presentPaymentMethodsResult = result) }
+    private fun onLinkControllerPresentPaymentMethod(result: LinkController.PresentPaymentMethodsResult) {
+        state.update { it.copy(presentPaymentMethodsResult = result) }
     }
 
     fun onEmailChange(email: String) {
         viewModelScope.launch {
             if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                 val result = linkController.lookupConsumer(email)
-                linkControllerState.update { it.copy(lookupConsumerResult = result) }
+                state.update { it.copy(lookupConsumerResult = result) }
             }
         }
     }
@@ -48,18 +69,33 @@ internal class LinkControllerPlaygroundViewModel(
                 country = country,
                 name = name
             )
-            linkControllerState.update { it.copy(registerConsumerResult = result) }
+            state.update { it.copy(registerConsumerResult = result) }
         }
-    }
-
-    fun onLinkControllerAuthentication(result: LinkController.AuthenticationResult) {
-        linkControllerState.update { it.copy(authenticationResult = result) }
     }
 
     fun onCreatePaymentMethodClick() {
         viewModelScope.launch {
             val result = linkController.createPaymentMethod()
-            linkControllerState.update { it.copy(createPaymentMethodResult = result) }
+            state.update { it.copy(createPaymentMethodResult = result) }
         }
+    }
+
+    fun onPaymentMethodClick(email: String) {
+        linkControllerPresenter?.paymentSelectionHint =
+            "Lorem ipsum dolor sit amet consectetur adipiscing elit."
+        linkControllerPresenter?.presentPaymentMethods(email = email.takeIf { it.isNotBlank() })
+    }
+
+    fun onAuthenticateClick(email: String, existingOnly: Boolean) {
+        val cleanedEmail = email.takeIf { it.isNotBlank() } ?: ""
+        if (existingOnly) {
+            linkControllerPresenter?.authenticateExistingConsumer(cleanedEmail)
+        } else {
+            linkControllerPresenter?.authenticate(cleanedEmail)
+        }
+    }
+
+    private fun onLinkControllerAuthentication(result: LinkController.AuthenticationResult) {
+        state.update { it.copy(authenticationResult = result) }
     }
 }

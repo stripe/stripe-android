@@ -59,7 +59,7 @@ internal class LinkControllerCoordinatorTest {
             override val activityResultRegistry = registry
         }
         return LinkControllerCoordinator(
-            viewModel = viewModel,
+            interactor = viewModel,
             lifecycleOwner = lifecycleOwner,
             activityResultRegistryOwner = activityResultRegistryOwner,
             linkActivityContract = linkActivityContract,

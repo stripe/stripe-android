@@ -42,7 +42,7 @@ internal class LinkControllerInteractor @Inject constructor(
     private val linkComponentBuilderProvider: Provider<LinkComponent.Builder>,
 ) {
 
-    private val tag = "LinkControllerViewModel"
+    private val tag = "LinkControllerViewInteractor"
 
     private val _account = linkAccountHolder.linkAccountInfo.mapAsStateFlow { it.account }
 

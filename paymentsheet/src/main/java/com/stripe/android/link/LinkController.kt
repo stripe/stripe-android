@@ -25,8 +25,11 @@ import javax.inject.Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class LinkController @Inject internal constructor(
     private val interactor: LinkControllerInteractor,
-    private val linkControllerPresenterComponentFactory: LinkControllerPresenterComponent.Factory
+    private val presenterComponentFactory: LinkControllerPresenterComponent.Factory
 ) {
+    /**
+     * The current [State] of the Link controller.
+     */
     fun state(context: Context): StateFlow<State> = interactor.state(context)
 
     /**
@@ -69,12 +72,19 @@ class LinkController @Inject internal constructor(
         return interactor.lookupConsumer(email)
     }
 
+    /**
+     * Creates a [Presenter] for the Link controller that can present user-interactive flows.
+     *
+     * @param activity The [ComponentActivity] that will host the Link UI.
+     * @param presentPaymentMethodsCallback Callback to receive results from presenting payment methods.
+     * @param authenticationCallback Callback to receive results from authentication flows.
+     */
     fun createPresenter(
         activity: ComponentActivity,
         presentPaymentMethodsCallback: PresentPaymentMethodsCallback,
         authenticationCallback: AuthenticationCallback,
     ): Presenter {
-        return linkControllerPresenterComponentFactory
+        return presenterComponentFactory
             .build(
                 activity = activity,
                 lifecycleOwner = activity,
@@ -237,9 +247,13 @@ class LinkController @Inject internal constructor(
             get() = internalLinkAccount?.sessionState?.let { it == SessionState.LoggedIn }
     }
 
+    /**
+     * A presenter for the Link controller that presents user-interactive flows.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Presenter @Inject internal constructor(
         private val linkControllerCoordinator: LinkControllerCoordinator,
-        private val viewModel: LinkControllerInteractor,
+        private val interactor: LinkControllerInteractor,
     ) {
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         var paymentSelectionHint: String? = null
@@ -258,12 +272,14 @@ class LinkController @Inject internal constructor(
          * If null, the user will need to sign in or create a Link account.
          */
         fun presentPaymentMethods(email: String?) {
-            viewModel.presentPaymentMethods(
+            interactor.presentPaymentMethods(
                 launcher = linkControllerCoordinator.linkActivityResultLauncher,
                 email = email,
                 hint = paymentSelectionHint,
             )
         }
+
+        // Crypto Onramp specific methods
 
         /**
          * [CRYPTO ONRAMP ONLY] Authenticate with Link.
@@ -281,7 +297,7 @@ class LinkController @Inject internal constructor(
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun authenticate(email: String?) {
-            viewModel.authenticate(
+            interactor.authenticate(
                 launcher = linkControllerCoordinator.linkActivityResultLauncher,
                 email = email
             )
@@ -306,7 +322,7 @@ class LinkController @Inject internal constructor(
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun authenticateExistingConsumer(email: String) {
-            viewModel.authenticateExistingConsumer(
+            interactor.authenticateExistingConsumer(
                 launcher = linkControllerCoordinator.linkActivityResultLauncher,
                 email = email
             )
@@ -462,7 +478,7 @@ class LinkController @Inject internal constructor(
     }
 
     /**
-     * Callback for receiving results from [presentPaymentMethods].
+     * Callback for receiving results from [Presenter.presentPaymentMethods].
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun interface PresentPaymentMethodsCallback {
@@ -470,7 +486,8 @@ class LinkController @Inject internal constructor(
     }
 
     /**
-     * [CRYPTO ONRAMP ONLY] Callback for receiving results from [authenticate] and [authenticateExistingConsumer].
+     * [CRYPTO ONRAMP ONLY] Callback for receiving results from [Presenter.authenticate] and
+     * [Presenter.authenticateExistingConsumer].
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun interface AuthenticationCallback {
