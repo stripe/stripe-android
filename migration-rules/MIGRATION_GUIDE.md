@@ -2,49 +2,26 @@
 
 Automated migration tool for upgrading from Stripe Android SDK v21+ to v25.
 
-## ⚡ TL;DR - Complete Workflow
+## ⚡ Complete Workflow
 
 ```bash
-# 1. Download migration tools
+# 1. Update your dependencies FIRST
+# In your build.gradle: implementation 'com.stripe:stripe-android:25.+'
+
+# 2. Download migration tools
 curl -L https://github.com/stripe/stripe-android/archive/master.zip -o stripe-android.zip
 unzip stripe-android.zip && cd stripe-android-master/migration-rules
 
-# 2. Run migration (automatically fixes your code!)
+# 3. Run migration (automatically fixes your code!)
 ./migrateToV25.sh /path/to/your-android-project
 
-# 3. Build and test your project
+# 4. Build and test your project
 ```
 
-## 🚀 Getting Started
-
-### Step 1: Download Migration Tools
-
-```bash
-# Download and extract migration tools
-curl -L https://github.com/stripe/stripe-android/archive/master.zip -o stripe-android.zip
-unzip stripe-android.zip
-cd stripe-android-master/migration-rules
-```
-
-### Step 2: Run Migration
-
-```bash
-# Run the migration script (replace with your project path)
-./migrateToV25.sh /path/to/your-android-project
-```
-
-**What this does:**
-- ✅ Copies migration tools to your project
-- ✅ Configures migration for your codebase
+**What the script does:**
+- ✅ Scans your project for v25 migration patterns  
 - ✅ **Automatically fixes your code** to use v25 APIs
-- ✅ Generates detailed reports
-
-### Step 3: Verify Migration
-
-1. **Build your project:** `./gradlew build`
-2. **Run tests:** `./gradlew test`
-3. **Review the report:** `your-project/migration-rules/build/reports/detekt/detekt.html`
-4. **Test key payment flows** in your app
+- ✅ Reports any issues that need manual review
 
 ## 📋 What Gets Migrated
 
@@ -83,17 +60,9 @@ Complex cases that require manual attention:
 - Dynamically constructed parameters
 - The tool will flag these in the report for manual review
 
-## 📚 Manual Migration Steps
+## 📚 Manual Review
 
-For changes not covered by the tool:
-
-### Update your dependencies
-```gradle
-implementation 'com.stripe:stripe-android:25.+'
-```
-
-### Review flagged items
-Check the HTML report for any items marked as "needs manual review" and update them according to the v25 migration guide.
+If the script reports issues that need manual attention, check the HTML report and update them according to the v25 migration guide.
 
 ## 🐛 Getting Help
 

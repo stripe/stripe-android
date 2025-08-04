@@ -23,23 +23,21 @@ if [ ! -f "$PROJECT_PATH/build.gradle" ]; then
     exit 1
 fi
 
-# Copy migration rules directory (this entire directory)
-echo "📁 Setting up migration tools..."
-cp -r "$SCRIPT_DIR" "$PROJECT_PATH/migration-rules"
-
-# Update the source path in build.gradle to point to the user's project
-echo "⚙️  Configuring migration..."
-sed -i.bak "s|setSource(files(\"\${projectDir}\"))|setSource(files(\"$PROJECT_PATH\"))|" "$PROJECT_PATH/migration-rules/build.gradle"
-
-# Run the migration
+# Run the migration from original location
 echo "🔍 Running migration (auto-fixing code)..."
-cd "$PROJECT_PATH/migration-rules"
-./gradlew migrateToV25
+cd "$SCRIPT_DIR"
+./gradlew detektMigration -PprojectPath="$PROJECT_PATH"
 
 echo ""
 echo "✅ Migration completed!"
 echo "📋 Your code has been automatically updated to v25 APIs"
-echo "📋 Check the migration report at:"
-echo "   $PROJECT_PATH/migration-rules/build/reports/detekt/detekt.html"
+
+# Only show report if there were issues that couldn't be auto-corrected
+if [ -s "$SCRIPT_DIR/build/reports/detekt/detekt.txt" ]; then
+    echo ""
+    echo "⚠️  Some issues need manual review:"
+    echo "   📄 Report: $SCRIPT_DIR/build/reports/detekt/detekt.html"
+fi
+
 echo ""
-echo "📖 See MIGRATION_GUIDE.md for verification steps"
+echo "📖 See MIGRATION_GUIDE.md for next steps"

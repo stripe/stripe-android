@@ -64,7 +64,11 @@ tasks.register('detektMigration', Detekt) {
     parallel = false  // Disable parallel execution to avoid concurrent modifications
     autoCorrect = true
     config.setFrom(files("config/detekt/migration.yml"))
-    setSource(files("${projectDir}"))
+    
+    // Accept project path as parameter, default to current directory
+    def targetProjectPath = project.hasProperty('projectPath') ? project.property('projectPath') : projectDir
+    setSource(files(targetProjectPath))
+    
     include("**/*.kt")
     exclude("**/build/**", "**/migration-rules/**")
 }
