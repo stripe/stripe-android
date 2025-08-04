@@ -38,6 +38,7 @@ import java.util.Optional
 import javax.inject.Provider
 import kotlin.jvm.optionals.getOrNull
 
+@Suppress("LargeClass")
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class LinkControllerInteractorTest {
