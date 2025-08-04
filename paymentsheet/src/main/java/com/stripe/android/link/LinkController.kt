@@ -48,11 +48,12 @@ class LinkController @Inject internal constructor(
      * Create a payment method from the currently selected Link payment method.
      *
      * This converts the selected Link payment method into a Stripe [PaymentMethod] that can be
-     * used for payment processing. The created payment method will be available in [State.createdPaymentMethod]
-     * and the result will be communicated through the [CreatePaymentMethodCallback].
+     * used for payment processing. The created payment method will be available in [State.createdPaymentMethod].
      *
-     * **Note**: This requires a payment method to be selected via [presentPaymentMethods] first,
+     * **Note**: This requires a payment method to be selected via [Presenter.presentPaymentMethods] first,
      * and a valid Link configuration and account. If these requirements are not met, the operation will fail.
+     *
+     * @return The result of the payment method creation.
      */
     suspend fun createPaymentMethod(): CreatePaymentMethodResult {
         return interactor.createPaymentMethod()
@@ -64,9 +65,8 @@ class LinkController @Inject internal constructor(
      * This is useful for determining whether to show Link-specific UI elements or messaging to the user
      * before they interact with Link payment methods.
      *
-     * The result will be communicated through the [LookupConsumerCallback] provided during controller creation.
-     *
      * @param email The email address to check for an existing Link consumer account.
+     * @return The result of the consumer lookup.
      */
     suspend fun lookupConsumer(email: String): LookupConsumerResult {
         return interactor.lookupConsumer(email)
@@ -248,7 +248,10 @@ class LinkController @Inject internal constructor(
     }
 
     /**
-     * A presenter for the Link controller that presents user-interactive flows.
+     * A presenter for the Link controller that handles UI operations requiring Activity context.
+     *
+     * The Presenter is tied to an Activity lifecycle and should be created and destroyed appropriately
+     * to avoid memory leaks.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Presenter @Inject internal constructor(
