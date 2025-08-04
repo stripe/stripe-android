@@ -225,7 +225,7 @@ internal object TestFactory {
         collectMissingBillingDetailsForExistingPaymentMethods = true,
         allowUserEmailEdits = true,
         enableDisplayableDefaultValuesInEce = false,
-        linkAppearance = null
+        linkAppearance = null,
         linkSignUpOptInFeatureEnabled = false,
         linkSignUpOptInInitialValue = false,
         customerId = null

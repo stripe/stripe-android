@@ -10,7 +10,6 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.link.injection.LinkControllerScope
 import com.stripe.android.link.model.LinkAppearance
-import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import dev.drewhamilton.poko.Poko

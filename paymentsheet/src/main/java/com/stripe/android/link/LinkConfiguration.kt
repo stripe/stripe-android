@@ -36,9 +36,9 @@ internal data class LinkConfiguration(
     val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
     val allowUserEmailEdits: Boolean,
     val enableDisplayableDefaultValuesInEce: Boolean,
-    val linkAppearance: LinkAppearance?
+    val linkAppearance: LinkAppearance?,
     val linkSignUpOptInFeatureEnabled: Boolean,
-    val linkSignUpOptInIni stialValue: Boolean,
+    val linkSignUpOptInInitialValue: Boolean,
     private val customerId: String?
 ) : Parcelable {
 
