@@ -73,6 +73,7 @@ internal class OnrampActivity : ComponentActivity() {
             paymentSheetAppearance = PaymentSheet.Appearance()
         )
 
+        @Suppress("MaxLineLength")
         PaymentConfiguration.init(
             application,
             "pk_test_51K9W3OHMaDsveWq0oLP0ZjldetyfHIqyJcz27k2BpMGHxu9v9Cei2tofzoHncPyk3A49jMkFEgTOBQyAMTUffRLa00xzzARtZO"
