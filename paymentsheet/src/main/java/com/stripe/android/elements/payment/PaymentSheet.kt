@@ -25,7 +25,6 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.DefaultPaymentSheetLauncher
 import com.stripe.android.paymentsheet.PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheetLauncher
-import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.internalRememberPaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import dev.drewhamilton.poko.Poko
@@ -43,7 +42,7 @@ class PaymentSheet internal constructor(
      *
      * @param resultCallback Called with the result of the payment after [PaymentSheet] is dismissed.
      */
-    class Builder(internal val resultCallback: PaymentSheetResultCallback) {
+    class Builder(internal val resultCallback: ResultCallback) {
         private val callbacksBuilder = PaymentElementCallbacks.Builder()
 
         /**
@@ -132,8 +131,8 @@ class PaymentSheet internal constructor(
     /**
      * Present [PaymentSheet] to process a [PaymentIntent].
      *
-     * If the [PaymentIntent] is already confirmed, [PaymentSheetResultCallback] will be invoked
-     * with [PaymentSheetResult.Completed].
+     * If the [PaymentIntent] is already confirmed, [ResultCallback] will be invoked
+     * with [Result.Completed].
      *
      * @param paymentIntentClientSecret The client secret of the [PaymentIntent].
      * @param configuration An optional [PaymentSheet] configuration.
@@ -152,8 +151,8 @@ class PaymentSheet internal constructor(
     /**
      * Present [PaymentSheet] to process a [SetupIntent].
      *
-     * If the [SetupIntent] is already confirmed, [PaymentSheetResultCallback] will be invoked
-     * with [PaymentSheetResult.Completed].
+     * If the [SetupIntent] is already confirmed, [ResultCallback] will be invoked
+     * with [Result.Completed].
      *
      * @param setupIntentClientSecret The client secret of the [SetupIntent].
      * @param configuration An optional [PaymentSheet] configuration.
@@ -675,6 +674,54 @@ class PaymentSheet internal constructor(
             @IgnoredOnParcel
             override val analyticsValue: String = "customer_session"
         }
+    }
+
+    /**
+     * The result of an attempt to confirm a [PaymentIntent] or [SetupIntent].
+     */
+    sealed class Result : Parcelable {
+
+        /**
+         * The customer completed the payment or setup.
+         * The payment may still be processing at this point; don't assume money has successfully moved.
+         *
+         * Your app should transition to a generic receipt view (e.g. a screen that displays "Your order
+         * is confirmed!"), and fulfill the order (e.g. ship the product to the customer) after
+         * receiving a successful payment event from Stripe.
+         *
+         * See [Stripe's documentation](https://stripe.com/docs/payments/handling-payment-events)
+         */
+        @Parcelize
+        @Poko
+        class Completed internal constructor(
+            @Suppress("unused") private val irrelevantValueForGeneratedCode: Boolean = true
+        ) : Result()
+
+        /**
+         * The customer canceled the payment or setup attempt.
+         */
+        @Parcelize
+        @Poko
+        class Canceled internal constructor(
+            @Suppress("unused") private val irrelevantValueForGeneratedCode: Boolean = true
+        ) : Result()
+
+        /**
+         * The payment or setup attempt failed.
+         * @param error The error encountered by the customer.
+         */
+        @Parcelize
+        @Poko
+        class Failed internal constructor(
+            val error: Throwable
+        ) : Result()
+    }
+
+    /**
+     * Callback that is invoked when a [Result] is available.
+     */
+    fun interface ResultCallback {
+        fun onPaymentSheetResult(paymentSheetResult: Result)
     }
 
     companion object {

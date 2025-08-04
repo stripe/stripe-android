@@ -13,8 +13,8 @@ import com.stripe.android.elements.payment.CreateIntentCallback
 import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
-import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.elements.payment.FlowController.PaymentOptionDisplayData
+import com.stripe.android.elements.payment.PaymentSheet
 import kotlinx.coroutines.test.runTest
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -44,7 +44,7 @@ internal class FlowControllerTestRunnerContext(
     }
 
     /**
-     * Normally we know a test succeeds when it calls [PaymentSheetResultCallback], but some tests
+     * Normally we know a test succeeds when it calls [PaymentSheet.ResultCallback], but some tests
      * succeed based on other criteria. In these cases, call this method to manually mark a test as
      * succeeded.
      */
@@ -60,7 +60,7 @@ internal fun runFlowControllerTest(
     callConfirmOnPaymentOptionCallback: Boolean = true,
     showWalletButtons: Boolean = false,
     builder: FlowController.Builder.() -> Unit = {},
-    resultCallback: PaymentSheetResultCallback,
+    resultCallback: PaymentSheet.ResultCallback,
     block: suspend (FlowControllerTestRunnerContext) -> Unit,
 ) {
     val countDownLatch = CountDownLatch(1)
@@ -128,7 +128,7 @@ internal fun runMultipleFlowControllerInstancesTest(
     testType: MultipleInstancesTestType,
     callConfirmOnPaymentOptionCallback: Boolean = true,
     createIntentCallback: CreateIntentCallback,
-    resultCallback: PaymentSheetResultCallback,
+    resultCallback: PaymentSheet.ResultCallback,
     block: suspend (FlowControllerTestRunnerContext) -> Unit,
 ) {
     var firstCreateIntentCallbackCalled = false

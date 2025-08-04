@@ -4,14 +4,14 @@ import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import app.cash.turbine.Turbine
 import com.stripe.android.elements.payment.FlowController
-import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.elements.payment.FlowController.PaymentOptionDisplayData
+import com.stripe.android.elements.payment.PaymentSheet
 
 internal class FlowControllerTestFactory(
     callConfirmOnPaymentOptionCallback: Boolean,
     builder: FlowController.Builder.() -> Unit,
     configureCallbackTurbine: Turbine<PaymentOptionDisplayData?>,
-    resultCallback: PaymentSheetResultCallback,
+    resultCallback: PaymentSheet.ResultCallback,
 ) {
     // Needs to be lateinit in order to reference in `paymentOptionCallback`
     private lateinit var flowController: FlowController

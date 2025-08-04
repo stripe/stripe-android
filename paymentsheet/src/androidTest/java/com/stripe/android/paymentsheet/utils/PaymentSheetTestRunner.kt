@@ -11,7 +11,6 @@ import com.stripe.android.elements.payment.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
-import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import kotlinx.coroutines.test.runTest
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -34,7 +33,7 @@ internal class PaymentSheetTestRunnerContext(
     }
 
     /**
-     * Normally we know a test succeeds when it calls [PaymentSheetResultCallback], but some tests
+     * Normally we know a test succeeds when it calls [PaymentSheet.ResultCallback], but some tests
      * succeed based on other criteria. In these cases, call this method to manually mark a test as
      * succeeded.
      */
@@ -48,7 +47,7 @@ internal fun runPaymentSheetTest(
     integrationType: IntegrationType = IntegrationType.Compose,
     builder: PaymentSheet.Builder.() -> Unit = {},
     successTimeoutSeconds: Long = 5L,
-    resultCallback: PaymentSheetResultCallback,
+    resultCallback: PaymentSheet.ResultCallback,
     block: suspend (PaymentSheetTestRunnerContext) -> Unit,
 ) {
     val countDownLatch = CountDownLatch(1)
@@ -98,7 +97,7 @@ internal fun runMultiplePaymentSheetInstancesTest(
     testType: MultipleInstancesTestType,
     createIntentCallback: CreateIntentCallback,
     successTimeoutSeconds: Long = 5L,
-    resultCallback: PaymentSheetResultCallback,
+    resultCallback: PaymentSheet.ResultCallback,
     block: (PaymentSheetTestRunnerContext) -> Unit,
 ) {
     var firstCreateIntentCallbackCalled = false

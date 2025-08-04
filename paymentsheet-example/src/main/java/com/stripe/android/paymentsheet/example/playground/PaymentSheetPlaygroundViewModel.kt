@@ -26,9 +26,9 @@ import com.stripe.android.elements.payment.DelicatePaymentSheetApi
 import com.stripe.android.elements.payment.EmbeddedPaymentElement
 import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
-import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentRequest
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentResponse
@@ -387,27 +387,27 @@ internal class PaymentSheetPlaygroundViewModel(
         }
     }
 
-    fun onPaymentSheetResult(paymentResult: PaymentSheetResult) {
+    fun onPaymentSheetResult(paymentResult: PaymentSheet.Result) {
         val integrationType = playgroundSettingsFlow.value?.configurationData?.value?.integrationType
             ?: PlaygroundConfigurationData.IntegrationType.PaymentSheet
         if (integrationType == PlaygroundConfigurationData.IntegrationType.FlowController) {
-            if (paymentResult is PaymentSheetResult.Completed) {
+            if (paymentResult is PaymentSheet.Result.Completed) {
                 setPlaygroundState(null)
             }
-        } else if (paymentResult !is PaymentSheetResult.Canceled) {
+        } else if (paymentResult !is PaymentSheet.Result.Canceled) {
             setPlaygroundState(null)
         }
 
         val statusMessage = when (paymentResult) {
-            is PaymentSheetResult.Canceled -> {
+            is PaymentSheet.Result.Canceled -> {
                 "Canceled"
             }
 
-            is PaymentSheetResult.Completed -> {
+            is PaymentSheet.Result.Completed -> {
                 SUCCESS_RESULT
             }
 
-            is PaymentSheetResult.Failed -> {
+            is PaymentSheet.Result.Failed -> {
                 when (paymentResult.error) {
                     is ConfirmIntentEndpointException -> {
                         "Couldn't process your payment: ${paymentResult.error.message}"

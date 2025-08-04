@@ -27,7 +27,6 @@ import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER
-import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.internalRememberPaymentSheetFlowController
 import com.stripe.android.uicore.image.rememberDrawablePainter
@@ -112,7 +111,7 @@ interface FlowController {
      * @param paymentOptionCallback Called when the customer's desired payment method changes.
      */
     class Builder(
-        internal val resultCallback: PaymentSheetResultCallback,
+        internal val resultCallback: PaymentSheet.ResultCallback,
         internal val paymentOptionCallback: PaymentOptionDisplayData.Callback
     ) {
         private val callbacksBuilder = PaymentElementCallbacks.Builder()

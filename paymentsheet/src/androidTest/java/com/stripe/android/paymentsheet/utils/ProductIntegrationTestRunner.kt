@@ -10,13 +10,12 @@ import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.elements.payment.CreateIntentCallback
 import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 
 internal fun runProductIntegrationTest(
     networkRule: NetworkRule,
     integrationType: ProductIntegrationType,
     builder: ProductIntegrationBuilder.() -> Unit = {},
-    resultCallback: PaymentSheetResultCallback,
+    resultCallback: PaymentSheet.ResultCallback,
     block: suspend (ProductIntegrationTestRunnerContext) -> Unit,
 ) {
     val integrationBuilder = ProductIntegrationBuilder().apply {

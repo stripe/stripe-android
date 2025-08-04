@@ -14,7 +14,7 @@ import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
 internal class PaymentSheetContract :
-    ActivityResultContract<PaymentSheetContract.Args, PaymentSheetResult>() {
+    ActivityResultContract<PaymentSheetContract.Args, PaymentSheet.Result>() {
 
     override fun createIntent(
         context: Context,
@@ -26,10 +26,10 @@ internal class PaymentSheetContract :
     override fun parseResult(
         resultCode: Int,
         intent: Intent?
-    ): PaymentSheetResult {
+    ): PaymentSheet.Result {
         @Suppress("DEPRECATION")
         val paymentResult = intent?.getParcelableExtra<Result>(EXTRA_RESULT)?.paymentSheetResult
-        return paymentResult ?: PaymentSheetResult.Failed(
+        return paymentResult ?: PaymentSheet.Result.Failed(
             IllegalArgumentException("Failed to retrieve a PaymentSheetResult.")
         )
     }
@@ -55,7 +55,7 @@ internal class PaymentSheetContract :
 
     @Parcelize
     internal data class Result(
-        val paymentSheetResult: PaymentSheetResult
+        val paymentSheetResult: PaymentSheet.Result
     ) : ActivityStarter.Result {
         override fun toBundle(): Bundle {
             return bundleOf(EXTRA_RESULT to this)

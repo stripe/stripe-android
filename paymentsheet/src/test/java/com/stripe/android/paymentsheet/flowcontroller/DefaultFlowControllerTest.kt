@@ -24,6 +24,7 @@ import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.FlowController.PaymentOptionDisplayData
 import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.elements.payment.WalletButtonsConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
@@ -71,8 +72,6 @@ import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
-import com.stripe.android.paymentsheet.PaymentSheetResult
-import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
@@ -125,7 +124,7 @@ internal class DefaultFlowControllerTest {
     val paymentElemntCallbackTestRule = PaymentElementCallbackTestRule()
 
     private val paymentOptionCallback = mock<PaymentOptionDisplayData.Callback>()
-    private val paymentResultCallback = mock<PaymentSheetResultCallback>()
+    private val paymentResultCallback = mock<PaymentSheet.ResultCallback>()
     private val eventReporter = mock<EventReporter>()
 
     private val paymentOptionActivityLauncher =
@@ -478,7 +477,7 @@ internal class DefaultFlowControllerTest {
 
         verifyNoInteractions(paymentResultCallback)
         flowController.presentPaymentOptions()
-        val resultCaptor = argumentCaptor<PaymentSheetResult.Failed>()
+        val resultCaptor = argumentCaptor<PaymentSheet.Result.Failed>()
         verify(paymentResultCallback).onPaymentSheetResult(resultCaptor.capture())
 
         assertThat(resultCaptor.firstValue.error).hasMessageThat()
@@ -496,7 +495,7 @@ internal class DefaultFlowControllerTest {
         verifyNoInteractions(paymentResultCallback)
 
         flowController.presentPaymentOptions()
-        val resultCaptor = argumentCaptor<PaymentSheetResult.Failed>()
+        val resultCaptor = argumentCaptor<PaymentSheet.Result.Failed>()
         verify(paymentResultCallback).onPaymentSheetResult(resultCaptor.capture())
 
         assertThat(resultCaptor.firstValue.error).hasMessageThat()
@@ -886,7 +885,7 @@ internal class DefaultFlowControllerTest {
 
         assertThat(errorReporter.getLoggedErrors()).isEmpty()
 
-        verify(paymentResultCallback).onPaymentSheetResult(isA<PaymentSheetResult.Failed>())
+        verify(paymentResultCallback).onPaymentSheetResult(isA<PaymentSheet.Result.Failed>())
     }
 
     @Test
@@ -911,7 +910,7 @@ internal class DefaultFlowControllerTest {
             "unexpected_error.flow_controller.invalid_payment_selection"
         )
 
-        verify(paymentResultCallback).onPaymentSheetResult(isA<PaymentSheetResult.Failed>())
+        verify(paymentResultCallback).onPaymentSheetResult(isA<PaymentSheet.Result.Failed>())
     }
 
     @Test
@@ -1280,7 +1279,7 @@ internal class DefaultFlowControllerTest {
             )
         )
 
-        verify(paymentResultCallback).onPaymentSheetResult(any<PaymentSheetResult.Canceled>())
+        verify(paymentResultCallback).onPaymentSheetResult(any<PaymentSheet.Result.Canceled>())
     }
 
     @Test
@@ -1364,7 +1363,7 @@ internal class DefaultFlowControllerTest {
 
         verify(paymentResultCallback).onPaymentSheetResult(
             argWhere { paymentResult ->
-                paymentResult is PaymentSheetResult.Completed
+                paymentResult is PaymentSheet.Result.Completed
             }
         )
     }
@@ -1379,7 +1378,7 @@ internal class DefaultFlowControllerTest {
 
         verify(paymentResultCallback).onPaymentSheetResult(
             argWhere { paymentResult ->
-                paymentResult is PaymentSheetResult.Canceled
+                paymentResult is PaymentSheet.Result.Canceled
             }
         )
     }
@@ -1394,7 +1393,7 @@ internal class DefaultFlowControllerTest {
 
             verify(paymentResultCallback).onPaymentSheetResult(
                 argWhere { paymentResult ->
-                    paymentResult is PaymentSheetResult.Failed &&
+                    paymentResult is PaymentSheet.Result.Failed &&
                         errorMessage == paymentResult.error.localizedMessage
                 }
             )
@@ -1626,7 +1625,7 @@ internal class DefaultFlowControllerTest {
             )
         )
 
-        verify(paymentResultCallback).onPaymentSheetResult(PaymentSheetResult.Completed())
+        verify(paymentResultCallback).onPaymentSheetResult(PaymentSheet.Result.Completed())
     }
 
     @Test
@@ -1658,7 +1657,7 @@ internal class DefaultFlowControllerTest {
 
         verify(paymentResultCallback).onPaymentSheetResult(
             argWhere {
-                (it as PaymentSheetResult.Failed).error.message == "something went wrong"
+                (it as PaymentSheet.Result.Failed).error.message == "something went wrong"
             }
         )
     }
@@ -1694,10 +1693,10 @@ internal class DefaultFlowControllerTest {
             "recent call to configureWithPaymentIntent(), configureWithSetupIntent() or " +
             "configureWithIntentConfiguration() has completed successfully."
 
-        val argumentCaptor = argumentCaptor<PaymentSheetResult>()
+        val argumentCaptor = argumentCaptor<PaymentSheet.Result>()
         verify(paymentResultCallback).onPaymentSheetResult(argumentCaptor.capture())
 
-        val result = argumentCaptor.firstValue as? PaymentSheetResult.Failed
+        val result = argumentCaptor.firstValue as? PaymentSheet.Result.Failed
         assertThat(result?.error?.message).isEqualTo(expectedError)
     }
 
@@ -1730,10 +1729,10 @@ internal class DefaultFlowControllerTest {
             "recent call to configureWithPaymentIntent(), configureWithSetupIntent() or " +
             "configureWithIntentConfiguration() has completed successfully."
 
-        val argumentCaptor = argumentCaptor<PaymentSheetResult>()
+        val argumentCaptor = argumentCaptor<PaymentSheet.Result>()
         verify(paymentResultCallback).onPaymentSheetResult(argumentCaptor.capture())
 
-        val result = argumentCaptor.firstValue as? PaymentSheetResult.Failed
+        val result = argumentCaptor.firstValue as? PaymentSheet.Result.Failed
         assertThat(result?.error?.message).isEqualTo(expectedError)
     }
 

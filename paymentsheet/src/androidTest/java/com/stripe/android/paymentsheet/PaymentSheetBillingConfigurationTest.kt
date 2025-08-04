@@ -18,6 +18,7 @@ import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.elements.payment.PaymentSheet.Builder
+import com.stripe.android.elements.payment.PaymentSheet.Result
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.PaymentSheetLayoutType
 import com.stripe.android.paymentsheet.utils.PaymentSheetLayoutTypeProvider
@@ -67,7 +68,7 @@ internal class PaymentSheetBillingConfigurationTest {
         scenario.onActivity {
             PaymentConfiguration.init(it, "pk_test_123")
             paymentSheet = Builder { result ->
-                assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
+                assertThat(result).isInstanceOf(PaymentSheet.Result.Completed::class.java)
                 countDownLatch.countDown()
             }.build(it)
         }
@@ -144,7 +145,7 @@ internal class PaymentSheetBillingConfigurationTest {
         scenario.onActivity {
             PaymentConfiguration.init(it, "pk_test_123")
             paymentSheet = Builder { result ->
-                assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
+                assertThat(result).isInstanceOf(PaymentSheet.Result.Completed::class.java)
                 countDownLatch.countDown()
             }.build(it)
         }
