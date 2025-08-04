@@ -16,6 +16,7 @@ import com.stripe.android.crypto.onramp.model.CryptoCustomerRequestParams
 import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.KycInfo
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -65,11 +66,15 @@ internal class CryptoApiRepository @Inject internal constructor(
      * @param kycInfo The KycInfo to attach.
      */
     suspend fun collectKycData(
-        kycInfo: KycInfo
+        kycInfo: KycInfo,
+        consumerSessionClientSecret: String
     ): Result<Unit> {
+        val params = CryptoCustomerRequestParams(CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret))
+        val kycRequestModel = CollectKycRequestModel(kycInfo, params)
+
         return execute(
             collectKycDataUrl,
-            Json.encodeToJsonElement(kycInfo).jsonObject,
+            Json.encodeToJsonElement(kycRequestModel).jsonObject,
             Unit.serializer()
         )
     }
@@ -122,4 +127,11 @@ internal class CryptoApiRepository @Inject internal constructor(
             return "${ApiRequest.API_HOST}/v1/$path"
         }
     }
+
+    @Serializable
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    private data class CollectKycRequestModel(
+        val kycInfo: KycInfo,
+        val credentials: CryptoCustomerRequestParams
+    )
 }

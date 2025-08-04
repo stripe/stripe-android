@@ -97,7 +97,8 @@ class CryptoApiRepositoryTest {
                     nationalities = listOf("TestNationality"),
                     birthCountry = "US",
                     birthCity = "Chicago"
-                )
+                ),
+                consumerSessionClientSecret = "test-secret"
             )
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
