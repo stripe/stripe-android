@@ -236,6 +236,7 @@ internal class SignUpViewModel @Inject constructor(
         val targetScreen = when {
             linkAccount?.completedSignup == true -> LinkScreen.PaymentMethod
             linkAccount?.isVerified == true -> LinkScreen.Wallet
+            // TODO: Consent
             else -> LinkScreen.Verification
         }
 

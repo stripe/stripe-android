@@ -354,7 +354,9 @@ internal class LinkActivityViewModel @Inject constructor(
         return ScreenState.FullScreen(
             initialDestination = when (accountStatus) {
                 AccountStatus.Verified -> {
-                    if (linkAccount?.completedSignup == true && linkLaunchMode.selectedPayment() == null) {
+                    if (linkAccount?.consentNeeded == true) {
+                        LinkScreen.OAuthConsent
+                    } else if (linkAccount?.completedSignup == true && linkLaunchMode.selectedPayment() == null) {
                         // We just completed signup, but haven't added a payment method yet.
                         LinkScreen.PaymentMethod
                     } else {
@@ -363,10 +365,12 @@ internal class LinkActivityViewModel @Inject constructor(
                         LinkScreen.Wallet
                     }
                 }
-                AccountStatus.NeedsVerification, AccountStatus.VerificationStarted -> {
+                AccountStatus.NeedsVerification,
+                AccountStatus.VerificationStarted -> {
                     LinkScreen.Verification
                 }
-                AccountStatus.SignedOut, AccountStatus.Error -> {
+                AccountStatus.SignedOut,
+                AccountStatus.Error -> {
                     LinkScreen.SignUp
                 }
             }
