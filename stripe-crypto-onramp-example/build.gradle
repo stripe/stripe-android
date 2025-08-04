@@ -53,6 +53,8 @@ dependencies {
     implementation libs.places
     implementation libs.retrofitKotlinSerializationConverter
 
+    testImplementation testLibs.junit
+
     androidTestImplementation project(':payments-ui-core')
     androidTestImplementation project(':payments-core-testing')
     androidTestImplementation libs.playServicesWallet
