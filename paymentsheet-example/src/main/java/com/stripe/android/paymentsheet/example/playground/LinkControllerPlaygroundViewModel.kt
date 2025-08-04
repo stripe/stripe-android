@@ -42,6 +42,10 @@ internal class LinkControllerPlaygroundViewModel(
     }
 
     fun configureLinkController(config: LinkController.Configuration) {
+        if (state.value.configureResult == LinkController.ConfigureResult.Success) {
+            // Assumes `config` doesn't change in LinkControllerPlaygroundActivity.
+            return
+        }
         viewModelScope.launch {
             val result = linkController.configure(config)
             state.update { it.copy(configureResult = result) }
