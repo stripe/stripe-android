@@ -36,6 +36,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
@@ -70,6 +71,11 @@ internal class OnrampActivity : ComponentActivity() {
 
         val configuration = OnrampConfiguration(
             paymentSheetAppearance = PaymentSheet.Appearance()
+        )
+
+        PaymentConfiguration.init(
+            application,
+            "pk_test_51K9W3OHMaDsveWq0oLP0ZjldetyfHIqyJcz27k2BpMGHxu9v9Cei2tofzoHncPyk3A49jMkFEgTOBQyAMTUffRLa00xzzARtZO"
         )
 
         onrampCoordinator.configure(configuration)
