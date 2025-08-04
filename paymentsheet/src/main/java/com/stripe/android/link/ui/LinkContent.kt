@@ -165,8 +165,6 @@ private fun Screens(
 
         composable(LinkScreen.Wallet.route) {
             val linkAccount = getLinkAccount() ?: return@composable dismissWithResult(noLinkAccountResult())
-            OAuthConsentRoute(linkAccount)
-            return@composable
 
             WalletRoute(
                 linkAccount = linkAccount,

@@ -3,6 +3,7 @@ package com.stripe.android.link.model
 import android.os.Parcelable
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.DisplayablePaymentDetails
+import com.stripe.android.model.LinkAuthIntentState
 import com.stripe.android.uicore.elements.convertPhoneNumberToE164
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.IgnoredOnParcel
@@ -59,6 +60,22 @@ internal class LinkAccount(
             AccountStatus.NeedsVerification
         }
     }
+
+    @IgnoredOnParcel
+    val linkAuthIntentState: LinkAuthIntentState? =
+        consumerSession.linkAuthIntent?.state
+
+    @IgnoredOnParcel
+    val consentNeeded: Boolean = when (linkAuthIntentState) {
+        null,
+        LinkAuthIntentState.Unknown,
+        LinkAuthIntentState.Consented ->
+            false
+        LinkAuthIntentState.Created,
+        LinkAuthIntentState.Authenticated ->
+            true
+    }
+    // val needsConsent: Boolean = true
 
     private fun ConsumerSession.containsSMSSessionStarted() = verificationSessions.find {
         it.type == ConsumerSession.VerificationSession.SessionType.Sms &&
