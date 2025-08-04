@@ -784,6 +784,7 @@ internal class PaymentMethodMetadataTest {
             lightThemeIconUrl = "example_url",
             darkThemeIconUrl = null,
             iconResource = 0,
+            iconResourceNight = 0,
             iconRequiresTinting = false,
         )
 
@@ -975,6 +976,7 @@ internal class PaymentMethodMetadataTest {
             lightThemeIconUrl = "example_url",
             darkThemeIconUrl = "example_url",
             iconResource = 0,
+            iconResourceNight = 0,
             iconRequiresTinting = false,
         )
 
@@ -1332,7 +1334,8 @@ internal class PaymentMethodMetadataTest {
             elementsSessionId = "session_1234",
             flags = emptyMap(),
             orderedPaymentMethodTypesAndWallets = orderedPaymentMethodTypesAndWallets,
-            experimentsData = null
+            experimentsData = null,
+            passiveCaptcha = null
         )
     }
 
@@ -1963,6 +1966,8 @@ internal class PaymentMethodMetadataTest {
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             allowUserEmailEdits = true,
             enableDisplayableDefaultValuesInEce = false,
+            linkSignUpOptInFeatureEnabled = false,
+            linkSignUpOptInInitialValue = false,
             customerId = null
         )
     }

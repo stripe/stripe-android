@@ -401,7 +401,8 @@ class LogLinkGlobalHoldbackExposureTest {
             paymentMethodSpecs = null,
             elementsSessionId = "session_1234",
             flags = emptyMap(),
-            experimentsData = experimentsData
+            experimentsData = experimentsData,
+            passiveCaptcha = null
         )
     }
 

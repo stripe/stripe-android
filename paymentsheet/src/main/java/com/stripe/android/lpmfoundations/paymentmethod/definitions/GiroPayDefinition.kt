@@ -34,5 +34,6 @@ private object GiroPayUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDa
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_giropay,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_giropay,
+        iconResourceNight = null,
     )
 }

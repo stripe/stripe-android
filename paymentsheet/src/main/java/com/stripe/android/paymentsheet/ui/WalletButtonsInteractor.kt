@@ -10,6 +10,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.link.ui.verification.VerificationViewState
 import com.stripe.android.link.verification.LinkInlineInteractor
 import com.stripe.android.link.verification.VerificationState
@@ -67,7 +68,7 @@ internal interface WalletButtonsInteractor {
         @Immutable
         @Stable
         data class Link(
-            val email: String?,
+            val state: LinkButtonState,
         ) : WalletButton {
             override fun createSelection(): PaymentSelection {
                 return PaymentSelection.Link(useLinkExpress = false)
@@ -136,8 +137,9 @@ internal class DefaultWalletButtonsInteractor(
     override val state: StateFlow<WalletButtonsInteractor.State> = combineAsStateFlow(
         arguments,
         confirmationHandler.state,
-        linkInlineInteractor.state
-    ) { arguments, confirmationState, linkEmbeddedState ->
+        linkInlineInteractor.state,
+        linkAccountHolder.linkAccountInfo
+    ) { arguments, confirmationState, linkEmbeddedState, linkAccountInfo ->
         val walletButtons = arguments?.run {
             arguments.paymentMethodMetadata.availableWallets.mapNotNull { wallet ->
                 when (wallet) {
@@ -152,12 +154,19 @@ internal class DefaultWalletButtonsInteractor(
                     ).takeIf {
                         walletsAllowedByMerchant.contains(WalletType.GooglePay)
                     }
-                    WalletType.Link -> WalletButton.Link(
-                        email = linkEmail
-                    ).takeIf {
-                        // Only show Link button if the Link verification state is resolved.
-                        linkEmbeddedState.verificationState is VerificationState.RenderButton &&
-                            walletsAllowedByMerchant.contains(WalletType.Link)
+                    WalletType.Link -> {
+                        val linkConfiguration = arguments.paymentMethodMetadata.linkState?.configuration
+                        WalletButton.Link(
+                            state = LinkButtonState.create(
+                                enableDefaultValues = linkConfiguration?.enableDisplayableDefaultValuesInEce == true,
+                                linkEmail = arguments.linkEmail,
+                                paymentDetails = linkAccountInfo.account?.displayablePaymentDetails
+                            )
+                        ).takeIf {
+                            // Only show Link button if the Link verification state is resolved.
+                            linkEmbeddedState.verificationState is VerificationState.RenderButton &&
+                                walletsAllowedByMerchant.contains(WalletType.Link)
+                        }
                     }
                     WalletType.ShopPay -> {
                         WalletButton.ShopPay.takeIf {
@@ -224,7 +233,12 @@ internal class DefaultWalletButtonsInteractor(
                 useLinkExpress = true
             )
         } else {
-            handleButtonPressed(WalletButton.Link(email = null), arguments)
+            handleButtonPressed(
+                WalletButton.Link(
+                    state = LinkButtonState.Default
+                ),
+                arguments
+            )
         }
     }
 

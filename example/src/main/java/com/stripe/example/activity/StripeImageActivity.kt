@@ -34,7 +34,7 @@ class StripeImageActivity : AppCompatActivity() {
                     Html(
                         imageLoader = mapOf(
                             "affirm" to EmbeddableImage.Drawable(
-                                R.drawable.stripe_ic_affirm_logo,
+                                R.drawable.stripe_ic_affirm_logo_day,
                                 R.string.stripe_paymentsheet_payment_method_affirm
                             )
                         ),
@@ -50,7 +50,7 @@ class StripeImageActivity : AppCompatActivity() {
                     Html(
                         imageLoader = mapOf(
                             "affirm" to EmbeddableImage.Drawable(
-                                R.drawable.stripe_ic_affirm_logo,
+                                R.drawable.stripe_ic_affirm_logo_day,
                                 R.string.stripe_paymentsheet_payment_method_affirm
                             )
                         ),

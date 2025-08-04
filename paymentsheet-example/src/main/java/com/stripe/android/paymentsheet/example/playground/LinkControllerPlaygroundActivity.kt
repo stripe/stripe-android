@@ -47,7 +47,9 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
                 )
             }
             LaunchedEffect(Unit) {
-                linkController.configure(linkControllerConfig)
+                viewModel.onConfigureResult(
+                    result = linkController.configure(linkControllerConfig)
+                )
             }
 
             val linkControllerPlaygroundState by viewModel.linkControllerState.collectAsState()
@@ -65,6 +67,8 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
                             }
                         },
                         onPaymentMethodButtonClick = { email ->
+                            linkController.paymentSelectionHint =
+                                "Lorem ipsum dolor sit amet consectetur adipiscing elit."
                             linkController.presentPaymentMethods(email = email.takeIf { it.isNotBlank() })
                         },
                         onCreatePaymentMethodClick = linkController::createPaymentMethod,
@@ -82,7 +86,6 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
                                 phone = phone,
                                 country = country,
                                 name = name,
-                                consentAction = com.stripe.android.model.ConsumerSignUpConsentAction.Checkbox
                             )
                         },
                         onErrorMessage = { viewModel.status.value = StatusMessage(it) },

@@ -438,6 +438,7 @@ private object TransformSpecToElementsFactory {
                 cardBrandFilter = DefaultCardBrandFilter,
                 setAsDefaultMatchesSaveForFutureUse = false,
                 autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+                linkInlineHandler = null,
             )
         )
     }

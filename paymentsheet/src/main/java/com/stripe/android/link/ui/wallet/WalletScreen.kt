@@ -241,6 +241,14 @@ private fun PaymentDetailsSection(
     Column(
         modifier = modifier
     ) {
+        if (state.paymentSelectionHint != null) {
+            Text(
+                modifier = Modifier.padding(bottom = 16.dp),
+                text = state.paymentSelectionHint,
+                style = LinkTheme.typography.body,
+                color = LinkTheme.colors.textPrimary,
+            )
+        }
         PaymentMethodSection(
             state = state,
             isExpanded = isExpanded,

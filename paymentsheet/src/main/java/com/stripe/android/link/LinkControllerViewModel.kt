@@ -11,18 +11,23 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.Logger
+import com.stripe.android.core.utils.flatMapCatching
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.link.LinkController.AuthenticationResult
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.account.LinkAuthResult
+import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.confirmation.computeExpectedPaymentMethodType
+import com.stripe.android.link.exceptions.AppAttestationException
 import com.stripe.android.link.exceptions.MissingConfigurationException
 import com.stripe.android.link.injection.DaggerLinkControllerViewModelComponent
+import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.injection.LinkControllerComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.toLoginState
-import com.stripe.android.link.repositories.LinkRepository
+import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.wallet.displayName
-import com.stripe.android.model.ConsumerSignUpConsentAction
+import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentsheet.R
@@ -38,6 +43,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Singleton
@@ -46,7 +52,7 @@ internal class LinkControllerViewModel @Inject constructor(
     private val logger: Logger,
     private val linkConfigurationLoader: LinkConfigurationLoader,
     private val linkAccountHolder: LinkAccountHolder,
-    private val linkRepository: LinkRepository,
+    private val linkComponentBuilderProvider: Provider<LinkComponent.Builder>,
     val controllerComponentFactory: LinkControllerComponent.Factory,
 ) : AndroidViewModel(application) {
 
@@ -110,9 +116,17 @@ internal class LinkControllerViewModel @Inject constructor(
         logger.debug("$tag: updating configuration")
         updateState { State() }
         return linkConfigurationLoader.load(configuration)
+            .flatMapCatching { config ->
+                val component = linkComponentBuilderProvider.get()
+                    .configuration(config)
+                    .build()
+                component.linkAttestationCheck.invoke()
+                    .toResult()
+                    .map { component }
+            }
             .fold(
-                onSuccess = { config ->
-                    updateState { it.copy(linkConfiguration = config) }
+                onSuccess = { component ->
+                    updateState { it.copy(linkComponent = component) }
                     LinkController.ConfigureResult.Success
                 },
                 onFailure = { error ->
@@ -123,7 +137,8 @@ internal class LinkControllerViewModel @Inject constructor(
 
     fun onPresentPaymentMethods(
         launcher: ActivityResultLauncher<LinkActivityContract.Args>,
-        email: String?
+        email: String?,
+        hint: String? = null,
     ) {
         present(
             launcher = launcher,
@@ -137,6 +152,7 @@ internal class LinkControllerViewModel @Inject constructor(
                 LinkLaunchMode.PaymentMethodSelection(
                     selectedPayment = state.selectedPaymentMethod?.details,
                     sharePaymentDetailsImmediatelyAfterCreation = false,
+                    hint = hint,
                 )
             }
         )
@@ -169,7 +185,7 @@ internal class LinkControllerViewModel @Inject constructor(
                     AuthenticationResult.Failed(error)
                 )
             },
-            getLaunchMode = { linkAccount, state ->
+            getLaunchMode = { linkAccount, _ ->
                 if (linkAccount?.isVerified == true) {
                     logger.debug("$tag: account is already verified, skipping authentication")
                     _authenticationResultFlow.emit(AuthenticationResult.Success)
@@ -186,7 +202,8 @@ internal class LinkControllerViewModel @Inject constructor(
         onError: suspend (Throwable) -> Unit,
         onSuccess: suspend (LinkConfiguration) -> Unit
     ) {
-        val configuration = requireConfiguration()
+        val configuration = requireLinkComponent()
+            .map { it.configuration }
             .map { config ->
                 email
                     ?.let { config.copy(customerInfo = config.customerInfo.copy(email = email)) }
@@ -202,6 +219,7 @@ internal class LinkControllerViewModel @Inject constructor(
     fun onLinkActivityResult(result: LinkActivityResult) {
         val currentLaunchMode = _state.value.currentLaunchMode
         updateState { it.copy(currentLaunchMode = null) }
+        updateStateOnAccountUpdate(result.linkAccountUpdate)
 
         when (currentLaunchMode) {
             is LinkLaunchMode.PaymentMethodSelection ->
@@ -211,8 +229,6 @@ internal class LinkControllerViewModel @Inject constructor(
             else ->
                 logger.warning("$tag: unexpected result for launch mode: $currentLaunchMode")
         }
-
-        updateStateOnAccountUpdate(result.linkAccountUpdate)
     }
 
     private fun updateStateOnNewEmail(email: String?) {
@@ -321,11 +337,17 @@ internal class LinkControllerViewModel @Inject constructor(
 
     fun onLookupConsumer(email: String) {
         viewModelScope.launch {
-            val result = linkRepository.lookupConsumer(
-                email = email,
-                customerId = null
-            )
-                .map { it.exists }
+            val result = requireLinkComponent()
+                .flatMapCatching { component ->
+                    component.linkAuth.lookUp(
+                        email = email,
+                        emailSource = EmailSource.USER_ACTION,
+                        startSession = false,
+                        customerId = null,
+                    )
+                        .toResult()
+                        .map { it != null }
+                }
                 .fold(
                     onSuccess = { LinkController.LookupConsumerResult.Success(email, it) },
                     onFailure = { LinkController.LookupConsumerResult.Failed(email, it) }
@@ -352,21 +374,17 @@ internal class LinkControllerViewModel @Inject constructor(
         phone: String,
         country: String,
         name: String?,
-        consentAction: ConsumerSignUpConsentAction
     ) {
         viewModelScope.launch {
-            val result = linkRepository.consumerSignUp(
-                email = email,
-                phone = phone,
-                country = country,
-                name = name,
-                consentAction = consentAction,
-            )
-                .map {
-                    LinkAccount(
-                        consumerSession = it.consumerSession,
-                        consumerPublishableKey = it.publishableKey
-                    )
+            val result = requireLinkComponent()
+                .flatMapCatching {
+                    it.linkAuth.signUp(
+                        email = email,
+                        phoneNumber = phone,
+                        country = country,
+                        name = name,
+                        consentAction = SignUpConsentAction.Implied
+                    ).toResult()
                 }
                 .fold(
                     onSuccess = { account ->
@@ -382,8 +400,8 @@ internal class LinkControllerViewModel @Inject constructor(
         }
     }
 
-    private fun requireConfiguration(state: State = _state.value): Result<LinkConfiguration> {
-        return state.linkConfiguration
+    private fun requireLinkComponent(state: State = _state.value): Result<LinkComponent> {
+        return state.linkComponent
             ?.let { Result.success(it) }
             ?: Result.failure(MissingConfigurationException())
     }
@@ -432,18 +450,14 @@ internal class LinkControllerViewModel @Inject constructor(
 
     private suspend fun createPaymentMethod(): Result<PaymentMethod> {
         val state = _state.value
-        val configuration = requireConfiguration(state)
+        val component = requireLinkComponent(state)
             .getOrElse { return Result.failure(it) }
+        val configuration = component.configuration
         val paymentMethod = state.selectedPaymentMethod
-        val account = _account.value
-
-        if (paymentMethod == null || account == null) {
-            return Result.failure(IllegalStateException("Invalid state"))
-        }
+            ?: return Result.failure(IllegalStateException("No selected payment method"))
 
         return if (configuration.passthroughModeEnabled) {
-            linkRepository.sharePaymentDetails(
-                consumerSessionClientSecret = account.clientSecret,
+            component.linkAccountManager.sharePaymentDetails(
                 paymentDetailsId = paymentMethod.details.id,
                 expectedPaymentMethodType = computeExpectedPaymentMethodType(configuration, paymentMethod.details),
                 cvc = paymentMethod.collectedCvc,
@@ -453,9 +467,8 @@ internal class LinkControllerViewModel @Inject constructor(
                 PaymentMethodJsonParser().parse(json)
             }
         } else {
-            linkRepository.createPaymentMethod(
-                consumerSessionClientSecret = account.clientSecret,
-                paymentMethod = paymentMethod,
+            component.linkAccountManager.createPaymentMethod(
+                linkPaymentMethod = paymentMethod
             )
         }
     }
@@ -473,18 +486,47 @@ internal class LinkControllerViewModel @Inject constructor(
         )
     }
 
+    private fun LinkAttestationCheck.Result.toResult(): Result<Unit> =
+        when (this) {
+            is LinkAttestationCheck.Result.AccountError ->
+                Result.failure(error)
+            is LinkAttestationCheck.Result.AttestationFailed ->
+                Result.failure(AppAttestationException(error))
+            is LinkAttestationCheck.Result.Error ->
+                Result.failure(error)
+            LinkAttestationCheck.Result.Successful ->
+                Result.success(Unit)
+        }
+
+    private fun LinkAuthResult.toResult(): Result<LinkAccount?> =
+        when (this) {
+            is LinkAuthResult.AccountError ->
+                Result.failure(error)
+            is LinkAuthResult.AttestationFailed ->
+                Result.failure(AppAttestationException(error))
+            is LinkAuthResult.Error ->
+                Result.failure(error)
+            LinkAuthResult.NoLinkAccountFound ->
+                Result.success(null)
+            is LinkAuthResult.Success ->
+                Result.success(account)
+        }
+
     @VisibleForTesting
     internal fun updateState(block: (State) -> State) {
         _state.update(block)
     }
 
     internal data class State(
-        val linkConfiguration: LinkConfiguration? = null,
+        val linkComponent: LinkComponent? = null,
         val emailInput: String? = null,
         val selectedPaymentMethod: LinkPaymentMethod? = null,
         val createdPaymentMethod: PaymentMethod? = null,
         val currentLaunchMode: LinkLaunchMode? = null,
-    )
+    ) {
+        val linkConfiguration: LinkConfiguration?
+            get() = linkComponent?.configuration
+    }
 
     class Factory : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")

@@ -13,6 +13,7 @@ import com.stripe.android.model.ElementsSessionFixtures.createPaymentIntentWithC
 import com.stripe.android.model.ElementsSessionFixtures.createWithCustomPaymentMethods
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.LinkConsumerIncentive
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
@@ -1414,6 +1415,45 @@ class ElementsSessionJsonParserTest {
 
         assertThat(enabledCustomerSheetComponent?.isPaymentMethodRemoveEnabled).isEqualTo(canRemovePaymentMethods)
         assertThat(enabledCustomerSheetComponent?.canRemoveLastPaymentMethod).isEqualTo(canRemoveLastPaymentMethod)
+    }
+
+    @Test
+    fun `Parses passive captcha when present in response`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            isLiveMode = false,
+        )
+
+        val session = parser.parse(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON_WITH_PASSIVE_CAPTCHA)
+
+        assertThat(session?.passiveCaptchaParams).isEqualTo(
+            PassiveCaptchaParams(
+                siteKey = "test_site_key",
+                rqData = "test_rq_data"
+            )
+        )
+    }
+
+    @Test
+    fun `Returns null passive captcha when passive_captcha field is missing`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            isLiveMode = false,
+        )
+
+        val session = parser.parse(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON_WITHOUT_PASSIVE_CAPTCHA)
+
+        assertThat(session?.passiveCaptchaParams).isNull()
     }
 
     companion object {

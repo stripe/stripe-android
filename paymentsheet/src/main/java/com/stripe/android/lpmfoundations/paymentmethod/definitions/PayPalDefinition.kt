@@ -36,6 +36,7 @@ private object PayPalUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDat
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_paypal,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal,
+        iconResourceNight = null,
     )
 
     override fun createFormElements(

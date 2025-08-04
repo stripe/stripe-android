@@ -5,3 +5,6 @@ import com.stripe.android.core.exception.StripeException
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class MissingConfigurationException : StripeException()
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class AppAttestationException(cause: Throwable?) : StripeException(cause = cause)
