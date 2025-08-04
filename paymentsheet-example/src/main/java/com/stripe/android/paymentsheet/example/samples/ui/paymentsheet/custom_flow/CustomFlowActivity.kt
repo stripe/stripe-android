@@ -118,7 +118,7 @@ internal class CustomFlowActivity : AppCompatActivity() {
     ) {
         flowController.configureWithPaymentIntent(
             paymentIntentClientSecret = paymentInfo.clientSecret,
-            configuration = paymentInfo.paymentSheetConfig,
+            configuration = paymentInfo.flowcontrollerConfig,
             callback = viewModel::handleFlowControllerConfigured,
         )
     }

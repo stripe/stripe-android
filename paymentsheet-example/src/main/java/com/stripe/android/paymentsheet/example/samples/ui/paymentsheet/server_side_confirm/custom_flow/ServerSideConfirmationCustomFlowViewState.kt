@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow
 
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.FlowController.PaymentOptionDisplayData
 import com.stripe.android.elements.payment.GooglePayConfiguration
-import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.model.CartState
 
 data class ServerSideConfirmationCustomFlowViewState(
@@ -18,8 +18,8 @@ data class ServerSideConfirmationCustomFlowViewState(
     val cartState: CartState
         get() = dirtyCartState ?: confirmedCartState
 
-    val paymentSheetConfig: PaymentSheet.Configuration
-        get() = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
+    val paymentSheetConfig: FlowController.Configuration
+        get() = FlowController.Configuration.Builder(merchantDisplayName = "Example, Inc.")
             .customer(cartState.makeCustomerConfig())
             .googlePay(
                 GooglePayConfiguration(

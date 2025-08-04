@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.utils
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.model.asFlowControllerConfiguration
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.networktesting.NetworkRule
@@ -139,6 +140,7 @@ internal sealed interface ProductIntegrationTestRunnerContext {
         val context: FlowControllerTestRunnerContext
     ) : ProductIntegrationTestRunnerContext {
         override fun launch(configuration: PaymentSheet.Configuration, isDeferredIntent: Boolean) {
+            val flowControllerConfiguration = configuration.asFlowControllerConfiguration()
             context.configureFlowController {
                 if (isDeferredIntent) {
                     configureWithIntentConfiguration(
@@ -148,7 +150,7 @@ internal sealed interface ProductIntegrationTestRunnerContext {
                                 currency = "usd",
                             )
                         ),
-                        configuration = configuration,
+                        configuration = flowControllerConfiguration,
                         callback = { success, error ->
                             assertThat(success).isTrue()
                             assertThat(error).isNull()
@@ -158,7 +160,7 @@ internal sealed interface ProductIntegrationTestRunnerContext {
                 } else {
                     configureWithPaymentIntent(
                         paymentIntentClientSecret = "pi_example_secret_example",
-                        configuration = configuration,
+                        configuration = flowControllerConfiguration,
                         callback = { success, error ->
                             assertThat(success).isTrue()
                             assertThat(error).isNull()

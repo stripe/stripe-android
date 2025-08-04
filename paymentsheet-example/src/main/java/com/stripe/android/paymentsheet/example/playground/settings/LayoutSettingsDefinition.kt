@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
@@ -44,6 +45,15 @@ internal object LayoutSettingsDefinition :
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
+    ) {
+        configurationBuilder.paymentMethodLayout(value.paymentMethodLayout)
+    }
+
+    override fun configure(
+        value: Layout,
+        configurationBuilder: FlowController.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment,
+        configurationData: PlaygroundSettingDefinition.FlowControllerConfigurationData,
     ) {
         configurationBuilder.paymentMethodLayout(value.paymentMethodLayout)
     }

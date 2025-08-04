@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.elements.payment.CustomPaymentMethod
 import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
@@ -41,6 +42,15 @@ internal object CustomPaymentMethodsSettingDefinition :
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
+    ) {
+        configurationBuilder.customPaymentMethods(createCustomPaymentMethodsFromType(value))
+    }
+
+    override fun configure(
+        value: CustomPaymentMethodPlaygroundType,
+        configurationBuilder: FlowController.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment,
+        configurationData: PlaygroundSettingDefinition.FlowControllerConfigurationData,
     ) {
         configurationBuilder.customPaymentMethods(createCustomPaymentMethodsFromType(value))
     }

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 
@@ -37,6 +38,17 @@ internal object PrimaryButtonLabelSettingsDefinition :
 
     override fun configure(
         value: String,
+        configurationBuilder: FlowController.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment,
+        configurationData: PlaygroundSettingDefinition.FlowControllerConfigurationData,
+    ) {
+        if (value.isNotEmpty()) {
+            configurationBuilder.primaryButtonLabel(value)
+        }
+    }
+
+    override fun configure(
+        value: String,
         configurationBuilder: EmbeddedPaymentElement.Configuration.Builder,
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.EmbeddedConfigurationData
@@ -51,6 +63,17 @@ internal object PrimaryButtonLabelSettingsDefinition :
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState.SharedPaymentToken,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
+    ) {
+        if (value.isNotEmpty()) {
+            configurationBuilder.primaryButtonLabel(value)
+        }
+    }
+
+    override fun configure(
+        value: String,
+        configurationBuilder: FlowController.Configuration.Builder,
+        playgroundState: PlaygroundState.SharedPaymentToken,
+        configurationData: PlaygroundSettingDefinition.FlowControllerConfigurationData,
     ) {
         if (value.isNotEmpty()) {
             configurationBuilder.primaryButtonLabel(value)

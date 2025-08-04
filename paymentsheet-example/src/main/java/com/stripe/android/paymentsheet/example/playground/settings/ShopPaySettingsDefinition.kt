@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.elements.payment.ShopPayPreview
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
@@ -46,6 +47,35 @@ internal object ShopPaySettingsDefinition : BooleanSettingsDefinition(
     private fun configure(
         value: Boolean,
         configurationBuilder: PaymentSheet.Configuration.Builder
+    ) {
+        if (value.not()) return
+        configurationBuilder.shopPayConfiguration(ShopPayData.shopPayConfiguration())
+    }
+
+    override fun configure(
+        value: Boolean,
+        configurationBuilder: FlowController.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment,
+        configurationData: PlaygroundSettingDefinition.FlowControllerConfigurationData,
+    ) {
+        configure(value, configurationBuilder)
+    }
+
+    @OptIn(ShopPayPreview::class)
+    override fun configure(
+        value: Boolean,
+        configurationBuilder: FlowController.Configuration.Builder,
+        playgroundState: PlaygroundState.SharedPaymentToken,
+        configurationData: PlaygroundSettingDefinition.FlowControllerConfigurationData,
+    ) {
+        if (value.not()) return
+        configurationBuilder.shopPayConfiguration(ShopPayData.shopPayConfiguration())
+    }
+
+    @OptIn(ShopPayPreview::class)
+    private fun configure(
+        value: Boolean,
+        configurationBuilder: FlowController.Configuration.Builder
     ) {
         if (value.not()) return
         configurationBuilder.shopPayConfiguration(ShopPayData.shopPayConfiguration())

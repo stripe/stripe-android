@@ -1,9 +1,9 @@
 package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_flow
 
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.FlowController.PaymentOptionDisplayData
 import com.stripe.android.elements.payment.GooglePayConfiguration
-import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.model.CartState
 
 data class CustomFlowViewState(
@@ -27,8 +27,8 @@ data class CustomFlowViewState(
         val customerConfiguration: CustomerConfiguration?,
     ) {
 
-        val paymentSheetConfig: PaymentSheet.Configuration
-            get() = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
+        val flowcontrollerConfig: FlowController.Configuration
+            get() = FlowController.Configuration.Builder(merchantDisplayName = "Example, Inc.")
                 .customer(customerConfiguration)
                 .googlePay(
                     GooglePayConfiguration(

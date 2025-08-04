@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.link.LinkController
 import com.stripe.android.paymentsheet.example.Settings
@@ -27,6 +28,24 @@ internal interface PlaygroundSettingDefinition<T> {
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState.Payment,
         configurationData: PaymentSheetConfigurationData,
+    ) {
+    }
+
+    fun configure(
+        value: T,
+        configurationBuilder: FlowController.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment,
+        configurationData: FlowControllerConfigurationData,
+        settings: Settings,
+    ) {
+        configure(value, configurationBuilder, playgroundState, configurationData)
+    }
+
+    fun configure(
+        value: T,
+        configurationBuilder: FlowController.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment,
+        configurationData: FlowControllerConfigurationData,
     ) {
     }
 
@@ -59,6 +78,14 @@ internal interface PlaygroundSettingDefinition<T> {
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState.SharedPaymentToken,
         configurationData: PaymentSheetConfigurationData,
+    ) {
+    }
+
+    fun configure(
+        value: T,
+        configurationBuilder: FlowController.Configuration.Builder,
+        playgroundState: PlaygroundState.SharedPaymentToken,
+        configurationData: FlowControllerConfigurationData,
     ) {
     }
 
@@ -103,6 +130,25 @@ internal interface PlaygroundSettingDefinition<T> {
 
     data class PaymentSheetConfigurationData(
         private val configurationBuilder: PaymentSheet.Configuration.Builder,
+        private val billingDetailsCollectionConfigurationBuilder: BillingDetailsCollectionConfigurationBuilder =
+            BillingDetailsCollectionConfigurationBuilder()
+    ) {
+        // Billing details is a nested configuration, but we have individual settings for it in the
+        // UI, this helper keeps all of the configurations, rather than just the most recent.
+        fun updateBillingDetails(
+            block: BillingDetailsCollectionConfigurationBuilder.() -> Unit
+        ) {
+            billingDetailsCollectionConfigurationBuilder.apply {
+                block()
+            }
+            configurationBuilder.billingDetailsCollectionConfiguration(
+                billingDetailsCollectionConfigurationBuilder.build()
+            )
+        }
+    }
+
+    data class FlowControllerConfigurationData(
+        private val configurationBuilder: FlowController.Configuration.Builder,
         private val billingDetailsCollectionConfigurationBuilder: BillingDetailsCollectionConfigurationBuilder =
             BillingDetailsCollectionConfigurationBuilder()
     ) {

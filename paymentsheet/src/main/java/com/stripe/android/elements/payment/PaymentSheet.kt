@@ -294,8 +294,7 @@ class PaymentSheet internal constructor(
              * If `true`, allows payment methods that require a shipping address, like Afterpay and
              * Affirm. Defaults to `false`.
              *
-             * Set this to `true` if you collect shipping addresses via [shippingDetails] or
-             * [FlowController.shippingDetails].
+             * Set this to `true` if you collect shipping addresses via [shippingDetails]
              *
              * **Note**: PaymentSheet considers this property `true` if `shipping` details are present
              * on the PaymentIntent when PaymentSheet loads.
@@ -447,8 +446,7 @@ class PaymentSheet internal constructor(
              * If `true`, allows payment methods that require a shipping address, like Afterpay and
              * Affirm. Defaults to `false`.
              *
-             * Set this to `true` if you collect shipping addresses via [shippingDetails] or
-             * [FlowController.shippingDetails].
+             * Set this to `true` if you collect shipping addresses via [shippingDetails]
              *
              * **Note**: PaymentSheet considers this property `true` if `shipping` details are present
              * on the PaymentIntent when PaymentSheet loads.
@@ -526,7 +524,7 @@ class PaymentSheet internal constructor(
              * External payment methods to display in PaymentSheet.
              *
              * If you specify any external payment methods here, you must also pass an
-             * [ExternalPaymentMethodConfirmHandler] to the FlowController or PaymentSheet constructor.
+             * [ExternalPaymentMethodConfirmHandler] to the PaymentSheet constructor.
              *
              * To learn more about external payment methods, see
              * https://docs.stripe.com/payments/external-payment-methods?platform=android. For the full list of

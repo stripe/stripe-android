@@ -109,7 +109,7 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
 
                     flowController.configureWithIntentConfiguration(
                         intentConfiguration = playgroundState.intentConfiguration(),
-                        configuration = playgroundState.paymentSheetConfiguration(),
+                        configuration = playgroundState.flowControllerConfiguration(),
                         callback = { success, error ->
                             paymentOption = flowController.getPaymentOption()
 

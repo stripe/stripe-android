@@ -9,6 +9,7 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.elements.payment.LinkConfiguration
 import com.stripe.android.elements.payment.PaymentSheet
@@ -845,6 +846,11 @@ internal fun PaymentSelection.linkContext(): String? {
 }
 
 internal fun PaymentSheet.Configuration.primaryButtonColorUsage(): Boolean {
+    return appearance.primaryButton.colorsLight.background != null ||
+        appearance.primaryButton.colorsDark.background != null
+}
+
+internal fun FlowController.Configuration.primaryButtonColorUsage(): Boolean {
     return appearance.primaryButton.colorsLight.background != null ||
         appearance.primaryButton.colorsDark.background != null
 }

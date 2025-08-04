@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.common.model.asPaymentSheetConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.elements.AddressDetails
@@ -23,7 +24,6 @@ import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.FlowController.PaymentOptionDisplayData
 import com.stripe.android.elements.payment.IntentConfiguration
-import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
@@ -187,43 +187,43 @@ internal class DefaultFlowController @Inject internal constructor(
 
     override fun configureWithPaymentIntent(
         paymentIntentClientSecret: String,
-        configuration: PaymentSheet.Configuration?,
+        configuration: FlowController.Configuration?,
         callback: FlowController.ConfigCallback
     ) {
         configure(
             mode = PaymentElementLoader.InitializationMode.PaymentIntent(paymentIntentClientSecret),
-            configuration = configuration ?: PaymentSheet.Configuration.default(context),
+            configuration = configuration ?: FlowController.Configuration.default(context),
             callback = callback,
         )
     }
 
     override fun configureWithSetupIntent(
         setupIntentClientSecret: String,
-        configuration: PaymentSheet.Configuration?,
+        configuration: FlowController.Configuration?,
         callback: FlowController.ConfigCallback
     ) {
         configure(
             mode = PaymentElementLoader.InitializationMode.SetupIntent(setupIntentClientSecret),
-            configuration = configuration ?: PaymentSheet.Configuration.default(context),
+            configuration = configuration ?: FlowController.Configuration.default(context),
             callback = callback,
         )
     }
 
     override fun configureWithIntentConfiguration(
         intentConfiguration: IntentConfiguration,
-        configuration: PaymentSheet.Configuration?,
+        configuration: FlowController.Configuration?,
         callback: FlowController.ConfigCallback
     ) {
         configure(
             mode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration),
-            configuration = configuration ?: PaymentSheet.Configuration.default(context),
+            configuration = configuration ?: FlowController.Configuration.default(context),
             callback = callback,
         )
     }
 
     private fun configure(
         mode: PaymentElementLoader.InitializationMode,
-        configuration: PaymentSheet.Configuration,
+        configuration: FlowController.Configuration,
         callback: FlowController.ConfigCallback
     ) {
         configurationHandler.configure(
@@ -316,7 +316,7 @@ internal class DefaultFlowController @Inject internal constructor(
     ) {
         val args = PaymentOptionContract.Args(
             state = state.paymentSheetState.copy(paymentSelection = paymentSelection),
-            configuration = state.config,
+            configuration = state.config.asPaymentSheetConfiguration(),
             enableLogging = enableLogging,
             productUsage = productUsage,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
@@ -743,13 +743,13 @@ internal class DefaultFlowController @Inject internal constructor(
     @Parcelize
     data class Args(
         val clientSecret: String,
-        val config: PaymentSheet.Configuration?
+        val config: FlowController.Configuration?
     ) : Parcelable
 
     @Parcelize
     data class State(
         val paymentSheetState: PaymentSheetState.Full,
-        val config: PaymentSheet.Configuration,
+        val config: FlowController.Configuration,
         val declinedLink2FA: Boolean = false
     ) : Parcelable {
         fun copyPaymentSheetState(

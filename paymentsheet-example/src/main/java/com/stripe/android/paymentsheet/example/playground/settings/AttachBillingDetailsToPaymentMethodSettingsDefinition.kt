@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.link.LinkController
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
@@ -18,6 +19,15 @@ internal object AttachBillingDetailsToPaymentMethodSettingsDefinition : BooleanS
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
     ) {
         configurationData.updateBillingDetails { attachDefaultsToPaymentMethod = value }
+    }
+
+    override fun configure(
+        value: Boolean,
+        configurationBuilder: FlowController.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment,
+        flowControllerConfigurationData: PlaygroundSettingDefinition.FlowControllerConfigurationData,
+    ) {
+        flowControllerConfigurationData.updateBillingDetails { attachDefaultsToPaymentMethod = value }
     }
 
     override fun configure(
@@ -45,6 +55,15 @@ internal object AttachBillingDetailsToPaymentMethodSettingsDefinition : BooleanS
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
     ) {
         configurationData.updateBillingDetails { attachDefaultsToPaymentMethod = value }
+    }
+
+    override fun configure(
+        value: Boolean,
+        configurationBuilder: FlowController.Configuration.Builder,
+        playgroundState: PlaygroundState.SharedPaymentToken,
+        flowControllerConfigurationData: PlaygroundSettingDefinition.FlowControllerConfigurationData,
+    ) {
+        flowControllerConfigurationData.updateBillingDetails { attachDefaultsToPaymentMethod = value }
     }
 
     override fun configure(

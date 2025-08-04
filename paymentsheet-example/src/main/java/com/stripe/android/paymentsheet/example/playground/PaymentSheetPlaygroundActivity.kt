@@ -682,20 +682,20 @@ internal class PaymentSheetPlaygroundActivity :
             if (playgroundState.checkoutMode == CheckoutMode.SETUP) {
                 flowController.configureWithSetupIntent(
                     setupIntentClientSecret = playgroundState.clientSecret,
-                    configuration = playgroundState.paymentSheetConfiguration(viewModel.settings),
+                    configuration = playgroundState.flowControllerConfiguration(viewModel.settings),
                     callback = viewModel::onFlowControllerConfigured,
                 )
             } else {
                 flowController.configureWithPaymentIntent(
                     paymentIntentClientSecret = playgroundState.clientSecret,
-                    configuration = playgroundState.paymentSheetConfiguration(viewModel.settings),
+                    configuration = playgroundState.flowControllerConfiguration(viewModel.settings),
                     callback = viewModel::onFlowControllerConfigured,
                 )
             }
         } else {
             flowController.configureWithIntentConfiguration(
                 intentConfiguration = playgroundState.intentConfiguration(),
-                configuration = playgroundState.paymentSheetConfiguration(viewModel.settings),
+                configuration = playgroundState.flowControllerConfiguration(viewModel.settings),
                 callback = viewModel::onFlowControllerConfigured,
             )
         }

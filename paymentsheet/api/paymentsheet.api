@@ -1574,9 +1574,9 @@ public final class com/stripe/android/elements/payment/ExternalPaymentMethodResu
 public abstract interface class com/stripe/android/elements/payment/FlowController {
 	public static final field Companion Lcom/stripe/android/elements/payment/FlowController$Companion;
 	public abstract fun WalletButtons (Landroidx/compose/runtime/Composer;I)V
-	public abstract fun configureWithIntentConfiguration (Lcom/stripe/android/elements/payment/IntentConfiguration;Lcom/stripe/android/elements/payment/PaymentSheet$Configuration;Lcom/stripe/android/elements/payment/FlowController$ConfigCallback;)V
-	public abstract fun configureWithPaymentIntent (Ljava/lang/String;Lcom/stripe/android/elements/payment/PaymentSheet$Configuration;Lcom/stripe/android/elements/payment/FlowController$ConfigCallback;)V
-	public abstract fun configureWithSetupIntent (Ljava/lang/String;Lcom/stripe/android/elements/payment/PaymentSheet$Configuration;Lcom/stripe/android/elements/payment/FlowController$ConfigCallback;)V
+	public abstract fun configureWithIntentConfiguration (Lcom/stripe/android/elements/payment/IntentConfiguration;Lcom/stripe/android/elements/payment/FlowController$Configuration;Lcom/stripe/android/elements/payment/FlowController$ConfigCallback;)V
+	public abstract fun configureWithPaymentIntent (Ljava/lang/String;Lcom/stripe/android/elements/payment/FlowController$Configuration;Lcom/stripe/android/elements/payment/FlowController$ConfigCallback;)V
+	public abstract fun configureWithSetupIntent (Ljava/lang/String;Lcom/stripe/android/elements/payment/FlowController$Configuration;Lcom/stripe/android/elements/payment/FlowController$ConfigCallback;)V
 	public abstract fun confirm ()V
 	public abstract fun getPaymentOption ()Lcom/stripe/android/elements/payment/FlowController$PaymentOptionDisplayData;
 	public abstract fun getShippingDetails ()Lcom/stripe/android/elements/AddressDetails;
@@ -1605,10 +1605,67 @@ public abstract interface class com/stripe/android/elements/payment/FlowControll
 	public abstract fun onConfigured (ZLjava/lang/Throwable;)V
 }
 
+public final class com/stripe/android/elements/payment/FlowController$Configuration : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;Lcom/stripe/android/elements/payment/GooglePayConfiguration;)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;Lcom/stripe/android/elements/payment/GooglePayConfiguration;Lcom/stripe/android/elements/BillingDetails;)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;Lcom/stripe/android/elements/payment/GooglePayConfiguration;Lcom/stripe/android/elements/BillingDetails;Lcom/stripe/android/elements/AddressDetails;)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;Lcom/stripe/android/elements/payment/GooglePayConfiguration;Lcom/stripe/android/elements/BillingDetails;Lcom/stripe/android/elements/AddressDetails;Z)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;Lcom/stripe/android/elements/payment/GooglePayConfiguration;Lcom/stripe/android/elements/BillingDetails;Lcom/stripe/android/elements/AddressDetails;ZZ)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;Lcom/stripe/android/elements/payment/GooglePayConfiguration;Lcom/stripe/android/elements/BillingDetails;Lcom/stripe/android/elements/AddressDetails;ZZLcom/stripe/android/elements/Appearance;)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;Lcom/stripe/android/elements/payment/GooglePayConfiguration;Lcom/stripe/android/elements/BillingDetails;Lcom/stripe/android/elements/AddressDetails;ZZLcom/stripe/android/elements/Appearance;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;Lcom/stripe/android/elements/payment/GooglePayConfiguration;Lcom/stripe/android/elements/BillingDetails;Lcom/stripe/android/elements/AddressDetails;ZZLcom/stripe/android/elements/Appearance;Ljava/lang/String;Lcom/stripe/android/elements/BillingDetailsCollectionConfiguration;)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;Lcom/stripe/android/elements/payment/GooglePayConfiguration;Lcom/stripe/android/elements/BillingDetails;Lcom/stripe/android/elements/AddressDetails;ZZLcom/stripe/android/elements/Appearance;Ljava/lang/String;Lcom/stripe/android/elements/BillingDetailsCollectionConfiguration;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;Lcom/stripe/android/elements/payment/GooglePayConfiguration;Lcom/stripe/android/elements/BillingDetails;Lcom/stripe/android/elements/AddressDetails;ZZLcom/stripe/android/elements/Appearance;Ljava/lang/String;Lcom/stripe/android/elements/BillingDetailsCollectionConfiguration;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/elements/payment/FlowController$Configuration$Builder {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+	public final fun allowsDelayedPaymentMethods (Z)Lcom/stripe/android/elements/payment/FlowController$Configuration$Builder;
+	public final fun allowsPaymentMethodsRequiringShippingAddress (Z)Lcom/stripe/android/elements/payment/FlowController$Configuration$Builder;
+	public final fun allowsRemovalOfLastSavedPaymentMethod (Z)Lcom/stripe/android/elements/payment/FlowController$Configuration$Builder;
+	public final fun appearance (Lcom/stripe/android/elements/Appearance;)Lcom/stripe/android/elements/payment/FlowController$Configuration$Builder;
+	public final fun billingDetailsCollectionConfiguration (Lcom/stripe/android/elements/BillingDetailsCollectionConfiguration;)Lcom/stripe/android/elements/payment/FlowController$Configuration$Builder;
+	public final fun build ()Lcom/stripe/android/elements/payment/FlowController$Configuration;
+	public final fun cardBrandAcceptance (Lcom/stripe/android/elements/CardBrandAcceptance;)Lcom/stripe/android/elements/payment/FlowController$Configuration$Builder;
+	public final fun customPaymentMethods (Ljava/util/List;)Lcom/stripe/android/elements/payment/FlowController$Configuration$Builder;
+	public final fun customer (Lcom/stripe/android/elements/CustomerConfiguration;)Lcom/stripe/android/elements/payment/FlowController$Configuration$Builder;
+	public final fun defaultBillingDetails (Lcom/stripe/android/elements/BillingDetails;)Lcom/stripe/android/elements/payment/FlowController$Configuration$Builder;
+	public final fun externalPaymentMethods (Ljava/util/List;)Lcom/stripe/android/elements/payment/FlowController$Configuration$Builder;
+	public final fun googlePay (Lcom/stripe/android/elements/payment/GooglePayConfiguration;)Lcom/stripe/android/elements/payment/FlowController$Configuration$Builder;
+	public final fun googlePlacesApiKey (Ljava/lang/String;)Lcom/stripe/android/elements/payment/FlowController$Configuration$Builder;
+	public final fun link (Lcom/stripe/android/elements/payment/LinkConfiguration;)Lcom/stripe/android/elements/payment/FlowController$Configuration$Builder;
+	public final fun merchantDisplayName (Ljava/lang/String;)Lcom/stripe/android/elements/payment/FlowController$Configuration$Builder;
+	public final fun paymentMethodLayout (Lcom/stripe/android/elements/payment/PaymentMethodLayout;)Lcom/stripe/android/elements/payment/FlowController$Configuration$Builder;
+	public final fun paymentMethodOrder (Ljava/util/List;)Lcom/stripe/android/elements/payment/FlowController$Configuration$Builder;
+	public final fun preferredNetworks (Ljava/util/List;)Lcom/stripe/android/elements/payment/FlowController$Configuration$Builder;
+	public final fun primaryButtonLabel (Ljava/lang/String;)Lcom/stripe/android/elements/payment/FlowController$Configuration$Builder;
+	public final fun shippingDetails (Lcom/stripe/android/elements/AddressDetails;)Lcom/stripe/android/elements/payment/FlowController$Configuration$Builder;
+	public final fun shopPayConfiguration (Lcom/stripe/android/elements/payment/ShopPayConfiguration;)Lcom/stripe/android/elements/payment/FlowController$Configuration$Builder;
+	public final fun walletButtons (Lcom/stripe/android/elements/payment/WalletButtonsConfiguration;)Lcom/stripe/android/elements/payment/FlowController$Configuration$Builder;
+}
+
+public final class com/stripe/android/elements/payment/FlowController$Configuration$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/payment/FlowController$Configuration;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/elements/payment/FlowController$Configuration;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/elements/payment/FlowController$DefaultImpls {
-	public static synthetic fun configureWithIntentConfiguration$default (Lcom/stripe/android/elements/payment/FlowController;Lcom/stripe/android/elements/payment/IntentConfiguration;Lcom/stripe/android/elements/payment/PaymentSheet$Configuration;Lcom/stripe/android/elements/payment/FlowController$ConfigCallback;ILjava/lang/Object;)V
-	public static synthetic fun configureWithPaymentIntent$default (Lcom/stripe/android/elements/payment/FlowController;Ljava/lang/String;Lcom/stripe/android/elements/payment/PaymentSheet$Configuration;Lcom/stripe/android/elements/payment/FlowController$ConfigCallback;ILjava/lang/Object;)V
-	public static synthetic fun configureWithSetupIntent$default (Lcom/stripe/android/elements/payment/FlowController;Ljava/lang/String;Lcom/stripe/android/elements/payment/PaymentSheet$Configuration;Lcom/stripe/android/elements/payment/FlowController$ConfigCallback;ILjava/lang/Object;)V
+	public static synthetic fun configureWithIntentConfiguration$default (Lcom/stripe/android/elements/payment/FlowController;Lcom/stripe/android/elements/payment/IntentConfiguration;Lcom/stripe/android/elements/payment/FlowController$Configuration;Lcom/stripe/android/elements/payment/FlowController$ConfigCallback;ILjava/lang/Object;)V
+	public static synthetic fun configureWithPaymentIntent$default (Lcom/stripe/android/elements/payment/FlowController;Ljava/lang/String;Lcom/stripe/android/elements/payment/FlowController$Configuration;Lcom/stripe/android/elements/payment/FlowController$ConfigCallback;ILjava/lang/Object;)V
+	public static synthetic fun configureWithSetupIntent$default (Lcom/stripe/android/elements/payment/FlowController;Ljava/lang/String;Lcom/stripe/android/elements/payment/FlowController$Configuration;Lcom/stripe/android/elements/payment/FlowController$ConfigCallback;ILjava/lang/Object;)V
 }
 
 public final class com/stripe/android/elements/payment/FlowController$PaymentOptionDisplayData {

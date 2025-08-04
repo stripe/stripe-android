@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.elements.payment.AddressAutocompletePreview
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
@@ -22,6 +23,20 @@ internal object AutocompleteAddressSettingsDefinition : BooleanSettingsDefinitio
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
+        settings: Settings,
+    ) {
+        if (value) {
+            settings.googlePlacesApiKey?.let {
+                configurationBuilder.googlePlacesApiKey(it)
+            }
+        }
+    }
+
+    override fun configure(
+        value: Boolean,
+        configurationBuilder: FlowController.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment,
+        configurationData: PlaygroundSettingDefinition.FlowControllerConfigurationData,
         settings: Settings,
     ) {
         if (value) {
