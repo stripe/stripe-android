@@ -44,41 +44,11 @@ dependencies {
     implementation libs.compose.ui
     implementation libs.compose.uiTooling
     implementation libs.compose.viewModels
-
-    implementation libs.fuel
-    implementation libs.kotlin.serialization
-    implementation libs.loggingInterceptor
     implementation libs.material
-    implementation libs.okio
-    implementation libs.places
-    implementation libs.retrofitKotlinSerializationConverter
 
     testImplementation testLibs.junit
 
-    androidTestImplementation project(':payments-ui-core')
-    androidTestImplementation project(':payments-core-testing')
-    androidTestImplementation libs.playServicesWallet
-    androidTestImplementation testLibs.androidx.archCore
-    androidTestImplementation testLibs.androidx.composeUi
-    androidTestImplementation testLibs.androidx.core
-    androidTestImplementation testLibs.androidx.coreKtx
     androidTestImplementation testLibs.androidx.junit
-    androidTestImplementation testLibs.androidx.testRules
     androidTestImplementation testLibs.androidx.testRunner
-    androidTestImplementation testLibs.androidx.truth
     androidTestImplementation testLibs.androidx.uiAutomator
-    androidTestImplementation(testLibs.espresso.accessibility) {
-        exclude group: 'org.checkerframework', module: 'checker'
-    }
-    androidTestImplementation(testLibs.espresso.contrib) {
-        exclude group: 'org.checkerframework', module: 'checker'
-    }
-    androidTestImplementation testLibs.espresso.core
-    androidTestImplementation testLibs.espresso.intents
-    androidTestImplementation testLibs.espresso.web
-    androidTestImplementation testLibs.leakCanaryInstrumentation
-    androidTestImplementation testLibs.truth
-
-    debugImplementation libs.compose.uiTestManifest
-    debugImplementation libs.leakCanary
 }
