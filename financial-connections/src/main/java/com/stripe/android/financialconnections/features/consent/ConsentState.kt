@@ -2,7 +2,7 @@ package com.stripe.android.financialconnections.features.consent
 
 import com.stripe.android.financialconnections.model.ConsentPane
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
-import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.uicore.presentation.Async
 
 internal data class ConsentState(
     val consent: Async<Payload> = Async.Uninitialized,
