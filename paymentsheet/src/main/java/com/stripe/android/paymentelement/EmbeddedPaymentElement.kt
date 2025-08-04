@@ -526,7 +526,8 @@ class EmbeddedPaymentElement @Inject internal constructor(
 
     @Poko
     class PaymentOptionDisplayData internal constructor(
-        private val imageLoader: suspend () -> Drawable,
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val imageLoader: suspend () -> Drawable,
 
         /**
          * A user facing string representing the payment method; e.g. "Google Pay" or "···· 4242" for a card.
