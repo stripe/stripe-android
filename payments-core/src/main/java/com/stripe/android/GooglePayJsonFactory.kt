@@ -20,6 +20,7 @@ import javax.inject.Singleton
  * A factory for generating [Google Pay JSON request objects](https://developers.google.com/pay/api/android/reference/request-objects)
  * for Google Pay API version 2.0.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Singleton
 class GooglePayJsonFactory internal constructor(
     private val googlePayConfig: GooglePayConfig,
