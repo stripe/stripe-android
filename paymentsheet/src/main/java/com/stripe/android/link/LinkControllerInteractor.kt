@@ -70,21 +70,9 @@ internal class LinkControllerInteractor @Inject constructor(
         MutableSharedFlow<LinkController.PresentPaymentMethodsResult>(replay = 1)
     val presentPaymentMethodsResultFlow = _presentPaymentMethodsResultFlow.asSharedFlow()
 
-    private val _lookupConsumerResultFlow =
-        MutableSharedFlow<LinkController.LookupConsumerResult>(replay = 1)
-    val lookupConsumerResultFlow = _lookupConsumerResultFlow.asSharedFlow()
-
-    private val _createPaymentMethodResultFlow =
-        MutableSharedFlow<LinkController.CreatePaymentMethodResult>(replay = 1)
-    val createPaymentMethodResultFlow = _createPaymentMethodResultFlow.asSharedFlow()
-
     private val _authenticationResultFlow =
         MutableSharedFlow<AuthenticationResult>(replay = 1)
     val authenticationResultFlow = _authenticationResultFlow.asSharedFlow()
-
-    private val _registerConsumerResultFlow =
-        MutableSharedFlow<LinkController.RegisterConsumerResult>(replay = 1)
-    val registerConsumerResultFlow = _registerConsumerResultFlow.asSharedFlow()
 
     fun state(context: Context): StateFlow<LinkController.State> {
         return combineAsStateFlow(_internalLinkAccount, _state) { account, state ->

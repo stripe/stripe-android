@@ -252,7 +252,7 @@ class LinkController @Inject internal constructor(
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Presenter @Inject internal constructor(
-        private val linkControllerCoordinator: LinkControllerCoordinator,
+        private val coordinator: LinkControllerCoordinator,
         private val interactor: LinkControllerInteractor,
     ) {
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -273,7 +273,7 @@ class LinkController @Inject internal constructor(
          */
         fun presentPaymentMethods(email: String?) {
             interactor.presentPaymentMethods(
-                launcher = linkControllerCoordinator.linkActivityResultLauncher,
+                launcher = coordinator.linkActivityResultLauncher,
                 email = email,
                 hint = paymentSelectionHint,
             )
@@ -298,7 +298,7 @@ class LinkController @Inject internal constructor(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun authenticate(email: String?) {
             interactor.authenticate(
-                launcher = linkControllerCoordinator.linkActivityResultLauncher,
+                launcher = coordinator.linkActivityResultLauncher,
                 email = email
             )
         }
@@ -323,7 +323,7 @@ class LinkController @Inject internal constructor(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun authenticateExistingConsumer(email: String) {
             interactor.authenticateExistingConsumer(
-                launcher = linkControllerCoordinator.linkActivityResultLauncher,
+                launcher = coordinator.linkActivityResultLauncher,
                 email = email
             )
         }
