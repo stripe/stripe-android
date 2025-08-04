@@ -9,9 +9,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.crypto.onramp.di.DaggerOnrampComponent
 import com.stripe.android.crypto.onramp.di.OnrampComponent
+import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
+import com.stripe.android.crypto.onramp.model.OnrampKYCResult
 import com.stripe.android.crypto.onramp.viewmodels.OnrampCoordinatorViewModel
 import javax.inject.Inject
 
@@ -68,6 +70,10 @@ class OnrampCoordinator @Inject internal constructor(
      */
     fun authenticateExistingLinkUser(email: String) {
         onrampLinkController.authenticateExistingUser(email)
+    }
+
+    suspend fun collectKycInfo(kycInfo: KycInfo): OnrampKYCResult {
+        return viewModel.collectKycInfo(kycInfo)
     }
 
     /**

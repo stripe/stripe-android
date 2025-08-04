@@ -8,9 +8,11 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.crypto.onramp.di.DaggerOnrampCoordinatorViewModelComponent
+import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
+import com.stripe.android.crypto.onramp.model.OnrampKYCResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
 import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
@@ -65,6 +67,18 @@ internal class OnrampCoordinatorViewModel @Inject constructor(
             val config = LinkController.Configuration.Builder(merchantDisplayName = "").build()
 
             _configurationFlow.emit(config)
+        }
+    }
+
+    suspend fun collectKycInfo(kycInfo: KycInfo): OnrampKYCResult {
+        linkControllerState?.internalLinkAccount?.consumerSessionClientSecret?.let { secret ->
+            return cryptoApiRepository.collectKycData(kycInfo, secret)
+                .fold(
+                    onSuccess = { OnrampKYCResult.Completed },
+                    onFailure = { OnrampKYCResult.Failed(it) }
+                )
+        } ?: run {
+            return OnrampKYCResult.Failed(IllegalStateException("Missing consumer secret"))
         }
     }
 

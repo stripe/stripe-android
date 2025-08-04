@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-internal data class KycInfo(
+data class KycInfo(
     val firstName: String,
     val lastName: String,
     val idNumber: String?,
@@ -24,14 +24,14 @@ internal data class KycInfo(
 )
 
 @Serializable
-internal data class DateOfBirth(
+data class DateOfBirth(
     val day: Int,
     val month: Int,
     val year: Int
 )
 
 @Suppress("UnusedPrivateProperty")
-internal enum class IdType(private val value: String) {
+enum class IdType(private val value: String) {
     AADHAAR("aadhaar"),
     ABN("abn"),
     BUSINESS_TAX_DEDUCTION_ACCOUNT_NUMBER("business_tax_deduction_account_number"),
