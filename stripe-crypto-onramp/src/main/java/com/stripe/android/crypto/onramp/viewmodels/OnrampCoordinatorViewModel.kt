@@ -1,5 +1,7 @@
 package com.stripe.android.crypto.onramp.viewmodels
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -8,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.crypto.onramp.di.DaggerOnrampCoordinatorViewModelComponent
+import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
@@ -31,10 +34,11 @@ import javax.inject.Inject
  *
  */
 internal class OnrampCoordinatorViewModel @Inject constructor(
+    application: Application,
     private val handle: SavedStateHandle,
     private val onrampCallbacks: OnrampCallbacks,
     private val cryptoApiRepository: CryptoApiRepository
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
     /**
      * The current OnrampConfiguration, persisted across process restarts.
@@ -52,6 +56,13 @@ internal class OnrampCoordinatorViewModel @Inject constructor(
      * A flow that receives the built configuration model when `[configure]` is called.
      */
     internal val configurationFlow = _configurationFlow.asSharedFlow()
+
+    val linkController: LinkController by lazy {
+        LinkController.create(
+            application = application,
+            savedStateHandle = handle,
+        )
+    }
 
     /**
      * Configure the view model and associated types.
@@ -81,7 +92,15 @@ internal class OnrampCoordinatorViewModel @Inject constructor(
         linkControllerState = state
     }
 
-    fun handleConsumerLookupResult(result: LinkController.LookupConsumerResult) {
+    fun onIsLinkUser(email: String) {
+        viewModelScope.launch {
+            handleConsumerLookupResult(
+                linkController.lookupConsumer(email)
+            )
+        }
+    }
+
+    private fun handleConsumerLookupResult(result: LinkController.LookupConsumerResult) {
         when (result) {
             is LinkController.LookupConsumerResult.Success ->
                 onrampCallbacks.linkLookupCallback.onResult(
@@ -130,7 +149,20 @@ internal class OnrampCoordinatorViewModel @Inject constructor(
         }
     }
 
-    fun handleRegisterNewUserResult(result: LinkController.RegisterConsumerResult) {
+    fun onRegisterNewUser(info: LinkUserInfo) {
+        viewModelScope.launch {
+            handleRegisterNewUserResult(
+                linkController.registerConsumer(
+                    email = info.email,
+                    phone = info.phone,
+                    country = info.country,
+                    name = info.fullName,
+                )
+            )
+        }
+    }
+
+    private fun handleRegisterNewUserResult(result: LinkController.RegisterConsumerResult) {
         when (result) {
             is LinkController.RegisterConsumerResult.Success ->
                 viewModelScope.launch {
