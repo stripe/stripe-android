@@ -1,6 +1,7 @@
 package com.stripe.android.crypto.onramp.example
 
 import android.app.Application
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -16,6 +17,7 @@ import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
 import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
+import com.stripe.android.link.model.LinkAppearance
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -47,11 +49,20 @@ internal class OnrampViewModel(
             .build(application, savedStateHandle)
 
         viewModelScope.launch {
-            onrampCoordinator.configure(
-                configuration = OnrampConfiguration(
-                    paymentSheetAppearance = PaymentSheet.Appearance()
+            val configuration = OnrampConfiguration(
+                appearance = LinkAppearance(
+                    lightColors = LinkAppearance.Colors(
+                        primary = Color.Blue
+                    ),
+                    darkColors = LinkAppearance.Colors(
+                        primary = Color.Red
+                    ),
+                    style = LinkAppearance.Style.AUTOMATIC,
+                    primaryButton = LinkAppearance.PrimaryButton()
                 )
             )
+
+            onrampCoordinator.configure(configuration = configuration)
             // Set initial state to EmailInput after configuration
             _uiState.value = OnrampUiState.EmailInput
         }
