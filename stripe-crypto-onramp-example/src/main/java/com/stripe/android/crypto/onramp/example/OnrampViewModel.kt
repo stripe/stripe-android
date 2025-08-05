@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.example.onramp
+package com.stripe.android.crypto.onramp.example
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
@@ -26,7 +27,7 @@ internal class OnrampViewModel(
     savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
 
-    val onrampCoordinator = OnrampCoordinator.Builder().build(application, savedStateHandle)
+    val onrampCoordinator: OnrampCoordinator
 
     private val _uiState = MutableStateFlow<OnrampUiState>(OnrampUiState.Loading)
     val uiState: StateFlow<OnrampUiState> = _uiState.asStateFlow()
@@ -37,11 +38,20 @@ internal class OnrampViewModel(
     private var currentEmail: String = ""
 
     init {
-        val configuration = OnrampConfiguration(
-            paymentSheetAppearance = PaymentSheet.Appearance()
+        @Suppress("MaxLineLength")
+        PaymentConfiguration.init(
+            application,
+            "pk_test_51K9W3OHMaDsveWq0oLP0ZjldetyfHIqyJcz27k2BpMGHxu9v9Cei2tofzoHncPyk3A49jMkFEgTOBQyAMTUffRLa00xzzARtZO"
         )
+        onrampCoordinator = OnrampCoordinator.Builder()
+            .build(application, savedStateHandle)
+
         viewModelScope.launch {
-            onrampCoordinator.configure(configuration)
+            onrampCoordinator.configure(
+                configuration = OnrampConfiguration(
+                    paymentSheetAppearance = PaymentSheet.Appearance()
+                )
+            )
             // Set initial state to EmailInput after configuration
             _uiState.value = OnrampUiState.EmailInput
         }

@@ -1,4 +1,4 @@
-package com.stripe.android.crypto.onramp
+package com.stripe.android.crypto.onramp.example
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.stripe.android.crypto.onramp.test", appContext.packageName)
+        assertEquals("com.stripe.android.crypto.onramp.example", appContext.packageName)
     }
 }

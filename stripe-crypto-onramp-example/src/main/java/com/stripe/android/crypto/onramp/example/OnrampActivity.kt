@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.example.onramp
+package com.stripe.android.crypto.onramp.example
 
 import android.os.Bundle
 import android.widget.Toast
@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,9 +18,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material.darkColors
+import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,7 +40,6 @@ import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
-import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
 internal class OnrampActivity : ComponentActivity() {
 
@@ -60,7 +63,7 @@ internal class OnrampActivity : ComponentActivity() {
             .createPresenter(this, callbacks)
 
         setContent {
-            PaymentSheetExampleTheme {
+            OnrampExampleTheme {
                 OnrampScreen(
                     viewModel = viewModel,
                     onAuthenticateUser = { email -> onrampPresenter.authenticateExistingLinkUser(email) }
@@ -331,4 +334,14 @@ private fun AuthenticationScreen(
             Text("Back to Email Input")
         }
     }
+}
+
+@Composable
+fun OnrampExampleTheme(
+    content: @Composable () -> Unit,
+) {
+    MaterialTheme(
+        colors = if (isSystemInDarkTheme()) darkColors() else lightColors(),
+        content = content,
+    )
 }
