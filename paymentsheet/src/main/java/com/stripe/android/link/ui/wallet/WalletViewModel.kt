@@ -80,7 +80,7 @@ internal class WalletViewModel @Inject constructor(
             selectedItemId = null,
             cardBrandFilter = configuration.cardBrandFilter,
             collectMissingBillingDetailsForExistingPaymentMethods =
-            configuration.collectMissingBillingDetailsForExistingPaymentMethods,
+                configuration.collectMissingBillingDetailsForExistingPaymentMethods,
             isProcessing = false,
             hasCompleted = false,
             // initially expand the wallet if a payment method is preselected.
@@ -208,35 +208,29 @@ internal class WalletViewModel @Inject constructor(
         val autoSelectedPaymentMethod =
             paymentDetails.singleOrNull()?.details
                 ?: paymentDetails.firstOrNull { it.details.isDefault }?.details
+        _uiState.update { it.copy(hasAttemptedAutoSelection = true) }
 
-        if (autoSelectedPaymentMethod != null && isPaymentMethodReadyForUse(autoSelectedPaymentMethod)) {
-            // Set the default as selected and proceed with payment confirmation
+        if (autoSelectedPaymentMethod?.isReadyForUse() == true) {
+            // Set the default as selected and proceed with payment selection
             _uiState.update {
-                it.copy(
-                    selectedItemId = autoSelectedPaymentMethod.id,
-                    hasAttemptedAutoSelection = true
-                )
+                it.copy(selectedItemId = autoSelectedPaymentMethod.id)
             }
             performPaymentConfirmation(autoSelectedPaymentMethod)
         } else {
             // Auto-selection not supported, show the wallet UI
             _uiState.update {
-                it.copy(
-                    isAutoSelecting = false,
-                    isProcessing = false,
-                    hasAttemptedAutoSelection = true
-                )
+                it.copy(isAutoSelecting = false)
             }
         }
     }
 
-    private fun isPaymentMethodReadyForUse(paymentMethod: ConsumerPaymentDetails.PaymentDetails): Boolean {
+    private fun ConsumerPaymentDetails.PaymentDetails.isReadyForUse(): Boolean {
         // Check if card requires details recollection (includes both expiry and CVC checks)
-        val requiresCardDetailsRecollection = (paymentMethod as? ConsumerPaymentDetails.Card)
+        val requiresCardDetailsRecollection = (this as? ConsumerPaymentDetails.Card)
             ?.requiresCardDetailsRecollection == true
 
         // Check if billing details collection is needed
-        val needsBillingDetails = paymentMethod.supports(
+        val needsBillingDetails = supports(
             billingDetailsConfig = configuration.billingDetailsCollectionConfiguration,
             linkAccount = linkAccount
         ).not() && _uiState.value.collectMissingBillingDetailsForExistingPaymentMethods
