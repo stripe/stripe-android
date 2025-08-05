@@ -475,9 +475,10 @@ public final class com/stripe/android/link/model/LinkAppearance : android/os/Par
 public final class com/stripe/android/link/model/LinkAppearance$Colors : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public synthetic fun <init> (JLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (JJLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBorderSelected-0d7_KjU ()J
 	public final fun getPrimary-0d7_KjU ()J
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
