@@ -11,6 +11,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.common.model.asPaymentSheetConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.requireApplication
@@ -66,7 +67,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     linkHandler: LinkHandler,
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
 ) : BaseSheetViewModel(
-    config = args.configuration,
+    config = args.configuration.asPaymentSheetConfiguration(),
     eventReporter = eventReporter,
     customerRepository = customerRepository,
     workContext = workContext,

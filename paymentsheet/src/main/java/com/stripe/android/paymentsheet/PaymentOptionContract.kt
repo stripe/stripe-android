@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
-import com.stripe.android.elements.payment.PaymentSheet
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -30,7 +30,7 @@ internal class PaymentOptionContract :
     @Parcelize
     internal data class Args(
         val state: PaymentSheetState.Full,
-        val configuration: PaymentSheet.Configuration,
+        val configuration: FlowController.Configuration,
         val linkAccountInfo: LinkAccountUpdate.Value,
         val enableLogging: Boolean,
         val walletsToShow: List<WalletType>,

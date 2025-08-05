@@ -15,7 +15,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.exception.stripeErrorMessage
-import com.stripe.android.common.model.asPaymentSheetConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.elements.AddressDetails
@@ -314,7 +313,7 @@ internal class DefaultFlowController @Inject internal constructor(
     ) {
         val args = PaymentOptionContract.Args(
             state = state.paymentSheetState.copy(paymentSelection = paymentSelection),
-            configuration = state.config.asPaymentSheetConfiguration(),
+            configuration = state.config,
             enableLogging = enableLogging,
             productUsage = productUsage,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,

@@ -14,7 +14,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.common.model.asPaymentSheetConfiguration
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.Address
@@ -458,8 +457,7 @@ internal class DefaultFlowControllerTest {
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             ),
             configuration = FlowController
-                .Configuration("com.stripe.android.paymentsheet.test")
-                .asPaymentSheetConfiguration(),
+                .Configuration("com.stripe.android.paymentsheet.test"),
             enableLogging = ENABLE_LOGGING,
             productUsage = PRODUCT_USAGE,
             linkAccountInfo = LinkAccountUpdate.Value(null),
