@@ -11,10 +11,12 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.crypto.onramp.OnrampCoordinator
+import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
+import com.stripe.android.crypto.onramp.model.OnrampSetWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,6 +38,7 @@ internal class OnrampViewModel(
     val message: StateFlow<String?> = _message.asStateFlow()
 
     private var currentEmail: String = ""
+    private var currentCustomerId: String = ""
 
     init {
         @Suppress("MaxLineLength")
@@ -94,8 +97,9 @@ internal class OnrampViewModel(
     fun onAuthenticationResult(result: OnrampVerificationResult) {
         when (result) {
             is OnrampVerificationResult.Completed -> {
-                _message.value = "Authentication successful"
-                _uiState.value = OnrampUiState.EmailInput
+                currentCustomerId = result.customerId
+                _message.value = "Authentication successful! You can now perform authenticated operations."
+                _uiState.value = OnrampUiState.AuthenticatedOperations(currentEmail, currentCustomerId)
             }
             is OnrampVerificationResult.Cancelled -> {
                 _message.value = "Authentication cancelled, please try again"
@@ -123,6 +127,28 @@ internal class OnrampViewModel(
         }
     }
 
+    fun registerWalletAddress(walletAddress: String, network: CryptoNetwork) {
+        viewModelScope.launch {
+            if (walletAddress.isBlank()) {
+                _message.value = "Please enter a wallet address"
+                return@launch
+            }
+
+            _uiState.value = OnrampUiState.Loading
+            val result = onrampCoordinator.registerWalletAddress(walletAddress.trim(), network)
+            when (result) {
+                is OnrampSetWalletAddressResult.Completed -> {
+                    _message.value = "Wallet address registered successfully!"
+                    _uiState.value = OnrampUiState.AuthenticatedOperations(currentEmail, currentCustomerId)
+                }
+                is OnrampSetWalletAddressResult.Failed -> {
+                    _message.value = "Failed to register wallet address: ${result.error.message}"
+                    _uiState.value = OnrampUiState.AuthenticatedOperations(currentEmail, currentCustomerId)
+                }
+            }
+        }
+    }
+
     class Factory : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(
@@ -140,4 +166,5 @@ internal sealed class OnrampUiState {
     object Loading : OnrampUiState()
     data class Registration(val email: String) : OnrampUiState()
     data class Authentication(val email: String) : OnrampUiState()
+    data class AuthenticatedOperations(val email: String, val customerId: String) : OnrampUiState()
 }

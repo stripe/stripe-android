@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
@@ -38,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.crypto.onramp.OnrampCoordinator
+import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 
@@ -66,7 +69,8 @@ internal class OnrampActivity : ComponentActivity() {
             OnrampExampleTheme {
                 OnrampScreen(
                     viewModel = viewModel,
-                    onAuthenticateUser = { email -> onrampPresenter.authenticateExistingLinkUser(email) }
+                    onAuthenticateUser = onrampPresenter::authenticateExistingLinkUser,
+                    onRegisterWalletAddress = viewModel::registerWalletAddress
                 )
             }
         }
@@ -77,7 +81,8 @@ internal class OnrampActivity : ComponentActivity() {
 @Suppress("LongMethod")
 internal fun OnrampScreen(
     viewModel: OnrampViewModel,
-    onAuthenticateUser: (String) -> Unit
+    onAuthenticateUser: (String) -> Unit,
+    onRegisterWalletAddress: (String, CryptoNetwork) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
@@ -134,6 +139,16 @@ internal fun OnrampScreen(
                 AuthenticationScreen(
                     email = currentState.email,
                     onAuthenticate = onAuthenticateUser,
+                    onBack = {
+                        viewModel.onBackToEmailInput()
+                    }
+                )
+            }
+            is OnrampUiState.AuthenticatedOperations -> {
+                AuthenticatedOperationsScreen(
+                    email = currentState.email,
+                    customerId = currentState.customerId,
+                    onRegisterWalletAddress = onRegisterWalletAddress,
                     onBack = {
                         viewModel.onBackToEmailInput()
                     }
@@ -325,6 +340,103 @@ private fun AuthenticationScreen(
                 .padding(bottom = 24.dp)
         ) {
             Text("Authenticate")
+        }
+
+        TextButton(
+            onClick = onBack,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Back to Email Input")
+        }
+    }
+}
+
+@Composable
+@Suppress("LongMethod")
+private fun AuthenticatedOperationsScreen(
+    email: String,
+    customerId: String,
+    onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
+    onBack: () -> Unit
+) {
+    var walletAddress by remember { mutableStateOf("") }
+    var selectedNetwork by remember { mutableStateOf(CryptoNetwork.Ethereum) }
+    var isDropdownExpanded by remember { mutableStateOf(false) }
+
+    Column {
+        Text(
+            text = "Authenticated Operations",
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        Text(
+            text = "Email: $email",
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        Text(
+            text = "Customer ID: $customerId",
+            modifier = Modifier.padding(bottom = 24.dp)
+        )
+
+        Text(
+            text = "Register Wallet Address",
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        // Network Selection
+        Box {
+            OutlinedTextField(
+                value = selectedNetwork.value.replaceFirstChar { it.uppercase() },
+                onValueChange = { },
+                label = { Text("Network") },
+                readOnly = true,
+                trailingIcon = {
+                    TextButton(onClick = { isDropdownExpanded = true }) {
+                        Text("▼")
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp)
+            )
+
+            DropdownMenu(
+                expanded = isDropdownExpanded,
+                onDismissRequest = { isDropdownExpanded = false }
+            ) {
+                CryptoNetwork.values().forEach { network ->
+                    DropdownMenuItem(
+                        onClick = {
+                            selectedNetwork = network
+                            isDropdownExpanded = false
+                        }
+                    ) {
+                        Text(network.value.replaceFirstChar { it.uppercase() })
+                    }
+                }
+            }
+        }
+
+        OutlinedTextField(
+            value = walletAddress,
+            onValueChange = { walletAddress = it },
+            label = { Text("Wallet Address") },
+            placeholder = { Text("0x1234567890abcdef...") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
+        )
+
+        Button(
+            onClick = { onRegisterWalletAddress(walletAddress, selectedNetwork) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp)
+        ) {
+            Text("Register Wallet Address")
         }
 
         TextButton(

@@ -14,6 +14,10 @@ public final class com/stripe/android/crypto/onramp/OnrampCoordinator$Presenter 
 	public final fun authenticateExistingLinkUser (Ljava/lang/String;)V
 }
 
+public final class com/stripe/android/crypto/onramp/model/CryptoNetwork$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
 public final class com/stripe/android/crypto/onramp/model/LinkUserInfo$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/crypto/onramp/model/LinkUserInfo;
@@ -80,6 +84,16 @@ public final class com/stripe/android/crypto/onramp/model/OnrampRegisterUserResu
 }
 
 public final class com/stripe/android/crypto/onramp/model/OnrampRegisterUserResult$Failed : com/stripe/android/crypto/onramp/model/OnrampRegisterUserResult {
+	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampSetWalletAddressResult {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampSetWalletAddressResult$Completed : com/stripe/android/crypto/onramp/model/OnrampSetWalletAddressResult {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampSetWalletAddressResult$Failed : com/stripe/android/crypto/onramp/model/OnrampSetWalletAddressResult {
 	public final fun getError ()Ljava/lang/Throwable;
 }
 

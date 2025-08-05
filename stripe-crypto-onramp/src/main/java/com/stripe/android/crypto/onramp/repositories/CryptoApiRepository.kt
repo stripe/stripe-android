@@ -14,6 +14,8 @@ import com.stripe.android.core.networking.toMap
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.crypto.onramp.model.CryptoCustomerRequestParams
 import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
+import com.stripe.android.crypto.onramp.model.CryptoNetwork
+import com.stripe.android.crypto.onramp.model.CryptoWalletRequestParams
 import com.stripe.android.crypto.onramp.model.KycInfo
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.serializer
@@ -41,6 +43,15 @@ internal class CryptoApiRepository @Inject internal constructor(
         apiVersion = apiVersion,
         sdkVersion = sdkVersion
     )
+
+    private val json by lazy {
+        Json {
+            ignoreUnknownKeys = true
+            isLenient = true
+            encodeDefaults = true
+            explicitNulls = false
+        }
+    }
 
     /**
      * Grants the provided session merchant permissions.
@@ -74,6 +85,31 @@ internal class CryptoApiRepository @Inject internal constructor(
         )
     }
 
+    /**
+     * Sets the wallet address for the user.
+     *
+     * @param walletAddress The wallet address to set.
+     * @param network The crypto network for the wallet address.
+     * @param consumerSessionClientSecret The client session secret for authentication.
+     */
+    suspend fun setWalletAddress(
+        walletAddress: String,
+        network: CryptoNetwork,
+        consumerSessionClientSecret: String
+    ): Result<Unit> {
+        val params = CryptoWalletRequestParams(
+            walletAddress = walletAddress,
+            network = network,
+            credentials = CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret)
+        )
+
+        return execute(
+            setWalletAddressUrl,
+            Json.encodeToJsonElement(params).jsonObject,
+            Unit.serializer()
+        )
+    }
+
     private fun buildRequestOptions(): ApiRequest.Options {
         return ApiRequest.Options(
             apiKey = publishableKeyProvider(),
@@ -97,11 +133,11 @@ internal class CryptoApiRepository @Inject internal constructor(
         }.mapCatching { response ->
             if (response.isError) {
                 val error = StripeErrorJsonParser().parse(response.responseJson())
-                throw APIConnectionException("Failed to execute $request", cause = APIException(error))
+                throw APIException(error)
             }
 
             val body = requireNotNull(response.body) { "No response body found" }
-            Json.decodeFromString(responseSerializer, body)
+            json.decodeFromString(responseSerializer, body)
         }.recoverCatching {
             throw APIConnectionException("Failed to execute $request", cause = it)
         }
@@ -117,6 +153,11 @@ internal class CryptoApiRepository @Inject internal constructor(
          * @return `https://api.stripe.com/v1/crypto/internal/kyc_data_collection`
          */
         internal val collectKycDataUrl: String = getApiUrl("crypto/internal/kyc_data_collection")
+
+        /**
+         * @return `https://api.stripe.com/v1/crypto/internal/wallet`
+         */
+        internal val setWalletAddressUrl: String = getApiUrl("crypto/internal/wallet")
 
         private fun getApiUrl(path: String): String {
             return "${ApiRequest.API_HOST}/v1/$path"

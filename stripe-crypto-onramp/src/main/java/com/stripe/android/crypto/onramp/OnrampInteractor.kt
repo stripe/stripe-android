@@ -1,10 +1,12 @@
 package com.stripe.android.crypto.onramp
 
 import android.app.Application
+import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
+import com.stripe.android.crypto.onramp.model.OnrampSetWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.link.LinkController
@@ -63,6 +65,28 @@ internal class OnrampInteractor @Inject constructor(
                     error = result.error
                 )
             }
+        }
+    }
+
+    suspend fun registerWalletAddress(
+        walletAddress: String,
+        network: CryptoNetwork
+    ): OnrampSetWalletAddressResult {
+        val secret = consumerSessionClientSecret()
+        return if (secret != null) {
+            val result = cryptoApiRepository.setWalletAddress(walletAddress, network, secret)
+            result.fold(
+                onSuccess = {
+                    OnrampSetWalletAddressResult.Completed()
+                },
+                onFailure = { error ->
+                    OnrampSetWalletAddressResult.Failed(error)
+                }
+            )
+        } else {
+            OnrampSetWalletAddressResult.Failed(
+                IllegalStateException("Missing consumer session client secret")
+            )
         }
     }
 
