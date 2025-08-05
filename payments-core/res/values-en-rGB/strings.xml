@@ -56,8 +56,6 @@
   <string name="stripe_address_name_required">Please enter your name</string>
   <!-- Error text indicating that phone number is required, used for all addresses -->
   <string name="stripe_address_phone_number_required">Please enter your phone number</string>
-  <!-- Error message for when postal code in form is invalid -->
-  <string name="stripe_address_postal_code_invalid">Your postcode is invalid.</string>
   <!-- Error text indicating postcode is invalid, used for UK addresses -->
   <string name="stripe_address_postcode_invalid">Your postcode is invalid</string>
   <!-- Error text indicating that province is required, used for Canada addresses -->

@@ -52,10 +52,20 @@ class PostalCodeConfig(
         override fun getError(): FieldError? {
             return when {
                 input.isNotBlank() && !isValid() && country == "US" -> {
-                    FieldError(R.string.stripe_address_zip_invalid)
+                    // Check if it's too short (incomplete) vs invalid format
+                    if (input.length < format.minimumLength) {
+                        FieldError(R.string.stripe_address_zip_incomplete)
+                    } else {
+                        FieldError(R.string.stripe_address_zip_invalid)
+                    }
                 }
                 input.isNotBlank() && !isValid() -> {
-                    FieldError(R.string.stripe_address_zip_postal_invalid)
+                    // Check if it's too short (incomplete) vs invalid format
+                    if (input.length < format.minimumLength) {
+                        FieldError(R.string.stripe_address_postal_code_incomplete)
+                    } else {
+                        FieldError(R.string.stripe_address_postal_code_invalid)
+                    }
                 }
                 else -> null
             }

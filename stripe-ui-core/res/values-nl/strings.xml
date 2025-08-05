@@ -82,4 +82,6 @@
   <string name="stripe_invalid_expiry_month">De vervalmaand van de kaart is ongeldig.</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="stripe_invalid_expiry_year">Het vervaljaar van de kaart is ongeldig.</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="stripe_address_postal_code_invalid">Je postcode is ongeldig.</string>
 </resources>

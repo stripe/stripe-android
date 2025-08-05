@@ -1,35 +1,30 @@
 package com.stripe.android.crypto.onramp
 
+import android.app.Application
 import androidx.activity.ComponentActivity
-import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.RestrictTo
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.crypto.onramp.di.DaggerOnrampComponent
 import com.stripe.android.crypto.onramp.di.OnrampComponent
+import com.stripe.android.crypto.onramp.di.OnrampPresenterComponent
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
-import com.stripe.android.crypto.onramp.viewmodels.OnrampCoordinatorViewModel
+import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
+import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
 import javax.inject.Inject
 
 /**
  * Coordinator interface for managing the Onramp lifecycle, Link user checks,
  * and authentication flows.
  *
- * @param viewModel The ViewModel that persists configuration state across process restarts.
- * @param activityResultRegistryOwner Host providing ActivityResultRegistry for LinkController.
- * @param onrampCallbacks Callback structure that manages the results of asynchronous requests
- *                        made by the coordinator.
+ * @param interactor The interactor that persists configuration state across process restarts.
+ * @param presenterComponentFactory Factory for creating presenter components.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class OnrampCoordinator @Inject internal constructor(
-    private val viewModel: OnrampCoordinatorViewModel,
-    private val onrampLinkController: OnrampLinkController,
-    private val activityResultRegistryOwner: ActivityResultRegistryOwner,
-    private val onrampCallbacks: OnrampCallbacks
+    private val interactor: OnrampInteractor,
+    private val presenterComponentFactory: OnrampPresenterComponent.Factory,
 ) {
 
     /**
@@ -37,108 +32,89 @@ class OnrampCoordinator @Inject internal constructor(
      *
      * @param configuration The OnrampConfiguration to apply.
      */
-    fun configure(
+    suspend fun configure(
         configuration: OnrampConfiguration,
     ) {
-        viewModel.configure(configuration)
+        interactor.configure(configuration)
     }
 
     /**
      * Check if the given email corresponds to an existing Link user.
      *
      * @param email The email address to look up.
+     * @return OnrampLinkLookupResult indicating whether the user exists.
      */
-    fun isLinkUser(email: String) {
-        onrampLinkController.isLinkUser(email)
+    suspend fun isLinkUser(email: String): OnrampLinkLookupResult {
+        return interactor.isLinkUser(email)
     }
 
     /**
      * Given the required information, registers a new Link user.
      *
      * @param info The LinkInfo for the new user.
+     * @return OnrampRegisterUserResult indicating the result of registration.
      */
-    fun registerNewLinkUser(info: LinkUserInfo) {
-        onrampLinkController.registerNewUser(info)
+    suspend fun registerNewLinkUser(info: LinkUserInfo): OnrampRegisterUserResult {
+        return interactor.registerNewLinkUser(info)
     }
 
     /**
-     * Authenticate an existing Link user via email.
+     * Create a presenter for handling Link UI interactions.
      *
-     * @param email The email address of the existing user.
+     * @param activity The activity that will host the Link flows.
+     * @param onrampCallbacks Callbacks for handling asynchronous responses from UI operations.
+     * @return A presenter instance for handling Link UI operations.
      */
-    fun authenticateExistingLinkUser(email: String) {
-        onrampLinkController.authenticateExistingUser(email)
+    fun createPresenter(
+        activity: ComponentActivity,
+        onrampCallbacks: OnrampCallbacks
+    ): Presenter {
+        return presenterComponentFactory
+            .build(
+                activity = activity,
+                lifecycleOwner = activity,
+                activityResultRegistryOwner = activity,
+                onrampCallbacks = onrampCallbacks,
+            )
+            .presenter
+    }
+
+    /**
+     * Presenter for handling Link UI interactions without requiring direct activity references.
+     */
+    class Presenter @Inject internal constructor(
+        private val coordinator: OnrampPresenterCoordinator,
+    ) {
+        /**
+         * Authenticate an existing Link user via email.
+         * This presents the authentication UI.
+         *
+         * @param email The email address of the existing user.
+         */
+        fun authenticateExistingLinkUser(email: String) {
+            coordinator.authenticateExistingLinkUser(email)
+        }
     }
 
     /**
      * A Builder utility type to create an [OnrampCoordinator] with appropriate parameters.
-     *
-     * @param onrampCallbacks Callbacks for handling asynchronous responses from the coordinator.
      */
-    class Builder(
-        private val onrampCallbacks: OnrampCallbacks
-    ) {
+    class Builder {
         /**
          * Constructs an [OnrampCoordinator] for the given parameters.
          *
-         * @param activity The Activity that is using the [OnrampCoordinator].
+         * @param application The Application context.
+         * @param savedStateHandle The SavedStateHandle for state persistence.
          */
-        fun build(activity: ComponentActivity): OnrampCoordinator {
-            return create(
-                viewModelStoreOwner = activity,
-                lifecycleOwner = activity,
-                activityResultRegistryOwner = activity
-            )
-        }
-
-        /**
-         * Constructs an [OnrampCoordinator] for the given parameters.
-         *
-         * @param fragment The Fragment that is using the [OnrampCoordinator].
-         */
-        fun build(fragment: Fragment): OnrampCoordinator {
-            return create(
-                viewModelStoreOwner = fragment,
-                lifecycleOwner = fragment,
-                activityResultRegistryOwner = (fragment.host as? ActivityResultRegistryOwner)
-                    ?: fragment.requireActivity()
-            )
-        }
-
-        private fun create(
-            viewModelStoreOwner: ViewModelStoreOwner,
-            lifecycleOwner: LifecycleOwner,
-            activityResultRegistryOwner: ActivityResultRegistryOwner
+        fun build(
+            application: Application,
+            savedStateHandle: SavedStateHandle
         ): OnrampCoordinator {
-            val linkElementCallbackIdentifier = "OnrampCoordinator"
-
-            val viewModel = ViewModelProvider(
-                owner = viewModelStoreOwner,
-                factory = OnrampCoordinatorViewModel.Factory(
-                    onrampCallbacks = onrampCallbacks
-                )
-            ).get(
-                key = "OnRampCoordinatorViewModel(instance = $linkElementCallbackIdentifier)",
-                modelClass = OnrampCoordinatorViewModel::class.java
-            )
-
-            val componentActivity: ComponentActivity = when {
-                lifecycleOwner is ComponentActivity -> lifecycleOwner
-                lifecycleOwner is Fragment -> lifecycleOwner.requireActivity()
-                activityResultRegistryOwner is ComponentActivity -> activityResultRegistryOwner
-                else -> throw IllegalStateException("Expected a ComponentActivity")
-            }
-
             val onrampComponent: OnrampComponent =
                 DaggerOnrampComponent
                     .builder()
-                    .application(componentActivity.application)
-                    .componentActivity(componentActivity)
-                    .onRampCoordinatorViewModel(viewModel)
-                    .linkElementCallbackIdentifier(linkElementCallbackIdentifier)
-                    .activityResultRegistryOwner(activityResultRegistryOwner)
-                    .lifecycleOwner(lifecycleOwner)
-                    .onrampCallbacks(onrampCallbacks)
+                    .application(application)
+                    .savedStateHandle(savedStateHandle)
                     .build()
 
             return onrampComponent.onrampCoordinator

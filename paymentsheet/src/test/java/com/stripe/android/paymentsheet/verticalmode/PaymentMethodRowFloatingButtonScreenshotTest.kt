@@ -121,10 +121,10 @@ internal class PaymentMethodRowFloatingButtonScreenshotTest {
 
     @Test
     fun testStyleAppearance() {
-        val style = FloatingButton(
-            spacingDp = StripeThemeDefaults.floating.spacing,
-            additionalInsetsDp = 40f
-        )
+        val style = FloatingButton.Builder()
+            .spacingDp(StripeThemeDefaults.floating.spacing)
+            .additionalInsetsDp(40f)
+            .build()
         testPaymentMethodRowButton_FloatingButton(
             trailingContent = {
                 TrailingContent()

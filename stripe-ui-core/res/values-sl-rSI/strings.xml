@@ -82,4 +82,6 @@
   <string name="stripe_invalid_expiry_month">Mesec poteka vaše kartice ni veljaven.</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="stripe_invalid_expiry_year">Leto poteka vaše kartice ni veljavno.</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="stripe_address_postal_code_invalid">Vaša poštna številka ni veljavna.</string>
 </resources>

@@ -82,4 +82,6 @@
   <string name="stripe_invalid_expiry_month">Ix-xahar tal-iskadenza tal-karta tiegħek mhux tajjeb.</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="stripe_invalid_expiry_year">Is-sena tal-iskadenza tal-karta tiegħek mhix tajba.</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="stripe_address_postal_code_invalid">Il-kodići postali tiegħek mhux validu.</string>
 </resources>
