@@ -8,18 +8,29 @@ import kotlinx.serialization.Serializable
 @Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class KycInfo(
+    @SerialName("first_name")
     val firstName: String,
+
+    @SerialName("last_name")
     val lastName: String,
+
+    @SerialName("id_number")
     val idNumber: String?,
+
+    @SerialName("id_type")
     val idType: IdType?,
 
-    @SerialName("date_of_birth")
+    @SerialName("dob")
     val dateOfBirth: DateOfBirth,
 
     @Serializable(with = PaymentSheetAddressSerializer::class)
     val address: PaymentSheet.Address,
     val nationalities: List<String>?,
+
+    @SerialName("birth_country")
     val birthCountry: String?,
+
+    @SerialName("birth_city")
     val birthCity: String?
 )
 

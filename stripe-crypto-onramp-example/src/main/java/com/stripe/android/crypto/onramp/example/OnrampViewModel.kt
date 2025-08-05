@@ -2,6 +2,7 @@ package com.stripe.android.crypto.onramp.example
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
@@ -87,6 +88,19 @@ internal class OnrampViewModel : ViewModel() {
         _message.value = null
     }
 
+    fun submitKycInfo(kycInfo: KycInfo, onSubmitKycInfo: (KycInfo) -> Unit) {
+        _uiState.value = OnrampUiState.Loading
+
+        try {
+            onSubmitKycInfo(kycInfo)
+
+            _message.value = "KYC Submitted"
+        } catch (@Suppress("TooGenericExceptionCaught") e: RuntimeException) {
+            _message.value = "Submission failed: ${e.message}"
+            _uiState.value = OnrampUiState.KYCScreen
+        }
+    }
+
     // Handle configuration result
     fun onConfigurationResult(result: OnrampConfigurationResult) {
         when (result) {
@@ -129,7 +143,7 @@ internal class OnrampViewModel : ViewModel() {
         when (result) {
             is OnrampVerificationResult.Completed -> {
                 _message.value = "Authentication successful"
-                _uiState.value = OnrampUiState.EmailInput
+                _uiState.value = OnrampUiState.KYCScreen
             }
             is OnrampVerificationResult.Cancelled -> {
                 _message.value = "Authentication cancelled, please try again"
@@ -172,4 +186,5 @@ internal sealed class OnrampUiState {
     object Loading : OnrampUiState()
     data class Registration(val email: String) : OnrampUiState()
     data class Authentication(val email: String) : OnrampUiState()
+    object KYCScreen : OnrampUiState()
 }
