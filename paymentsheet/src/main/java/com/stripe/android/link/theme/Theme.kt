@@ -86,7 +86,7 @@ internal fun LinkAppearanceTheme(
         val overrides = if (isDark) appearance.darkColors else appearance.lightColors
         val resolvedColors = defaultColors.copy(
             textBrand = overrides.primary,
-            borderSelected = overrides.primary
+            borderSelected = overrides.borderSelected
         )
 
         val baseContext = LocalContext.current

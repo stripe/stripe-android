@@ -36,11 +36,13 @@ class LinkAppearance(
     @Parcelize
     @TypeParceler<Color, ColorParceler>()
     class Colors(
-        val primary: Color
+        val primary: Color,
+        val borderSelected: Color
     ) : Parcelable {
         internal companion object {
             fun default(isDark: Boolean) = Colors(
-                primary = LinkThemeConfig.colors(isDark = isDark).buttonPrimary
+                primary = LinkThemeConfig.colors(isDark = isDark).buttonPrimary,
+                borderSelected = LinkThemeConfig.colors(isDark = isDark).borderSelected,
             )
         }
     }

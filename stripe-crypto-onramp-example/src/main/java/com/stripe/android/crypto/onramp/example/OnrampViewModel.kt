@@ -52,10 +52,12 @@ internal class OnrampViewModel(
             val configuration = OnrampConfiguration(
                 appearance = LinkAppearance(
                     lightColors = LinkAppearance.Colors(
-                        primary = Color.Blue
+                        primary = Color.Blue,
+                        borderSelected = Color.Red
                     ),
                     darkColors = LinkAppearance.Colors(
-                        primary = Color.Red
+                        primary = Color.Red,
+                        borderSelected = Color.Blue
                     ),
                     style = LinkAppearance.Style.AUTOMATIC,
                     primaryButton = LinkAppearance.PrimaryButton()
