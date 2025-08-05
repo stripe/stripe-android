@@ -27,8 +27,12 @@ internal class OnrampInteractor @Inject constructor(
 
     suspend fun configure(configuration: OnrampConfiguration) {
         _state.value = _state.value.copy(configuration = configuration)
+
         linkController.configure(
-            LinkController.Configuration.Builder("Onramp Merchant").build()
+            LinkController.Configuration.Builder(
+                merchantDisplayName = "Onramp Merchant",
+                appearance = configuration.appearance
+            ).build()
         )
     }
 
