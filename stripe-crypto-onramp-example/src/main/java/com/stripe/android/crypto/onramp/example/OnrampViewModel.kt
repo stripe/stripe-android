@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
+import com.stripe.android.crypto.onramp.model.OnrampKYCResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
 import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
@@ -163,6 +164,19 @@ internal class OnrampViewModel : ViewModel() {
             }
             is OnrampRegisterUserResult.Failed -> {
                 _message.value = "Registration failed: ${result.error.message}"
+                _uiState.value = OnrampUiState.EmailInput
+            }
+        }
+    }
+
+    fun onKycInfoResult(result: OnrampKYCResult) {
+        when (result) {
+            is OnrampKYCResult.Completed -> {
+                _message.value = "KYC Submitted"
+                _uiState.value = OnrampUiState.EmailInput
+            }
+            is OnrampKYCResult.Failed -> {
+                _message.value = "KYC Submission failed: ${result.error.message}"
                 _uiState.value = OnrampUiState.EmailInput
             }
         }

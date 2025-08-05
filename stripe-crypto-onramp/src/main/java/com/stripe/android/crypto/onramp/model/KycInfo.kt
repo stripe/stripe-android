@@ -2,8 +2,15 @@ package com.stripe.android.crypto.onramp.model
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.paymentsheet.PaymentSheet
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 
 @Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -18,6 +25,7 @@ data class KycInfo(
     val idNumber: String?,
 
     @SerialName("id_type")
+    @Serializable(with = IdTypeSerializer::class)
     val idType: IdType?,
 
     @SerialName("dob")
@@ -42,7 +50,7 @@ data class DateOfBirth(
 )
 
 @Suppress("UnusedPrivateProperty")
-enum class IdType(private val value: String) {
+enum class IdType(internal val value: String) {
     AADHAAR("aadhaar"),
     ABN("abn"),
     BUSINESS_TAX_DEDUCTION_ACCOUNT_NUMBER("business_tax_deduction_account_number"),
@@ -68,4 +76,19 @@ enum class IdType(private val value: String) {
     PASSPORT_NUMBER("passport_number"),
     DRIVING_LICENSE_NUMBER("driving_license_number"),
     PHOTO_ID_NUMBER("photo_id_number")
+}
+
+private object IdTypeSerializer : KSerializer<IdType> {
+    override val descriptor: SerialDescriptor =
+        PrimitiveSerialDescriptor("IdType", PrimitiveKind.STRING)
+
+    override fun serialize(encoder: Encoder, value: IdType) {
+        encoder.encodeString(value.value)
+    }
+
+    override fun deserialize(decoder: Decoder): IdType {
+        val raw = decoder.decodeString()
+        return IdType.entries.firstOrNull { it.value == raw }
+            ?: throw SerializationException("Unknown IdType: $raw")
+    }
 }

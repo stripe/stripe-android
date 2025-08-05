@@ -72,7 +72,8 @@ internal class CryptoApiRepository @Inject internal constructor(
         kycInfo: KycInfo,
         consumerSessionClientSecret: String
     ): Result<Unit> {
-        val kycRequestModel = CollectKycRequestModel(kycInfo, CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret))
+        val kycRequestModel =
+            CollectKycRequestModel(kycInfo, CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret))
 
         return execute(
             collectKycDataUrl,
@@ -108,7 +109,9 @@ internal class CryptoApiRepository @Inject internal constructor(
             }
 
             val body = requireNotNull(response.body) { "No response body found" }
-            Json.decodeFromString(responseSerializer, body)
+
+            val json = Json { ignoreUnknownKeys = true }
+            json.decodeFromString(responseSerializer, body)
         }.recoverCatching {
             throw APIConnectionException("Failed to execute $request", cause = it)
         }
@@ -137,7 +140,7 @@ internal class CryptoApiRepository @Inject internal constructor(
         val credentials: CryptoCustomerRequestParams.Credentials
     )
 
-    private object CollectKycRequestModelSerializer: JsonTransformingSerializer<CollectKycRequestModel>(
+    private object CollectKycRequestModelSerializer : JsonTransformingSerializer<CollectKycRequestModel>(
         CollectKycRequestModel.serializer()
     ) {
         override fun transformSerialize(element: JsonElement): JsonElement {

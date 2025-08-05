@@ -403,21 +403,22 @@ private fun KYCScreen(
                     KycInfo(
                         firstName = firstName,
                         lastName = lastName,
-                        idNumber = "111-11-1111",
+                        idNumber = "123456789",
                         idType = IdType.SOCIAL_SECURITY_NUMBER,
                         dateOfBirth = DateOfBirth(1, month = 1, year = 1990),
                         address = PaymentSheet.Address(
-                            city = "Chicago",
+                            city = "New York",
                             country = "US",
                             line1 = "1234 Fake Street",
-                            postalCode = "01010",
-                            state = "IL"
+                            postalCode = "10108",
+                            state = "New York"
                         ),
                         nationalities = null,
                         birthCountry = "US",
                         birthCity = "Chicago"
                     )
-                ) },
+                )
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 24.dp)
