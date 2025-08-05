@@ -804,7 +804,7 @@ internal class FlowControllerTest {
             val failureResult = result as? PaymentSheetResult.Failed
             assertThat(failureResult?.error?.message).isEqualTo(
                 "Your PaymentIntent currency (usd) does not match " +
-                    "the PaymentSheet.IntentConfiguration currency (cad)."
+                    "the IntentConfiguration currency (cad)."
             )
         },
     ) { testContext ->

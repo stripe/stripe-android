@@ -13,7 +13,7 @@ import org.json.JSONObject
 internal object DeferredIntentValidator {
 
     /**
-     * Validates that the created [StripeIntent] matches the [PaymentSheet.IntentConfiguration] that
+     * Validates that the created [StripeIntent] matches the [IntentConfiguration] that
      * was provided to [PaymentSheet].
      */
     fun validate(
@@ -27,18 +27,18 @@ internal object DeferredIntentValidator {
             is PaymentIntent -> {
                 val paymentMode = requireNotNull(params.mode as? DeferredIntentParams.Mode.Payment) {
                     "You returned a PaymentIntent client secret " +
-                        "but used a PaymentSheet.IntentConfiguration in setup mode."
+                        "but used a IntentConfiguration in setup mode."
                 }
 
                 require(paymentMode.currency.lowercase() == stripeIntent.currency?.lowercase()) {
                     "Your PaymentIntent currency (${stripeIntent.currency?.lowercase()}) does " +
-                        "not match the PaymentSheet.IntentConfiguration currency " +
+                        "not match the IntentConfiguration currency " +
                         "(${paymentMode.currency.lowercase()})."
                 }
 
                 require(paymentMode.setupFutureUsage.isNull() == stripeIntent.setupFutureUsage.isNull()) {
                     "Your PaymentIntent setupFutureUsage (${stripeIntent.setupFutureUsage}) " +
-                        "does not match the PaymentSheet.IntentConfiguration " +
+                        "does not match the IntentConfiguration " +
                         "setupFutureUsage (${paymentMode.setupFutureUsage})."
                 }
 
@@ -59,19 +59,19 @@ internal object DeferredIntentValidator {
                 ) {
                     "Your PaymentIntent payment_method_options setup_future_usage values " +
                         "(${stripeIntent.getPaymentMethodOptions()} do not match the values provided in " +
-                        "PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions " +
+                        "IntentConfiguration.Mode.Payment.PaymentMethodOptions " +
                         "(${paymentMode.paymentMethodOptionsJsonString})"
                 }
             }
             is SetupIntent -> {
                 val setupMode = requireNotNull(params.mode as? DeferredIntentParams.Mode.Setup) {
                     "You returned a SetupIntent client secret " +
-                        "but used a PaymentSheet.IntentConfiguration in payment mode."
+                        "but used a IntentConfiguration in payment mode."
                 }
 
                 require(setupMode.setupFutureUsage.isNull() == stripeIntent.usage.isNull()) {
                     "Your SetupIntent usage (${stripeIntent.usage}) does not match " +
-                        "the PaymentSheet.IntentConfiguration usage (${stripeIntent.usage})."
+                        "the IntentConfiguration usage (${stripeIntent.usage})."
                 }
             }
         }
