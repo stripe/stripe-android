@@ -36,7 +36,7 @@ internal class DeferredIntentValidatorTest {
 
         assertThat(failure).hasMessageThat().isEqualTo(
             "You returned a PaymentIntent client secret " +
-                "but used a PaymentSheet.IntentConfiguration in setup mode."
+                "but used a IntentConfiguration in setup mode."
         )
     }
 
@@ -55,7 +55,7 @@ internal class DeferredIntentValidatorTest {
 
         assertThat(failure).hasMessageThat().isEqualTo(
             "Your PaymentIntent currency (usd) does not match " +
-                "the PaymentSheet.IntentConfiguration currency (eur)."
+                "the IntentConfiguration currency (eur)."
         )
     }
 
@@ -96,7 +96,7 @@ internal class DeferredIntentValidatorTest {
 
         assertThat(failure).hasMessageThat().isEqualTo(
             "Your PaymentIntent setupFutureUsage (on_session) does not match " +
-                "the PaymentSheet.IntentConfiguration setupFutureUsage (null)."
+                "the IntentConfiguration setupFutureUsage (null)."
         )
     }
 
@@ -200,7 +200,7 @@ internal class DeferredIntentValidatorTest {
 
         assertThat(failure).hasMessageThat().isEqualTo(
             "You returned a SetupIntent client secret " +
-                "but used a PaymentSheet.IntentConfiguration in payment mode."
+                "but used a IntentConfiguration in payment mode."
         )
     }
 
@@ -564,7 +564,7 @@ internal class DeferredIntentValidatorTest {
             assertThat(failure).hasMessageThat().isEqualTo(
                 "Your PaymentIntent payment_method_options setup_future_usage values " +
                     "(${intent.getPaymentMethodOptions()} do not match the values provided in " +
-                    "PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions " +
+                    "IntentConfiguration.Mode.Payment.PaymentMethodOptions " +
                     "(${paymentMethodOptions.toJsonObjectString()})"
             )
         }
