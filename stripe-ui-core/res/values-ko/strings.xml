@@ -78,4 +78,6 @@
   <string name="stripe_invalid_expiry_month">카드의 만료 월이 유효하지 않습니다.</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="stripe_invalid_expiry_year">카드의 만료 연도가 유효하지 않습니다.</string>
+  <\!-- Error message for when postal code in form is invalid -->
+  <string name="stripe_address_postal_code_invalid">우편번호가 유효하지 않습니다.</string>
 </resources>

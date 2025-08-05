@@ -78,4 +78,6 @@
   <string name="stripe_invalid_expiry_month">Luna de expirare a cardului nu este validă.</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="stripe_invalid_expiry_year">Anul de expirare al cardului nu este valid.</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="stripe_address_postal_code_invalid">Codul dvs. poștal nu este valid.</string>
 </resources>

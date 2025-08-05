@@ -78,4 +78,6 @@
   <string name="stripe_invalid_expiry_month">Bulan tamat tempoh kad anda tidak sah.</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="stripe_invalid_expiry_year">Tahun tamat tempoh kad anda tidak sah.</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="stripe_address_postal_code_invalid">Poskod anda tidak sah.</string>
 </resources>

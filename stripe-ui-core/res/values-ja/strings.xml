@@ -78,4 +78,6 @@
   <string name="stripe_invalid_expiry_month">カードの有効期限の月が無効です。</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="stripe_invalid_expiry_year">カードの有効期限の年が無効です。</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="stripe_address_postal_code_invalid">郵便番号が無効です</string>
 </resources>
