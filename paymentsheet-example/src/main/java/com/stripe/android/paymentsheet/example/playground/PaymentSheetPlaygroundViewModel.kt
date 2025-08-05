@@ -388,13 +388,6 @@ internal class PaymentSheetPlaygroundViewModel(
     }
 
     fun onPaymentSheetResult(paymentResult: PaymentSheet.Result) {
-        val integrationType = playgroundSettingsFlow.value?.configurationData?.value?.integrationType
-            ?: PlaygroundConfigurationData.IntegrationType.PaymentSheet
-
-        if (integrationType == PlaygroundConfigurationData.IntegrationType.FlowController) {
-            throw IllegalStateException("PaymentSheet Result should not be returned in FlowController Integration")
-        }
-
         if (paymentResult !is PaymentSheet.Result.Canceled) {
             setPlaygroundState(null)
         }
@@ -429,13 +422,6 @@ internal class PaymentSheetPlaygroundViewModel(
     }
 
     fun onFlowControllerResult(paymentResult: FlowController.Result) {
-        val integrationType = playgroundSettingsFlow.value?.configurationData?.value?.integrationType
-            ?: PlaygroundConfigurationData.IntegrationType.FlowController
-
-        if (integrationType == PlaygroundConfigurationData.IntegrationType.PaymentSheet) {
-            throw IllegalStateException("FlowController Result should not be returned in PaymentSheet Integration")
-        }
-
         if (paymentResult is FlowController.Result.Completed) {
             setPlaygroundState(null)
         } else if (paymentResult !is FlowController.Result.Canceled) {
