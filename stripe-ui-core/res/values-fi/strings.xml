@@ -82,4 +82,6 @@
   <string name="stripe_invalid_expiry_month">Kortin erääntymiskuukausi ei kelpaa.</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="stripe_invalid_expiry_year">Kortin voimassaolovuosi ei kelpaa.</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="stripe_address_postal_code_invalid">Postinumeroon virheellinen.</string>
 </resources>
