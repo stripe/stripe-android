@@ -7,8 +7,8 @@ import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.FlowController.PaymentOptionDisplayData
-import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.model.CartState
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutRequest
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutResponse
@@ -68,18 +68,18 @@ internal class CustomFlowViewModel(
         }
     }
 
-    fun handlePaymentSheetResult(paymentResult: PaymentSheet.Result) {
+    fun handleFlowControllerResult(paymentResult: FlowController.Result) {
         val status = when (paymentResult) {
-            is PaymentSheet.Result.Canceled -> null
-            is PaymentSheet.Result.Completed -> "Success"
-            is PaymentSheet.Result.Failed -> paymentResult.error.message
+            is FlowController.Result.Canceled -> null
+            is FlowController.Result.Completed -> "Success"
+            is FlowController.Result.Failed -> paymentResult.error.message
         }
 
         _state.update {
             it.copy(
                 isProcessing = false,
                 status = status,
-                didComplete = paymentResult is PaymentSheet.Result.Completed,
+                didComplete = paymentResult is FlowController.Result.Completed,
             )
         }
     }

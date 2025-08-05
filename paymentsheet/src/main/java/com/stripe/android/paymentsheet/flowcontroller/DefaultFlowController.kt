@@ -24,7 +24,6 @@ import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.FlowController.PaymentOptionDisplayData
 import com.stripe.android.elements.payment.IntentConfiguration
-import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
@@ -85,7 +84,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val lifecycleOwner: LifecycleOwner,
     private val paymentOptionFactory: PaymentOptionFactory,
     private val paymentOptionCallback: PaymentOptionDisplayData.Callback,
-    private val paymentResultCallback: PaymentSheet.ResultCallback,
+    private val paymentResultCallback: FlowController.ResultCallback,
     private val prefsRepositoryFactory: @JvmSuppressWildcards (CustomerConfiguration?) -> PrefsRepository,
     activityResultCaller: ActivityResultCaller,
     activityResultRegistryOwner: ActivityResultRegistryOwner,
@@ -243,8 +242,8 @@ internal class DefaultFlowController @Inject internal constructor(
     private fun withCurrentState(block: (State) -> Unit) {
         val state = viewModel.state
         if (state == null) {
-            paymentResultCallback.onPaymentSheetResult(
-                PaymentSheet.Result.Failed(
+            paymentResultCallback.onFlowControllerResult(
+                FlowController.Result.Failed(
                     IllegalStateException(
                         "FlowController must be successfully initialized " +
                             "using configureWithPaymentIntent(), configureWithSetupIntent() or " +
@@ -253,8 +252,8 @@ internal class DefaultFlowController @Inject internal constructor(
                 )
             )
         } else if (!configurationHandler.isConfigured) {
-            paymentResultCallback.onPaymentSheetResult(
-                PaymentSheet.Result.Failed(
+            paymentResultCallback.onFlowControllerResult(
+                FlowController.Result.Failed(
                     IllegalStateException(
                         "FlowController is not configured, or has a configuration update in flight."
                     )
@@ -339,7 +338,9 @@ internal class DefaultFlowController @Inject internal constructor(
             paymentOptionActivityLauncher.launch(args, options)
         } catch (e: IllegalStateException) {
             val message = "The host activity is not in a valid state (${lifecycleOwner.lifecycle.currentState})."
-            paymentResultCallback.onPaymentSheetResult(PaymentSheet.Result.Failed(IllegalStateException(message, e)))
+            paymentResultCallback.onFlowControllerResult(
+                FlowController.Result.Failed(IllegalStateException(message, e))
+            )
         }
     }
 
@@ -688,8 +689,8 @@ internal class DefaultFlowController @Inject internal constructor(
         }
 
         viewModelScope.launch {
-            paymentResultCallback.onPaymentSheetResult(
-                paymentResult.convertToPaymentSheetResult()
+            paymentResultCallback.onFlowControllerResult(
+                paymentResult.convertToFlowControllerResult()
             )
         }
     }
@@ -701,7 +702,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 confirm()
             }
             SepaMandateResult.Canceled -> {
-                paymentResultCallback.onPaymentSheetResult(PaymentSheet.Result.Canceled())
+                paymentResultCallback.onFlowControllerResult(FlowController.Result.Canceled())
             }
         }
     }
@@ -733,10 +734,10 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    private fun PaymentResult.convertToPaymentSheetResult() = when (this) {
-        is PaymentResult.Completed -> PaymentSheet.Result.Completed()
-        is PaymentResult.Canceled -> PaymentSheet.Result.Canceled()
-        is PaymentResult.Failed -> PaymentSheet.Result.Failed(throwable)
+    private fun PaymentResult.convertToFlowControllerResult() = when (this) {
+        is PaymentResult.Completed -> FlowController.Result.Completed()
+        is PaymentResult.Canceled -> FlowController.Result.Canceled()
+        is PaymentResult.Failed -> FlowController.Result.Failed(throwable)
     }
 
     @Parcelize
@@ -777,7 +778,7 @@ internal class DefaultFlowController @Inject internal constructor(
             activityResultCaller: ActivityResultCaller,
             statusBarColor: () -> Int?,
             paymentOptionCallback: PaymentOptionDisplayData.Callback,
-            paymentResultCallback: PaymentSheet.ResultCallback,
+            paymentResultCallback: FlowController.ResultCallback,
             paymentElementCallbackIdentifier: String,
             initializedViaCompose: Boolean,
             activityResultRegistryOwner: ActivityResultRegistryOwner,

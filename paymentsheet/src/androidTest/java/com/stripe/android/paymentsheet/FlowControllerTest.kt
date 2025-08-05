@@ -39,8 +39,6 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.WalletButtonsPage
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.elements.payment.FlowController
-import com.stripe.android.elements.payment.PaymentSheet
-import com.stripe.android.elements.payment.PaymentSheet.Result
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.ActivityLaunchObserver
@@ -687,8 +685,8 @@ internal class FlowControllerTest {
             }
         },
         resultCallback = { result ->
-            assertThat(result).isInstanceOf(PaymentSheet.Result.Failed::class.java)
-            assertThat((result as PaymentSheet.Result.Failed).error.cause?.message)
+            assertThat(result).isInstanceOf(FlowController.Result.Failed::class.java)
+            assertThat((result as FlowController.Result.Failed).error.cause?.message)
                 .isEqualTo("We don't accept visa")
         },
     ) { testContext ->
@@ -802,7 +800,7 @@ internal class FlowControllerTest {
             }
         },
         resultCallback = { result ->
-            val failureResult = result as? PaymentSheet.Result.Failed
+            val failureResult = result as? FlowController.Result.Failed
             assertThat(failureResult?.error?.message).isEqualTo(
                 "Your PaymentIntent currency (usd) does not match " +
                     "the IntentConfiguration currency (cad)."

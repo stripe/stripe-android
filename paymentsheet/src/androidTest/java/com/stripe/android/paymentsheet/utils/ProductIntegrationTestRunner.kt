@@ -43,12 +43,26 @@ internal fun runProductIntegrationTest(
                 builder = {
                     integrationBuilder.applyToFlowControllerBuilder(this)
                 },
-                resultCallback = resultCallback,
+                resultCallback = {
+                    FlowController.ResultCallback { flowControllerResult ->
+                        resultCallback.onPaymentSheetResult(
+                            paymentSheetResult = flowControllerResult.toPaymentSheetResult()
+                        )
+                    }
+                },
                 block = { context ->
                     block(ProductIntegrationTestRunnerContext.WithFlowController(context))
                 }
             )
         }
+    }
+}
+
+private fun FlowController.Result.toPaymentSheetResult(): PaymentSheet.Result {
+    return when (this) {
+        is FlowController.Result.Completed -> PaymentSheet.Result.Completed()
+        is FlowController.Result.Canceled -> PaymentSheet.Result.Canceled()
+        is FlowController.Result.Failed -> PaymentSheet.Result.Failed(this.error)
     }
 }
 

@@ -167,7 +167,7 @@ internal class PaymentSheetPlaygroundActivity :
                 .build()
             val flowController = remember {
                 FlowController.Builder(
-                    viewModel::onPaymentSheetResult,
+                    viewModel::onFlowControllerResult,
                     viewModel::onPaymentOptionSelected
                 )
                     .externalPaymentMethodConfirmHandler(this)

@@ -9,7 +9,6 @@ import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.stripe.android.common.ui.UpdateCallbacks
 import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.FlowController.PaymentOptionDisplayData
-import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.utils.rememberActivity
@@ -19,7 +18,7 @@ import java.util.UUID
 internal fun internalRememberPaymentSheetFlowController(
     callbacks: PaymentElementCallbacks,
     paymentOptionCallback: PaymentOptionDisplayData.Callback,
-    paymentResultCallback: PaymentSheet.ResultCallback,
+    paymentResultCallback: FlowController.ResultCallback,
 ): FlowController {
     val paymentElementCallbackIdentifier = rememberSaveable {
         UUID.randomUUID().toString()
@@ -48,7 +47,7 @@ internal fun internalRememberPaymentSheetFlowController(
             activityResultRegistryOwner = activityResultRegistryOwner,
             statusBarColor = { activity.window?.statusBarColor },
             paymentOptionCallback = paymentOptionCallback,
-            paymentResultCallback = paymentResultCallback,
+            resultCallback = paymentResultCallback,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             initializedViaCompose = true,
         ).create()

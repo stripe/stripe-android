@@ -107,11 +107,11 @@ interface FlowController {
     /**
      * Builder utility to set optional callbacks for [FlowController].
      *
-     * @param resultCallback Called when a [PaymentSheetResult] is available.
+     * @param resultCallback Called when a [FlowController.Result] is available.
      * @param paymentOptionCallback Called when the customer's desired payment method changes.
      */
     class Builder(
-        internal val resultCallback: PaymentSheet.ResultCallback,
+        internal val resultCallback: ResultCallback,
         internal val paymentOptionCallback: PaymentOptionDisplayData.Callback
     ) {
         private val callbacksBuilder = PaymentElementCallbacks.Builder()
@@ -784,12 +784,52 @@ interface FlowController {
             }
     }
 
-    sealed class Result {
-        object Success : Result()
+    /**
+     * The result of an attempt to confirm a [PaymentIntent] or [SetupIntent].
+     */
+    sealed class Result : Parcelable {
 
-        class Failure(
+        /**
+         * The customer completed the payment or setup.
+         * The payment may still be processing at this point; don't assume money has successfully moved.
+         *
+         * Your app should transition to a generic receipt view (e.g. a screen that displays "Your order
+         * is confirmed!"), and fulfill the order (e.g. ship the product to the customer) after
+         * receiving a successful payment event from Stripe.
+         *
+         * See [Stripe's documentation](https://stripe.com/docs/payments/handling-payment-events)
+         */
+        @Parcelize
+        @Poko
+        class Completed internal constructor(
+            @Suppress("unused") private val irrelevantValueForGeneratedCode: Boolean = true
+        ) : Result()
+
+        /**
+         * The customer canceled the payment or setup attempt.
+         */
+        @Parcelize
+        @Poko
+        class Canceled internal constructor(
+            @Suppress("unused") private val irrelevantValueForGeneratedCode: Boolean = true
+        ) : Result()
+
+        /**
+         * The payment or setup attempt failed.
+         * @param error The error encountered by the customer.
+         */
+        @Parcelize
+        @Poko
+        class Failed internal constructor(
             val error: Throwable
         ) : Result()
+    }
+
+    /**
+     * Callback that is invoked when a [Result] is available.
+     */
+    fun interface ResultCallback {
+        fun onFlowControllerResult(flowControllerResult: Result)
     }
 
     fun interface ConfigCallback {

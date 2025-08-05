@@ -390,11 +390,12 @@ internal class PaymentSheetPlaygroundViewModel(
     fun onPaymentSheetResult(paymentResult: PaymentSheet.Result) {
         val integrationType = playgroundSettingsFlow.value?.configurationData?.value?.integrationType
             ?: PlaygroundConfigurationData.IntegrationType.PaymentSheet
+
         if (integrationType == PlaygroundConfigurationData.IntegrationType.FlowController) {
-            if (paymentResult is PaymentSheet.Result.Completed) {
-                setPlaygroundState(null)
-            }
-        } else if (paymentResult !is PaymentSheet.Result.Canceled) {
+            throw IllegalStateException("PaymentSheet Result should not be returned in FlowController Integration")
+        }
+
+        if (paymentResult !is PaymentSheet.Result.Canceled) {
             setPlaygroundState(null)
         }
 
@@ -408,6 +409,49 @@ internal class PaymentSheetPlaygroundViewModel(
             }
 
             is PaymentSheet.Result.Failed -> {
+                when (paymentResult.error) {
+                    is ConfirmIntentEndpointException -> {
+                        "Couldn't process your payment: ${paymentResult.error.message}"
+                    }
+
+                    is ConfirmIntentNetworkException -> {
+                        "No internet. Try again later."
+                    }
+
+                    else -> {
+                        "Something went wrong: ${paymentResult.error.message}"
+                    }
+                }
+            }
+        }
+
+        status.value = StatusMessage(statusMessage)
+    }
+
+    fun onFlowControllerResult(paymentResult: FlowController.Result) {
+        val integrationType = playgroundSettingsFlow.value?.configurationData?.value?.integrationType
+            ?: PlaygroundConfigurationData.IntegrationType.FlowController
+
+        if (integrationType == PlaygroundConfigurationData.IntegrationType.PaymentSheet) {
+            throw IllegalStateException("FlowController Result should not be returned in PaymentSheet Integration")
+        }
+
+        if (paymentResult is FlowController.Result.Completed) {
+            setPlaygroundState(null)
+        } else if (paymentResult !is FlowController.Result.Canceled) {
+            setPlaygroundState(null)
+        }
+
+        val statusMessage = when (paymentResult) {
+            is FlowController.Result.Canceled -> {
+                "Canceled"
+            }
+
+            is FlowController.Result.Completed -> {
+                SUCCESS_RESULT
+            }
+
+            is FlowController.Result.Failed -> {
                 when (paymentResult.error) {
                     is ConfirmIntentEndpointException -> {
                         "Couldn't process your payment: ${paymentResult.error.message}"
