@@ -48,6 +48,8 @@
   <string name="stripe_address_zip_incomplete">Your ZIP code is incomplete.</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
   <string name="stripe_address_zip_invalid">Your ZIP code is invalid.</string>
+  <!-- Error text indicating the zip/postal code is invalid, used for addresses of unknown country -->
+  <string name="stripe_address_zip_or_postal_invalid">Your ZIP/postal code is invalid.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="stripe_address_zip_postal_invalid">Your ZIP/Postal code is invalid</string>
   <!-- Label for a checkbox that makes customers billing address same as their shipping address -->
