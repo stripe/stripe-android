@@ -75,20 +75,6 @@ public final class com/stripe/android/crypto/onramp/model/IdType : java/lang/Enu
 	public static fun values ()[Lcom/stripe/android/crypto/onramp/model/IdType;
 }
 
-public synthetic class com/stripe/android/crypto/onramp/model/KycInfo$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field INSTANCE Lcom/stripe/android/crypto/onramp/model/KycInfo$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/crypto/onramp/model/KycInfo;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/crypto/onramp/model/KycInfo;)V
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-}
-
-public final class com/stripe/android/crypto/onramp/model/KycInfo$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
 public final class com/stripe/android/crypto/onramp/model/LinkUserInfo$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/crypto/onramp/model/LinkUserInfo;

@@ -107,6 +107,29 @@ class CryptoApiRepositoryTest {
             assertThat(apiRequest.baseUrl)
                 .isEqualTo("https://api.stripe.com/v1/crypto/internal/kyc_data_collection")
 
+            val params = apiRequest.params!!
+            val dobValue = params["dob"] as Map<*, *>
+            assertThat(params["first_name"]).isEqualTo("Test")
+            assertThat(params["last_name"]).isEqualTo("User")
+            assertThat(params["id_number"]).isEqualTo("999-88-7777")
+            assertThat(params["id_type"]).isEqualTo("social_security_number")
+            assertThat(dobValue["day"]).isEqualTo("1")
+            assertThat(dobValue["month"]).isEqualTo("3")
+            assertThat(dobValue["year"]).isEqualTo("1975")
+            assertThat(params["nationalities"]).isEqualTo(listOf("TestNationality"))
+            assertThat(params["birth_country"]).isEqualTo("US")
+            assertThat(params["birth_city"]).isEqualTo("Chicago")
+            assertThat(params["city"]).isEqualTo("Orlando")
+            assertThat(params["state"]).isEqualTo("FL")
+            assertThat(params["country"]).isNull()
+            assertThat(params["line1"]).isNull()
+            assertThat(params["line2"]).isNull()
+            assertThat(params["zip"]).isNull()
+
+            assertThat(params["credentials"]).isEqualTo(
+                mapOf("consumer_session_client_secret" to "test-secret")
+            )
+
             assertThat(result.isSuccess)
                 .isEqualTo(true)
         }

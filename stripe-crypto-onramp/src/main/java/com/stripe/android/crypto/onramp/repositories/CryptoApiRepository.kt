@@ -14,15 +14,12 @@ import com.stripe.android.core.networking.toMap
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.crypto.onramp.model.CryptoCustomerRequestParams
 import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
+import com.stripe.android.crypto.onramp.model.KycCollectionRequest
 import com.stripe.android.crypto.onramp.model.KycInfo
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonTransformingSerializer
-import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 import javax.inject.Inject
@@ -72,12 +69,14 @@ internal class CryptoApiRepository @Inject internal constructor(
         kycInfo: KycInfo,
         consumerSessionClientSecret: String
     ): Result<Unit> {
-        val kycRequestModel =
-            CollectKycRequestModel(kycInfo, CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret))
+        val apiRequest = KycCollectionRequest.fromKycInfo(
+            kycInfo = kycInfo,
+            credentials = CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret)
+        )
 
         return execute(
             collectKycDataUrl,
-            Json.encodeToJsonElement(CollectKycRequestModelSerializer, kycRequestModel).jsonObject,
+            Json.encodeToJsonElement(apiRequest).jsonObject,
             Unit.serializer()
         )
     }
@@ -130,33 +129,6 @@ internal class CryptoApiRepository @Inject internal constructor(
 
         private fun getApiUrl(path: String): String {
             return "${ApiRequest.API_HOST}/v1/$path"
-        }
-    }
-
-    @Serializable
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    private data class CollectKycRequestModel(
-        val kycInfo: KycInfo,
-        val credentials: CryptoCustomerRequestParams.Credentials
-    )
-
-    private object CollectKycRequestModelSerializer : JsonTransformingSerializer<CollectKycRequestModel>(
-        CollectKycRequestModel.serializer()
-    ) {
-        override fun transformSerialize(element: JsonElement): JsonElement {
-            val json = element.jsonObject
-            val kycFields = json["kycInfo"]?.jsonObject ?: JsonObject(emptyMap())
-            val creds = json["credentials"]?.jsonObject ?: JsonObject(emptyMap())
-
-            val addressObj = kycFields["address"]?.jsonObject ?: JsonObject(emptyMap())
-            val otherKycFields = kycFields.filterKeys { it != "address" }
-
-            return buildJsonObject {
-                otherKycFields.forEach { (key, value) -> put(key, value) }
-                addressObj.forEach { (key, value) -> put(key, value) }
-
-                put("credentials", creds)
-            }
         }
     }
 }
