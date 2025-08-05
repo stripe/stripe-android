@@ -31,6 +31,7 @@ class LinkAppearance(
      * Color configuration for Link components.
      *
      * @param primary The primary color used for buttons, highlights, and interactive elements.
+     * @param borderSelected The color used for the border of selected views.
      */
     @Poko
     @Parcelize
