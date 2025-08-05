@@ -19,6 +19,7 @@ import com.stripe.android.paymentelement.assertCompleted
 import com.stripe.android.paymentelement.runEmbeddedPaymentElementTest
 import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runFlowControllerTest
