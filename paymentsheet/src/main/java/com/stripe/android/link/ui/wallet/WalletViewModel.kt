@@ -52,6 +52,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -133,8 +134,7 @@ internal class WalletViewModel @Inject constructor(
                 if (paymentDetailsState.paymentDetails.isEmpty()) {
                     navigateAndClearStack(LinkScreen.PaymentMethod)
                 } else {
-                    val currentState = _uiState.value
-                    _uiState.update {
+                    val currentState = _uiState.updateAndGet {
                         it.updateWithResponse(paymentDetailsState.paymentDetails)
                     }
 
@@ -206,8 +206,8 @@ internal class WalletViewModel @Inject constructor(
 
     private suspend fun handleAutoSelection(paymentDetails: List<LinkPaymentMethod.ConsumerPaymentDetails>) {
         val autoSelectedPaymentMethod =
-            paymentDetails.singleOrNull()?.details
-                ?: paymentDetails.firstOrNull { it.details.isDefault }?.details
+            (paymentDetails.firstOrNull { it.details.isDefault } ?: paymentDetails.singleOrNull())?.details
+
         _uiState.update { it.copy(hasAttemptedAutoSelection = true) }
 
         if (autoSelectedPaymentMethod?.isReadyForUse() == true) {
