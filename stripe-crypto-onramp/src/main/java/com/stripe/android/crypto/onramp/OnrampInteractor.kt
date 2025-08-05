@@ -15,17 +15,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Represents the current state of the Onramp feature.
- *
- * @param configuration The current onramp configuration, if any.
- * @param linkControllerState The current Link controller state, if any.
- */
-internal data class OnrampState(
-    val configuration: OnrampConfiguration? = null,
-    val linkControllerState: LinkController.State? = null,
-)
-
 @Singleton
 internal class OnrampInteractor @Inject constructor(
     private val application: Application,
@@ -109,3 +98,8 @@ internal class OnrampInteractor @Inject constructor(
         _state.value = _state.value.copy(linkControllerState = linkState)
     }
 }
+
+internal data class OnrampState(
+    val configuration: OnrampConfiguration? = null,
+    val linkControllerState: LinkController.State? = null,
+)
