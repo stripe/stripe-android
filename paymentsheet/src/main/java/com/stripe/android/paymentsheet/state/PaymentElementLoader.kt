@@ -273,15 +273,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             state = state
         )
 
-        // Only log Link AB Test if Link is enabled
-        val linkEnabled = state.paymentMethodMetadata.linkState != null
-        if (linkEnabled) {
-            logLinkHoldbackExperiment(
-                elementsSession = elementsSession,
-                state = state,
-                experimentAssignment = ElementsSession.ExperimentAssignment.LINK_AB_TEST
-            )
-        }
+        logLinkHoldbackExperiment(
+            elementsSession = elementsSession,
+            state = state,
+            experimentAssignment = ElementsSession.ExperimentAssignment.LINK_AB_TEST
+        )
     }
 
     private suspend fun retrieveElementsSession(
