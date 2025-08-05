@@ -6,6 +6,7 @@ import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.payment.AnalyticEvent
+import com.stripe.android.elements.payment.AnalyticEventCallbackPreview
 import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.networktesting.NetworkRule
@@ -17,7 +18,6 @@ import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.AnalyticEventRule
-import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentsheet.utils.AdvancedFraudSignalsTestRule
 import com.stripe.android.paymentsheet.utils.FlowControllerTestRunnerContext
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
@@ -32,7 +32,7 @@ import org.junit.Rule
 import org.junit.Test
 import kotlin.time.Duration.Companion.seconds
 
-@OptIn(ExperimentalAnalyticEventCallbackApi::class)
+@OptIn(AnalyticEventCallbackPreview::class)
 class FlowControllerAnalyticsTest {
     private val networkRule = NetworkRule(
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
