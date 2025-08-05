@@ -16,6 +16,7 @@ import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.payment.AnalyticEventCallback
+import com.stripe.android.elements.payment.AnalyticEventCallbackPreview
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.RealLinkConfigurationCoordinator
 import com.stripe.android.link.account.LinkAccountHolder
@@ -25,7 +26,6 @@ import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.injection.LinkCommonModule
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -184,7 +184,7 @@ internal abstract class PaymentSheetCommonModule {
             return DefaultCvcRecollectionInteractor.Factory
         }
 
-        @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+        @OptIn(AnalyticEventCallbackPreview::class)
         @Provides
         fun providesAnalyticEventCallback(
             @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,

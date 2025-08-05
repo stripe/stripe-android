@@ -25,7 +25,6 @@ import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
@@ -168,7 +167,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal var confirmCustomPaymentMethodCallback: ConfirmCustomPaymentMethodCallback? = null
             private set
 
-        @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+        @OptIn(AnalyticEventCallbackPreview::class)
         internal var analyticEventCallback: AnalyticEventCallback? = null
             private set
 
@@ -192,7 +191,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         /**
          * Called when an analytic event is emitted.
          */
-        @ExperimentalAnalyticEventCallbackApi
+        @AnalyticEventCallbackPreview
         fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
             this.analyticEventCallback = callback
         }

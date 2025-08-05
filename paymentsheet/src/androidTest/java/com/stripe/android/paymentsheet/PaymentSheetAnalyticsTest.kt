@@ -18,7 +18,7 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.elements.payment.AnalyticEvent
 import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentelement.AnalyticEventRule
-import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
+import com.stripe.android.elements.payment.AnalyticEventCallbackPreview
 import com.stripe.android.paymentsheet.utils.AdvancedFraudSignalsTestRule
 import com.stripe.android.paymentsheet.utils.FlowControllerTestRunnerContext
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
@@ -36,7 +36,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.time.Duration.Companion.seconds
 
-@OptIn(ExperimentalAnalyticEventCallbackApi::class)
+@OptIn(AnalyticEventCallbackPreview::class)
 @RunWith(TestParameterInjector::class)
 internal class PaymentSheetAnalyticsTest {
     private val networkRule = NetworkRule(

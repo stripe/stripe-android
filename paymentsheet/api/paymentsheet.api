@@ -1258,6 +1258,9 @@ public abstract interface class com/stripe/android/elements/payment/AnalyticEven
 	public abstract fun onEvent (Lcom/stripe/android/elements/payment/AnalyticEvent;)V
 }
 
+public abstract interface annotation class com/stripe/android/elements/payment/AnalyticEventCallbackPreview : java/lang/annotation/Annotation {
+}
+
 public abstract interface class com/stripe/android/elements/payment/ConfirmCustomPaymentMethodCallback {
 	public abstract fun onConfirmCustomPaymentMethod (Lcom/stripe/android/elements/payment/CustomPaymentMethod;Lcom/stripe/android/model/PaymentMethod$BillingDetails;)V
 }
@@ -2703,9 +2706,6 @@ public final class com/stripe/android/lpmfoundations/paymentmethod/PaymentSheetC
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/lpmfoundations/paymentmethod/PaymentSheetCardBrandFilter;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public abstract interface annotation class com/stripe/android/paymentelement/ExperimentalAnalyticEventCallbackApi : java/lang/annotation/Annotation {
 }
 
 public final class com/stripe/android/paymentelement/confirmation/ConfirmationDefinition$Parameters$Creator : android/os/Parcelable$Creator {
