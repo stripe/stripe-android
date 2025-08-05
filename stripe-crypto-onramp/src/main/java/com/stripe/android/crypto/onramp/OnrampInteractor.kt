@@ -1,7 +1,6 @@
 package com.stripe.android.crypto.onramp
 
 import android.app.Application
-import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
@@ -10,25 +9,35 @@ import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.LinkController.AuthenticationResult
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Represents the current state of the Onramp feature.
+ *
+ * @param configuration The current onramp configuration, if any.
+ * @param linkControllerState The current Link controller state, if any.
+ */
+internal data class OnrampState(
+    val configuration: OnrampConfiguration? = null,
+    val linkControllerState: LinkController.State? = null,
+)
+
 @Singleton
 internal class OnrampInteractor @Inject constructor(
-    private val handle: SavedStateHandle,
     private val application: Application,
     private val linkController: LinkController,
     private val cryptoApiRepository: CryptoApiRepository,
 ) {
 
-    private var configuration: OnrampConfiguration?
-        get() = handle.get<OnrampConfiguration>(CONFIGURATION_KEY)
-        set(value) = handle.set(CONFIGURATION_KEY, value)
-
-    private var linkControllerState: LinkController.State? = null
+    private val _state = MutableStateFlow(OnrampState())
+    val state: StateFlow<OnrampState> = _state.asStateFlow()
 
     suspend fun configure(configuration: OnrampConfiguration) {
-        this.configuration = configuration
+        _state.value = _state.value.copy(configuration = configuration)
         linkController.configure(
             LinkController.Configuration.Builder("Onramp Merchant").build()
         )
@@ -92,14 +101,11 @@ internal class OnrampInteractor @Inject constructor(
         is AuthenticationResult.Canceled -> OnrampVerificationResult.Cancelled()
     }
 
-    private fun consumerSessionClientSecret(): String? = linkController.state(application)
-        .value.internalLinkAccount?.consumerSessionClientSecret
+    private fun consumerSessionClientSecret(): String? =
+        _state.value.linkControllerState?.internalLinkAccount?.consumerSessionClientSecret
+            ?: linkController.state(application).value.internalLinkAccount?.consumerSessionClientSecret
 
-    fun onLinkControllerState(state: LinkController.State) {
-        linkControllerState = state
-    }
-
-    private companion object Companion {
-        private const val CONFIGURATION_KEY = "OnrampCoordinatorInteractor.configuration"
+    fun onLinkControllerState(linkState: LinkController.State) {
+        _state.value = _state.value.copy(linkControllerState = linkState)
     }
 }
