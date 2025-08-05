@@ -205,19 +205,19 @@ internal class WalletViewModel @Inject constructor(
     }
 
     private suspend fun handleAutoSelection(paymentDetails: List<LinkPaymentMethod.ConsumerPaymentDetails>) {
-        val defaultPaymentMethod = paymentDetails
-            .map { it.details }
-            .firstOrNull { it.isDefault }
+        val autoSelectedPaymentMethod =
+            paymentDetails.singleOrNull()?.details
+                ?: paymentDetails.firstOrNull { it.details.isDefault }?.details
 
-        if (defaultPaymentMethod != null && isPaymentMethodReadyForUse(defaultPaymentMethod)) {
+        if (autoSelectedPaymentMethod != null && isPaymentMethodReadyForUse(autoSelectedPaymentMethod)) {
             // Set the default as selected and proceed with payment confirmation
             _uiState.update {
                 it.copy(
-                    selectedItemId = defaultPaymentMethod.id,
+                    selectedItemId = autoSelectedPaymentMethod.id,
                     hasAttemptedAutoSelection = true
                 )
             }
-            performPaymentConfirmation(defaultPaymentMethod)
+            performPaymentConfirmation(autoSelectedPaymentMethod)
         } else {
             // Auto-selection not supported, show the wallet UI
             _uiState.update {
