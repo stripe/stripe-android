@@ -7,7 +7,7 @@ public final class com/stripe/android/crypto/onramp/BuildConfig {
 
 public final class com/stripe/android/crypto/onramp/OnrampCoordinator$Builder {
 	public fun <init> ()V
-	public final fun build (Landroid/app/Application;)Lcom/stripe/android/crypto/onramp/OnrampCoordinator;
+	public final fun build (Landroid/app/Application;Landroidx/lifecycle/SavedStateHandle;)Lcom/stripe/android/crypto/onramp/OnrampCoordinator;
 }
 
 public final class com/stripe/android/crypto/onramp/OnrampCoordinator$Presenter {
