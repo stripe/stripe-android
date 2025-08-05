@@ -94,6 +94,7 @@ internal object LinkTestUtils {
             enableDisplayableDefaultValuesInEce = false,
             linkSignUpOptInFeatureEnabled = false,
             linkSignUpOptInInitialValue = false,
+            skipWalletInFlowController = false,
             customerId = null
         )
     }

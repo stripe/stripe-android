@@ -751,6 +751,7 @@ internal class DefaultPaymentElementLoaderTest {
                 suppress2faModal = false,
                 disableLinkRuxInFlowController = false,
                 linkEnableDisplayableDefaultValuesInEce = false,
+                linkMobileSkipWalletInFlowController = false,
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false
             )
@@ -791,6 +792,7 @@ internal class DefaultPaymentElementLoaderTest {
                 suppress2faModal = false,
                 disableLinkRuxInFlowController = false,
                 linkEnableDisplayableDefaultValuesInEce = false,
+                linkMobileSkipWalletInFlowController = false,
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false
             )
@@ -879,6 +881,7 @@ internal class DefaultPaymentElementLoaderTest {
                 suppress2faModal = false,
                 disableLinkRuxInFlowController = false,
                 linkEnableDisplayableDefaultValuesInEce = false,
+                linkMobileSkipWalletInFlowController = false,
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false
             ),
@@ -913,6 +916,7 @@ internal class DefaultPaymentElementLoaderTest {
                 suppress2faModal = false,
                 disableLinkRuxInFlowController = false,
                 linkEnableDisplayableDefaultValuesInEce = false,
+                linkMobileSkipWalletInFlowController = false,
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false
             )
@@ -1435,6 +1439,7 @@ internal class DefaultPaymentElementLoaderTest {
                 suppress2faModal = false,
                 disableLinkRuxInFlowController = false,
                 linkEnableDisplayableDefaultValuesInEce = false,
+                linkMobileSkipWalletInFlowController = false,
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false
             ),
@@ -3321,6 +3326,7 @@ internal class DefaultPaymentElementLoaderTest {
             suppress2faModal = false,
             disableLinkRuxInFlowController = false,
             linkEnableDisplayableDefaultValuesInEce = false,
+            linkMobileSkipWalletInFlowController = false,
             linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
             linkSignUpOptInInitialValue = false,
         )

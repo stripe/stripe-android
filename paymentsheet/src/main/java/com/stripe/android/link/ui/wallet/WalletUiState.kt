@@ -33,6 +33,8 @@ internal data class WalletUiState(
     val addBankAccountState: AddBankAccountState = AddBankAccountState.Idle,
     val alertMessage: ResolvableString? = null,
     val paymentSelectionHint: String? = null,
+    val isAutoSelecting: Boolean = false,
+    val hasAttemptedAutoSelection: Boolean = false,
 ) {
 
     val selectedItem: ConsumerPaymentDetails.PaymentDetails?
@@ -47,6 +49,9 @@ internal data class WalletUiState(
 
     val mandate: ResolvableString?
         get() = selectedItem?.makeMandateText(isSettingUp, merchantName)
+
+    val shouldShowLoadingState: Boolean
+        get() = paymentDetailsList.isEmpty() || isAutoSelecting
 
     val isExpanded: Boolean
         get() = userSetIsExpanded ?: (selectedItem?.let { isItemAvailable(it) } != true)

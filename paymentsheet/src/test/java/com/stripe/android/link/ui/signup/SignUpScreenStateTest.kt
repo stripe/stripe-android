@@ -104,6 +104,7 @@ class SignUpScreenStateTest {
             enableDisplayableDefaultValuesInEce = false,
             linkSignUpOptInFeatureEnabled = false,
             linkSignUpOptInInitialValue = false,
+            skipWalletInFlowController = false,
             customerId = null
         )
     }

@@ -617,6 +617,7 @@ class ConfirmationHandlerOptionKtxTest {
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             allowUserEmailEdits = true,
             enableDisplayableDefaultValuesInEce = false,
+            skipWalletInFlowController = false,
             linkSignUpOptInFeatureEnabled = false,
             linkSignUpOptInInitialValue = false,
             customerId = null
