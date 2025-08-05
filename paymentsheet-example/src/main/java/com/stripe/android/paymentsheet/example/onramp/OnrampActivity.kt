@@ -50,19 +50,14 @@ internal class OnrampActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
-        // Force Link native (this will go through attestation in live).
         FeatureFlags.nativeLinkEnabled.setEnabled(true)
 
-        // Get coordinator from ViewModel (already configured in ViewModel init)
-        val onrampCoordinator = viewModel.onrampCoordinator
-
-        // Create callbacks to handle async responses
         val callbacks = OnrampCallbacks(
             authenticationCallback = viewModel::onAuthenticationResult,
         )
 
-        // Create presenter with callbacks
-        onrampPresenter = onrampCoordinator.createPresenter(this, callbacks)
+        onrampPresenter = viewModel.onrampCoordinator
+            .createPresenter(this, callbacks)
 
         setContent {
             PaymentSheetExampleTheme {
