@@ -3,18 +3,23 @@ package com.stripe.android.paymentelement.confirmation.challenge
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.challenge.PassiveChallengeActivityContract
 import com.stripe.android.challenge.PassiveChallengeActivityResult
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
+import com.stripe.android.paymentelement.confirmation.asFail
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNextStep
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeActivityResultLauncher
@@ -111,7 +116,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'action' should return expected 'Launch' action`() = runTest {
+    fun `'action' should return expected 'Launch' action when passiveCaptchaParams is not null`() = runTest {
         val definition = createPassiveChallengeConfirmationDefinition()
 
         val action = definition.action(
@@ -126,6 +131,53 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         assertThat(launchAction.launcherArguments).isEqualTo(Unit)
         assertThat(launchAction.receivesResultInProcess).isFalse()
         assertThat(launchAction.deferredIntentConfirmationType).isNull()
+    }
+
+    @Test
+    fun `'action' should return 'Fail' action when passiveCaptchaParams is null`() = runTest {
+        val definition = createPassiveChallengeConfirmationDefinition()
+        val optionWithoutCaptcha = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(
+            passiveCaptchaParams = null
+        )
+
+        val action = definition.action(
+            confirmationOption = optionWithoutCaptcha,
+            confirmationParameters = CONFIRMATION_PARAMETERS,
+        )
+
+        assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Fail<Unit>>()
+
+        val failAction = action.asFail()
+
+        assertThat(failAction.cause).isInstanceOf<IllegalArgumentException>()
+        assertThat(failAction.cause.message).isEqualTo("Passive challenge params are null")
+        assertThat(failAction.message).isEqualTo("Passive challenge params are null".resolvableString)
+        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Internal)
+    }
+
+    @Test
+    fun `'action' should report error when passiveCaptchaParams is null`() = runTest {
+        val fakeErrorReporter = FakeErrorReporter()
+        val definition = createPassiveChallengeConfirmationDefinition(fakeErrorReporter)
+        val optionWithoutCaptcha = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(
+            passiveCaptchaParams = null
+        )
+
+        definition.action(
+            confirmationOption = optionWithoutCaptcha,
+            confirmationParameters = CONFIRMATION_PARAMETERS,
+        )
+
+        val reportedErrors = fakeErrorReporter.getLoggedErrors()
+        assertThat(reportedErrors).containsExactly(
+            ErrorReporter.UnexpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_PASSIVE_CHALLENGE_PARAMS_NULL.eventName
+        )
+
+        val call = fakeErrorReporter.awaitCall()
+        assertThat(call.errorEvent).isEqualTo(
+            ErrorReporter.UnexpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_PASSIVE_CHALLENGE_PARAMS_NULL
+        )
+        assertThat(call.stripeException?.message).isEqualTo("Passive challenge params are null")
     }
 
     @Test
@@ -214,8 +266,8 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         assertThat(nextStepResult.parameters).isEqualTo(CONFIRMATION_PARAMETERS)
     }
 
-    private fun createPassiveChallengeConfirmationDefinition(): PassiveChallengeConfirmationDefinition {
-        return PassiveChallengeConfirmationDefinition()
+    private fun createPassiveChallengeConfirmationDefinition(errorReporter: ErrorReporter = FakeErrorReporter()): PassiveChallengeConfirmationDefinition {
+        return PassiveChallengeConfirmationDefinition(errorReporter)
     }
 
     private companion object {
