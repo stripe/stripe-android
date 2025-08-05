@@ -61,6 +61,16 @@ class OnrampCoordinator @Inject internal constructor(
     }
 
     /**
+     * Given the required information, collects information .
+     *
+     * @param info The KycInfo for the user.
+     * @return OnrampKYCResult indicating the result of data collection.
+     */
+    suspend fun collectKycInfo(info: KycInfo): OnrampKYCResult {
+        return interactor.collectKycInfo(info)
+    }
+
+    /**
      * Create a presenter for handling Link UI interactions.
      *
      * @param activity The activity that will host the Link flows.

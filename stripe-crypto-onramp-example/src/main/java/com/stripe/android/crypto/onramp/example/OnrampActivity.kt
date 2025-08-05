@@ -155,9 +155,7 @@ internal fun OnrampScreen(
                     onFirstNameChange = { firstName = it },
                     lastName = lastName,
                     onLastNameChange = { lastName = it },
-                    onCollectKYC = { kycInfo ->
-                        //viewModel.submitKycInfo(kycInfo, onSubmitKycInfo)
-                    }
+                    onCollectKYC = { kycInfo -> viewModel.collectKycInfo(kycInfo) }
                 )
             }
         }
