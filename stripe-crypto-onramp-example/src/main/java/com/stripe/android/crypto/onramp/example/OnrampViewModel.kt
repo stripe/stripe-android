@@ -85,7 +85,7 @@ internal class OnrampViewModel(
             }
         }
     }
-	
+    
     fun onBackToEmailInput() {
         _uiState.value = OnrampUiState.EmailInput
     }
