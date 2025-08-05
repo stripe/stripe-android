@@ -43,12 +43,10 @@ internal fun runProductIntegrationTest(
                 builder = {
                     integrationBuilder.applyToFlowControllerBuilder(this)
                 },
-                resultCallback = {
-                    FlowController.ResultCallback { flowControllerResult ->
-                        resultCallback.onPaymentSheetResult(
-                            paymentSheetResult = flowControllerResult.toPaymentSheetResult()
-                        )
-                    }
+                resultCallback = { flowControllerResult ->
+                    resultCallback.onPaymentSheetResult(
+                        paymentSheetResult = flowControllerResult.toPaymentSheetResult()
+                    )
                 },
                 block = { context ->
                     block(ProductIntegrationTestRunnerContext.WithFlowController(context))
