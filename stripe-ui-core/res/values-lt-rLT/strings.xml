@@ -40,6 +40,8 @@
   <string name="stripe_address_label_suburb">Priemiestis</string>
   <!-- Used to describe an address field. -->
   <string name="stripe_address_label_village_township">Kaimas arba miestelis</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="stripe_address_postal_code_invalid">Jūsų pašto kodas yra netinkamas.</string>
   <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
   <string name="stripe_address_search_content_description">Paieška</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
@@ -78,6 +80,4 @@
   <string name="stripe_invalid_expiry_month">Negaliojantis kortelės galiojimo pabaigos mėnuo.</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="stripe_invalid_expiry_year">Kortelės galiojimo pabaigos metai neteisingi.</string>
-  <!-- Error message for when postal code in form is invalid -->
-  <string name="stripe_address_postal_code_invalid">Jūsų pašto kodas yra netinkamas.</string>
 </resources>
