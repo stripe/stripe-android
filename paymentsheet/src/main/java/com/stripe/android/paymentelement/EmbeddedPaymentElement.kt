@@ -19,6 +19,7 @@ import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfigurationCoordinator
@@ -32,6 +33,7 @@ import com.stripe.android.paymentelement.embedded.content.PaymentOptionDisplayDa
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.TermsDisplay
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
@@ -235,6 +237,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val embeddedViewDisplaysMandateText: Boolean,
         internal val link: PaymentSheet.LinkConfiguration,
         internal val formSheetAction: FormSheetAction,
+        internal val termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap(),
     ) : Parcelable {
         @Suppress("TooManyFunctions")
         class Builder(
@@ -266,6 +269,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 ConfigurationDefaults.customPaymentMethods
             private var link: PaymentSheet.LinkConfiguration = ConfigurationDefaults.link
             private var formSheetAction: FormSheetAction = FormSheetAction.Continue
+            private var termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap()
 
             /**
              * If set, the customer can select a previously saved payment method.
@@ -464,6 +468,16 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 this.formSheetAction = formSheetAction
             }
 
+            /**
+             * A map for specifying when legal agreements are displayed for each payment method type.
+             * If the payment method is not specified in the list, the TermsDisplay value will default to automatic.
+             *
+             * Valid payment method types include: amazon_pay, card, cashapp, klarna, paypal, revolut_pay, satispay.
+             */
+            fun termsDisplay(termsDisplay: Map<PaymentMethod.Type, TermsDisplay>) = apply {
+                this.termsDisplay = termsDisplay
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -484,6 +498,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
                 link = link,
                 formSheetAction = formSheetAction,
+                termsDisplay = termsDisplay,
             )
         }
     }

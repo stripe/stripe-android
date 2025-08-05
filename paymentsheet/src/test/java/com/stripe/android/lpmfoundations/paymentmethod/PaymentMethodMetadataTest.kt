@@ -1148,7 +1148,8 @@ internal class PaymentMethodMetadataTest {
             paymentMethodIncentive = null,
             elementsSessionId = "session_1234",
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
-            shopPayConfiguration = null
+            shopPayConfiguration = null,
+            termsDisplay = emptyMap(),
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1221,7 +1222,8 @@ internal class PaymentMethodMetadataTest {
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
             elementsSessionId = "session_1234",
-            shopPayConfiguration = null
+            shopPayConfiguration = null,
+            termsDisplay = emptyMap(),
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }

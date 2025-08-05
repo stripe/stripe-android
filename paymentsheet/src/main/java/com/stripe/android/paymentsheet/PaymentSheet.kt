@@ -656,6 +656,19 @@ class PaymentSheet internal constructor(
         }
     }
 
+    /**
+     * [TermsDisplay] controls how mandates and legal agreements are displayed.
+     * Use [TermsDisplay.NEVER] to never display legal agreements.
+     * The default setting is [TermsDisplay.AUTOMATIC], which causes legal agreements to be shown only when necessary.
+     */
+    enum class TermsDisplay {
+        /** Show legal agreements only when necessary */
+        AUTOMATIC,
+
+        /** Never show legal agreements */
+        NEVER
+    }
+
     /** Configuration for [PaymentSheet] **/
     @Parcelize
     data class Configuration internal constructor(
@@ -791,6 +804,8 @@ class PaymentSheet internal constructor(
         internal val shopPayConfiguration: ShopPayConfiguration? = ConfigurationDefaults.shopPayConfiguration,
 
         internal val googlePlacesApiKey: String? = ConfigurationDefaults.googlePlacesApiKey,
+
+        internal val termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap(),
     ) : Parcelable {
 
         @JvmOverloads
@@ -946,6 +961,7 @@ class PaymentSheet internal constructor(
             private var walletButtons: WalletButtonsConfiguration = ConfigurationDefaults.walletButtons
             private var shopPayConfiguration: ShopPayConfiguration? = ConfigurationDefaults.shopPayConfiguration
             private var googlePlacesApiKey: String? = ConfigurationDefaults.googlePlacesApiKey
+            private var termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap()
 
             private var customPaymentMethods: List<CustomPaymentMethod> =
                 ConfigurationDefaults.customPaymentMethods
@@ -1102,6 +1118,16 @@ class PaymentSheet internal constructor(
                 this.googlePlacesApiKey = googlePlacesApiKey
             }
 
+            /**
+             * A map for specifying when legal agreements are displayed for each payment method type.
+             * If the payment method is not specified in the list, the TermsDisplay value will default to automatic.
+             *
+             * Valid payment method types include: amazon_pay, card, cashapp, klarna, paypal, revolut_pay, satispay.
+             */
+            fun termsDisplay(termsDisplay: Map<PaymentMethod.Type, TermsDisplay>) = apply {
+                this.termsDisplay = termsDisplay
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -1125,6 +1151,7 @@ class PaymentSheet internal constructor(
                 walletButtons = walletButtons,
                 shopPayConfiguration = shopPayConfiguration,
                 googlePlacesApiKey = googlePlacesApiKey,
+                termsDisplay = termsDisplay,
             )
         }
 
