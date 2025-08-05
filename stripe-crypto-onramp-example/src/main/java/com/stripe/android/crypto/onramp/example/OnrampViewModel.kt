@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.example.onramp
+package com.stripe.android.crypto.onramp.example
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

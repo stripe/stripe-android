@@ -33,7 +33,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.paymentsheet.example.databinding.ActivityMainBinding
-import com.stripe.android.paymentsheet.example.onramp.OnrampActivity
 import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedExampleActivity
 import com.stripe.android.paymentsheet.example.samples.ui.SECTION_ALPHA
@@ -102,12 +101,6 @@ class MainActivity : AppCompatActivity() {
                 subtitleResId = R.string.address_element_subtitle,
                 klass = AddressElementExampleActivity::class.java,
                 section = MenuItem.Section.AddressElement,
-            ),
-            MenuItem(
-                titleResId = R.string.onramp_title,
-                subtitleResId = R.string.onramp_subtitle,
-                klass = OnrampActivity::class.java,
-                section = MenuItem.Section.Onramp,
             ),
         )
     }
