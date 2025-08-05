@@ -79,8 +79,8 @@ internal class WalletViewModel @Inject constructor(
             merchantName = configuration.merchantName,
             selectedItemId = null,
             cardBrandFilter = configuration.cardBrandFilter,
-            collectMissingBillingDetailsForExistingPaymentMethods =
-                configuration.collectMissingBillingDetailsForExistingPaymentMethods,
+            collectMissingBillingDetailsForExistingPaymentMethods = configuration
+                .collectMissingBillingDetailsForExistingPaymentMethods,
             isProcessing = false,
             hasCompleted = false,
             // initially expand the wallet if a payment method is preselected.
