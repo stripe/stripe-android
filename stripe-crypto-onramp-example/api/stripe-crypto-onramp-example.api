@@ -1,0 +1,43 @@
+public final class com/stripe/android/crypto/onramp/example/BuildConfig {
+	public static final field APPLICATION_ID Ljava/lang/String;
+	public static final field BUILD_TYPE Ljava/lang/String;
+	public static final field DEBUG Z
+	public static final field IS_BROWSERSTACK_BUILD Z
+	public static final field IS_NIGHTLY_BUILD Z
+	public static final field IS_RUNNING_IN_CI Z
+	public static final field VERSION_CODE I
+	public static final field VERSION_NAME Ljava/lang/String;
+	public fun <init> ()V
+}
+
+public final class com/stripe/android/crypto/onramp/example/ComposableSingletons$OnrampActivityKt {
+	public static final field INSTANCE Lcom/stripe/android/crypto/onramp/example/ComposableSingletons$OnrampActivityKt;
+	public fun <init> ()V
+	public final fun getLambda-1$stripe_crypto_onramp_example_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-10$stripe_crypto_onramp_example_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-11$stripe_crypto_onramp_example_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-12$stripe_crypto_onramp_example_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-13$stripe_crypto_onramp_example_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-2$stripe_crypto_onramp_example_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-3$stripe_crypto_onramp_example_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-4$stripe_crypto_onramp_example_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-5$stripe_crypto_onramp_example_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-6$stripe_crypto_onramp_example_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-7$stripe_crypto_onramp_example_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-8$stripe_crypto_onramp_example_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-9$stripe_crypto_onramp_example_release ()Lkotlin/jvm/functions/Function3;
+}
+
+public final class com/stripe/android/crypto/onramp/example/OnrampActivityKt {
+	public static final fun OnrampExampleTheme (Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class com/stripe/android/crypto/onramp/example/ui/theme/ColorKt {
+	public static final fun getPink40 ()J
+	public static final fun getPink80 ()J
+	public static final fun getPurple40 ()J
+	public static final fun getPurple80 ()J
+	public static final fun getPurpleGrey40 ()J
+	public static final fun getPurpleGrey80 ()J
+}
+

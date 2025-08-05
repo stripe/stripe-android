@@ -1,19 +1,33 @@
 package com.stripe.android.crypto.onramp.example
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.crypto.onramp.model.KycInfo
+import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.utils.requireApplication
+import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
-import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
-import com.stripe.android.crypto.onramp.model.OnrampKYCResult
+import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
 import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
+import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
-internal class OnrampViewModel : ViewModel() {
+internal class OnrampViewModel(
+    application: Application,
+    savedStateHandle: SavedStateHandle
+) : AndroidViewModel(application) {
+
+    val onrampCoordinator: OnrampCoordinator
 
     private val _uiState = MutableStateFlow<OnrampUiState>(OnrampUiState.Loading)
     val uiState: StateFlow<OnrampUiState> = _uiState.asStateFlow()
@@ -23,106 +37,36 @@ internal class OnrampViewModel : ViewModel() {
 
     private var currentEmail: String = ""
 
-    fun checkIfLinkUser(email: String, onCheckUser: (String) -> Unit) {
+    init {
+        @Suppress("MaxLineLength")
+        PaymentConfiguration.init(
+            application,
+            "pk_test_51K9W3OHMaDsveWq0oLP0ZjldetyfHIqyJcz27k2BpMGHxu9v9Cei2tofzoHncPyk3A49jMkFEgTOBQyAMTUffRLa00xzzARtZO"
+        )
+        onrampCoordinator = OnrampCoordinator.Builder()
+            .build(application, savedStateHandle)
+
+        viewModelScope.launch {
+            onrampCoordinator.configure(
+                configuration = OnrampConfiguration(
+                    paymentSheetAppearance = PaymentSheet.Appearance()
+                )
+            )
+            // Set initial state to EmailInput after configuration
+            _uiState.value = OnrampUiState.EmailInput
+        }
+    }
+
+    fun checkIfLinkUser(email: String) = viewModelScope.launch {
         if (email.isBlank()) {
             _message.value = "Please enter an email address"
-            return
+            return@launch
         }
 
         currentEmail = email.trim()
         _uiState.value = OnrampUiState.Loading
-        onCheckUser(currentEmail)
-    }
 
-    fun registerNewUser(
-        email: String,
-        phone: String,
-        country: String,
-        fullName: String?,
-        onRegister: (LinkUserInfo) -> Unit
-    ) {
-        if (email.isBlank() || phone.isBlank() || country.isBlank()) {
-            _message.value = "Please fill in all required fields"
-            return
-        }
-
-        _uiState.value = OnrampUiState.Loading
-        val userInfo = LinkUserInfo(
-            email = email.trim(),
-            phone = phone.trim(),
-            country = country.trim(),
-            fullName = fullName?.trim()?.takeIf { it.isNotEmpty() }
-        )
-
-        try {
-            onRegister(userInfo)
-            _message.value = "Registration attempted (not yet implemented)"
-            _uiState.value = OnrampUiState.EmailInput
-        } catch (@Suppress("TooGenericExceptionCaught") e: RuntimeException) {
-            _message.value = "Registration failed: ${e.message}"
-            _uiState.value = OnrampUiState.Registration(email)
-        }
-    }
-
-    fun authenticateUser(email: String, onAuthenticate: (String) -> Unit) {
-        if (email.isBlank()) {
-            _message.value = "Email is required for authentication"
-            return
-        }
-
-        _uiState.value = OnrampUiState.Loading
-        try {
-            onAuthenticate(email.trim())
-            _message.value = "Authentication attempted"
-            _uiState.value = OnrampUiState.EmailInput
-        } catch (@Suppress("TooGenericExceptionCaught") e: RuntimeException) {
-            _message.value = "Authentication failed: ${e.message}"
-            _uiState.value = OnrampUiState.Authentication(email)
-        }
-    }
-
-    fun onBackToEmailInput() {
-        _uiState.value = OnrampUiState.EmailInput
-    }
-
-    fun clearMessage() {
-        _message.value = null
-    }
-
-    fun submitKycInfo(kycInfo: KycInfo, onSubmitKycInfo: (KycInfo) -> Unit) {
-        _uiState.value = OnrampUiState.Loading
-
-        try {
-            onSubmitKycInfo(kycInfo)
-
-            _message.value = "KYC Submitted"
-        } catch (@Suppress("TooGenericExceptionCaught") e: RuntimeException) {
-            _message.value = "Submission failed: ${e.message}"
-            _uiState.value = OnrampUiState.KYCScreen
-        }
-    }
-
-    // Handle configuration result
-    fun onConfigurationResult(result: OnrampConfigurationResult) {
-        when (result) {
-            is OnrampConfigurationResult.Completed -> {
-                if (result.success) {
-                    _message.value = "Configuration successful"
-                    _uiState.value = OnrampUiState.EmailInput
-                } else {
-                    _message.value = "Configuration failed"
-                    _uiState.value = OnrampUiState.EmailInput // Still allow user to try
-                }
-            }
-            is OnrampConfigurationResult.Failed -> {
-                _message.value = "Configuration failed: ${result.error.message}"
-                _uiState.value = OnrampUiState.EmailInput // Still allow user to try
-            }
-        }
-    }
-
-    // Handle lookup result
-    fun onLookupResult(result: OnrampLinkLookupResult) {
+        val result = onrampCoordinator.isLinkUser(currentEmail)
         when (result) {
             is OnrampLinkLookupResult.Completed -> {
                 if (result.isLinkUser) {
@@ -138,6 +82,14 @@ internal class OnrampViewModel : ViewModel() {
                 _uiState.value = OnrampUiState.EmailInput
             }
         }
+    }
+	
+    fun onBackToEmailInput() {
+        _uiState.value = OnrampUiState.EmailInput
+    }
+
+    fun clearMessage() {
+        _message.value = null
     }
 
     fun onAuthenticationResult(result: OnrampVerificationResult) {
@@ -156,41 +108,30 @@ internal class OnrampViewModel : ViewModel() {
         }
     }
 
-    fun onRegisterUserResult(result: OnrampRegisterUserResult) {
-        when (result) {
-            is OnrampRegisterUserResult.Completed -> {
-                _message.value = "Registration successful"
-                _uiState.value = OnrampUiState.EmailInput
-            }
-            is OnrampRegisterUserResult.Failed -> {
-                _message.value = "Registration failed: ${result.error.message}"
-                _uiState.value = OnrampUiState.EmailInput
-            }
-        }
-    }
-
-    fun onKycInfoResult(result: OnrampKYCResult) {
-        when (result) {
-            is OnrampKYCResult.Completed -> {
-                _message.value = "KYC Submitted"
-                _uiState.value = OnrampUiState.EmailInput
-            }
-            is OnrampKYCResult.Failed -> {
-                _message.value = "KYC Submission failed: ${result.error.message}"
-                _uiState.value = OnrampUiState.EmailInput
+    fun registerNewLinkUser(userInfo: LinkUserInfo) {
+        viewModelScope.launch {
+            val result = onrampCoordinator.registerNewLinkUser(userInfo)
+            when (result) {
+                is OnrampRegisterUserResult.Completed -> {
+                    _message.value = "Registration successful"
+                    _uiState.value = OnrampUiState.EmailInput
+                }
+                is OnrampRegisterUserResult.Failed -> {
+                    _message.value = "Registration failed: ${result.error.message}"
+                    _uiState.value = OnrampUiState.EmailInput
+                }
             }
         }
-    }
-
-    // Update registration state with email
-    fun showRegistrationForEmail(email: String) {
-        _uiState.value = OnrampUiState.Registration(email)
     }
 
     class Factory : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return OnrampViewModel() as T
+        override fun <T : ViewModel> create(
+            modelClass: Class<T>,
+            extras: CreationExtras
+        ): T {
+            val application = extras.requireApplication()
+            return OnrampViewModel(application, extras.createSavedStateHandle()) as T
         }
     }
 }

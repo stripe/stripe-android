@@ -45,13 +45,11 @@ import com.stripe.android.crypto.onramp.model.IdType
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
-import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
-import kotlinx.coroutines.launch
 
 internal class OnrampActivity : ComponentActivity() {
 
-    private lateinit var onrampCoordinator: OnrampCoordinator
+    private lateinit var onrampPresenter: OnrampCoordinator.Presenter
 
     private val viewModel: OnrampViewModel by viewModels {
         OnrampViewModel.Factory()
@@ -61,43 +59,21 @@ internal class OnrampActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
-        // Force Link native (this will go through attestation in live).
         FeatureFlags.nativeLinkEnabled.setEnabled(true)
 
-        // Create callbacks to handle async responses
         val callbacks = OnrampCallbacks(
-            configurationCallback = viewModel::onConfigurationResult,
-            linkLookupCallback = viewModel::onLookupResult,
             authenticationCallback = viewModel::onAuthenticationResult,
-            registerUserCallback = viewModel::onRegisterUserResult
         )
 
-        onrampCoordinator = OnrampCoordinator.Builder(callbacks).build(this)
 
-        val configuration = OnrampConfiguration(
-            paymentSheetAppearance = PaymentSheet.Appearance()
-        )
-
-        @Suppress("MaxLineLength")
-        PaymentConfiguration.init(
-            application,
-            "pk_test_51K9W3OHMaDsveWq0oLP0ZjldetyfHIqyJcz27k2BpMGHxu9v9Cei2tofzoHncPyk3A49jMkFEgTOBQyAMTUffRLa00xzzARtZO"
-        )
-
-        onrampCoordinator.configure(configuration)
+        onrampPresenter = viewModel.onrampCoordinator
+            .createPresenter(this, callbacks)
 
         setContent {
             OnrampExampleTheme {
                 OnrampScreen(
                     viewModel = viewModel,
-                    onCheckUser = { email -> onrampCoordinator.isLinkUser(email) },
-                    onRegisterUser = { userInfo -> onrampCoordinator.registerNewLinkUser(userInfo) },
-                    onAuthenticateUser = { email -> onrampCoordinator.authenticateExistingLinkUser(email) },
-                    onSubmitKycInfo = { kycInfo ->
-                        viewModel.viewModelScope.launch {
-                            onrampCoordinator.collectKycInfo(kycInfo)
-                        }
-                    }
+                    onAuthenticateUser = { email -> onrampPresenter.authenticateExistingLinkUser(email) }
                 )
             }
         }
@@ -105,12 +81,10 @@ internal class OnrampActivity : ComponentActivity() {
 }
 
 @Composable
+@Suppress("LongMethod")
 internal fun OnrampScreen(
     viewModel: OnrampViewModel,
-    onCheckUser: (String) -> Unit,
-    onRegisterUser: (LinkUserInfo) -> Unit,
-    onAuthenticateUser: (String) -> Unit,
-    onSubmitKycInfo: (KycInfo) -> Unit
+    onAuthenticateUser: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
@@ -139,7 +113,7 @@ internal fun OnrampScreen(
             is OnrampUiState.EmailInput -> {
                 EmailInputScreen(
                     onCheckUser = { email ->
-                        viewModel.checkIfLinkUser(email, onCheckUser)
+                        viewModel.checkIfLinkUser(email)
                     }
                 )
             }
@@ -150,7 +124,13 @@ internal fun OnrampScreen(
                 RegistrationScreen(
                     initialEmail = currentState.email,
                     onRegister = { email, phone, country, fullName ->
-                        viewModel.registerNewUser(email, phone, country, fullName, onRegisterUser)
+                        val userInfo = LinkUserInfo(
+                            email = email.trim(),
+                            phone = phone.trim(),
+                            country = country.trim(),
+                            fullName = fullName?.trim()?.takeIf { it.isNotEmpty() }
+                        )
+                        viewModel.registerNewLinkUser(userInfo)
                     },
                     onBack = {
                         viewModel.onBackToEmailInput()
@@ -160,9 +140,7 @@ internal fun OnrampScreen(
             is OnrampUiState.Authentication -> {
                 AuthenticationScreen(
                     email = currentState.email,
-                    onAuthenticate = { email ->
-                        viewModel.authenticateUser(email, onAuthenticateUser)
-                    },
+                    onAuthenticate = onAuthenticateUser,
                     onBack = {
                         viewModel.onBackToEmailInput()
                     }
@@ -178,7 +156,7 @@ internal fun OnrampScreen(
                     lastName = lastName,
                     onLastNameChange = { lastName = it },
                     onCollectKYC = { kycInfo ->
-                        viewModel.submitKycInfo(kycInfo, onSubmitKycInfo)
+                        //viewModel.submitKycInfo(kycInfo, onSubmitKycInfo)
                     }
                 )
             }

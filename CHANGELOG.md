@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## XX.XX.XX - 20XX-XX-XX
+* [ADDED][11179](https://github.com/stripe/stripe-android/pull/11179) More specific error messaging for postal codes
 
 ## 21.22.1 - 2025-08-04
 

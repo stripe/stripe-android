@@ -1,15 +1,10 @@
 package com.stripe.android.crypto.onramp.di
 
 import android.app.Application
-import androidx.activity.ComponentActivity
-import androidx.activity.result.ActivityResultRegistryOwner
-import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.crypto.onramp.OnrampCoordinator
-import com.stripe.android.crypto.onramp.model.OnrampCallbacks
-import com.stripe.android.crypto.onramp.viewmodels.OnrampCoordinatorViewModel
-import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
@@ -19,11 +14,12 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
+        OnrampModule::class,
+        OnrampInteractorModule::class,
         StripeRepositoryModule::class,
         ResourceRepositoryModule::class,
         CoreCommonModule::class,
         CoroutineContextModule::class,
-        OnrampModule::class
     ]
 )
 internal interface OnrampComponent {
@@ -35,26 +31,7 @@ internal interface OnrampComponent {
         fun application(application: Application): Builder
 
         @BindsInstance
-        fun lifecycleOwner(lifecycleOwner: LifecycleOwner): Builder
-
-        @BindsInstance
-        fun componentActivity(activity: ComponentActivity): Builder
-
-        @BindsInstance
-        fun onRampCoordinatorViewModel(viewModel: OnrampCoordinatorViewModel): Builder
-
-        @BindsInstance
-        fun linkElementCallbackIdentifier(
-            @PaymentElementCallbackIdentifier linkElementCallbackIdentifier: String
-        ): Builder
-
-        @BindsInstance
-        fun activityResultRegistryOwner(
-            activityResultRegistryOwner: ActivityResultRegistryOwner
-        ): Builder
-
-        @BindsInstance
-        fun onrampCallbacks(onrampCallbacks: OnrampCallbacks): Builder
+        fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
 
         fun build(): OnrampComponent
     }
