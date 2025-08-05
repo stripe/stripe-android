@@ -463,7 +463,7 @@ internal class PlaygroundTestDriver(
         composeTestRule.waitForIdle()
 
         selectors.googlePaySheet.waitFor()
-        selectors.googlePayContinueButton.click()
+        selectors.googlePayCheckoutButton.click()
 
         composeTestRule.waitForIdle()
 
