@@ -17,6 +17,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.elements.payment.AnalyticEvent
+import com.stripe.android.elements.payment.AnalyticEventCallbackPreview
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.elements.payment.LinkConfiguration
 import com.stripe.android.elements.payment.PaymentSheet
@@ -29,7 +30,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -58,7 +58,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 @RunWith(RobolectricTestRunner::class)
-@OptIn(ExperimentalAnalyticEventCallbackApi::class)
+@OptIn(AnalyticEventCallbackPreview::class)
 class DefaultEventReporterTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
@@ -248,7 +248,7 @@ class DefaultEventReporterTest {
             )
         }
 
-    @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+    @OptIn(AnalyticEventCallbackPreview::class)
     @Test
     fun `onShowNewPaymentOptions() should fire analytics request with expected event value`() =
         runTest(testDispatcher) {
@@ -772,7 +772,7 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+    @OptIn(AnalyticEventCallbackPreview::class)
     fun `constructor does not read from PaymentConfiguration`() {
         PaymentConfiguration.clearInstance()
         // Would crash if it tries to read from the uninitialized PaymentConfiguration
@@ -1049,7 +1049,7 @@ class DefaultEventReporterTest {
             assertThat(event).isEqualTo(PaymentAnalyticsEvent.FileCreate.eventName)
         }
 
-    @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+    @OptIn(AnalyticEventCallbackPreview::class)
     @Test
     fun `Throwable in analytic event callback should not be propagated`() = runTest(testDispatcher) {
         val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
@@ -1069,7 +1069,7 @@ class DefaultEventReporterTest {
         )
     }
 
-    @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+    @OptIn(AnalyticEventCallbackPreview::class)
     @Test
     fun `Null callback return by provider should not crash the app`() = runTest(testDispatcher) {
         val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
@@ -1210,7 +1210,7 @@ class DefaultEventReporterTest {
         )
     }
 
-    @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+    @OptIn(AnalyticEventCallbackPreview::class)
     private fun createEventReporter(
         mode: EventReporter.Mode,
         duration: Duration = 1.seconds,
@@ -1236,7 +1236,7 @@ class DefaultEventReporterTest {
         return reporter
     }
 
-    @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+    @OptIn(AnalyticEventCallbackPreview::class)
     private fun createEventReporter(
         mode: EventReporter.Mode,
         durationProvider: DurationProvider,

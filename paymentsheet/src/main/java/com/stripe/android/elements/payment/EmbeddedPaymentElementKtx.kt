@@ -11,7 +11,6 @@ import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.common.ui.UpdateCallbacks
-import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.utils.rememberActivity
@@ -62,7 +61,7 @@ fun rememberEmbeddedPaymentElement(
     val callbacks = remember(builder) {
         @OptIn(
             ExperimentalCustomPaymentMethodsApi::class,
-            ExperimentalAnalyticEventCallbackApi::class,
+            AnalyticEventCallbackPreview::class,
             SharedPaymentTokenSessionPreview::class
         )
         PaymentElementCallbacks.Builder()

@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.callbacks
 
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.elements.payment.AnalyticEventCallback
+import com.stripe.android.elements.payment.AnalyticEventCallbackPreview
 import com.stripe.android.elements.payment.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.elements.payment.CreateIntentCallback
 import com.stripe.android.elements.payment.EmbeddedPaymentElement
@@ -10,13 +11,12 @@ import com.stripe.android.elements.payment.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.elements.payment.PreparePaymentMethodHandler
 import com.stripe.android.elements.payment.ShopPayHandlers
 import com.stripe.android.elements.payment.ShopPayPreview
-import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 
 @OptIn(
     ExperimentalCustomPaymentMethodsApi::class,
-    ExperimentalAnalyticEventCallbackApi::class,
+    AnalyticEventCallbackPreview::class,
     ShopPayPreview::class,
     SharedPaymentTokenSessionPreview::class
 )

@@ -5,7 +5,6 @@ import androidx.compose.runtime.Composable
 import androidx.fragment.app.Fragment
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.elements.AddressDetails
-import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -125,7 +124,7 @@ interface FlowController {
         /**
          * @param callback If specified, called when an analytic event occurs.
          */
-        @ExperimentalAnalyticEventCallbackApi
+        @AnalyticEventCallbackPreview
         fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
             callbacksBuilder.analyticEventCallback(callback)
         }

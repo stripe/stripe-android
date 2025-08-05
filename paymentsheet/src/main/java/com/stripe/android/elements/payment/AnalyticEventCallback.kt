@@ -1,6 +1,5 @@
 package com.stripe.android.elements.payment
 
-import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import dev.drewhamilton.poko.Poko
 
 /**
@@ -10,12 +9,12 @@ import dev.drewhamilton.poko.Poko
  *
  * @param event the [AnalyticEvent] that was emitted
  */
-@ExperimentalAnalyticEventCallbackApi
+@AnalyticEventCallbackPreview
 fun interface AnalyticEventCallback {
     fun onEvent(event: AnalyticEvent)
 }
 
-@ExperimentalAnalyticEventCallbackApi
+@AnalyticEventCallbackPreview
 abstract class AnalyticEvent internal constructor() {
 
     /**

@@ -13,6 +13,7 @@ import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.payment.AnalyticEvent
 import com.stripe.android.elements.payment.AnalyticEventCallback
+import com.stripe.android.elements.payment.AnalyticEventCallbackPreview
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.elements.payment.LinkConfiguration
 import com.stripe.android.model.CardBrand
@@ -20,7 +21,6 @@ import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent.BankAccountCollectorFinished
@@ -36,7 +36,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
-@OptIn(ExperimentalAnalyticEventCallbackApi::class)
+@OptIn(AnalyticEventCallbackPreview::class)
 internal class DefaultEventReporter @Inject internal constructor(
     context: Context,
     private val mode: EventReporter.Mode,

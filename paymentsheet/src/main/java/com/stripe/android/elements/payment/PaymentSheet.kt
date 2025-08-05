@@ -18,7 +18,6 @@ import com.stripe.android.link.account.LinkStore
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -75,7 +74,7 @@ class PaymentSheet internal constructor(
         /**
          * @param callback Called when an analytic event occurs.
          */
-        @ExperimentalAnalyticEventCallbackApi
+        @AnalyticEventCallbackPreview
         fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
             callbacksBuilder.analyticEventCallback(callback)
         }

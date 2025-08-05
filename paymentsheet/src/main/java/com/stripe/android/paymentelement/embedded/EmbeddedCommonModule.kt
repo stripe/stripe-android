@@ -13,9 +13,9 @@ import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.elements.payment.AnalyticEventCallback
+import com.stripe.android.elements.payment.AnalyticEventCallbackPreview
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
@@ -139,7 +139,7 @@ internal interface EmbeddedCommonModule {
         @UIContext
         fun provideUiContext(): CoroutineContext = Dispatchers.Main
 
-        @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+        @OptIn(AnalyticEventCallbackPreview::class)
         @Provides
         fun providesAnalyticEventCallback(
             @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
