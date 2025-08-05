@@ -14,7 +14,6 @@ import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.exceptions.AppAttestationException
 import com.stripe.android.link.exceptions.MissingConfigurationException
 import com.stripe.android.link.injection.LinkComponent
-import com.stripe.android.link.injection.LinkControllerComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
@@ -39,9 +38,10 @@ import java.util.Optional
 import javax.inject.Provider
 import kotlin.jvm.optionals.getOrNull
 
+@Suppress("LargeClass")
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-class LinkControllerViewModelTest {
+class LinkControllerInteractorTest {
     private val dispatcher = UnconfinedTestDispatcher()
 
     @get:Rule
@@ -62,13 +62,12 @@ class LinkControllerViewModelTest {
         )
     private val linkComponentBuilderProvider: Provider<LinkComponent.Builder> =
         Provider { FakeLinkComponent.Builder(linkComponent) }
-    private val controllerComponentFactory: LinkControllerComponent.Factory = mock()
 
     @Test
     fun `Initial state is correct`() = runTest {
-        val viewModel = createViewModel()
+        val interactor = createInteractor()
 
-        viewModel.state(application).test {
+        interactor.state(application).test {
             assertThat(awaitItem()).isEqualTo(
                 LinkController.State()
             )
@@ -77,9 +76,9 @@ class LinkControllerViewModelTest {
 
     @Test
     fun `state is updated when account changes`() = runTest {
-        val viewModel = createViewModel()
+        val interactor = createInteractor()
 
-        viewModel.state(application).test {
+        interactor.state(application).test {
             awaitItem().run {
                 assertThat(isConsumerVerified).isNull()
                 assertThat(internalLinkAccount).isNull()
@@ -120,52 +119,52 @@ class LinkControllerViewModelTest {
 
     @Test
     fun `configure() sets new configuration and loads it`() = runTest {
-        val viewModel = createViewModel()
+        val interactor = createInteractor()
 
         val loadedConfiguration = LinkTestUtils.createLinkConfiguration()
         linkConfigurationLoader.linkConfigurationResult = Result.success(loadedConfiguration)
 
-        assertThat(viewModel.configure(createControllerConfig())).isEqualTo(LinkController.ConfigureResult.Success)
+        assertThat(interactor.configure(createControllerConfig())).isEqualTo(LinkController.ConfigureResult.Success)
         assertThat(linkComponent.configuration).isEqualTo(loadedConfiguration)
     }
 
     @Test
     fun `configure() fails when loader fails`() = runTest {
         val error = Exception("Failed to load")
-        val viewModel = createViewModel()
+        val interactor = createInteractor()
 
         linkConfigurationLoader.linkConfigurationResult = Result.failure(error)
 
-        assertThat(viewModel.configure(createControllerConfig()))
+        assertThat(interactor.configure(createControllerConfig()))
             .isEqualTo(LinkController.ConfigureResult.Failed(error))
     }
 
     @Test
     fun `configure() resets state`() = runTest {
-        val viewModel = createViewModel()
+        val interactor = createInteractor()
 
-        viewModel.updateState {
+        interactor.updateState {
             it.copy(createdPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         }
 
         val loadedConfiguration = LinkTestUtils.createLinkConfiguration()
         linkConfigurationLoader.linkConfigurationResult = Result.success(loadedConfiguration)
 
-        viewModel.state(application).test {
+        interactor.state(application).test {
             assertThat(awaitItem()).isNotEqualTo(LinkController.State())
-            assertThat(viewModel.configure(createControllerConfig())).isEqualTo(LinkController.ConfigureResult.Success)
+            assertThat(interactor.configure(createControllerConfig())).isEqualTo(LinkController.ConfigureResult.Success)
             assertThat(awaitItem()).isEqualTo(LinkController.State())
         }
     }
 
     @Test
     fun `configure() fails when attestation check fails with AttestationFailed`() = runTest {
-        val viewModel = createViewModel()
+        val interactor = createInteractor()
         val attestationError = Exception("Attestation failed")
 
-        configureWithAttestation(viewModel, LinkAttestationCheck.Result.AttestationFailed(attestationError))
+        configureWithAttestation(interactor, LinkAttestationCheck.Result.AttestationFailed(attestationError))
 
-        val result = viewModel.configure(createControllerConfig())
+        val result = interactor.configure(createControllerConfig())
 
         assertThat(result).isInstanceOf(LinkController.ConfigureResult.Failed::class.java)
         val failedResult = result as LinkController.ConfigureResult.Failed
@@ -175,12 +174,12 @@ class LinkControllerViewModelTest {
 
     @Test
     fun `configure() fails when attestation check fails with AccountError`() = runTest {
-        val viewModel = createViewModel()
+        val interactor = createInteractor()
         val accountError = Exception("Account error")
 
-        configureWithAttestation(viewModel, LinkAttestationCheck.Result.AccountError(accountError))
+        configureWithAttestation(interactor, LinkAttestationCheck.Result.AccountError(accountError))
 
-        val result = viewModel.configure(createControllerConfig())
+        val result = interactor.configure(createControllerConfig())
 
         assertThat(result).isInstanceOf(LinkController.ConfigureResult.Failed::class.java)
         val failedResult = result as LinkController.ConfigureResult.Failed
@@ -189,12 +188,12 @@ class LinkControllerViewModelTest {
 
     @Test
     fun `configure() fails when attestation check fails with Error`() = runTest {
-        val viewModel = createViewModel()
+        val interactor = createInteractor()
         val genericError = Exception("Generic error")
 
-        configureWithAttestation(viewModel, LinkAttestationCheck.Result.Error(genericError))
+        configureWithAttestation(interactor, LinkAttestationCheck.Result.Error(genericError))
 
-        val result = viewModel.configure(createControllerConfig())
+        val result = interactor.configure(createControllerConfig())
 
         assertThat(result).isInstanceOf(LinkController.ConfigureResult.Failed::class.java)
         val failedResult = result as LinkController.ConfigureResult.Failed
@@ -203,10 +202,10 @@ class LinkControllerViewModelTest {
 
     @Test
     fun `onPresentPaymentMethods() fails when configuration is not set`() = runTest {
-        val viewModel = createViewModel()
+        val interactor = createInteractor()
 
-        viewModel.presentPaymentMethodsResultFlow.test {
-            viewModel.onPresentPaymentMethods(mock(), "test@example.com")
+        interactor.presentPaymentMethodsResultFlow.test {
+            interactor.presentPaymentMethods(mock(), "test@example.com")
 
             val result = awaitItem()
             assertThat(result).isInstanceOf(LinkController.PresentPaymentMethodsResult.Failed::class.java)
@@ -217,90 +216,78 @@ class LinkControllerViewModelTest {
 
     @Test
     fun `onCreatePaymentMethod() fails when configuration is not set`() = runTest {
-        val viewModel = createViewModel()
+        val interactor = createInteractor()
 
-        viewModel.createPaymentMethodResultFlow.test {
-            viewModel.onCreatePaymentMethod()
+        val result = interactor.createPaymentMethod()
 
-            val result = awaitItem()
-            assertThat(result).isInstanceOf(LinkController.CreatePaymentMethodResult.Failed::class.java)
-            val error = (result as LinkController.CreatePaymentMethodResult.Failed).error
-            assertThat(error).isInstanceOf(MissingConfigurationException::class.java)
-        }
+        assertThat(result).isInstanceOf(LinkController.CreatePaymentMethodResult.Failed::class.java)
+        val error = (result as LinkController.CreatePaymentMethodResult.Failed).error
+        assertThat(error).isInstanceOf(MissingConfigurationException::class.java)
     }
 
     @Test
     fun `onCreatePaymentMethod() fails when selectedPaymentMethod is not set`() = runTest {
-        val viewModel = createViewModel()
-        configure(viewModel)
+        val interactor = createInteractor()
+        configure(interactor)
 
-        viewModel.createPaymentMethodResultFlow.test {
-            viewModel.onCreatePaymentMethod()
+        val result = interactor.createPaymentMethod()
 
-            val result = awaitItem()
-            assertThat(result).isInstanceOf(LinkController.CreatePaymentMethodResult.Failed::class.java)
-            val error = (result as LinkController.CreatePaymentMethodResult.Failed).error
-            assertThat(error).isInstanceOf(IllegalStateException::class.java)
-        }
+        assertThat(result).isInstanceOf(LinkController.CreatePaymentMethodResult.Failed::class.java)
+        val error = (result as LinkController.CreatePaymentMethodResult.Failed).error
+        assertThat(error).isInstanceOf(IllegalStateException::class.java)
     }
 
     @Test
     fun `onCreatePaymentMethod() succeeds when not in passthrough mode`() = runTest {
-        val viewModel = createViewModel()
-        configure(viewModel)
+        val interactor = createInteractor()
+        configure(interactor)
         signIn()
 
-        viewModel.updateState {
+        interactor.updateState {
             it.copy(selectedPaymentMethod = createTestPaymentMethod())
         }
 
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         linkAccountManager.createCardPaymentDetailsResult = Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
 
-        viewModel.createPaymentMethodResultFlow.test {
-            viewModel.onCreatePaymentMethod()
+        assertThat(interactor.createPaymentMethod())
+            .isEqualTo(LinkController.CreatePaymentMethodResult.Success)
 
-            assertThat(awaitItem()).isEqualTo(LinkController.CreatePaymentMethodResult.Success)
-        }
-
-        viewModel.state(application).test {
+        interactor.state(application).test {
             assertThat(awaitItem().createdPaymentMethod).isEqualTo(paymentMethod)
         }
     }
 
     @Test
     fun `onCreatePaymentMethod() fails when not in passthrough mode`() = runTest {
-        val viewModel = createViewModel()
-        configure(viewModel)
+        val interactor = createInteractor()
+        configure(interactor)
         signIn()
 
-        viewModel.updateState {
+        interactor.updateState {
             it.copy(selectedPaymentMethod = createTestPaymentMethod())
         }
 
         val error = Exception("Error")
         linkAccountManager.createPaymentMethodResult = Result.failure(error)
 
-        viewModel.createPaymentMethodResultFlow.test {
-            viewModel.onCreatePaymentMethod()
+        val result = interactor.createPaymentMethod()
 
-            val result = awaitItem()
-            assertThat(result).isInstanceOf(LinkController.CreatePaymentMethodResult.Failed::class.java)
-            assertThat((result as LinkController.CreatePaymentMethodResult.Failed).error).isEqualTo(error)
-        }
+        assertThat(result).isInstanceOf(LinkController.CreatePaymentMethodResult.Failed::class.java)
+        assertThat((result as LinkController.CreatePaymentMethodResult.Failed).error).isEqualTo(error)
 
-        viewModel.state(application).test {
+        interactor.state(application).test {
             assertThat(awaitItem().createdPaymentMethod).isNull()
         }
     }
 
     @Test
     fun `onCreatePaymentMethod() in passthrough mode on success stores payment method`() = runTest {
-        val viewModel = createViewModel()
-        configure(viewModel, passthroughModeEnabled = true)
+        val interactor = createInteractor()
+        configure(interactor, passthroughModeEnabled = true)
         signIn()
 
-        viewModel.updateState {
+        interactor.updateState {
             it.copy(selectedPaymentMethod = createTestPaymentMethod())
         }
 
@@ -309,99 +296,83 @@ class LinkControllerViewModelTest {
             JSONObject(TestFactory.LINK_SHARE_PAYMENT_DETAILS.encodedPaymentMethod)
         )
 
-        viewModel.createPaymentMethodResultFlow.test {
-            viewModel.onCreatePaymentMethod()
+        assertThat(interactor.createPaymentMethod())
+            .isEqualTo(LinkController.CreatePaymentMethodResult.Success)
 
-            assertThat(awaitItem()).isEqualTo(LinkController.CreatePaymentMethodResult.Success)
-        }
-
-        viewModel.state(application).test {
+        interactor.state(application).test {
             assertThat(awaitItem().createdPaymentMethod).isEqualTo(paymentMethod)
         }
     }
 
     @Test
     fun `onCreatePaymentMethod() fails when in passthrough mode`() = runTest {
-        val viewModel = createViewModel()
-        configure(viewModel, passthroughModeEnabled = true)
+        val interactor = createInteractor()
+        configure(interactor, passthroughModeEnabled = true)
         signIn()
 
-        viewModel.updateState {
+        interactor.updateState {
             it.copy(selectedPaymentMethod = createTestPaymentMethod())
         }
 
         val error = Exception("Error")
         linkAccountManager.sharePaymentDetails = Result.failure(error)
 
-        viewModel.createPaymentMethodResultFlow.test {
-            viewModel.onCreatePaymentMethod()
+        val result = interactor.createPaymentMethod()
+        assertThat(result).isInstanceOf(LinkController.CreatePaymentMethodResult.Failed::class.java)
+        assertThat((result as LinkController.CreatePaymentMethodResult.Failed).error).isEqualTo(error)
 
-            val result = awaitItem()
-            assertThat(result).isInstanceOf(LinkController.CreatePaymentMethodResult.Failed::class.java)
-            assertThat((result as LinkController.CreatePaymentMethodResult.Failed).error).isEqualTo(error)
-        }
-
-        viewModel.state(application).test {
+        interactor.state(application).test {
             assertThat(awaitItem().createdPaymentMethod).isNull()
         }
     }
 
     @Test
     fun `onLookupConsumer() on success emits success result`() = runTest {
-        val viewModel = createViewModel()
-        configure(viewModel)
+        val interactor = createInteractor()
+        configure(interactor)
 
         linkAccountManager.lookupConsumerResult = Result.success(TestFactory.LINK_ACCOUNT)
 
-        viewModel.lookupConsumerResultFlow.test {
-            viewModel.onLookupConsumer("test@example.com")
-            assertThat(awaitItem())
-                .isEqualTo(LinkController.LookupConsumerResult.Success("test@example.com", true))
-        }
+        assertThat(interactor.lookupConsumer("test@example.com"))
+            .isEqualTo(LinkController.LookupConsumerResult.Success("test@example.com", true))
     }
 
     @Test
     fun `onLookupConsumer() on failure emits failure result`() = runTest(dispatcher) {
-        val viewModel = createViewModel()
-        configure(viewModel)
+        val interactor = createInteractor()
+        configure(interactor)
 
         val error = Exception("Error")
         linkAuth.lookupResult = LinkAuthResult.Error(error)
 
-        viewModel.lookupConsumerResultFlow.test {
-            viewModel.onLookupConsumer("test@example.com")
-            assertThat(awaitItem())
-                .isEqualTo(LinkController.LookupConsumerResult.Failed("test@example.com", error))
-        }
+        assertThat(interactor.lookupConsumer("test@example.com"))
+            .isEqualTo(LinkController.LookupConsumerResult.Failed("test@example.com", error))
     }
 
     @Test
     fun `onLookupConsumer() on attestation failure emits failure result with AppAttestationException`() =
         runTest(dispatcher) {
-            val viewModel = createViewModel()
-            configure(viewModel)
+            val interactor = createInteractor()
+            configure(interactor)
 
             val attestationError = Exception("Attestation failed")
             linkAuth.lookupResult = LinkAuthResult.AttestationFailed(attestationError)
 
-            viewModel.lookupConsumerResultFlow.test {
-                viewModel.onLookupConsumer("test@example.com")
-                val result = awaitItem()
-                assertThat(result).isInstanceOf(LinkController.LookupConsumerResult.Failed::class.java)
-                val failedResult = result as LinkController.LookupConsumerResult.Failed
-                assertThat(failedResult.email).isEqualTo("test@example.com")
-                assertThat(failedResult.error).isInstanceOf(AppAttestationException::class.java)
-                assertThat(failedResult.error.cause).isEqualTo(attestationError)
-            }
+            val result = interactor.lookupConsumer("test@example.com")
+            assertThat(result).isInstanceOf(LinkController.LookupConsumerResult.Failed::class.java)
+            val failedResult = result as LinkController.LookupConsumerResult.Failed
+            assertThat(failedResult.email).isEqualTo("test@example.com")
+            assertThat(failedResult.error).isInstanceOf(AppAttestationException::class.java)
+            assertThat(failedResult.error.cause).isEqualTo(attestationError)
         }
 
     @Test
     fun `onPresentPaymentMethods() launches Link with correct arguments`() = runTest {
-        val viewModel = createViewModel()
-        configure(viewModel)
+        val interactor = createInteractor()
+        configure(interactor)
 
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        viewModel.onPresentPaymentMethods(launcher, "test@example.com")
+        interactor.presentPaymentMethods(launcher, "test@example.com")
 
         val call = launcher.calls.awaitItem()
         val args = call.input
@@ -415,18 +386,18 @@ class LinkControllerViewModelTest {
                 )
             )
 
-        val state = viewModel.state(application).first()
+        val state = interactor.state(application).first()
         assertThat(state.isConsumerVerified).isNull()
     }
 
     @Test
     fun `onPresentPaymentMethods() on matching email passes existing account`() = runTest(dispatcher) {
-        val viewModel = createViewModel()
-        configure(viewModel)
+        val interactor = createInteractor()
+        configure(interactor)
         signIn()
 
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        viewModel.onPresentPaymentMethods(launcher, TestFactory.LINK_ACCOUNT.email)
+        interactor.presentPaymentMethods(launcher, TestFactory.LINK_ACCOUNT.email)
 
         val call = launcher.calls.awaitItem()
         val args = call.input
@@ -435,11 +406,11 @@ class LinkControllerViewModelTest {
 
     @Test
     fun `onPresentPaymentMethods() on non-matching email clears account state`() = runTest {
-        val viewModel = createViewModel()
-        configure(viewModel)
+        val interactor = createInteractor()
+        configure(interactor)
         signIn()
 
-        viewModel.updateState {
+        interactor.updateState {
             it.copy(
                 selectedPaymentMethod = createTestPaymentMethod(),
                 createdPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -447,13 +418,13 @@ class LinkControllerViewModelTest {
         }
 
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        viewModel.onPresentPaymentMethods(launcher, "another@email.com")
+        interactor.presentPaymentMethods(launcher, "another@email.com")
 
         val call = launcher.calls.awaitItem()
         val args = call.input
         assertThat(args.linkAccountInfo.account).isNull()
 
-        viewModel.state(application).test {
+        interactor.state(application).test {
             val state = awaitItem()
             assertThat(state.selectedPaymentMethodPreview).isNull()
             assertThat(state.createdPaymentMethod).isNull()
@@ -462,12 +433,12 @@ class LinkControllerViewModelTest {
 
     @Test
     fun `onPresentPaymentMethods() with email includes the email in the launch config`() = runTest {
-        val viewModel = createViewModel()
-        configure(viewModel)
+        val interactor = createInteractor()
+        configure(interactor)
 
         val newEmail = "new@email.com"
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        viewModel.onPresentPaymentMethods(launcher = launcher, email = newEmail)
+        interactor.presentPaymentMethods(launcher = launcher, email = newEmail)
 
         val customerInfo = launcher.calls.awaitItem().input.configuration.customerInfo
         assertThat(customerInfo.email).isEqualTo(newEmail)
@@ -475,17 +446,17 @@ class LinkControllerViewModelTest {
 
     @Test
     fun `onPresentPaymentMethods() with null email uses existing customer info`() = runTest {
-        val viewModel = createViewModel()
+        val interactor = createInteractor()
         val billingDetails = PaymentSheet.BillingDetails(
             address = null,
             email = TestFactory.CUSTOMER_EMAIL,
             name = TestFactory.CUSTOMER_NAME,
             phone = TestFactory.CUSTOMER_PHONE,
         )
-        configure(viewModel, defaultBillingDetails = Optional.of(billingDetails))
+        configure(interactor, defaultBillingDetails = Optional.of(billingDetails))
 
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        viewModel.onPresentPaymentMethods(launcher = launcher, email = null)
+        interactor.presentPaymentMethods(launcher = launcher, email = null)
 
         val customerInfo = launcher.calls.awaitItem().input.configuration.customerInfo
         assertThat(customerInfo.email).isEqualTo(TestFactory.CUSTOMER_EMAIL)
@@ -495,17 +466,17 @@ class LinkControllerViewModelTest {
 
     @Test
     fun `onLinkActivityResult() with PaymentMethodObtained result does nothing`() = runTest {
-        val viewModel = createViewModel()
-        configure(viewModel)
+        val interactor = createInteractor()
+        configure(interactor)
 
-        val initialState = viewModel.state(application).first()
+        val initialState = interactor.state(application).first()
         val initialAccount = linkAccountHolder.linkAccountInfo.first()
 
         // First call onPresentPaymentMethods to set up the launch mode
-        viewModel.onPresentPaymentMethods(FakeActivityResultLauncher(), "test@example.com")
+        interactor.presentPaymentMethods(FakeActivityResultLauncher(), "test@example.com")
 
-        viewModel.presentPaymentMethodsResultFlow.test {
-            viewModel.onLinkActivityResult(
+        interactor.presentPaymentMethodsResultFlow.test {
+            interactor.onLinkActivityResult(
                 LinkActivityResult.PaymentMethodObtained(
                     paymentMethod = mock()
                 )
@@ -513,20 +484,20 @@ class LinkControllerViewModelTest {
             expectNoEvents()
         }
 
-        assertThat(viewModel.state(application).first()).isEqualTo(initialState)
+        assertThat(interactor.state(application).first()).isEqualTo(initialState)
         assertThat(linkAccountHolder.linkAccountInfo.first()).isEqualTo(initialAccount)
     }
 
     @Test
     fun `onLinkActivityResult() with Canceled result`() = runTest {
-        val viewModel = createViewModel()
-        configure(viewModel)
+        val interactor = createInteractor()
+        configure(interactor)
 
         // First call onPresentPaymentMethods to set up the launch mode
-        viewModel.onPresentPaymentMethods(FakeActivityResultLauncher(), "test@example.com")
+        interactor.presentPaymentMethods(FakeActivityResultLauncher(), "test@example.com")
 
-        viewModel.presentPaymentMethodsResultFlow.test {
-            viewModel.onLinkActivityResult(
+        interactor.presentPaymentMethodsResultFlow.test {
+            interactor.onLinkActivityResult(
                 LinkActivityResult.Canceled(
                     reason = LinkActivityResult.Canceled.Reason.BackPressed,
                     linkAccountUpdate = LinkAccountUpdate.Value(null)
@@ -538,15 +509,15 @@ class LinkControllerViewModelTest {
 
     @Test
     fun `onLinkActivityResult() on Completed result emits Success and updates preview`() = runTest {
-        val viewModel = createViewModel()
-        configure(viewModel)
+        val interactor = createInteractor()
+        configure(interactor)
 
         // First call onPresentPaymentMethods to set up the launch mode
-        viewModel.onPresentPaymentMethods(FakeActivityResultLauncher(), "test@example.com")
+        interactor.presentPaymentMethods(FakeActivityResultLauncher(), "test@example.com")
 
         val linkPaymentMethod = createTestPaymentMethod()
-        viewModel.presentPaymentMethodsResultFlow.test {
-            viewModel.onLinkActivityResult(
+        interactor.presentPaymentMethodsResultFlow.test {
+            interactor.onLinkActivityResult(
                 LinkActivityResult.Completed(
                     linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                     selectedPayment = linkPaymentMethod,
@@ -556,7 +527,7 @@ class LinkControllerViewModelTest {
             assertThat(awaitItem()).isEqualTo(LinkController.PresentPaymentMethodsResult.Success)
         }
 
-        viewModel.state(application).test {
+        interactor.state(application).test {
             assertThat(awaitItem().selectedPaymentMethodPreview?.sublabel)
                 .isEqualTo("Visa Credit •••• 4242")
         }
@@ -564,15 +535,15 @@ class LinkControllerViewModelTest {
 
     @Test
     fun `onLinkActivityResult() with Failed result`() = runTest {
-        val viewModel = createViewModel()
-        configure(viewModel)
+        val interactor = createInteractor()
+        configure(interactor)
 
         // First call onPresentPaymentMethods to set up the launch mode
-        viewModel.onPresentPaymentMethods(FakeActivityResultLauncher(), "test@example.com")
+        interactor.presentPaymentMethods(FakeActivityResultLauncher(), "test@example.com")
 
         val error = Exception("Error")
-        viewModel.presentPaymentMethodsResultFlow.test {
-            viewModel.onLinkActivityResult(
+        interactor.presentPaymentMethodsResultFlow.test {
+            interactor.onLinkActivityResult(
                 LinkActivityResult.Failed(
                     error = error,
                     linkAccountUpdate = LinkAccountUpdate.Value(null)
@@ -586,28 +557,28 @@ class LinkControllerViewModelTest {
 
     @Test
     fun `onLinkActivityResult() on account cleared clears verification state`() = runTest {
-        val viewModel = createViewModel()
-        configure(viewModel)
+        val interactor = createInteractor()
+        configure(interactor)
         signIn()
 
-        viewModel.onLinkActivityResult(
+        interactor.onLinkActivityResult(
             LinkActivityResult.Canceled(
                 reason = LinkActivityResult.Canceled.Reason.BackPressed,
                 linkAccountUpdate = LinkAccountUpdate.Value(null)
             )
         )
 
-        viewModel.state(application).test {
+        interactor.state(application).test {
             assertThat(awaitItem().isConsumerVerified).isNull()
         }
     }
 
     @Test
     fun `onAuthenticate() fails when configuration is not set`() = runTest {
-        val viewModel = createViewModel()
+        val interactor = createInteractor()
 
-        viewModel.authenticationResultFlow.test {
-            viewModel.onAuthenticate(mock(), "test@example.com")
+        interactor.authenticationResultFlow.test {
+            interactor.authenticate(mock(), "test@example.com")
             val result = awaitItem() as LinkController.AuthenticationResult.Failed
             assertThat(result.error).isInstanceOf(MissingConfigurationException::class.java)
         }
@@ -615,25 +586,25 @@ class LinkControllerViewModelTest {
 
     @Test
     fun `onAuthenticate() launches Link with correct arguments`() = runTest {
-        val viewModel = createViewModel()
-        configure(viewModel)
+        val interactor = createInteractor()
+        configure(interactor)
 
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        viewModel.onAuthenticate(launcher, "test@example.com")
+        interactor.authenticate(launcher, "test@example.com")
 
         val args = launcher.calls.awaitItem().input
         assertThat(args.startWithVerificationDialog).isTrue()
         assertThat(args.linkAccountInfo.account).isNull()
         assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication())
 
-        val state = viewModel.state(application).first()
+        val state = interactor.state(application).first()
         assertThat(state.isConsumerVerified).isNull()
     }
 
     @Test
     fun `onAuthenticate() on matching email passes existing account`() = runTest(dispatcher) {
-        val viewModel = createViewModel()
-        configure(viewModel)
+        val interactor = createInteractor()
+        configure(interactor)
 
         // Create an unverified account (one that needs verification)
         val unverifiedSession = TestFactory.CONSUMER_SESSION.copy(
@@ -643,7 +614,7 @@ class LinkControllerViewModelTest {
         linkAccountHolder.set(LinkAccountUpdate.Value(unverifiedAccount))
 
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        viewModel.onAuthenticate(launcher, unverifiedAccount.email)
+        interactor.authenticate(launcher, unverifiedAccount.email)
 
         val args = launcher.calls.awaitItem().input
         assertThat(args.linkAccountInfo.account).isEqualTo(unverifiedAccount)
@@ -652,12 +623,12 @@ class LinkControllerViewModelTest {
 
     @Test
     fun `onAuthenticate() on non-matching email clears account state`() = runTest {
-        val viewModel = createViewModel()
-        configure(viewModel)
+        val interactor = createInteractor()
+        configure(interactor)
         signIn()
 
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        viewModel.onAuthenticate(launcher, "another@email.com")
+        interactor.authenticate(launcher, "another@email.com")
 
         val call = launcher.calls.awaitItem()
         val args = call.input
@@ -667,12 +638,12 @@ class LinkControllerViewModelTest {
 
     @Test
     fun `onAuthenticate() updates state with presentedForEmail and currentLaunchMode`() = runTest {
-        val viewModel = createViewModel()
-        configure(viewModel)
+        val interactor = createInteractor()
+        configure(interactor)
 
         val email = "test@example.com"
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        viewModel.onAuthenticate(launcher, email)
+        interactor.authenticate(launcher, email)
 
         val call = launcher.calls.awaitItem()
         val args = call.input
@@ -682,11 +653,11 @@ class LinkControllerViewModelTest {
 
     @Test
     fun `onAuthenticate() handles configuration loading failure`() = runTest {
-        val viewModel = createViewModel()
-        // Don't configure the viewModel, so it will fail with MissingConfigurationException
+        val interactor = createInteractor()
+        // Don't configure the interactor, so it will fail with MissingConfigurationException
 
-        viewModel.authenticationResultFlow.test {
-            viewModel.onAuthenticate(mock(), "test@example.com")
+        interactor.authenticationResultFlow.test {
+            interactor.authenticate(mock(), "test@example.com")
 
             val result = awaitItem() as LinkController.AuthenticationResult.Failed
             assertThat(result.error).isInstanceOf(MissingConfigurationException::class.java)
@@ -695,11 +666,11 @@ class LinkControllerViewModelTest {
 
     @Test
     fun `onAuthenticate() with null email passes null to configuration`() = runTest {
-        val viewModel = createViewModel()
-        configure(viewModel)
+        val interactor = createInteractor()
+        configure(interactor)
 
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        viewModel.onAuthenticate(launcher, null)
+        interactor.authenticate(launcher, null)
 
         val call = launcher.calls.awaitItem()
         val args = call.input
@@ -709,12 +680,12 @@ class LinkControllerViewModelTest {
 
     @Test
     fun `onAuthenticate() sets correct customer info in configuration`() = runTest {
-        val viewModel = createViewModel()
-        configure(viewModel)
+        val interactor = createInteractor()
+        configure(interactor)
 
         val email = "test@example.com"
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        viewModel.onAuthenticate(launcher, email)
+        interactor.authenticate(launcher, email)
 
         val call = launcher.calls.awaitItem()
         val args = call.input
@@ -727,11 +698,11 @@ class LinkControllerViewModelTest {
 
     @Test
     fun `onAuthenticateExistingConsumer() launches Link with existingOnly flag set to true`() = runTest {
-        val viewModel = createViewModel()
-        configure(viewModel)
+        val interactor = createInteractor()
+        configure(interactor)
 
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        viewModel.onAuthenticateExistingConsumer(launcher, "test@example.com")
+        interactor.authenticateExistingConsumer(launcher, "test@example.com")
 
         val args = launcher.calls.awaitItem().input
         assertThat(args.startWithVerificationDialog).isTrue()
@@ -741,13 +712,13 @@ class LinkControllerViewModelTest {
 
     @Test
     fun `onAuthenticateExistingConsumer() on succeeds immediately with matching email`() = runTest(dispatcher) {
-        val viewModel = createViewModel()
-        configure(viewModel)
+        val interactor = createInteractor()
+        configure(interactor)
         signIn()
 
-        viewModel.authenticationResultFlow.test {
+        interactor.authenticationResultFlow.test {
             val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-            viewModel.onAuthenticateExistingConsumer(launcher, TestFactory.LINK_ACCOUNT.email)
+            interactor.authenticateExistingConsumer(launcher, TestFactory.LINK_ACCOUNT.email)
 
             assertThat(awaitItem()).isEqualTo(LinkController.AuthenticationResult.Success)
         }
@@ -755,8 +726,8 @@ class LinkControllerViewModelTest {
 
     @Test
     fun `getLinkAccountInfo() clears account holder when account is null`() = runTest {
-        val viewModel = createViewModel()
-        configure(viewModel)
+        val interactor = createInteractor()
+        configure(interactor)
 
         // Set up an existing account
         signIn()
@@ -764,7 +735,7 @@ class LinkControllerViewModelTest {
 
         // Call onAuthenticate with a non-matching email
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        viewModel.onAuthenticate(launcher, "different@email.com")
+        interactor.authenticate(launcher, "different@email.com")
 
         // Verify that the account holder was cleared
         assertThat(linkAccountHolder.linkAccountInfo.value.account).isNull()
@@ -776,8 +747,8 @@ class LinkControllerViewModelTest {
 
     @Test
     fun `getLinkAccountInfo() does not clear account holder when account is not null`() = runTest {
-        val viewModel = createViewModel()
-        configure(viewModel)
+        val interactor = createInteractor()
+        configure(interactor)
 
         // Create an unverified account (one that needs verification)
         val unverifiedSession = TestFactory.CONSUMER_SESSION.copy(
@@ -789,7 +760,7 @@ class LinkControllerViewModelTest {
 
         // Call onAuthenticate with a matching email
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        viewModel.onAuthenticate(launcher, unverifiedAccount.email)
+        interactor.authenticate(launcher, unverifiedAccount.email)
 
         // Verify that the account holder was NOT cleared
         assertThat(linkAccountHolder.linkAccountInfo.value.account).isEqualTo(unverifiedAccount)
@@ -801,22 +772,22 @@ class LinkControllerViewModelTest {
 
     @Test
     fun `onAuthenticate() on non-matching email clears saved payment data`() = runTest {
-        testAuthenticationClearsSavedPaymentData { viewModel, launcher, email ->
-            viewModel.onAuthenticate(launcher, email)
+        testAuthenticationClearsSavedPaymentData { interactor, launcher, email ->
+            interactor.authenticate(launcher, email)
         }
     }
 
     @Test
     fun `onAuthenticateExistingConsumer() on non-matching email clears saved payment data`() = runTest {
-        testAuthenticationClearsSavedPaymentData { viewModel, launcher, email ->
-            viewModel.onAuthenticateExistingConsumer(launcher, email)
+        testAuthenticationClearsSavedPaymentData { interactor, launcher, email ->
+            interactor.authenticateExistingConsumer(launcher, email)
         }
     }
 
     @Test
     fun `onPresentPaymentMethods() clears account holder when email doesn't match`() = runTest {
-        val viewModel = createViewModel()
-        configure(viewModel)
+        val interactor = createInteractor()
+        configure(interactor)
 
         // Set up an existing account
         signIn()
@@ -824,7 +795,7 @@ class LinkControllerViewModelTest {
 
         // Call onPresentPaymentMethods with a non-matching email
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        viewModel.onPresentPaymentMethods(launcher, "different@email.com")
+        interactor.presentPaymentMethods(launcher, "different@email.com")
 
         // Verify that the account holder was cleared
         assertThat(linkAccountHolder.linkAccountInfo.value.account).isNull()
@@ -836,18 +807,14 @@ class LinkControllerViewModelTest {
 
     @Test
     fun `onRegisterConsumer() on success emits success result and updates account`() = runTest {
-        val viewModel = createViewModel()
-        configure(viewModel)
+        val interactor = createInteractor()
+        configure(interactor)
 
         val expectedAccount = TestFactory.LINK_ACCOUNT
         linkAuth.signupResult = LinkAuthResult.Success(expectedAccount)
 
-        viewModel.registerConsumerResultFlow.test {
-            viewModel.registerConsumerWith()
-
-            val result = awaitItem()
-            assertThat(result).isEqualTo(LinkController.RegisterConsumerResult.Success)
-        }
+        assertThat(interactor.registerConsumerWith())
+            .isEqualTo(LinkController.RegisterConsumerResult.Success)
 
         // Verify that the account was updated
         val account = linkAccountHolder.linkAccountInfo.value.account
@@ -856,20 +823,17 @@ class LinkControllerViewModelTest {
 
     @Test
     fun `onRegisterConsumer() on failure emits failure result and clears account`() = runTest {
-        val viewModel = createViewModel()
-        configure(viewModel)
+        val interactor = createInteractor()
+        configure(interactor)
         signIn()
 
         val error = Exception("Registration failed")
         linkAuth.signupResult = LinkAuthResult.Error(error)
 
-        viewModel.registerConsumerResultFlow.test {
-            viewModel.registerConsumerWith()
+        val result = interactor.registerConsumerWith()
 
-            val result = awaitItem()
-            assertThat(result).isInstanceOf(LinkController.RegisterConsumerResult.Failed::class.java)
-            assertThat((result as LinkController.RegisterConsumerResult.Failed).error).isEqualTo(error)
-        }
+        assertThat(result).isInstanceOf(LinkController.RegisterConsumerResult.Failed::class.java)
+        assertThat((result as LinkController.RegisterConsumerResult.Failed).error).isEqualTo(error)
 
         // Verify that the account was cleared
         assertThat(linkAccountHolder.linkAccountInfo.value.account).isNull()
@@ -877,22 +841,19 @@ class LinkControllerViewModelTest {
 
     @Test
     fun `onRegisterConsumer() on attestation failure emits failure result with AppAttestationException`() = runTest {
-        val viewModel = createViewModel()
-        configure(viewModel)
+        val interactor = createInteractor()
+        configure(interactor)
         signIn()
 
         val attestationError = Exception("Attestation failed")
         linkAuth.signupResult = LinkAuthResult.AttestationFailed(attestationError)
 
-        viewModel.registerConsumerResultFlow.test {
-            viewModel.registerConsumerWith()
+        val result = interactor.registerConsumerWith()
 
-            val result = awaitItem()
-            assertThat(result).isInstanceOf(LinkController.RegisterConsumerResult.Failed::class.java)
-            val failedResult = result as LinkController.RegisterConsumerResult.Failed
-            assertThat(failedResult.error).isInstanceOf(AppAttestationException::class.java)
-            assertThat(failedResult.error.cause).isEqualTo(attestationError)
-        }
+        assertThat(result).isInstanceOf(LinkController.RegisterConsumerResult.Failed::class.java)
+        val failedResult = result as LinkController.RegisterConsumerResult.Failed
+        assertThat(failedResult.error).isInstanceOf(AppAttestationException::class.java)
+        assertThat(failedResult.error.cause).isEqualTo(attestationError)
 
         // Verify that the account was cleared
         assertThat(linkAccountHolder.linkAccountInfo.value.account).isNull()
@@ -900,19 +861,19 @@ class LinkControllerViewModelTest {
 
     private suspend fun testAuthenticationClearsSavedPaymentData(
         authenticateCall: (
-            viewModel: LinkControllerViewModel,
+            interactor: LinkControllerInteractor,
             launcher: FakeActivityResultLauncher<LinkActivityContract.Args>,
             email: String
         ) -> Unit
     ) {
-        val viewModel = createViewModel()
-        configure(viewModel)
+        val interactor = createInteractor()
+        configure(interactor)
         signIn()
 
         // Set up some saved payment data
         val selectedPaymentMethod = createTestPaymentMethod()
         val createdPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        viewModel.updateState {
+        interactor.updateState {
             it.copy(
                 selectedPaymentMethod = selectedPaymentMethod,
                 createdPaymentMethod = createdPaymentMethod
@@ -920,7 +881,7 @@ class LinkControllerViewModelTest {
         }
 
         // Verify initial state has the saved data
-        viewModel.state(application).test {
+        interactor.state(application).test {
             val initialState = awaitItem()
             assertThat(initialState.selectedPaymentMethodPreview).isNotNull()
             assertThat(initialState.createdPaymentMethod).isEqualTo(createdPaymentMethod)
@@ -928,29 +889,27 @@ class LinkControllerViewModelTest {
 
         // Call the authentication method with a non-matching email
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        authenticateCall(viewModel, launcher, "another@email.com")
+        authenticateCall(interactor, launcher, "another@email.com")
 
         // Verify that saved payment data is cleared
-        viewModel.state(application).test {
+        interactor.state(application).test {
             val finalState = awaitItem()
             assertThat(finalState.selectedPaymentMethodPreview).isNull()
             assertThat(finalState.createdPaymentMethod).isNull()
         }
     }
 
-    private fun createViewModel(): LinkControllerViewModel {
-        return LinkControllerViewModel(
-            application = application,
+    private fun createInteractor(): LinkControllerInteractor {
+        return LinkControllerInteractor(
             logger = logger,
             linkConfigurationLoader = linkConfigurationLoader,
             linkAccountHolder = linkAccountHolder,
             linkComponentBuilderProvider = linkComponentBuilderProvider,
-            controllerComponentFactory = controllerComponentFactory
         )
     }
 
     private suspend fun configure(
-        viewModel: LinkControllerViewModel,
+        interactor: LinkControllerInteractor,
         passthroughModeEnabled: Boolean = false,
         defaultBillingDetails: Optional<PaymentSheet.BillingDetails>? = null,
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration? = null,
@@ -962,7 +921,7 @@ class LinkControllerViewModelTest {
             passthroughModeEnabled = passthroughModeEnabled
         )
         linkConfigurationLoader.linkConfigurationResult = Result.success(linkConfiguration)
-        viewModel.configure(
+        interactor.configure(
             LinkController.Configuration.Builder("Test")
                 .apply { defaultBillingDetails?.let { defaultBillingDetails(it.getOrNull()) } }
                 .apply { billingDetailsCollectionConfiguration?.let { billingDetailsCollectionConfiguration(it) } }
@@ -988,13 +947,13 @@ class LinkControllerViewModelTest {
     }
 
     private suspend fun configureWithAttestation(
-        viewModel: LinkControllerViewModel,
+        interactor: LinkControllerInteractor,
         attestationResult: LinkAttestationCheck.Result = LinkAttestationCheck.Result.Successful
     ) {
         linkAttestationCheck.result = attestationResult
         val loadedConfiguration = LinkTestUtils.createLinkConfiguration()
         linkConfigurationLoader.linkConfigurationResult = Result.success(loadedConfiguration)
-        viewModel.configure(createControllerConfig())
+        interactor.configure(createControllerConfig())
     }
 
     private data class ConsumerRegistrationParams(
@@ -1004,14 +963,12 @@ class LinkControllerViewModelTest {
         val name: String = "Test User"
     )
 
-    private fun LinkControllerViewModel.registerConsumerWith(
+    private suspend fun LinkControllerInteractor.registerConsumerWith(
         params: ConsumerRegistrationParams = ConsumerRegistrationParams()
-    ) {
-        onRegisterConsumer(
-            email = params.email,
-            phone = params.phone,
-            country = params.country,
-            name = params.name
-        )
-    }
+    ) = registerConsumer(
+        email = params.email,
+        phone = params.phone,
+        country = params.country,
+        name = params.name
+    )
 }

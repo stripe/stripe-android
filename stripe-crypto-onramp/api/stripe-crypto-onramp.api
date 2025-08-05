@@ -6,9 +6,12 @@ public final class com/stripe/android/crypto/onramp/BuildConfig {
 }
 
 public final class com/stripe/android/crypto/onramp/OnrampCoordinator$Builder {
-	public fun <init> (Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;)V
-	public final fun build (Landroidx/activity/ComponentActivity;)Lcom/stripe/android/crypto/onramp/OnrampCoordinator;
-	public final fun build (Landroidx/fragment/app/Fragment;)Lcom/stripe/android/crypto/onramp/OnrampCoordinator;
+	public fun <init> ()V
+	public final fun build (Landroid/app/Application;Landroidx/lifecycle/SavedStateHandle;)Lcom/stripe/android/crypto/onramp/OnrampCoordinator;
+}
+
+public final class com/stripe/android/crypto/onramp/OnrampCoordinator$Presenter {
+	public final fun authenticateExistingLinkUser (Ljava/lang/String;)V
 }
 
 public final class com/stripe/android/crypto/onramp/model/LinkUserInfo$Creator : android/os/Parcelable$Creator {
@@ -20,12 +23,9 @@ public final class com/stripe/android/crypto/onramp/model/LinkUserInfo$Creator :
 }
 
 public final class com/stripe/android/crypto/onramp/model/OnrampCallbacks {
-	public fun <init> (Lcom/stripe/android/crypto/onramp/model/OnrampConfigurationCallback;Lcom/stripe/android/crypto/onramp/model/OnrampLinkLookupCallback;Lcom/stripe/android/crypto/onramp/model/OnrampVerificationCallback;Lcom/stripe/android/crypto/onramp/model/OnrampRegisterUserCallback;)V
+	public fun <init> (Lcom/stripe/android/crypto/onramp/model/OnrampVerificationCallback;)V
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAuthenticationCallback ()Lcom/stripe/android/crypto/onramp/model/OnrampVerificationCallback;
-	public final fun getConfigurationCallback ()Lcom/stripe/android/crypto/onramp/model/OnrampConfigurationCallback;
-	public final fun getLinkLookupCallback ()Lcom/stripe/android/crypto/onramp/model/OnrampLinkLookupCallback;
-	public final fun getRegisterUserCallback ()Lcom/stripe/android/crypto/onramp/model/OnrampRegisterUserCallback;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
