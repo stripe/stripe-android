@@ -104,10 +104,12 @@ class OnrampCoordinator @Inject internal constructor(
          * Constructs an [OnrampCoordinator] for the given parameters.
          *
          * @param application The Application context.
+         * @param savedStateHandle The SavedStateHandle for state persistence.
          */
-        fun build(application: Application): OnrampCoordinator {
-            val savedStateHandle = SavedStateHandle()
-
+        fun build(
+            application: Application,
+            savedStateHandle: SavedStateHandle
+        ): OnrampCoordinator {
             val onrampComponent: OnrampComponent =
                 DaggerOnrampComponent
                     .builder()

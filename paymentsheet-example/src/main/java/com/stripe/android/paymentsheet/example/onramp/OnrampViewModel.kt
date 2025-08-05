@@ -2,8 +2,10 @@ package com.stripe.android.paymentsheet.example.onramp
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.utils.requireApplication
@@ -21,9 +23,10 @@ import kotlinx.coroutines.launch
 
 internal class OnrampViewModel(
     application: Application,
+    savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
 
-    val onrampCoordinator = OnrampCoordinator.Builder().build(application)
+    val onrampCoordinator = OnrampCoordinator.Builder().build(application, savedStateHandle)
 
     private val _uiState = MutableStateFlow<OnrampUiState>(OnrampUiState.Loading)
     val uiState: StateFlow<OnrampUiState> = _uiState.asStateFlow()
@@ -117,7 +120,7 @@ internal class OnrampViewModel(
             extras: CreationExtras
         ): T {
             val application = extras.requireApplication()
-            return OnrampViewModel(application) as T
+            return OnrampViewModel(application, extras.createSavedStateHandle()) as T
         }
     }
 }
