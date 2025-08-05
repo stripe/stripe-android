@@ -20,15 +20,13 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     private val coroutineScope: CoroutineScope,
 ) {
 
-    private val linkPresenter by lazy {
-        linkController.createPresenter(
-            activity = activity,
-            presentPaymentMethodsCallback = { result ->
-                // Handle payment methods result if needed
-            },
-            authenticationCallback = ::handleAuthenticationResult
-        )
-    }
+    private val linkPresenter = linkController.createPresenter(
+        activity = activity,
+        presentPaymentMethodsCallback = { result ->
+            // Handle payment methods result if needed
+        },
+        authenticationCallback = ::handleAuthenticationResult
+    )
 
     init {
         // Observe Link controller state
