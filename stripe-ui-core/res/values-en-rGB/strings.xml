@@ -82,6 +82,6 @@
   <string name="stripe_invalid_expiry_month">Your card\'s expiration month is invalid.</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="stripe_invalid_expiry_year">Your card\'s expiration year is invalid.</string>
-  <\!-- Error message for when postal code in form is invalid -->
+  <!-- Error message for when postal code in form is invalid -->
   <string name="stripe_address_postal_code_invalid">Your postcode is invalid.</string>
 </resources>

@@ -82,6 +82,6 @@
   <string name="stripe_invalid_expiry_month">Der Ablaufmonat Ihrer Karte ist ungültig.</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="stripe_invalid_expiry_year">Das Ablaufjahr der Karte ist ungültig.</string>
-  <\!-- Error message for when postal code in form is invalid -->
+  <!-- Error message for when postal code in form is invalid -->
   <string name="stripe_address_postal_code_invalid">Postleitzahl ist ungültig</string>
 </resources>
