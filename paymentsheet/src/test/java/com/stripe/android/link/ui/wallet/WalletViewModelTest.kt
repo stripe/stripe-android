@@ -962,16 +962,16 @@ class WalletViewModelTest {
     @Test
     fun `marks auto-selection attempted when skipWalletInFlowController is enabled`() = runTest(dispatcher) {
         val defaultCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(isDefault = true)
-        
+
         val linkAccountManager = WalletLinkAccountManager()
         linkAccountManager.listPaymentDetailsResult = Result.success(
             ConsumerPaymentDetails(paymentDetails = listOf(defaultCard))
         )
-        
+
         val configuration = TestFactory.LINK_CONFIGURATION.copy(
             skipWalletInFlowController = true
         )
-        
+
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
             configuration = configuration,
@@ -988,16 +988,16 @@ class WalletViewModelTest {
     @Test
     fun `does not auto-select when skipWalletInFlowController is disabled`() = runTest(dispatcher) {
         val defaultCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(isDefault = true)
-        
+
         val linkAccountManager = WalletLinkAccountManager()
         linkAccountManager.listPaymentDetailsResult = Result.success(
             ConsumerPaymentDetails(paymentDetails = listOf(defaultCard))
         )
-        
+
         val configuration = TestFactory.LINK_CONFIGURATION.copy(
             skipWalletInFlowController = false // Disabled
         )
-        
+
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
             configuration = configuration,
