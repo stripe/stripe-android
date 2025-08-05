@@ -40,8 +40,12 @@
   <string name="stripe_address_label_suburb">Subborg</string>
   <!-- Used to describe an address field. -->
   <string name="stripe_address_label_village_township">Raħal jew Belt</string>
+  <!-- Error message for when postal code in form is incomplete -->
+  <string name="stripe_address_postal_code_incomplete">Il-kodiċi postali tiegħek mhux komplut.</string>
   <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
   <string name="stripe_address_search_content_description">Fittex</string>
+  <!-- Error message for when ZIP code in form is incomplete (US only) -->
+  <string name="stripe_address_zip_incomplete">Iż-ZIP postali tiegħek mhux komplut.</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
   <string name="stripe_address_zip_invalid">Il-kodiċi postali tiegħek mhux validu.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->

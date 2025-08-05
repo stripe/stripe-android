@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.painter.Painter
@@ -526,7 +527,8 @@ class EmbeddedPaymentElement @Inject internal constructor(
 
     @Poko
     class PaymentOptionDisplayData internal constructor(
-        private val imageLoader: suspend () -> Drawable,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val imageLoader: suspend () -> Drawable,
 
         /**
          * A user facing string representing the payment method; e.g. "Google Pay" or "···· 4242" for a card.

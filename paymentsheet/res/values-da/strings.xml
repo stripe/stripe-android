@@ -45,8 +45,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up">Acceptér og fortsæt</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">Hurtig og sikker betaling med ét klik</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">Hurtig og sikker betaling</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Gem dine betalingsoplysninger med Link, og betal sikkert med et enkelt klik på sider, der understøtter Link.</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">Betal hurtigere alle steder, hvor Link accepteres.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Ved at tilmelde dig Link accepterer du <terms>vilkårene</terms> og <privacy>privatlivspolitikken</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -105,6 +109,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Kortoplysninger kan ikke ændres.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Ved at angive dine kortoplysninger tillader du %s at opkræve dit kort for denne betaling i overensstemmelse med dennes vilkår.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Ved at fortsætte accepterer du at gemme dine oplysninger til senere køb med %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Ved at fortsætte accepterer du at gemme dine oplysninger til senere køb med %s og <link>Link</link>Du accepterer også Links <terms>vilkår</terms> og <privacy>politik om beskyttelse af personlige oplysninger</privacy>.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Kortet blev ikke opdateret. Prøv igen.</string>
   <!-- Title shown above a carousel containing available payment methods -->

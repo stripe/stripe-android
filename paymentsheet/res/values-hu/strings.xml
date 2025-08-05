@@ -45,8 +45,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up">Beleegyezés és folytatás</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">Gyors, biztonságos, egykattintásos fizetés</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">Gyors és biztonságos fizetés</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Mentse fizetési adatait a Linkbe, hogy biztonságosan fizessen egy kattintással a Link által támogatott oldalakon.</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">Gyorsabban fizethet mindenhol, ahol a Linket elfogadják.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[A folytatással elfogadja a <terms>feltételeket</terms> és az <privacy>adatvédelmi szabályzatot</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -105,6 +109,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">A kártyai adatai nem módosíthatók.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">A kártyaadatok megadásával engedélyezi, hogy a(z) %s megterhelje kártyáját a jövőbeli kifizetésekkel a feltételeiknek megfelelően.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">A folytatással Ön beleegyezik abba, hogy adatait elmenti a jövőbeni vásárlásokhoz itt: %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[A folytatással Ön beleegyezik abba, hogy adatait elmenti a jövőbeni vásárlásokhoz itt: %s és <link>Link</link>. Ön elfogadja a Link <terms>feltételeit</terms> és <privacy>adatvédelmi szabályzatát</privacy>.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">A kártya frissítése nem sikerült, próbálja újra.</string>
   <!-- Title shown above a carousel containing available payment methods -->
