@@ -8,9 +8,9 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.configuration.ConfigurationDefaults
-import com.stripe.android.link.model.LinkAppearance
 import com.stripe.android.link.injection.DaggerLinkControllerComponent
 import com.stripe.android.link.injection.LinkControllerPresenterComponent
+import com.stripe.android.link.model.LinkAppearance
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import dev.drewhamilton.poko.Poko
