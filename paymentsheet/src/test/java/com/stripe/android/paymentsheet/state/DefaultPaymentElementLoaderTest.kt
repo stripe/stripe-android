@@ -3190,7 +3190,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Just Link holdback experiment is triggered when loading PaymentSheet and Link unavailable`() = runTest {
+    fun `Both Link holdback experiments are triggered when loading PaymentSheet when Link is unavailable`() = runTest {
         val logLinkHoldbackExperiment = FakeLogLinkHoldbackExperiment()
 
         val loader = createPaymentElementLoader(
@@ -3208,13 +3208,14 @@ internal class DefaultPaymentElementLoaderTest {
             ),
         )
 
-        val item = logLinkHoldbackExperiment.calls.awaitItem()
-        assertThat(item.experiment).isEqualTo(ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK)
-        logLinkHoldbackExperiment.calls.expectNoEvents()
+        val globalHoldback = logLinkHoldbackExperiment.calls.awaitItem()
+        assertThat(globalHoldback.experiment).isEqualTo(ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK)
+        val abTest = logLinkHoldbackExperiment.calls.awaitItem()
+        assertThat(abTest.experiment).isEqualTo(ElementsSession.ExperimentAssignment.LINK_AB_TEST)
     }
 
     @Test
-    fun `Both Link holdback experiments are triggered when loading PaymentSheet`() = runTest {
+    fun `Both Link holdback experiments are triggered when loading PaymentSheet when Link is available`() = runTest {
         val logLinkHoldbackExperiment = FakeLogLinkHoldbackExperiment()
 
         val loader = createPaymentElementLoader(
