@@ -7,21 +7,18 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.stripe.android.link.injection.LinkControllerScope
+import com.stripe.android.link.injection.LinkControllerPresenterScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@LinkControllerScope
+@LinkControllerPresenterScope
 internal class LinkControllerCoordinator @Inject constructor(
-    private val viewModel: LinkControllerViewModel,
+    private val interactor: LinkControllerInteractor,
     private val lifecycleOwner: LifecycleOwner,
     activityResultRegistryOwner: ActivityResultRegistryOwner,
     linkActivityContract: NativeLinkActivityContract,
     private val selectedPaymentMethodCallback: LinkController.PresentPaymentMethodsCallback,
-    private val lookupConsumerCallback: LinkController.LookupConsumerCallback,
-    private val createPaymentMethodCallback: LinkController.CreatePaymentMethodCallback,
     private val authenticationCallback: LinkController.AuthenticationCallback,
-    private val registerConsumerCallback: LinkController.RegisterConsumerCallback,
 ) {
     val linkActivityResultLauncher: ActivityResultLauncher<LinkActivityContract.Args>
 
@@ -32,30 +29,18 @@ internal class LinkControllerCoordinator @Inject constructor(
             key = "LinkController_LinkActivityResultLauncher",
             contract = linkActivityContract,
         ) { result ->
-            viewModel.onLinkActivityResult(result)
+            interactor.onLinkActivityResult(result)
         }
 
         lifecycleOwner.lifecycleScope.launch {
             lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    viewModel.presentPaymentMethodsResultFlow
+                    interactor.presentPaymentMethodsResultFlow
                         .collect(selectedPaymentMethodCallback::onPresentPaymentMethodsResult)
                 }
                 launch {
-                    viewModel.lookupConsumerResultFlow
-                        .collect(lookupConsumerCallback::onLookupConsumerResult)
-                }
-                launch {
-                    viewModel.createPaymentMethodResultFlow
-                        .collect(createPaymentMethodCallback::onCreatePaymentMethodResult)
-                }
-                launch {
-                    viewModel.authenticationResultFlow
+                    interactor.authenticationResultFlow
                         .collect(authenticationCallback::onAuthenticationResult)
-                }
-                launch {
-                    viewModel.registerConsumerResultFlow
-                        .collect(registerConsumerCallback::onRegisterConsumerResult)
                 }
             }
         }

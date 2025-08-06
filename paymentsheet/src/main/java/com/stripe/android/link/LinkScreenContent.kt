@@ -6,7 +6,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.model.LinkAppearance
 import com.stripe.android.link.ui.FullScreenContent
 import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.link.ui.LinkContentScrollHandler
@@ -53,7 +55,8 @@ internal fun LinkScreenContent(
             goBack = viewModel::goBack,
             changeEmail = viewModel::changeEmail,
             onNavBackStackEntryChanged = viewModel::onNavEntryChanged,
-            navigationChannel = viewModel.navigationFlow
+            navigationChannel = viewModel.navigationFlow,
+            appearance = viewModel.linkConfiguration.linkAppearance
         )
     }
 }
@@ -64,6 +67,7 @@ internal fun LinkScreenContentBody(
     screenState: ScreenState,
     appBarState: LinkAppBarState,
     eventReporter: EventReporter,
+    appearance: LinkAppearance?,
     navigationChannel: SharedFlow<NavigationIntent>,
     onNavBackStackEntryChanged: (NavBackStackEntryUpdate) -> Unit,
     onVerificationSucceeded: () -> Unit,
@@ -108,7 +112,8 @@ internal fun LinkScreenContentBody(
                 linkAccount = screenState.linkAccount,
                 onVerificationSucceeded = onVerificationSucceeded,
                 onDismissClicked = onDismissClicked,
-                dismissWithResult = dismissWithResult
+                dismissWithResult = dismissWithResult,
+                linkAppearance = appearance
             )
         }
     }
