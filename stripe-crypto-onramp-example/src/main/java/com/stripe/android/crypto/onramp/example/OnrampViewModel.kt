@@ -12,8 +12,10 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.crypto.onramp.OnrampCoordinator
+import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
+import com.stripe.android.crypto.onramp.model.OnrampKYCResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
 import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
@@ -77,6 +79,7 @@ internal class OnrampViewModel(
 
         currentEmail = email.trim()
         _uiState.value = OnrampUiState.Loading
+
         val result = onrampCoordinator.isLinkUser(currentEmail)
         when (result) {
             is OnrampLinkLookupResult.Completed -> {
@@ -94,7 +97,6 @@ internal class OnrampViewModel(
             }
         }
     }
-
     fun onBackToEmailInput() {
         _uiState.value = OnrampUiState.EmailInput
     }
@@ -107,7 +109,7 @@ internal class OnrampViewModel(
         when (result) {
             is OnrampVerificationResult.Completed -> {
                 _message.value = "Authentication successful"
-                _uiState.value = OnrampUiState.EmailInput
+                _uiState.value = OnrampUiState.KYCScreen
             }
             is OnrampVerificationResult.Cancelled -> {
                 _message.value = "Authentication cancelled, please try again"
@@ -135,6 +137,25 @@ internal class OnrampViewModel(
         }
     }
 
+    fun collectKycInfo(kycInfo: KycInfo) {
+        _uiState.value = OnrampUiState.Loading
+
+        viewModelScope.launch {
+            val result = onrampCoordinator.collectKycInfo(kycInfo)
+
+            when (result) {
+                is OnrampKYCResult.Completed -> {
+                    _message.value = "KYC Collection successful"
+                    _uiState.value = OnrampUiState.EmailInput
+                }
+                is OnrampKYCResult.Failed -> {
+                    _message.value = "KYC Collection failed: ${result.error.message}"
+                    _uiState.value = OnrampUiState.KYCScreen
+                }
+            }
+        }
+    }
+
     class Factory : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(
@@ -152,4 +173,5 @@ internal sealed class OnrampUiState {
     object Loading : OnrampUiState()
     data class Registration(val email: String) : OnrampUiState()
     data class Authentication(val email: String) : OnrampUiState()
+    object KYCScreen : OnrampUiState()
 }

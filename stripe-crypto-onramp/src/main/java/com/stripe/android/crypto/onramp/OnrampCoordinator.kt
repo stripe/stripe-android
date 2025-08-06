@@ -7,9 +7,11 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.crypto.onramp.di.DaggerOnrampComponent
 import com.stripe.android.crypto.onramp.di.OnrampComponent
 import com.stripe.android.crypto.onramp.di.OnrampPresenterComponent
+import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
+import com.stripe.android.crypto.onramp.model.OnrampKYCResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
 import javax.inject.Inject
@@ -56,6 +58,16 @@ class OnrampCoordinator @Inject internal constructor(
      */
     suspend fun registerNewLinkUser(info: LinkUserInfo): OnrampRegisterUserResult {
         return interactor.registerNewLinkUser(info)
+    }
+
+    /**
+     * Given the required information, collects information .
+     *
+     * @param info The KycInfo for the user.
+     * @return OnrampKYCResult indicating the result of data collection.
+     */
+    suspend fun collectKycInfo(info: KycInfo): OnrampKYCResult {
+        return interactor.collectKycInfo(info)
     }
 
     /**
