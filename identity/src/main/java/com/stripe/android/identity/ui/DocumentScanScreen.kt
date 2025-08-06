@@ -125,6 +125,7 @@ internal fun DocumentScanScreen(
                     identityViewModel,
                     lifecycleOwner,
                     cameraManager,
+                    documentScanViewModel
                 ) {
                     coroutineScope.launch {
                         identityViewModel.collectDataForDocumentScanScreen(
@@ -156,6 +157,7 @@ private fun DocumentCaptureScreen(
     identityViewModel: IdentityViewModel,
     lifecycleOwner: LifecycleOwner,
     cameraManager: IdentityCameraManager,
+    documentScanViewModel: DocumentScanViewModel,
     onContinueClick: () -> Unit
 ) {
     val collectedData by identityViewModel.collectedData.collectAsState()
@@ -178,11 +180,7 @@ private fun DocumentCaptureScreen(
         }
     }
 
-    val title = if (targetScanType.isNullOrFront()) {
-        stringResource(id = R.string.stripe_front_of_id_document)
-    } else {
-        stringResource(id = R.string.stripe_back_of_id_document)
-    }
+    val title = stringResource(id = documentScanViewModel.getDocumentPositionStringRes(targetScanType))
 
     Column(
         modifier = Modifier
