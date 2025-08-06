@@ -8,8 +8,9 @@ import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.elements.payment.CreateIntentCallback
+import com.stripe.android.elements.payment.FlowController
+import com.stripe.android.elements.payment.FlowController.PaymentOptionDisplayData
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.samples.model.CartProduct
 import com.stripe.android.paymentsheet.example.samples.model.CartState
 import com.stripe.android.paymentsheet.example.samples.model.updateWithResponse
@@ -25,7 +26,6 @@ import com.stripe.android.paymentsheet.example.samples.networking.toCheckoutRequ
 import com.stripe.android.paymentsheet.example.samples.networking.toCreateIntentRequest
 import com.stripe.android.paymentsheet.example.samples.networking.toUpdateRequest
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowViewModel.ConfigureResult
-import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -81,7 +81,7 @@ internal class ServerSideConfirmationCustomFlowViewModel(
         }
     }
 
-    fun handlePaymentOptionChanged(paymentOption: PaymentOption?) {
+    fun handlePaymentOptionChanged(paymentOption: PaymentOptionDisplayData?) {
         viewModelScope.launch {
             _state.update {
                 it.copy(paymentOption = paymentOption)
@@ -124,18 +124,18 @@ internal class ServerSideConfirmationCustomFlowViewModel(
         }
     }
 
-    fun handlePaymentSheetResult(paymentResult: PaymentSheetResult) {
+    fun handlePaymentSheetResult(paymentResult: FlowController.Result) {
         val status = when (paymentResult) {
-            is PaymentSheetResult.Canceled -> null
-            is PaymentSheetResult.Completed -> "Success"
-            is PaymentSheetResult.Failed -> paymentResult.error.message
+            is FlowController.Result.Canceled -> null
+            is FlowController.Result.Completed -> "Success"
+            is FlowController.Result.Failed -> paymentResult.error.message
         }
 
         _state.update {
             it.copy(
                 isProcessing = false,
                 status = status,
-                didComplete = paymentResult is PaymentSheetResult.Completed,
+                didComplete = paymentResult is FlowController.Result.Completed,
             )
         }
     }
@@ -300,7 +300,7 @@ internal class ServerSideConfirmationCustomFlowViewModel(
     }
 
     data class ConfigureResult(
-        val paymentOption: PaymentOption?,
+        val paymentOption: PaymentOptionDisplayData?,
         val error: Throwable?,
     )
 

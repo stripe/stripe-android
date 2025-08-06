@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.graphics.Color
 import androidx.core.graphics.toColorInt
-import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.Address
 import com.stripe.android.elements.Appearance
@@ -14,25 +13,17 @@ import com.stripe.android.elements.payment.CustomPaymentMethod
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.elements.payment.PaymentSheet
-import com.stripe.android.link.LinkAccountUpdate
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
-import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.BILLING_DETAILS
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.state.CustomerState
-import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.ui.BillingDetailsFormState
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.forms.FormFieldEntry
-import org.mockito.kotlin.mock
 
 internal object PaymentSheetFixtures {
     internal val STATUS_BAR_COLOR
@@ -43,7 +34,6 @@ internal object PaymentSheetFixtures {
     internal const val DIFFERENT_CLIENT_SECRET = "pi_4321_secret_4321"
     internal const val SETUP_CLIENT_SECRET = "seti_1234_secret_4321"
     internal const val PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER = "PaymentSheetTestIdentifier"
-    internal const val FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER = "FlowControllerTestIdentifier"
 
     internal val PAYMENT_INTENT_CLIENT_SECRET = PaymentIntentClientSecret(CLIENT_SECRET)
     internal val SETUP_INTENT_CLIENT_SECRET = PaymentIntentClientSecret(SETUP_CLIENT_SECRET)
@@ -172,51 +162,6 @@ internal object PaymentSheetFixtures {
             attachDefaultsToPaymentMethod = true,
         )
     )
-
-    internal val PAYMENT_OPTIONS_CONTRACT_ARGS = PaymentOptionContract.Args(
-        state = PaymentSheetState.Full(
-            customer = EMPTY_CUSTOMER_STATE,
-            config = CONFIG_GOOGLEPAY.asCommonConfiguration(),
-            paymentSelection = null,
-            validationError = null,
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-        ),
-        configuration = CONFIG_GOOGLEPAY,
-        enableLogging = false,
-        productUsage = mock(),
-        paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
-        linkAccountInfo = LinkAccountUpdate.Value(null),
-        walletsToShow = WalletType.entries,
-    )
-
-    internal fun PaymentOptionContract.Args.updateState(
-        paymentMethods: List<PaymentMethod> = state.customer?.paymentMethods ?: emptyList(),
-        isGooglePayReady: Boolean = state.paymentMethodMetadata.isGooglePayReady,
-        stripeIntent: StripeIntent = state.stripeIntent,
-        config: PaymentSheet.Configuration = configuration,
-        paymentSelection: PaymentSelection? = state.paymentSelection,
-        linkState: LinkState? = state.paymentMethodMetadata.linkState,
-    ): PaymentOptionContract.Args {
-        return copy(
-            state = state.copy(
-                customer = CustomerState(
-                    id = config.customer?.id ?: "cus_1",
-                    ephemeralKeySecret = config.customer?.ephemeralKeySecret ?: "client_secret",
-                    customerSessionClientSecret = null,
-                    paymentMethods = paymentMethods,
-                    defaultPaymentMethodId = null,
-                ),
-                config = config.asCommonConfiguration(),
-                paymentSelection = paymentSelection,
-                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                    stripeIntent = stripeIntent,
-                    isGooglePayReady = isGooglePayReady,
-                    linkState = linkState,
-                ),
-            ),
-            configuration = config,
-        )
-    }
 
     internal val ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
         get() = PaymentSheetContract.Args(

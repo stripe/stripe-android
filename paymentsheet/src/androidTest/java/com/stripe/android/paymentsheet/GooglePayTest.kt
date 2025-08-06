@@ -21,6 +21,7 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.elements.payment.PaymentSheet
+import com.stripe.android.elements.payment.PaymentSheet.Result
 import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -133,7 +134,7 @@ internal class GooglePayTest {
     }
 
     private fun runGooglePayFlowTest(
-        paymentResultCallback: (PaymentSheetResult) -> Unit,
+        paymentResultCallback: (PaymentSheet.Result) -> Unit,
         test: (GooglePayFlowScenario) -> Unit
     ) {
         runGooglePayTest(
@@ -189,7 +190,7 @@ internal class GooglePayTest {
         isGooglePayReady: Boolean,
         isGooglePayEnabledInElementsSession: Boolean,
         hasGooglePayConfig: Boolean,
-        paymentResultCallback: (PaymentSheetResult) -> Unit,
+        paymentResultCallback: (PaymentSheet.Result) -> Unit,
         test: (context: ProductIntegrationTestRunnerContext) -> Unit,
     ) {
         GooglePayRepository.googlePayAvailabilityClientFactory =

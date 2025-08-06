@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 
@@ -25,6 +26,17 @@ internal object PaymentMethodOrderSettingsDefinition :
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
+    ) {
+        if (value.isNotEmpty()) {
+            configurationBuilder.paymentMethodOrder(value.split(",").map { it.trim() })
+        }
+    }
+
+    override fun configure(
+        value: String,
+        configurationBuilder: FlowController.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment,
+        configurationData: PlaygroundSettingDefinition.FlowControllerConfigurationData,
     ) {
         if (value.isNotEmpty()) {
             configurationBuilder.paymentMethodOrder(value.split(",").map { it.trim() })
@@ -58,6 +70,17 @@ internal object PaymentMethodOrderSettingsDefinition :
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState.SharedPaymentToken,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
+    ) {
+        if (value.isNotEmpty()) {
+            configurationBuilder.paymentMethodOrder(value.split(",").map { it.trim() })
+        }
+    }
+
+    override fun configure(
+        value: String,
+        configurationBuilder: FlowController.Configuration.Builder,
+        playgroundState: PlaygroundState.SharedPaymentToken,
+        configurationData: PlaygroundSettingDefinition.FlowControllerConfigurationData,
     ) {
         if (value.isNotEmpty()) {
             configurationBuilder.paymentMethodOrder(value.split(",").map { it.trim() })

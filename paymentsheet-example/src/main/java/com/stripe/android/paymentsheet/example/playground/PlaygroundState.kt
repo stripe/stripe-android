@@ -6,6 +6,7 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.elements.payment.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.elements.payment.PaymentSheet
@@ -104,6 +105,10 @@ internal sealed interface PlaygroundState : Parcelable {
             return snapshot.paymentSheetConfiguration(playgroundState = this, appSettings = settings)
         }
 
+        fun flowControllerConfiguration(settings: Settings): FlowController.Configuration {
+            return snapshot.flowControllerConfiguration(playgroundState = this, appSettings = settings)
+        }
+
         fun embeddedConfiguration(): EmbeddedPaymentElement.Configuration {
             return snapshot.embeddedConfiguration(this)
         }
@@ -179,8 +184,8 @@ internal sealed interface PlaygroundState : Parcelable {
         override val endpoint: String
             get() = ""
 
-        fun paymentSheetConfiguration(): PaymentSheet.Configuration {
-            return snapshot.paymentSheetConfiguration(this)
+        fun flowControllerConfiguration(): FlowController.Configuration {
+            return snapshot.flowControllerConfiguration(this)
         }
 
         @OptIn(SharedPaymentTokenSessionPreview::class)

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 
@@ -38,6 +39,21 @@ internal object ExternalPaymentMethodSettingsDefinition :
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
+    ) {
+        when (value) {
+            ExternalPaymentMethodType.Off -> Unit
+            ExternalPaymentMethodType.Fawry,
+            ExternalPaymentMethodType.PayPalAndVenmo,
+            ExternalPaymentMethodType.All ->
+                configurationBuilder.externalPaymentMethods(value.externalPaymentMethods)
+        }
+    }
+
+    override fun configure(
+        value: ExternalPaymentMethodType,
+        configurationBuilder: FlowController.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment,
+        configurationData: PlaygroundSettingDefinition.FlowControllerConfigurationData,
     ) {
         when (value) {
             ExternalPaymentMethodType.Off -> Unit

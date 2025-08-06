@@ -36,10 +36,11 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
-import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.StripePrimaryButtonBinding
+import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFixtures
+import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
+import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFixtures.updateState
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -297,7 +298,7 @@ internal class PaymentOptionsActivityTest {
     fun `primary button appearance is set`() {
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
-            config = PaymentSheetFixtures.CONFIG_MINIMUM.newBuilder()
+            config = FlowControllerFixtures.CONFIG_MINIMUM.newBuilder()
                 .appearance(
                     Appearance(
                         primaryButton = Appearance.PrimaryButton(

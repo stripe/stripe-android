@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.elements.payment.WalletButtonsConfiguration
 import com.stripe.android.paymentelement.WalletButtonsPreview
@@ -50,10 +51,48 @@ internal object WalletButtonsSettingsDefinition :
         configureWalletButtons(value, configurationBuilder)
     }
 
+    override fun configure(
+        value: WalletButtonsPlaygroundType,
+        configurationBuilder: FlowController.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment,
+        configurationData: PlaygroundSettingDefinition.FlowControllerConfigurationData,
+    ) {
+        configureWalletButtons(value, configurationBuilder)
+    }
+
+    override fun configure(
+        value: WalletButtonsPlaygroundType,
+        configurationBuilder: FlowController.Configuration.Builder,
+        playgroundState: PlaygroundState.SharedPaymentToken,
+        configurationData: PlaygroundSettingDefinition.FlowControllerConfigurationData,
+    ) {
+        configureWalletButtons(value, configurationBuilder)
+    }
+
     @OptIn(WalletButtonsPreview::class)
     private fun configureWalletButtons(
         value: WalletButtonsPlaygroundType,
         configurationBuilder: PaymentSheet.Configuration.Builder,
+    ) {
+        configureWalletButtonsHelper(value) {
+            configurationBuilder.walletButtons(it)
+        }
+    }
+
+    @OptIn(WalletButtonsPreview::class)
+    private fun configureWalletButtons(
+        value: WalletButtonsPlaygroundType,
+        configurationBuilder: FlowController.Configuration.Builder,
+    ) {
+        configureWalletButtonsHelper(value) {
+            configurationBuilder.walletButtons(it)
+        }
+    }
+
+    @OptIn(WalletButtonsPreview::class)
+    private fun configureWalletButtonsHelper(
+        value: WalletButtonsPlaygroundType,
+        configurationBuilderBlock: (WalletButtonsConfiguration) -> Unit,
     ) {
         val configuration = when (value) {
             WalletButtonsPlaygroundType.Disabled -> {
@@ -74,7 +113,7 @@ internal object WalletButtonsSettingsDefinition :
             }
         }
 
-        configurationBuilder.walletButtons(configuration)
+        configurationBuilderBlock(configuration)
     }
 }
 

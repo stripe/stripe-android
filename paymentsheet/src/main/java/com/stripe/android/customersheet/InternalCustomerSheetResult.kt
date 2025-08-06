@@ -6,14 +6,13 @@ import android.os.Parcelable
 import androidx.core.os.bundleOf
 import com.stripe.android.elements.customersheet.CustomerSheet.Companion.toPaymentOptionSelection
 import com.stripe.android.elements.customersheet.CustomerSheet.Result
-import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
 internal sealed class InternalCustomerSheetResult : Parcelable {
     abstract fun toPublicResult(
-        paymentOptionFactory: PaymentOptionFactory,
+        paymentOptionFactory: CustomerSheetPaymentOptionFactory,
     ): Result
 
     /**
@@ -24,7 +23,7 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
         val paymentSelection: PaymentSelection?
     ) : InternalCustomerSheetResult() {
         override fun toPublicResult(
-            paymentOptionFactory: PaymentOptionFactory,
+            paymentOptionFactory: CustomerSheetPaymentOptionFactory,
         ): Result {
             return Result.Selected(
                 selection = paymentSelection?.toPaymentOptionSelection(paymentOptionFactory, canUseGooglePay = true)
@@ -40,7 +39,7 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
         val paymentSelection: PaymentSelection?
     ) : InternalCustomerSheetResult() {
         override fun toPublicResult(
-            paymentOptionFactory: PaymentOptionFactory,
+            paymentOptionFactory: CustomerSheetPaymentOptionFactory,
         ): Result {
             return Result.Canceled(
                 selection = paymentSelection?.toPaymentOptionSelection(paymentOptionFactory, canUseGooglePay = true)
@@ -56,7 +55,7 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
         val exception: Throwable
     ) : InternalCustomerSheetResult() {
         override fun toPublicResult(
-            paymentOptionFactory: PaymentOptionFactory,
+            paymentOptionFactory: CustomerSheetPaymentOptionFactory,
         ): Result {
             return Result.Failed(exception)
         }

@@ -2,10 +2,10 @@ package com.stripe.android.paymentsheet.example.playground
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
-import com.stripe.android.paymentsheet.model.PaymentOption
+import com.stripe.android.elements.customersheet.CustomerSheet
 
 internal data class CustomerSheetState(
-    val selectedPaymentOption: PaymentOption? = null,
+    val selectedPaymentOption: CustomerSheet.PaymentOptionDisplayData? = null,
     val shouldFetchPaymentOption: Boolean = true
 )
 

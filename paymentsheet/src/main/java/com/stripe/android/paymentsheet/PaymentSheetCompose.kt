@@ -18,7 +18,7 @@ import java.util.UUID
 @Composable
 internal fun internalRememberPaymentSheet(
     callbacks: PaymentElementCallbacks,
-    paymentResultCallback: PaymentSheetResultCallback,
+    paymentResultCallback: PaymentSheet.ResultCallback,
 ): PaymentSheet {
     val paymentElementCallbackIdentifier = rememberSaveable {
         UUID.randomUUID().toString()

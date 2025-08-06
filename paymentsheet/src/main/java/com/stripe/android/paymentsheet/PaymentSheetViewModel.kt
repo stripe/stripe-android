@@ -22,6 +22,7 @@ import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.elements.payment.PaymentMethodLayout
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -122,8 +123,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         },
     )
 
-    private val _paymentSheetResult = MutableSharedFlow<PaymentSheetResult>(replay = 1)
-    internal val paymentSheetResult: SharedFlow<PaymentSheetResult> = _paymentSheetResult
+    private val _paymentSheetResult = MutableSharedFlow<PaymentSheet.Result>(replay = 1)
+    internal val paymentSheetResult: SharedFlow<PaymentSheet.Result> = _paymentSheetResult
 
     @VisibleForTesting
     internal val viewState = MutableStateFlow<PaymentSheetViewState?>(null)
@@ -584,10 +585,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         inProgressSelection = null
 
         if (finishImmediately) {
-            _paymentSheetResult.tryEmit(PaymentSheetResult.Completed())
+            _paymentSheetResult.tryEmit(PaymentSheet.Result.Completed())
         } else {
             viewState.value = PaymentSheetViewState.FinishProcessing {
-                _paymentSheetResult.tryEmit(PaymentSheetResult.Completed())
+                _paymentSheetResult.tryEmit(PaymentSheet.Result.Completed())
             }
         }
     }
@@ -627,12 +628,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun onFatal(throwable: Throwable) {
         logger.error("Payment Sheet error", throwable)
-        _paymentSheetResult.tryEmit(PaymentSheetResult.Failed(throwable))
+        _paymentSheetResult.tryEmit(PaymentSheet.Result.Failed(throwable))
     }
 
     override fun onUserCancel() {
         eventReporter.onDismiss()
-        _paymentSheetResult.tryEmit(PaymentSheetResult.Canceled())
+        _paymentSheetResult.tryEmit(PaymentSheet.Result.Canceled())
     }
 
     override fun onError(error: ResolvableString?) = resetViewState(error)

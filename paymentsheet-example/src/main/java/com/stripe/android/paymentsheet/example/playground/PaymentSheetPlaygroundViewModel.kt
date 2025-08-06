@@ -24,10 +24,11 @@ import com.stripe.android.elements.payment.AnalyticEventCallbackPreview
 import com.stripe.android.elements.payment.CreateIntentCallback
 import com.stripe.android.elements.payment.DelicatePaymentSheetApi
 import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
-import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentRequest
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentResponse
@@ -42,12 +43,10 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomEndpoin
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
-import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettingDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.ShippingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
-import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -378,7 +377,7 @@ internal class PaymentSheetPlaygroundViewModel(
     }
 
     @OptIn(ShippingDetailsInPaymentOptionPreview::class)
-    fun onPaymentOptionSelected(paymentOption: PaymentOption?) {
+    fun onPaymentOptionSelected(paymentOption: FlowController.PaymentOptionDisplayData?) {
         flowControllerState.update { existingState ->
             existingState?.copy(
                 selectedPaymentOption = paymentOption,
@@ -387,27 +386,57 @@ internal class PaymentSheetPlaygroundViewModel(
         }
     }
 
-    fun onPaymentSheetResult(paymentResult: PaymentSheetResult) {
-        val integrationType = playgroundSettingsFlow.value?.configurationData?.value?.integrationType
-            ?: PlaygroundConfigurationData.IntegrationType.PaymentSheet
-        if (integrationType == PlaygroundConfigurationData.IntegrationType.FlowController) {
-            if (paymentResult is PaymentSheetResult.Completed) {
-                setPlaygroundState(null)
-            }
-        } else if (paymentResult !is PaymentSheetResult.Canceled) {
+    fun onPaymentSheetResult(paymentResult: PaymentSheet.Result) {
+        if (paymentResult !is PaymentSheet.Result.Canceled) {
             setPlaygroundState(null)
         }
 
         val statusMessage = when (paymentResult) {
-            is PaymentSheetResult.Canceled -> {
+            is PaymentSheet.Result.Canceled -> {
                 "Canceled"
             }
 
-            is PaymentSheetResult.Completed -> {
+            is PaymentSheet.Result.Completed -> {
                 SUCCESS_RESULT
             }
 
-            is PaymentSheetResult.Failed -> {
+            is PaymentSheet.Result.Failed -> {
+                when (paymentResult.error) {
+                    is ConfirmIntentEndpointException -> {
+                        "Couldn't process your payment: ${paymentResult.error.message}"
+                    }
+
+                    is ConfirmIntentNetworkException -> {
+                        "No internet. Try again later."
+                    }
+
+                    else -> {
+                        "Something went wrong: ${paymentResult.error.message}"
+                    }
+                }
+            }
+        }
+
+        status.value = StatusMessage(statusMessage)
+    }
+
+    fun onFlowControllerResult(paymentResult: FlowController.Result) {
+        if (paymentResult is FlowController.Result.Completed) {
+            setPlaygroundState(null)
+        } else if (paymentResult !is FlowController.Result.Canceled) {
+            setPlaygroundState(null)
+        }
+
+        val statusMessage = when (paymentResult) {
+            is FlowController.Result.Canceled -> {
+                "Canceled"
+            }
+
+            is FlowController.Result.Completed -> {
+                SUCCESS_RESULT
+            }
+
+            is FlowController.Result.Failed -> {
                 when (paymentResult.error) {
                     is ConfirmIntentEndpointException -> {
                         "Couldn't process your payment: ${paymentResult.error.message}"
@@ -674,7 +703,7 @@ internal class PaymentSheetPlaygroundViewModel(
         }
     }
 
-    private fun updatePaymentOptionForCustomerSheet(paymentOption: PaymentOption?) {
+    private fun updatePaymentOptionForCustomerSheet(paymentOption: CustomerSheet.PaymentOptionDisplayData?) {
         customerSheetState.update { existingState ->
             existingState?.copy(
                 selectedPaymentOption = paymentOption,

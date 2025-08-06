@@ -9,6 +9,7 @@ import androidx.core.content.edit
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.link.LinkController
 import com.stripe.android.paymentsheet.example.Settings
@@ -165,6 +166,47 @@ internal class PlaygroundSettings private constructor(
             return builder.build()
         }
 
+        fun flowControllerConfiguration(
+            playgroundState: PlaygroundState.Payment,
+            appSettings: Settings,
+        ): FlowController.Configuration {
+            val builder = FlowController.Configuration.Builder("Example, Inc.")
+            val flowControllerConfigurationData =
+                PlaygroundSettingDefinition.FlowControllerConfigurationData(builder)
+            settings.filter { (definition, _) ->
+                definition.applicable(configurationData)
+            }.onEach { (settingDefinition, value) ->
+                settingDefinition
+                    .configure(
+                        value = value,
+                        configurationBuilder = builder,
+                        playgroundState = playgroundState,
+                        flowControllerConfigurationData = flowControllerConfigurationData,
+                        settings = appSettings
+                    )
+            }
+            return builder.build()
+        }
+
+        fun flowControllerConfiguration(
+            playgroundState: PlaygroundState.SharedPaymentToken
+        ): FlowController.Configuration {
+            val builder = FlowController.Configuration.Builder("Example, Inc.")
+            val flowControllerConfigurationData =
+                PlaygroundSettingDefinition.FlowControllerConfigurationData(builder)
+            settings.filter { (definition, _) ->
+                definition.applicable(configurationData)
+            }.onEach { (settingDefinition, value) ->
+                settingDefinition.configure(
+                    value = value,
+                    configurationBuilder = builder,
+                    playgroundState = playgroundState,
+                    flowControllerConfigurationData = flowControllerConfigurationData,
+                )
+            }
+            return builder.build()
+        }
+
         fun embeddedConfiguration(
             playgroundState: PlaygroundState.Payment
         ): EmbeddedPaymentElement.Configuration {
@@ -279,6 +321,38 @@ internal class PlaygroundSettings private constructor(
                 configurationBuilder = configurationBuilder,
                 playgroundState = playgroundState,
                 configurationData = configurationData,
+            )
+        }
+
+        private fun <T> PlaygroundSettingDefinition<T>.configure(
+            value: Any?,
+            configurationBuilder: FlowController.Configuration.Builder,
+            playgroundState: PlaygroundState.Payment,
+            flowControllerConfigurationData: PlaygroundSettingDefinition.FlowControllerConfigurationData,
+            settings: Settings,
+        ) {
+            @Suppress("UNCHECKED_CAST")
+            configure(
+                value = value as T,
+                configurationBuilder = configurationBuilder,
+                playgroundState = playgroundState,
+                configurationData = flowControllerConfigurationData,
+                settings = settings,
+            )
+        }
+
+        private fun <T> PlaygroundSettingDefinition<T>.configure(
+            value: Any?,
+            configurationBuilder: FlowController.Configuration.Builder,
+            playgroundState: PlaygroundState.SharedPaymentToken,
+            flowControllerConfigurationData: PlaygroundSettingDefinition.FlowControllerConfigurationData,
+        ) {
+            @Suppress("UNCHECKED_CAST")
+            configure(
+                value = value as T,
+                configurationBuilder = configurationBuilder,
+                playgroundState = playgroundState,
+                configurationData = flowControllerConfigurationData,
             )
         }
 

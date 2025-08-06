@@ -46,10 +46,10 @@ internal class CustomFlowActivity : AppCompatActivity() {
         setContent {
             val flowController = remember(
                 viewModel::handlePaymentOptionChanged,
-                viewModel::handlePaymentSheetResult
+                viewModel::handleFlowControllerResult
             ) {
                 FlowController.Builder(
-                    resultCallback = viewModel::handlePaymentSheetResult,
+                    resultCallback = viewModel::handleFlowControllerResult,
                     paymentOptionCallback = viewModel::handlePaymentOptionChanged
                 )
             }.build()
@@ -118,7 +118,7 @@ internal class CustomFlowActivity : AppCompatActivity() {
     ) {
         flowController.configureWithPaymentIntent(
             paymentIntentClientSecret = paymentInfo.clientSecret,
-            configuration = paymentInfo.paymentSheetConfig,
+            configuration = paymentInfo.flowcontrollerConfig,
             callback = viewModel::handleFlowControllerConfigured,
         )
     }

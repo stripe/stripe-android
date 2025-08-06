@@ -1037,7 +1037,7 @@ internal class PaymentSheetViewModelTest {
             (finishedProcessingState as PaymentSheetViewState.FinishProcessing).onComplete()
 
             assertThat(resultTurbine.awaitItem())
-                .isEqualTo(PaymentSheetResult.Completed())
+                .isEqualTo(PaymentSheet.Result.Completed())
 
             verify(eventReporter)
                 .onPaymentSuccess(
@@ -1105,7 +1105,7 @@ internal class PaymentSheetViewModelTest {
 
             (finishedProcessingState as PaymentSheetViewState.FinishProcessing).onComplete()
 
-            assertThat(resultTurbine.awaitItem()).isEqualTo(PaymentSheetResult.Completed())
+            assertThat(resultTurbine.awaitItem()).isEqualTo(PaymentSheet.Result.Completed())
 
             verify(eventReporter)
                 .onPaymentSuccess(
@@ -1263,7 +1263,7 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(shouldFailLoad = true)
         viewModel.paymentSheetResult.test {
             assertThat(awaitItem())
-                .isInstanceOf<PaymentSheetResult.Failed>()
+                .isInstanceOf<PaymentSheet.Result.Failed>()
         }
     }
 
@@ -1695,7 +1695,7 @@ internal class PaymentSheetViewModelTest {
             assertThat(awaitItem()).isInstanceOf<AddFirstPaymentMethod>()
             viewModel.paymentSheetResult.test {
                 viewModel.handleBackPressed()
-                assertThat(awaitItem()).isEqualTo(PaymentSheetResult.Canceled())
+                assertThat(awaitItem()).isEqualTo(PaymentSheet.Result.Canceled())
             }
         }
     }
@@ -2142,7 +2142,7 @@ internal class PaymentSheetViewModelTest {
             val finishingState = viewModel.viewState.value as PaymentSheetViewState.FinishProcessing
             finishingState.onComplete()
 
-            assertThat(awaitItem()).isEqualTo(PaymentSheetResult.Completed())
+            assertThat(awaitItem()).isEqualTo(PaymentSheet.Result.Completed())
         }
     }
 
@@ -3504,7 +3504,7 @@ internal class PaymentSheetViewModelTest {
                 loadState()
             }
 
-            assertThat(awaitItem()).isEqualTo(PaymentSheetResult.Completed())
+            assertThat(awaitItem()).isEqualTo(PaymentSheet.Result.Completed())
         }
     }
 

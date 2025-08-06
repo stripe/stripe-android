@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.model
+package com.stripe.android.customersheet
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
@@ -13,6 +13,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.image.StripeImageLoader
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -20,9 +21,9 @@ import kotlin.test.Test
 
 @Suppress("DEPRECATION")
 @RunWith(RobolectricTestRunner::class)
-class PaymentOptionFactoryTest {
+class CustomerSheetPaymentOptionFactoryTest {
 
-    private val factory = PaymentOptionFactory(
+    private val factory = CustomerSheetPaymentOptionFactory(
         iconLoader = PaymentSelection.IconLoader(
             resources = ApplicationProvider.getApplicationContext<Context>().resources,
             imageLoader = StripeImageLoader(ApplicationProvider.getApplicationContext()),

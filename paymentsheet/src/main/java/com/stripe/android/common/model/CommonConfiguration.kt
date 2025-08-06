@@ -10,6 +10,7 @@ import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.payment.CustomPaymentMethod
 import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.elements.payment.LinkConfiguration
 import com.stripe.android.elements.payment.PaymentSheet
@@ -149,6 +150,26 @@ internal data class CommonConfiguration(
 }
 
 internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
+    merchantDisplayName = merchantDisplayName,
+    customer = customer,
+    googlePay = googlePay,
+    defaultBillingDetails = defaultBillingDetails,
+    shippingDetails = shippingDetails,
+    allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
+    allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
+    billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+    preferredNetworks = preferredNetworks,
+    allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
+    paymentMethodOrder = paymentMethodOrder,
+    externalPaymentMethods = externalPaymentMethods,
+    cardBrandAcceptance = cardBrandAcceptance,
+    customPaymentMethods = customPaymentMethods,
+    link = link,
+    shopPayConfiguration = shopPayConfiguration,
+    googlePlacesApiKey = googlePlacesApiKey,
+)
+
+internal fun FlowController.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
     merchantDisplayName = merchantDisplayName,
     customer = customer,
     googlePay = googlePay,

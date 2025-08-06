@@ -565,7 +565,7 @@ internal class PaymentSheetActivityTest {
                 scenario.getResult().resultData
             )
         ).isEqualTo(
-            PaymentSheetResult.Canceled()
+            PaymentSheet.Result.Canceled()
         )
     }
 
@@ -797,7 +797,7 @@ internal class PaymentSheetActivityTest {
             scenario.getResult().resultData
         )
 
-        assertThat(result).isEqualTo(PaymentSheetResult.Completed())
+        assertThat(result).isEqualTo(PaymentSheet.Result.Completed())
     }
 
     @Test
@@ -816,7 +816,7 @@ internal class PaymentSheetActivityTest {
                 scenario.getResult().resultCode,
                 scenario.getResult().resultData
             )
-        ).isInstanceOf<PaymentSheetResult.Failed>()
+        ).isInstanceOf<PaymentSheet.Result.Failed>()
     }
 
     @Test
@@ -1013,7 +1013,7 @@ internal class PaymentSheetActivityTest {
         )
 
         assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
-        assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
+        assertThat(result).isInstanceOf<PaymentSheet.Result.Failed>()
     }
 
     @Test
@@ -1045,7 +1045,7 @@ internal class PaymentSheetActivityTest {
         )
 
         assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
-        assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
+        assertThat(result).isInstanceOf<PaymentSheet.Result.Failed>()
     }
 
     @Test
@@ -1069,7 +1069,7 @@ internal class PaymentSheetActivityTest {
         )
 
         assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
-        assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
+        assertThat(result).isInstanceOf<PaymentSheet.Result.Failed>()
     }
 
     @Test

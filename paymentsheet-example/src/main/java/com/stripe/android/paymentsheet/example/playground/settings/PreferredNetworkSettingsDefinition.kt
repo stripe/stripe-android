@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
@@ -23,6 +24,17 @@ internal object PreferredNetworkSettingsDefinition : BooleanSettingsDefinition(
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
+    ) {
+        if (value) {
+            configurationBuilder.preferredNetworks(preferredNetworks)
+        }
+    }
+
+    override fun configure(
+        value: Boolean,
+        configurationBuilder: FlowController.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment,
+        configurationData: PlaygroundSettingDefinition.FlowControllerConfigurationData,
     ) {
         if (value) {
             configurationBuilder.preferredNetworks(preferredNetworks)

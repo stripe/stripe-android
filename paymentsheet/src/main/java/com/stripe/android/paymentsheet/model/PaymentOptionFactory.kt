@@ -3,14 +3,15 @@ package com.stripe.android.paymentsheet.model
 import android.content.Context
 import com.stripe.android.elements.Address
 import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.payment.FlowController.PaymentOptionDisplayData
 import javax.inject.Inject
 
 internal class PaymentOptionFactory @Inject constructor(
     private val iconLoader: PaymentSelection.IconLoader,
     private val context: Context,
 ) {
-    fun create(selection: PaymentSelection): PaymentOption {
-        return PaymentOption(
+    fun create(selection: PaymentSelection): PaymentOptionDisplayData {
+        return PaymentOptionDisplayData(
             drawableResourceId = selection.drawableResourceId,
             label = selection.label.resolve(context),
             paymentMethodType = selection.paymentMethodType,

@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
@@ -33,6 +34,40 @@ internal object GooglePaySettingsDefinition : BooleanSettingsDefinition(
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState.SharedPaymentToken,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
+    ) {
+        if (value) {
+            configurationBuilder.googlePay(
+                GooglePayConfiguration(
+                    environment = GooglePayConfiguration.Environment.Test,
+                    countryCode = playgroundState.countryCode.value,
+                    currencyCode = playgroundState.currencyCode.value,
+                )
+            )
+        }
+    }
+
+    override fun configure(
+        value: Boolean,
+        configurationBuilder: FlowController.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment,
+        configurationData: PlaygroundSettingDefinition.FlowControllerConfigurationData,
+    ) {
+        if (value) {
+            configurationBuilder.googlePay(
+                GooglePayConfiguration(
+                    environment = GooglePayConfiguration.Environment.Test,
+                    countryCode = playgroundState.countryCode.value,
+                    currencyCode = playgroundState.currencyCode.value,
+                )
+            )
+        }
+    }
+
+    override fun configure(
+        value: Boolean,
+        configurationBuilder: FlowController.Configuration.Builder,
+        playgroundState: PlaygroundState.SharedPaymentToken,
+        configurationData: PlaygroundSettingDefinition.FlowControllerConfigurationData,
     ) {
         if (value) {
             configurationBuilder.googlePay(

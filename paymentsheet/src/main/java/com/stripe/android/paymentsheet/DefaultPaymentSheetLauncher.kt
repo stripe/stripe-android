@@ -24,7 +24,7 @@ internal class DefaultPaymentSheetLauncher(
     private val activity: Activity,
     private val lifecycleOwner: LifecycleOwner,
     private val application: Application,
-    private val callback: PaymentSheetResultCallback,
+    private val callback: PaymentSheet.ResultCallback,
     private val paymentElementCallbackIdentifier: String = PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER,
     private val initializedViaCompose: Boolean = false,
 ) : PaymentSheetLauncher {
@@ -41,7 +41,7 @@ internal class DefaultPaymentSheetLauncher(
 
     constructor(
         activity: ComponentActivity,
-        callback: PaymentSheetResultCallback
+        callback: PaymentSheet.ResultCallback
     ) : this(
         activityResultLauncher = activity.registerForActivityResult(
             PaymentSheetContract()
@@ -56,7 +56,7 @@ internal class DefaultPaymentSheetLauncher(
 
     constructor(
         fragment: Fragment,
-        callback: PaymentSheetResultCallback
+        callback: PaymentSheet.ResultCallback
     ) : this(
         activityResultLauncher = fragment.registerForActivityResult(
             PaymentSheetContract()
@@ -73,7 +73,7 @@ internal class DefaultPaymentSheetLauncher(
     constructor(
         fragment: Fragment,
         registry: ActivityResultRegistry,
-        callback: PaymentSheetResultCallback
+        callback: PaymentSheet.ResultCallback
     ) : this(
         activityResultLauncher = fragment.registerForActivityResult(
             PaymentSheetContract(),
@@ -109,7 +109,7 @@ internal class DefaultPaymentSheetLauncher(
             activityResultLauncher.launch(args, options)
         } catch (e: IllegalStateException) {
             val message = "The host activity is not in a valid state (${lifecycleOwner.lifecycle.currentState})."
-            callback.onPaymentSheetResult(PaymentSheetResult.Failed(IllegalStateException(message, e)))
+            callback.onPaymentSheetResult(PaymentSheet.Result.Failed(IllegalStateException(message, e)))
         }
     }
 }
