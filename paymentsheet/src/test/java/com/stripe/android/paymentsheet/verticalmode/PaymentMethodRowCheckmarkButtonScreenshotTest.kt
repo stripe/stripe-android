@@ -77,24 +77,28 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
 
     @Test
     fun testStyleAppearance() {
-        val style = FlatWithCheckmark(
-            separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
-            startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-            endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-            topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
-            bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
-            checkmarkInsetDp = 20f,
-            additionalVerticalInsetsDp = 40f,
-            horizontalInsetsDp = 40f,
-            colorsLight = FlatWithCheckmark.Colors(
-                separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-                checkmarkColor = StripeThemeDefaults.colorsLight.materialColors.error.toArgb()
-            ),
-            colorsDark = FlatWithCheckmark.Colors(
-                separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
-                checkmarkColor = StripeThemeDefaults.colorsDark.materialColors.error.toArgb()
+        val style = FlatWithCheckmark.Builder()
+            .separatorThicknessDp(StripeThemeDefaults.flat.separatorThickness)
+            .startSeparatorInsetDp(StripeThemeDefaults.flat.separatorInsets)
+            .endSeparatorInsetDp(StripeThemeDefaults.flat.separatorInsets)
+            .topSeparatorEnabled(StripeThemeDefaults.flat.topSeparatorEnabled)
+            .bottomSeparatorEnabled(StripeThemeDefaults.flat.bottomSeparatorEnabled)
+            .checkmarkInsetDp(20f)
+            .additionalVerticalInsetsDp(40f)
+            .horizontalInsetsDp(40f)
+            .colorsLight(
+                FlatWithCheckmark.Colors(
+                    separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+                    checkmarkColor = StripeThemeDefaults.colorsLight.materialColors.error.toArgb()
+                )
             )
-        )
+            .colorsDark(
+                FlatWithCheckmark.Colors(
+                    separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
+                    checkmarkColor = StripeThemeDefaults.colorsDark.materialColors.error.toArgb()
+                )
+            )
+            .build()
 
         testPaymentMethodRowButton_Checkmark(
             appearance = Appearance.Embedded(style),

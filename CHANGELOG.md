@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 * [ADDED][11269](https://github.com/stripe/stripe-android/pull/11269) Refactoring public classes and types for ergonomics. FlowController and CustomerSheet and PaymentSheet now have their own Configuration, Result, and PaymentOptionDisplayData classes.
+* [ADDED][11179](https://github.com/stripe/stripe-android/pull/11179) More specific error messaging for postal codes
+
+## 21.22.1 - 2025-08-04
 
 ## 21.22.0 - 2025-07-28
 ### PaymentSheet

@@ -796,6 +796,37 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
+    fun confirmSetupIntent_withApiUserKey_sendsValidRequest() =
+        runTest {
+            val apiKey = "uk_12345"
+            val clientSecret = "seti_12345_secret_fake"
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(
+                    StripeResponse(
+                        200,
+                        SetupIntentFixtures.SI_3DS2_SUCCEEDED_JSON.toString(),
+                        emptyMap()
+                    )
+                )
+
+            val confirmSetupIntentParams =
+                ConfirmSetupIntentParams.createWithoutPaymentMethod(
+                    clientSecret
+                )
+            create().confirmSetupIntent(
+                confirmSetupIntentParams = confirmSetupIntentParams,
+                options = ApiRequest.Options(apiKey)
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val apiRequest = apiRequestArgumentCaptor.firstValue
+            assertThat(apiRequest.baseUrl)
+                .contains("seti_12345/confirm")
+            assertThat(apiRequest.params)
+                .doesNotContainKey(ConfirmStripeIntentParams.PARAM_CLIENT_SECRET)
+        }
+
+    @Test
     fun confirmSetupIntent_setsCorrectPaymentUserAgent() =
         runTest {
             // put a private key here to simulate the backend

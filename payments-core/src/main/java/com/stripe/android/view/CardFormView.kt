@@ -268,7 +268,7 @@ class CardFormView @JvmOverloads constructor(
             postalCodeView.setErrorMessage(resources.getString(UiCoreR.string.stripe_address_zip_invalid))
         } else {
             postalCodeView.config = PostalCodeEditText.Config.Global
-            postalCodeView.setErrorMessage(resources.getString(R.string.stripe_address_postal_code_invalid))
+            postalCodeView.setErrorMessage(resources.getString(UiCoreR.string.stripe_address_postal_code_invalid))
         }
     }
 

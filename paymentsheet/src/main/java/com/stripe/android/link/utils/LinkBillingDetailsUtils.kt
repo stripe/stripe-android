@@ -8,6 +8,8 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.PaymentDetails
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.model.toPaymentSheetBillingDetails
 
 /**
  * Returns the effective billing details, which refers to billing details that have been
@@ -108,4 +110,8 @@ private fun BillingDetails.toConsumerBillingAddress(): ConsumerPaymentDetails.Bi
         postalCode = billingAddress.postalCode,
         countryCode = billingAddress.country?.let { CountryCode.create(it) }
     )
+}
+
+internal fun PaymentMethod.BillingDetails.toConsumerBillingAddress(): ConsumerPaymentDetails.BillingAddress? {
+    return this.toPaymentSheetBillingDetails().toConsumerBillingAddress()
 }

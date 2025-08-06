@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
@@ -27,65 +29,42 @@ import kotlin.test.Test
 class DefaultAddPaymentMethodInteractorTest {
     @Test
     fun handleViewAction_ReportFieldInteraction_reportsFieldInteraction() {
-        var latestCodeWithInteraction: PaymentMethodCode? = null
-        fun reportFieldInteraction(code: PaymentMethodCode) {
-            latestCodeWithInteraction = code
-        }
-
-        val expectedCode = PaymentMethod.Type.CashAppPay.code
-
-        runScenario(
-            reportFieldInteraction = ::reportFieldInteraction,
-        ) {
+        runScenario {
+            val expectedCode = PaymentMethod.Type.CashAppPay.code
             interactor.handleViewAction(
                 AddPaymentMethodInteractor.ViewAction.ReportFieldInteraction(expectedCode)
             )
 
-            assertThat(latestCodeWithInteraction).isEqualTo(expectedCode)
+            assertThat(reportFieldInteractionTurbine.awaitItem()).isEqualTo(expectedCode)
         }
     }
 
     @Test
     fun handleViewAction_OnFormFieldValuesChanged_updatesFormFields() {
-        var latestCodeWithChangedFormFields: PaymentMethodCode? = null
-        fun onFormFieldValuesChanged(code: PaymentMethodCode) {
-            latestCodeWithChangedFormFields = code
-        }
-
-        val expectedCode = PaymentMethod.Type.CashAppPay.code
-
-        runScenario(
-            onFormFieldValuesChanged = { _, code -> onFormFieldValuesChanged(code) },
-        ) {
+        runScenario {
+            val expectedCode = PaymentMethod.Type.CashAppPay.code
             interactor.handleViewAction(
                 AddPaymentMethodInteractor.ViewAction.OnFormFieldValuesChanged(null, expectedCode)
             )
 
-            assertThat(latestCodeWithChangedFormFields).isEqualTo(expectedCode)
+            assertThat(onFormFieldValuesChangedTurbine.awaitItem().second).isEqualTo(expectedCode)
         }
     }
 
     @Test
     fun handleViewAction_OnPaymentMethodSelected_selectsPaymentMethod() {
-        var reportedSelectedPaymentMethodCode: PaymentMethodCode? = null
-        fun reportPaymentMethodSelected(code: PaymentMethodCode) {
-            reportedSelectedPaymentMethodCode = code
-        }
-
-        val expectedCode = PaymentMethod.Type.CashAppPay.code
-
         runScenario(
             initiallySelectedPaymentMethodType = PaymentMethod.Type.Card.code,
-            reportPaymentMethodTypeSelected = ::reportPaymentMethodSelected,
-            clearErrorMessages = {},
         ) {
+            val expectedCode = PaymentMethod.Type.CashAppPay.code
             interactor.handleViewAction(
                 AddPaymentMethodInteractor.ViewAction.OnPaymentMethodSelected(expectedCode)
             )
 
             dispatcher.scheduler.advanceUntilIdle()
 
-            assertThat(reportedSelectedPaymentMethodCode).isEqualTo(expectedCode)
+            assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo(expectedCode)
+            assertThat(clearErrorMessagesTurbine.awaitItem()).isNotNull()
             interactor.state.test {
                 awaitItem().run {
                     assertThat(selectedPaymentMethodCode).isEqualTo(expectedCode)
@@ -96,22 +75,14 @@ class DefaultAddPaymentMethodInteractorTest {
 
     @Test
     fun handleViewAction_OnPaymentMethodSelected_withoutNewPaymentMethod_doesntReportSelection() {
-        var reportedSelectedPaymentMethodCode: PaymentMethodCode? = null
-        fun reportPaymentMethodSelected(code: PaymentMethodCode) {
-            reportedSelectedPaymentMethodCode = code
-        }
-
         val expectedCode = PaymentMethod.Type.CashAppPay.code
-
         runScenario(
             initiallySelectedPaymentMethodType = expectedCode,
-            reportPaymentMethodTypeSelected = ::reportPaymentMethodSelected,
         ) {
             interactor.handleViewAction(
                 AddPaymentMethodInteractor.ViewAction.OnPaymentMethodSelected(expectedCode)
             )
 
-            assertThat(reportedSelectedPaymentMethodCode).isNull()
             interactor.state.test {
                 awaitItem().run {
                     assertThat(selectedPaymentMethodCode).isEqualTo(expectedCode)
@@ -178,8 +149,6 @@ class DefaultAddPaymentMethodInteractorTest {
             initiallySelectedPaymentMethodType = PaymentMethod.Type.Card.code,
             createFormArguments = ::createFormArguments,
             formElementsForCode = ::formElementsForCode,
-            reportPaymentMethodTypeSelected = {},
-            clearErrorMessages = {},
         ) {
             val newPaymentMethodCode = PaymentMethod.Type.CashAppPay.code
             interactor.handleViewAction(
@@ -191,6 +160,9 @@ class DefaultAddPaymentMethodInteractorTest {
             dispatcher.scheduler.advanceUntilIdle()
 
             interactor.state.test {
+                assertThat(clearErrorMessagesTurbine.awaitItem()).isNotNull()
+                assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo(newPaymentMethodCode)
+
                 awaitItem().run {
                     assertThat(selectedPaymentMethodCode).isEqualTo(newPaymentMethodCode)
 
@@ -203,29 +175,21 @@ class DefaultAddPaymentMethodInteractorTest {
 
     @Test
     fun changingSelectedPaymentMethod_clearsErrorMessages() {
-        var errorMessagesHaveBeenCleared = false
-        fun clearErrorMessages() {
-            errorMessagesHaveBeenCleared = true
-        }
-
         runScenario(
             initiallySelectedPaymentMethodType = PaymentMethod.Type.Card.code,
-            clearErrorMessages = ::clearErrorMessages,
-            reportPaymentMethodTypeSelected = {},
         ) {
             interactor.handleViewAction(
                 AddPaymentMethodInteractor.ViewAction.OnPaymentMethodSelected(
                     PaymentMethod.Type.CashAppPay.code,
                 )
             )
+            assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("cashapp")
 
             dispatcher.scheduler.advanceUntilIdle()
 
-            assertThat(errorMessagesHaveBeenCleared).isTrue()
+            assertThat(clearErrorMessagesTurbine.awaitItem()).isNotNull()
         }
     }
-
-    private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
 
     private fun runScenario(
         initiallySelectedPaymentMethodType: PaymentMethodCode = PaymentMethod.Type.Card.code,
@@ -246,14 +210,15 @@ class DefaultAddPaymentMethodInteractorTest {
             )
         },
         formElementsForCode: (PaymentMethodCode) -> List<FormElement> = { emptyList() },
-        clearErrorMessages: () -> Unit = { notImplemented() },
-        reportFieldInteraction: (PaymentMethodCode) -> Unit = { notImplemented() },
-        onFormFieldValuesChanged: (FormFieldValues?, String) -> Unit = { _, _ -> notImplemented() },
-        reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit = { notImplemented() },
         createUSBankAccountFormArguments: (PaymentMethodCode) -> USBankAccountFormArguments = { mock() },
         testBlock: suspend TestParams.() -> Unit
     ) {
         val dispatcher = StandardTestDispatcher(TestCoroutineScheduler())
+
+        val reportFieldInteractionTurbine = Turbine<PaymentMethodCode>()
+        val onFormFieldValuesChangedTurbine = Turbine<Pair<FormFieldValues?, String>>()
+        val clearErrorMessagesTurbine = Turbine<Unit>()
+        val reportPaymentMethodTypeSelectedTurbine = Turbine<PaymentMethodCode>()
 
         val interactor = DefaultAddPaymentMethodInteractor(
             initiallySelectedPaymentMethodType = initiallySelectedPaymentMethodType,
@@ -263,10 +228,18 @@ class DefaultAddPaymentMethodInteractorTest {
             supportedPaymentMethods = supportedPaymentMethods,
             createFormArguments = createFormArguments,
             formElementsForCode = formElementsForCode,
-            clearErrorMessages = clearErrorMessages,
-            reportFieldInteraction = reportFieldInteraction,
-            onFormFieldValuesChanged = onFormFieldValuesChanged,
-            reportPaymentMethodTypeSelected = reportPaymentMethodTypeSelected,
+            clearErrorMessages = {
+                clearErrorMessagesTurbine.add(Unit)
+            },
+            reportFieldInteraction = {
+                reportFieldInteractionTurbine.add(it)
+            },
+            onFormFieldValuesChanged = { formFields: FormFieldValues?, paymentMethodCode: String ->
+                onFormFieldValuesChangedTurbine.add(Pair(formFields, paymentMethodCode))
+            },
+            reportPaymentMethodTypeSelected = {
+                reportPaymentMethodTypeSelectedTurbine.add(it)
+            },
             createUSBankAccountFormArguments = createUSBankAccountFormArguments,
             coroutineScope = CoroutineScope(dispatcher),
             isLiveMode = true,
@@ -275,15 +248,31 @@ class DefaultAddPaymentMethodInteractorTest {
         TestParams(
             interactor = interactor,
             dispatcher = dispatcher,
+            reportFieldInteractionTurbine = reportFieldInteractionTurbine,
+            onFormFieldValuesChangedTurbine = onFormFieldValuesChangedTurbine,
+            clearErrorMessagesTurbine = clearErrorMessagesTurbine,
+            reportPaymentMethodTypeSelectedTurbine = reportPaymentMethodTypeSelectedTurbine,
         ).apply {
             runTest {
                 testBlock()
             }
+            ensureAllEventsConsumed()
         }
     }
 
     private class TestParams(
         val interactor: AddPaymentMethodInteractor,
         val dispatcher: TestDispatcher,
-    )
+        val reportFieldInteractionTurbine: ReceiveTurbine<PaymentMethodCode>,
+        val onFormFieldValuesChangedTurbine: ReceiveTurbine<Pair<FormFieldValues?, String>>,
+        val clearErrorMessagesTurbine: ReceiveTurbine<Unit>,
+        val reportPaymentMethodTypeSelectedTurbine: ReceiveTurbine<PaymentMethodCode>,
+    ) {
+        fun ensureAllEventsConsumed() {
+            reportFieldInteractionTurbine.ensureAllEventsConsumed()
+            onFormFieldValuesChangedTurbine.ensureAllEventsConsumed()
+            clearErrorMessagesTurbine.ensureAllEventsConsumed()
+            reportPaymentMethodTypeSelectedTurbine.ensureAllEventsConsumed()
+        }
+    }
 }

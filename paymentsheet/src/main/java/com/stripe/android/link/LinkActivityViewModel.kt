@@ -58,7 +58,7 @@ internal class LinkActivityViewModel @Inject constructor(
     private val linkAccountManager: LinkAccountManager,
     private val linkAccountHolder: LinkAccountHolder,
     val eventReporter: EventReporter,
-    private val linkConfiguration: LinkConfiguration,
+    val linkConfiguration: LinkConfiguration,
     private val linkAttestationCheck: LinkAttestationCheck,
     val savedStateHandle: SavedStateHandle,
     private val startWithVerificationDialog: Boolean,
@@ -158,9 +158,30 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     fun moveToWeb() {
-        launchWebFlow?.let { launcher ->
-            navigate(LinkScreen.Loading, clearStack = true)
-            launcher.invoke(linkConfiguration)
+        when (linkLaunchMode) {
+            // Authentication flows with existing accounts -> dismiss with an error.
+            is LinkLaunchMode.Authentication -> dismissWithResult(
+                LinkActivityResult.Failed(
+                    error = IllegalStateException(
+                        "authentication only is not supported in web mode"
+                    ),
+                    linkAccountUpdate = LinkAccountUpdate.None
+                )
+            )
+            // Payment selection flows -> dismiss selecting Link with no selected payment method.
+            is LinkLaunchMode.PaymentMethodSelection -> dismissWithResult(
+                LinkActivityResult.Completed(
+                    linkAccountUpdate = LinkAccountUpdate.None,
+                    selectedPayment = null,
+                    shippingAddress = null
+                )
+            )
+            // Flows that end up in confirmation -> we can launch the web flow.
+            is LinkLaunchMode.Confirmation,
+            LinkLaunchMode.Full -> launchWebFlow?.let { launcher ->
+                navigate(LinkScreen.Loading, clearStack = true)
+                launcher.invoke(linkConfiguration)
+            }
         }
     }
 
@@ -227,7 +248,7 @@ internal class LinkActivityViewModel @Inject constructor(
             val attestationCheckResult = linkAttestationCheck.invoke()
             when (attestationCheckResult) {
                 is LinkAttestationCheck.Result.AttestationFailed -> {
-                    launchWebFlow?.invoke(linkConfiguration)
+                    moveToWeb()
                 }
                 LinkAttestationCheck.Result.Successful -> {
                     updateScreenState()

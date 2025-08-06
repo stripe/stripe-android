@@ -433,7 +433,7 @@ internal fun Wallet(
             }
 
             LinkButton(
-                email = it.email,
+                state = it.state,
                 enabled = state.buttonsEnabled,
                 onClick = onLinkPressed,
             )

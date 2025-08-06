@@ -118,7 +118,8 @@ internal object CustomerSheetFixtures {
             flags = emptyMap(),
             elementsSessionId = "session_1234",
             orderedPaymentMethodTypesAndWallets = listOf("card"),
-            experimentsData = null
+            experimentsData = null,
+            passiveCaptcha = null
         )
 
         return CustomerSheetSession(

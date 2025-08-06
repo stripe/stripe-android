@@ -158,6 +158,72 @@ class InlineSignupViewStateTest {
         assertThat(viewState.useLink).isFalse()
     }
 
+    @Test
+    fun `Uses Link if signup opt-in feature enabled and user input present and expanded`() {
+        val linkConfig = createLinkConfig(
+            countryCode = "US",
+            linkSignUpOptInFeatureEnabled = true,
+        )
+
+        val viewState = InlineSignupViewState.create(
+            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+            config = linkConfig
+        ).copy(
+            userInput = UserInput.SignUp(
+                email = "email@email.com",
+                phone = "5555555555",
+                name = null,
+                country = "US",
+                consentAction = SignUpConsentAction.Checkbox,
+            ),
+            isExpanded = true,
+        )
+
+        assertThat(viewState.useLink).isTrue()
+    }
+
+    @Test
+    fun `Does not use Link if signup opt-in feature enabled but not expanded`() {
+        val linkConfig = createLinkConfig(
+            countryCode = "US",
+            linkSignUpOptInFeatureEnabled = true,
+        )
+
+        val viewState = InlineSignupViewState.create(
+            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+            config = linkConfig
+        ).copy(
+            userInput = UserInput.SignUp(
+                email = "email@email.com",
+                phone = "5555555555",
+                name = null,
+                country = "US",
+                consentAction = SignUpConsentAction.Checkbox,
+            ),
+            isExpanded = false,
+        )
+
+        assertThat(viewState.useLink).isFalse()
+    }
+
+    @Test
+    fun `Does not use Link if signup opt-in feature enabled but no user input`() {
+        val linkConfig = createLinkConfig(
+            countryCode = "US",
+            linkSignUpOptInFeatureEnabled = true,
+        )
+
+        val viewState = InlineSignupViewState.create(
+            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+            config = linkConfig
+        ).copy(
+            userInput = null,
+            isExpanded = true,
+        )
+
+        assertThat(viewState.useLink).isFalse()
+    }
+
     private fun testDefaultOptInAllowed(
         countryCode: String,
         signupMode: LinkSignupMode,
@@ -181,6 +247,7 @@ class InlineSignupViewStateTest {
         countryCode: String,
         email: String? = "john@doe.ca",
         allowsDefaultOptIn: Boolean = false,
+        linkSignUpOptInFeatureEnabled: Boolean = false,
     ): LinkConfiguration {
         return TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = PaymentIntentFactory.create(countryCode = countryCode),
@@ -188,6 +255,7 @@ class InlineSignupViewStateTest {
                 email = email
             ),
             allowDefaultOptIn = allowsDefaultOptIn,
+            linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
         )
     }
 }

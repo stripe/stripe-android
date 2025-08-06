@@ -13,7 +13,7 @@ private data class AddressSurrogate(
     val country: String? = null,
     val line1: String? = null,
     val line2: String? = null,
-    @SerialName("postal_code") val postalCode: String? = null,
+    @SerialName("zip") val postalCode: String? = null,
     val state: String? = null
 )
 

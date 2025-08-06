@@ -43,7 +43,7 @@ class PaymentSelectionUpdaterTest {
         val newState = mockPaymentSheetStateWithPaymentIntent(paymentSelection = PaymentSelection.GooglePay)
         val updater = createUpdater()
         val result = updater(
-            currentSelection = null,
+            selection = null,
             previousConfig = null,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
@@ -75,7 +75,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = existingSelection,
+            selection = existingSelection,
             previousConfig = PaymentSheet.Configuration(
                 merchantDisplayName = "Example, Inc.",
                 allowsDelayedPaymentMethods = true,
@@ -99,7 +99,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = existingSelection,
+            selection = existingSelection,
             previousConfig = defaultPaymentSheetConfiguration,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
@@ -115,7 +115,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = existing,
+            selection = existing,
             previousConfig = null,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
@@ -133,7 +133,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = existing,
+            selection = existing,
             previousConfig = null,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
@@ -154,7 +154,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = existingSelection,
+            selection = existingSelection,
             previousConfig = null,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
@@ -174,7 +174,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = paymentSelection,
+            selection = paymentSelection,
             previousConfig = null,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
@@ -194,7 +194,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = paymentSelection,
+            selection = paymentSelection,
             previousConfig = null,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
@@ -214,7 +214,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = paymentSelection,
+            selection = paymentSelection,
             previousConfig = null,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
@@ -234,7 +234,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = paymentSelection,
+            selection = paymentSelection,
             previousConfig = null,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
@@ -263,7 +263,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = existingSelection,
+            selection = existingSelection,
             previousConfig = null,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
@@ -295,7 +295,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = existingSelection,
+            selection = existingSelection,
             previousConfig = defaultPaymentSheetConfiguration,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
@@ -327,7 +327,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = existingSelection,
+            selection = existingSelection,
             previousConfig = defaultPaymentSheetConfiguration,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
@@ -378,7 +378,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = existingSelection,
+            selection = existingSelection,
             previousConfig = defaultPaymentSheetConfiguration.newBuilder()
                 .googlePay(
                     GooglePayConfiguration(
@@ -412,7 +412,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = existingSelection,
+            selection = existingSelection,
             previousConfig = defaultPaymentSheetConfiguration,
             newState = newState,
             newConfig = newConfig,
@@ -427,7 +427,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = PaymentSelection.GooglePay,
+            selection = PaymentSelection.GooglePay,
             previousConfig = null,
             newState = mockPaymentSheetStateWithPaymentIntent(),
             newConfig = defaultPaymentSheetConfiguration,
@@ -442,7 +442,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = PaymentSelection.Link(useLinkExpress = false),
+            selection = PaymentSelection.Link(useLinkExpress = false),
             previousConfig = null,
             newState = mockPaymentSheetStateWithPaymentIntent(),
             newConfig = defaultPaymentSheetConfiguration,
@@ -458,7 +458,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = PaymentSelection.GooglePay,
+            selection = PaymentSelection.GooglePay,
             previousConfig = null,
             newState = mockPaymentSheetStateWithPaymentIntent(),
             newConfig = defaultPaymentSheetConfiguration.newBuilder()
@@ -479,7 +479,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = PaymentSelection.Link(useLinkExpress = false),
+            selection = PaymentSelection.Link(useLinkExpress = false),
             previousConfig = null,
             newState = mockPaymentSheetStateWithPaymentIntent(),
             newConfig = defaultPaymentSheetConfiguration.newBuilder()
@@ -500,7 +500,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = PaymentSelection.Link(useLinkExpress = false),
+            selection = PaymentSelection.Link(useLinkExpress = false),
             previousConfig = null,
             newState = mockPaymentSheetStateWithPaymentIntent(),
             newConfig = defaultPaymentSheetConfiguration.newBuilder()
@@ -522,7 +522,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            currentSelection = PaymentSelection.GooglePay,
+            selection = PaymentSelection.GooglePay,
             previousConfig = null,
             newState = mockPaymentSheetStateWithPaymentIntent(),
             newConfig = defaultPaymentSheetConfiguration.newBuilder()
@@ -536,6 +536,28 @@ class PaymentSelectionUpdaterTest {
         )
 
         assertThat(result).isEqualTo(PaymentSelection.GooglePay)
+    }
+
+    @OptIn(WalletButtonsPreview::class)
+    @Test
+    fun `If using wallet buttons config with specific wallet and existing selection matches, should preserve it`() {
+        val updater = createUpdater()
+
+        val result = updater(
+            selection = PaymentSelection.Link(useLinkExpress = false),
+            previousConfig = null,
+            newState = mockPaymentSheetStateWithPaymentIntent(),
+            newConfig = defaultPaymentSheetConfiguration.newBuilder()
+                .walletButtons(
+                    PaymentSheet.WalletButtonsConfiguration(
+                        willDisplayExternally = true,
+                        walletsToShow = listOf("link"),
+                    ),
+                ).build(),
+            walletButtonsAlreadyShown = false,
+        )
+
+        assertThat(result).isEqualTo(PaymentSelection.Link(useLinkExpress = false))
     }
 
     private fun mockPaymentSheetStateWithPaymentIntent(

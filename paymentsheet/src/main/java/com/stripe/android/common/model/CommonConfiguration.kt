@@ -16,6 +16,7 @@ import com.stripe.android.elements.payment.LinkConfiguration
 import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.elements.payment.ShopPayConfiguration
 import com.stripe.android.link.LinkController
+import com.stripe.android.link.model.LinkAppearance
 import com.stripe.android.model.CardBrand
 import kotlinx.parcelize.Parcelize
 
@@ -38,6 +39,7 @@ internal data class CommonConfiguration(
     val customPaymentMethods: List<CustomPaymentMethod>,
     val shopPayConfiguration: ShopPayConfiguration?,
     val googlePlacesApiKey: String?,
+    val linkAppearance: LinkAppearance? = null
 ) : Parcelable {
 
     fun validate(isLiveMode: Boolean) {
@@ -231,6 +233,7 @@ internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfigu
     ),
     shopPayConfiguration = null,
     googlePlacesApiKey = null,
+    linkAppearance = linkAppearance
 )
 
 private fun String.isEKClientSecretValid(): Boolean {

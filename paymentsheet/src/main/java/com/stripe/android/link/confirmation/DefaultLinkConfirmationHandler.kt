@@ -6,6 +6,7 @@ import com.stripe.android.elements.Appearance
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.LinkMode
@@ -134,7 +135,8 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                 createParams = createPaymentMethodCreateParams(
                     selectedPaymentDetails = paymentDetails,
                     consumerSessionClientSecret = linkAccount.clientSecret,
-                    cvc = cvc
+                    cvc = cvc,
+                    billingPhone = billingPhone,
                 ),
                 extraParams = null,
                 optionsParams = null,
@@ -199,11 +201,29 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
 internal fun createPaymentMethodCreateParams(
     selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
     consumerSessionClientSecret: String,
-    cvc: String?
+    cvc: String?,
+    billingPhone: String?,
 ): PaymentMethodCreateParams {
+    val billingDetails = PaymentMethod.BillingDetails(
+        address = selectedPaymentDetails.billingAddress?.let {
+            Address(
+                line1 = it.line1,
+                line2 = it.line2,
+                postalCode = it.postalCode,
+                city = it.locality,
+                state = it.administrativeArea,
+                country = it.countryCode?.value,
+            )
+        },
+        email = selectedPaymentDetails.billingEmailAddress,
+        name = selectedPaymentDetails.billingAddress?.name,
+        phone = billingPhone,
+    )
+
     return PaymentMethodCreateParams.createLink(
         paymentDetailsId = selectedPaymentDetails.id,
         consumerSessionClientSecret = consumerSessionClientSecret,
+        billingDetails = billingDetails.takeIf { it != PaymentMethod.BillingDetails() },
         extraParams = cvc?.let { mapOf("card" to mapOf("cvc" to cvc)) },
     )
 }

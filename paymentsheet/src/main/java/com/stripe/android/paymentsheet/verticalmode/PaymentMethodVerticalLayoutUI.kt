@@ -101,10 +101,10 @@ internal fun PaymentMethodVerticalLayoutUI(
         val textColor = MaterialTheme.stripeColors.onComponent
 
         val rowStyle = Appearance.Embedded.RowStyle.FloatingButton.default.run {
-            Appearance.Embedded.RowStyle.FloatingButton(
-                spacingDp = spacingDp,
-                additionalInsetsDp = StripeTheme.verticalModeRowPadding,
-            )
+            Appearance.Embedded.RowStyle.FloatingButton.Builder()
+                .spacingDp(spacingDp)
+                .additionalInsetsDp(StripeTheme.verticalModeRowPadding)
+                .build()
         }
 
         if (displayedSavedPaymentMethod != null) {

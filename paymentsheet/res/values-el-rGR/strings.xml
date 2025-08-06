@@ -45,8 +45,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up">Αποδοχή και συνέχεια</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">Γρήγορη και ασφαλής ολοκλήρωση αγοράς με 1 κλικ</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">Γρήγορο, ασφαλές ταμείο</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Αποθηκεύστε τα στοιχεία πληρωμής σας με το Link, για ασφαλή ολοκλήρωση αγοράς με 1 κλικ στους ιστότοπους που υποστηρίζονται από το Link.</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">Πληρώστε γρηγορότερα όπου γίνεται δεκτό το Link.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Αν συνεχίσετε, συμφωνείτε με τους <terms>Όρους</terms> και την <privacy>Πολιτική απορρήτου</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -105,6 +109,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Δεν είναι δυνατή η αλλαγή των στοιχείων κάρτας.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Με την παροχή των στοιχείων της κάρτας σας, επιτρέπετε στην %s να χρεώνει την κάρτα σας για μελλοντικές πληρωμές σύμφωνα με τους όρους της.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Συνεχίζοντας, συμφωνείτε να αποθηκεύσετε τις πληροφορίες σας για μελλοντικές αγορές με το %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Συνεχίζοντας, συμφωνείτε να αποθηκεύσετε τις πληροφορίες σας για μελλοντικές αγορές με το %s και <link>Link</link>. Συμφωνείτε επίσης με τους <terms>Όρους</terms> και το <privacy>Απόρρητο</privacy> του Link.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Η κάρτα δεν ενημερώθηκε. Δοκιμάστε ξανά.</string>
   <!-- Title shown above a carousel containing available payment methods -->

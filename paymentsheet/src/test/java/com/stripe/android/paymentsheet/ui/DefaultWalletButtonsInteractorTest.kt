@@ -11,13 +11,18 @@ import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.link.verification.NoOpLinkInlineInteractor
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
+import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
@@ -26,6 +31,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
@@ -33,11 +39,18 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
 
 @Suppress("LargeClass")
 class DefaultWalletButtonsInteractorTest {
+
+    private val testDispatcher = UnconfinedTestDispatcher()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(testDispatcher)
+
     @Test
     fun `on init with no arguments, state should be empty`() = runTest {
         val interactor = createInteractor(arguments = null)
@@ -196,7 +209,11 @@ class DefaultWalletButtonsInteractorTest {
         )
 
         interactor.handleViewAction(
-            WalletButtonsInteractor.ViewAction.OnButtonPressed(WalletButtonsInteractor.WalletButton.Link(email = null))
+            WalletButtonsInteractor.ViewAction.OnButtonPressed(
+                WalletButtonsInteractor.WalletButton.Link(
+                    state = LinkButtonState.Default,
+                )
+            )
         )
 
         val call = errorReporter.awaitCall()
@@ -221,7 +238,9 @@ class DefaultWalletButtonsInteractorTest {
         )
 
         interactor.handleViewAction(
-            WalletButtonsInteractor.ViewAction.OnButtonPressed(WalletButtonsInteractor.WalletButton.Link(email = null))
+            WalletButtonsInteractor.ViewAction.OnButtonPressed(
+                WalletButtonsInteractor.WalletButton.Link(state = LinkButtonState.Default)
+            )
         )
 
         val call = errorReporter.awaitCall()
@@ -275,7 +294,7 @@ class DefaultWalletButtonsInteractorTest {
 
             val button = state.walletButtons.first().asLinkWalletButton()
 
-            assertThat(button.email).isNull()
+            assertThat(button.state).isInstanceOf<LinkButtonState.Default>()
         }
     }
 
@@ -296,7 +315,8 @@ class DefaultWalletButtonsInteractorTest {
 
             val button = state.walletButtons.first().asLinkWalletButton()
 
-            assertThat(button.email).isEqualTo("email@email.com")
+            val buttonState = button.state as LinkButtonState.Email
+            assertThat(buttonState.email).isEqualTo("email@email.com")
         }
     }
 
@@ -632,6 +652,79 @@ class DefaultWalletButtonsInteractorTest {
     }
 
     @Test
+    fun `when linkEnableDisplayableDefaultValuesInEce is false, should not use payment details`() = runTest {
+        val interactor = createInteractor(
+            arguments = createArguments(
+                availableWallets = listOf(WalletType.Link),
+                linkState = LinkState(
+                    configuration = TestFactory.LINK_CONFIGURATION.copy(
+                        enableDisplayableDefaultValuesInEce = false
+                    ),
+                    loginState = LinkState.LoginState.LoggedOut,
+                    signupMode = null,
+                ),
+                linkEmail = "test@example.com"
+            )
+        )
+
+        interactor.state.test {
+            val state = awaitItem()
+
+            assertThat(state.walletButtons).hasSize(1)
+            val button = state.walletButtons.first().asLinkWalletButton()
+
+            // Should show email since payment details are disabled by flag
+            val buttonState = button.state as LinkButtonState.Email
+            assertThat(buttonState.email).isEqualTo("test@example.com")
+        }
+    }
+
+    @Test
+    fun `when linkEnableDisplayableDefaultValuesInEce is true, should use payment details in the button`() =
+        runTest {
+            val paymentDetails = DisplayablePaymentDetails(
+                defaultCardBrand = "VISA",
+                defaultPaymentType = "CARD",
+                last4 = "4242",
+                numberOfSavedPaymentDetails = 3L
+            )
+
+            val linkAccount = LinkAccount(
+                consumerSession = TestFactory.CONSUMER_SESSION,
+                consumerPublishableKey = TestFactory.PUBLISHABLE_KEY,
+                displayablePaymentDetails = paymentDetails
+            )
+
+            val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+            linkAccountHolder.set(LinkAccountUpdate.Value(linkAccount))
+
+            val interactor = createInteractor(
+                arguments = createArguments(
+                    availableWallets = listOf(WalletType.Link),
+                    linkEmail = "test@example.com",
+                    linkState = LinkState(
+                        configuration = TestFactory.LINK_CONFIGURATION.copy(
+                            enableDisplayableDefaultValuesInEce = true
+                        ),
+                        loginState = LinkState.LoginState.LoggedOut,
+                        signupMode = null,
+                    )
+                ),
+                linkAccountHolder = linkAccountHolder
+            )
+
+            interactor.state.test {
+                val state = awaitItem()
+
+                assertThat(state.walletButtons).hasSize(1)
+                val button = state.walletButtons.first().asLinkWalletButton()
+
+                val buttonState = button.state as LinkButtonState.DefaultPayment
+                assertThat(buttonState.paymentUI.last4).isEqualTo("4242")
+            }
+        }
+
+    @Test
     fun `on init with mixed wallet order including ShopPay, state should preserve order`() = runTest {
         val interactor = createInteractor(
             arguments = createArguments(
@@ -740,6 +833,7 @@ class DefaultWalletButtonsInteractorTest {
         confirmationHandler: ConfirmationHandler = FakeConfirmationHandler(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
         linkPaymentLauncher: LinkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
+        linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
         onWalletButtonsRenderStateChanged: (isRendered: Boolean) -> Unit = {
             error("Should not be called!")
         },
@@ -747,11 +841,11 @@ class DefaultWalletButtonsInteractorTest {
         return DefaultWalletButtonsInteractor(
             arguments = stateFlowOf(arguments),
             confirmationHandler = confirmationHandler,
-            coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+            coroutineScope = CoroutineScope(testDispatcher),
             errorReporter = errorReporter,
             linkInlineInteractor = NoOpLinkInlineInteractor(),
             linkPaymentLauncher = linkPaymentLauncher,
-            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+            linkAccountHolder = linkAccountHolder,
             onWalletButtonsRenderStateChanged = onWalletButtonsRenderStateChanged,
         )
     }

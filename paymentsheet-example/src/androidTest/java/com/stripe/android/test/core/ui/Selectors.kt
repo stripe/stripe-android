@@ -137,8 +137,8 @@ internal class Selectors(
         "com.google.android.gms"
     )
 
-    val googlePayContinueButton = UiAutomatorText(
-        "Continue",
+    val googlePayCheckoutButton = UiAutomatorText(
+        "Pay",
         className = "android.widget.Button",
         device = device
     )

@@ -88,25 +88,29 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
 
     @Test
     fun testStyleAppearance() {
-        val style = FlatWithRadio(
-            separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
-            startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-            endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-            topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
-            bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
-            additionalVerticalInsetsDp = 40f,
-            horizontalInsetsDp = 40f,
-            colorsLight = FlatWithRadio.Colors(
-                separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-                selectedColor = StripeThemeDefaults.colorsLight.materialColors.error.toArgb(),
-                unselectedColor = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb()
-            ),
-            colorsDark = FlatWithRadio.Colors(
-                separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
-                selectedColor = StripeThemeDefaults.colorsDark.materialColors.error.toArgb(),
-                unselectedColor = StripeThemeDefaults.colorsDark.materialColors.primary.toArgb()
+        val style = FlatWithRadio.Builder()
+            .separatorThicknessDp(StripeThemeDefaults.flat.separatorThickness)
+            .startSeparatorInsetDp(StripeThemeDefaults.flat.separatorInsets)
+            .endSeparatorInsetDp(StripeThemeDefaults.flat.separatorInsets)
+            .topSeparatorEnabled(StripeThemeDefaults.flat.topSeparatorEnabled)
+            .bottomSeparatorEnabled(StripeThemeDefaults.flat.bottomSeparatorEnabled)
+            .additionalVerticalInsetsDp(40f)
+            .horizontalInsetsDp(40f)
+            .colorsLight(
+                FlatWithRadio.Colors(
+                    separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+                    selectedColor = StripeThemeDefaults.colorsLight.materialColors.error.toArgb(),
+                    unselectedColor = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb()
+                )
             )
-        )
+            .colorsDark(
+                FlatWithRadio.Colors(
+                    separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
+                    selectedColor = StripeThemeDefaults.colorsDark.materialColors.error.toArgb(),
+                    unselectedColor = StripeThemeDefaults.colorsDark.materialColors.primary.toArgb()
+                )
+            )
+            .build()
 
         testPaymentMethodRowButton_RadioButton(
             trailingContent = {

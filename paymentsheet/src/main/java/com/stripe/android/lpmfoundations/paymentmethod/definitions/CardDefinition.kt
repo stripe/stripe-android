@@ -1,9 +1,16 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
+import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
+import com.stripe.android.link.ui.replaceHyperlinks
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.luxe.addSavePaymentOptionElements
@@ -19,7 +26,9 @@ import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.ui.core.elements.EmailElement
+import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.ui.core.elements.MandateTextElement
+import com.stripe.android.ui.core.elements.RenderableFormElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -28,6 +37,10 @@ import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.flow.StateFlow
 import com.stripe.android.paymentsheet.R as PaymentSheetR
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
@@ -103,7 +116,11 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                 metadata = metadata
             )
 
-            if (canChangeSaveForFutureUsage) {
+            val linkSignupOptInEnabled =
+                metadata.linkState?.configuration?.linkSignUpOptInFeatureEnabled == true
+
+            // sign up opt in combines save for future usage and link signup acceptance
+            if (canChangeSaveForFutureUsage && linkSignupOptInEnabled.not()) {
                 addSavePaymentOptionElements(
                     metadata = metadata,
                     arguments = arguments,
@@ -128,28 +145,32 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                 null
             }
 
-            if (metadata.hasIntentToSetup(CardDefinition.type.code)) {
-                add(createCardMandateElement(metadata.merchantName, signupMode, canChangeSaveForFutureUsage))
+            if (linkSignupOptInEnabled && signupMode != null) {
+                add(
+                    CombinedLinkMandateElement(
+                        identifier = IdentifierSpec.Generic("card_mandate"),
+                        merchantName = metadata.merchantName,
+                        signupMode = signupMode,
+                        canChangeSaveForFutureUse = canChangeSaveForFutureUsage,
+                        linkSignupStateFlow = arguments.linkInlineHandler?.linkInlineState ?: stateFlowOf(null)
+                    )
+                )
+            } else if (metadata.hasIntentToSetup(CardDefinition.type.code)) {
+                add(
+                    MandateTextElement(
+                        identifier = IdentifierSpec.Generic("card_mandate"),
+                        stringResId = PaymentSheetR.string.stripe_paymentsheet_card_mandate,
+                        topPadding = when {
+                            signupMode == LinkSignupMode.AlongsideSaveForFutureUse -> 0.dp
+                            signupMode == LinkSignupMode.InsteadOfSaveForFutureUse -> 4.dp
+                            canChangeSaveForFutureUsage -> 6.dp
+                            else -> 2.dp
+                        },
+                        args = listOf(metadata.merchantName),
+                    )
+                )
             }
         }
-    }
-
-    private fun createCardMandateElement(
-        merchantName: String,
-        signupMode: LinkSignupMode?,
-        canChangeSaveForFutureUse: Boolean,
-    ): MandateTextElement {
-        return MandateTextElement(
-            identifier = IdentifierSpec.Generic("card_mandate"),
-            stringResId = PaymentSheetR.string.stripe_paymentsheet_card_mandate,
-            topPadding = when {
-                signupMode == LinkSignupMode.AlongsideSaveForFutureUse -> 0.dp
-                signupMode == LinkSignupMode.InsteadOfSaveForFutureUse -> 4.dp
-                canChangeSaveForFutureUse -> 6.dp
-                else -> 2.dp
-            },
-            args = listOf(merchantName),
-        )
     }
 
     private fun MutableList<FormElement>.addContactInformationElement(
@@ -264,4 +285,43 @@ private fun contactInformationElement(
         label = resolvableString(PaymentsUiCoreR.string.stripe_contact_information),
         sectionFieldElements = elements,
     )
+}
+
+internal class CombinedLinkMandateElement(
+    identifier: IdentifierSpec,
+    signupMode: LinkSignupMode?,
+    canChangeSaveForFutureUse: Boolean,
+    private val merchantName: String,
+    private val linkSignupStateFlow: StateFlow<InlineSignupViewState?>,
+) : RenderableFormElement(
+    allowsUserInteraction = false,
+    identifier = identifier
+) {
+    override fun getFormFieldValueFlow() = stateFlowOf(emptyList<Pair<IdentifierSpec, FormFieldEntry>>())
+
+    private val topPadding = when {
+        signupMode == LinkSignupMode.AlongsideSaveForFutureUse -> 0.dp
+        signupMode == LinkSignupMode.InsteadOfSaveForFutureUse -> 4.dp
+        canChangeSaveForFutureUse -> 6.dp
+        else -> 2.dp
+    }
+
+    @Composable
+    override fun ComposeUI(enabled: Boolean) {
+        val linkState by linkSignupStateFlow.collectAsState()
+        Mandate(
+            mandateText = if (linkState?.isExpanded == true) {
+                stringResource(
+                    id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_on,
+                    formatArgs = arrayOf(merchantName)
+                ).replaceHyperlinks()
+            } else {
+                stringResource(
+                    id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_off,
+                    formatArgs = arrayOf(merchantName)
+                ).replaceHyperlinks()
+            },
+            modifier = Modifier.padding(top = topPadding)
+        )
+    }
 }

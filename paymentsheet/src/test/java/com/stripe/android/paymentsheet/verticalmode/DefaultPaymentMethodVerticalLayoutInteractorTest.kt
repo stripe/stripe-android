@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
@@ -8,6 +9,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.Address
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
@@ -437,7 +439,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun `calling state_displayablePaymentMethods_onClick calls ViewAction_PaymentMethodSelected`() {
-        var onFormFieldValuesChangedCalled = false
         runScenario(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -445,19 +446,17 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 )
             ),
             formTypeForCode = { FormHelper.FormType.Empty },
-            onFormFieldValuesChanged = { fieldValues, selectedPaymentMethodCode ->
-                fieldValues.run {
-                    assertThat(fieldValuePairs).isEmpty()
-                    assertThat(userRequestedReuse).isEqualTo(PaymentSelection.CustomerRequestedSave.NoRequest)
-                }
-                assertThat(selectedPaymentMethodCode).isEqualTo("cashapp")
-                onFormFieldValuesChangedCalled = true
-            },
-            reportPaymentMethodTypeSelected = {},
         ) {
             val paymentMethod = interactor.state.value.displayablePaymentMethods.first { it.code == "cashapp" }
             paymentMethod.onClick()
-            assertThat(onFormFieldValuesChangedCalled).isTrue()
+            assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("cashapp")
+            onFormFieldValuesChangedTurbine.awaitItem().apply {
+                first.run {
+                    assertThat(fieldValuePairs).isEmpty()
+                    assertThat(userRequestedReuse).isEqualTo(PaymentSelection.CustomerRequestedSave.NoRequest)
+                }
+                assertThat(second).isEqualTo("cashapp")
+            }
         }
     }
 
@@ -483,7 +482,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         canShowWalletsInline = false,
     ) {
         walletsState.value = WalletsState(
-            link = WalletsState.Link("email@email.com"),
+            link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
             googlePay = WalletsState.GooglePay(
                 buttonType = GooglePayButtonType.Pay,
                 allowCreditCards = true,
@@ -514,7 +513,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         canShowWalletsInline = true,
     ) {
         walletsState.value = WalletsState(
-            link = WalletsState.Link("email@email.com"),
+            link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
             googlePay = WalletsState.GooglePay(
                 buttonType = GooglePayButtonType.Pay,
                 allowCreditCards = true,
@@ -547,7 +546,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             canShowWalletsInline = true,
         ) {
             walletsState.value = WalletsState(
-                link = WalletsState.Link("email@email.com"),
+                link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
                 googlePay = WalletsState.GooglePay(
                     buttonType = GooglePayButtonType.Pay,
                     allowCreditCards = true,
@@ -616,7 +615,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         canShowWalletsInline = true,
     ) {
         walletsState.value = WalletsState(
-            link = WalletsState.Link("email@email.com"),
+            link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
             googlePay = null,
             buttonsEnabled = true,
             dividerTextResource = 0,
@@ -677,7 +676,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         canShowWalletButtons = false,
     ) {
         walletsState.value = WalletsState(
-            link = WalletsState.Link("email@email.com"),
+            link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
             googlePay = null,
             buttonsEnabled = true,
             dividerTextResource = 0,
@@ -694,81 +693,98 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun handleViewAction_PaymentMethodSelected_transitionsToFormScreen_whenFieldsAllowUserInteraction() {
-        var calledFormScreenFactory = false
-        var reportedSelectedPaymentMethodType: PaymentMethodCode? = null
-        var reportFormShownForPm: PaymentMethodCode? = null
         runScenario(
             formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
-            transitionToFormScreen = {
-                calledFormScreenFactory = true
-            },
-            reportPaymentMethodTypeSelected = { reportedSelectedPaymentMethodType = it },
-            reportFormShown = { reportFormShownForPm = it }
         ) {
             interactor.handleViewAction(ViewAction.PaymentMethodSelected("card"))
-            assertThat(calledFormScreenFactory).isTrue()
-            assertThat(reportedSelectedPaymentMethodType).isEqualTo("card")
-            assertThat(reportFormShownForPm).isEqualTo("card")
+            assertThat(transitionToFormScreenTurbine.awaitItem()).isEqualTo("card")
+            assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("card")
+            assertThat(reportFormShownTurbine.awaitItem()).isEqualTo("card")
         }
     }
 
     @Test
     fun handleViewAction_PaymentMethodSelected_transitionsToFormScreen_whenSelectedIsUsBank() {
-        var calledFormScreenFactory = false
         runScenario(
             formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
-            transitionToFormScreen = {
-                calledFormScreenFactory = true
-            },
-            reportPaymentMethodTypeSelected = {},
-            reportFormShown = {},
         ) {
             interactor.handleViewAction(ViewAction.PaymentMethodSelected("us_bank_account"))
-            assertThat(calledFormScreenFactory).isTrue()
+            assertThat(transitionToFormScreenTurbine.awaitItem()).isEqualTo("us_bank_account")
+            assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("us_bank_account")
+            assertThat(reportFormShownTurbine.awaitItem()).isEqualTo("us_bank_account")
         }
     }
 
     @Test
     fun handleViewAction_PaymentMethodSelected_transitionsToFormScreen_whenSelectedIsInstantDebits() {
-        var calledFormScreenFactory = false
         runScenario(
             formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
-            transitionToFormScreen = {
-                calledFormScreenFactory = true
-            },
-            reportPaymentMethodTypeSelected = {},
-            reportFormShown = {},
         ) {
             interactor.handleViewAction(ViewAction.PaymentMethodSelected("link"))
-            assertThat(calledFormScreenFactory).isTrue()
+            assertThat(transitionToFormScreenTurbine.awaitItem()).isEqualTo("link")
+            assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("link")
+            assertThat(reportFormShownTurbine.awaitItem()).isEqualTo("link")
         }
     }
 
     @Test
     fun handleViewAction_PaymentMethodSelected_updatesSelectedLPM() {
-        var onFormFieldValuesChangedCalled = false
-        var reportedSelectedPaymentMethodType: PaymentMethodCode? = null
         runScenario(
             formTypeForCode = { FormHelper.FormType.Empty },
-            onFormFieldValuesChanged = { fieldValues, selectedPaymentMethodCode ->
-                fieldValues.run {
+        ) {
+            interactor.handleViewAction(ViewAction.PaymentMethodSelected("cashapp"))
+            assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("cashapp")
+            onFormFieldValuesChangedTurbine.awaitItem().apply {
+                first.run {
                     assertThat(fieldValuePairs).isEmpty()
                     assertThat(userRequestedReuse).isEqualTo(PaymentSelection.CustomerRequestedSave.NoRequest)
                 }
-                assertThat(selectedPaymentMethodCode).isEqualTo("cashapp")
-                onFormFieldValuesChangedCalled = true
-            },
-            reportPaymentMethodTypeSelected = { reportedSelectedPaymentMethodType = it }
+                assertThat(second).isEqualTo("cashapp")
+            }
+        }
+    }
+
+    @Test
+    fun handleViewAction_PaymentMethodSelected_launchesFormWhenDisplaysMandatesInFormScreen() {
+        runScenario(
+            invokeRowSelectionCallback = { /* Shouldn't be null to match production behavior */ },
+            formTypeForCode = { FormHelper.FormType.MandateOnly("This is a fake mandate".resolvableString) },
+            displaysMandatesInFormScreen = true,
         ) {
-            interactor.handleViewAction(ViewAction.PaymentMethodSelected("cashapp"))
-            assertThat(onFormFieldValuesChangedCalled).isTrue()
-            assertThat(reportedSelectedPaymentMethodType).isEqualTo("cashapp")
+            interactor.state.test {
+                assertThat(awaitItem().mandate).isNull()
+                interactor.handleViewAction(ViewAction.PaymentMethodSelected("cashapp"))
+                assertThat(transitionToFormScreenTurbine.awaitItem()).isEqualTo("cashapp")
+                assertThat(reportFormShownTurbine.awaitItem()).isEqualTo("cashapp")
+                assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("cashapp")
+            }
+        }
+    }
+
+    @Test
+    fun handleViewAction_PaymentMethodSelected_doesNotLaunchFormWhenMandateDoesNotExist() {
+        runScenario(
+            invokeRowSelectionCallback = { /* Shouldn't be null to match production behavior */ },
+            formTypeForCode = { FormHelper.FormType.Empty },
+            displaysMandatesInFormScreen = true,
+        ) {
+            interactor.state.test {
+                assertThat(awaitItem().selection).isNull()
+                interactor.handleViewAction(ViewAction.PaymentMethodSelected("cashapp"))
+                assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("cashapp")
+                onFormFieldValuesChangedTurbine.awaitItem().apply {
+                    first.run {
+                        assertThat(fieldValuePairs).isEmpty()
+                        assertThat(userRequestedReuse).isEqualTo(PaymentSelection.CustomerRequestedSave.NoRequest)
+                    }
+                    assertThat(second).isEqualTo("cashapp")
+                }
+            }
         }
     }
 
     @Test
     fun handleViewAction_PaymentMethodSelected_callsOnFormFieldValuesChanged() {
-        var onFormFieldValuesChangedCalled = false
         val paymentMethodTypes = listOf("card", "cashapp")
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
@@ -778,27 +794,24 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         runScenario(
             paymentMethodMetadata = paymentMethodMetadata,
             formTypeForCode = { FormHelper.FormType.MandateOnly("Foobar".resolvableString) },
-            onFormFieldValuesChanged = { fieldValues, selectedPaymentMethodCode ->
-                fieldValues.run {
-                    assertThat(fieldValuePairs).isEmpty()
-                    assertThat(userRequestedReuse).isEqualTo(PaymentSelection.CustomerRequestedSave.NoRequest)
-                }
-                assertThat(selectedPaymentMethodCode).isEqualTo("cashapp")
-                onFormFieldValuesChangedCalled = true
-            },
-            reportPaymentMethodTypeSelected = {}
         ) {
             interactor.state.test {
                 assertThat(awaitItem().mandate).isNull()
                 interactor.handleViewAction(ViewAction.PaymentMethodSelected("cashapp"))
-                assertThat(onFormFieldValuesChangedCalled).isTrue()
+                assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("cashapp")
+                onFormFieldValuesChangedTurbine.awaitItem().apply {
+                    first.run {
+                        assertThat(fieldValuePairs).isEmpty()
+                        assertThat(userRequestedReuse).isEqualTo(PaymentSelection.CustomerRequestedSave.NoRequest)
+                    }
+                    assertThat(second).isEqualTo("cashapp")
+                }
             }
         }
     }
 
     @Test
     fun handleViewAction_PaymentMethodSelected_callsOnFormFieldValuesChanged_withDefaultBillingDetails_whenRequired() {
-        var onFormFieldValuesChangedCalled = false
         val paymentMethodTypes = listOf("card", "cashapp")
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
@@ -824,32 +837,30 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         runScenario(
             paymentMethodMetadata = paymentMethodMetadata,
             formTypeForCode = { FormHelper.FormType.MandateOnly("Foobar".resolvableString) },
-            onFormFieldValuesChanged = { fieldValues, selectedPaymentMethodCode ->
-                fieldValues.run {
-                    assertThat(fieldValuePairs).isEqualTo(
-                        mapOf(
-                            IdentifierSpec.Name to FormFieldEntry("Jenny Rosen", isComplete = true),
-                            IdentifierSpec.Email to FormFieldEntry("mail@mail.com", isComplete = true),
-                            IdentifierSpec.Phone to FormFieldEntry("+13105551234", isComplete = true),
-                            IdentifierSpec.Line1 to FormFieldEntry("123 Main Street", isComplete = true),
-                            IdentifierSpec.Line2 to FormFieldEntry("456", isComplete = true),
-                            IdentifierSpec.City to FormFieldEntry("San Francisco", isComplete = true),
-                            IdentifierSpec.State to FormFieldEntry("CA", isComplete = true),
-                            IdentifierSpec.Country to FormFieldEntry("US", isComplete = true),
-                            IdentifierSpec.PostalCode to FormFieldEntry("94111", isComplete = true),
-                        )
-                    )
-                    assertThat(userRequestedReuse).isEqualTo(PaymentSelection.CustomerRequestedSave.NoRequest)
-                }
-                assertThat(selectedPaymentMethodCode).isEqualTo("cashapp")
-                onFormFieldValuesChangedCalled = true
-            },
-            reportPaymentMethodTypeSelected = {}
         ) {
             interactor.state.test {
                 assertThat(awaitItem().mandate).isNull()
                 interactor.handleViewAction(ViewAction.PaymentMethodSelected("cashapp"))
-                assertThat(onFormFieldValuesChangedCalled).isTrue()
+                assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("cashapp")
+                onFormFieldValuesChangedTurbine.awaitItem().apply {
+                    first.run {
+                        assertThat(fieldValuePairs).isEqualTo(
+                            mapOf(
+                                IdentifierSpec.Name to FormFieldEntry("Jenny Rosen", isComplete = true),
+                                IdentifierSpec.Email to FormFieldEntry("mail@mail.com", isComplete = true),
+                                IdentifierSpec.Phone to FormFieldEntry("+13105551234", isComplete = true),
+                                IdentifierSpec.Line1 to FormFieldEntry("123 Main Street", isComplete = true),
+                                IdentifierSpec.Line2 to FormFieldEntry("456", isComplete = true),
+                                IdentifierSpec.City to FormFieldEntry("San Francisco", isComplete = true),
+                                IdentifierSpec.State to FormFieldEntry("CA", isComplete = true),
+                                IdentifierSpec.Country to FormFieldEntry("US", isComplete = true),
+                                IdentifierSpec.PostalCode to FormFieldEntry("94111", isComplete = true),
+                            )
+                        )
+                        assertThat(userRequestedReuse).isEqualTo(PaymentSelection.CustomerRequestedSave.NoRequest)
+                    }
+                    assertThat(second).isEqualTo("cashapp")
+                }
             }
         }
     }
@@ -859,7 +870,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val savedPaymentMethods = PaymentMethodFixtures.createCards(3)
         val displayedPaymentMethod = savedPaymentMethods[2]
         val paymentMethodTypes = listOf("card", "cashapp")
-        var currentlySelectedPaymentMethodCode: PaymentMethodCode? = null
         runScenario(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -867,19 +877,16 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 )
             ),
             formTypeForCode = { FormHelper.FormType.Empty },
-            onFormFieldValuesChanged = { _, selectedPaymentMethodCode ->
-                currentlySelectedPaymentMethodCode = selectedPaymentMethodCode
-            },
             initialPaymentMethods = savedPaymentMethods,
             initialMostRecentlySelectedSavedPaymentMethod = displayedPaymentMethod,
-            reportPaymentMethodTypeSelected = {},
         ) {
             interactor.handleViewAction(ViewAction.PaymentMethodSelected("cashapp"))
             interactor.state.test {
                 awaitItem().run {
                     assertThat(displayedSavedPaymentMethod).isNotNull()
                     assertThat(displayedSavedPaymentMethod!!.paymentMethod).isEqualTo(displayedPaymentMethod)
-                    assertThat(currentlySelectedPaymentMethodCode).isEqualTo("cashapp")
+                    assertThat(onFormFieldValuesChangedTurbine.awaitItem().second).isEqualTo("cashapp")
+                    assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("cashapp")
                 }
             }
         }
@@ -887,73 +894,50 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun handleViewAction_TransitionToManageSavedPaymentMethods_transitionsToManageScreen() {
-        var calledManageScreenFactory = false
-        runScenario(
-            transitionToManageScreen = {
-                calledManageScreenFactory = true
-            },
-        ) {
+        runScenario {
             interactor.handleViewAction(ViewAction.TransitionToManageSavedPaymentMethods)
-            assertThat(calledManageScreenFactory).isTrue()
+            assertThat(transitionToManageScreenTurbine.awaitItem()).isNotNull()
         }
     }
 
     @Test
     fun handleViewAction_OnManageOneSavedPaymentMethod_callsOnUpdatePM() {
-        var onUpdatePaymentMethodCalled = false
-        runScenario(
-            onUpdatePaymentMethod = {
-                onUpdatePaymentMethodCalled = true
-            },
-        ) {
+        runScenario {
             interactor.handleViewAction(
                 ViewAction.OnManageOneSavedPaymentMethod(
                     PaymentMethodFixtures.displayableCard()
                 )
             )
-            assertThat(onUpdatePaymentMethodCalled).isTrue()
+            assertThat(onUpdatePaymentMethodTurbine.awaitItem()).isNotNull()
         }
     }
 
     @Test
     fun handleViewAction_OnManageOneSavedPaymentMethod_transitionsToUpdateScreen_whenFeatureEnabled() {
-        var updatedPaymentMethod: DisplayableSavedPaymentMethod? = null
-        runScenario(
-            onUpdatePaymentMethod = {
-                updatedPaymentMethod = it
-            },
-        ) {
+        runScenario {
             val paymentMethod = PaymentMethodFixtures.displayableCard()
             interactor.handleViewAction(ViewAction.OnManageOneSavedPaymentMethod(paymentMethod))
-            assertThat(updatedPaymentMethod).isEqualTo(paymentMethod)
+            assertThat(onUpdatePaymentMethodTurbine.awaitItem()).isEqualTo(paymentMethod)
         }
     }
 
     @Test
     fun handleViewAction_OnUpdatePaymentMethod_transitionsToUpdateScreen() {
-        var updatedPaymentMethod: DisplayableSavedPaymentMethod? = null
-        runScenario(
-            onUpdatePaymentMethod = {
-                updatedPaymentMethod = it
-            },
-        ) {
+        runScenario {
             val paymentMethod = PaymentMethodFixtures.displayableCard()
             interactor.handleViewAction(ViewAction.OnManageOneSavedPaymentMethod(paymentMethod))
-            assertThat(updatedPaymentMethod).isEqualTo(paymentMethod)
+            assertThat(onUpdatePaymentMethodTurbine.awaitItem()).isEqualTo(paymentMethod)
         }
     }
 
     @Test
     fun handleViewAction_SelectSavedPaymentMethod_selectsSavedPm() {
         val savedPaymentMethod = PaymentMethodFixtures.displayableCard()
-        var reportedSelectedPaymentMethodType: PaymentMethodCode? = null
-        runScenario(
-            reportPaymentMethodTypeSelected = { reportedSelectedPaymentMethodType = it }
-        ) {
+        runScenario {
             interactor.handleViewAction(ViewAction.SavedPaymentMethodSelected(savedPaymentMethod.paymentMethod))
             assertThat((selection.value as PaymentSelection.Saved).paymentMethod)
                 .isEqualTo(savedPaymentMethod.paymentMethod)
-            assertThat(reportedSelectedPaymentMethodType).isEqualTo("saved")
+            assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("saved")
             assertThat(updateSelectionTurbine.awaitItem()).isTrue()
         }
     }
@@ -963,12 +947,12 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val savedPaymentMethod = PaymentMethodFixtures.displayableCard()
         var rowSelectionCallbackInvoked = false
         runScenario(
-            reportPaymentMethodTypeSelected = { true },
             invokeRowSelectionCallback = {
                 rowSelectionCallbackInvoked = true
             }
         ) {
             interactor.handleViewAction(ViewAction.SavedPaymentMethodSelected(savedPaymentMethod.paymentMethod))
+            assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("saved")
             assertThat(rowSelectionCallbackInvoked).isTrue()
             assertThat(updateSelectionTurbine.awaitItem()).isTrue()
         }
@@ -1132,7 +1116,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun verticalModeSelectionIsInitialedAsUsBankAccount() {
-        var verticalModeSelection: PaymentSelection? = PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION
+        val verticalModeSelection: PaymentSelection? = PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION
         runScenario(
             initialSelection = verticalModeSelection,
             formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
@@ -1475,7 +1459,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
 
     private val linkAndGooglePayWalletState = WalletsState(
-        link = WalletsState.Link("email@email.com"),
+        link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
         googlePay = WalletsState.GooglePay(
             buttonType = GooglePayButtonType.Pay,
             allowCreditCards = true,
@@ -1506,19 +1490,11 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         initialIsCurrentScreen: Boolean = false,
         incentive: PaymentMethodIncentive? = null,
         formTypeForCode: (code: String) -> FormHelper.FormType = { notImplemented() },
-        onFormFieldValuesChanged: (formValues: FormFieldValues, selectedPaymentMethodCode: String) -> Unit = { _, _ ->
-            notImplemented()
-        },
-        transitionToManageScreen: () -> Unit = { notImplemented() },
-        transitionToFormScreen: (selectedPaymentMethodCode: String) -> Unit = { notImplemented() },
         initialPaymentMethods: List<PaymentMethod> = emptyList(),
         initialMostRecentlySelectedSavedPaymentMethod: PaymentMethod? = null,
-        onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit = { notImplemented() },
         canShowWalletsInline: Boolean = false,
         canShowWalletButtons: Boolean = true,
         canUpdateFullPaymentMethodDetails: Boolean = false,
-        reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit = { notImplemented() },
-        reportFormShown: (PaymentMethodCode) -> Unit = { notImplemented() },
         shouldUpdateVerticalModeSelection: (String?) -> Boolean = { paymentMethodCode ->
             val requiresFormScreen = paymentMethodCode != null &&
                 formTypeForCode(paymentMethodCode) == FormHelper.FormType.UserInteractionRequired
@@ -1526,6 +1502,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         },
         invokeRowSelectionCallback: (() -> Unit)? = null,
         initialWalletsState: WalletsState? = null,
+        displaysMandatesInFormScreen: Boolean = false,
         testBlock: suspend TestParams.() -> Unit
     ) {
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(initialProcessing)
@@ -1534,12 +1511,18 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val paymentMethods: MutableStateFlow<List<PaymentMethod>> = MutableStateFlow(initialPaymentMethods)
         val mostRecentlySelectedSavedPaymentMethod: MutableStateFlow<PaymentMethod?> =
             MutableStateFlow(initialMostRecentlySelectedSavedPaymentMethod)
-        val walletsState = MutableStateFlow<WalletsState?>(initialWalletsState)
+        val walletsState = MutableStateFlow(initialWalletsState)
         val canRemove = MutableStateFlow(true)
         val isCurrentScreen: MutableStateFlow<Boolean> = MutableStateFlow(initialIsCurrentScreen)
         val paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(incentive)
 
         val updateSelectionTurbine = Turbine<Boolean>()
+        val transitionToManageScreenTurbine = Turbine<Unit>()
+        val transitionToFormScreenTurbine = Turbine<String>()
+        val onUpdatePaymentMethodTurbine = Turbine<DisplayableSavedPaymentMethod>()
+        val reportPaymentMethodTypeSelectedTurbine = Turbine<PaymentMethodCode>()
+        val reportFormShownTurbine = Turbine<PaymentMethodCode>()
+        val onFormFieldValuesChangedTurbine = Turbine<Pair<FormFieldValues, String>>()
 
         val interactor = DefaultPaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
@@ -1548,9 +1531,15 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             selection = selection,
             paymentMethodIncentiveInteractor = paymentMethodIncentiveInteractor,
             formTypeForCode = formTypeForCode,
-            onFormFieldValuesChanged = onFormFieldValuesChanged,
-            transitionToManageScreen = transitionToManageScreen,
-            transitionToFormScreen = transitionToFormScreen,
+            onFormFieldValuesChanged = { formValues: FormFieldValues, selectedPaymentMethodCode: String ->
+                onFormFieldValuesChangedTurbine.add(Pair(formValues, selectedPaymentMethodCode))
+            },
+            transitionToManageScreen = {
+                transitionToManageScreenTurbine.add(Unit)
+            },
+            transitionToFormScreen = { selectedPaymentMethodCode ->
+                transitionToFormScreenTurbine.add(selectedPaymentMethodCode)
+            },
             paymentMethods = paymentMethods,
             mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
             providePaymentMethodName = { it!!.resolvableString },
@@ -1564,13 +1553,20 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 updateSelectionTurbine.add(isFormScreen)
             },
             isCurrentScreen = isCurrentScreen,
-            reportPaymentMethodTypeSelected = reportPaymentMethodTypeSelected,
-            reportFormShown = reportFormShown,
-            onUpdatePaymentMethod = onUpdatePaymentMethod,
+            reportPaymentMethodTypeSelected = { paymentMethodCode ->
+                reportPaymentMethodTypeSelectedTurbine.add(paymentMethodCode)
+            },
+            reportFormShown = { paymentMethodCode ->
+                reportFormShownTurbine.add(paymentMethodCode)
+            },
+            onUpdatePaymentMethod = { paymentMethod ->
+                onUpdatePaymentMethodTurbine.add(paymentMethod)
+            },
             shouldUpdateVerticalModeSelection = shouldUpdateVerticalModeSelection,
             dispatcher = UnconfinedTestDispatcher(),
             mainDispatcher = UnconfinedTestDispatcher(),
             invokeRowSelectionCallback = invokeRowSelectionCallback,
+            displaysMandatesInFormScreen = displaysMandatesInFormScreen,
         )
 
         TestParams(
@@ -1585,18 +1581,23 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             walletsState = walletsState,
             interactor = interactor,
             canRemove = canRemove,
+            transitionToManageScreenTurbine = transitionToManageScreenTurbine,
+            transitionToFormScreenTurbine = transitionToFormScreenTurbine,
+            onUpdatePaymentMethodTurbine = onUpdatePaymentMethodTurbine,
+            reportPaymentMethodTypeSelectedTurbine = reportPaymentMethodTypeSelectedTurbine,
+            reportFormShownTurbine = reportFormShownTurbine,
+            onFormFieldValuesChangedTurbine = onFormFieldValuesChangedTurbine,
         ).apply {
             runTest {
                 testBlock()
             }
+            ensureAllEventsConsumed()
         }
-
-        updateSelectionTurbine.ensureAllEventsConsumed()
     }
 
     private class TestParams(
         val selection: MutableStateFlow<PaymentSelection?>,
-        val updateSelectionTurbine: Turbine<Boolean>,
+        val updateSelectionTurbine: ReceiveTurbine<Boolean>,
         val processingSource: MutableStateFlow<Boolean>,
         val temporarySelectionSource: MutableStateFlow<PaymentMethodCode?>,
         val selectionSource: MutableStateFlow<PaymentSelection?>,
@@ -1606,5 +1607,21 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val walletsState: MutableStateFlow<WalletsState?>,
         val canRemove: MutableStateFlow<Boolean>,
         val interactor: PaymentMethodVerticalLayoutInteractor,
-    )
+        val transitionToManageScreenTurbine: ReceiveTurbine<Unit>,
+        val transitionToFormScreenTurbine: ReceiveTurbine<String>,
+        val onUpdatePaymentMethodTurbine: ReceiveTurbine<DisplayableSavedPaymentMethod>,
+        val reportPaymentMethodTypeSelectedTurbine: ReceiveTurbine<PaymentMethodCode>,
+        val reportFormShownTurbine: ReceiveTurbine<PaymentMethodCode>,
+        val onFormFieldValuesChangedTurbine: ReceiveTurbine<Pair<FormFieldValues, String>>,
+    ) {
+        fun ensureAllEventsConsumed() {
+            updateSelectionTurbine.ensureAllEventsConsumed()
+            transitionToManageScreenTurbine.ensureAllEventsConsumed()
+            transitionToFormScreenTurbine.ensureAllEventsConsumed()
+            onUpdatePaymentMethodTurbine.ensureAllEventsConsumed()
+            reportPaymentMethodTypeSelectedTurbine.ensureAllEventsConsumed()
+            reportFormShownTurbine.ensureAllEventsConsumed()
+            onFormFieldValuesChangedTurbine.ensureAllEventsConsumed()
+        }
+    }
 }

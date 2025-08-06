@@ -88,8 +88,8 @@ internal open class FakeLinkRepository : LinkRepository {
 
     override suspend fun consumerSignUp(
         email: String,
-        phone: String,
-        country: String,
+        phone: String?,
+        country: String?,
         name: String?,
         consentAction: ConsumerSignUpConsentAction
     ) = consumerSignUpResult

@@ -21,6 +21,7 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.LinkAppearance
 import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
@@ -196,7 +197,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 configuration = configuration,
                 elementsSession = elementsSession,
                 customer = customerInfo,
-                initializationMode = initializationMode
+                initializationMode = initializationMode,
+                linkAppearance = configuration.linkAppearance
             )
         }
 
@@ -478,14 +480,16 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         elementsSession: ElementsSession,
         configuration: CommonConfiguration,
         customer: CustomerInfo?,
-        initializationMode: PaymentElementLoader.InitializationMode
+        initializationMode: PaymentElementLoader.InitializationMode,
+        linkAppearance: LinkAppearance?
     ): LinkState? {
         val linkConfig =
             createLinkConfiguration(
                 configuration = configuration,
                 customer = customer,
                 elementsSession = elementsSession,
-                initializationMode = initializationMode
+                initializationMode = initializationMode,
+                linkAppearance = linkAppearance
             ) ?: return null
         return loadLinkState(
             configuration = configuration,
@@ -512,13 +516,19 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             hasCustomerConfiguration = configuration.customer != null,
         )
         val hasUsedLink = linkStore.hasUsedLink()
+        val signupToggleEnabled = elementsSession.linkSignUpOptInFeatureEnabled
 
-        val linkSignupMode = if (hasUsedLink || linkSignUpDisabled) {
-            null
-        } else if (isSaveForFutureUseValueChangeable) {
-            LinkSignupMode.AlongsideSaveForFutureUse
-        } else {
-            LinkSignupMode.InsteadOfSaveForFutureUse
+        val linkSignupMode = when {
+            // If signup toggle enabled, we show a future usage + link combined toggle
+            signupToggleEnabled && !linkConfiguration.customerInfo.email.isNullOrBlank() -> {
+                LinkSignupMode.InsteadOfSaveForFutureUse
+            }
+            // If inline signup is disabled or user has used Link, we don't show inline signup
+            linkSignUpDisabled || hasUsedLink -> null
+            // If inline signup and save for future use, we show it alongside save for future use
+            isSaveForFutureUseValueChangeable -> LinkSignupMode.AlongsideSaveForFutureUse
+            // If inline signup and save for future usage is not displayed, only show link signup
+            else -> LinkSignupMode.InsteadOfSaveForFutureUse
         }
 
         return LinkState(
@@ -535,11 +545,13 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         )
     }
 
+    @Suppress("LongMethod")
     private suspend fun createLinkConfiguration(
         configuration: CommonConfiguration,
         customer: CustomerInfo?,
         elementsSession: ElementsSession,
-        initializationMode: PaymentElementLoader.InitializationMode
+        initializationMode: PaymentElementLoader.InitializationMode,
+        linkAppearance: LinkAppearance?,
     ): LinkConfiguration? {
         if (!configuration.link.shouldDisplay || !elementsSession.isLinkEnabled) {
             return null
@@ -598,6 +610,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             suppress2faModal = elementsSession.suppressLink2faModal,
             disableRuxInFlowController = elementsSession.disableRuxInFlowController,
             enableDisplayableDefaultValuesInEce = elementsSession.linkEnableDisplayableDefaultValuesInEce,
+            linkSignUpOptInFeatureEnabled = elementsSession.linkSignUpOptInFeatureEnabled,
+            linkSignUpOptInInitialValue = elementsSession.linkSignUpOptInInitialValue,
             elementsSessionId = elementsSession.elementsSessionId,
             initializationMode = initializationMode,
             linkMode = elementsSession.linkSettings?.linkMode,
@@ -609,6 +623,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             configuration.link.collectMissingBillingDetailsForExistingPaymentMethods,
             allowUserEmailEdits = configuration.link.allowUserEmailEdits,
             customerId = elementsSession.customer?.session?.customerId,
+            linkAppearance = linkAppearance
         )
 
         // CBF isn't currently supported in the web flow.

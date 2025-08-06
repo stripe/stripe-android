@@ -40,8 +40,12 @@
   <string name="stripe_address_label_suburb">Suburbi</string>
   <!-- Used to describe an address field. -->
   <string name="stripe_address_label_village_township">Poble o municipi</string>
+  <!-- Error message for when postal code in form is incomplete -->
+  <string name="stripe_address_postal_code_incomplete">El codi postal no és complet.</string>
   <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
   <string name="stripe_address_search_content_description">Cerca</string>
+  <!-- Error message for when ZIP code in form is incomplete (US only) -->
+  <string name="stripe_address_zip_incomplete">El vostre codi postal no és complet.</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
   <string name="stripe_address_zip_invalid">El teu codi ZIP no és vàlid.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
@@ -78,4 +82,6 @@
   <string name="stripe_invalid_expiry_month">El mes de caducitat de la teva targeta no és vàlid.</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="stripe_invalid_expiry_year">L\'any de caducitat de la teva targeta no és vàlid.</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="stripe_address_postal_code_invalid">El teu codi postal no és vàlid.</string>
 </resources>

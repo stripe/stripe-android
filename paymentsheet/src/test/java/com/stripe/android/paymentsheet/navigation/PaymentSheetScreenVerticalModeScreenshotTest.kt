@@ -6,6 +6,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.AppearanceAPIAdditionsPreview
+import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -142,9 +143,7 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
         val initialScreen = VerticalMode(interactor)
         val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
         viewModel.walletsStateSource.value = WalletsState(
-            link = WalletsState.Link(
-                email = null,
-            ),
+            link = WalletsState.Link(state = LinkButtonState.Default),
             googlePay = null,
             buttonsEnabled = true,
             dividerTextResource = R.string.stripe_paymentsheet_or_pay_using,

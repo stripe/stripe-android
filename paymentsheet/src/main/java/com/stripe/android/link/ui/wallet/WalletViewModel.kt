@@ -9,6 +9,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.link.LinkActivityResult
@@ -87,6 +88,7 @@ internal class WalletViewModel @Inject constructor(
             primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent, linkLaunchMode),
             secondaryButtonLabel = configuration.stripeIntent.secondaryButtonLabel(linkLaunchMode),
             addPaymentMethodOptions = getAddPaymentMethodOptions(),
+            paymentSelectionHint = linkLaunchMode.paymentSelectionHint,
         )
     )
 
@@ -97,6 +99,13 @@ internal class WalletViewModel @Inject constructor(
             is LinkLaunchMode.PaymentMethodSelection -> selectedPayment?.id
             is LinkLaunchMode.Authentication -> null
         }
+
+    private val LinkLaunchMode.paymentSelectionHint: String?
+        get() = (this as? LinkLaunchMode.PaymentMethodSelection)?.hint
+            ?.takeIf {
+                configuration.enableLinkPaymentSelectionHint ||
+                    FeatureFlags.forceEnableLinkPaymentSelectionHint.isEnabled
+            }
 
     val uiState: StateFlow<WalletUiState> = _uiState.asStateFlow()
 

@@ -5,9 +5,12 @@ import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.forms.FormFieldEntry
 
 internal data class FormArguments(
     val paymentMethodCode: PaymentMethodCode,
@@ -37,5 +40,16 @@ internal data class FormArguments(
                 }
             }
         }.toMap()
+    }
+
+    fun noUserInteractionFormFieldValues(): FormFieldValues {
+        return FormFieldValues(
+            fieldValuePairs = defaultFormValues.mapValues {
+                FormFieldEntry(it.value, isComplete = true)
+            },
+            // userRequestedReuse only changes based on `SaveForFutureUse`, which won't ever hit this
+            // code path.
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest
+        )
     }
 }

@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
@@ -136,16 +138,10 @@ class DefaultUpdatePaymentMethodInteractorTest {
 
     @Test
     fun updatingCard_callsOnUpdateSuccess() {
-        var updateSuccessCalled = false
-        fun onUpdateSuccess() {
-            updateSuccessCalled = true
-        }
-
         runScenario(
             displayableSavedPaymentMethod =
             PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD.toDisplayableSavedPaymentMethod(),
             updatePaymentMethodExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
-            onUpdateSuccess = ::onUpdateSuccess,
         ) {
             interactor.cardParamsUpdateAction(CardBrand.Visa)
 
@@ -154,7 +150,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             }
 
             interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
-            assertThat(updateSuccessCalled).isTrue()
+            assertThat(onUpdateSuccessTurbine.awaitItem()).isNotNull()
         }
     }
 
@@ -169,7 +165,6 @@ class DefaultUpdatePaymentMethodInteractorTest {
                 updatedPaymentMethod = paymentMethod
                 Result.success(paymentMethod)
             },
-            onUpdateSuccess = {},
         ) {
             interactor.cardParamsUpdateAction(CardBrand.CartesBancaires)
 
@@ -178,6 +173,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             }
 
             interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
+            assertThat(onUpdateSuccessTurbine.awaitItem()).isNotNull()
 
             assertThat(updatedPaymentMethod).isEqualTo(initialPaymentMethod)
             // The user should be able to change their card brand back to the original value if they wanted to at this
@@ -366,33 +362,19 @@ class DefaultUpdatePaymentMethodInteractorTest {
 
     @Test
     fun setAsDefaultNotChanged_pressSave_doesNotCallOnUpdateSuccess() {
-        var updateSuccessCalled = false
-        fun onUpdateSuccess() {
-            updateSuccessCalled = true
-        }
-
         runScenario(
             shouldShowSetAsDefaultCheckbox = true,
             onSetDefaultPaymentMethod = { Result.success(Unit) },
-            onUpdateSuccess = ::onUpdateSuccess,
         ) {
             interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
-
-            assertThat(updateSuccessCalled).isFalse()
         }
     }
 
     @Test
     fun setAsDefault_success_callsOnUpdateSuccess() {
-        var updateSuccessCalled = false
-        fun onUpdateSuccess() {
-            updateSuccessCalled = true
-        }
-
         runScenario(
             shouldShowSetAsDefaultCheckbox = true,
             onSetDefaultPaymentMethod = { Result.success(Unit) },
-            onUpdateSuccess = ::onUpdateSuccess,
         ) {
             interactor.handleViewAction(
                 UpdatePaymentMethodInteractor.ViewAction.SetAsDefaultCheckboxChanged(
@@ -402,7 +384,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
 
             interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
 
-            assertThat(updateSuccessCalled).isTrue()
+            assertThat(onUpdateSuccessTurbine.awaitItem()).isNotNull()
         }
     }
 
@@ -426,11 +408,6 @@ class DefaultUpdatePaymentMethodInteractorTest {
 
     @Test
     fun updateCardAndDefault_cardUpdateFails_displaysError() {
-        var updateSuccessCalled = false
-        fun onUpdateSuccess() {
-            updateSuccessCalled = true
-        }
-
         val expectedError = IllegalStateException("Fake error")
 
         runScenario(
@@ -440,11 +417,9 @@ class DefaultUpdatePaymentMethodInteractorTest {
             shouldShowSetAsDefaultCheckbox = true,
             onSetDefaultPaymentMethod = { Result.success(Unit) },
             updatePaymentMethodExecutor = { _, _ -> Result.failure(expectedError) },
-            onUpdateSuccess = ::onUpdateSuccess,
         ) {
             updateCardAndDefaultPaymentMethod(interactor)
 
-            assertThat(updateSuccessCalled).isFalse()
             interactor.state.test {
                 assertThat(awaitItem().error).isEqualTo(updateCardBrandErrorMessage)
             }
@@ -453,11 +428,6 @@ class DefaultUpdatePaymentMethodInteractorTest {
 
     @Test
     fun updateCardAndDefault_setDefaultFails_displaysError() {
-        var updateSuccessCalled = false
-        fun onUpdateSuccess() {
-            updateSuccessCalled = true
-        }
-
         runScenario(
             displayableSavedPaymentMethod = PaymentMethodFixtures
                 .CARD_WITH_NETWORKS_PAYMENT_METHOD
@@ -465,11 +435,9 @@ class DefaultUpdatePaymentMethodInteractorTest {
             shouldShowSetAsDefaultCheckbox = true,
             onSetDefaultPaymentMethod = { Result.failure(IllegalStateException("Fake error")) },
             updatePaymentMethodExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
-            onUpdateSuccess = ::onUpdateSuccess,
         ) {
             updateCardAndDefaultPaymentMethod(interactor)
 
-            assertThat(updateSuccessCalled).isFalse()
             interactor.state.test {
                 assertThat(awaitItem().error).isEqualTo(setDefaultPaymentMethodErrorMessage)
             }
@@ -478,11 +446,6 @@ class DefaultUpdatePaymentMethodInteractorTest {
 
     @Test
     fun updateCardAndDefault_bothFail_displaysError() {
-        var updateSuccessCalled = false
-        fun onUpdateSuccess() {
-            updateSuccessCalled = true
-        }
-
         runScenario(
             displayableSavedPaymentMethod = PaymentMethodFixtures
                 .CARD_WITH_NETWORKS_PAYMENT_METHOD
@@ -490,11 +453,9 @@ class DefaultUpdatePaymentMethodInteractorTest {
             shouldShowSetAsDefaultCheckbox = true,
             onSetDefaultPaymentMethod = { Result.failure(IllegalStateException("Fake error")) },
             updatePaymentMethodExecutor = { _, _ -> Result.failure(IllegalStateException("Fake error")) },
-            onUpdateSuccess = ::onUpdateSuccess,
         ) {
             updateCardAndDefaultPaymentMethod(interactor)
 
-            assertThat(updateSuccessCalled).isFalse()
             interactor.state.test {
                 assertThat(awaitItem().error).isEqualTo(updatesFailedErrorMessage)
             }
@@ -674,7 +635,6 @@ class DefaultUpdatePaymentMethodInteractorTest {
             CardUpdateParams
         ) -> Result<PaymentMethod> = { _, _ -> notImplemented() },
         onSetDefaultPaymentMethod: (PaymentMethod) -> Result<Unit> = { _ -> notImplemented() },
-        onUpdateSuccess: () -> Unit = { notImplemented() },
         shouldShowSetAsDefaultCheckbox: Boolean = false,
         isDefaultPaymentMethod: Boolean = false,
         canUpdateFullPaymentMethodDetails: Boolean = false,
@@ -683,6 +643,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         onBrandChoiceSelected: (CardBrand) -> Unit = {},
         testBlock: suspend TestParams.() -> Unit
     ) {
+        val onUpdateSuccessTurbine = Turbine<Unit>()
         val interactor = DefaultUpdatePaymentMethodInteractor(
             isLiveMode = isLiveMode,
             canRemove = canRemove,
@@ -696,14 +657,27 @@ class DefaultUpdatePaymentMethodInteractorTest {
             onBrandChoiceSelected = onBrandChoiceSelected,
             shouldShowSetAsDefaultCheckbox = shouldShowSetAsDefaultCheckbox,
             isDefaultPaymentMethod = isDefaultPaymentMethod,
-            onUpdateSuccess = onUpdateSuccess,
+            onUpdateSuccess = {
+                onUpdateSuccessTurbine.add(Unit)
+            },
             editCardDetailsInteractorFactory = editCardDetailsInteractorFactory
         )
 
-        TestParams(interactor).apply { runTest { testBlock() } }
+        TestParams(
+            interactor = interactor,
+            onUpdateSuccessTurbine = onUpdateSuccessTurbine,
+        ).apply {
+            runTest { testBlock() }
+            ensureAllEventsConsumed()
+        }
     }
 
     private data class TestParams(
         val interactor: UpdatePaymentMethodInteractor,
-    )
+        val onUpdateSuccessTurbine: ReceiveTurbine<Unit>,
+    ) {
+        fun ensureAllEventsConsumed() {
+            onUpdateSuccessTurbine.ensureAllEventsConsumed()
+        }
+    }
 }

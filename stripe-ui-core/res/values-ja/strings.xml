@@ -40,8 +40,12 @@
   <string name="stripe_address_label_suburb">近郊</string>
   <!-- Used to describe an address field. -->
   <string name="stripe_address_label_village_township">村またはタウンシップ</string>
+  <!-- Error message for when postal code in form is incomplete -->
+  <string name="stripe_address_postal_code_incomplete">郵便番号に不備があります。</string>
   <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
   <string name="stripe_address_search_content_description">検索</string>
+  <!-- Error message for when ZIP code in form is incomplete (US only) -->
+  <string name="stripe_address_zip_incomplete">郵便番号に不備があります。</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
   <string name="stripe_address_zip_invalid">郵便番号が無効です。</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
@@ -78,4 +82,6 @@
   <string name="stripe_invalid_expiry_month">カードの有効期限の月が無効です。</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="stripe_invalid_expiry_year">カードの有効期限の年が無効です。</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="stripe_address_postal_code_invalid">郵便番号が無効です</string>
 </resources>

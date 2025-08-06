@@ -42,6 +42,8 @@
   <string name="stripe_address_label_village_township">Village or Township</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="stripe_address_postal_code_incomplete">Your postal code is incomplete.</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="stripe_address_postal_code_invalid">Your postal code is invalid.</string>
   <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
   <string name="stripe_address_search_content_description">Search</string>
   <!-- Error message for when ZIP code in form is incomplete (US only) -->

@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.payment.CreateIntentCallback
 import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -33,14 +34,23 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
     private val card1 = CardPaymentMethodDetails("pm_12345", "4242")
     private val card2 = CardPaymentMethodDetails("pm_67890", "5544")
 
+    private val paymentWithSetupFutureUsageIntentConfiguration = IntentConfiguration(
+        mode = IntentConfiguration.Mode.Payment(
+            amount = 5000,
+            currency = "USD",
+            setupFutureUse = IntentConfiguration.SetupFutureUse.OffSession
+        )
+    )
+
     @Test
     fun testSuccessfulCardPayment_withFormSheetActionContinue() {
         runEmbeddedPaymentElementRowSelectionTest(
             responseTestBodyFileName = "elements-sessions-requires_payment_method.json",
-            configureBlock = {
+        ) { testContext ->
+            testContext.configure {
+                embeddedViewDisplaysMandateText(false)
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
-        ) { testContext ->
             embeddedContentPage.clickOnLpm("card")
             formPage.waitUntilVisible()
             formPage.fillOutCardDetails()
@@ -57,10 +67,11 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
     fun testSuccessfulCardPayment_withFormEdit_withFormSheetActionContinue() {
         runEmbeddedPaymentElementRowSelectionTest(
             responseTestBodyFileName = "elements-sessions-requires_payment_method.json",
-            configureBlock = {
+        ) { testContext ->
+            testContext.configure {
+                embeddedViewDisplaysMandateText(false)
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
-        ) { testContext ->
             embeddedContentPage.clickOnLpm("card")
             formPage.waitUntilVisible()
             formPage.fillOutCardDetails("5555555555554444")
@@ -84,10 +95,11 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
     fun testSuccessfulCardPayment_withReselection_withFormSheetActionContinue() {
         runEmbeddedPaymentElementRowSelectionTest(
             responseTestBodyFileName = "elements-sessions-requires_payment_method.json",
-            configureBlock = {
+        ) { testContext ->
+            testContext.configure {
+                embeddedViewDisplaysMandateText(false)
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
-        ) { testContext ->
             embeddedContentPage.clickOnLpm("card")
             formPage.waitUntilVisible()
             formPage.fillOutCardDetails()
@@ -110,10 +122,11 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
     fun testSuccessfulCardPayment_withFormSheetActionConfirm() {
         runEmbeddedPaymentElementRowSelectionTest(
             responseTestBodyFileName = "elements-sessions-requires_payment_method.json",
-            configureBlock = {
+        ) { testContext ->
+            testContext.configure {
+                embeddedViewDisplaysMandateText(false)
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
             }
-        ) { testContext ->
             embeddedContentPage.clickOnLpm("card")
             formPage.fillOutCardDetails()
 
@@ -132,10 +145,11 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
     fun testSuccessfulNonFormRowPayment_withFormSheetActionContinue() {
         runEmbeddedPaymentElementRowSelectionTest(
             responseTestBodyFileName = "elements-sessions-requires_payment_method.json",
-            configureBlock = {
+        ) { testContext ->
+            testContext.configure {
+                embeddedViewDisplaysMandateText(false)
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
-        ) { testContext ->
             embeddedContentPage.clickOnLpm("cashapp")
             testContext.assertNextRowSelectionItem("cashapp", "Cash App Pay")
 
@@ -149,10 +163,11 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
     fun testSuccessfulNonFormRowPayment_withReselection_withFormSheetActionContinue() {
         runEmbeddedPaymentElementRowSelectionTest(
             responseTestBodyFileName = "elements-sessions-requires_payment_method.json",
-            configureBlock = {
+        ) { testContext ->
+            testContext.configure {
+                embeddedViewDisplaysMandateText(false)
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
-        ) { testContext ->
             embeddedContentPage.clickOnLpm("cashapp")
             testContext.assertNextRowSelectionItem("cashapp", "Cash App Pay")
 
@@ -169,10 +184,11 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
     fun testSuccessfulNonFormRowPayment_withFormSheetActionConfirm() {
         runEmbeddedPaymentElementRowSelectionTest(
             responseTestBodyFileName = "elements-sessions-requires_payment_method.json",
-            configureBlock = {
+        ) { testContext ->
+            testContext.configure {
+                embeddedViewDisplaysMandateText(false)
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
             }
-        ) { testContext ->
             embeddedContentPage.clickOnLpm("cashapp")
             testContext.assertNextRowSelectionItem("cashapp", "Cash App Pay")
 
@@ -186,11 +202,12 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
         runEmbeddedPaymentElementRowSelectionTest(
             responseTestBodyFileName = "elements-sessions-deferred_payment_intent_no_link.json",
             shouldSetupV1PaymentMethodsResponse = true,
-            configureBlock = {
+        ) { testContext ->
+            testContext.configure {
+                embeddedViewDisplaysMandateText(false)
                 customer(CustomerConfiguration("cus_123", "ek_test"))
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
-        ) { testContext ->
             embeddedContentPage.clickViewMore()
             managePage.waitUntilVisible()
             managePage.selectPaymentMethod(card1.id)
@@ -206,11 +223,12 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
         runEmbeddedPaymentElementRowSelectionTest(
             responseTestBodyFileName = "elements-sessions-deferred_payment_intent_no_link.json",
             shouldSetupV1PaymentMethodsResponse = true,
-            configureBlock = {
+        ) { testContext ->
+            testContext.configure {
+                embeddedViewDisplaysMandateText(false)
                 customer(CustomerConfiguration("cus_123", "ek_test"))
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
-        ) { testContext ->
             embeddedContentPage.clickViewMore()
             managePage.waitUntilVisible()
             managePage.selectPaymentMethod(card1.id)
@@ -232,11 +250,12 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
         runEmbeddedPaymentElementRowSelectionTest(
             responseTestBodyFileName = "elements-sessions-deferred_payment_intent_no_link.json",
             shouldSetupV1PaymentMethodsResponse = true,
-            configureBlock = {
+        ) { testContext ->
+            testContext.configure {
+                embeddedViewDisplaysMandateText(false)
                 customer(CustomerConfiguration("cus_123", "ek_test"))
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
-        ) { testContext ->
             embeddedContentPage.clickViewMore()
             managePage.waitUntilVisible()
             managePage.selectPaymentMethod(card1.id)
@@ -258,11 +277,12 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
         runEmbeddedPaymentElementRowSelectionTest(
             responseTestBodyFileName = "elements-sessions-deferred_payment_intent_no_link.json",
             shouldSetupV1PaymentMethodsResponse = true,
-            configureBlock = {
-                customer(CustomerConfiguration("cus_123", "ek_test"))
-                formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
-            }
         ) { testContext ->
+            testContext.configure {
+                embeddedViewDisplaysMandateText(false)
+                formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
+                customer(CustomerConfiguration("cus_123", "ek_test"))
+            }
             embeddedContentPage.clickOnSavedPM(card1.id)
             testContext.assertNextCardRowSelectionItem("4242")
 
@@ -276,11 +296,12 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
         runEmbeddedPaymentElementRowSelectionTest(
             responseTestBodyFileName = "elements-sessions-deferred_payment_intent_no_link.json",
             shouldSetupV1PaymentMethodsResponse = true,
-            configureBlock = {
-                customer(CustomerConfiguration("cus_123", "ek_test"))
-                formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
-            }
         ) { testContext ->
+            testContext.configure {
+                embeddedViewDisplaysMandateText(false)
+                formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
+                customer(CustomerConfiguration("cus_123", "ek_test"))
+            }
             embeddedContentPage.clickOnSavedPM(card1.id)
             testContext.assertNextCardRowSelectionItem("4242")
 
@@ -297,10 +318,11 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
         runEmbeddedPaymentElementRowSelectionTest(
             responseTestBodyFileName = "elements-sessions-deferred_payment_intent_no_link.json",
             shouldSetupV1PaymentMethodsResponse = true,
-            configureBlock = {
+        ) { testContext ->
+            testContext.configure {
+                embeddedViewDisplaysMandateText(false)
                 customer(CustomerConfiguration("cus_123", "ek_test"))
             }
-        ) { testContext ->
             embeddedContentPage.clickViewMore()
             managePage.waitUntilVisible()
             managePage.clickEdit()
@@ -320,10 +342,41 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
         }
     }
 
+    @Test
+    fun testMandateIsShownInForm() {
+        runEmbeddedPaymentElementRowSelectionTest(
+            responseTestBodyFileName = "elements-sessions-requires_payment_method.json",
+        ) { testContext ->
+            testContext.configure(intentConfiguration = paymentWithSetupFutureUsageIntentConfiguration)
+            embeddedContentPage.clickOnLpm("cashapp")
+            formPage.waitUntilVisible()
+            formPage.clickPrimaryButton()
+            testContext.assertNextRowSelectionItem("cashapp", "Cash App Pay")
+
+            enqueueDeferredIntentConfirmationRequests(isSetupFutureUsage = true)
+            testContext.confirm()
+        }
+    }
+
+    @Test
+    fun testImmediateActionCallbackIsImmediatelyInvoked() {
+        runEmbeddedPaymentElementRowSelectionTest(
+            responseTestBodyFileName = "elements-sessions-requires_payment_method.json",
+        ) { testContext ->
+            testContext.configure(intentConfiguration = paymentWithSetupFutureUsageIntentConfiguration) {
+                embeddedViewDisplaysMandateText(false)
+            }
+            embeddedContentPage.clickOnLpm("cashapp")
+            testContext.assertNextRowSelectionItem("cashapp", "Cash App Pay")
+
+            enqueueDeferredIntentConfirmationRequests(isSetupFutureUsage = true)
+            testContext.confirm()
+        }
+    }
+
     private fun runEmbeddedPaymentElementRowSelectionTest(
         responseTestBodyFileName: String,
         shouldSetupV1PaymentMethodsResponse: Boolean = false,
-        configureBlock: EmbeddedPaymentElement.Configuration.Builder.() -> EmbeddedPaymentElement.Configuration.Builder = { this },
         testBlock: suspend (EmbeddedPaymentElementTestRunnerContext) -> Unit,
     ) {
         val rowSelectionCalls = Turbine<RowSelectionCall>()
@@ -358,10 +411,6 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             if (shouldSetupV1PaymentMethodsResponse) {
                 networkRule.setupV1PaymentMethodsResponse(card1, card2)
             }
-            testContext.configure {
-                embeddedViewDisplaysMandateText(false)
-                configureBlock()
-            }
             testBlock(testContext)
         }
     }
@@ -385,7 +434,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
         return "···· $last4"
     }
 
-    private fun enqueueDeferredIntentConfirmationRequests() {
+    private fun enqueueDeferredIntentConfirmationRequests(isSetupFutureUsage: Boolean = false) {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_methods"),
@@ -396,7 +445,11 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             method("GET"),
             path("/v1/payment_intents/pi_example"),
         ) { response ->
-            response.testBodyFromFile("payment-intent-get-requires_payment_method.json")
+            if (isSetupFutureUsage) {
+                response.testBodyFromFile("payment-intent-sfu-get-requires_payment_method.json")
+            } else {
+                response.testBodyFromFile("payment-intent-get-requires_payment_method.json")
+            }
         }
         networkRule.enqueue(
             host("api.stripe.com"),

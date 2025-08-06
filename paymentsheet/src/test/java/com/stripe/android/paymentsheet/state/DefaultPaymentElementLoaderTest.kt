@@ -759,7 +759,9 @@ internal class DefaultPaymentElementLoaderTest {
                 useAttestationEndpoints = false,
                 suppress2faModal = false,
                 disableLinkRuxInFlowController = false,
-                linkEnableDisplayableDefaultValuesInEce = false
+                linkEnableDisplayableDefaultValuesInEce = false,
+                linkSignUpOptInFeatureEnabled = false,
+                linkSignUpOptInInitialValue = false
             )
         )
 
@@ -797,7 +799,9 @@ internal class DefaultPaymentElementLoaderTest {
                 useAttestationEndpoints = false,
                 suppress2faModal = false,
                 disableLinkRuxInFlowController = false,
-                linkEnableDisplayableDefaultValuesInEce = false
+                linkEnableDisplayableDefaultValuesInEce = false,
+                linkSignUpOptInFeatureEnabled = false,
+                linkSignUpOptInInitialValue = false
             )
         )
 
@@ -883,7 +887,9 @@ internal class DefaultPaymentElementLoaderTest {
                 useAttestationEndpoints = false,
                 suppress2faModal = false,
                 disableLinkRuxInFlowController = false,
-                linkEnableDisplayableDefaultValuesInEce = false
+                linkEnableDisplayableDefaultValuesInEce = false,
+                linkSignUpOptInFeatureEnabled = false,
+                linkSignUpOptInInitialValue = false
             ),
             linkStore = mock {
                 on { hasUsedLink() } doReturn true
@@ -915,7 +921,9 @@ internal class DefaultPaymentElementLoaderTest {
                 useAttestationEndpoints = false,
                 suppress2faModal = false,
                 disableLinkRuxInFlowController = false,
-                linkEnableDisplayableDefaultValuesInEce = false
+                linkEnableDisplayableDefaultValuesInEce = false,
+                linkSignUpOptInFeatureEnabled = false,
+                linkSignUpOptInInitialValue = false
             )
         )
 
@@ -1435,7 +1443,9 @@ internal class DefaultPaymentElementLoaderTest {
                 useAttestationEndpoints = false,
                 suppress2faModal = false,
                 disableLinkRuxInFlowController = false,
-                linkEnableDisplayableDefaultValuesInEce = false
+                linkEnableDisplayableDefaultValuesInEce = false,
+                linkSignUpOptInFeatureEnabled = false,
+                linkSignUpOptInInitialValue = false
             ),
             linkStore = linkStore,
         )
@@ -1535,6 +1545,111 @@ internal class DefaultPaymentElementLoaderTest {
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(AlongsideSaveForFutureUse)
+    }
+
+    @Test
+    fun `Returns InsteadOfSaveForFutureUse signup mode when linkSignUpOptInFeatureEnabled is true`() = runTest {
+        val loader = createPaymentElementLoader(
+            linkAccountState = AccountStatus.SignedOut,
+            linkSettings = createLinkSettings(
+                passthroughModeEnabled = false,
+                linkSignUpOptInFeatureEnabled = true
+            )
+        )
+
+        val result = loader.load(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            paymentSheetConfiguration = DEFAULT_PAYMENT_SHEET_CONFIG.copy(
+                defaultBillingDetails = PaymentSheet.BillingDetails(
+                    email = "john@doe.com",
+                ),
+            ),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        ).getOrThrow()
+
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
+    }
+
+    @Test
+    fun `Returns InsteadOfSaveForFutureUse signup mode when linkSignUpOptInFeatureEnabled is true even with customer config`() = runTest {
+        val loader = createPaymentElementLoader(
+            linkAccountState = AccountStatus.SignedOut,
+            linkSettings = createLinkSettings(
+                passthroughModeEnabled = false,
+                linkSignUpOptInFeatureEnabled = true
+            )
+        )
+
+        val result = loader.load(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            paymentSheetConfiguration = PaymentSheet.Configuration(
+                merchantDisplayName = "Some Name",
+                customer = PaymentSheet.CustomerConfiguration(
+                    id = "cus_123",
+                    ephemeralKeySecret = "ek_123",
+                ),
+                defaultBillingDetails = PaymentSheet.BillingDetails(
+                    email = "john@doe.com",
+                ),
+            ),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        ).getOrThrow()
+
+        // Even with customer config that would normally trigger AlongsideSaveForFutureUse,
+        // the feature flag should override it to InsteadOfSaveForFutureUse
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
+    }
+
+    @Test
+    fun `Returns null signup mode when linkSignUpOptInFeatureEnabled is true but user has used Link`() = runTest {
+        val linkStore = mock<LinkStore>()
+        whenever(linkStore.hasUsedLink()).thenReturn(true)
+
+        val loader = createPaymentElementLoader(
+            linkAccountState = AccountStatus.SignedOut,
+            linkStore = linkStore,
+            linkSettings = createLinkSettings(
+                passthroughModeEnabled = false,
+                linkSignUpOptInFeatureEnabled = true
+            )
+        )
+
+        val result = loader.load(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            paymentSheetConfiguration = DEFAULT_PAYMENT_SHEET_CONFIG,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        ).getOrThrow()
+
+        // Feature flag should override the hasUsedLink check
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(null)
+    }
+
+    @Test
+    fun `Returns null signup mode when linkSignUpOptInFeatureEnabled is true but signup is disabled`() = runTest {
+        val loader = createPaymentElementLoader(
+            linkAccountState = AccountStatus.SignedOut,
+            linkSettings = createLinkSettings(
+                passthroughModeEnabled = false,
+                linkSignUpOptInFeatureEnabled = true
+            ).copy(disableLinkSignup = true)
+        )
+
+        val result = loader.load(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            paymentSheetConfiguration = DEFAULT_PAYMENT_SHEET_CONFIG,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        ).getOrThrow()
+
+        // Feature flag should override the disableLinkSignup check
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(null)
     }
 
     @Test
@@ -3200,7 +3315,10 @@ internal class DefaultPaymentElementLoaderTest {
         )
     }
 
-    private fun createLinkSettings(passthroughModeEnabled: Boolean): ElementsSession.LinkSettings {
+    private fun createLinkSettings(
+        passthroughModeEnabled: Boolean,
+        linkSignUpOptInFeatureEnabled: Boolean = false
+    ): ElementsSession.LinkSettings {
         return ElementsSession.LinkSettings(
             linkFundingSources = listOf("card", "bank"),
             linkPassthroughModeEnabled = passthroughModeEnabled,
@@ -3211,7 +3329,9 @@ internal class DefaultPaymentElementLoaderTest {
             useAttestationEndpoints = false,
             suppress2faModal = false,
             disableLinkRuxInFlowController = false,
-            linkEnableDisplayableDefaultValuesInEce = false
+            linkEnableDisplayableDefaultValuesInEce = false,
+            linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
+            linkSignUpOptInInitialValue = false,
         )
     }
 

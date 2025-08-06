@@ -56,8 +56,6 @@
   <string name="stripe_address_name_required">Skriv inn namnet ditt</string>
   <!-- Error text indicating that phone number is required, used for all addresses -->
   <string name="stripe_address_phone_number_required">Skriv inn telefonnummeret ditt</string>
-  <!-- Error message for when postal code in form is invalid -->
-  <string name="stripe_address_postal_code_invalid">Postnummeret ditt er ugyldig.</string>
   <!-- Error text indicating postcode is invalid, used for UK addresses -->
   <string name="stripe_address_postcode_invalid">Postnummeret ditt er ugyldig</string>
   <!-- Error text indicating that province is required, used for Canada addresses -->

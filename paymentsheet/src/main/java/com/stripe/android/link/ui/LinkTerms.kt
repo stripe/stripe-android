@@ -72,13 +72,16 @@ internal fun LinkTerms(
     )
 }
 
-private fun String.replaceHyperlinks() = this.replace(
+internal fun String.replaceHyperlinks() = this.replace(
     "<terms>",
-    "<a href=\"https://link.co/terms\">"
+    "<a href=\"https://link.com/terms\">"
 ).replace("</terms>", "</a>").replace(
     "<privacy>",
-    "<a href=\"https://link.co/privacy\">"
-).replace("</privacy>", "</a>")
+    "<a href=\"https://link.com/privacy\">"
+).replace("</privacy>", "</a>").replace(
+    "<link>",
+    "<a href=\"https://link.com\">"
+).replace("</link>", "</a>")
 
 @Preview
 @Composable

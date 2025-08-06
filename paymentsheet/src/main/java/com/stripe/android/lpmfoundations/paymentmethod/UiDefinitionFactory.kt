@@ -16,6 +16,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.setupFutureUsage
+import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
@@ -40,6 +41,7 @@ internal sealed interface UiDefinitionFactory {
         val cardBrandFilter: CardBrandFilter,
         val setAsDefaultMatchesSaveForFutureUse: Boolean,
         val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
+        val linkInlineHandler: LinkInlineHandler?,
     ) {
         interface Factory {
             fun create(
@@ -50,6 +52,7 @@ internal sealed interface UiDefinitionFactory {
             class Default(
                 private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
                 private val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
+                private val linkInlineHandler: LinkInlineHandler?,
                 private val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
                 private val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
                 private val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
@@ -82,6 +85,7 @@ internal sealed interface UiDefinitionFactory {
                         initialLinkUserInput = initialLinkUserInput,
                         setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
                         autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+                        linkInlineHandler = linkInlineHandler,
                     )
                 }
 

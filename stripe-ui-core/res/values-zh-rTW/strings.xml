@@ -40,8 +40,12 @@
   <string name="stripe_address_label_suburb">郊區</string>
   <!-- Used to describe an address field. -->
   <string name="stripe_address_label_village_township">村莊或城鎮</string>
+  <!-- Error message for when postal code in form is incomplete -->
+  <string name="stripe_address_postal_code_incomplete">您的郵遞區號不完整。</string>
   <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
   <string name="stripe_address_search_content_description">搜尋</string>
+  <!-- Error message for when ZIP code in form is incomplete (US only) -->
+  <string name="stripe_address_zip_incomplete">您的郵遞區號不完整。</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
   <string name="stripe_address_zip_invalid">您的郵遞區號無效。</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
@@ -78,4 +82,6 @@
   <string name="stripe_invalid_expiry_month">您的金融卡的到期月份無效。</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="stripe_invalid_expiry_year">您的金融卡的到期年份無效。</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="stripe_address_postal_code_invalid">您的郵遞區號無效。</string>
 </resources>

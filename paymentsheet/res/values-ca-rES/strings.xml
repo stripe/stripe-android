@@ -45,8 +45,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up">Accepteu i continueu</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">Pagament ràpid i segur amb 1 clic</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">Finalització de la compra ràpida i segura</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Deseu la vostra informació de pagament amb Link i pagueu amb seguretat en 1 clic als llocs compatibles.</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">Pagueu més ràpid als llocs on s\'accepta Link.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[En continuar, accepteu els <terms>Termes</terms> i la <privacy>Política de privacitat</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -105,6 +109,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Les dades de la targeta no es poden canviar.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Si proporcioneu la informació de la targeta, permeteu que %s hi faci càrrecs per a pagaments en el futur d\'acord amb les seves condicions.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">En continuar, accepteu desar la vostra informació per a futures compres amb %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[En continuar, accepteu desar la vostra informació per a futures compres amb %s i <link>Link</link>. Així mateix, accepteu les <terms>Condicions</terms> i la <privacy>Privadesa</privacy> de Link.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">La targeta no s\'ha actualitzat. Torneu-ho a provar.</string>
   <!-- Title shown above a carousel containing available payment methods -->

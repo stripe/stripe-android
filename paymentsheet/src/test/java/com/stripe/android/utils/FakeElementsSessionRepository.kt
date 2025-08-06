@@ -60,7 +60,8 @@ internal class FakeElementsSessionRepository(
                     elementsSessionId = "session_1234",
                     flags = emptyMap(),
                     orderedPaymentMethodTypesAndWallets = stripeIntent.paymentMethodTypes,
-                    experimentsData = null
+                    experimentsData = null,
+                    passiveCaptcha = null
                 )
             )
         }

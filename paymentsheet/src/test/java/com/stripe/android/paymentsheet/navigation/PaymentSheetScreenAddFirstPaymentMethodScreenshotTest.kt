@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.Appearance
+import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
@@ -88,7 +89,7 @@ internal class PaymentSheetScreenAddFirstPaymentMethodScreenshotTest {
 
         viewModel.walletsStateSource.value = WalletsState(
             link = WalletsState.Link(
-                email = "email@email.com"
+                state = LinkButtonState.Email("email@email.com"),
             ),
             googlePay = null,
             buttonsEnabled = true,

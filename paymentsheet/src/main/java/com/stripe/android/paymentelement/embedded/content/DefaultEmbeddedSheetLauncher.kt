@@ -77,6 +77,10 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
                 } else {
                     result.selection?.let { rowSelectionImmediateActionHandler.invoke() }
                 }
+            } else if (result is FormResult.Cancelled) {
+                embeddedResultCallbackHelper.setResult(
+                    EmbeddedPaymentElement.Result.Canceled()
+                )
             }
         }
 

@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
@@ -108,16 +110,14 @@ class DefaultManageScreenInteractorTest {
 
     @Test
     fun topBarState_onEditIconPressed_callsToggleEdit() {
-        var hasCalledToggleEdit = false
         val initialPaymentMethods = PaymentMethodFixtures.createCards(2)
         runScenario(
             initialPaymentMethods = initialPaymentMethods,
             currentSelection = null,
-            toggleEdit = { hasCalledToggleEdit = true },
         ) {
             interactor.state.map { it.topBarState(interactor) }.test {
                 awaitItem().onEditIconPressed()
-                assertThat(hasCalledToggleEdit).isTrue()
+                assertThat(toggleEditTurbine.awaitItem()).isNotNull()
             }
         }
     }
@@ -200,17 +200,11 @@ class DefaultManageScreenInteractorTest {
             backPressed = true
         }
 
-        var selectedPaymentMethod: DisplayableSavedPaymentMethod? = null
-        fun onSelectPaymentMethod(savedPaymentMethod: DisplayableSavedPaymentMethod) {
-            selectedPaymentMethod = savedPaymentMethod
-        }
-
         val paymentMethods = PaymentMethodFactory.cards(3)
 
         runScenario(
             initialPaymentMethods = paymentMethods,
             currentSelection = PaymentSelection.Saved(paymentMethods[0]),
-            onSelectPaymentMethod = ::onSelectPaymentMethod,
             isEditing = true,
             handleBackPressed = ::handleBackPressed,
         ) {
@@ -227,7 +221,7 @@ class DefaultManageScreenInteractorTest {
             editingSource.value = false
 
             assertThat(backPressed).isTrue()
-            assertThat(selectedPaymentMethod?.paymentMethod).isEqualTo(lastPaymentMethod)
+            assertThat(onSelectPaymentMethodTurbine.awaitItem().paymentMethod).isEqualTo(lastPaymentMethod)
         }
     }
 
@@ -244,7 +238,6 @@ class DefaultManageScreenInteractorTest {
         runScenario(
             initialPaymentMethods = paymentMethods,
             currentSelection = PaymentSelection.Saved(paymentMethods[0]),
-            onSelectPaymentMethod = {},
             isEditing = true,
             handleBackPressed = ::handleBackPressed,
         ) {
@@ -273,7 +266,6 @@ class DefaultManageScreenInteractorTest {
         runScenario(
             initialPaymentMethods = paymentMethods,
             currentSelection = PaymentSelection.Saved(paymentMethods[0]),
-            onSelectPaymentMethod = {},
             isEditing = true,
             handleBackPressed = ::handleBackPressed,
         ) {
@@ -287,15 +279,13 @@ class DefaultManageScreenInteractorTest {
 
     @Test
     fun `handleViewAction ToggleEdit calls toggleEdit`() {
-        var hasCalledToggleEdit = false
         val initialPaymentMethods = PaymentMethodFixtures.createCards(2)
         runScenario(
             initialPaymentMethods = initialPaymentMethods,
             currentSelection = null,
-            toggleEdit = { hasCalledToggleEdit = true },
         ) {
             interactor.handleViewAction(ManageScreenInteractor.ViewAction.ToggleEdit)
-            assertThat(hasCalledToggleEdit).isTrue()
+            assertThat(toggleEditTurbine.awaitItem()).isNotNull()
         }
     }
 
@@ -338,8 +328,6 @@ class DefaultManageScreenInteractorTest {
         currentSelection: PaymentSelection?,
         isLiveMode: Boolean = false,
         isEditing: Boolean = false,
-        toggleEdit: () -> Unit = { notImplemented() },
-        onSelectPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit = { notImplemented() },
         handleBackPressed: (withDelay: Boolean) -> Unit = { notImplemented() },
         testBlock: suspend TestParams.() -> Unit
     ) {
@@ -351,6 +339,9 @@ class DefaultManageScreenInteractorTest {
         val dispatcher = UnconfinedTestDispatcher()
         val defaultPaymentMethodId: MutableStateFlow<String?> = MutableStateFlow(null)
 
+        val toggleEditTurbine = Turbine<Unit>()
+        val onSelectPaymentMethodTurbine = Turbine<DisplayableSavedPaymentMethod>()
+
         val interactor = DefaultManageScreenInteractor(
             paymentMethods = paymentMethods,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
@@ -360,9 +351,13 @@ class DefaultManageScreenInteractorTest {
             selection = selection,
             editing = editing,
             canEdit = canEdit,
-            toggleEdit = toggleEdit,
+            toggleEdit = {
+                toggleEditTurbine.add(Unit)
+            },
             providePaymentMethodName = { (it ?: "Missing name").resolvableString },
-            onSelectPaymentMethod = onSelectPaymentMethod,
+            onSelectPaymentMethod = {
+                onSelectPaymentMethodTurbine.add(it)
+            },
             onUpdatePaymentMethod = { notImplemented() },
             navigateBack = handleBackPressed,
             defaultPaymentMethodId = defaultPaymentMethodId,
@@ -375,11 +370,14 @@ class DefaultManageScreenInteractorTest {
             editingSource = editing,
             canEditSource = canEdit,
             canRemoveSource = canRemove,
-            defaultPaymentMethodSource = defaultPaymentMethodId
+            defaultPaymentMethodSource = defaultPaymentMethodId,
+            toggleEditTurbine = toggleEditTurbine,
+            onSelectPaymentMethodTurbine = onSelectPaymentMethodTurbine,
         ).apply {
             runTest {
                 testBlock()
             }
+            ensureAllEventsConsumed()
         }
     }
 
@@ -390,5 +388,12 @@ class DefaultManageScreenInteractorTest {
         val canEditSource: MutableStateFlow<Boolean>,
         val canRemoveSource: MutableStateFlow<Boolean>,
         val defaultPaymentMethodSource: MutableStateFlow<String?>,
-    )
+        val toggleEditTurbine: ReceiveTurbine<Unit>,
+        val onSelectPaymentMethodTurbine: ReceiveTurbine<DisplayableSavedPaymentMethod>,
+    ) {
+        fun ensureAllEventsConsumed() {
+            toggleEditTurbine.ensureAllEventsConsumed()
+            onSelectPaymentMethodTurbine.ensureAllEventsConsumed()
+        }
+    }
 }

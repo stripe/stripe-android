@@ -103,15 +103,18 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                 _embeddedContent.value = if (state == null) {
                     null
                 } else {
+                    val isImmediateAction = internalRowSelectionCallback.get() != null
                     EmbeddedContent(
                         interactor = createInteractor(
                             coroutineScope = coroutineScope,
                             paymentMethodMetadata = state.paymentMethodMetadata,
                             walletsState = embeddedWalletsHelper.walletsState(state.paymentMethodMetadata),
+                            isImmediateAction = isImmediateAction,
+                            embeddedViewDisplaysMandateText = state.embeddedViewDisplaysMandateText,
                         ),
                         embeddedViewDisplaysMandateText = state.embeddedViewDisplaysMandateText,
                         appearance = state.appearance,
-                        isImmediateAction = internalRowSelectionCallback.get() != null
+                        isImmediateAction = isImmediateAction,
                     )
                 }
             }
@@ -176,6 +179,8 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
         coroutineScope: CoroutineScope,
         paymentMethodMetadata: PaymentMethodMetadata,
         walletsState: StateFlow<WalletsState?>,
+        isImmediateAction: Boolean,
+        embeddedViewDisplaysMandateText: Boolean,
     ): PaymentMethodVerticalLayoutInteractor {
         val paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(
             incentive = paymentMethodMetadata.paymentMethodIncentive,
@@ -255,7 +260,8 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                     true
                 }
             },
-            invokeRowSelectionCallback = ::invokeRowSelectionCallback
+            invokeRowSelectionCallback = ::invokeRowSelectionCallback,
+            displaysMandatesInFormScreen = isImmediateAction && embeddedViewDisplaysMandateText,
         )
     }
 

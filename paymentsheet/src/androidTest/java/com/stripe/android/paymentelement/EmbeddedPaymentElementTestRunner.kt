@@ -30,12 +30,13 @@ internal class EmbeddedPaymentElementTestRunnerContext(
     private val countDownLatch: CountDownLatch,
 ) {
     suspend fun configure(
+        intentConfiguration: IntentConfiguration = IntentConfiguration(
+            mode = IntentConfiguration.Mode.Payment(amount = 5000, currency = "USD")
+        ),
         configurationMutator: EmbeddedPaymentElement.Configuration.Builder.() -> EmbeddedPaymentElement.Configuration.Builder = { this },
     ) {
         embeddedPaymentElement.configure(
-            intentConfiguration = IntentConfiguration(
-                mode = IntentConfiguration.Mode.Payment(amount = 5000, currency = "USD")
-            ),
+            intentConfiguration = intentConfiguration,
             configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
                 .configurationMutator()
                 .build()

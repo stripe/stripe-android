@@ -2,21 +2,15 @@ package com.stripe.android.crypto.onramp.model
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.elements.Address
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-internal data class KycInfo(
+data class KycInfo(
     val firstName: String,
     val lastName: String,
     val idNumber: String?,
     val idType: IdType?,
-
-    @SerialName("date_of_birth")
     val dateOfBirth: DateOfBirth,
-
-    @Serializable(with = PaymentSheetAddressSerializer::class)
     val address: Address,
     val nationalities: List<String>?,
     val birthCountry: String?,
@@ -24,14 +18,14 @@ internal data class KycInfo(
 )
 
 @Serializable
-internal data class DateOfBirth(
+data class DateOfBirth(
     val day: Int,
     val month: Int,
     val year: Int
 )
 
 @Suppress("UnusedPrivateProperty")
-internal enum class IdType(private val value: String) {
+enum class IdType(internal val value: String) {
     AADHAAR("aadhaar"),
     ABN("abn"),
     BUSINESS_TAX_DEDUCTION_ACCOUNT_NUMBER("business_tax_deduction_account_number"),
