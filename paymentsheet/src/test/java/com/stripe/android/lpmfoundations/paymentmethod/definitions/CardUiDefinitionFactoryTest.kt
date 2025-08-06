@@ -1,5 +1,10 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
+import com.stripe.android.elements.Address
+import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.AppearanceAPIAdditionsPreview
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.getDefaultCustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
@@ -7,9 +12,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntentFixtures
-import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.screenshottesting.LayoutDirection
@@ -90,11 +92,11 @@ class CardUiDefinitionFactoryTest {
         paparazziRule.snapshot {
             CardDefinition.CreateFormUi(
                 metadata = metadata.copy(
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                        name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                     )
                 )
             )
@@ -146,7 +148,7 @@ class CardUiDefinitionFactoryTest {
             CardDefinition.CreateFormUi(
                 metadata = metadata.copy(
                     shippingDetails = AddressDetails(
-                        address = PaymentSheet.Address(
+                        address = Address(
                             line1 = "354 Oyster Point Blvd",
                             city = "South San Francisco",
                             state = "CA",
@@ -255,11 +257,11 @@ class CardUiDefinitionFactoryTest {
                     productUsage = emptySet(),
                 ),
                 metadata = metadata.copy(
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                        name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                     ),
                 ),
             )
@@ -287,8 +289,8 @@ class CardUiDefinitionFactoryTest {
                     productUsage = emptySet(),
                 ),
                 metadata = metadata.copy(
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                        address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                     ),
                 ),
                 autocompleteAddressInteractorFactory = {
@@ -333,8 +335,8 @@ class CardUiDefinitionFactoryTest {
                     productUsage = emptySet(),
                 ),
                 metadata = metadata.copy(
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                        address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                     ),
                 ),
                 autocompleteAddressInteractorFactory = {
@@ -352,8 +354,8 @@ class CardUiDefinitionFactoryTest {
 
     @OptIn(AppearanceAPIAdditionsPreview::class)
     private data object CustomSpacingAppearance : PaparazziConfigOption {
-        private val appearance = PaymentSheet.Appearance.Builder()
-            .sectionSpacing(PaymentSheet.Spacing(spacingDp = 50f))
+        private val appearance = Appearance.Builder()
+            .sectionSpacing(Appearance.Spacing(spacingDp = 50f))
             .build()
 
         override fun initialize() {
@@ -367,9 +369,9 @@ class CardUiDefinitionFactoryTest {
 
     @OptIn(AppearanceAPIAdditionsPreview::class)
     private data object CustomTextInsetsAppearance : PaparazziConfigOption {
-        private val appearance = PaymentSheet.Appearance.Builder()
+        private val appearance = Appearance.Builder()
             .textFieldInsets(
-                PaymentSheet.Insets(
+                Appearance.Insets(
                     startDp = 24f,
                     endDp = 20f,
                     topDp = 28f,

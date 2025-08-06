@@ -1,12 +1,12 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.bacs
 
 import androidx.activity.result.ActivityResultLauncher
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.Appearance
 
 internal interface BacsMandateConfirmationLauncher {
     fun launch(
         data: BacsMandateData,
-        appearance: PaymentSheet.Appearance
+        appearance: Appearance
     )
 }
 
@@ -15,7 +15,7 @@ internal class DefaultBacsMandateConfirmationLauncher(
 ) : BacsMandateConfirmationLauncher {
     override fun launch(
         data: BacsMandateData,
-        appearance: PaymentSheet.Appearance
+        appearance: Appearance
     ) {
         activityResultLauncher.launch(
             BacsMandateConfirmationContract.Args(

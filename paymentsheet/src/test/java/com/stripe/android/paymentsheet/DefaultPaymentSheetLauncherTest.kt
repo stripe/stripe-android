@@ -11,6 +11,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
@@ -35,7 +36,7 @@ class DefaultPaymentSheetLauncherTest {
 
     @Test
     fun `init and present should return expected PaymentResult`() {
-        val testRegistry = FakeActivityResultRegistry(PaymentSheetResult.Completed())
+        val testRegistry = FakeActivityResultRegistry(PaymentSheet.Result.Completed())
 
         with(
             launchFragmentInContainer(initialState = Lifecycle.State.CREATED) {
@@ -43,7 +44,7 @@ class DefaultPaymentSheetLauncherTest {
             }
         ) {
             onFragment { fragment ->
-                val results = mutableListOf<PaymentSheetResult>()
+                val results = mutableListOf<PaymentSheet.Result>()
                 val launcher = DefaultPaymentSheetLauncher(
                     fragment,
                     testRegistry
@@ -53,7 +54,7 @@ class DefaultPaymentSheetLauncherTest {
 
                 moveToState(Lifecycle.State.RESUMED)
                 launcher.present(mode = PaymentElementLoader.InitializationMode.PaymentIntent("pi_fake"))
-                assertThat(results).containsExactly(PaymentSheetResult.Completed())
+                assertThat(results).containsExactly(PaymentSheet.Result.Completed())
             }
         }
     }
@@ -68,7 +69,7 @@ class DefaultPaymentSheetLauncherTest {
             }
         ) {
             onFragment { fragment ->
-                val results = mutableListOf<PaymentSheetResult>()
+                val results = mutableListOf<PaymentSheet.Result>()
                 val launcher = DefaultPaymentSheetLauncher(
                     fragment,
                     testRegistry
@@ -79,7 +80,7 @@ class DefaultPaymentSheetLauncherTest {
                 moveToState(Lifecycle.State.DESTROYED)
                 launcher.present(mode = PaymentElementLoader.InitializationMode.PaymentIntent("pi_fake"))
                 assertThat(results).hasSize(1)
-                assertThat((results.first() as PaymentSheetResult.Failed).error).hasMessageThat().isEqualTo(
+                assertThat((results.first() as PaymentSheet.Result.Failed).error).hasMessageThat().isEqualTo(
                     "The host activity is not in a valid state (INITIALIZED)."
                 )
             }
@@ -189,7 +190,7 @@ class DefaultPaymentSheetLauncherTest {
     }
 
     private class FakeActivityResultRegistry(
-        private val result: PaymentSheetResult? = null,
+        private val result: PaymentSheet.Result? = null,
         private val error: Throwable? = null
     ) : ActivityResultRegistry() {
         override fun <I, O> onLaunch(

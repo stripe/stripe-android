@@ -49,6 +49,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.example.Experience.FinancialConnections
 import com.stripe.android.financialconnections.example.Experience.InstantDebits
@@ -66,7 +69,6 @@ import com.stripe.android.payments.bankaccount.CollectBankAccountForInstantDebit
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher.Companion.HOSTED_SURFACE_PAYMENT_ELEMENT
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
-import com.stripe.android.paymentsheet.PaymentSheet
 
 class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
 
@@ -206,13 +208,13 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         val config = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
             .allowsDelayedPaymentMethods(true)
             .customer(
-                PaymentSheet.CustomerConfiguration(
+                CustomerConfiguration(
                     id = requireNotNull(customerId),
                     ephemeralKeySecret = requireNotNull(ephemeralKey),
                 )
             )
             .defaultBillingDetails(
-                PaymentSheet.BillingDetails(
+                BillingDetails(
                     email = email.takeIf { it.isNotBlank() },
                 )
             )

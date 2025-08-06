@@ -7,12 +7,18 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.elements.Address
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.payment.PaymentMethodLayout
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentsheet.PaymentSheet.Builder
+import com.stripe.android.elements.payment.PaymentSheet.Builder
+import com.stripe.android.elements.payment.PaymentSheet.Result
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.PaymentSheetLayoutType
 import com.stripe.android.paymentsheet.utils.PaymentSheetLayoutTypeProvider
@@ -62,7 +68,7 @@ internal class PaymentSheetBillingConfigurationTest {
         scenario.onActivity {
             PaymentConfiguration.init(it, "pk_test_123")
             paymentSheet = Builder { result ->
-                assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
+                assertThat(result).isInstanceOf(PaymentSheet.Result.Completed::class.java)
                 countDownLatch.countDown()
             }.build(it)
         }
@@ -72,23 +78,23 @@ internal class PaymentSheetBillingConfigurationTest {
                 paymentIntentClientSecret = "pi_example_secret_example",
                 configuration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    defaultBillingDetails = PaymentSheet.BillingDetails(
+                    defaultBillingDetails = BillingDetails(
                         name = "Jenny Rosen",
                         email = "foo@bar.com",
                         phone = "+13105551234",
-                        address = PaymentSheet.Address(
+                        address = Address(
                             postalCode = "94111",
                             country = "US",
                         ),
                     ),
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                        name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        phone = BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                        address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
                         attachDefaultsToPaymentMethod = true,
                     ),
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    paymentMethodLayout = PaymentMethodLayout.Horizontal,
                 ),
             )
         }
@@ -139,7 +145,7 @@ internal class PaymentSheetBillingConfigurationTest {
         scenario.onActivity {
             PaymentConfiguration.init(it, "pk_test_123")
             paymentSheet = Builder { result ->
-                assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
+                assertThat(result).isInstanceOf(PaymentSheet.Result.Completed::class.java)
                 countDownLatch.countDown()
             }.build(it)
         }
@@ -149,20 +155,20 @@ internal class PaymentSheetBillingConfigurationTest {
                 paymentIntentClientSecret = "pi_example_secret_example",
                 configuration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    defaultBillingDetails = PaymentSheet.BillingDetails(
+                    defaultBillingDetails = BillingDetails(
                         name = "Jenny Rosen",
                         email = "foo@bar.com",
                         phone = "+13105551234",
-                        address = PaymentSheet.Address(
+                        address = Address(
                             postalCode = "94111",
                             country = "US",
                         ),
                     ),
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                        address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
                         attachDefaultsToPaymentMethod = false,
                     ),
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    paymentMethodLayout = PaymentMethodLayout.Horizontal,
                 ),
             )
         }
@@ -211,11 +217,11 @@ internal class PaymentSheetBillingConfigurationTest {
                 paymentIntentClientSecret = "pi_example_secret_example",
                 configuration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    defaultBillingDetails = PaymentSheet.BillingDetails(
+                    defaultBillingDetails = BillingDetails(
                         name = "Jenny Rosen",
                         email = "foo@bar.com",
                         phone = "+13105551234",
-                        address = PaymentSheet.Address(
+                        address = Address(
                             postalCode = "94111",
                             country = "US",
                             state = "CA",
@@ -224,11 +230,11 @@ internal class PaymentSheetBillingConfigurationTest {
                             line2 = null,
                         ),
                     ),
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                        address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                         attachDefaultsToPaymentMethod = false,
                     ),
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    paymentMethodLayout = PaymentMethodLayout.Horizontal,
                 ),
             )
         }
@@ -271,11 +277,11 @@ internal class PaymentSheetBillingConfigurationTest {
         testContext.launch(
             configuration = PaymentSheet.Configuration(
                 merchantDisplayName = "Merchant, Inc.",
-                defaultBillingDetails = PaymentSheet.BillingDetails(
+                defaultBillingDetails = BillingDetails(
                     name = "Jenny Rosen",
                     email = "foo@bar.com",
                     phone = "+13105551234",
-                    address = PaymentSheet.Address(
+                    address = Address(
                         postalCode = "94111",
                         country = "US",
                         state = "CA",
@@ -284,8 +290,8 @@ internal class PaymentSheetBillingConfigurationTest {
                         line2 = "Unit #123",
                     ),
                 ),
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                    address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                     attachDefaultsToPaymentMethod = true,
                 ),
                 paymentMethodLayout = layoutType.paymentMethodLayout,

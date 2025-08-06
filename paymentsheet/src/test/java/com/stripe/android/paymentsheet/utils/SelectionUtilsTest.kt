@@ -1,9 +1,9 @@
 package com.stripe.android.paymentsheet.utils
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import org.junit.Test
@@ -41,11 +41,11 @@ class SelectionUtilsTest {
         assertThat(
             NEW_SELECTION.canSave(
                 PaymentElementLoader.InitializationMode.DeferredIntent(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    intentConfiguration = IntentConfiguration(
+                        mode = IntentConfiguration.Mode.Payment(
                             amount = 10L,
                             currency = "USD",
-                            setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+                            setupFutureUse = IntentConfiguration.SetupFutureUse.OffSession
                         )
                     )
                 )
@@ -58,8 +58,8 @@ class SelectionUtilsTest {
         assertThat(
             NEW_SELECTION.canSave(
                 PaymentElementLoader.InitializationMode.DeferredIntent(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    intentConfiguration = IntentConfiguration(
+                        mode = IntentConfiguration.Mode.Payment(
                             amount = 10L,
                             currency = "USD",
                             setupFutureUse = null
@@ -75,8 +75,8 @@ class SelectionUtilsTest {
         assertThat(
             NEW_SELECTION_WITH_CUSTOMER_REQUEST.canSave(
                 PaymentElementLoader.InitializationMode.DeferredIntent(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    intentConfiguration = IntentConfiguration(
+                        mode = IntentConfiguration.Mode.Payment(
                             amount = 10L,
                             currency = "USD",
                             setupFutureUse = null
@@ -92,8 +92,8 @@ class SelectionUtilsTest {
         assertThat(
             NEW_SELECTION_WITH_CUSTOMER_REQUEST.canSave(
                 PaymentElementLoader.InitializationMode.DeferredIntent(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        mode = PaymentSheet.IntentConfiguration.Mode.Setup()
+                    intentConfiguration = IntentConfiguration(
+                        mode = IntentConfiguration.Mode.Setup()
                     ),
                 )
             )

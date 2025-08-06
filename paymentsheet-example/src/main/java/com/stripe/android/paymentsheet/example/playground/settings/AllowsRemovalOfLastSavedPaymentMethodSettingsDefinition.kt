@@ -1,9 +1,10 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
-import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
-import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.AllowsRemovalOfLastSavedPaymentMethodPreview
+import com.stripe.android.elements.customersheet.CustomerSheet
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.FlowController
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 
 internal object AllowsRemovalOfLastSavedPaymentMethodSettingsDefinition : BooleanSettingsDefinition(
@@ -16,7 +17,7 @@ internal object AllowsRemovalOfLastSavedPaymentMethodSettingsDefinition : Boolea
             configurationData.integrationType.isCustomerFlow()
     }
 
-    @OptIn(ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class)
+    @OptIn(AllowsRemovalOfLastSavedPaymentMethodPreview::class)
     override fun configure(
         value: Boolean,
         configurationBuilder: PaymentSheet.Configuration.Builder,
@@ -26,7 +27,17 @@ internal object AllowsRemovalOfLastSavedPaymentMethodSettingsDefinition : Boolea
         configurationBuilder.allowsRemovalOfLastSavedPaymentMethod(value)
     }
 
-    @OptIn(ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class)
+    @OptIn(AllowsRemovalOfLastSavedPaymentMethodPreview::class)
+    override fun configure(
+        value: Boolean,
+        configurationBuilder: FlowController.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment,
+        configurationData: PlaygroundSettingDefinition.FlowControllerConfigurationData
+    ) {
+        configurationBuilder.allowsRemovalOfLastSavedPaymentMethod(value)
+    }
+
+    @OptIn(AllowsRemovalOfLastSavedPaymentMethodPreview::class)
     override fun configure(
         value: Boolean,
         configurationBuilder: EmbeddedPaymentElement.Configuration.Builder,
@@ -36,7 +47,7 @@ internal object AllowsRemovalOfLastSavedPaymentMethodSettingsDefinition : Boolea
         configurationBuilder.allowsRemovalOfLastSavedPaymentMethod(value)
     }
 
-    @OptIn(ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class)
+    @OptIn(AllowsRemovalOfLastSavedPaymentMethodPreview::class)
     override fun configure(
         value: Boolean,
         configurationBuilder: CustomerSheet.Configuration.Builder,

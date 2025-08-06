@@ -3,14 +3,14 @@
 package com.stripe.android.paymentsheet
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
-import com.stripe.android.paymentsheet.PaymentSheet.IntentConfiguration
 import com.stripe.android.paymentsheet.paymentmethodoptions.setupfutureusage.toJsonObjectString
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
@@ -36,7 +36,7 @@ internal class DeferredIntentValidatorTest {
 
         assertThat(failure).hasMessageThat().isEqualTo(
             "You returned a PaymentIntent client secret " +
-                "but used a PaymentSheet.IntentConfiguration in setup mode."
+                "but used a IntentConfiguration in setup mode."
         )
     }
 
@@ -55,7 +55,7 @@ internal class DeferredIntentValidatorTest {
 
         assertThat(failure).hasMessageThat().isEqualTo(
             "Your PaymentIntent currency (usd) does not match " +
-                "the PaymentSheet.IntentConfiguration currency (eur)."
+                "the IntentConfiguration currency (eur)."
         )
     }
 
@@ -96,7 +96,7 @@ internal class DeferredIntentValidatorTest {
 
         assertThat(failure).hasMessageThat().isEqualTo(
             "Your PaymentIntent setupFutureUsage (on_session) does not match " +
-                "the PaymentSheet.IntentConfiguration setupFutureUsage (null)."
+                "the IntentConfiguration setupFutureUsage (null)."
         )
     }
 
@@ -134,7 +134,7 @@ internal class DeferredIntentValidatorTest {
 
         assertThat(failure).hasMessageThat().isEqualTo(
             "Your PaymentIntent confirmationMethod (Manual) can only " +
-                "be used with PaymentSheet.FlowController."
+                "be used with FlowController."
         )
     }
 
@@ -200,7 +200,7 @@ internal class DeferredIntentValidatorTest {
 
         assertThat(failure).hasMessageThat().isEqualTo(
             "You returned a SetupIntent client secret " +
-                "but used a PaymentSheet.IntentConfiguration in payment mode."
+                "but used a IntentConfiguration in payment mode."
         )
     }
 
@@ -564,7 +564,7 @@ internal class DeferredIntentValidatorTest {
             assertThat(failure).hasMessageThat().isEqualTo(
                 "Your PaymentIntent payment_method_options setup_future_usage values " +
                     "(${intent.getPaymentMethodOptions()} do not match the values provided in " +
-                    "PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions " +
+                    "IntentConfiguration.Mode.Payment.PaymentMethodOptions " +
                     "(${paymentMethodOptions.toJsonObjectString()})"
             )
         }

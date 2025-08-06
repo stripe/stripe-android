@@ -3,9 +3,9 @@ package com.stripe.android.paymentsheet.flowcontroller
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.elements.payment.FlowController
+import com.stripe.android.elements.payment.FlowController.PaymentOptionDisplayData
 import com.stripe.android.paymentsheet.InitializedViaCompose
-import com.stripe.android.paymentsheet.PaymentOptionCallback
-import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import dagger.BindsInstance
 import dagger.Subcomponent
 
@@ -31,10 +31,10 @@ internal interface FlowControllerComponent {
         ): Builder
 
         @BindsInstance
-        fun paymentOptionCallback(paymentOptionCallback: PaymentOptionCallback): Builder
+        fun paymentOptionCallback(paymentOptionCallback: PaymentOptionDisplayData.Callback): Builder
 
         @BindsInstance
-        fun paymentResultCallback(paymentResultCallback: PaymentSheetResultCallback): Builder
+        fun paymentResultCallback(paymentResultCallback: FlowController.ResultCallback): Builder
 
         @BindsInstance
         fun initializedViaCompose(@InitializedViaCompose initializedViaCompose: Boolean): Builder

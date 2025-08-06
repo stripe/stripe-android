@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.payment.FlowController
+import com.stripe.android.elements.payment.PaymentMethodLayout
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import java.util.Locale
 
@@ -46,10 +48,19 @@ internal object LayoutSettingsDefinition :
     ) {
         configurationBuilder.paymentMethodLayout(value.paymentMethodLayout)
     }
+
+    override fun configure(
+        value: Layout,
+        configurationBuilder: FlowController.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment,
+        configurationData: PlaygroundSettingDefinition.FlowControllerConfigurationData,
+    ) {
+        configurationBuilder.paymentMethodLayout(value.paymentMethodLayout)
+    }
 }
 
-enum class Layout(override val value: String, val paymentMethodLayout: PaymentSheet.PaymentMethodLayout) : ValueEnum {
-    HORIZONTAL("horizontal", PaymentSheet.PaymentMethodLayout.Horizontal),
-    VERTICAL("vertical", PaymentSheet.PaymentMethodLayout.Vertical),
-    AUTOMATIC("automatic", PaymentSheet.PaymentMethodLayout.Automatic),
+enum class Layout(override val value: String, val paymentMethodLayout: PaymentMethodLayout) : ValueEnum {
+    HORIZONTAL("horizontal", PaymentMethodLayout.Horizontal),
+    VERTICAL("vertical", PaymentMethodLayout.Vertical),
+    AUTOMATIC("automatic", PaymentMethodLayout.Automatic),
 }

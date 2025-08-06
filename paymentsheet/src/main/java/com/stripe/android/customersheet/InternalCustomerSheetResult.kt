@@ -4,16 +4,16 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.core.os.bundleOf
-import com.stripe.android.customersheet.CustomerSheet.Companion.toPaymentOptionSelection
-import com.stripe.android.paymentsheet.model.PaymentOptionFactory
+import com.stripe.android.elements.customersheet.CustomerSheet.Companion.toPaymentOptionSelection
+import com.stripe.android.elements.customersheet.CustomerSheet.Result
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
 internal sealed class InternalCustomerSheetResult : Parcelable {
     abstract fun toPublicResult(
-        paymentOptionFactory: PaymentOptionFactory,
-    ): CustomerSheetResult
+        paymentOptionFactory: CustomerSheetPaymentOptionFactory,
+    ): Result
 
     /**
      * The customer selected a payment method
@@ -23,9 +23,9 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
         val paymentSelection: PaymentSelection?
     ) : InternalCustomerSheetResult() {
         override fun toPublicResult(
-            paymentOptionFactory: PaymentOptionFactory,
-        ): CustomerSheetResult {
-            return CustomerSheetResult.Selected(
+            paymentOptionFactory: CustomerSheetPaymentOptionFactory,
+        ): Result {
+            return Result.Selected(
                 selection = paymentSelection?.toPaymentOptionSelection(paymentOptionFactory, canUseGooglePay = true)
             )
         }
@@ -39,9 +39,9 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
         val paymentSelection: PaymentSelection?
     ) : InternalCustomerSheetResult() {
         override fun toPublicResult(
-            paymentOptionFactory: PaymentOptionFactory,
-        ): CustomerSheetResult {
-            return CustomerSheetResult.Canceled(
+            paymentOptionFactory: CustomerSheetPaymentOptionFactory,
+        ): Result {
+            return Result.Canceled(
                 selection = paymentSelection?.toPaymentOptionSelection(paymentOptionFactory, canUseGooglePay = true)
             )
         }
@@ -55,9 +55,9 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
         val exception: Throwable
     ) : InternalCustomerSheetResult() {
         override fun toPublicResult(
-            paymentOptionFactory: PaymentOptionFactory,
-        ): CustomerSheetResult {
-            return CustomerSheetResult.Failed(exception)
+            paymentOptionFactory: CustomerSheetPaymentOptionFactory,
+        ): Result {
+            return Result.Failed(exception)
         }
     }
 

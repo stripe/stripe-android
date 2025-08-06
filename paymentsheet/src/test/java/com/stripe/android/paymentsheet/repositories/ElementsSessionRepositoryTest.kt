@@ -8,14 +8,16 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.payment.CustomPaymentMethod
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -186,8 +188,8 @@ internal class ElementsSessionRepositoryTest {
             appId = APP_ID
         ).get(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1234,
                         currency = "cad",
                     )
@@ -221,8 +223,8 @@ internal class ElementsSessionRepositoryTest {
             appId = APP_ID
         ).get(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1234,
                         currency = "cad",
                     ),
@@ -239,7 +241,7 @@ internal class ElementsSessionRepositoryTest {
         assertThat(session.getOrNull()?.stripeIntent?.paymentMethodTypes).isEqualTo(expectedPaymentMethodTypes)
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `Verify customer session client secret is passed to 'StripeRepository'`() = runTest {
         whenever(
@@ -265,7 +267,7 @@ internal class ElementsSessionRepositoryTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "client_secret"
             ),
-            customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+            customer = CustomerConfiguration.createWithCustomerSession(
                 id = "cus_1",
                 clientSecret = "customer_session_client_secret"
             ),
@@ -290,7 +292,7 @@ internal class ElementsSessionRepositoryTest {
         )
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `Verify legacy customer ephemeral key is passed to 'StripeRepository'`() = runTest {
         whenever(
@@ -316,7 +318,7 @@ internal class ElementsSessionRepositoryTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "client_secret"
             ),
-            customer = PaymentSheet.CustomerConfiguration(
+            customer = CustomerConfiguration(
                 id = "cus_1",
                 ephemeralKeySecret = "legacy_customer_ephemeral_key"
             ),
@@ -409,17 +411,17 @@ internal class ElementsSessionRepositoryTest {
             customer = null,
             externalPaymentMethods = emptyList(),
             customPaymentMethods = listOf(
-                PaymentSheet.CustomPaymentMethod(
+                CustomPaymentMethod(
                     id = "cpmt_123",
                     subtitle = "Pay now".resolvableString,
                     disableBillingDetailCollection = true,
                 ),
-                PaymentSheet.CustomPaymentMethod(
+                CustomPaymentMethod(
                     id = "cpmt_456",
                     subtitle = "Pay later".resolvableString,
                     disableBillingDetailCollection = true,
                 ),
-                PaymentSheet.CustomPaymentMethod(
+                CustomPaymentMethod(
                     id = "cpmt_789",
                     subtitle = "Pay never".resolvableString,
                     disableBillingDetailCollection = true,
@@ -462,10 +464,10 @@ internal class ElementsSessionRepositoryTest {
 
         repository.get(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
+                intentConfiguration = IntentConfiguration(
                     sharedPaymentTokenSessionWithMode =
-                    PaymentSheet.IntentConfiguration.Mode.Payment(amount = 1234, currency = "cad"),
-                    sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                    IntentConfiguration.Mode.Payment(amount = 1234, currency = "cad"),
+                    sellerDetails = IntentConfiguration.SellerDetails(
                         networkId = "network_123",
                         externalId = "external_123",
                     ),
@@ -537,17 +539,17 @@ internal class ElementsSessionRepositoryTest {
             customer = null,
             externalPaymentMethods = emptyList(),
             customPaymentMethods = listOf(
-                PaymentSheet.CustomPaymentMethod(
+                CustomPaymentMethod(
                     id = "cpmt_123",
                     subtitle = "Pay now".resolvableString,
                     disableBillingDetailCollection = true,
                 ),
-                PaymentSheet.CustomPaymentMethod(
+                CustomPaymentMethod(
                     id = "cpmt_456",
                     subtitle = "Pay later".resolvableString,
                     disableBillingDetailCollection = true,
                 ),
-                PaymentSheet.CustomPaymentMethod(
+                CustomPaymentMethod(
                     id = "cpmt_789",
                     subtitle = "Pay never".resolvableString,
                     disableBillingDetailCollection = true,

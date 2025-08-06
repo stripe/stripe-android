@@ -1,9 +1,9 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
+import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.toConfirmPaymentIntentShipping
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 
 internal suspend fun IntentConfirmationInterceptor.intercept(

@@ -4,6 +4,8 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.elements.payment.GooglePayConfiguration
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
@@ -15,7 +17,6 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
@@ -148,7 +149,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             lifecycleScope = CoroutineScope(Dispatchers.Default),
             config = GooglePayPaymentMethodLauncher.Config(
                 environment = when (config.environment) {
-                    PaymentSheet.GooglePayConfiguration.Environment.Production -> GooglePayEnvironment.Production
+                    GooglePayConfiguration.Environment.Production -> GooglePayEnvironment.Production
                     else -> GooglePayEnvironment.Test
                 },
                 merchantCountryCode = config.merchantCountryCode,
@@ -174,7 +175,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             is PaymentElementLoader.InitializationMode.PaymentIntent -> true
             is PaymentElementLoader.InitializationMode.SetupIntent -> false
             is PaymentElementLoader.InitializationMode.DeferredIntent -> {
-                intentConfiguration.mode is PaymentSheet.IntentConfiguration.Mode.Payment
+                intentConfiguration.mode is IntentConfiguration.Mode.Payment
             }
         }
 }

@@ -1,8 +1,10 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
-import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.customersheet.CustomerSheet
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.FlowController
+import com.stripe.android.elements.payment.GooglePayConfiguration
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 
 internal object GooglePaySettingsDefinition : BooleanSettingsDefinition(
@@ -18,8 +20,8 @@ internal object GooglePaySettingsDefinition : BooleanSettingsDefinition(
     ) {
         if (value) {
             configurationBuilder.googlePay(
-                PaymentSheet.GooglePayConfiguration(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                GooglePayConfiguration(
+                    environment = GooglePayConfiguration.Environment.Test,
                     countryCode = playgroundState.countryCode.value,
                     currencyCode = playgroundState.currencyCode.value,
                 )
@@ -35,8 +37,42 @@ internal object GooglePaySettingsDefinition : BooleanSettingsDefinition(
     ) {
         if (value) {
             configurationBuilder.googlePay(
-                PaymentSheet.GooglePayConfiguration(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                GooglePayConfiguration(
+                    environment = GooglePayConfiguration.Environment.Test,
+                    countryCode = playgroundState.countryCode.value,
+                    currencyCode = playgroundState.currencyCode.value,
+                )
+            )
+        }
+    }
+
+    override fun configure(
+        value: Boolean,
+        configurationBuilder: FlowController.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment,
+        configurationData: PlaygroundSettingDefinition.FlowControllerConfigurationData,
+    ) {
+        if (value) {
+            configurationBuilder.googlePay(
+                GooglePayConfiguration(
+                    environment = GooglePayConfiguration.Environment.Test,
+                    countryCode = playgroundState.countryCode.value,
+                    currencyCode = playgroundState.currencyCode.value,
+                )
+            )
+        }
+    }
+
+    override fun configure(
+        value: Boolean,
+        configurationBuilder: FlowController.Configuration.Builder,
+        playgroundState: PlaygroundState.SharedPaymentToken,
+        configurationData: PlaygroundSettingDefinition.FlowControllerConfigurationData,
+    ) {
+        if (value) {
+            configurationBuilder.googlePay(
+                GooglePayConfiguration(
+                    environment = GooglePayConfiguration.Environment.Test,
                     countryCode = playgroundState.countryCode.value,
                     currencyCode = playgroundState.currencyCode.value,
                 )
@@ -52,8 +88,8 @@ internal object GooglePaySettingsDefinition : BooleanSettingsDefinition(
     ) {
         if (value) {
             configurationBuilder.googlePay(
-                PaymentSheet.GooglePayConfiguration(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                GooglePayConfiguration(
+                    environment = GooglePayConfiguration.Environment.Test,
                     countryCode = playgroundState.countryCode.value,
                     currencyCode = playgroundState.currencyCode.value,
                 )

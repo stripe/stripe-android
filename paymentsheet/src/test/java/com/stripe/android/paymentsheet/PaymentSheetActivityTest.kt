@@ -38,6 +38,9 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.PaymentMethodLayout
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
@@ -562,7 +565,7 @@ internal class PaymentSheetActivityTest {
                 scenario.getResult().resultData
             )
         ).isEqualTo(
-            PaymentSheetResult.Canceled()
+            PaymentSheet.Result.Canceled()
         )
     }
 
@@ -794,7 +797,7 @@ internal class PaymentSheetActivityTest {
             scenario.getResult().resultData
         )
 
-        assertThat(result).isEqualTo(PaymentSheetResult.Completed())
+        assertThat(result).isEqualTo(PaymentSheet.Result.Completed())
     }
 
     @Test
@@ -813,7 +816,7 @@ internal class PaymentSheetActivityTest {
                 scenario.getResult().resultCode,
                 scenario.getResult().resultData
             )
-        ).isInstanceOf<PaymentSheetResult.Failed>()
+        ).isInstanceOf<PaymentSheet.Result.Failed>()
     }
 
     @Test
@@ -975,7 +978,7 @@ internal class PaymentSheetActivityTest {
     fun `mandate text is shown above primary button when in vertical mode`() {
         val args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
             config = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
-                .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                .paymentMethodLayout(PaymentMethodLayout.Vertical)
                 .build()
         )
         val viewModel = createViewModel(args = args)
@@ -1010,12 +1013,12 @@ internal class PaymentSheetActivityTest {
         )
 
         assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
-        assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
+        assertThat(result).isInstanceOf<PaymentSheet.Result.Failed>()
     }
 
     @Test
     fun `Handles invalid arguments correctly`() {
-        val invalidCustomerConfig = PaymentSheet.CustomerConfiguration(
+        val invalidCustomerConfig = CustomerConfiguration(
             id = "",
             ephemeralKeySecret = "",
         )
@@ -1042,7 +1045,7 @@ internal class PaymentSheetActivityTest {
         )
 
         assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
-        assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
+        assertThat(result).isInstanceOf<PaymentSheet.Result.Failed>()
     }
 
     @Test
@@ -1066,7 +1069,7 @@ internal class PaymentSheetActivityTest {
         )
 
         assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
-        assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
+        assertThat(result).isInstanceOf<PaymentSheet.Result.Failed>()
     }
 
     @Test

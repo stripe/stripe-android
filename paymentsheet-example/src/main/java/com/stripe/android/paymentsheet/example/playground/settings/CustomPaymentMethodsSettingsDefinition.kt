@@ -1,8 +1,10 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.CustomPaymentMethod
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.FlowController
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 
 @OptIn(ExperimentalCustomPaymentMethodsApi::class)
@@ -44,9 +46,18 @@ internal object CustomPaymentMethodsSettingDefinition :
         configurationBuilder.customPaymentMethods(createCustomPaymentMethodsFromType(value))
     }
 
+    override fun configure(
+        value: CustomPaymentMethodPlaygroundType,
+        configurationBuilder: FlowController.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment,
+        configurationData: PlaygroundSettingDefinition.FlowControllerConfigurationData,
+    ) {
+        configurationBuilder.customPaymentMethods(createCustomPaymentMethodsFromType(value))
+    }
+
     private fun createCustomPaymentMethodsFromType(
         value: CustomPaymentMethodPlaygroundType
-    ): List<PaymentSheet.CustomPaymentMethod> {
+    ): List<CustomPaymentMethod> {
         return when (value) {
             CustomPaymentMethodPlaygroundType.On -> createCustomPaymentMethods(disableBillingDetails = true)
             CustomPaymentMethodPlaygroundType.OnWithBillingDetailsCollection ->
@@ -70,9 +81,9 @@ enum class CustomPaymentMethodPlaygroundType(
 internal const val DEFAULT_CUSTOM_PAYMENT_METHOD_ID = "cpmt_1QpIMNLu5o3P18Zpwln1Sm6I"
 
 @OptIn(ExperimentalCustomPaymentMethodsApi::class)
-private fun createCustomPaymentMethods(disableBillingDetails: Boolean): List<PaymentSheet.CustomPaymentMethod> {
+private fun createCustomPaymentMethods(disableBillingDetails: Boolean): List<CustomPaymentMethod> {
     return listOf(
-        PaymentSheet.CustomPaymentMethod(
+        CustomPaymentMethod(
             id = DEFAULT_CUSTOM_PAYMENT_METHOD_ID,
             subtitle = "Pay now with BufoPay",
             disableBillingDetailCollection = disableBillingDetails,

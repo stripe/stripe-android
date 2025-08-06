@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration.CollectionMode
 
 internal open class CollectionModeSettingsDefinition(
     override val key: String,

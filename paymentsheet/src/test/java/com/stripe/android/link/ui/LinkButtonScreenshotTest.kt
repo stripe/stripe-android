@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.Appearance
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.Locale
@@ -16,12 +16,12 @@ import com.stripe.android.utils.screenshots.PaymentSheetAppearance.DefaultAppear
 import org.junit.Rule
 import org.junit.Test
 
-private enum class LinkButtonAppearance(private val appearance: PaymentSheet.Appearance) : PaparazziConfigOption {
+private enum class LinkButtonAppearance(private val appearance: Appearance) : PaparazziConfigOption {
 
     TestSurfaceBackgroundAppearance(
-        appearance = PaymentSheet.Appearance(
-            colorsLight = PaymentSheet.Colors.configureDefaultLight(surface = Color.Red),
-            colorsDark = PaymentSheet.Colors.configureDefaultDark(surface = Color.Red),
+        appearance = Appearance(
+            colorsLight = Appearance.Colors.configureDefaultLight(surface = Color.Red),
+            colorsDark = Appearance.Colors.configureDefaultDark(surface = Color.Red),
         ),
     );
 

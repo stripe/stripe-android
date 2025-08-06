@@ -6,6 +6,10 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.model.CommonConfigurationFactory
+import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.CardBrandAcceptance
+import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentLauncher
@@ -19,7 +23,6 @@ import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -343,7 +346,7 @@ class DefaultWalletButtonsInteractorTest {
             format = GooglePayJsonFactory.BillingAddressParameters.Format.Min,
             isPhoneNumberRequired = false
         ),
-        expectedCardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all())
+        expectedCardBrandFilter = PaymentSheetCardBrandFilter(CardBrandAcceptance.all())
     )
 
     @Test
@@ -352,20 +355,20 @@ class DefaultWalletButtonsInteractorTest {
             arguments = createArguments(
                 availableWallets = listOf(WalletType.GooglePay),
                 linkEmail = null,
-                googlePay = PaymentSheet.GooglePayConfiguration(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                googlePay = GooglePayConfiguration(
+                    environment = GooglePayConfiguration.Environment.Test,
                     countryCode = "US",
-                    buttonType = PaymentSheet.GooglePayConfiguration.ButtonType.Book,
+                    buttonType = GooglePayConfiguration.ButtonType.Book,
                 ),
-                cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
+                cardBrandAcceptance = CardBrandAcceptance.disallowed(
                     brands = listOf(
-                        PaymentSheet.CardBrandAcceptance.BrandCategory.Amex,
-                        PaymentSheet.CardBrandAcceptance.BrandCategory.Discover,
+                        CardBrandAcceptance.BrandCategory.Amex,
+                        CardBrandAcceptance.BrandCategory.Discover,
                     )
                 ),
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-                    phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                    address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
                 )
             ),
             expectedAllowCreditCards = true,
@@ -376,10 +379,10 @@ class DefaultWalletButtonsInteractorTest {
                 isPhoneNumberRequired = true
             ),
             expectedCardBrandFilter = PaymentSheetCardBrandFilter(
-                PaymentSheet.CardBrandAcceptance.disallowed(
+                CardBrandAcceptance.disallowed(
                     brands = listOf(
-                        PaymentSheet.CardBrandAcceptance.BrandCategory.Amex,
-                        PaymentSheet.CardBrandAcceptance.BrandCategory.Discover,
+                        CardBrandAcceptance.BrandCategory.Amex,
+                        CardBrandAcceptance.BrandCategory.Discover,
                     )
                 )
             )
@@ -388,20 +391,20 @@ class DefaultWalletButtonsInteractorTest {
     @Test
     fun `On Google Pay pressed, should call confirmation handler with expected selection`() = runTest {
         val confirmationHandler = FakeConfirmationHandler()
-        val cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
+        val cardBrandAcceptance = CardBrandAcceptance.disallowed(
             brands = listOf(
-                PaymentSheet.CardBrandAcceptance.BrandCategory.Amex,
-                PaymentSheet.CardBrandAcceptance.BrandCategory.Discover,
+                CardBrandAcceptance.BrandCategory.Amex,
+                CardBrandAcceptance.BrandCategory.Discover,
             )
         )
-        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+        val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+            phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
         )
         val interactor = createInteractor(
             arguments = createArguments(
                 availableWallets = listOf(WalletType.GooglePay),
-                googlePay = PaymentSheet.GooglePayConfiguration(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
+                googlePay = GooglePayConfiguration(
+                    environment = GooglePayConfiguration.Environment.Production,
                     countryCode = "CA",
                     amount = 5050L,
                     currencyCode = "CAD",
@@ -429,7 +432,7 @@ class DefaultWalletButtonsInteractorTest {
             assertThat(arguments.confirmationOption).isEqualTo(
                 GooglePayConfirmationOption(
                     config = GooglePayConfirmationOption.Config(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
+                        environment = GooglePayConfiguration.Environment.Production,
                         merchantName = "Example, Inc.",
                         merchantCountryCode = "CA",
                         merchantCurrencyCode = "CAD",
@@ -706,12 +709,12 @@ class DefaultWalletButtonsInteractorTest {
         availableWallets: List<WalletType> = listOf(WalletType.Link, WalletType.GooglePay, WalletType.ShopPay),
         allowedWalletTypes: List<WalletType> = listOf(WalletType.Link, WalletType.GooglePay, WalletType.ShopPay),
         linkEmail: String? = null,
-        appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
-        googlePay: PaymentSheet.GooglePayConfiguration? = null,
+        appearance: Appearance = Appearance(),
+        googlePay: GooglePayConfiguration? = null,
         linkState: LinkState? = null,
-        cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all(),
-        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
-            PaymentSheet.BillingDetailsCollectionConfiguration(),
+        cardBrandAcceptance: CardBrandAcceptance = CardBrandAcceptance.all(),
+        billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
+            BillingDetailsCollectionConfiguration(),
         initializationMode: PaymentElementLoader.InitializationMode =
             PaymentElementLoader.InitializationMode.SetupIntent(clientSecret = "seti_123_secret_123")
     ): DefaultWalletButtonsInteractor.Arguments {

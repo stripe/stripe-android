@@ -5,8 +5,8 @@ import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.view.ActivityStarter

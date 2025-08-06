@@ -5,6 +5,11 @@ import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.AnalyticEvent
+import com.stripe.android.elements.payment.CreateIntentCallback
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.AnalyticEventCallbackPreview
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.host
@@ -12,8 +17,6 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentsheet.CreateIntentResult
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.utils.AdvancedFraudSignalsTestRule
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -27,7 +30,7 @@ import org.junit.Rule
 import org.junit.Test
 import kotlin.time.Duration.Companion.seconds
 
-@OptIn(ExperimentalAnalyticEventCallbackApi::class)
+@OptIn(AnalyticEventCallbackPreview::class)
 internal class EmbeddedPaymentElementAnalyticsTest {
     private val networkRule = NetworkRule(
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
@@ -55,7 +58,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         networkRule = networkRule,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
-            CreateIntentResult.Success("pi_example_secret_12345")
+            CreateIntentCallback.Result.Success("pi_example_secret_12345")
         },
         resultCallback = ::assertCompleted,
         builder = {
@@ -152,7 +155,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         networkRule = networkRule,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
-            CreateIntentResult.Success("pi_example_secret_12345")
+            CreateIntentCallback.Result.Success("pi_example_secret_12345")
         },
         resultCallback = ::assertCompleted,
         builder = {
@@ -176,7 +179,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_embedded_sheet_newpm_show")
 
         testContext.configure {
-            customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+            customer(CustomerConfiguration("cus_123", "ek_test"))
         }
 
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
@@ -221,7 +224,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         networkRule = networkRule,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
-            CreateIntentResult.Success("pi_example_secret_12345")
+            CreateIntentCallback.Result.Success("pi_example_secret_12345")
         },
         resultCallback = ::assertCompleted,
         builder = {
@@ -245,7 +248,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_embedded_sheet_newpm_show")
 
         testContext.configure {
-            customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+            customer(CustomerConfiguration("cus_123", "ek_test"))
         }
 
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
@@ -272,7 +275,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         networkRule = networkRule,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
-            CreateIntentResult.Success("pi_example_secret_12345")
+            CreateIntentCallback.Result.Success("pi_example_secret_12345")
         },
         builder = {
             analyticEventCallback(analyticEventRule)
@@ -296,7 +299,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_embedded_sheet_newpm_show")
 
         testContext.configure {
-            customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+            customer(CustomerConfiguration("cus_123", "ek_test"))
         }
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 

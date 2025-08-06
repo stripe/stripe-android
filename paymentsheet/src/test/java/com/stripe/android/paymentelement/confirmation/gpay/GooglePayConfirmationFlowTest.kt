@@ -3,6 +3,9 @@ package com.stripe.android.paymentelement.confirmation.gpay
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -11,7 +14,6 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationMediator.Param
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.runResultTest
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.utils.RecordingGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.testing.PaymentIntentFactory
@@ -99,14 +101,14 @@ class GooglePayConfirmationFlowTest {
     private companion object {
         private val GOOGLE_PAY_CONFIRMATION_OPTION = GooglePayConfirmationOption(
             config = GooglePayConfirmationOption.Config(
-                environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                environment = GooglePayConfiguration.Environment.Test,
                 merchantName = "Test merchant Inc.",
                 merchantCountryCode = "US",
                 merchantCurrencyCode = "CA",
                 customAmount = 1099,
                 customLabel = null,
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                    address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 ),
                 cardBrandFilter = DefaultCardBrandFilter,
             )
@@ -122,7 +124,7 @@ class GooglePayConfirmationFlowTest {
             ),
             shippingDetails = null,
             intent = PAYMENT_INTENT,
-            appearance = PaymentSheet.Appearance()
+            appearance = Appearance()
         )
     }
 }

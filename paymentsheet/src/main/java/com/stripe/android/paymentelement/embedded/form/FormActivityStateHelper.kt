@@ -2,10 +2,10 @@ package com.stripe.android.paymentelement.embedded.form
 
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter

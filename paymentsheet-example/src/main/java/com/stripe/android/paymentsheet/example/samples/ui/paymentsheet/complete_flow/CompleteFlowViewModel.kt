@@ -8,7 +8,7 @@ import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
 import com.github.kittinunf.result.Result
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.paymentsheet.PaymentSheetResult
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.model.CartState
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutRequest
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutResponse
@@ -79,18 +79,18 @@ internal class CompleteFlowViewModel(
         }
     }
 
-    fun handlePaymentSheetResult(paymentResult: PaymentSheetResult) {
+    fun handlePaymentSheetResult(paymentResult: PaymentSheet.Result) {
         val status = when (paymentResult) {
-            is PaymentSheetResult.Canceled -> null
-            is PaymentSheetResult.Completed -> "Success"
-            is PaymentSheetResult.Failed -> paymentResult.error.message
+            is PaymentSheet.Result.Canceled -> null
+            is PaymentSheet.Result.Completed -> "Success"
+            is PaymentSheet.Result.Failed -> paymentResult.error.message
         }
 
         _state.update {
             it.copy(
                 isProcessing = false,
                 status = status,
-                didComplete = paymentResult is PaymentSheetResult.Completed,
+                didComplete = paymentResult is PaymentSheet.Result.Completed,
             )
         }
     }

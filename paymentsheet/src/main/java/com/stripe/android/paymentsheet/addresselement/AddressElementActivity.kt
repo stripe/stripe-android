@@ -22,6 +22,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
+import com.stripe.android.elements.AddressLauncher
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState
@@ -124,7 +125,7 @@ internal class AddressElementActivity : ComponentActivity() {
         }
     }
 
-    private fun setResult(result: AddressLauncherResult = AddressLauncherResult.Canceled()) {
+    private fun setResult(result: AddressLauncher.Result = AddressLauncher.Result.Canceled()) {
         setResult(
             result.resultCode,
             Intent().putExtras(

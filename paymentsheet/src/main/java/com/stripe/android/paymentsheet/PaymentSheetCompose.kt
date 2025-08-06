@@ -10,6 +10,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.stripe.android.common.ui.UpdateCallbacks
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.utils.rememberActivity
 import java.util.UUID
@@ -17,7 +18,7 @@ import java.util.UUID
 @Composable
 internal fun internalRememberPaymentSheet(
     callbacks: PaymentElementCallbacks,
-    paymentResultCallback: PaymentSheetResultCallback,
+    paymentResultCallback: PaymentSheet.ResultCallback,
 ): PaymentSheet {
     val paymentElementCallbackIdentifier = rememberSaveable {
         UUID.randomUUID().toString()

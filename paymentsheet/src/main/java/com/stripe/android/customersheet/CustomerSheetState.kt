@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet
 
+import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod

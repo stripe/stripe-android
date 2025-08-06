@@ -6,6 +6,10 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.payment.GooglePayConfiguration
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
@@ -24,7 +28,6 @@ import com.stripe.android.paymentelement.confirmation.asFailed
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.paymentelement.confirmation.asSaved
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
@@ -209,8 +212,8 @@ class GooglePayConfirmationDefinitionTest {
     fun `'Fail' action should be returned if currency code is not provided with a deferred intent in setup mode`() =
         runActionTest(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Setup(),
                 ),
             ),
             merchantCurrencyCode = null,
@@ -231,8 +234,8 @@ class GooglePayConfirmationDefinitionTest {
     fun `'Launch' action should be returned if currency code is provided with a deferred intent in setup mode`() =
         runActionTest(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Setup(),
                 ),
             ),
             merchantCurrencyCode = "USD",
@@ -263,8 +266,8 @@ class GooglePayConfirmationDefinitionTest {
     fun `'Launch' action should be returned if currency code is not provided with deferred intent in payment mode`() =
         runActionTest(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1099,
                         currency = "USD",
                     ),
@@ -278,8 +281,8 @@ class GooglePayConfirmationDefinitionTest {
     fun `'Launch' action should be returned if currency code is provided with deferred intent in payment mode`() =
         runActionTest(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1099,
                         currency = "USD",
                     ),
@@ -342,11 +345,11 @@ class GooglePayConfirmationDefinitionTest {
                 config = GOOGLE_PAY_CONFIRMATION_OPTION.config.copy(
                     merchantName = "Another merchant Inc.",
                     merchantCountryCode = "CA",
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                    environment = GooglePayConfiguration.Environment.Production,
+                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                        email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
                     ),
                     cardBrandFilter = FakeCardBrandFilter,
                 )
@@ -366,7 +369,7 @@ class GooglePayConfirmationDefinitionTest {
         runLaunchParametersTest(
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION.copy(
                 config = GOOGLE_PAY_CONFIRMATION_OPTION.config.copy(
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
                 )
             ),
             merchantNameShouldBe = "Test merchant Inc.",
@@ -611,14 +614,14 @@ class GooglePayConfirmationDefinitionTest {
     private companion object {
         private val GOOGLE_PAY_CONFIRMATION_OPTION = GooglePayConfirmationOption(
             config = GooglePayConfirmationOption.Config(
-                environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                environment = GooglePayConfiguration.Environment.Test,
                 merchantName = "Test merchant Inc.",
                 merchantCountryCode = "US",
                 merchantCurrencyCode = "CA",
                 customAmount = 1099,
                 customLabel = null,
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                    address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 ),
                 cardBrandFilter = DefaultCardBrandFilter,
             )
@@ -626,8 +629,8 @@ class GooglePayConfirmationDefinitionTest {
 
         private val PAYMENT_INTENT = PaymentIntentFactory.create()
 
-        private val APPEARANCE = PaymentSheet.Appearance.Builder()
-            .colorsDark(PaymentSheet.Colors.defaultLight)
+        private val APPEARANCE = Appearance.Builder()
+            .colorsDark(Appearance.Colors.defaultLight)
             .build()
 
         private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(

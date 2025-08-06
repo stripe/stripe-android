@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import com.stripe.android.core.exception.LocalStripeException
+import com.stripe.android.elements.payment.ExternalPaymentMethodResult
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentResult

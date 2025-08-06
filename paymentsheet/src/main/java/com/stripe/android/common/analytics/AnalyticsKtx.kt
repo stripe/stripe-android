@@ -1,8 +1,11 @@
 package com.stripe.android.common.analytics
 
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.CardBrandAcceptance
+import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.model.CardBrand
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.uicore.StripeThemeDefaults
 
@@ -23,20 +26,20 @@ internal const val FIELD_EMBEDDED_PAYMENT_ELEMENT = "embedded_payment_element"
 internal const val FIELD_STYLE = "style"
 internal const val FIELD_ROW_STYLE = "row_style"
 
-internal fun PaymentSheet.Appearance.toAnalyticsMap(isEmbedded: Boolean = false): Map<String, Any?> {
+internal fun Appearance.toAnalyticsMap(isEmbedded: Boolean = false): Map<String, Any?> {
     val primaryButtonConfig = primaryButton
 
     val primaryButtonConfigMap = mapOf(
-        FIELD_COLORS_LIGHT to (primaryButton.colorsLight != PaymentSheet.PrimaryButtonColors.defaultLight),
-        FIELD_COLORS_DARK to (primaryButton.colorsDark != PaymentSheet.PrimaryButtonColors.defaultDark),
+        FIELD_COLORS_LIGHT to (primaryButton.colorsLight != Appearance.PrimaryButton.Colors.defaultLight),
+        FIELD_COLORS_DARK to (primaryButton.colorsDark != Appearance.PrimaryButton.Colors.defaultDark),
         FIELD_CORNER_RADIUS to (primaryButtonConfig.shape.cornerRadiusDp != null),
         FIELD_BORDER_WIDTH to (primaryButtonConfig.shape.borderStrokeWidthDp != null),
         FIELD_FONT to (primaryButtonConfig.typography.fontResId != null)
     )
 
     val appearanceConfigMap = mutableMapOf<String, Any?>(
-        FIELD_COLORS_LIGHT to (colorsLight != PaymentSheet.Colors.defaultLight),
-        FIELD_COLORS_DARK to (colorsDark != PaymentSheet.Colors.defaultDark),
+        FIELD_COLORS_LIGHT to (colorsLight != Appearance.Colors.defaultLight),
+        FIELD_COLORS_DARK to (colorsDark != Appearance.Colors.defaultDark),
         FIELD_CORNER_RADIUS to (shapes.cornerRadiusDp != StripeThemeDefaults.shapes.cornerRadius),
         FIELD_BORDER_WIDTH to (shapes.borderStrokeWidthDp != StripeThemeDefaults.shapes.borderStrokeWidth),
         FIELD_FONT to (typography.fontResId != null),
@@ -57,23 +60,23 @@ internal fun PaymentSheet.Appearance.toAnalyticsMap(isEmbedded: Boolean = false)
     return appearanceConfigMap
 }
 
-internal fun PaymentSheet.Appearance.Embedded.toAnalyticsMap(): Map<String, Any?> {
+internal fun Appearance.Embedded.toAnalyticsMap(): Map<String, Any?> {
     return mapOf(
-        FIELD_STYLE to (this.style != PaymentSheet.Appearance.Embedded.default.style),
+        FIELD_STYLE to (this.style != Appearance.Embedded.default.style),
         FIELD_ROW_STYLE to this.style.toAnalyticsValue()
     )
 }
 
-internal fun PaymentSheet.Appearance.Embedded.RowStyle.toAnalyticsValue(): String {
+internal fun Appearance.Embedded.RowStyle.toAnalyticsValue(): String {
     return when (this) {
-        is PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton -> "floating_button"
-        is PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio -> "flat_with_radio"
-        is PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark -> "flat_with_checkmark"
-        is PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure -> "flat_with_disclosure"
+        is Appearance.Embedded.RowStyle.FloatingButton -> "floating_button"
+        is Appearance.Embedded.RowStyle.FlatWithRadio -> "flat_with_radio"
+        is Appearance.Embedded.RowStyle.FlatWithCheckmark -> "flat_with_checkmark"
+        is Appearance.Embedded.RowStyle.FlatWithDisclosure -> "flat_with_disclosure"
     }
 }
 
-internal fun PaymentSheet.BillingDetailsCollectionConfiguration.toAnalyticsMap(): Map<String, Any?> {
+internal fun BillingDetailsCollectionConfiguration.toAnalyticsMap(): Map<String, Any?> {
     return mapOf(
         FIELD_ATTACH_DEFAULTS to attachDefaultsToPaymentMethod,
         FIELD_COLLECT_NAME to name.name,
@@ -103,14 +106,14 @@ internal fun CommonConfiguration.getCustomPaymentMethodsAnalyticsValue(): String
     }
 }
 
-internal fun PaymentSheet.CardBrandAcceptance.toAnalyticsValue(): Boolean {
-    return this !is PaymentSheet.CardBrandAcceptance.All
+internal fun CardBrandAcceptance.toAnalyticsValue(): Boolean {
+    return this !is CardBrandAcceptance.All
 }
 
-internal fun PaymentSheet.PaymentMethodLayout.toAnalyticsValue(): String {
+internal fun PaymentMethodLayout.toAnalyticsValue(): String {
     return when (this) {
-        PaymentSheet.PaymentMethodLayout.Horizontal -> "horizontal"
-        PaymentSheet.PaymentMethodLayout.Vertical -> "vertical"
-        PaymentSheet.PaymentMethodLayout.Automatic -> "automatic"
+        PaymentMethodLayout.Horizontal -> "horizontal"
+        PaymentMethodLayout.Vertical -> "vertical"
+        PaymentMethodLayout.Automatic -> "automatic"
     }
 }

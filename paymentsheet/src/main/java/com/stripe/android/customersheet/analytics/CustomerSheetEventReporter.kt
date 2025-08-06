@@ -1,9 +1,9 @@
 package com.stripe.android.customersheet.analytics
 
 import com.stripe.android.core.networking.AnalyticsEvent
-import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetIntegration
 import com.stripe.android.customersheet.data.CustomerSheetSession
+import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.model.CardBrand
 
 internal interface CustomerSheetEventReporter {

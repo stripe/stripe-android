@@ -1,7 +1,9 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.FlowController
+import com.stripe.android.elements.payment.LinkConfiguration
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 
@@ -34,6 +36,17 @@ internal object LinkSettingsDefinition : BooleanSettingsDefinition(
 
     override fun configure(
         value: Boolean,
+        configurationBuilder: FlowController.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment,
+        configurationData: PlaygroundSettingDefinition.FlowControllerConfigurationData,
+    ) {
+        configurationBuilder.link(
+            link = makeLinkConfiguration(value),
+        )
+    }
+
+    override fun configure(
+        value: Boolean,
         configurationBuilder: EmbeddedPaymentElement.Configuration.Builder,
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.EmbeddedConfigurationData
@@ -43,12 +56,12 @@ internal object LinkSettingsDefinition : BooleanSettingsDefinition(
         )
     }
 
-    private fun makeLinkConfiguration(value: Boolean): PaymentSheet.LinkConfiguration {
-        return PaymentSheet.LinkConfiguration(
+    private fun makeLinkConfiguration(value: Boolean): LinkConfiguration {
+        return LinkConfiguration(
             display = if (value) {
-                PaymentSheet.LinkConfiguration.Display.Automatic
+                LinkConfiguration.Display.Automatic
             } else {
-                PaymentSheet.LinkConfiguration.Display.Never
+                LinkConfiguration.Display.Never
             }
         )
     }

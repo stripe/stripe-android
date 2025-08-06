@@ -5,6 +5,9 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.Address
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
@@ -16,7 +19,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FormHelper
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
@@ -802,14 +804,14 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = paymentMethodTypes
             ),
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                 attachDefaultsToPaymentMethod = true,
             ),
-            defaultBillingDetails = PaymentSheet.BillingDetails(
+            defaultBillingDetails = BillingDetails(
                 name = "Jenny Rosen",
                 email = "mail@mail.com",
                 phone = "+13105551234",
-                address = PaymentSheet.Address(
+                address = Address(
                     line1 = "123 Main Street",
                     line2 = "456",
                     city = "San Francisco",

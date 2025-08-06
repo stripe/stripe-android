@@ -5,6 +5,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
@@ -14,7 +15,6 @@ import com.stripe.android.paymentelement.confirmation.lpms.foundations.LpmAssert
 import com.stripe.android.paymentelement.confirmation.lpms.foundations.LpmNetworkTestActivity
 import com.stripe.android.paymentelement.confirmation.lpms.foundations.network.MerchantCountry
 import com.stripe.android.paymentelement.confirmation.lpms.foundations.network.PublishableKeyFetcher
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.createTestActivityRule
 import com.stripe.android.testing.RetryRule
 import com.stripe.android.utils.PaymentElementCallbackTestRule

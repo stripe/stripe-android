@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.verticalmode
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
+import com.stripe.android.elements.Appearance.Embedded
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance

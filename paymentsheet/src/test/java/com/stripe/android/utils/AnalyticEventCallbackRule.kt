@@ -2,14 +2,14 @@ package com.stripe.android.utils
 
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentelement.AnalyticEvent
-import com.stripe.android.paymentelement.AnalyticEventCallback
-import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
+import com.stripe.android.elements.payment.AnalyticEvent
+import com.stripe.android.elements.payment.AnalyticEventCallback
+import com.stripe.android.elements.payment.AnalyticEventCallbackPreview
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import javax.inject.Provider
 
-@OptIn(ExperimentalAnalyticEventCallbackApi::class)
+@OptIn(AnalyticEventCallbackPreview::class)
 class AnalyticEventCallbackRule : TestWatcher(), AnalyticEventCallback, Provider<AnalyticEventCallback?> {
     private lateinit var analyticEventCall: Turbine<AnalyticEvent>
     private var callback: AnalyticEventCallback? = null

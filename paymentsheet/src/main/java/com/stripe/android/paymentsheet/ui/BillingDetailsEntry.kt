@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet.ui
 
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.uicore.forms.FormFieldEntry
 
 internal data class BillingDetailsEntry(

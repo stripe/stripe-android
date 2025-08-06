@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.Stripe
 import com.stripe.android.confirmPaymentIntent
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
@@ -32,7 +33,6 @@ import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountForInstantDebitsResult
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
-import com.stripe.android.paymentsheet.PaymentSheetResult
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -377,12 +377,12 @@ internal class FinancialConnectionsPlaygroundViewModel(
         }
     }
 
-    fun onPaymentSheetResult(result: PaymentSheetResult) {
+    fun onPaymentSheetResult(result: PaymentSheet.Result) {
         when (result) {
-            is PaymentSheetResult.Canceled -> {
+            is PaymentSheet.Result.Canceled -> {
                 _state.update { it.copy(loading = false, status = it.status + "Cancelled!") }
             }
-            is PaymentSheetResult.Completed -> {
+            is PaymentSheet.Result.Completed -> {
                 _state.update {
                     it.copy(
                         status = it.status + listOf(
@@ -391,7 +391,7 @@ internal class FinancialConnectionsPlaygroundViewModel(
                     )
                 }
             }
-            is PaymentSheetResult.Failed -> {
+            is PaymentSheet.Result.Failed -> {
                 _state.update {
                     it.copy(
                         loading = false,

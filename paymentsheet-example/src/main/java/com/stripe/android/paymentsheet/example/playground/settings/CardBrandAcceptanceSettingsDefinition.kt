@@ -1,9 +1,11 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
-import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.elements.CardBrandAcceptance
+import com.stripe.android.elements.customersheet.CustomerSheet
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.FlowController
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.link.LinkController
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 
 internal object CardBrandAcceptanceSettingsDefinition :
@@ -33,6 +35,15 @@ internal object CardBrandAcceptanceSettingsDefinition :
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
+    ) {
+        configurationBuilder.cardBrandAcceptance(value.cardBrandAcceptance)
+    }
+
+    override fun configure(
+        value: CardBrandAcceptanceType,
+        configurationBuilder: FlowController.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment,
+        configurationData: PlaygroundSettingDefinition.FlowControllerConfigurationData,
     ) {
         configurationBuilder.cardBrandAcceptance(value.cardBrandAcceptance)
     }
@@ -81,20 +92,20 @@ internal object CardBrandAcceptanceSettingsDefinition :
     }
 }
 
-sealed class CardBrandAcceptanceType(val value: String, val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance) {
-    object All : CardBrandAcceptanceType("all", PaymentSheet.CardBrandAcceptance.all())
+sealed class CardBrandAcceptanceType(val value: String, val cardBrandAcceptance: CardBrandAcceptance) {
+    object All : CardBrandAcceptanceType("all", CardBrandAcceptance.all())
 
     object DisallowVisa : CardBrandAcceptanceType(
         "disallow_visa",
-        PaymentSheet.CardBrandAcceptance.disallowed(
-            brands = listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Visa)
+        CardBrandAcceptance.disallowed(
+            brands = listOf(CardBrandAcceptance.BrandCategory.Visa)
         )
     )
 
     object AllowVisa : CardBrandAcceptanceType(
         "allow_visa",
-        PaymentSheet.CardBrandAcceptance.allowed(
-            brands = listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Visa)
+        CardBrandAcceptance.allowed(
+            brands = listOf(CardBrandAcceptance.BrandCategory.Visa)
         )
     )
 }

@@ -3,9 +3,10 @@ package com.stripe.android.paymentsheet
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.CustomerSheetResult
-import com.stripe.android.customersheet.PaymentOptionSelection
+import com.stripe.android.elements.customersheet.CustomerSheet
+import com.stripe.android.elements.customersheet.CustomerSheet.Result
+import com.stripe.android.elements.customersheet.PaymentOptionSelection
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.CustomerSheetTestType
@@ -42,7 +43,7 @@ internal class CustomerSheetTest {
         integrationType = integrationType,
         customerSheetTestType = customerSheetTestType,
         resultCallback = { result ->
-            assertThat(result).isInstanceOf(CustomerSheetResult.Selected::class.java)
+            assertThat(result).isInstanceOf(Result.Selected::class.java)
         }
     ) { context ->
         networkRule.enqueue(
@@ -81,9 +82,9 @@ internal class CustomerSheetTest {
         integrationType = integrationType,
         customerSheetTestType = CustomerSheetTestType.AttachToSetupIntent,
         resultCallback = { result ->
-            assertThat(result).isInstanceOf(CustomerSheetResult.Selected::class.java)
+            assertThat(result).isInstanceOf(Result.Selected::class.java)
 
-            val selected = result as CustomerSheetResult.Selected
+            val selected = result as CustomerSheet.Result.Selected
 
             assertThat(selected.selection).isInstanceOf(PaymentOptionSelection.PaymentMethod::class.java)
 
@@ -119,9 +120,9 @@ internal class CustomerSheetTest {
         integrationType = integrationType,
         customerSheetTestType = CustomerSheetTestType.AttachToSetupIntent,
         resultCallback = { result ->
-            assertThat(result).isInstanceOf(CustomerSheetResult.Selected::class.java)
+            assertThat(result).isInstanceOf(Result.Selected::class.java)
 
-            val selected = result as CustomerSheetResult.Selected
+            val selected = result as CustomerSheet.Result.Selected
 
             assertThat(selected.selection).isInstanceOf(PaymentOptionSelection.PaymentMethod::class.java)
 
@@ -171,18 +172,18 @@ internal class CustomerSheetTest {
         networkRule = networkRule,
         configuration = CustomerSheet.Configuration.builder("Merchant, Inc.")
             .billingDetailsCollectionConfiguration(
-                PaymentSheet.BillingDetailsCollectionConfiguration(
-                    name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                    phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                BillingDetailsCollectionConfiguration(
+                    name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 )
             )
             .build(),
         integrationType = integrationType,
         customerSheetTestType = customerSheetTestType,
         resultCallback = { result ->
-            assertThat(result).isInstanceOf(CustomerSheetResult.Selected::class.java)
+            assertThat(result).isInstanceOf(Result.Selected::class.java)
         }
     ) { context ->
         networkRule.enqueue(
@@ -228,7 +229,7 @@ internal class CustomerSheetTest {
         integrationType = integrationType,
         customerSheetTestType = customerSheetTestType,
         resultCallback = { result ->
-            assertThat(result).isInstanceOf(CustomerSheetResult.Selected::class.java)
+            assertThat(result).isInstanceOf(Result.Selected::class.java)
         }
     ) { context ->
         networkRule.enqueue(

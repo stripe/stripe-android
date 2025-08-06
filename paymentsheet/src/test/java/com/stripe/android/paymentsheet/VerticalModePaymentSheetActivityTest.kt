@@ -9,6 +9,11 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.CardBrandAcceptance
+import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.PaymentMethodLayout
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.model.CardBrand
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.host
@@ -93,7 +98,7 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `Displays saved payment methods`() = runTest(
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        customer = CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card"))
             networkRule.setupV1PaymentMethodsResponse(card1, card2)
@@ -119,7 +124,7 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `When the payment intent only has card it launches directly into the form with customer`() = runTest(
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        customer = CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         initialLoadWaiter = { formPage.waitUntilVisible() },
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card"))
@@ -134,8 +139,8 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `When the payment intent only has one LPM it launches directly into the form`() = runTest(
-        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+            email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
         ),
         initialLoadWaiter = { formPage.waitUntilVisible() },
         networkSetup = {
@@ -149,7 +154,7 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `Updates selected saved payment method`() = runTest(
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        customer = CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card"))
             networkRule.setupV1PaymentMethodsResponse(card1, card2)
@@ -170,7 +175,7 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `Removing card selects next available card`() = runTest(
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        customer = CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse()
             networkRule.setupV1PaymentMethodsResponse(card1, card2)
@@ -200,7 +205,7 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `Removing last card navigates back`() = runTest(
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        customer = CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse()
             networkRule.setupV1PaymentMethodsResponse(card1, card2)
@@ -230,7 +235,7 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `Removing only card navigates back`() = runTest(
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        customer = CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse()
             networkRule.setupV1PaymentMethodsResponse(card1)
@@ -251,7 +256,7 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `Updating a card brand updates the icon in the list`() = runTest(
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        customer = CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse(isCbcEligible = true)
             networkRule.setupV1PaymentMethodsResponse(
@@ -286,7 +291,7 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `Displayed saved payment method is correct`() = runTest(
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        customer = CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse()
             networkRule.setupV1PaymentMethodsResponse(card1, card2)
@@ -312,7 +317,7 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `Selection is preserved after opening form`() = runTest(
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        customer = CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse()
             networkRule.setupV1PaymentMethodsResponse(card1, card2)
@@ -346,7 +351,7 @@ internal class VerticalModePaymentSheetActivityTest {
     @Test
     fun `Primary button label is correctly applied`() = runTest(
         primaryButtonLabel = "Gimme money!",
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        customer = CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse()
             networkRule.setupV1PaymentMethodsResponse(card1, card2)
@@ -360,7 +365,7 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `Saved payment method mandates work correctly`() = runTest(
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        customer = CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card", "us_bank_account"))
             networkRule.setupV1PaymentMethodsResponse(usBankAccount1)
@@ -395,7 +400,7 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `Default saved payment method is loaded with mandate`() = runTest(
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        customer = CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card", "us_bank_account"))
             networkRule.setupV1PaymentMethodsResponse(usBankAccount1)
@@ -410,7 +415,7 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `Manage screen should not display mandates`() = runTest(
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        customer = CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card", "us_bank_account"))
             networkRule.setupV1PaymentMethodsResponse(usBankAccount1, usBankAccount2)
@@ -436,10 +441,10 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `Entering Amex card shows disallowed error when disallowed`() = runTest(
-        cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
+        cardBrandAcceptance = CardBrandAcceptance.disallowed(
             listOf(
 
-                PaymentSheet.CardBrandAcceptance.BrandCategory.Amex
+                CardBrandAcceptance.BrandCategory.Amex
             )
         ),
         networkSetup = {
@@ -466,13 +471,13 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `Displayed saved payment method is correct when a card brand is disallowed`() = runTest(
-        cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
+        cardBrandAcceptance = CardBrandAcceptance.disallowed(
             listOf(
 
-                PaymentSheet.CardBrandAcceptance.BrandCategory.Visa
+                CardBrandAcceptance.BrandCategory.Visa
             )
         ),
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        customer = CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse()
             networkRule.setupV1PaymentMethodsResponse(card1)
@@ -485,13 +490,13 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `Disallowed brands are disabled in the CBC dropdown`() = runTest(
-        cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
+        cardBrandAcceptance = CardBrandAcceptance.disallowed(
             listOf(
 
-                PaymentSheet.CardBrandAcceptance.BrandCategory.Visa
+                CardBrandAcceptance.BrandCategory.Visa
             )
         ),
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
+        customer = CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse(isCbcEligible = true)
             networkRule.setupV1PaymentMethodsResponse(
@@ -522,9 +527,9 @@ internal class VerticalModePaymentSheetActivityTest {
 
     private fun runTest(
         primaryButtonLabel: String? = null,
-        customer: PaymentSheet.CustomerConfiguration? = null,
-        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration? = null,
-        cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all(),
+        customer: CustomerConfiguration? = null,
+        billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration? = null,
+        cardBrandAcceptance: CardBrandAcceptance = CardBrandAcceptance.all(),
         networkSetup: () -> Unit,
         initialLoadWaiter: () -> Unit = { verticalModePage.waitUntilVisible() },
         test: () -> Unit,
@@ -541,7 +546,7 @@ internal class VerticalModePaymentSheetActivityTest {
                     config = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
                         .customer(customer)
                         .allowsDelayedPaymentMethods(true)
-                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                        .paymentMethodLayout(PaymentMethodLayout.Vertical)
                         .cardBrandAcceptance(cardBrandAcceptance)
                         .apply {
                             if (primaryButtonLabel != null) {

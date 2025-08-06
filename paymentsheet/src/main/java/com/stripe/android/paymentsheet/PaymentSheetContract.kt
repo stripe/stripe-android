@@ -7,12 +7,14 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.ColorInt
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
+import com.stripe.android.elements.payment.GooglePayConfiguration
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
 internal class PaymentSheetContract :
-    ActivityResultContract<PaymentSheetContract.Args, PaymentSheetResult>() {
+    ActivityResultContract<PaymentSheetContract.Args, PaymentSheet.Result>() {
 
     override fun createIntent(
         context: Context,
@@ -24,10 +26,10 @@ internal class PaymentSheetContract :
     override fun parseResult(
         resultCode: Int,
         intent: Intent?
-    ): PaymentSheetResult {
+    ): PaymentSheet.Result {
         @Suppress("DEPRECATION")
         val paymentResult = intent?.getParcelableExtra<Result>(EXTRA_RESULT)?.paymentSheetResult
-        return paymentResult ?: PaymentSheetResult.Failed(
+        return paymentResult ?: PaymentSheet.Result.Failed(
             IllegalArgumentException("Failed to retrieve a PaymentSheetResult.")
         )
     }
@@ -41,7 +43,7 @@ internal class PaymentSheetContract :
         val initializedViaCompose: Boolean = false,
     ) : ActivityStarter.Args {
 
-        val googlePayConfig: PaymentSheet.GooglePayConfiguration? get() = config.googlePay
+        val googlePayConfig: GooglePayConfiguration? get() = config.googlePay
 
         companion object {
             internal fun fromIntent(intent: Intent): Args? {
@@ -53,7 +55,7 @@ internal class PaymentSheetContract :
 
     @Parcelize
     internal data class Result(
-        val paymentSheetResult: PaymentSheetResult
+        val paymentSheetResult: PaymentSheet.Result
     ) : ActivityStarter.Result {
         override fun toBundle(): Bundle {
             return bundleOf(EXTRA_RESULT to this)

@@ -2,11 +2,11 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import androidx.compose.runtime.Composable
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryArgumentsFactory
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.ui.core.FormUI
 import org.junit.Rule
@@ -28,11 +28,11 @@ internal class CustomPaymentMethodUiDefinitionFactoryTest {
         paparazziRule.snapshot {
             CreateFormUi(
                 displayableCustomPaymentMethod = createCustomPaymentMethod(doesNotCollectBillingDetails = false),
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                    phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                    name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 )
             )
         }
@@ -43,11 +43,11 @@ internal class CustomPaymentMethodUiDefinitionFactoryTest {
         paparazziRule.snapshot {
             CreateFormUi(
                 displayableCustomPaymentMethod = createCustomPaymentMethod(doesNotCollectBillingDetails = true),
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                    phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                    name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 )
             )
         }
@@ -56,8 +56,8 @@ internal class CustomPaymentMethodUiDefinitionFactoryTest {
     @Composable
     private fun CreateFormUi(
         displayableCustomPaymentMethod: DisplayableCustomPaymentMethod = createCustomPaymentMethod(),
-        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
-            PaymentSheet.BillingDetailsCollectionConfiguration(),
+        billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
+            BillingDetailsCollectionConfiguration(),
         createParams: PaymentMethodCreateParams? = null
     ) {
         FormUI(

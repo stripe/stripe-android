@@ -12,11 +12,15 @@ import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.elements.Address
 import com.stripe.android.paymentelement.assertCompleted
 import com.stripe.android.paymentelement.runEmbeddedPaymentElementTest
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.payment.FlowController
+import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runFlowControllerTest
@@ -62,12 +66,12 @@ internal class PreparePaymentMethodTest {
 
             context.presentPaymentSheet {
                 presentWithIntentConfiguration(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    intentConfiguration = IntentConfiguration(
+                        sharedPaymentTokenSessionWithMode = IntentConfiguration.Mode.Payment(
                             amount = 5000L,
                             currency = "USD",
                         ),
-                        sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                        sellerDetails = IntentConfiguration.SellerDetails(
                             networkId = "network_123",
                             externalId = "external_123",
                         )
@@ -121,17 +125,17 @@ internal class PreparePaymentMethodTest {
 
             context.configureFlowController {
                 configureWithIntentConfiguration(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    intentConfiguration = IntentConfiguration(
+                        sharedPaymentTokenSessionWithMode = IntentConfiguration.Mode.Payment(
                             amount = 5000L,
                             currency = "USD",
                         ),
-                        sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                        sellerDetails = IntentConfiguration.SellerDetails(
                             networkId = "network_456",
                             externalId = "external_456",
                         )
                     ),
-                    configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
+                    configuration = FlowController.Configuration.Builder(merchantDisplayName = "Example, Inc.")
                         .shippingDetails(SHIPPING_ADDRESS)
                         .build(),
                     callback = { success, error ->
@@ -191,12 +195,12 @@ internal class PreparePaymentMethodTest {
             )
 
             context.embeddedPaymentElement.configure(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    sharedPaymentTokenSessionWithMode = IntentConfiguration.Mode.Payment(
                         amount = 5000L,
                         currency = "USD",
                     ),
-                    sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                    sellerDetails = IntentConfiguration.SellerDetails(
                         networkId = "network_789",
                         externalId = "external_789",
                     )
@@ -272,7 +276,7 @@ internal class PreparePaymentMethodTest {
 
     private companion object {
         val SHIPPING_ADDRESS = AddressDetails(
-            address = PaymentSheet.Address(
+            address = Address(
                 city = "South San Francisc",
                 line1 = "123 Apple Street",
                 line2 = "Unit #2",

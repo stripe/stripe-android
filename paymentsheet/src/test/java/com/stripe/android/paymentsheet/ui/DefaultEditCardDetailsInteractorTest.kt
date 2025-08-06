@@ -3,12 +3,12 @@ package com.stripe.android.paymentsheet.ui
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.CardUpdateParams
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.forms.FormFieldEntry

@@ -75,7 +75,7 @@ internal object FlowControllerModule {
     @Provides
     @Singleton
     @Named(PRODUCT_USAGE)
-    fun provideProductUsageTokens() = setOf("PaymentSheet.FlowController")
+    fun provideProductUsageTokens() = setOf("FlowController")
 
     @Provides
     @Singleton

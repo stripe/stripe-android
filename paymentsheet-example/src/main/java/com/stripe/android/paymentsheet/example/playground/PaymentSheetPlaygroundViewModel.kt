@@ -13,23 +13,22 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
-import com.github.kittinunf.result.Result
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.customersheet.CustomerAdapter
-import com.stripe.android.customersheet.CustomerEphemeralKey
-import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.CustomerSheetResult
+import com.stripe.android.elements.AddressLauncher
+import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.customersheet.CustomerAdapter
+import com.stripe.android.elements.customersheet.CustomerEphemeralKey
+import com.stripe.android.elements.customersheet.CustomerSheet
+import com.stripe.android.elements.payment.AnalyticEvent
+import com.stripe.android.elements.payment.AnalyticEventCallbackPreview
+import com.stripe.android.elements.payment.CreateIntentCallback
+import com.stripe.android.elements.payment.DelicatePaymentSheetApi
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.FlowController
+import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentelement.AnalyticEvent
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
-import com.stripe.android.paymentsheet.CreateIntentResult
-import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheetResult
-import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentRequest
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentResponse
@@ -44,12 +43,10 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomEndpoin
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
-import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettingDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.ShippingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
-import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -58,7 +55,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import java.io.IOException
 
-@OptIn(ExperimentalCustomerSessionApi::class)
+@OptIn(CustomerSessionApiPreview::class)
 internal class PaymentSheetPlaygroundViewModel(
     application: Application,
     private val savedStateHandle: SavedStateHandle,
@@ -229,12 +226,12 @@ internal class PaymentSheetPlaygroundViewModel(
                     .awaitModel(CustomerEphemeralKeyResponse.serializer())
 
                 return when (apiResponse) {
-                    is Result.Failure -> {
+                    is com.github.kittinunf.result.Result.Failure -> {
                         val exception = apiResponse.getException()
 
                         kotlin.Result.failure(exception)
                     }
-                    is Result.Success -> {
+                    is com.github.kittinunf.result.Result.Success -> {
                         val response = apiResponse.value
 
                         // Init PaymentConfiguration with the publishable key returned from the backend,
@@ -279,8 +276,9 @@ internal class PaymentSheetPlaygroundViewModel(
                     .awaitModel(CreateSetupIntentResponse.serializer())
 
                 return when (apiResponse) {
-                    is Result.Failure -> kotlin.Result.failure(apiResponse.getException())
-                    is Result.Success -> kotlin.Result.success(apiResponse.value.clientSecret)
+                    is com.github.kittinunf.result.Result.Failure -> kotlin.Result.failure(apiResponse.getException())
+                    is com.github.kittinunf.result.Result.Success ->
+                        kotlin.Result.success(apiResponse.value.clientSecret)
                 }
             }
         }
@@ -296,7 +294,7 @@ internal class PaymentSheetPlaygroundViewModel(
             .awaitModel(CustomerEphemeralKeyResponse.serializer())
 
         return when (apiResponse) {
-            is Result.Failure -> {
+            is com.github.kittinunf.result.Result.Failure -> {
                 val exception = apiResponse.getException()
 
                 CustomerAdapter.Result.failure(
@@ -304,7 +302,7 @@ internal class PaymentSheetPlaygroundViewModel(
                     displayMessage = "Failed to fetch ephemeral key:\n${exception.message}"
                 )
             }
-            is Result.Success -> {
+            is com.github.kittinunf.result.Result.Success -> {
                 val response = apiResponse.value
 
                 // Init PaymentConfiguration with the publishable key returned from the backend,
@@ -357,7 +355,7 @@ internal class PaymentSheetPlaygroundViewModel(
             .awaitModel(CreateSetupIntentResponse.serializer())
 
         return when (apiResponse) {
-            is Result.Failure -> {
+            is com.github.kittinunf.result.Result.Failure -> {
                 val exception = apiResponse.getException()
 
                 CustomerAdapter.Result.failure(
@@ -365,7 +363,8 @@ internal class PaymentSheetPlaygroundViewModel(
                     displayMessage = "Failed to fetch setup intent secret:\n${exception.message}"
                 )
             }
-            is Result.Success -> CustomerAdapter.Result.success(apiResponse.value.clientSecret)
+            is com.github.kittinunf.result.Result.Success ->
+                CustomerAdapter.Result.success(apiResponse.value.clientSecret)
         }
     }
 
@@ -378,7 +377,7 @@ internal class PaymentSheetPlaygroundViewModel(
     }
 
     @OptIn(ShippingDetailsInPaymentOptionPreview::class)
-    fun onPaymentOptionSelected(paymentOption: PaymentOption?) {
+    fun onPaymentOptionSelected(paymentOption: FlowController.PaymentOptionDisplayData?) {
         flowControllerState.update { existingState ->
             existingState?.copy(
                 selectedPaymentOption = paymentOption,
@@ -387,27 +386,57 @@ internal class PaymentSheetPlaygroundViewModel(
         }
     }
 
-    fun onPaymentSheetResult(paymentResult: PaymentSheetResult) {
-        val integrationType = playgroundSettingsFlow.value?.configurationData?.value?.integrationType
-            ?: PlaygroundConfigurationData.IntegrationType.PaymentSheet
-        if (integrationType == PlaygroundConfigurationData.IntegrationType.FlowController) {
-            if (paymentResult is PaymentSheetResult.Completed) {
-                setPlaygroundState(null)
-            }
-        } else if (paymentResult !is PaymentSheetResult.Canceled) {
+    fun onPaymentSheetResult(paymentResult: PaymentSheet.Result) {
+        if (paymentResult !is PaymentSheet.Result.Canceled) {
             setPlaygroundState(null)
         }
 
         val statusMessage = when (paymentResult) {
-            is PaymentSheetResult.Canceled -> {
+            is PaymentSheet.Result.Canceled -> {
                 "Canceled"
             }
 
-            is PaymentSheetResult.Completed -> {
+            is PaymentSheet.Result.Completed -> {
                 SUCCESS_RESULT
             }
 
-            is PaymentSheetResult.Failed -> {
+            is PaymentSheet.Result.Failed -> {
+                when (paymentResult.error) {
+                    is ConfirmIntentEndpointException -> {
+                        "Couldn't process your payment: ${paymentResult.error.message}"
+                    }
+
+                    is ConfirmIntentNetworkException -> {
+                        "No internet. Try again later."
+                    }
+
+                    else -> {
+                        "Something went wrong: ${paymentResult.error.message}"
+                    }
+                }
+            }
+        }
+
+        status.value = StatusMessage(statusMessage)
+    }
+
+    fun onFlowControllerResult(paymentResult: FlowController.Result) {
+        if (paymentResult is FlowController.Result.Completed) {
+            setPlaygroundState(null)
+        } else if (paymentResult !is FlowController.Result.Canceled) {
+            setPlaygroundState(null)
+        }
+
+        val statusMessage = when (paymentResult) {
+            is FlowController.Result.Canceled -> {
+                "Canceled"
+            }
+
+            is FlowController.Result.Completed -> {
+                SUCCESS_RESULT
+            }
+
+            is FlowController.Result.Failed -> {
                 when (paymentResult.error) {
                     is ConfirmIntentEndpointException -> {
                         "Couldn't process your payment: ${paymentResult.error.message}"
@@ -468,19 +497,19 @@ internal class PaymentSheetPlaygroundViewModel(
         status.value = StatusMessage(statusMessage)
     }
 
-    fun onCustomerSheetCallback(result: CustomerSheetResult) {
+    fun onCustomerSheetCallback(result: CustomerSheet.Result) {
         val statusMessage = when (result) {
-            is CustomerSheetResult.Canceled -> {
+            is CustomerSheet.Result.Canceled -> {
                 updatePaymentOptionForCustomerSheet(result.selection?.paymentOption)
 
                 "Canceled"
             }
-            is CustomerSheetResult.Selected -> {
+            is CustomerSheet.Result.Selected -> {
                 updatePaymentOptionForCustomerSheet(result.selection?.paymentOption)
 
                 null
             }
-            is CustomerSheetResult.Failed -> "An error occurred: ${result.exception.message}"
+            is CustomerSheet.Result.Failed -> "An error occurred: ${result.exception.message}"
         }
 
         statusMessage?.let { message ->
@@ -490,15 +519,15 @@ internal class PaymentSheetPlaygroundViewModel(
         }
     }
 
-    private suspend fun createIntent(playgroundState: PlaygroundState): CreateIntentResult {
+    private suspend fun createIntent(playgroundState: PlaygroundState): CreateIntentCallback.Result {
         val playgroundSettingsSnapshot = playgroundState.snapshot
         return PlaygroundRequester(playgroundSettingsSnapshot, getApplication()).fetch().fold(
             onSuccess = { state ->
                 val clientSecret = requireNotNull(state.asPaymentState()).clientSecret
-                CreateIntentResult.Success(clientSecret)
+                CreateIntentCallback.Result.Success(clientSecret)
             },
             onFailure = { exception ->
-                CreateIntentResult.Failure(IllegalStateException(exception))
+                CreateIntentCallback.Result.Failure(IllegalStateException(exception))
             },
         )
     }
@@ -506,8 +535,8 @@ internal class PaymentSheetPlaygroundViewModel(
     suspend fun createIntentCallback(
         paymentMethod: PaymentMethod,
         shouldSavePaymentMethod: Boolean,
-    ): CreateIntentResult {
-        val playgroundState = state.value?.asPaymentState() ?: return CreateIntentResult.Failure(
+    ): CreateIntentCallback.Result {
+        val playgroundState = state.value?.asPaymentState() ?: return CreateIntentCallback.Result.Failure(
             cause = IllegalStateException("No payment playground state"),
             displayMessage = "No payment playground state"
         )
@@ -518,7 +547,7 @@ internal class PaymentSheetPlaygroundViewModel(
         )
     }
 
-    @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+    @OptIn(AnalyticEventCallbackPreview::class)
     fun analyticCallback(event: AnalyticEvent) {
         Log.d("AnalyticEvent", "Event: $event")
     }
@@ -528,7 +557,7 @@ internal class PaymentSheetPlaygroundViewModel(
         paymentMethodId: String,
         shouldSavePaymentMethod: Boolean,
         playgroundState: PlaygroundState.Payment,
-    ): CreateIntentResult {
+    ): CreateIntentCallback.Result {
         return when (playgroundState.initializationType) {
             InitializationType.Normal -> {
                 error("createAndConfirmIntent should not be called when initialization type is Normal")
@@ -548,7 +577,7 @@ internal class PaymentSheetPlaygroundViewModel(
             }
 
             InitializationType.DeferredMultiprocessor -> {
-                CreateIntentResult.Success(PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
+                CreateIntentCallback.Result.Success(IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
             }
         }
     }
@@ -557,7 +586,7 @@ internal class PaymentSheetPlaygroundViewModel(
         paymentMethodId: String,
         shouldSavePaymentMethod: Boolean,
         playgroundState: PlaygroundState.Payment,
-    ): CreateIntentResult {
+    ): CreateIntentCallback.Result {
         // Note: This is not how you'd do this in a real application. You wouldn't have a client
         // secret available at this point, but you'd call your backend to create (and optionally
         // confirm) a payment or setup intent.
@@ -575,7 +604,7 @@ internal class PaymentSheetPlaygroundViewModel(
             .suspendable()
             .awaitModel(ConfirmIntentResponse.serializer())
         val createIntentResult = when (result) {
-            is Result.Failure -> {
+            is com.github.kittinunf.result.Result.Failure -> {
                 val message = "Creating intent failed:\n${result.getException().message}"
                 status.value = StatusMessage(message)
 
@@ -585,14 +614,14 @@ internal class PaymentSheetPlaygroundViewModel(
                     ConfirmIntentEndpointException()
                 }
 
-                CreateIntentResult.Failure(
+                CreateIntentCallback.Result.Failure(
                     cause = error,
                     displayMessage = message
                 )
             }
 
-            is Result.Success -> {
-                CreateIntentResult.Success(
+            is com.github.kittinunf.result.Result.Success -> {
+                CreateIntentCallback.Result.Success(
                     clientSecret = result.value.clientSecret,
                 )
             }
@@ -600,13 +629,13 @@ internal class PaymentSheetPlaygroundViewModel(
         return createIntentResult
     }
 
-    fun onAddressLauncherResult(addressLauncherResult: AddressLauncherResult) {
+    fun onAddressLauncherResult(addressLauncherResult: AddressLauncher.Result) {
         when (addressLauncherResult) {
-            is AddressLauncherResult.Canceled -> {
+            is AddressLauncher.Result.Canceled -> {
                 status.value = StatusMessage("Canceled")
             }
 
-            is AddressLauncherResult.Succeeded -> {
+            is AddressLauncher.Result.Succeeded -> {
                 val addressDetails = addressLauncherResult.address
                 playgroundSettingsFlow.value?.set(ShippingAddressSettingsDefinition, addressDetails)
                 flowControllerState.update { it?.copy(addressDetails = addressDetails) }
@@ -674,7 +703,7 @@ internal class PaymentSheetPlaygroundViewModel(
         }
     }
 
-    private fun updatePaymentOptionForCustomerSheet(paymentOption: PaymentOption?) {
+    private fun updatePaymentOptionForCustomerSheet(paymentOption: CustomerSheet.PaymentOptionDisplayData?) {
         customerSheetState.update { existingState ->
             existingState?.copy(
                 selectedPaymentOption = paymentOption,

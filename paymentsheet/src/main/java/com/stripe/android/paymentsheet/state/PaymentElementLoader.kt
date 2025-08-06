@@ -9,6 +9,12 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.elements.CardBrandAcceptance
+import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.CustomPaymentMethod
+import com.stripe.android.elements.payment.GooglePayConfiguration
+import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkConfiguration
@@ -33,8 +39,6 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.IntentConfiguration
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
@@ -58,7 +62,7 @@ import kotlin.coroutines.CoroutineContext
 
 /**
  * Loads the information necessary to display [PaymentSheet], either directly or via
- * [PaymentSheet.FlowController].
+ * [FlowController].
  */
 internal interface PaymentElementLoader {
 
@@ -136,7 +140,7 @@ internal interface PaymentElementLoader {
 @Singleton
 @SuppressWarnings("LargeClass")
 internal class DefaultPaymentElementLoader @Inject constructor(
-    private val prefsRepositoryFactory: @JvmSuppressWildcards (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
+    private val prefsRepositoryFactory: @JvmSuppressWildcards (CustomerConfiguration?) -> PrefsRepository,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
     private val elementsSessionRepository: ElementsSessionRepository,
     private val customerRepository: CustomerRepository,
@@ -284,8 +288,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
     private suspend fun retrieveElementsSession(
         initializationMode: PaymentElementLoader.InitializationMode,
-        customer: PaymentSheet.CustomerConfiguration?,
-        customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
+        customer: CustomerConfiguration?,
+        customPaymentMethods: List<CustomPaymentMethod>,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
     ): Result<ElementsSession> {
@@ -448,7 +452,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
     private suspend fun retrieveCustomerPaymentMethods(
         metadata: PaymentMethodMetadata,
-        customerConfig: PaymentSheet.CustomerConfiguration,
+        customerConfig: CustomerConfiguration,
     ): List<PaymentMethod> {
         val paymentMethodTypes = metadata.supportedSavedPaymentMethodTypes()
 
@@ -543,7 +547,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         val isCardBrandFilteringRequired =
             elementsSession.linkPassthroughModeEnabled &&
-                configuration.cardBrandAcceptance != PaymentSheet.CardBrandAcceptance.All
+                configuration.cardBrandAcceptance != CardBrandAcceptance.All
 
         val cardBrandFilter =
             if (isCardBrandFilteringRequired) {
@@ -647,9 +651,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         return googlePay?.environment?.let { environment ->
             googlePayRepositoryFactory(
                 when (environment) {
-                    PaymentSheet.GooglePayConfiguration.Environment.Production ->
+                    GooglePayConfiguration.Environment.Production ->
                         GooglePayEnvironment.Production
-                    PaymentSheet.GooglePayConfiguration.Environment.Test ->
+                    GooglePayConfiguration.Environment.Test ->
                         GooglePayEnvironment.Test
                 }
             )
@@ -762,7 +766,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         state: PaymentElementLoader.State,
         isReloadingAfterProcessDeath: Boolean,
         isGooglePaySupported: Boolean,
-        linkDisplay: PaymentSheet.LinkConfiguration.Display,
+        linkDisplay: com.stripe.android.elements.payment.LinkConfiguration.Display,
         initializationMode: PaymentElementLoader.InitializationMode,
         customerInfo: CustomerInfo?,
         paymentMethodMetadata: PaymentMethodMetadata,
@@ -871,7 +875,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         }
 
         data class Legacy(
-            val customerConfig: PaymentSheet.CustomerConfiguration,
+            val customerConfig: CustomerConfiguration,
             val accessType: PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey
         ) : CustomerInfo {
             override val id: String = customerConfig.id

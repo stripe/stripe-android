@@ -10,6 +10,7 @@ import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
@@ -36,9 +37,10 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
-import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.addresselement.AutocompleteContract
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFixtures
+import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFixtures.updateState
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -402,8 +404,8 @@ internal class PaymentOptionsViewModelTest {
         runTest {
             val viewModel = createViewModel(
                 args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
-                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                    config = FlowControllerFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                        .paymentMethodLayout(PaymentMethodLayout.Vertical)
                         .build(),
                     paymentMethods = listOf(),
                     isGooglePayReady = false,
@@ -424,8 +426,8 @@ internal class PaymentOptionsViewModelTest {
         runTest {
             val viewModel = createViewModel(
                 args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
-                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                    config = FlowControllerFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                        .paymentMethodLayout(PaymentMethodLayout.Vertical)
                         .build(),
                     paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
                     isGooglePayReady = false,
@@ -446,8 +448,8 @@ internal class PaymentOptionsViewModelTest {
         runTest {
             val viewModel = createViewModel(
                 args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
-                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                    config = FlowControllerFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                        .paymentMethodLayout(PaymentMethodLayout.Vertical)
                         .build(),
                     paymentMethods = listOf(),
                     isGooglePayReady = false,
@@ -468,8 +470,8 @@ internal class PaymentOptionsViewModelTest {
         runTest {
             val viewModel = createViewModel(
                 args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
-                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Automatic)
+                    config = FlowControllerFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                        .paymentMethodLayout(PaymentMethodLayout.Automatic)
                         .build(),
                     paymentMethods = listOf(),
                     isGooglePayReady = false,
@@ -490,8 +492,8 @@ internal class PaymentOptionsViewModelTest {
         runTest {
             val viewModel = createViewModel(
                 args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
-                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Automatic)
+                    config = FlowControllerFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                        .paymentMethodLayout(PaymentMethodLayout.Automatic)
                         .build(),
                     paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
                     isGooglePayReady = false,
@@ -512,8 +514,8 @@ internal class PaymentOptionsViewModelTest {
         runTest {
             val viewModel = createViewModel(
                 args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
-                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Automatic)
+                    config = FlowControllerFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                        .paymentMethodLayout(PaymentMethodLayout.Automatic)
                         .build(),
                     paymentMethods = listOf(),
                     isGooglePayReady = false,
@@ -1204,7 +1206,7 @@ internal class PaymentOptionsViewModelTest {
                     isGooglePayReady = true,
                 ),
             ),
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            configuration = FlowControllerFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             enableLogging = false,
             productUsage = mock(),
             paymentElementCallbackIdentifier = "PaymentOptionsViewModelTestCallbackIdentifier",

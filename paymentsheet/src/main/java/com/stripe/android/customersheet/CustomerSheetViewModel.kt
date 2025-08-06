@@ -36,6 +36,7 @@ import com.stripe.android.customersheet.injection.DaggerCustomerSheetViewModelCo
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.customersheet.util.isUnverifiedUSBankAccount
 import com.stripe.android.customersheet.util.sortPaymentMethods
+import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter

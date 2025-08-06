@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.cvcrecollection
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.Appearance
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionData
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncher
 
@@ -11,7 +11,7 @@ internal class RecordingCvcRecollectionLauncher private constructor() : CvcRecol
 
     override fun launch(
         data: CvcRecollectionData,
-        appearance: PaymentSheet.Appearance,
+        appearance: Appearance,
         isLiveMode: Boolean,
     ) {
         launchCalls.add(Call(data, appearance, isLiveMode))
@@ -19,7 +19,7 @@ internal class RecordingCvcRecollectionLauncher private constructor() : CvcRecol
 
     data class Call(
         val data: CvcRecollectionData,
-        val appearance: PaymentSheet.Appearance,
+        val appearance: Appearance,
         val isLiveMode: Boolean,
     )
 

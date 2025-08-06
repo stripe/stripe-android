@@ -9,25 +9,24 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.WalletButtonsPreview
-import com.stripe.android.paymentsheet.CreateIntentCallback
+import com.stripe.android.elements.payment.CreateIntentCallback
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheetResultCallback
-import com.stripe.android.paymentsheet.model.PaymentOption
+import com.stripe.android.elements.payment.FlowController.PaymentOptionDisplayData
 import kotlinx.coroutines.test.runTest
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 internal class FlowControllerTestRunnerContext(
     val scenario: ActivityScenario<MainActivity>,
-    val flowController: PaymentSheet.FlowController,
-    val configureCallbackTurbine: Turbine<PaymentOption?>,
+    val flowController: FlowController,
+    val configureCallbackTurbine: Turbine<PaymentOptionDisplayData?>,
     private val countDownLatch: CountDownLatch,
 ) {
 
     fun configureFlowController(
-        block: PaymentSheet.FlowController.() -> Unit,
+        block: FlowController.() -> Unit,
     ) {
         val activityLaunchObserver = ActivityLaunchObserver(PaymentOptionsActivity::class.java)
         scenario.onActivity {
@@ -44,9 +43,9 @@ internal class FlowControllerTestRunnerContext(
     }
 
     /**
-     * Normally we know a test succeeds when it calls [PaymentSheetResultCallback], but some tests
-     * succeed based on other criteria. In these cases, call this method to manually mark a test as
-     * succeeded.
+     * Normally we know a test succeeds when it calls [FlowController.ResultCallback],
+     * but some tests succeed based on other criteria.
+     * In these cases, call this method to manually mark a test as succeeded.
      */
     fun markTestSucceeded() {
         countDownLatch.countDown()
@@ -59,19 +58,19 @@ internal fun runFlowControllerTest(
     integrationType: IntegrationType = IntegrationType.Compose,
     callConfirmOnPaymentOptionCallback: Boolean = true,
     showWalletButtons: Boolean = false,
-    builder: PaymentSheet.FlowController.Builder.() -> Unit = {},
-    resultCallback: PaymentSheetResultCallback,
+    builder: FlowController.Builder.() -> Unit = {},
+    resultCallback: FlowController.ResultCallback,
     block: suspend (FlowControllerTestRunnerContext) -> Unit,
 ) {
     val countDownLatch = CountDownLatch(1)
-    val configureCallbackTurbine = Turbine<PaymentOption?>()
+    val configureCallbackTurbine = Turbine<PaymentOptionDisplayData?>()
 
     val factory = FlowControllerTestFactory(
         callConfirmOnPaymentOptionCallback = callConfirmOnPaymentOptionCallback,
         builder = builder,
         configureCallbackTurbine = configureCallbackTurbine,
         resultCallback = { result ->
-            resultCallback.onPaymentSheetResult(result)
+            resultCallback.onFlowControllerResult(result)
             countDownLatch.countDown()
         }
     )
@@ -84,7 +83,7 @@ internal fun runFlowControllerTest(
             LinkStore(it.applicationContext).clear()
         }
 
-        var flowController: PaymentSheet.FlowController? = null
+        var flowController: FlowController? = null
 
         scenario.onActivity { activity ->
             when (integrationType) {
@@ -128,14 +127,14 @@ internal fun runMultipleFlowControllerInstancesTest(
     testType: MultipleInstancesTestType,
     callConfirmOnPaymentOptionCallback: Boolean = true,
     createIntentCallback: CreateIntentCallback,
-    resultCallback: PaymentSheetResultCallback,
+    resultCallback: FlowController.ResultCallback,
     block: suspend (FlowControllerTestRunnerContext) -> Unit,
 ) {
     var firstCreateIntentCallbackCalled = false
     var secondCreateIntentCallbackCalled = false
 
     val countDownLatch = CountDownLatch(1)
-    val configureCallbackTurbine = Turbine<PaymentOption?>()
+    val configureCallbackTurbine = Turbine<PaymentOptionDisplayData?>()
 
     val firstFlowControllerFactory = FlowControllerTestFactory(
         callConfirmOnPaymentOptionCallback = callConfirmOnPaymentOptionCallback,
@@ -153,7 +152,7 @@ internal fun runMultipleFlowControllerInstancesTest(
         configureCallbackTurbine = configureCallbackTurbine,
         resultCallback = { result ->
             if (testType == MultipleInstancesTestType.RunWithFirst) {
-                resultCallback.onPaymentSheetResult(result)
+                resultCallback.onFlowControllerResult(result)
                 countDownLatch.countDown()
             } else {
                 error("Should not have been called!")
@@ -177,7 +176,7 @@ internal fun runMultipleFlowControllerInstancesTest(
         configureCallbackTurbine = configureCallbackTurbine,
         resultCallback = { result ->
             if (testType == MultipleInstancesTestType.RunWithSecond) {
-                resultCallback.onPaymentSheetResult(result)
+                resultCallback.onFlowControllerResult(result)
                 countDownLatch.countDown()
             } else {
                 error("Should not have been called!")
@@ -192,8 +191,8 @@ internal fun runMultipleFlowControllerInstancesTest(
             LinkStore(it.applicationContext).clear()
         }
 
-        lateinit var firstFlowController: PaymentSheet.FlowController
-        lateinit var secondFlowController: PaymentSheet.FlowController
+        lateinit var firstFlowController: FlowController
+        lateinit var secondFlowController: FlowController
 
         scenario.onActivity { activity ->
             activity.setContent {

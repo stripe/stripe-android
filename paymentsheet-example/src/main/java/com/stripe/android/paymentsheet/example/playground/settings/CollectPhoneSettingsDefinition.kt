@@ -1,10 +1,11 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
-import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration.CollectionMode
+import com.stripe.android.elements.customersheet.CustomerSheet
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.FlowController
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.link.LinkController
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 
 internal object CollectPhoneSettingsDefinition : CollectionModeSettingsDefinition(
@@ -16,6 +17,15 @@ internal object CollectPhoneSettingsDefinition : CollectionModeSettingsDefinitio
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
+    ) {
+        configurationData.updateBillingDetails { phone = value }
+    }
+
+    override fun configure(
+        value: CollectionMode,
+        configurationBuilder: FlowController.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment,
+        configurationData: PlaygroundSettingDefinition.FlowControllerConfigurationData,
     ) {
         configurationData.updateBillingDetails { phone = value }
     }
@@ -43,6 +53,15 @@ internal object CollectPhoneSettingsDefinition : CollectionModeSettingsDefinitio
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState.SharedPaymentToken,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
+    ) {
+        configurationData.updateBillingDetails { phone = value }
+    }
+
+    override fun configure(
+        value: CollectionMode,
+        configurationBuilder: FlowController.Configuration.Builder,
+        playgroundState: PlaygroundState.SharedPaymentToken,
+        configurationData: PlaygroundSettingDefinition.FlowControllerConfigurationData,
     ) {
         configurationData.updateBillingDetails { phone = value }
     }

@@ -1,7 +1,7 @@
 package com.stripe.android.crypto.onramp.model
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.Address
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -17,7 +17,7 @@ internal data class KycInfo(
     val dateOfBirth: DateOfBirth,
 
     @Serializable(with = PaymentSheetAddressSerializer::class)
-    val address: PaymentSheet.Address,
+    val address: Address,
     val nationalities: List<String>?,
     val birthCountry: String?,
     val birthCity: String?

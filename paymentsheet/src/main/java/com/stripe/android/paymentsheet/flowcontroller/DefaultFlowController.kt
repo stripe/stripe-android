@@ -17,6 +17,12 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.FlowController
+import com.stripe.android.elements.payment.FlowController.PaymentOptionDisplayData
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
@@ -44,18 +50,12 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.InitializedViaCompose
 import com.stripe.android.paymentsheet.LinkHandler
-import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheetResult
-import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.allowedWalletTypes
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
-import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.Link
@@ -82,9 +82,9 @@ internal class DefaultFlowController @Inject internal constructor(
     private val viewModelScope: CoroutineScope,
     private val lifecycleOwner: LifecycleOwner,
     private val paymentOptionFactory: PaymentOptionFactory,
-    private val paymentOptionCallback: PaymentOptionCallback,
-    private val paymentResultCallback: PaymentSheetResultCallback,
-    private val prefsRepositoryFactory: @JvmSuppressWildcards (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
+    private val paymentOptionCallback: PaymentOptionDisplayData.Callback,
+    private val paymentResultCallback: FlowController.ResultCallback,
+    private val prefsRepositoryFactory: @JvmSuppressWildcards (CustomerConfiguration?) -> PrefsRepository,
     activityResultCaller: ActivityResultCaller,
     activityResultRegistryOwner: ActivityResultRegistryOwner,
     // Properties provided through injection
@@ -103,7 +103,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val errorReporter: ErrorReporter,
     @InitializedViaCompose private val initializedViaCompose: Boolean,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
-) : PaymentSheet.FlowController {
+) : FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private val sepaMandateActivityLauncher: ActivityResultLauncher<SepaMandateContract.Args>
 
@@ -184,44 +184,44 @@ internal class DefaultFlowController @Inject internal constructor(
 
     override fun configureWithPaymentIntent(
         paymentIntentClientSecret: String,
-        configuration: PaymentSheet.Configuration?,
-        callback: PaymentSheet.FlowController.ConfigCallback
+        configuration: FlowController.Configuration?,
+        callback: FlowController.ConfigCallback
     ) {
         configure(
             mode = PaymentElementLoader.InitializationMode.PaymentIntent(paymentIntentClientSecret),
-            configuration = configuration ?: PaymentSheet.Configuration.default(context),
+            configuration = configuration ?: FlowController.Configuration.default(context),
             callback = callback,
         )
     }
 
     override fun configureWithSetupIntent(
         setupIntentClientSecret: String,
-        configuration: PaymentSheet.Configuration?,
-        callback: PaymentSheet.FlowController.ConfigCallback
+        configuration: FlowController.Configuration?,
+        callback: FlowController.ConfigCallback
     ) {
         configure(
             mode = PaymentElementLoader.InitializationMode.SetupIntent(setupIntentClientSecret),
-            configuration = configuration ?: PaymentSheet.Configuration.default(context),
+            configuration = configuration ?: FlowController.Configuration.default(context),
             callback = callback,
         )
     }
 
     override fun configureWithIntentConfiguration(
-        intentConfiguration: PaymentSheet.IntentConfiguration,
-        configuration: PaymentSheet.Configuration?,
-        callback: PaymentSheet.FlowController.ConfigCallback
+        intentConfiguration: IntentConfiguration,
+        configuration: FlowController.Configuration?,
+        callback: FlowController.ConfigCallback
     ) {
         configure(
             mode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration),
-            configuration = configuration ?: PaymentSheet.Configuration.default(context),
+            configuration = configuration ?: FlowController.Configuration.default(context),
             callback = callback,
         )
     }
 
     private fun configure(
         mode: PaymentElementLoader.InitializationMode,
-        configuration: PaymentSheet.Configuration,
-        callback: PaymentSheet.FlowController.ConfigCallback
+        configuration: FlowController.Configuration,
+        callback: FlowController.ConfigCallback
     ) {
         configurationHandler.configure(
             scope = viewModelScope,
@@ -232,7 +232,7 @@ internal class DefaultFlowController @Inject internal constructor(
         )
     }
 
-    override fun getPaymentOption(): PaymentOption? {
+    override fun getPaymentOption(): PaymentOptionDisplayData? {
         return viewModel.paymentSelection?.let {
             paymentOptionFactory.create(it)
         }
@@ -241,8 +241,8 @@ internal class DefaultFlowController @Inject internal constructor(
     private fun withCurrentState(block: (State) -> Unit) {
         val state = viewModel.state
         if (state == null) {
-            paymentResultCallback.onPaymentSheetResult(
-                PaymentSheetResult.Failed(
+            paymentResultCallback.onFlowControllerResult(
+                FlowController.Result.Failed(
                     IllegalStateException(
                         "FlowController must be successfully initialized " +
                             "using configureWithPaymentIntent(), configureWithSetupIntent() or " +
@@ -251,8 +251,8 @@ internal class DefaultFlowController @Inject internal constructor(
                 )
             )
         } else if (!configurationHandler.isConfigured) {
-            paymentResultCallback.onPaymentSheetResult(
-                PaymentSheetResult.Failed(
+            paymentResultCallback.onFlowControllerResult(
+                FlowController.Result.Failed(
                     IllegalStateException(
                         "FlowController is not configured, or has a configuration update in flight."
                     )
@@ -337,7 +337,9 @@ internal class DefaultFlowController @Inject internal constructor(
             paymentOptionActivityLauncher.launch(args, options)
         } catch (e: IllegalStateException) {
             val message = "The host activity is not in a valid state (${lifecycleOwner.lifecycle.currentState})."
-            paymentResultCallback.onPaymentSheetResult(PaymentSheetResult.Failed(IllegalStateException(message, e)))
+            paymentResultCallback.onFlowControllerResult(
+                FlowController.Result.Failed(IllegalStateException(message, e))
+            )
         }
     }
 
@@ -474,7 +476,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private fun confirmSavedPaymentMethod(
         paymentSelection: PaymentSelection.Saved,
         state: PaymentSheetState.Full,
-        appearance: PaymentSheet.Appearance,
+        appearance: Appearance,
         initializationMode: PaymentElementLoader.InitializationMode,
     ) {
         if (paymentSelection.paymentMethod.type == PaymentMethod.Type.SepaDebit &&
@@ -497,7 +499,7 @@ internal class DefaultFlowController @Inject internal constructor(
     fun confirmPaymentSelection(
         paymentSelection: PaymentSelection?,
         state: PaymentSheetState.Full,
-        appearance: PaymentSheet.Appearance,
+        appearance: Appearance,
         initializationMode: PaymentElementLoader.InitializationMode,
     ) {
         viewModelScope.launch {
@@ -686,8 +688,8 @@ internal class DefaultFlowController @Inject internal constructor(
         }
 
         viewModelScope.launch {
-            paymentResultCallback.onPaymentSheetResult(
-                paymentResult.convertToPaymentSheetResult()
+            paymentResultCallback.onFlowControllerResult(
+                paymentResult.convertToFlowControllerResult()
             )
         }
     }
@@ -699,7 +701,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 confirm()
             }
             SepaMandateResult.Canceled -> {
-                paymentResultCallback.onPaymentSheetResult(PaymentSheetResult.Canceled())
+                paymentResultCallback.onFlowControllerResult(FlowController.Result.Canceled())
             }
         }
     }
@@ -731,22 +733,22 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    private fun PaymentResult.convertToPaymentSheetResult() = when (this) {
-        is PaymentResult.Completed -> PaymentSheetResult.Completed()
-        is PaymentResult.Canceled -> PaymentSheetResult.Canceled()
-        is PaymentResult.Failed -> PaymentSheetResult.Failed(throwable)
+    private fun PaymentResult.convertToFlowControllerResult() = when (this) {
+        is PaymentResult.Completed -> FlowController.Result.Completed()
+        is PaymentResult.Canceled -> FlowController.Result.Canceled()
+        is PaymentResult.Failed -> FlowController.Result.Failed(throwable)
     }
 
     @Parcelize
     data class Args(
         val clientSecret: String,
-        val config: PaymentSheet.Configuration?
+        val config: FlowController.Configuration?
     ) : Parcelable
 
     @Parcelize
     data class State(
         val paymentSheetState: PaymentSheetState.Full,
-        val config: PaymentSheet.Configuration,
+        val config: FlowController.Configuration,
         val declinedLink2FA: Boolean = false
     ) : Parcelable {
         fun copyPaymentSheetState(
@@ -774,12 +776,12 @@ internal class DefaultFlowController @Inject internal constructor(
             lifecycleOwner: LifecycleOwner,
             activityResultCaller: ActivityResultCaller,
             statusBarColor: () -> Int?,
-            paymentOptionCallback: PaymentOptionCallback,
-            paymentResultCallback: PaymentSheetResultCallback,
+            paymentOptionCallback: PaymentOptionDisplayData.Callback,
+            paymentResultCallback: FlowController.ResultCallback,
             paymentElementCallbackIdentifier: String,
             initializedViaCompose: Boolean,
             activityResultRegistryOwner: ActivityResultRegistryOwner,
-        ): PaymentSheet.FlowController {
+        ): FlowController {
             val flowControllerViewModel = ViewModelProvider(
                 owner = viewModelStoreOwner,
                 factory = FlowControllerViewModel.Factory(statusBarColor(), paymentElementCallbackIdentifier),

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 

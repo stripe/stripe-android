@@ -37,7 +37,7 @@ import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.Appearance
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
 internal class OnrampActivity : ComponentActivity() {
@@ -66,7 +66,7 @@ internal class OnrampActivity : ComponentActivity() {
         onrampCoordinator = OnrampCoordinator.Builder(callbacks).build(this)
 
         val configuration = OnrampConfiguration(
-            paymentSheetAppearance = PaymentSheet.Appearance()
+            paymentSheetAppearance = Appearance()
         )
 
         onrampCoordinator.configure(configuration)

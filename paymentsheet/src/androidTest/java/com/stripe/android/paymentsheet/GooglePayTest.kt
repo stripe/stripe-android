@@ -18,6 +18,10 @@ import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.elements.payment.GooglePayConfiguration
+import com.stripe.android.elements.payment.PaymentMethodLayout
+import com.stripe.android.elements.payment.PaymentSheet
+import com.stripe.android.elements.payment.PaymentSheet.Result
 import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -130,7 +134,7 @@ internal class GooglePayTest {
     }
 
     private fun runGooglePayFlowTest(
-        paymentResultCallback: (PaymentSheetResult) -> Unit,
+        paymentResultCallback: (PaymentSheet.Result) -> Unit,
         test: (GooglePayFlowScenario) -> Unit
     ) {
         runGooglePayTest(
@@ -186,7 +190,7 @@ internal class GooglePayTest {
         isGooglePayReady: Boolean,
         isGooglePayEnabledInElementsSession: Boolean,
         hasGooglePayConfig: Boolean,
-        paymentResultCallback: (PaymentSheetResult) -> Unit,
+        paymentResultCallback: (PaymentSheet.Result) -> Unit,
         test: (context: ProductIntegrationTestRunnerContext) -> Unit,
     ) {
         GooglePayRepository.googlePayAvailabilityClientFactory =
@@ -200,12 +204,12 @@ internal class GooglePayTest {
             resultCallback = paymentResultCallback,
         ) { context ->
             val configBuilder = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
-                .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                .paymentMethodLayout(PaymentMethodLayout.Horizontal)
 
             if (hasGooglePayConfig) {
                 configBuilder.googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    GooglePayConfiguration(
+                        environment = GooglePayConfiguration.Environment.Test,
                         countryCode = "USD",
                     )
                 )

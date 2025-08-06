@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
@@ -20,7 +21,7 @@ import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetS
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.flow.filterNotNull
 
-internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
+internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheet.Result>() {
 
     @VisibleForTesting
     internal var viewModelFactory: ViewModelProvider.Factory = PaymentSheetViewModel.Factory {
@@ -100,7 +101,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         return result
     }
 
-    override fun setActivityResult(result: PaymentSheetResult) {
+    override fun setActivityResult(result: PaymentSheet.Result) {
         setResult(
             Activity.RESULT_OK,
             Intent().putExtras(PaymentSheetContract.Result(result).toBundle())
@@ -109,7 +110,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
     private fun finishWithError(error: Throwable?) {
         val e = error ?: defaultInitializationError()
-        setActivityResult(PaymentSheetResult.Failed(e))
+        setActivityResult(PaymentSheet.Result.Failed(e))
         finish()
     }
 

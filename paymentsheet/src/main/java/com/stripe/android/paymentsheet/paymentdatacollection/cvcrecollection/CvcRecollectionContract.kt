@@ -5,8 +5,8 @@ import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
+import com.stripe.android.elements.Appearance
 import com.stripe.android.model.CardBrand
-import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.parcelize.Parcelize
 
 internal class CvcRecollectionContract :
@@ -25,7 +25,7 @@ internal class CvcRecollectionContract :
     data class Args(
         val lastFour: String,
         val cardBrand: CardBrand,
-        val appearance: PaymentSheet.Appearance,
+        val appearance: Appearance,
         val isTestMode: Boolean
     ) : Parcelable {
         companion object {

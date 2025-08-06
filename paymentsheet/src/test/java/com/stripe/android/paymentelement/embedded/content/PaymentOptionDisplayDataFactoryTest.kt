@@ -3,6 +3,9 @@ package com.stripe.android.paymentelement.embedded.content
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.TestFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -14,8 +17,6 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import org.junit.Test
@@ -139,7 +140,7 @@ internal class PaymentOptionDisplayDataFactoryTest {
             AddressDetails(
                 name = "Jenny Rosen",
                 phoneNumber = "+15555555555",
-                address = PaymentSheet.Address(
+                address = com.stripe.android.elements.Address(
                     line1 = "123 Main St",
                     line2 = null,
                     city = "San Francisco",
@@ -167,11 +168,11 @@ internal class PaymentOptionDisplayDataFactoryTest {
     }
 
     companion object {
-        private val paymentSheetBillingDetails = PaymentSheet.BillingDetails(
+        private val paymentSheetBillingDetails = BillingDetails(
             name = "Jenny Rosen",
             email = "foo@bar.com",
             phone = "+13105551234",
-            address = PaymentSheet.Address(
+            address = com.stripe.android.elements.Address(
                 postalCode = "94111",
                 country = "US",
             ),
@@ -190,7 +191,7 @@ internal class PaymentOptionDisplayDataFactoryTest {
             stripeIntent = SetupIntentFixtures.SI_SUCCEEDED.copy(
                 paymentMethodTypes = listOf("card", "cashapp", "google_pay"),
             ),
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
             allowsDelayedPaymentMethods = false,
             allowsPaymentMethodsRequiringShippingAddress = false,
             isGooglePayReady = true,

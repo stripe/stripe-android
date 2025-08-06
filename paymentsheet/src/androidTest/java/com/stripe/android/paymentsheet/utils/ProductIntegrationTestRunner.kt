@@ -1,18 +1,21 @@
 package com.stripe.android.paymentsheet.utils
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.model.asFlowControllerConfiguration
+import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
+import com.stripe.android.elements.payment.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
-import com.stripe.android.paymentsheet.CreateIntentCallback
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheetResultCallback
+import com.stripe.android.elements.payment.CreateIntentCallback
+import com.stripe.android.elements.payment.FlowController
+import com.stripe.android.elements.payment.PaymentSheet
 
 internal fun runProductIntegrationTest(
     networkRule: NetworkRule,
     integrationType: ProductIntegrationType,
     builder: ProductIntegrationBuilder.() -> Unit = {},
-    resultCallback: PaymentSheetResultCallback,
+    resultCallback: PaymentSheet.ResultCallback,
     block: suspend (ProductIntegrationTestRunnerContext) -> Unit,
 ) {
     val integrationBuilder = ProductIntegrationBuilder().apply {
@@ -40,12 +43,24 @@ internal fun runProductIntegrationTest(
                 builder = {
                     integrationBuilder.applyToFlowControllerBuilder(this)
                 },
-                resultCallback = resultCallback,
+                resultCallback = { flowControllerResult ->
+                    resultCallback.onPaymentSheetResult(
+                        paymentSheetResult = flowControllerResult.toPaymentSheetResult()
+                    )
+                },
                 block = { context ->
                     block(ProductIntegrationTestRunnerContext.WithFlowController(context))
                 }
             )
         }
+    }
+}
+
+private fun FlowController.Result.toPaymentSheetResult(): PaymentSheet.Result {
+    return when (this) {
+        is FlowController.Result.Completed -> PaymentSheet.Result.Completed()
+        is FlowController.Result.Canceled -> PaymentSheet.Result.Canceled()
+        is FlowController.Result.Failed -> PaymentSheet.Result.Failed(this.error)
     }
 }
 
@@ -75,7 +90,7 @@ internal class ProductIntegrationBuilder {
         }
     }
 
-    fun applyToFlowControllerBuilder(builder: PaymentSheet.FlowController.Builder) {
+    fun applyToFlowControllerBuilder(builder: FlowController.Builder) {
         createIntentCallback?.let {
             builder.createIntentCallback(it)
         }
@@ -91,7 +106,7 @@ internal sealed interface ProductIntegrationTestRunnerContext {
     fun launch(
         configuration: PaymentSheet.Configuration = PaymentSheet.Configuration(
             merchantDisplayName = "Merchant, Inc.",
-            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            paymentMethodLayout = PaymentMethodLayout.Horizontal,
         ),
         isDeferredIntent: Boolean = false
     )
@@ -107,8 +122,8 @@ internal sealed interface ProductIntegrationTestRunnerContext {
             context.presentPaymentSheet {
                 if (isDeferredIntent) {
                     presentWithIntentConfiguration(
-                        intentConfiguration = PaymentSheet.IntentConfiguration(
-                            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        intentConfiguration = IntentConfiguration(
+                            mode = IntentConfiguration.Mode.Payment(
                                 amount = 5099,
                                 currency = "usd"
                             )
@@ -136,16 +151,17 @@ internal sealed interface ProductIntegrationTestRunnerContext {
         val context: FlowControllerTestRunnerContext
     ) : ProductIntegrationTestRunnerContext {
         override fun launch(configuration: PaymentSheet.Configuration, isDeferredIntent: Boolean) {
+            val flowControllerConfiguration = configuration.asFlowControllerConfiguration()
             context.configureFlowController {
                 if (isDeferredIntent) {
                     configureWithIntentConfiguration(
-                        PaymentSheet.IntentConfiguration(
-                            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        IntentConfiguration(
+                            mode = IntentConfiguration.Mode.Payment(
                                 amount = 5099,
                                 currency = "usd",
                             )
                         ),
-                        configuration = configuration,
+                        configuration = flowControllerConfiguration,
                         callback = { success, error ->
                             assertThat(success).isTrue()
                             assertThat(error).isNull()
@@ -155,7 +171,7 @@ internal sealed interface ProductIntegrationTestRunnerContext {
                 } else {
                     configureWithPaymentIntent(
                         paymentIntentClientSecret = "pi_example_secret_example",
-                        configuration = configuration,
+                        configuration = flowControllerConfiguration,
                         callback = { success, error ->
                             assertThat(success).isTrue()
                             assertThat(error).isNull()

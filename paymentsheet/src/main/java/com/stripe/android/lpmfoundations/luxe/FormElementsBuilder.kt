@@ -1,8 +1,8 @@
 package com.stripe.android.lpmfoundations.luxe
 
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.uicore.elements.FormElement
 
@@ -28,7 +28,7 @@ internal class FormElementsBuilder(
 
         // Setup the required billing fields section based on the merchant billingDetailsCollectionConfiguration.
         if (arguments.billingDetailsCollectionConfiguration.address
-            == PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+            == BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
         ) {
             requireBillingAddressIfAllowed()
         }
@@ -60,7 +60,7 @@ internal class FormElementsBuilder(
         availableCountries: Set<String> = this.availableCountries,
     ): FormElementsBuilder = apply {
         if (arguments.billingDetailsCollectionConfiguration.address
-            != PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+            != BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
         ) {
             requireBillingAddressCollection = true
 

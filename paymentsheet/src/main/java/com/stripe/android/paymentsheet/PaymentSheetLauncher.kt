@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 
 internal interface PaymentSheetLauncher {

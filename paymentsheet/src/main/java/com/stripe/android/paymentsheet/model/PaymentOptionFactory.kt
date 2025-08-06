@@ -1,16 +1,17 @@
 package com.stripe.android.paymentsheet.model
 
 import android.content.Context
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.elements.Address
+import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.payment.FlowController.PaymentOptionDisplayData
 import javax.inject.Inject
 
 internal class PaymentOptionFactory @Inject constructor(
     private val iconLoader: PaymentSelection.IconLoader,
     private val context: Context,
 ) {
-    fun create(selection: PaymentSelection): PaymentOption {
-        return PaymentOption(
+    fun create(selection: PaymentSelection): PaymentOptionDisplayData {
+        return PaymentOptionDisplayData(
             drawableResourceId = selection.drawableResourceId,
             label = selection.label.resolve(context),
             paymentMethodType = selection.paymentMethodType,
@@ -51,7 +52,7 @@ private fun PaymentSelection.Link.makeAddressDetails(): AddressDetails? {
         AddressDetails(
             name = address.address.name,
             phoneNumber = address.unredactedPhoneNumber,
-            address = PaymentSheet.Address(
+            address = Address(
                 line1 = address.address.line1,
                 line2 = address.address.line2,
                 city = address.address.locality,

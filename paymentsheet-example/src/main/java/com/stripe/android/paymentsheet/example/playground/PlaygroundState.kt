@@ -3,11 +3,14 @@ package com.stripe.android.paymentsheet.example.playground
 import android.os.Parcelable
 import androidx.compose.runtime.Stable
 import com.stripe.android.SharedPaymentTokenSessionPreview
-import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.customersheet.CustomerSheet
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.FlowController
+import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.PaymentMethodOptionsSetupFutureUsagePreview
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.link.LinkController
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
@@ -49,7 +52,7 @@ internal sealed interface PlaygroundState : Parcelable {
         override val snapshot: PlaygroundSettings.Snapshot,
         val amount: Long,
         val paymentMethodTypes: List<String>,
-        val customerConfig: PaymentSheet.CustomerConfiguration?,
+        val customerConfig: CustomerConfiguration?,
         val clientSecret: String,
         private val defaultEndpoint: String,
     ) : PlaygroundState {
@@ -81,7 +84,7 @@ internal sealed interface PlaygroundState : Parcelable {
             get() = snapshot[CustomEndpointDefinition] ?: defaultEndpoint
 
         @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
-        val paymentMethodOptionsSetupFutureUsage: PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions
+        val paymentMethodOptionsSetupFutureUsage: IntentConfiguration.Mode.Payment.PaymentMethodOptions
             get() {
                 val map = stringValueToMap(
                     snapshot[PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition]
@@ -89,8 +92,8 @@ internal sealed interface PlaygroundState : Parcelable {
                 return getPMOSFUFromStringMap(map)
             }
 
-        fun intentConfiguration(): PaymentSheet.IntentConfiguration {
-            return PaymentSheet.IntentConfiguration(
+        fun intentConfiguration(): IntentConfiguration {
+            return IntentConfiguration(
                 mode = checkoutMode.intentConfigurationMode(this),
                 paymentMethodTypes = paymentMethodTypes,
                 paymentMethodConfigurationId = paymentMethodConfigurationId,
@@ -100,6 +103,10 @@ internal sealed interface PlaygroundState : Parcelable {
 
         fun paymentSheetConfiguration(settings: Settings): PaymentSheet.Configuration {
             return snapshot.paymentSheetConfiguration(playgroundState = this, appSettings = settings)
+        }
+
+        fun flowControllerConfiguration(settings: Settings): FlowController.Configuration {
+            return snapshot.flowControllerConfiguration(playgroundState = this, appSettings = settings)
         }
 
         fun embeddedConfiguration(): EmbeddedPaymentElement.Configuration {
@@ -177,19 +184,19 @@ internal sealed interface PlaygroundState : Parcelable {
         override val endpoint: String
             get() = ""
 
-        fun paymentSheetConfiguration(): PaymentSheet.Configuration {
-            return snapshot.paymentSheetConfiguration(this)
+        fun flowControllerConfiguration(): FlowController.Configuration {
+            return snapshot.flowControllerConfiguration(this)
         }
 
         @OptIn(SharedPaymentTokenSessionPreview::class)
-        fun intentConfiguration(): PaymentSheet.IntentConfiguration {
-            return PaymentSheet.IntentConfiguration(
-                sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+        fun intentConfiguration(): IntentConfiguration {
+            return IntentConfiguration(
+                sharedPaymentTokenSessionWithMode = IntentConfiguration.Mode.Payment(
                     amount = amount,
                     currency = currencyCode.value,
-                    captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Manual,
+                    captureMethod = IntentConfiguration.CaptureMethod.Manual,
                 ),
-                sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                sellerDetails = IntentConfiguration.SellerDetails(
                     networkId = "internal",
                     externalId = "stripe_test_merchant"
                 ),

@@ -9,7 +9,6 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.customersheet.CustomerPermissions
-import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetIntegration
 import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.CustomerSheetViewModel
@@ -22,6 +21,7 @@ import com.stripe.android.customersheet.data.CustomerSheetSavedSelectionDataSour
 import com.stripe.android.customersheet.data.FakeCustomerSheetIntentDataSource
 import com.stripe.android.customersheet.data.FakeCustomerSheetPaymentMethodDataSource
 import com.stripe.android.customersheet.data.FakeCustomerSheetSavedSelectionDataSource
+import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory

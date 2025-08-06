@@ -4,10 +4,10 @@ import android.content.Context
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.customersheet.CustomerEphemeralKey
-import com.stripe.android.customersheet.CustomerEphemeralKeyProvider
-import com.stripe.android.customersheet.SetupIntentClientSecretProvider
 import com.stripe.android.customersheet.StripeCustomerAdapter
+import com.stripe.android.elements.customersheet.CustomerEphemeralKey
+import com.stripe.android.elements.customersheet.CustomerEphemeralKeyProvider
+import com.stripe.android.elements.customersheet.SetupIntentClientSecretProvider
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository

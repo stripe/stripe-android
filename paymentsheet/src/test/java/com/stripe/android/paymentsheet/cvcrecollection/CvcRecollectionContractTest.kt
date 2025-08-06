@@ -4,8 +4,8 @@ import android.content.Intent
 import androidx.core.os.BundleCompat
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.Appearance
 import com.stripe.android.model.CardBrand
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionContract
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionContract.Args
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionContract.Companion.EXTRA_ARGS
@@ -24,7 +24,7 @@ class CvcRecollectionContractTest {
         val input = Args(
             lastFour = "444",
             cardBrand = CardBrand.Visa,
-            appearance = PaymentSheet.Appearance(),
+            appearance = Appearance(),
             isTestMode = true
         )
 

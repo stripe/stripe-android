@@ -2,6 +2,7 @@ package com.stripe.android.customersheet
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.customersheet.CustomerSheet
 import kotlin.test.Test
 
 class CustomerSheetConfigViewModelTest {

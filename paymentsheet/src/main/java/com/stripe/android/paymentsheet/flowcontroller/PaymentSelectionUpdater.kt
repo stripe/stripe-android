@@ -2,9 +2,9 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.model.containsVolatileDifferences
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.allowedWalletTypes
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentSheetState

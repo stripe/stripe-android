@@ -15,6 +15,10 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -27,9 +31,7 @@ import com.stripe.android.paymentelement.confirmation.assertFailed
 import com.stripe.android.paymentelement.confirmation.assertIdle
 import com.stripe.android.paymentelement.confirmation.assertSucceeded
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.createTestActivityRule
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
@@ -283,14 +285,13 @@ internal class GooglePayConfirmationActivityTest {
 
         val GOOGLE_PAY_CONFIRMATION_OPTION = GooglePayConfirmationOption(
             config = GooglePayConfirmationOption.Config(
-                environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                environment = GooglePayConfiguration.Environment.Test,
                 merchantName = "Test merchant Inc.",
                 merchantCurrencyCode = null,
                 customAmount = null,
                 merchantCountryCode = "CA",
                 customLabel = "Test merchant Inc.",
-                billingDetailsCollectionConfiguration = PaymentSheet
-                    .BillingDetailsCollectionConfiguration(),
+                billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
                 cardBrandFilter = DefaultCardBrandFilter,
             )
         )
@@ -302,7 +303,7 @@ internal class GooglePayConfirmationActivityTest {
             ),
             shippingDetails = AddressDetails(),
             intent = PAYMENT_INTENT,
-            appearance = PaymentSheet.Appearance(),
+            appearance = Appearance(),
         )
 
         const val GOOGLE_PAY_ACTIVITY_NAME =

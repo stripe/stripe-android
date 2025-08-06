@@ -19,6 +19,10 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.requireApplication
+import com.stripe.android.elements.payment.GooglePayConfiguration
+import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.PaymentMethodLayout
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -119,8 +123,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         },
     )
 
-    private val _paymentSheetResult = MutableSharedFlow<PaymentSheetResult>(replay = 1)
-    internal val paymentSheetResult: SharedFlow<PaymentSheetResult> = _paymentSheetResult
+    private val _paymentSheetResult = MutableSharedFlow<PaymentSheet.Result>(replay = 1)
+    internal val paymentSheetResult: SharedFlow<PaymentSheet.Result> = _paymentSheetResult
 
     @VisibleForTesting
     internal val viewState = MutableStateFlow<PaymentSheetViewState?>(null)
@@ -157,7 +161,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             } else {
                 GooglePayPaymentMethodLauncher.Config(
                     environment = when (config.environment) {
-                        PaymentSheet.GooglePayConfiguration.Environment.Production ->
+                        GooglePayConfiguration.Environment.Production ->
                             GooglePayEnvironment.Production
                         else ->
                             GooglePayEnvironment.Test
@@ -581,10 +585,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         inProgressSelection = null
 
         if (finishImmediately) {
-            _paymentSheetResult.tryEmit(PaymentSheetResult.Completed())
+            _paymentSheetResult.tryEmit(PaymentSheet.Result.Completed())
         } else {
             viewState.value = PaymentSheetViewState.FinishProcessing {
-                _paymentSheetResult.tryEmit(PaymentSheetResult.Completed())
+                _paymentSheetResult.tryEmit(PaymentSheet.Result.Completed())
             }
         }
     }
@@ -624,12 +628,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun onFatal(throwable: Throwable) {
         logger.error("Payment Sheet error", throwable)
-        _paymentSheetResult.tryEmit(PaymentSheetResult.Failed(throwable))
+        _paymentSheetResult.tryEmit(PaymentSheet.Result.Failed(throwable))
     }
 
     override fun onUserCancel() {
         eventReporter.onDismiss()
-        _paymentSheetResult.tryEmit(PaymentSheetResult.Canceled())
+        _paymentSheetResult.tryEmit(PaymentSheet.Result.Canceled())
     }
 
     override fun onError(error: ResolvableString?) = resetViewState(error)
@@ -638,7 +642,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         paymentMethodMetadata: PaymentMethodMetadata,
         customerStateHolder: CustomerStateHolder,
     ): List<PaymentSheetScreen> {
-        if (config.paymentMethodLayout != PaymentSheet.PaymentMethodLayout.Horizontal) {
+        if (config.paymentMethodLayout != PaymentMethodLayout.Horizontal) {
             return VerticalModeInitialScreenFactory.create(
                 viewModel = this,
                 paymentMethodMetadata = paymentMethodMetadata,
@@ -734,7 +738,7 @@ private val PaymentElementLoader.InitializationMode.isProcessingPayment: Boolean
         is PaymentElementLoader.InitializationMode.PaymentIntent -> true
         is PaymentElementLoader.InitializationMode.SetupIntent -> false
         is PaymentElementLoader.InitializationMode.DeferredIntent -> {
-            intentConfiguration.mode is PaymentSheet.IntentConfiguration.Mode.Payment
+            intentConfiguration.mode is IntentConfiguration.Mode.Payment
         }
     }
 
