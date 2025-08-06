@@ -6,8 +6,7 @@
 ## 21.22.0 - 2025-07-28
 ### PaymentSheet
 * [FIXED][11184](https://github.com/stripe/stripe-android/pull/11184) PaymentSheet will now accurately show a success state when confirming Blik and UPI PaymentIntents using a Stripe Connect account ID.
-* [FIXED][11184](https://github.com/stripe/stripe-android/pull/11184) Added `subtitleFont` to `PaymentSheet.Appearance.Embedded` for customization of EmbeddedPaymentElement payment method row subtitles.
-
+* [ADDED][11205](https://github.com/stripe/stripe-android/pull/11205) Added `subtitleFont` to `PaymentSheet.Appearance.Embedded` for customization of EmbeddedPaymentElement payment method row subtitles.
 ## 21.21.0 - 2025-07-21
 ### PaymentSheet
 * [CHANGED][11151](https://github.com/stripe/stripe-android/pull/11151) Remove intrinsic top and bottom padding from `EmbeddedPaymentElement.Content`.
