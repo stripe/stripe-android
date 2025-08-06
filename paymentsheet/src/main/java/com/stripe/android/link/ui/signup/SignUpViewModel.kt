@@ -51,7 +51,7 @@ internal class SignUpViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val dismissalCoordinator: LinkDismissalCoordinator,
     private val navigateAndClearStack: (LinkScreen) -> Unit,
-    private val moveToWeb: () -> Unit,
+    private val moveToWeb: (Throwable) -> Unit,
     private val linkLaunchMode: LinkLaunchMode,
     private val dismissWithResult: (LinkActivityResult) -> Unit
 ) : ViewModel() {
@@ -186,7 +186,7 @@ internal class SignUpViewModel @Inject constructor(
 
         when (signupResult) {
             is LinkAuthResult.AttestationFailed -> {
-                moveToWeb()
+                moveToWeb(signupResult.error)
             }
             is LinkAuthResult.Error -> {
                 onError(signupResult.error)
@@ -213,7 +213,7 @@ internal class SignUpViewModel @Inject constructor(
     ) {
         when (lookupResult) {
             is LinkAuthResult.AttestationFailed -> {
-                moveToWeb()
+                moveToWeb(lookupResult.error)
             }
             is LinkAuthResult.Error -> {
                 updateSignUpState(SignUpState.InputtingRemainingFields)
@@ -296,7 +296,7 @@ internal class SignUpViewModel @Inject constructor(
         fun factory(
             parentComponent: NativeLinkComponent,
             navigateAndClearStack: (LinkScreen) -> Unit,
-            moveToWeb: () -> Unit,
+            moveToWeb: (Throwable) -> Unit,
             dismissWithResult: (LinkActivityResult) -> Unit
         ): ViewModelProvider.Factory {
             return viewModelFactory {

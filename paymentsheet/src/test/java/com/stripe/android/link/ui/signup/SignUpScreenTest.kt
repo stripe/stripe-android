@@ -245,7 +245,7 @@ internal class SignUpScreenTest {
         linkAuth: LinkAuth = FakeLinkAuth(),
         dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
         customerInfo: LinkConfiguration.CustomerInfo = TestFactory.LINK_CUSTOMER_INFO,
-        moveToWeb: () -> Unit = {}
+        moveToWeb: (Throwable) -> Unit = {}
     ): SignUpViewModel {
         return SignUpViewModel(
             configuration = TestFactory.LINK_CONFIGURATION.copy(

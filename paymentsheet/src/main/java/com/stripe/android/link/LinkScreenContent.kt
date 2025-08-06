@@ -78,7 +78,7 @@ internal fun LinkScreenContentBody(
     dismissWithResult: (LinkActivityResult) -> Unit,
     getLinkAccount: () -> LinkAccount?,
     handleViewAction: (LinkAction) -> Unit,
-    moveToWeb: () -> Unit,
+    moveToWeb: (Throwable) -> Unit,
     goBack: () -> Unit,
     changeEmail: () -> Unit,
 ) {

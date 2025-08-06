@@ -85,7 +85,8 @@ internal class LinkActivityViewModel @Inject constructor(
     val linkAccount: LinkAccount?
         get() = linkAccountManager.linkAccountInfo.value.account
 
-    var launchWebFlow: ((LinkConfiguration) -> Unit)? = null
+    private val _launchWebFlow = MutableSharedFlow<LinkConfiguration>(replay = 0, extraBufferCapacity = 1)
+    val launchWebFlow: SharedFlow<LinkConfiguration> = _launchWebFlow.asSharedFlow()
 
     val canDismissSheet: Boolean
         get() = activityRetainedComponent.dismissalCoordinator.canDismiss
@@ -157,14 +158,12 @@ internal class LinkActivityViewModel @Inject constructor(
         }
     }
 
-    fun moveToWeb() {
+    fun moveToWeb(error: Throwable) {
         when (linkLaunchMode) {
             // Authentication flows with existing accounts -> dismiss with an error.
             is LinkLaunchMode.Authentication -> dismissWithResult(
                 LinkActivityResult.Failed(
-                    error = IllegalStateException(
-                        "authentication only is not supported in web mode"
-                    ),
+                    error = error,
                     linkAccountUpdate = LinkAccountUpdate.None
                 )
             )
@@ -178,9 +177,9 @@ internal class LinkActivityViewModel @Inject constructor(
             )
             // Flows that end up in confirmation -> we can launch the web flow.
             is LinkLaunchMode.Confirmation,
-            LinkLaunchMode.Full -> launchWebFlow?.let { launcher ->
+            LinkLaunchMode.Full -> {
                 navigate(LinkScreen.Loading, clearStack = true)
-                launcher.invoke(linkConfiguration)
+                viewModelScope.launch { _launchWebFlow.emit(linkConfiguration) }
             }
         }
     }
@@ -225,10 +224,6 @@ internal class LinkActivityViewModel @Inject constructor(
         navigate(LinkScreen.SignUp, clearStack = true)
     }
 
-    fun unregisterActivity() {
-        launchWebFlow = null
-    }
-
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         viewModelScope.launch {
@@ -242,13 +237,13 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     private suspend fun loadLink() {
+        val attestationCheckResult = linkAttestationCheck.invoke()
         if (startWithVerificationDialog) {
             updateScreenState()
         } else {
-            val attestationCheckResult = linkAttestationCheck.invoke()
             when (attestationCheckResult) {
                 is LinkAttestationCheck.Result.AttestationFailed -> {
-                    moveToWeb()
+                    moveToWeb(attestationCheckResult.error)
                 }
                 LinkAttestationCheck.Result.Successful -> {
                     updateScreenState()

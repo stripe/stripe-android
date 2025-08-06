@@ -51,7 +51,6 @@ internal class LinkActivity : ComponentActivity() {
             vm.handleResult(result)
         }
 
-        vm.launchWebFlow = ::launchWebFlow
         lifecycle.addObserver(vm)
         observeBackPress()
 
@@ -64,6 +63,12 @@ internal class LinkActivity : ComponentActivity() {
                 vm.result.collect { result ->
                     bottomSheetState.hide()
                     dismissWithResult(result)
+                }
+            }
+
+            LaunchedEffect(Unit) {
+                vm.launchWebFlow.collect { configuration ->
+                    launchWebFlow(configuration)
                 }
             }
 
@@ -104,7 +109,6 @@ internal class LinkActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        viewModel?.unregisterActivity()
     }
 
     override fun finish() {

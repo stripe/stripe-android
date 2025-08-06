@@ -48,7 +48,7 @@ internal fun LinkContent(
     dismissWithResult: (LinkActivityResult) -> Unit,
     getLinkAccount: () -> LinkAccount?,
     onBackPressed: () -> Unit,
-    moveToWeb: () -> Unit,
+    moveToWeb: (Throwable) -> Unit,
     goBack: () -> Unit,
     changeEmail: () -> Unit,
     initialDestination: LinkScreen
@@ -110,7 +110,7 @@ private fun Screens(
     dismissWithResult: (LinkActivityResult) -> Unit,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: suspend () -> Unit,
-    moveToWeb: () -> Unit,
+    moveToWeb: (Throwable) -> Unit,
     changeEmail: () -> Unit,
     initialDestination: LinkScreen,
     onLogoutClicked: () -> Unit,
@@ -186,7 +186,7 @@ private fun Screens(
 @Composable
 private fun SignUpRoute(
     navigateAndClearStack: (route: LinkScreen) -> Unit,
-    moveToWeb: () -> Unit,
+    moveToWeb: (Throwable) -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit
 ) {
     val viewModel: SignUpViewModel = linkViewModel { parentComponent ->
