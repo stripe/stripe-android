@@ -2,6 +2,7 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 * [ADDED][11179](https://github.com/stripe/stripe-android/pull/11179) More specific error messaging for postal codes
+* [FIXED][11280](https://github.com/stripe/stripe-android/pull/11280) Deferred intent flows now show specific API error messages instead of generic fallback messages
 
 ## 21.22.1 - 2025-08-04
 
