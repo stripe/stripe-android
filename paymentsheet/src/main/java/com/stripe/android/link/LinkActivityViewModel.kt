@@ -85,7 +85,8 @@ internal class LinkActivityViewModel @Inject constructor(
     val linkAccount: LinkAccount?
         get() = linkAccountManager.linkAccountInfo.value.account
 
-    var launchWebFlow: ((LinkConfiguration) -> Unit)? = null
+    private val _launchWebFlow = MutableSharedFlow<LinkConfiguration>(replay = 0, extraBufferCapacity = 1)
+    val launchWebFlow: SharedFlow<LinkConfiguration> = _launchWebFlow.asSharedFlow()
 
     val canDismissSheet: Boolean
         get() = activityRetainedComponent.dismissalCoordinator.canDismiss
@@ -176,9 +177,9 @@ internal class LinkActivityViewModel @Inject constructor(
             )
             // Flows that end up in confirmation -> we can launch the web flow.
             is LinkLaunchMode.Confirmation,
-            LinkLaunchMode.Full -> launchWebFlow?.let { launcher ->
+            LinkLaunchMode.Full -> {
                 navigate(LinkScreen.Loading, clearStack = true)
-                launcher.invoke(linkConfiguration)
+                viewModelScope.launch { _launchWebFlow.emit(linkConfiguration) }
             }
         }
     }
@@ -221,10 +222,6 @@ internal class LinkActivityViewModel @Inject constructor(
     fun changeEmail() {
         savedStateHandle[SignUpViewModel.USE_LINK_CONFIGURATION_CUSTOMER_INFO] = false
         navigate(LinkScreen.SignUp, clearStack = true)
-    }
-
-    fun unregisterActivity() {
-        launchWebFlow = null
     }
 
     override fun onCreate(owner: LifecycleOwner) {
