@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
-import android.util.Log
 
 internal class DocumentScanViewModel(
     applicationContext: Application,
@@ -51,7 +50,6 @@ internal class DocumentScanViewModel(
         when (scannerState) {
             State.Initializing -> {
                 val allowlist = verificationPage.data?.documentSelect?.idDocumentTypeAllowlist?.keys?.toList()
-                Log.d("TAG", "allowlist: $allowlist")
 
                 if (allowlist?.size == 1) {
                     when (allowlist[0]) {
@@ -92,7 +90,7 @@ internal class DocumentScanViewModel(
                     is IdentityScanState.Satisfied -> R.string.stripe_scanned
                     is IdentityScanState.TimeOut -> idleFeedback(targetScanType)
                     is IdentityScanState.Unsatisfied -> idleFeedback(targetScanType)
-                    null -> idleFeedback(targetScanType)
+                    null -> idleFeedback(targetScanType) // just initialized or start scanning, no scanState yet
                 }
             }
 
