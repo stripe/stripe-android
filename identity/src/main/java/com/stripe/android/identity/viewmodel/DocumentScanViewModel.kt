@@ -1,9 +1,11 @@
 package com.stripe.android.identity.viewmodel
 
 import android.app.Application
+import android.provider.ContactsContract.CommonDataKinds.Identity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.identity.R
@@ -28,7 +30,8 @@ internal class DocumentScanViewModel(
     override val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
     modelPerformanceTracker: ModelPerformanceTracker,
     laplacianBlurDetector: LaplacianBlurDetector,
-    verificationFlowFinishable: VerificationFlowFinishable
+    verificationFlowFinishable: VerificationFlowFinishable,
+    private val identityViewModel: IdentityViewModel
 ) : IdentityScanViewModel(
     applicationContext,
     fpsTracker,
@@ -41,7 +44,7 @@ internal class DocumentScanViewModel(
     @OptIn(FlowPreview::class)
     override val scanFeedback = combine(
         scannerState,
-        targetScanTypeFlow
+        targetScanTypeFlow,
     ) { scannerState, targetScanType ->
         when (scannerState) {
             State.Initializing -> {
@@ -93,7 +96,8 @@ internal class DocumentScanViewModel(
         private val modelPerformanceTracker: ModelPerformanceTracker,
         private val laplacianBlurDetector: LaplacianBlurDetector,
         private val fpsTracker: FPSTracker,
-        private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory
+        private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
+        private val identityViewModel: IdentityViewModel
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
@@ -103,7 +107,8 @@ internal class DocumentScanViewModel(
                 identityAnalyticsRequestFactory,
                 modelPerformanceTracker,
                 laplacianBlurDetector,
-                verificationFlowFinishable
+                verificationFlowFinishable,
+                identityViewModel
             ) as T
         }
     }
