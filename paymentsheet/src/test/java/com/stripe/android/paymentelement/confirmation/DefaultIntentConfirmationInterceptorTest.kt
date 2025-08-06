@@ -3,7 +3,9 @@ package com.stripe.android.paymentelement.confirmation
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -343,10 +345,14 @@ class DefaultIntentConfirmationInterceptorTest {
 
     @Test
     fun `Fails if creating payment method did not succeed`() = runTest {
-        val apiException = APIException(
+        val invalidRequestException = InvalidRequestException(
+            stripeError = StripeError(
+                type = "card_error",
+                message = "Your card is not supported.",
+                code = "card_declined",
+            ),
             requestId = "req_123",
-            statusCode = 500,
-            message = "Whoopsie",
+            statusCode = 400,
         )
 
         val interceptor = DefaultIntentConfirmationInterceptor(
@@ -355,7 +361,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     paymentMethodCreateParams: PaymentMethodCreateParams,
                     options: ApiRequest.Options
                 ): Result<PaymentMethod> {
-                    return Result.failure(apiException)
+                    return Result.failure(invalidRequestException)
                 }
             },
             publishableKeyProvider = { "pk" },
@@ -387,8 +393,8 @@ class DefaultIntentConfirmationInterceptorTest {
 
         assertThat(nextStep).isEqualTo(
             IntentConfirmationInterceptor.NextStep.Fail(
-                cause = apiException,
-                message = resolvableString(R.string.stripe_something_went_wrong),
+                cause = invalidRequestException,
+                message = "Your card is not supported.".resolvableString,
             )
         )
     }
