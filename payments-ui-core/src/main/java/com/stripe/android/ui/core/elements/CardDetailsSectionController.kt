@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.ui.core.DefaultIsStripeCardScanAvailable
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -16,7 +17,8 @@ class CardDetailsSectionController(
     collectName: Boolean = false,
     cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
-    val elementsSessionId: String? = null
+    val elementsSessionId: String? = null,
+    val directToCardScanData: DirectToCardScanData?,
 ) : SectionFieldErrorController {
 
     internal val cardDetailsElement = CardDetailsElement(
@@ -32,4 +34,8 @@ class CardDetailsSectionController(
     internal val isStripeCardScanAvailable = DefaultIsStripeCardScanAvailable()
 
     override val error = cardDetailsElement.controller.error
+
+    fun onCardScanResult(result: CardScanSheetResult) {
+        cardDetailsElement.controller.numberElement.controller.onCardScanResult(result)
+    }
 }

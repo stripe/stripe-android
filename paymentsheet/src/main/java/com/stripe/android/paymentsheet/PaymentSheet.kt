@@ -806,6 +806,8 @@ class PaymentSheet internal constructor(
         internal val googlePlacesApiKey: String? = ConfigurationDefaults.googlePlacesApiKey,
 
         internal val termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap(),
+
+        internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
     ) : Parcelable {
 
         @JvmOverloads
@@ -962,6 +964,7 @@ class PaymentSheet internal constructor(
             private var shopPayConfiguration: ShopPayConfiguration? = ConfigurationDefaults.shopPayConfiguration
             private var googlePlacesApiKey: String? = ConfigurationDefaults.googlePlacesApiKey
             private var termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap()
+            private var opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically
 
             private var customPaymentMethods: List<CustomPaymentMethod> =
                 ConfigurationDefaults.customPaymentMethods
@@ -1128,6 +1131,16 @@ class PaymentSheet internal constructor(
                 this.termsDisplay = termsDisplay
             }
 
+            /**
+             * By default, the payment sheet offers a card scan button within the new card entry form.
+             * When opensCardScannerAutomatically is set to true, the card entry form will
+             * initialize with the card scanner already open.
+             * **Note**: The stripecardscan dependency must be added to set `opensCardScannerAutomatically` to true
+             */
+            fun opensCardScannerAutomatically(opensCardScannerAutomatically: Boolean) = apply {
+                this.opensCardScannerAutomatically = opensCardScannerAutomatically
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -1152,6 +1165,7 @@ class PaymentSheet internal constructor(
                 shopPayConfiguration = shopPayConfiguration,
                 googlePlacesApiKey = googlePlacesApiKey,
                 termsDisplay = termsDisplay,
+                opensCardScannerAutomatically = opensCardScannerAutomatically,
             )
         }
 

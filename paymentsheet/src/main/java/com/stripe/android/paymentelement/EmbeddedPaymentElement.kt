@@ -238,6 +238,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val link: PaymentSheet.LinkConfiguration,
         internal val formSheetAction: FormSheetAction,
         internal val termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap(),
+        internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
     ) : Parcelable {
         @Suppress("TooManyFunctions")
         class Builder(
@@ -270,6 +271,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private var link: PaymentSheet.LinkConfiguration = ConfigurationDefaults.link
             private var formSheetAction: FormSheetAction = FormSheetAction.Continue
             private var termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap()
+            private var opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically
 
             /**
              * If set, the customer can select a previously saved payment method.
@@ -477,6 +479,14 @@ class EmbeddedPaymentElement @Inject internal constructor(
             fun termsDisplay(termsDisplay: Map<PaymentMethod.Type, TermsDisplay>) = apply {
                 this.termsDisplay = termsDisplay
             }
+            /**
+             * By default, the embedded payment element offers a card scan button within the new card entry form.
+             * When opensCardScannerAutomatically is set to true, the card entry form will initialize with the card scanner already open.
+             * **Note**: The stripecardscan dependency must be added to set `opensCardScannerAutomatically` to true
+             */
+            fun opensCardScannerAutomatically(opensCardScannerAutomatically: Boolean) = apply {
+                this.opensCardScannerAutomatically = opensCardScannerAutomatically
+            }
 
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
@@ -499,6 +509,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 link = link,
                 formSheetAction = formSheetAction,
                 termsDisplay = termsDisplay,
+                opensCardScannerAutomatically = opensCardScannerAutomatically,
             )
         }
     }

@@ -302,6 +302,19 @@ internal class PaymentOptionsViewModel @Inject constructor(
             linkGateFactory.create(linkConfiguration).showRuxInFlowController
     }
 
+    override suspend fun initializeHasSeenDirectToCardScanValue() {
+        paymentMethodMetadata.collect { metadata ->
+            if (metadata != null) {
+                directToCardScanData.shouldOpenCardScanAutomatically =
+                    metadata.openCardScanAutomaticallyConfig && !args.hasSeenDirectToCardScan
+                // no saved PMs
+//            customerStateHolder?.paymentMethods?.value.isNullOrEmpty() &&
+//            paymentMethodMetadata.supportedPaymentMethodTypes().size == 1 &&
+//            paymentMethodMetadata.supportedPaymentMethodTypes()[0] == PaymentMethod.Type.Card.code
+            }
+        }
+    }
+
     override fun handlePaymentMethodSelected(selection: PaymentSelection?) {
         updateSelection(selection)
 

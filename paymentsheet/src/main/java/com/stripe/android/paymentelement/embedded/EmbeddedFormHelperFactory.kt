@@ -10,14 +10,18 @@ import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.NewPaymentOptionSelection
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.payments.core.injection.HAS_SEEN_DIRECT_TO_CARD_SCAN
+import com.stripe.android.ui.core.elements.DirectToCardScanData
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
+import javax.inject.Named
 
 internal class EmbeddedFormHelperFactory @Inject constructor(
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val embeddedSelectionHolder: EmbeddedSelectionHolder,
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     private val savedStateHandle: SavedStateHandle,
+    @Named(HAS_SEEN_DIRECT_TO_CARD_SCAN) private val hasSeenDirectToCardScan: Boolean,
 ) {
     fun create(
         coroutineScope: CoroutineScope,
@@ -51,6 +55,11 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
             eventReporter = eventReporter,
             savedStateHandle = savedStateHandle,
             autocompleteAddressInteractorFactory = null,
+            directToCardScanData = DirectToCardScanData(
+                shouldOpenCardScanAutomaticallyInitialValue =
+                    !hasSeenDirectToCardScan && paymentMethodMetadata.openCardScanAutomaticallyConfig,
+                savedStateHandle = savedStateHandle,
+            ),
         )
     }
 }

@@ -647,6 +647,19 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         _paymentSheetResult.tryEmit(PaymentSheetResult.Canceled)
     }
 
+    override suspend fun initializeHasSeenDirectToCardScanValue() {
+        paymentMethodMetadata.collect { metadata ->
+            if (metadata != null) {
+                directToCardScanData.shouldOpenCardScanAutomatically =
+                    metadata.openCardScanAutomaticallyConfig
+                // no saved PMs
+//            customerStateHolder?.paymentMethods?.value.isNullOrEmpty() &&
+//            paymentMethodMetadata.supportedPaymentMethodTypes().size == 1 &&
+//            paymentMethodMetadata.supportedPaymentMethodTypes()[0] == PaymentMethod.Type.Card.code
+            }
+        }
+    }
+
     override fun onError(error: ResolvableString?) = resetViewState(error)
 
     private fun determineInitialBackStack(

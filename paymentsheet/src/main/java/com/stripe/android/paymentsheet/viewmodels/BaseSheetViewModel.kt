@@ -32,6 +32,7 @@ import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.elements.CvcConfig
 import com.stripe.android.ui.core.elements.CvcController
+import com.stripe.android.ui.core.elements.DirectToCardScanData
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
@@ -64,6 +65,11 @@ internal abstract class BaseSheetViewModel(
 
     private val _paymentMethodMetadata = MutableStateFlow<PaymentMethodMetadata?>(null)
     internal val paymentMethodMetadata: StateFlow<PaymentMethodMetadata?> = _paymentMethodMetadata
+
+    val directToCardScanData = DirectToCardScanData(
+        shouldOpenCardScanAutomaticallyInitialValue = false,
+        savedStateHandle = savedStateHandle,
+    )
 
     val navigationHandler: NavigationHandler<PaymentSheetScreen> = NavigationHandler(
         coroutineScope = viewModelScope,
@@ -148,6 +154,10 @@ internal abstract class BaseSheetViewModel(
                 clearErrorMessages()
             }
         }
+
+        viewModelScope.launch {
+            initializeHasSeenDirectToCardScanValue()
+        }
     }
 
     fun registerForActivityResult(
@@ -215,6 +225,8 @@ internal abstract class BaseSheetViewModel(
             onUserCancel()
         }
     }
+
+    abstract suspend fun initializeHasSeenDirectToCardScanValue()
 
     abstract fun onUserCancel()
 

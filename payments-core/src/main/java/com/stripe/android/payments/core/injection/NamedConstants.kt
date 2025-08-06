@@ -27,3 +27,8 @@ const val IS_INSTANT_APP = "isInstantApp"
 const val STATUS_BAR_COLOR = "STATUS_BAR_COLOR"
 
 internal const val INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS = "INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS"
+
+/**
+ * Name to indicate whether the user has seen direct-to-card-scan.
+ */
+const val HAS_SEEN_DIRECT_TO_CARD_SCAN = "HAS_SEEN_DIRECT_TO_CARD_SCAN"
