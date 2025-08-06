@@ -52,4 +52,11 @@ internal sealed interface LinkLaunchMode : Parcelable {
     data class Authentication(
         val existingOnly: Boolean = false,
     ) : LinkLaunchMode
+
+    fun selectedPayment(): ConsumerPaymentDetails.PaymentDetails? = when (this) {
+        is Authentication -> null
+        is Full -> null
+        is Confirmation -> selectedPayment.details
+        is PaymentMethodSelection -> selectedPayment
+    }
 }
