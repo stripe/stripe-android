@@ -30,6 +30,7 @@ import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.WalletButtonsPage
 import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.paymentsheet.PaymentSheet.FlowController
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.ActivityLaunchObserver
@@ -411,17 +412,15 @@ internal class FlowControllerTest {
             scenario.onActivity {
                 PaymentConfiguration.init(it, "pk_test_123")
 
-                @Suppress("Deprecation")
-                val unsynchronizedController = PaymentSheet.FlowController.create(
-                    activity = it,
+                val unsynchronizedController = FlowController.Builder(
+                    resultCallback = {
+                        throw AssertionError("Not expected")
+                    },
                     paymentOptionCallback = { paymentOption ->
                         assertThat(paymentOption?.label).endsWith("4242")
                         paymentOptionCallbackCountDownLatch.countDown()
-                    },
-                    paymentResultCallback = {
-                        throw AssertionError("Not expected")
-                    },
-                )
+                    }
+                ).build(activity = it)
 
                 flowController = unsynchronizedController
             }
@@ -478,16 +477,14 @@ internal class FlowControllerTest {
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
             PaymentConfiguration.init(it, "pk_test_123")
-            @Suppress("Deprecation")
-            flowController = PaymentSheet.FlowController.create(
-                activity = it,
+            flowController = FlowController.Builder(
+                resultCallback = {
+                    throw AssertionError("Not expected")
+                },
                 paymentOptionCallback = {
                     throw AssertionError("Not expected")
-                },
-                paymentResultCallback = {
-                    throw AssertionError("Not expected")
-                },
-            )
+                }
+            ).build(activity = it)
         }
         scenario.moveToState(Lifecycle.State.RESUMED)
 
