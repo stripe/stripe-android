@@ -129,7 +129,6 @@ internal open class FakeLinkRepository : LinkRepository {
         stripeIntent: StripeIntent,
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?,
-        active: Boolean
     ) = createCardPaymentDetailsResult
 
     override suspend fun createBankAccountPaymentDetails(

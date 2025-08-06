@@ -279,7 +279,6 @@ class LinkApiRepositoryTest {
             stripeIntent = paymentIntent,
             consumerSessionClientSecret = secret,
             consumerPublishableKey = consumerKey,
-            active = false,
         )
 
         verify(consumersApiService).createPaymentDetails(
@@ -297,7 +296,7 @@ class LinkApiRepositoryTest {
                         "country_code" to "US",
                         "postal_code" to "12345"
                     ),
-                    "active" to false,
+                    "active" to true,
                 )
             },
             requestSurface = eq("android_payment_element"),
@@ -330,7 +329,6 @@ class LinkApiRepositoryTest {
                 stripeIntent = paymentIntent,
                 consumerSessionClientSecret = secret,
                 consumerPublishableKey = consumerKey,
-                active = false,
             ).getOrThrow()
 
             assertThat(linkDetails.paymentMethodCreateParams.allowRedisplay).isEqualTo(allowRedisplay)
@@ -349,7 +347,6 @@ class LinkApiRepositoryTest {
                 stripeIntent = paymentIntent,
                 consumerSessionClientSecret = secret,
                 consumerPublishableKey = null,
-                active = false,
             )
 
             verify(consumersApiService).createPaymentDetails(
@@ -367,7 +364,7 @@ class LinkApiRepositoryTest {
                             "country_code" to "US",
                             "postal_code" to "12345"
                         ),
-                        "active" to false,
+                        "active" to true,
                     )
                 },
                 requestSurface = eq("android_payment_element"),
@@ -395,7 +392,6 @@ class LinkApiRepositoryTest {
             stripeIntent = paymentIntent,
             consumerSessionClientSecret = consumerSessionSecret,
             consumerPublishableKey = null,
-            active = false,
         )
 
         assertThat(result.isSuccess).isTrue()
@@ -443,7 +439,6 @@ class LinkApiRepositoryTest {
             stripeIntent = paymentIntent,
             consumerSessionClientSecret = "secret",
             consumerPublishableKey = null,
-            active = false,
         )
         val loggedErrors = errorReporter.getLoggedErrors()
 

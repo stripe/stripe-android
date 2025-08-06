@@ -482,7 +482,6 @@ class DefaultLinkAccountManagerTest {
                 stripeIntent: StripeIntent,
                 consumerSessionClientSecret: String,
                 consumerPublishableKey: String?,
-                active: Boolean
             ): Result<LinkPaymentDetails.New> {
                 val details = result.first()
                 if (result.size > 1) {

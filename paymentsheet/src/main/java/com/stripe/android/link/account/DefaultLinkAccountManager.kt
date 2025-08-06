@@ -288,7 +288,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     stripeIntent = config.stripeIntent,
                     consumerSessionClientSecret = account.clientSecret,
                     consumerPublishableKey = account.consumerPublishableKey.takeIf { !config.passthroughModeEnabled },
-                    active = config.passthroughModeEnabled,
                 ).onSuccess {
                     errorReporter.report(ErrorReporter.SuccessEvent.LINK_CREATE_CARD_SUCCESS)
                 }
