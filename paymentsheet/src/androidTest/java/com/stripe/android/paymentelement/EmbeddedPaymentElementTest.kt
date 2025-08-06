@@ -42,6 +42,14 @@ internal class EmbeddedPaymentElementTest {
     private val card1 = CardPaymentMethodDetails("pm_12345", "4242")
     private val card2 = CardPaymentMethodDetails("pm_67890", "5544")
 
+    private val paymentWithSetupFutureUsageIntentConfiguration = PaymentSheet.IntentConfiguration(
+        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+            amount = 5000,
+            currency = "USD",
+            setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+        )
+    )
+
     @After
     fun teardown() {
         GooglePayRepository.resetFactory()
@@ -309,6 +317,60 @@ internal class EmbeddedPaymentElementTest {
         walletButtonsPage.assertLinkIsDisplayed()
         walletButtonsPage.assertGooglePayIsDisplayed()
 
+        testContext.markTestSucceeded()
+    }
+
+    @Test
+    fun testEmbeddedPaymentElementDisplaysMandate() = runEmbeddedPaymentElementTest(
+        networkRule = networkRule,
+        createIntentCallback = { _, shouldSavePaymentMethod ->
+            assertThat(shouldSavePaymentMethod).isFalse()
+            CreateIntentResult.Success("pi_example_secret_12345")
+        },
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        testContext.configure(intentConfiguration = paymentWithSetupFutureUsageIntentConfiguration)
+
+        embeddedContentPage.clickOnLpm("card")
+        formPage.assertMandateIsShown()
+        testContext.markTestSucceeded()
+    }
+
+    @Test
+    fun testEmbeddedPaymentElementWithTermsDisplayNeverDoesNotDisplayMandate() = runEmbeddedPaymentElementTest(
+        networkRule = networkRule,
+        createIntentCallback = { _, shouldSavePaymentMethod ->
+            assertThat(shouldSavePaymentMethod).isFalse()
+            CreateIntentResult.Success("pi_example_secret_12345")
+        },
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        testContext.configure(intentConfiguration = paymentWithSetupFutureUsageIntentConfiguration) {
+            termsDisplay(
+                mapOf(
+                    PaymentMethod.Type.Card to PaymentSheet.TermsDisplay.NEVER
+                )
+            )
+        }
+
+        embeddedContentPage.clickOnLpm("card")
+        formPage.assertMandateIsMissing()
         testContext.markTestSucceeded()
     }
 
