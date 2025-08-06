@@ -6,6 +6,7 @@ import com.stripe.android.challenge.PassiveChallengeActivityContract
 import com.stripe.android.challenge.PassiveChallengeActivityResult
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -18,7 +19,7 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
 ) : ConfirmationDefinition<
     PaymentMethodConfirmationOption.New,
     ActivityResultLauncher<PassiveChallengeActivityContract.Args>,
-    Unit,
+    PassiveChallengeConfirmationDefinition.LauncherArgs,
     PassiveChallengeActivityResult
     > {
     override val key = "ChallengePassive"
@@ -57,21 +58,20 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
 
     override fun launch(
         launcher: ActivityResultLauncher<PassiveChallengeActivityContract.Args>,
-        arguments: Unit,
+        arguments: LauncherArgs,
         confirmationOption: PaymentMethodConfirmationOption.New,
         confirmationParameters: ConfirmationDefinition.Parameters
     ) {
-        requireNotNull(confirmationOption.passiveCaptchaParams)
-        launcher.launch(PassiveChallengeActivityContract.Args(confirmationOption.passiveCaptchaParams))
+        launcher.launch(PassiveChallengeActivityContract.Args(arguments.passiveCaptchaParams))
     }
 
     override suspend fun action(
         confirmationOption: PaymentMethodConfirmationOption.New,
         confirmationParameters: ConfirmationDefinition.Parameters
-    ): ConfirmationDefinition.Action<Unit> {
+    ): ConfirmationDefinition.Action<LauncherArgs> {
         if (confirmationOption.passiveCaptchaParams != null) {
             return ConfirmationDefinition.Action.Launch(
-                launcherArguments = Unit,
+                launcherArguments = LauncherArgs(confirmationOption.passiveCaptchaParams),
                 receivesResultInProcess = false,
                 deferredIntentConfirmationType = null,
             )
@@ -82,11 +82,15 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
             ErrorReporter.UnexpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_PASSIVE_CHALLENGE_PARAMS_NULL,
             stripeException = StripeException.create(error)
         )
-        
+
         return ConfirmationDefinition.Action.Fail(
             cause = error,
             message = "Passive challenge params are null".resolvableString,
             errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal
         )
     }
+
+    data class LauncherArgs(
+        val passiveCaptchaParams: PassiveCaptchaParams
+    )
 }
