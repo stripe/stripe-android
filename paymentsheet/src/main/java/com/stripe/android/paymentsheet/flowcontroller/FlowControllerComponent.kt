@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.flowcontroller
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.lifecycle.LifecycleOwner
-import com.stripe.android.paymentelement.FlowControllerPaymentOptionResultPreview
 import com.stripe.android.paymentsheet.InitializedViaCompose
 import com.stripe.android.paymentsheet.PaymentOptionResultCallback
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
@@ -31,7 +30,6 @@ internal interface FlowControllerComponent {
             activityResultRegistryOwner: ActivityResultRegistryOwner,
         ): Builder
 
-        @OptIn(FlowControllerPaymentOptionResultPreview::class)
         @BindsInstance
         fun paymentOptionResultCallback(paymentOptionResultCallback: PaymentOptionResultCallback): Builder
 

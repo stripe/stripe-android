@@ -1,17 +1,15 @@
 package com.stripe.android.paymentsheet
 
-import com.stripe.android.paymentelement.FlowControllerPaymentOptionResultPreview
 import com.stripe.android.paymentsheet.model.PaymentOption
 import dev.drewhamilton.poko.Poko
 
 /**
- * Result containing an update to the user's payment option and the action is was received from.
+ * Result containing an update to the user's payment option and the action it was received from.
  */
-@FlowControllerPaymentOptionResultPreview
 @Poko
-class PaymentOptionResult(
+class PaymentOptionResult internal constructor(
     /**
-     * The updated user payment option. Always update your internally tracked option irregardless of what action
+     * The updated user payment option. Always update your internally tracked option regardless of what action
      * it is received from.
      */
     val paymentOption: PaymentOption?,

@@ -1122,9 +1122,6 @@ public final class com/stripe/android/paymentelement/EmbeddedPaymentElementKtxKt
 public abstract interface annotation class com/stripe/android/paymentelement/ExperimentalAnalyticEventCallbackApi : java/lang/annotation/Annotation {
 }
 
-public abstract interface annotation class com/stripe/android/paymentelement/FlowControllerPaymentOptionResultPreview : java/lang/annotation/Annotation {
-}
-
 public abstract interface annotation class com/stripe/android/paymentelement/PaymentMethodOptionsSetupFutureUsagePreview : java/lang/annotation/Annotation {
 }
 
@@ -1481,7 +1478,6 @@ public final class com/stripe/android/paymentsheet/PaymentOptionContract$Args$Cr
 
 public final class com/stripe/android/paymentsheet/PaymentOptionResult {
 	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/paymentsheet/model/PaymentOption;Z)V
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getDidCancel ()Z
 	public final fun getPaymentOption ()Lcom/stripe/android/paymentsheet/model/PaymentOption;

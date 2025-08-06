@@ -12,7 +12,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.paymentelement.FlowControllerPaymentOptionResultPreview
 import com.stripe.android.paymentsheet.createTestActivityRule
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -23,7 +22,6 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-@OptIn(FlowControllerPaymentOptionResultPreview::class)
 @RunWith(RobolectricTestRunner::class)
 class FlowControllerFactoryTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()

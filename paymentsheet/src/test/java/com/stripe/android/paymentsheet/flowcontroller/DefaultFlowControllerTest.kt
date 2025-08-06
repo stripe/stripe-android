@@ -44,7 +44,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
-import com.stripe.android.paymentelement.FlowControllerPaymentOptionResultPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
@@ -114,7 +113,7 @@ import kotlin.test.Test
 
 @Suppress("DEPRECATION")
 @RunWith(RobolectricTestRunner::class)
-@OptIn(ExperimentalCustomPaymentMethodsApi::class, FlowControllerPaymentOptionResultPreview::class)
+@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal class DefaultFlowControllerTest {
 
     @get:Rule
@@ -2439,7 +2438,6 @@ internal class DefaultFlowControllerTest {
         )
     }
 
-    @OptIn(FlowControllerPaymentOptionResultPreview::class)
     private fun createFlowController(
         paymentElementLoader: PaymentElementLoader,
         viewModel: FlowControllerViewModel = createViewModel(),

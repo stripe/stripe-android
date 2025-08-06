@@ -9,7 +9,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.stripe.android.common.ui.UpdateCallbacks
-import com.stripe.android.paymentelement.FlowControllerPaymentOptionResultPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.utils.rememberActivity
@@ -41,7 +40,6 @@ fun rememberPaymentSheetFlowController(
             .build()
     }
 
-    @OptIn(FlowControllerPaymentOptionResultPreview::class)
     return internalRememberPaymentSheetFlowController(
         paymentOptionResultCallback = rememberUpdatedPaymentOptionCallback(paymentOptionCallback),
         paymentResultCallback = paymentResultCallback,
@@ -81,7 +79,6 @@ fun rememberPaymentSheetFlowController(
             .build()
     }
 
-    @OptIn(FlowControllerPaymentOptionResultPreview::class)
     return internalRememberPaymentSheetFlowController(
         paymentOptionResultCallback = rememberUpdatedPaymentOptionCallback(paymentOptionCallback),
         paymentResultCallback = paymentResultCallback,
@@ -132,7 +129,6 @@ fun rememberPaymentSheetFlowController(
             .build()
     }
 
-    @OptIn(FlowControllerPaymentOptionResultPreview::class)
     return internalRememberPaymentSheetFlowController(
         paymentOptionResultCallback = rememberUpdatedPaymentOptionCallback(paymentOptionCallback),
         paymentResultCallback = paymentResultCallback,
@@ -140,7 +136,6 @@ fun rememberPaymentSheetFlowController(
     )
 }
 
-@OptIn(FlowControllerPaymentOptionResultPreview::class)
 @Composable
 internal fun internalRememberPaymentSheetFlowController(
     callbacks: PaymentElementCallbacks,
@@ -181,7 +176,6 @@ internal fun internalRememberPaymentSheetFlowController(
     }
 }
 
-@OptIn(FlowControllerPaymentOptionResultPreview::class)
 @Composable
 private fun rememberUpdatedPaymentOptionCallback(
     paymentOptionCallback: PaymentOptionCallback
