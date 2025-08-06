@@ -238,16 +238,20 @@ internal class LinkActivityViewModel @Inject constructor(
 
     private suspend fun loadLink() {
         val attestationCheckResult = linkAttestationCheck.invoke()
-        when (attestationCheckResult) {
-            is LinkAttestationCheck.Result.AttestationFailed -> {
-                moveToWeb(attestationCheckResult.error)
-            }
-            LinkAttestationCheck.Result.Successful -> {
-                updateScreenState()
-            }
-            is LinkAttestationCheck.Result.Error,
-            is LinkAttestationCheck.Result.AccountError -> {
-                handleAccountError()
+        if (startWithVerificationDialog) {
+            updateScreenState()
+        } else {
+            when (attestationCheckResult) {
+                is LinkAttestationCheck.Result.AttestationFailed -> {
+                    moveToWeb(attestationCheckResult.error)
+                }
+                LinkAttestationCheck.Result.Successful -> {
+                    updateScreenState()
+                }
+                is LinkAttestationCheck.Result.Error,
+                is LinkAttestationCheck.Result.AccountError -> {
+                    handleAccountError()
+                }
             }
         }
     }
