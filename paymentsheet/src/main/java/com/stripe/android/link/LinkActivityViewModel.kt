@@ -157,14 +157,12 @@ internal class LinkActivityViewModel @Inject constructor(
         }
     }
 
-    fun moveToWeb() {
+    fun moveToWeb(error: Throwable) {
         when (linkLaunchMode) {
             // Authentication flows with existing accounts -> dismiss with an error.
             is LinkLaunchMode.Authentication -> dismissWithResult(
                 LinkActivityResult.Failed(
-                    error = IllegalStateException(
-                        "authentication only is not supported in web mode"
-                    ),
+                    error = error,
                     linkAccountUpdate = LinkAccountUpdate.None
                 )
             )
@@ -242,21 +240,17 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     private suspend fun loadLink() {
-        if (startWithVerificationDialog) {
-            updateScreenState()
-        } else {
-            val attestationCheckResult = linkAttestationCheck.invoke()
-            when (attestationCheckResult) {
-                is LinkAttestationCheck.Result.AttestationFailed -> {
-                    moveToWeb()
-                }
-                LinkAttestationCheck.Result.Successful -> {
-                    updateScreenState()
-                }
-                is LinkAttestationCheck.Result.Error,
-                is LinkAttestationCheck.Result.AccountError -> {
-                    handleAccountError()
-                }
+        val attestationCheckResult = linkAttestationCheck.invoke()
+        when (attestationCheckResult) {
+            is LinkAttestationCheck.Result.AttestationFailed -> {
+                moveToWeb(attestationCheckResult.error)
+            }
+            LinkAttestationCheck.Result.Successful -> {
+                updateScreenState()
+            }
+            is LinkAttestationCheck.Result.Error,
+            is LinkAttestationCheck.Result.AccountError -> {
+                handleAccountError()
             }
         }
     }
