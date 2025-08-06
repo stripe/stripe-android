@@ -7,6 +7,7 @@ import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampKYCResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
+import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.link.LinkController
@@ -83,6 +84,20 @@ internal class OnrampInteractor @Inject constructor(
                 )
         } ?: run {
             return OnrampKYCResult.Failed(IllegalStateException("Missing consumer secret"))
+        }
+    }
+
+    suspend fun startIdentityVerification(): OnrampStartVerificationResult {
+        val secret = consumerSessionClientSecret()
+
+        secret?.let {
+            return cryptoApiRepository.startIdentityVerification(secret)
+                .fold(
+                    onSuccess = { OnrampStartVerificationResult.Completed(it) },
+                    onFailure = { OnrampStartVerificationResult.Failed(it) }
+                )
+        } ?: run {
+            return OnrampStartVerificationResult.Failed(IllegalStateException("Missing consumer secret"))
         }
     }
 

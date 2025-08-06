@@ -70,7 +70,12 @@ internal class OnrampActivity : ComponentActivity() {
             OnrampExampleTheme {
                 OnrampScreen(
                     viewModel = viewModel,
-                    onAuthenticateUser = { email -> onrampPresenter.authenticateExistingLinkUser(email) }
+                    onAuthenticateUser = { email ->
+                        onrampPresenter.authenticateExistingLinkUser(email)
+                    },
+                    onStartVerification = {
+                        onrampPresenter.promptForIdentityVerification()
+                    }
                 )
             }
         }
@@ -81,7 +86,8 @@ internal class OnrampActivity : ComponentActivity() {
 @Suppress("LongMethod")
 internal fun OnrampScreen(
     viewModel: OnrampViewModel,
-    onAuthenticateUser: (String) -> Unit
+    onAuthenticateUser: (String) -> Unit,
+    onStartVerification: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
@@ -152,7 +158,7 @@ internal fun OnrampScreen(
                     onFirstNameChange = { firstName = it },
                     lastName = lastName,
                     onLastNameChange = { lastName = it },
-                    onCollectKYC = { kycInfo -> viewModel.collectKycInfo(kycInfo) }
+                    onCollectKYC = { kycInfo -> onStartVerification() }
                 )
             }
         }

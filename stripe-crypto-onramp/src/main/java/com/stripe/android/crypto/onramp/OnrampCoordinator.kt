@@ -14,6 +14,7 @@ import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampKYCResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
+import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import javax.inject.Inject
 
 /**
@@ -105,6 +106,10 @@ class OnrampCoordinator @Inject internal constructor(
          */
         fun authenticateExistingLinkUser(email: String) {
             coordinator.authenticateExistingLinkUser(email)
+        }
+
+        fun promptForIdentityVerification() {
+            coordinator.promptForIdentityVerification()
         }
     }
 
