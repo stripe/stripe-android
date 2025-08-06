@@ -9,6 +9,7 @@ import android.os.Build
 import android.util.Size
 import androidx.annotation.CheckResult
 import androidx.annotation.RestrictTo
+import androidx.core.graphics.createBitmap
 import com.stripe.android.camera.framework.util.centerOn
 import com.stripe.android.camera.framework.util.intersectionWith
 import com.stripe.android.camera.framework.util.move
@@ -121,7 +122,7 @@ fun Bitmap.scaleAndCrop(size: Size, filter: Boolean = false): Bitmap =
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Bitmap.cropWithFill(cropRegion: Rect): Bitmap {
     val intersectionRegion = this.size().toRect().intersectionWith(cropRegion)
-    val result = Bitmap.createBitmap(cropRegion.width(), cropRegion.height(), this.config)
+    val result = createBitmap(cropRegion.width(), cropRegion.height(), this.config.orDefault())
     val canvas = Canvas(result)
 
     canvas.drawColor(Color.GRAY)
@@ -147,7 +148,7 @@ fun Bitmap.rearrangeBySegments(
     segmentMap: Map<Rect, Rect>
 ): Bitmap {
     if (segmentMap.isEmpty()) {
-        return Bitmap.createBitmap(0, 0, this.config)
+        return createBitmap(0, 0, this.config.orDefault())
     }
     val newImageDimensions = segmentMap.values.reduce { a, b ->
         Rect(
@@ -158,7 +159,7 @@ fun Bitmap.rearrangeBySegments(
         )
     }
     val newImageSize = newImageDimensions.size()
-    val result = Bitmap.createBitmap(newImageSize.width, newImageSize.height, this.config)
+    val result = createBitmap(newImageSize.width, newImageSize.height, this.config.orDefault())
     val canvas = Canvas(result)
 
     // This should be using segmentMap.forEach, but doing so seems to require API 24. It's unclear
@@ -263,3 +264,6 @@ fun Bitmap.mirrorVertically(): Bitmap =
         },
         false
     )
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun Bitmap.Config?.orDefault() = this ?: Bitmap.Config.ARGB_8888
