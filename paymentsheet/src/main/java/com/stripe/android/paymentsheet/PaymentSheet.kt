@@ -3367,12 +3367,26 @@ class PaymentSheet internal constructor(
          * Builder utility to set optional callbacks for [PaymentSheet.FlowController].
          *
          * @param resultCallback Called when a [PaymentSheetResult] is available.
-         * @param paymentOptionCallback Called when the customer's desired payment method changes.
+         * @param paymentOptionResultCallback Called after the customer attempts to make a payment method change.
          */
         class Builder(
             internal val resultCallback: PaymentSheetResultCallback,
-            internal val paymentOptionCallback: PaymentOptionCallback
+            internal val paymentOptionResultCallback: PaymentOptionResultCallback,
         ) {
+            /**
+             * Builder utility to set optional callbacks for [PaymentSheet.FlowController].
+             *
+             * @param resultCallback Called when a [PaymentSheetResult] is available.
+             * @param paymentOptionCallback Called when the customer's desired payment method changes.
+             */
+            constructor(
+                resultCallback: PaymentSheetResultCallback,
+                paymentOptionCallback: PaymentOptionCallback
+            ) : this(
+                resultCallback = resultCallback,
+                paymentOptionResultCallback = paymentOptionCallback.toResultCallback(),
+            )
+
             private val callbacksBuilder = PaymentElementCallbacks.Builder()
 
             /**
@@ -3431,7 +3445,7 @@ class PaymentSheet internal constructor(
              */
             fun build(activity: ComponentActivity): FlowController {
                 initializeCallbacks()
-                return FlowControllerFactory(activity, paymentOptionCallback, resultCallback).create()
+                return FlowControllerFactory(activity, paymentOptionResultCallback, resultCallback).create()
             }
 
             /**
@@ -3441,7 +3455,7 @@ class PaymentSheet internal constructor(
              */
             fun build(fragment: Fragment): FlowController {
                 initializeCallbacks()
-                return FlowControllerFactory(fragment, paymentOptionCallback, resultCallback).create()
+                return FlowControllerFactory(fragment, paymentOptionResultCallback, resultCallback).create()
             }
 
             /**
@@ -3454,7 +3468,7 @@ class PaymentSheet internal constructor(
                  */
                 return internalRememberPaymentSheetFlowController(
                     callbacks = callbacksBuilder.build(),
-                    paymentOptionCallback = paymentOptionCallback,
+                    paymentOptionResultCallback = paymentOptionResultCallback,
                     paymentResultCallback = resultCallback,
                 )
             }
@@ -3504,7 +3518,7 @@ class PaymentSheet internal constructor(
             ): FlowController {
                 return FlowControllerFactory(
                     activity,
-                    paymentOptionCallback,
+                    paymentOptionCallback.toResultCallback(),
                     paymentResultCallback
                 ).create()
             }
@@ -3545,7 +3559,7 @@ class PaymentSheet internal constructor(
                 )
                 return FlowControllerFactory(
                     activity,
-                    paymentOptionCallback,
+                    paymentOptionCallback.toResultCallback(),
                     paymentResultCallback
                 ).create()
             }
@@ -3583,7 +3597,7 @@ class PaymentSheet internal constructor(
                 )
                 return FlowControllerFactory(
                     activity,
-                    paymentOptionCallback,
+                    paymentOptionCallback.toResultCallback(),
                     paymentResultCallback
                 ).create()
             }
@@ -3628,7 +3642,7 @@ class PaymentSheet internal constructor(
                 )
                 return FlowControllerFactory(
                     activity,
-                    paymentOptionCallback,
+                    paymentOptionCallback.toResultCallback(),
                     paymentResultCallback
                 ).create()
             }
@@ -3655,7 +3669,7 @@ class PaymentSheet internal constructor(
             ): FlowController {
                 return FlowControllerFactory(
                     fragment,
-                    paymentOptionCallback,
+                    paymentOptionCallback.toResultCallback(),
                     paymentResultCallback
                 ).create()
             }
@@ -3694,7 +3708,7 @@ class PaymentSheet internal constructor(
                 )
                 return FlowControllerFactory(
                     fragment,
-                    paymentOptionCallback,
+                    paymentOptionCallback.toResultCallback(),
                     paymentResultCallback
                 ).create()
             }
@@ -3732,7 +3746,7 @@ class PaymentSheet internal constructor(
                 )
                 return FlowControllerFactory(
                     fragment,
-                    paymentOptionCallback,
+                    paymentOptionCallback.toResultCallback(),
                     paymentResultCallback
                 ).create()
             }
@@ -3777,7 +3791,7 @@ class PaymentSheet internal constructor(
                 )
                 return FlowControllerFactory(
                     fragment,
-                    paymentOptionCallback,
+                    paymentOptionCallback.toResultCallback(),
                     paymentResultCallback
                 ).create()
             }
