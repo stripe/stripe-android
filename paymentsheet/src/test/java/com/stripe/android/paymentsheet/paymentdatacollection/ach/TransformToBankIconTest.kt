@@ -11,24 +11,24 @@ class TransformToBankIconTest {
         // bank of america
         Assert.assertEquals(TransformToBankIcon("Bank of America"), StripeR.drawable.stripe_ic_bank_boa)
         Assert.assertEquals(TransformToBankIcon("bank of america"), StripeR.drawable.stripe_ic_bank_boa)
-        Assert.assertEquals(TransformToBankIcon("BANKof AMERICA"), R.drawable.stripe_ic_paymentsheet_bank)
+        Assert.assertEquals(TransformToBankIcon("BANKof AMERICA"), R.drawable.stripe_ic_fc_bank)
 
         // capital one
         Assert.assertEquals(TransformToBankIcon("Capital One"), StripeR.drawable.stripe_ic_bank_capitalone)
         Assert.assertEquals(TransformToBankIcon("capital one"), StripeR.drawable.stripe_ic_bank_capitalone)
-        Assert.assertEquals(TransformToBankIcon("Capital      One"), R.drawable.stripe_ic_paymentsheet_bank)
+        Assert.assertEquals(TransformToBankIcon("Capital      One"), R.drawable.stripe_ic_fc_bank)
 
         // compass
         Assert.assertEquals(TransformToBankIcon("BBVA"), StripeR.drawable.stripe_ic_bank_compass)
         Assert.assertEquals(TransformToBankIcon("bbva"), StripeR.drawable.stripe_ic_bank_compass)
         Assert.assertEquals(TransformToBankIcon("Compass"), StripeR.drawable.stripe_ic_bank_compass)
         Assert.assertEquals(TransformToBankIcon("compass"), StripeR.drawable.stripe_ic_bank_compass)
-        Assert.assertEquals(TransformToBankIcon("b b v a"), R.drawable.stripe_ic_paymentsheet_bank)
+        Assert.assertEquals(TransformToBankIcon("b b v a"), R.drawable.stripe_ic_fc_bank)
 
         // citi
         Assert.assertEquals(TransformToBankIcon("Citibank"), StripeR.drawable.stripe_ic_bank_citi)
         Assert.assertEquals(TransformToBankIcon("citibank"), StripeR.drawable.stripe_ic_bank_citi)
-        Assert.assertEquals(TransformToBankIcon("Citi Bank"), R.drawable.stripe_ic_paymentsheet_bank)
+        Assert.assertEquals(TransformToBankIcon("Citi Bank"), R.drawable.stripe_ic_fc_bank)
 
         // morgan chase
         Assert.assertEquals(TransformToBankIcon("MORGAN CHASE"), StripeR.drawable.stripe_ic_bank_morganchase)
@@ -41,13 +41,13 @@ class TransformToBankIconTest {
         // nfcu
         Assert.assertEquals(TransformToBankIcon("NAVY FEDERAL CREDIT UNION"), StripeR.drawable.stripe_ic_bank_nfcu)
         Assert.assertEquals(TransformToBankIcon("navy federal credit union"), StripeR.drawable.stripe_ic_bank_nfcu)
-        Assert.assertEquals(TransformToBankIcon("NFCU"), R.drawable.stripe_ic_paymentsheet_bank)
+        Assert.assertEquals(TransformToBankIcon("NFCU"), R.drawable.stripe_ic_fc_bank)
 
         // pnc
         Assert.assertEquals(TransformToBankIcon("PNC BANK"), StripeR.drawable.stripe_ic_bank_pnc)
         Assert.assertEquals(TransformToBankIcon("pnc bank"), StripeR.drawable.stripe_ic_bank_pnc)
         Assert.assertEquals(TransformToBankIcon("PNC Bank"), StripeR.drawable.stripe_ic_bank_pnc)
-        Assert.assertEquals(TransformToBankIcon("PNC  BANK"), R.drawable.stripe_ic_paymentsheet_bank)
+        Assert.assertEquals(TransformToBankIcon("PNC  BANK"), R.drawable.stripe_ic_fc_bank)
 
         // suntrust
         Assert.assertEquals(TransformToBankIcon("SUNTRUST"), StripeR.drawable.stripe_ic_bank_suntrust)
@@ -58,7 +58,7 @@ class TransformToBankIconTest {
         // svb
         Assert.assertEquals(TransformToBankIcon("Silicon Valley Bank"), StripeR.drawable.stripe_ic_bank_svb)
         Assert.assertEquals(TransformToBankIcon("silicon valley bank"), StripeR.drawable.stripe_ic_bank_svb)
-        Assert.assertEquals(TransformToBankIcon("svb"), R.drawable.stripe_ic_paymentsheet_bank)
+        Assert.assertEquals(TransformToBankIcon("svb"), R.drawable.stripe_ic_fc_bank)
 
         // stripe
         Assert.assertEquals(TransformToBankIcon("stripe"), StripeR.drawable.stripe_ic_bank_stripe)
@@ -70,14 +70,14 @@ class TransformToBankIconTest {
         // td
         Assert.assertEquals(TransformToBankIcon("TD Bank"), StripeR.drawable.stripe_ic_bank_td)
         Assert.assertEquals(TransformToBankIcon("td bank"), StripeR.drawable.stripe_ic_bank_td)
-        Assert.assertEquals(TransformToBankIcon("TD"), R.drawable.stripe_ic_paymentsheet_bank)
+        Assert.assertEquals(TransformToBankIcon("TD"), R.drawable.stripe_ic_fc_bank)
 
         // usaa
         Assert.assertEquals(TransformToBankIcon("USAA FEDERAL SAVINGS BANK"), StripeR.drawable.stripe_ic_bank_usaa)
         Assert.assertEquals(TransformToBankIcon("usaa federal savings bank"), StripeR.drawable.stripe_ic_bank_usaa)
         Assert.assertEquals(TransformToBankIcon("USAA Bank"), StripeR.drawable.stripe_ic_bank_usaa)
         Assert.assertEquals(TransformToBankIcon("usaa bank"), StripeR.drawable.stripe_ic_bank_usaa)
-        Assert.assertEquals(TransformToBankIcon("USAA Savings Bank"), R.drawable.stripe_ic_paymentsheet_bank)
+        Assert.assertEquals(TransformToBankIcon("USAA Savings Bank"), R.drawable.stripe_ic_fc_bank)
 
         // us bank
         Assert.assertEquals(TransformToBankIcon("U.S. BANK"), StripeR.drawable.stripe_ic_bank_usbank)
@@ -85,12 +85,12 @@ class TransformToBankIconTest {
         Assert.assertEquals(TransformToBankIcon("u.s. Bank"), StripeR.drawable.stripe_ic_bank_usbank)
         Assert.assertEquals(TransformToBankIcon("US Bank"), StripeR.drawable.stripe_ic_bank_usbank)
         Assert.assertEquals(TransformToBankIcon("us bank"), StripeR.drawable.stripe_ic_bank_usbank)
-        Assert.assertEquals(TransformToBankIcon("usbank"), R.drawable.stripe_ic_paymentsheet_bank)
+        Assert.assertEquals(TransformToBankIcon("usbank"), R.drawable.stripe_ic_fc_bank)
 
         // wells fargo
         Assert.assertEquals(TransformToBankIcon("Wells Fargo"), StripeR.drawable.stripe_ic_bank_wellsfargo)
         Assert.assertEquals(TransformToBankIcon("wells fargo"), StripeR.drawable.stripe_ic_bank_wellsfargo)
         Assert.assertEquals(TransformToBankIcon("WELLS FARGO"), StripeR.drawable.stripe_ic_bank_wellsfargo)
-        Assert.assertEquals(TransformToBankIcon("Well's Fargo"), R.drawable.stripe_ic_paymentsheet_bank)
+        Assert.assertEquals(TransformToBankIcon("Well's Fargo"), R.drawable.stripe_ic_fc_bank)
     }
 }

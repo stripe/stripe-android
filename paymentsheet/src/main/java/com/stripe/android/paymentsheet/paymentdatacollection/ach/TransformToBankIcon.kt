@@ -5,7 +5,7 @@ import com.stripe.android.paymentsheet.R
 internal object TransformToBankIcon {
     operator fun invoke(
         bankName: String?,
-        fallbackIcon: Int = R.drawable.stripe_ic_paymentsheet_bank,
+        fallbackIcon: Int = R.drawable.stripe_ic_fc_bank,
     ): Int {
         if (bankName == null) {
             return fallbackIcon
@@ -31,6 +31,6 @@ internal object TransformToBankIcon {
             .filter { it.key.findAll(bankName).any() }
             .firstNotNullOfOrNull {
                 transformBankIconCodeToBankIcon(it.value, fallbackIcon)
-            } ?: R.drawable.stripe_ic_paymentsheet_bank
+            } ?: R.drawable.stripe_ic_fc_bank
     }
 }
