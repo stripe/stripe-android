@@ -41,6 +41,17 @@ internal class DocumentScanViewModel(
     verificationFlowFinishable
 ) {
 
+    // Helper to get allowed document types as a sorted list
+    private fun getAllowedDocumentTypes(): List<String> {
+        return identityViewModel.verificationPage.value
+            ?.data
+            ?.documentSelect
+            ?.idDocumentTypeAllowlist
+            ?.keys
+            ?.sorted()
+            ?: listOf("id_card", "passport", "driving_license")
+    }
+
     @OptIn(FlowPreview::class)
     override val scanFeedback = combine(
         scannerState,
@@ -106,68 +117,35 @@ internal class DocumentScanViewModel(
             initialValue = idleFeedback()
         )
 
+    // Helper to get the correct string resource for scan title based on allowed types and side
     fun getDocumentPositionStringRes(targetScanType: IdentityScanState.ScanType? = null): Int {
-        val allowlist = identityViewModel.verificationPage.value
-            ?.data
-            ?.documentSelect
-            ?.idDocumentTypeAllowlist
-            ?.keys
-            ?.toList()
-
-        val idType = allowlist?.firstOrNull() ?: "id_document"
+        val allowlist = getAllowedDocumentTypes()
         val isFront = targetScanType.isNullOrFront()
-
-        return when (idType) {
-            "passport" -> if (isFront) {
-                R.string.stripe_front_of_passport
-            } else {
-                R.string.stripe_back_of_passport
-            }
-            "driving_license" -> if (isFront) {
-                R.string.stripe_front_of_dl
-            } else {
-                R.string.stripe_back_of_dl
-            }
-            else -> if (isFront) {
-                R.string.stripe_front_of_id_document
-            } else {
-                R.string.stripe_back_of_id_document
-            }
+        return when (allowlist) {
+            listOf("driving_license", "id_card") -> if (isFront) R.string.stripe_front_of_driver_license_or_id else R.string.stripe_back_of_driver_license_or_id
+            listOf("driving_license", "passport") -> if (isFront) R.string.stripe_front_of_driver_license_or_passport else R.string.stripe_back_of_driver_license_or_passport
+            listOf("id_card", "passport") -> if (isFront) R.string.stripe_front_of_passport_or_id else R.string.stripe_back_of_passport_or_id
+            listOf("driving_license", "id_card", "passport") -> if (isFront) R.string.stripe_front_of_all_id_types else R.string.stripe_back_of_all_id_types
+            listOf("driving_license") -> if (isFront) R.string.stripe_front_of_dl else R.string.stripe_back_of_dl
+            listOf("passport") -> if (isFront) R.string.stripe_front_of_passport else R.string.stripe_back_of_passport
+            listOf("id_card") -> if (isFront) R.string.stripe_front_of_id_document else R.string.stripe_back_of_id_document
+            else -> if (isFront) R.string.stripe_front_of_id_document else R.string.stripe_back_of_id_document
         }
     }
 
+    // Helper to get the correct string resource for scan instructions based on allowed types and side
     private fun idleFeedback(targetScanType: IdentityScanState.ScanType? = null): Int {
-        val allowlist = identityViewModel.verificationPage.value
-            ?.data
-            ?.documentSelect
-            ?.idDocumentTypeAllowlist
-            ?.keys
-            ?.toList()
-
-        if (allowlist?.size == 1) {
-            return when (allowlist[0]) {
-                "passport" -> R.string.stripe_position_passport
-                "driving_license" -> {
-                    if (targetScanType.isNullOrFront()) {
-                        R.string.stripe_position_dl_front
-                    } else {
-                        R.string.stripe_position_dl_back
-                    }
-                }
-                else -> {
-                    if (targetScanType.isNullOrFront()) {
-                        R.string.stripe_position_id_front
-                    } else {
-                        R.string.stripe_position_id_back
-                    }
-                }
-            }
-        }
-
-        return if (targetScanType.isNullOrFront()) {
-            R.string.stripe_position_id_front
-        } else {
-            R.string.stripe_position_id_back
+        val allowlist = getAllowedDocumentTypes()
+        val isFront = targetScanType.isNullOrFront()
+        return when (allowlist) {
+            listOf("driving_license", "id_card") -> if (isFront) R.string.stripe_position_driver_license_or_id else R.string.stripe_flip_driver_license_or_id
+            listOf("driving_license", "passport") -> if (isFront) R.string.stripe_position_driver_license_or_passport else R.string.stripe_flip_driver_license_or_passport
+            listOf("id_card", "passport") -> if (isFront) R.string.stripe_position_passport_or_id else R.string.stripe_flip_passport_or_id
+            listOf("driving_license", "id_card", "passport") -> if (isFront) R.string.stripe_position_all_id_types else R.string.stripe_flip_all_id_types
+            listOf("driving_license") -> if (isFront) R.string.stripe_position_dl_front else R.string.stripe_position_dl_back
+            listOf("passport") -> R.string.stripe_position_passport
+            listOf("id_card") -> if (isFront) R.string.stripe_position_id_front else R.string.stripe_position_id_back
+            else -> if (isFront) R.string.stripe_position_id_front else R.string.stripe_position_id_back
         }
     }
 
