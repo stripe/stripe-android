@@ -2845,7 +2845,7 @@ internal class PaymentSheetViewModelTest {
         val paymentSuccessCall = eventReporter.paymentSuccessCalls.awaitItem()
 
         assertThat(paymentSuccessCall.paymentSelection)
-            .isEqualTo(PaymentSelection.Link(linkExpressMode = LinkExpressMode.ENABLED))
+            .isEqualTo(PaymentSelection.Link(linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK))
     }
 
     @Test
@@ -2883,7 +2883,7 @@ internal class PaymentSheetViewModelTest {
         val paymentFailureCall = eventReporter.paymentFailureCalls.awaitItem()
 
         assertThat(paymentFailureCall.paymentSelection)
-            .isEqualTo(PaymentSelection.Link(linkExpressMode = LinkExpressMode.ENABLED))
+            .isEqualTo(PaymentSelection.Link(linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK))
     }
 
     @Test
