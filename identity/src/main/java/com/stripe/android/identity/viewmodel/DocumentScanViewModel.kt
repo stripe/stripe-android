@@ -57,38 +57,9 @@ internal class DocumentScanViewModel(
         scannerState,
         targetScanTypeFlow,
         identityViewModel.verificationPage.asFlow()
-    ) { scannerState, targetScanType, verificationPage ->
+    ) { scannerState, targetScanType, _ ->
         when (scannerState) {
-            State.Initializing -> {
-                val allowlist = verificationPage.data?.documentSelect?.idDocumentTypeAllowlist?.keys?.toList()
-
-                if (allowlist?.size == 1) {
-                    when (allowlist[0]) {
-                        "passport" -> R.string.stripe_position_passport
-                        "driving_license" -> {
-                            if (targetScanType.isNullOrFront()) {
-                                R.string.stripe_position_dl_front
-                            } else {
-                                R.string.stripe_position_dl_back
-                            }
-                        }
-                        else -> {
-                            if (targetScanType.isNullOrFront()) {
-                                R.string.stripe_position_id_front
-                            } else {
-                                R.string.stripe_position_id_back
-                            }
-                        }
-                    }
-                } else {
-                    if (targetScanType.isNullOrFront()) {
-                        R.string.stripe_position_id_front
-                    } else {
-                        R.string.stripe_position_id_back
-                    }
-                }
-            }
-
+            State.Initializing -> idleFeedback(targetScanType)
             is State.Scanned -> R.string.stripe_scanned
 
             is State.Scanning -> {
