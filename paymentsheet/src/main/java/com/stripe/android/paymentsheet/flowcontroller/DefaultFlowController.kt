@@ -378,8 +378,20 @@ internal class DefaultFlowController @Inject internal constructor(
     fun onLinkResultFromWalletsButton(result: LinkActivityResult) {
         result.linkAccountUpdate?.updateLinkAccount()
         viewModel.flowControllerStateComponent.linkInlineInteractor.onLinkResult()
-        if (result is LinkActivityResult.Completed) {
-            with(Link(selectedPayment = result.selectedPayment)) {
+        when (result) {
+            is LinkActivityResult.PaymentMethodObtained,
+            is LinkActivityResult.Failed -> Unit
+            is LinkActivityResult.Canceled -> when (result.reason) {
+                // User pressed back in Link
+                Reason.BackPressed -> Unit
+                // User logged out of Link -> clear the Link payment selection
+                Reason.LoggedOut -> updateLinkPaymentSelection(null)
+                // User pressed "Pay another way" in Link -> show the payment option list
+                Reason.PayAnotherWay -> withCurrentState {
+                    showPaymentOptionList(it, viewModel.paymentSelection)
+                }
+            }
+            is LinkActivityResult.Completed -> with(Link(selectedPayment = result.selectedPayment)) {
                 viewModel.paymentSelection = this
                 paymentOptionCallback.onPaymentOption(paymentOptionFactory.create(this))
             }
