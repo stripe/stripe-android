@@ -1613,7 +1613,7 @@ internal class PaymentSheetViewModelTest {
             assertThat(arguments.confirmationOption).isEqualTo(
                 LinkConfirmationOption(
                     configuration = TestFactory.LINK_CONFIGURATION,
-                    linkExpressMode = LinkExpressMode.ENABLED,
+                    linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
                 )
             )
 
@@ -2830,7 +2830,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(arguments.confirmationOption).isEqualTo(
             LinkConfirmationOption(
-                linkExpressMode = LinkExpressMode.ENABLED,
+                linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
                 configuration = LINK_CONFIG,
             )
         )
@@ -2867,7 +2867,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(arguments.confirmationOption).isEqualTo(
             LinkConfirmationOption(
-                linkExpressMode = LinkExpressMode.ENABLED,
+                linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
                 configuration = LINK_CONFIG,
             )
         )
