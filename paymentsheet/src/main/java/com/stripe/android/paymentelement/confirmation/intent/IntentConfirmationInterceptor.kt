@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.intent
 
 import com.stripe.android.ConfirmStripeIntentParamsFactory
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.GenericStripeException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
@@ -292,7 +293,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             onFailure = { error ->
                 NextStep.Fail(
                     cause = error,
-                    message = resolvableString(GENERIC_STRIPE_MESSAGE),
+                    message = error.stripeErrorMessage(),
                 )
             }
         )
@@ -508,10 +509,11 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             }
 
             is CreateIntentResult.Failure -> {
+                val exception = CreateIntentCallbackFailureException(result.cause)
                 NextStep.Fail(
-                    cause = CreateIntentCallbackFailureException(result.cause),
+                    cause = exception,
                     message = result.displayMessage?.resolvableString
-                        ?: resolvableString(GENERIC_STRIPE_MESSAGE),
+                        ?: exception.stripeErrorMessage(),
                 )
             }
         }
@@ -546,7 +548,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         }.getOrElse { error ->
             NextStep.Fail(
                 cause = error,
-                message = resolvableString(GENERIC_STRIPE_MESSAGE),
+                message = error.stripeErrorMessage(),
             )
         }
     }
@@ -691,6 +693,5 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     private companion object {
         private const val PROVIDER_FETCH_TIMEOUT = 2
         private const val PROVIDER_FETCH_INTERVAL = 5L
-        private val GENERIC_STRIPE_MESSAGE = R.string.stripe_something_went_wrong
     }
 }
