@@ -18,7 +18,6 @@ import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
-import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.TestFactory
@@ -2770,7 +2769,8 @@ internal class PaymentSheetViewModelTest {
 
         val paymentSuccessCall = eventReporter.paymentSuccessCalls.awaitItem()
 
-        assertThat(paymentSuccessCall.paymentSelection).isEqualTo(PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED))
+        assertThat(paymentSuccessCall.paymentSelection)
+            .isEqualTo(PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED))
     }
 
     @Test
@@ -2807,7 +2807,8 @@ internal class PaymentSheetViewModelTest {
 
         val paymentFailureCall = eventReporter.paymentFailureCalls.awaitItem()
 
-        assertThat(paymentFailureCall.paymentSelection).isEqualTo(PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED))
+        assertThat(paymentFailureCall.paymentSelection)
+            .isEqualTo(PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED))
     }
 
     @Test
@@ -2843,7 +2844,8 @@ internal class PaymentSheetViewModelTest {
 
         val paymentSuccessCall = eventReporter.paymentSuccessCalls.awaitItem()
 
-        assertThat(paymentSuccessCall.paymentSelection).isEqualTo(PaymentSelection.Link(linkExpressMode = LinkExpressMode.ENABLED))
+        assertThat(paymentSuccessCall.paymentSelection)
+            .isEqualTo(PaymentSelection.Link(linkExpressMode = LinkExpressMode.ENABLED))
     }
 
     @Test
@@ -2880,7 +2882,8 @@ internal class PaymentSheetViewModelTest {
 
         val paymentFailureCall = eventReporter.paymentFailureCalls.awaitItem()
 
-        assertThat(paymentFailureCall.paymentSelection).isEqualTo(PaymentSelection.Link(linkExpressMode = LinkExpressMode.ENABLED))
+        assertThat(paymentFailureCall.paymentSelection)
+            .isEqualTo(PaymentSelection.Link(linkExpressMode = LinkExpressMode.ENABLED))
     }
 
     @Test

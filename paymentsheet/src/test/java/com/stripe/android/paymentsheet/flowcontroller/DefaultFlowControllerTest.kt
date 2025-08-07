@@ -301,8 +301,8 @@ internal class DefaultFlowControllerTest {
                     createParams = selection.paymentMethodCreateParams,
                     optionsParams = selection.paymentMethodOptionsParams,
                     extraParams = selection.paymentMethodExtraParams,
-                    shouldSave =
-                    selection.customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse,
+                    shouldSave = selection.customerRequestedSave == PaymentSelection
+                        .CustomerRequestedSave.RequestReuse,
                 )
             )
 
@@ -519,7 +519,7 @@ internal class DefaultFlowControllerTest {
             configuration = any(),
             linkAccountInfo = anyOrNull(),
             launchMode = any(),
-                            linkExpressMode = any()
+            linkExpressMode = any()
         )
 
         verify(paymentOptionActivityLauncher, never()).launch(any(), anyOrNull())
@@ -559,7 +559,7 @@ internal class DefaultFlowControllerTest {
             configuration = any(),
             linkAccountInfo = anyOrNull(),
             launchMode = any(),
-                            linkExpressMode = any()
+            linkExpressMode = any()
         )
 
         // Simulate user dismissing 2FA with back press
@@ -580,7 +580,7 @@ internal class DefaultFlowControllerTest {
         verify(flowControllerLinkPaymentLauncher, never()).present(
             configuration = any(),
             linkAccountInfo = anyOrNull(),
-                linkExpressMode = any(),
+            linkExpressMode = any(),
             launchMode = any()
         )
 
