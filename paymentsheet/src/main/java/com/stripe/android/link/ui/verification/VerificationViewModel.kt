@@ -89,7 +89,9 @@ internal class VerificationViewModel @Inject constructor(
             onSuccess = { account ->
                 updateViewState { it.copy(isProcessing = false) }
                 // Handle Authentication mode logic in ViewModel
-                if (linkLaunchMode is LinkLaunchMode.Authentication) {
+                if ((linkLaunchMode is LinkLaunchMode.Authentication) ||
+                    (linkLaunchMode is LinkLaunchMode.Authorization && !account.consentNeeded)
+                ) {
                     dismissWithResult(
                         LinkActivityResult.Completed(
                             linkAccountUpdate = linkAccountManager.linkAccountUpdate,

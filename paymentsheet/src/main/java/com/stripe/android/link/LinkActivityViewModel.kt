@@ -29,6 +29,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
+import com.stripe.android.model.LinkAuthIntentState
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.addresselement.AutocompleteActivityLauncher
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -99,7 +100,7 @@ internal class LinkActivityViewModel @Inject constructor(
 
     fun onVerificationSucceeded() {
         viewModelScope.launch {
-            _linkScreenState.value = buildFullScreenState()
+            updateScreenState(withAnimationDelay = false)
         }
     }
 
@@ -263,11 +264,11 @@ internal class LinkActivityViewModel @Inject constructor(
                 when (linkExpressMode) {
                     LinkExpressMode.DISABLED,
                     LinkExpressMode.ENABLED -> moveToWeb(attestationCheckResult.error)
-                    LinkExpressMode.ENABLED_NO_WEB_FALLBACK -> updateScreenState()
+                    LinkExpressMode.ENABLED_NO_WEB_FALLBACK -> updateScreenState(withAnimationDelay = true)
                 }
             }
             LinkAttestationCheck.Result.Successful -> {
-                updateScreenState()
+                updateScreenState(withAnimationDelay = true)
             }
             is LinkAttestationCheck.Result.Error,
             is LinkAttestationCheck.Result.AccountError -> {
@@ -321,8 +322,11 @@ internal class LinkActivityViewModel @Inject constructor(
         )
     }
 
-    private suspend fun updateScreenState() {
+    private suspend fun updateScreenState(withAnimationDelay: Boolean) {
         val accountStatus = linkAccountManager.accountStatus.first()
+
+        // Get linkAccount after getting `accountStatus` because account may be updated.
+        val linkAccount = this.linkAccount
 
         val authenticatingExistingAccount = (linkLaunchMode as? LinkLaunchMode.Authentication)?.existingOnly == true
         val authorizingAuthIntent = linkLaunchMode is LinkLaunchMode.Authorization
@@ -338,35 +342,44 @@ internal class LinkActivityViewModel @Inject constructor(
             return
         }
 
-        val linkAccount = linkAccountManager.linkAccountInfo.value.account
+        if (linkLaunchMode is LinkLaunchMode.Authorization &&
+            accountStatus is AccountStatus.Verified &&
+            linkAccount?.linkAuthIntentState == LinkAuthIntentState.Consented
+        ) {
+            dismissWithResult(LinkActivityResult.Completed(linkAccountManager.linkAccountUpdate))
+            return
+        }
+
         when (accountStatus) {
-            AccountStatus.Verified,
+            is AccountStatus.Verified,
             AccountStatus.SignedOut,
             AccountStatus.Error -> {
-                _linkScreenState.value = buildFullScreenState()
+                _linkScreenState.value = buildFullScreenState(withAnimationDelay)
             }
             AccountStatus.NeedsVerification,
             AccountStatus.VerificationStarted -> {
                 if (linkAccount != null && linkExpressMode != LinkExpressMode.DISABLED) {
                     _linkScreenState.value = ScreenState.VerificationDialog(linkAccount)
                 } else {
-                    _linkScreenState.value = buildFullScreenState()
+                    _linkScreenState.value = buildFullScreenState(withAnimationDelay)
                 }
             }
         }
     }
 
-    private suspend fun buildFullScreenState(): ScreenState.FullScreen {
+    private suspend fun buildFullScreenState(withAnimationDelay: Boolean): ScreenState.FullScreen {
         val accountStatus = linkAccountManager.accountStatus.first()
 
         // We add a tiny delay, which gives the loading screen a chance to fully inflate.
         // Otherwise, we get a weird scaling animation when we display the first non-loading screen.
-        delay(LINK_DEFAULT_ANIMATION_DELAY_MILLIS)
+        if (withAnimationDelay) {
+            delay(LINK_DEFAULT_ANIMATION_DELAY_MILLIS)
+        }
 
         return ScreenState.FullScreen(
             initialDestination = when (accountStatus) {
-                AccountStatus.Verified -> {
-                    if (linkAccount?.consentNeeded == true) {
+                is AccountStatus.Verified -> {
+                    if (linkLaunchMode is LinkLaunchMode.Authorization) {
                         LinkScreen.OAuthConsent
                     } else if (linkAccount?.completedSignup == true && linkLaunchMode.selectedPayment() == null) {
                         // We just completed signup, but haven't added a payment method yet.
@@ -392,7 +405,7 @@ internal class LinkActivityViewModel @Inject constructor(
     private suspend fun handleAccountError() {
         linkAccountManager.logOut()
         linkAccountHolder.set(LinkAccountUpdate.Value(account = null, lastUpdateReason = LoggedOut))
-        updateScreenState()
+        updateScreenState(withAnimationDelay = true)
     }
 
     private fun dismissWithResult(result: LinkActivityResult) {
