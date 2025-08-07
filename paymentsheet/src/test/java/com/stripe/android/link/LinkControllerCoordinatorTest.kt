@@ -6,6 +6,7 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.utils.FakeActivityResultRegistry
+import com.stripe.android.link.LinkExpressMode
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -131,7 +132,7 @@ internal class LinkControllerCoordinatorTest {
         coordinator.linkActivityResultLauncher.launch(
             LinkActivityContract.Args(
                 configuration = TestFactory.LINK_CONFIGURATION,
-                startWithVerificationDialog = false,
+                linkExpressMode = LinkExpressMode.DISABLED,
                 linkAccountInfo = LinkAccountUpdate.Value(null),
                 launchMode = LinkLaunchMode.PaymentMethodSelection(null),
             )

@@ -17,6 +17,7 @@ import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.testing.PaymentMethodFactory
@@ -426,7 +427,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            selection = PaymentSelection.Link(useLinkExpress = false),
+            selection = PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED),
             previousConfig = null,
             newState = mockPaymentSheetStateWithPaymentIntent(),
             newConfig = defaultPaymentSheetConfiguration,
@@ -463,7 +464,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            selection = PaymentSelection.Link(useLinkExpress = false),
+            selection = PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED),
             previousConfig = null,
             newState = mockPaymentSheetStateWithPaymentIntent(),
             newConfig = defaultPaymentSheetConfiguration.newBuilder()
@@ -484,7 +485,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            selection = PaymentSelection.Link(useLinkExpress = false),
+            selection = PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED),
             previousConfig = null,
             newState = mockPaymentSheetStateWithPaymentIntent(),
             newConfig = defaultPaymentSheetConfiguration.newBuilder()
@@ -497,7 +498,7 @@ class PaymentSelectionUpdaterTest {
             walletButtonsAlreadyShown = false,
         )
 
-        assertThat(result).isEqualTo(PaymentSelection.Link(useLinkExpress = false))
+        assertThat(result).isEqualTo(PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED))
     }
 
     @OptIn(WalletButtonsPreview::class)
@@ -528,7 +529,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            selection = PaymentSelection.Link(useLinkExpress = false),
+            selection = PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED),
             previousConfig = null,
             newState = mockPaymentSheetStateWithPaymentIntent(),
             newConfig = defaultPaymentSheetConfiguration.newBuilder()
@@ -541,7 +542,7 @@ class PaymentSelectionUpdaterTest {
             walletButtonsAlreadyShown = false,
         )
 
-        assertThat(result).isEqualTo(PaymentSelection.Link(useLinkExpress = false))
+        assertThat(result).isEqualTo(PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED))
     }
 
     private fun mockPaymentSheetStateWithPaymentIntent(

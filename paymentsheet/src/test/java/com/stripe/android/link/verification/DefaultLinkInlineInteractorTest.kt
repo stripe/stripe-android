@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.TestFactory
@@ -159,7 +160,7 @@ class DefaultLinkInlineInteractorTest {
                 configuration = any(),
                 linkAccountInfo = any(),
                 launchMode = eq(LinkLaunchMode.PaymentMethodSelection(null)),
-                useLinkExpress = any()
+                linkExpressMode = any()
             )
         }
 

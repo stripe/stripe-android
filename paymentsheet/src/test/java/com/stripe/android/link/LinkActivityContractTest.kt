@@ -7,6 +7,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.gate.LinkGate
+import com.stripe.android.link.LinkExpressMode
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
@@ -21,7 +22,7 @@ class LinkActivityContractTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val args = LinkActivityContract.Args(
         configuration = TestFactory.LINK_CONFIGURATION,
-        startWithVerificationDialog = false,
+        linkExpressMode = LinkExpressMode.DISABLED,
         linkAccountInfo = LinkAccountUpdate.Value(
             account = null,
             lastUpdateReason = null

@@ -245,7 +245,6 @@ internal class LinkActivityViewModel @Inject constructor(
                     LinkExpressMode.ENABLED -> moveToWeb(attestationCheckResult.error)
                     LinkExpressMode.ENABLED_NO_WEB_FALLBACK -> updateScreenState()
                 }
-
             }
             LinkAttestationCheck.Result.Successful -> {
                 updateScreenState()
@@ -255,7 +254,6 @@ internal class LinkActivityViewModel @Inject constructor(
                 handleAccountError()
             }
         }
-
     }
 
     /**

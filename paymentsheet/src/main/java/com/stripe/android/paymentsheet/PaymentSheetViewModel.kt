@@ -382,6 +382,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private fun checkoutWithLinkExpress() {
+        // We don't want to fall back to web on express mode if attestation
+        // fails on payment sheet given the OTP shows on launch.
         checkout(
             PaymentSelection.Link(
                 linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,

@@ -9,6 +9,7 @@ import com.stripe.android.common.model.CommonConfigurationFactory
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
@@ -260,7 +261,7 @@ class DefaultWalletButtonsInteractorTest {
             confirmationHandler = FakeConfirmationHandler().apply {
                 state.value = ConfirmationHandler.State.Confirming(
                     LinkConfirmationOption(
-                        useLinkExpress = false,
+                        linkExpressMode = LinkExpressMode.DISABLED,
                         configuration = mock()
                     )
                 )
@@ -346,7 +347,7 @@ class DefaultWalletButtonsInteractorTest {
 
             val call = presentCalls.awaitItem()
             assertThat(call.configuration).isEqualTo(linkConfiguration)
-            assertThat(call.useLinkExpress).isTrue()
+            assertThat(call.linkExpressMode).isNotEqualTo(LinkExpressMode.DISABLED)
         }
     }
 
@@ -752,7 +753,7 @@ class DefaultWalletButtonsInteractorTest {
             confirmationHandler = FakeConfirmationHandler().apply {
                 state.value = ConfirmationHandler.State.Confirming(
                     LinkConfirmationOption(
-                        useLinkExpress = false,
+                        linkExpressMode = LinkExpressMode.DISABLED,
                         configuration = mock()
                     )
                 )

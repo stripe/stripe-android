@@ -5,6 +5,7 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.LinkAccount
@@ -48,7 +49,7 @@ internal object RecordingLinkPaymentLauncher {
                         configuration = arguments[0] as LinkConfiguration,
                         linkAccount = arguments[1] as? LinkAccount,
                         launchMode = arguments[2] as LinkLaunchMode,
-                        useLinkExpress = arguments[3] as Boolean
+                        linkExpressMode = arguments[3] as LinkExpressMode
                     )
                 )
             }
@@ -84,6 +85,6 @@ internal object RecordingLinkPaymentLauncher {
         val configuration: LinkConfiguration,
         val linkAccount: LinkAccount?,
         val launchMode: LinkLaunchMode,
-        val useLinkExpress: Boolean,
+        val linkExpressMode: LinkExpressMode,
     )
 }

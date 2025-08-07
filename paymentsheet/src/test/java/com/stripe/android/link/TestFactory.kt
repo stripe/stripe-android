@@ -5,6 +5,7 @@ import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
@@ -264,7 +265,7 @@ internal object TestFactory {
         configuration = LINK_CONFIGURATION,
         publishableKey = "",
         stripeAccountId = "",
-        startWithVerificationDialog = false,
+        linkExpressMode = LinkExpressMode.DISABLED,
         linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
         paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
         launchMode = LinkLaunchMode.Full,

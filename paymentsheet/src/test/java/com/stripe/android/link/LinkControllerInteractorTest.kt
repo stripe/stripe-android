@@ -376,7 +376,7 @@ class LinkControllerInteractorTest {
 
         val call = launcher.calls.awaitItem()
         val args = call.input
-        assertThat(args.startWithVerificationDialog).isTrue()
+        assertThat(args.linkExpressMode).isEqualTo(LinkExpressMode.DISABLED)
         assertThat(args.linkAccountInfo.account).isNull()
         assertThat(args.launchMode)
             .isEqualTo(
@@ -593,7 +593,7 @@ class LinkControllerInteractorTest {
         interactor.authenticate(launcher, "test@example.com")
 
         val args = launcher.calls.awaitItem().input
-        assertThat(args.startWithVerificationDialog).isTrue()
+        assertThat(args.linkExpressMode).isEqualTo(LinkExpressMode.ENABLED)
         assertThat(args.linkAccountInfo.account).isNull()
         assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication())
 
@@ -705,7 +705,7 @@ class LinkControllerInteractorTest {
         interactor.authenticateExistingConsumer(launcher, "test@example.com")
 
         val args = launcher.calls.awaitItem().input
-        assertThat(args.startWithVerificationDialog).isTrue()
+        assertThat(args.linkExpressMode).isEqualTo(LinkExpressMode.ENABLED)
         assertThat(args.linkAccountInfo.account).isNull()
         assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication(existingOnly = true))
     }
