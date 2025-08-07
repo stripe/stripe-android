@@ -15,11 +15,11 @@ check.dependsOn('ktlint')
 
 android {
     namespace STRIPE_ANDROID_NAMESPACE
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    compileSdkVersion 35
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion rootProject.ext.compileSdkVersion
+        targetSdkVersion 35
         versionName VERSION_NAME
     }
 
