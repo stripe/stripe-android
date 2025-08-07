@@ -125,7 +125,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         )
 
         assertThat(action)
-            .isInstanceOf<ConfirmationDefinition.Action.Launch<PassiveChallengeConfirmationDefinition.LauncherArgs>>()
+            .isInstanceOf<ConfirmationDefinition.Action.Launch<PassiveChallengeActivityContract.Args>>()
 
         val launchAction = action.asLaunch()
 
@@ -147,7 +147,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         )
 
         assertThat(action)
-            .isInstanceOf<ConfirmationDefinition.Action.Fail<PassiveChallengeConfirmationDefinition.LauncherArgs>>()
+            .isInstanceOf<ConfirmationDefinition.Action.Fail<PassiveChallengeActivityContract.Args>>()
 
         val failAction = action.asFail()
 
@@ -187,7 +187,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         val definition = createPassiveChallengeConfirmationDefinition()
 
         val launcher = FakeActivityResultLauncher<PassiveChallengeActivityContract.Args>()
-        val launcherArgs = PassiveChallengeConfirmationDefinition.LauncherArgs(PASSIVE_CAPTCHA_PARAMS)
+        val launcherArgs = PassiveChallengeActivityContract.Args(PASSIVE_CAPTCHA_PARAMS)
 
         definition.launch(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
@@ -209,7 +209,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
             siteKey = "test_site_key",
             rqData = "test_rq_data"
         )
-        val launcherArgs = PassiveChallengeConfirmationDefinition.LauncherArgs(passiveCaptchaParams)
+        val launcherArgs = PassiveChallengeActivityContract.Args(passiveCaptchaParams)
 
         val launcher = FakeActivityResultLauncher<PassiveChallengeActivityContract.Args>()
 
