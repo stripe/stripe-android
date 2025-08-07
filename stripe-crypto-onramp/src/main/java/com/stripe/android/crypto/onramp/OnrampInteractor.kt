@@ -4,12 +4,14 @@ import android.app.Application
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
+import com.stripe.android.crypto.onramp.model.OnrampIdentityVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampKYCResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
+import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.LinkController.AuthenticationResult
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -123,6 +125,16 @@ internal class OnrampInteractor @Inject constructor(
         }
         is AuthenticationResult.Failed -> OnrampVerificationResult.Failed(result.error)
         is AuthenticationResult.Canceled -> OnrampVerificationResult.Cancelled()
+    }
+
+    fun handleIdentityVerificationResult(
+        result: IdentityVerificationSheet.VerificationFlowResult
+    ): OnrampIdentityVerificationResult = when (result) {
+        is IdentityVerificationSheet.VerificationFlowResult.Completed -> {
+            OnrampIdentityVerificationResult.Completed()
+        }
+        is IdentityVerificationSheet.VerificationFlowResult.Failed -> OnrampIdentityVerificationResult.Failed(result.throwable)
+        is IdentityVerificationSheet.VerificationFlowResult.Canceled -> OnrampIdentityVerificationResult.Canceled()
     }
 
     private fun consumerSessionClientSecret(): String? =

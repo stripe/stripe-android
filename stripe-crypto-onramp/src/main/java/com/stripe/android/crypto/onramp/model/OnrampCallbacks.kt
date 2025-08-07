@@ -8,4 +8,5 @@ import dev.drewhamilton.poko.Poko
 @Poko
 class OnrampCallbacks(
     val authenticationCallback: OnrampVerificationCallback,
+    val identityVerificationCallback: OnrampIdentityVerificationCallback
 )

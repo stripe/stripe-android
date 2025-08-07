@@ -6,8 +6,11 @@ import androidx.activity.ComponentActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.EphemeralKey
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
+import com.stripe.android.crypto.onramp.model.OnrampIdentityVerificationCallback
+import com.stripe.android.crypto.onramp.model.OnrampIdentityVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
 import com.stripe.android.identity.IdentityVerificationSheet
@@ -42,7 +45,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 .authority("test")
                 .appendPath("1")
                 .build()),
-        identityVerificationCallback = { result -> },
+        identityVerificationCallback = ::handleIdentityVerificationResult,
     )
 
     init {
@@ -60,9 +63,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     fun promptForIdentityVerification() {
         coroutineScope.launch {
-            val verification = interactor.startIdentityVerification()
-
-            when(verification) {
+            when(val verification = interactor.startIdentityVerification()) {
                 is OnrampStartVerificationResult.Completed -> {
                     verification.response.ephemeralKey?.let {
                         sheet.present(
@@ -70,11 +71,15 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                             ephemeralKeySecret = verification.response.ephemeralKey
                         )
                     } ?: run {
-
+                        onrampCallbacks.identityVerificationCallback.onResult(
+                            OnrampIdentityVerificationResult.Failed(APIException(message = "No ephemeral key found."))
+                        )
                     }
                 }
                 is OnrampStartVerificationResult.Failed -> {
-
+                    onrampCallbacks.identityVerificationCallback.onResult(
+                        OnrampIdentityVerificationResult.Failed(verification.error)
+                    )
                 }
             }
         }
@@ -84,6 +89,14 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         coroutineScope.launch {
             onrampCallbacks.authenticationCallback.onResult(
                 interactor.handleAuthenticationResult(result)
+            )
+        }
+    }
+
+    private fun handleIdentityVerificationResult(result: IdentityVerificationSheet.VerificationFlowResult) {
+        coroutineScope.launch {
+            onrampCallbacks.identityVerificationCallback.onResult(
+                interactor.handleIdentityVerificationResult(result)
             )
         }
     }
