@@ -322,6 +322,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
     ): ConsumerSessionLookup = consumersApiService.mobileLookupConsumerSession(
         email = email,
         emailSource = emailSource,
+        linkAuthIntentId = null,
         requestSurface = requestSurface,
         verificationToken = verificationToken,
         appId = appId,

@@ -31,7 +31,8 @@ internal interface LinkRepository {
      *                   retrieval of displayable payment details.
      */
     suspend fun lookupConsumer(
-        email: String,
+        email: String?,
+        linkAuthIntentId: String?,
         sessionId: String,
         customerId: String?
     ): Result<ConsumerSessionLookup>
@@ -53,8 +54,9 @@ internal interface LinkRepository {
      *                   retrieval of displayable payment details.
      */
     suspend fun mobileLookupConsumer(
-        email: String,
-        emailSource: EmailSource,
+        email: String?,
+        emailSource: EmailSource?,
+        linkAuthIntentId: String?,
         verificationToken: String,
         appId: String,
         sessionId: String,

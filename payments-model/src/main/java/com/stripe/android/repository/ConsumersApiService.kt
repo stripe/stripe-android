@@ -46,7 +46,8 @@ interface ConsumersApiService {
     ): Result<ConsumerSessionSignup>
 
     suspend fun lookupConsumerSession(
-        email: String,
+        email: String?,
+        linkAuthIntentId: String?,
         requestSurface: String,
         sessionId: String,
         doNotLogConsumerFunnelEvent: Boolean,
@@ -55,8 +56,9 @@ interface ConsumersApiService {
     ): ConsumerSessionLookup
 
     suspend fun mobileLookupConsumerSession(
-        email: String,
-        emailSource: EmailSource,
+        email: String?,
+        emailSource: EmailSource?,
+        linkAuthIntentId: String?,
         requestSurface: String,
         verificationToken: String,
         appId: String,
@@ -179,7 +181,8 @@ class ConsumersApiServiceImpl(
      * Retrieves the ConsumerSession if the given email is associated with a Link account.
      */
     override suspend fun lookupConsumerSession(
-        email: String,
+        email: String?,
+        linkAuthIntentId: String?,
         requestSurface: String,
         sessionId: String,
         doNotLogConsumerFunnelEvent: Boolean,
@@ -200,7 +203,8 @@ class ConsumersApiServiceImpl(
                 mapOf(
                     "request_surface" to requestSurface,
                     "session_id" to sessionId,
-                    "email_address" to email.lowercase(),
+                    "email_address" to email?.lowercase(),
+                    "link_auth_intent_id" to linkAuthIntentId,
                     "customer_id" to customerId
                 ).filterValues { it != null } + avoidConsumerLoggingParams
             ),
@@ -212,8 +216,9 @@ class ConsumersApiServiceImpl(
      * Retrieves the ConsumerSession if the given email is associated with a Link account.
      */
     override suspend fun mobileLookupConsumerSession(
-        email: String,
-        emailSource: EmailSource,
+        email: String?,
+        emailSource: EmailSource?,
+        linkAuthIntentId: String?,
         requestSurface: String,
         verificationToken: String,
         appId: String,
@@ -229,10 +234,11 @@ class ConsumersApiServiceImpl(
                 requestOptions,
                 mapOf(
                     "request_surface" to requestSurface,
-                    "email_address" to email.lowercase(),
+                    "email_address" to email?.lowercase(),
+                    "link_auth_intent_id" to linkAuthIntentId,
                     "android_verification_token" to verificationToken,
                     "session_id" to sessionId,
-                    "email_source" to emailSource.backendValue,
+                    "email_source" to emailSource?.backendValue,
                     "app_id" to appId,
                     "customer_id" to customerId
                 ).filterValues { it != null }

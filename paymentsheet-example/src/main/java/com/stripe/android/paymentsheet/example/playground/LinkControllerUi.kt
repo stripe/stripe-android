@@ -66,10 +66,12 @@ internal fun LinkControllerUi(
     onCreatePaymentMethodClick: () -> Unit,
     onLookupClick: (email: String) -> Unit,
     onAuthenticationClick: (email: String, existingOnly: Boolean) -> Unit,
+    onAuthorizeClick: (linkAuthIntentId: String) -> Unit,
     onRegisterConsumerClick: (email: String, phone: String, country: String, name: String?) -> Unit,
     onErrorMessage: (message: String) -> Unit,
 ) {
     var email by rememberSaveable { mutableStateOf("") }
+    var linkAuthIntentId by rememberSaveable { mutableStateOf("") }
     var existingOnly by rememberSaveable { mutableStateOf(false) }
     var showRegistrationForm by rememberSaveable { mutableStateOf(false) }
     var registrationPhone by rememberSaveable { mutableStateOf("") }
@@ -206,6 +208,19 @@ internal fun LinkControllerUi(
         )
         Divider(Modifier.padding(top = 10.dp, bottom = 20.dp))
 
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = linkAuthIntentId,
+            label = { Text(text = "LinkAuthIntent ID") },
+            onValueChange = { email = it }
+        )
+        AuthorizeButton(
+            modifier = Modifier.fillMaxWidth(),
+            linkAuthIntentId = linkAuthIntentId,
+            onClick = { onAuthorizeClick(linkAuthIntentId) },
+        )
+        Divider(Modifier.padding(top = 10.dp, bottom = 20.dp))
+
         PaymentMethodButton(
             preview = controllerState.selectedPaymentMethodPreview,
             onClick = { onPaymentMethodButtonClick(email) },
@@ -244,6 +259,7 @@ private fun StatusBox(
         add("Consumer verified" to (controllerState.isConsumerVerified?.toString() ?: ""))
         add("Payment Method created" to (controllerState.createdPaymentMethod?.id ?: ""))
         add("Authentication result" to (playgroundState.authenticationResult?.toString() ?: ""))
+        add("Authorize result" to (playgroundState.authorizeResult?.toString() ?: ""))
         add("Register result" to (playgroundState.registerConsumerResult?.toString() ?: ""))
     }
 
@@ -289,6 +305,7 @@ private fun LinkControllerPlaygroundState.linkControllerError(): Throwable? = li
     (lookupConsumerResult as? LinkController.LookupConsumerResult.Failed)?.error,
     (createPaymentMethodResult as? LinkController.CreatePaymentMethodResult.Failed)?.error,
     (authenticationResult as? LinkController.AuthenticationResult.Failed)?.error,
+    (authorizeResult as? LinkController.AuthorizeResult.Failed)?.error,
 ).firstOrNull { it != null }
 
 @Composable
@@ -303,6 +320,7 @@ private fun LinkControllerUiPreview() {
             onCreatePaymentMethodClick = {},
             onLookupClick = {},
             onAuthenticationClick = { _, _ -> },
+            onAuthorizeClick = {},
             onRegisterConsumerClick = { _, _, _, _ -> },
             onErrorMessage = {},
         )
@@ -511,6 +529,29 @@ private fun AuthenticateButton(
                 append("Authenticate")
                 if (email.isNotBlank()) {
                     append(" ${email.trim()}")
+                }
+            },
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
+private fun AuthorizeButton(
+    linkAuthIntentId: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier,
+    ) {
+        Text(
+            text = buildString {
+                append("Authorize")
+                if (linkAuthIntentId.isNotBlank()) {
+                    append(" ${linkAuthIntentId.trim()}")
                 }
             },
             maxLines = 1,

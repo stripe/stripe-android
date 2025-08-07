@@ -8,7 +8,6 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.flatMapCatching
-import com.stripe.android.link.LinkController.AuthenticationResult
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.attestation.LinkAttestationCheck
@@ -83,8 +82,12 @@ internal class LinkControllerInteractor @Inject constructor(
     val presentPaymentMethodsResultFlow = _presentPaymentMethodsResultFlow.asSharedFlow()
 
     private val _authenticationResultFlow =
-        MutableSharedFlow<AuthenticationResult>(replay = 1)
+        MutableSharedFlow<LinkController.AuthenticationResult>(replay = 1)
     val authenticationResultFlow = _authenticationResultFlow.asSharedFlow()
+
+    private val _authorizeResultFlow =
+        MutableSharedFlow<LinkController.AuthorizeResult>(replay = 1)
+    val authorizeResultFlow = _authorizeResultFlow.asSharedFlow()
 
     fun state(context: Context): StateFlow<LinkController.State> {
         val imageLoader = StripeImageLoader(context)
@@ -175,13 +178,13 @@ internal class LinkControllerInteractor @Inject constructor(
             email = email,
             onConfigurationError = { error ->
                 _authenticationResultFlow.tryEmit(
-                    AuthenticationResult.Failed(error)
+                    LinkController.AuthenticationResult.Failed(error)
                 )
             },
             getLaunchMode = { linkAccount, _ ->
                 if (linkAccount?.isVerified == true) {
                     logger.debug("$tag: account is already verified, skipping authentication")
-                    _authenticationResultFlow.tryEmit(AuthenticationResult.Success)
+                    _authenticationResultFlow.tryEmit(LinkController.AuthenticationResult.Success)
                     null
                 } else {
                     LinkLaunchMode.Authentication(existingOnly = existingOnly)
@@ -219,6 +222,8 @@ internal class LinkControllerInteractor @Inject constructor(
                 handlePaymentMethodSelectionResult(result)
             is LinkLaunchMode.Authentication ->
                 handleAuthenticationResult(result)
+            is LinkLaunchMode.Authorization ->
+                handleAuthorizationResult(result)
             else ->
                 logger.warning("$tag: unexpected result for launch mode: $currentLaunchMode")
         }
@@ -298,20 +303,42 @@ internal class LinkControllerInteractor @Inject constructor(
         when (result) {
             is LinkActivityResult.Canceled -> {
                 logger.debug("$tag: authentication canceled")
-                _authenticationResultFlow.tryEmit(AuthenticationResult.Canceled)
+                _authenticationResultFlow.tryEmit(LinkController.AuthenticationResult.Canceled)
             }
             is LinkActivityResult.Completed -> {
                 logger.debug("$tag: authentication completed")
-                _authenticationResultFlow.tryEmit(AuthenticationResult.Success)
+                _authenticationResultFlow.tryEmit(LinkController.AuthenticationResult.Success)
             }
             is LinkActivityResult.Failed -> {
                 logger.debug("$tag: authentication failed")
                 _authenticationResultFlow.tryEmit(
-                    AuthenticationResult.Failed(result.error)
+                    LinkController.AuthenticationResult.Failed(result.error)
                 )
             }
             is LinkActivityResult.PaymentMethodObtained -> {
                 logger.warning("$tag: authentication unexpected result: $result")
+            }
+        }
+    }
+
+    private fun handleAuthorizationResult(result: LinkActivityResult) {
+        when (result) {
+            is LinkActivityResult.Canceled -> {
+                logger.debug("$tag: authorization canceled")
+                _authorizeResultFlow.tryEmit(LinkController.AuthorizeResult.Canceled)
+            }
+            is LinkActivityResult.Completed -> {
+                logger.debug("$tag: authorization completed")
+                _authorizeResultFlow.tryEmit(LinkController.AuthorizeResult.Consented)
+            }
+            is LinkActivityResult.Failed -> {
+                logger.debug("$tag: authorization failed")
+                _authorizeResultFlow.tryEmit(
+                    LinkController.AuthorizeResult.Failed(result.error)
+                )
+            }
+            is LinkActivityResult.PaymentMethodObtained -> {
+                logger.warning("$tag: authorization unexpected result: $result")
             }
         }
     }
@@ -373,6 +400,24 @@ internal class LinkControllerInteractor @Inject constructor(
                     LinkController.RegisterConsumerResult.Failed(it)
                 }
             )
+    }
+
+    fun authorize(
+        launcher: ActivityResultLauncher<LinkActivityContract.Args>,
+        linkAuthIntentId: String
+    ) {
+        present(
+            launcher = launcher,
+            email = null,
+            onConfigurationError = { error ->
+                _authorizeResultFlow.tryEmit(
+                    LinkController.AuthorizeResult.Failed(error)
+                )
+            },
+            getLaunchMode = { _, _ ->
+                LinkLaunchMode.Authorization(linkAuthIntentId = linkAuthIntentId)
+            }
+        )
     }
 
     private fun requireLinkComponent(state: State = _state.value): Result<LinkComponent> {

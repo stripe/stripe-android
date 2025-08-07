@@ -15,7 +15,6 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
-import com.stripe.android.link.LinkLaunchMode.Authentication
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.account.LinkAuth
@@ -236,12 +235,11 @@ internal class SignUpViewModel @Inject constructor(
         val targetScreen = when {
             linkAccount?.completedSignup == true -> LinkScreen.PaymentMethod
             linkAccount?.isVerified == true -> LinkScreen.Wallet
-            // TODO: Consent
             else -> LinkScreen.Verification
         }
 
         // Return the account in authentication mode if verification not required
-        if (linkLaunchMode is Authentication && targetScreen != LinkScreen.Verification) {
+        if (linkLaunchMode is LinkLaunchMode.Authentication && targetScreen != LinkScreen.Verification) {
             dismissWithResult(
                 LinkActivityResult.Completed(
                     linkAccountUpdate = LinkAccountUpdate.Value(linkAccount),

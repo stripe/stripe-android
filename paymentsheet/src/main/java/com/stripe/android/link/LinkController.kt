@@ -89,6 +89,7 @@ class LinkController @Inject internal constructor(
         activity: ComponentActivity,
         presentPaymentMethodsCallback: PresentPaymentMethodsCallback,
         authenticationCallback: AuthenticationCallback,
+        authorizeCallback: AuthorizeCallback,
     ): Presenter {
         return presenterComponentFactory
             .build(
@@ -97,6 +98,7 @@ class LinkController @Inject internal constructor(
                 activityResultRegistryOwner = activity,
                 presentPaymentMethodsCallback = presentPaymentMethodsCallback,
                 authenticationCallback = authenticationCallback,
+                authorizeCallback = authorizeCallback,
             )
             .presenter
     }
@@ -361,6 +363,14 @@ class LinkController @Inject internal constructor(
                 email = email
             )
         }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun authorize(linkAuthIntentId: String) {
+            interactor.authorize(
+                launcher = coordinator.linkActivityResultLauncher,
+                linkAuthIntentId = linkAuthIntentId
+            )
+        }
     }
 
     /**
@@ -511,6 +521,20 @@ class LinkController @Inject internal constructor(
         class Failed internal constructor(val error: Throwable) : RegisterConsumerResult
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    sealed interface AuthorizeResult {
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data object Consented : AuthorizeResult
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data object Canceled : AuthorizeResult
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Poko
+        class Failed internal constructor(val error: Throwable) : AuthorizeResult
+    }
+
     /**
      * Callback for receiving results from [Presenter.presentPaymentMethods].
      */
@@ -526,6 +550,11 @@ class LinkController @Inject internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun interface AuthenticationCallback {
         fun onAuthenticationResult(result: AuthenticationResult)
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun interface AuthorizeCallback {
+        fun onAuthorizeResult(result: AuthorizeResult)
     }
 
     /**

@@ -65,7 +65,8 @@ internal class LinkApiRepository @Inject constructor(
     }
 
     override suspend fun lookupConsumer(
-        email: String,
+        email: String?,
+        linkAuthIntentId: String?,
         sessionId: String,
         customerId: String?
     ): Result<ConsumerSessionLookup> = withContext(workContext) {
@@ -73,6 +74,7 @@ internal class LinkApiRepository @Inject constructor(
             requireNotNull(
                 consumersApiService.lookupConsumerSession(
                     email = email,
+                    linkAuthIntentId = linkAuthIntentId,
                     requestSurface = requestSurface.value,
                     sessionId = sessionId,
                     doNotLogConsumerFunnelEvent = false,
@@ -91,6 +93,7 @@ internal class LinkApiRepository @Inject constructor(
             requireNotNull(
                 consumersApiService.lookupConsumerSession(
                     email = email,
+                    linkAuthIntentId = null,
                     requestSurface = requestSurface.value,
                     sessionId = sessionId,
                     doNotLogConsumerFunnelEvent = true,
@@ -102,8 +105,9 @@ internal class LinkApiRepository @Inject constructor(
     }
 
     override suspend fun mobileLookupConsumer(
-        email: String,
-        emailSource: EmailSource,
+        email: String?,
+        emailSource: EmailSource?,
+        linkAuthIntentId: String?,
         verificationToken: String,
         appId: String,
         sessionId: String,
@@ -113,6 +117,7 @@ internal class LinkApiRepository @Inject constructor(
             consumersApiService.mobileLookupConsumerSession(
                 email = email,
                 emailSource = emailSource,
+                linkAuthIntentId = linkAuthIntentId,
                 requestSurface = requestSurface.value,
                 verificationToken = verificationToken,
                 appId = appId,

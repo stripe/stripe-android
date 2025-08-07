@@ -167,6 +167,14 @@ internal class LinkActivityViewModel @Inject constructor(
                     linkAccountUpdate = LinkAccountUpdate.None
                 )
             )
+            is LinkLaunchMode.Authorization -> dismissWithResult(
+                LinkActivityResult.Failed(
+                    error = IllegalStateException(
+                        "authorization only is not supported in web mode"
+                    ),
+                    linkAccountUpdate = LinkAccountUpdate.None
+                )
+            )
             // Payment selection flows -> dismiss selecting Link with no selected payment method.
             is LinkLaunchMode.PaymentMethodSelection -> dismissWithResult(
                 LinkActivityResult.Completed(
@@ -239,8 +247,11 @@ internal class LinkActivityViewModel @Inject constructor(
             when (linkLaunchMode) {
                 is LinkLaunchMode.Full,
                 is LinkLaunchMode.PaymentMethodSelection,
-                is LinkLaunchMode.Authentication -> loadLink()
-                is LinkLaunchMode.Confirmation -> confirmLinkPayment(linkLaunchMode.selectedPayment)
+                is LinkLaunchMode.Authentication,
+                is LinkLaunchMode.Authorization ->
+                    loadLink()
+                is LinkLaunchMode.Confirmation ->
+                    confirmLinkPayment(linkLaunchMode.selectedPayment)
             }
         }
     }
@@ -314,9 +325,10 @@ internal class LinkActivityViewModel @Inject constructor(
         val accountStatus = linkAccountManager.accountStatus.first()
 
         val authenticatingExistingAccount = (linkLaunchMode as? LinkLaunchMode.Authentication)?.existingOnly == true
+        val authorizingAuthIntent = linkLaunchMode is LinkLaunchMode.Authorization
         val cannotChangeEmails = !linkConfiguration.allowUserEmailEdits
         val accountNotFound = accountStatus == AccountStatus.SignedOut || accountStatus == AccountStatus.Error
-        if (accountNotFound && (authenticatingExistingAccount || cannotChangeEmails)) {
+        if (accountNotFound && (authorizingAuthIntent || authenticatingExistingAccount || cannotChangeEmails)) {
             dismissWithResult(
                 LinkActivityResult.Failed(
                     error = NoLinkAccountFoundException(),

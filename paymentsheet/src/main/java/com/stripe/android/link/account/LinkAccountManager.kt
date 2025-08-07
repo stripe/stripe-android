@@ -48,7 +48,8 @@ internal interface LinkAccountManager {
      *                   retrieval of displayable payment details.
      */
     suspend fun lookupConsumer(
-        email: String,
+        email: String?,
+        linkAuthIntentId: String?,
         startSession: Boolean = true,
         customerId: String?
     ): Result<LinkAccount?>
@@ -63,8 +64,9 @@ internal interface LinkAccountManager {
      *                   retrieval of displayable payment details.
      */
     suspend fun mobileLookupConsumer(
-        email: String,
-        emailSource: EmailSource,
+        email: String?,
+        emailSource: EmailSource?,
+        linkAuthIntentId: String?,
         verificationToken: String,
         appId: String,
         startSession: Boolean,
