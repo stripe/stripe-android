@@ -386,7 +386,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 // User pressed back in Link
                 Reason.BackPressed -> Unit
                 // User logged out of Link -> clear the Link payment selection
-                Reason.LoggedOut -> updateLinkPaymentSelection(null)
+                Reason.LoggedOut -> updateLinkPaymentSelection(null, canceled = true)
                 // User pressed "Pay another way" in Link -> show the payment option list
                 Reason.PayAnotherWay -> withCurrentState {
                     showPaymentOptionList(it, viewModel.paymentSelection)
