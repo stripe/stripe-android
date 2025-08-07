@@ -134,7 +134,8 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
             errorMessage = null,
             defaultPayment = displayablePaymentDetails?.toDefaultPaymentUI(
                 linkConfiguration.enableDisplayableDefaultValuesInEce
-            )
+            ),
+            allowLogout = true,
         )
     )
 

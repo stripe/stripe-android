@@ -149,7 +149,7 @@ internal fun VerificationBody(
             onClick = onResendCodeClick,
         )
 
-        if (state.isDialog.not()) {
+        if (state.allowLogout) {
             Spacer(modifier = Modifier.size(24.dp))
             ChangeEmailRow(
                 email = state.email,
@@ -374,6 +374,7 @@ private fun Preview() {
                         email = "email@email.com",
                         defaultPayment = null,
                         isDialog = true,
+                        allowLogout = true,
                     ),
                     otpElement = OTPElement(
                         identifier = IdentifierSpec.Generic("otp"),

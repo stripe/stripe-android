@@ -221,7 +221,11 @@ internal class LinkActivityViewModel @Inject constructor(
 
     fun changeEmail() {
         savedStateHandle[SignUpViewModel.USE_LINK_CONFIGURATION_CUSTOMER_INFO] = false
-        navigate(LinkScreen.SignUp, clearStack = true)
+        if (linkScreenState.value is ScreenState.VerificationDialog) {
+            _linkScreenState.value = ScreenState.FullScreen(initialDestination = LinkScreen.SignUp)
+        } else {
+            navigate(LinkScreen.SignUp, clearStack = true)
+        }
     }
 
     override fun onCreate(owner: LifecycleOwner) {

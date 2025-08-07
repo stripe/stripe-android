@@ -33,6 +33,7 @@ internal fun VerificationDialog(
     linkAccount: LinkAccount,
     linkAppearance: LinkAppearance?,
     onVerificationSucceeded: () -> Unit,
+    changeEmail: () -> Unit,
     onDismissClicked: () -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit
 ) {
@@ -42,6 +43,7 @@ internal fun VerificationDialog(
             linkAccount = linkAccount,
             isDialog = true,
             onVerificationSucceeded = onVerificationSucceeded,
+            onChangeEmailClicked = changeEmail,
             onDismissClicked = onDismissClicked,
             dismissWithResult = dismissWithResult
         )
@@ -130,7 +132,8 @@ fun VerificationDialogPreview() {
                     redactedPhoneNumber = "(...)",
                     email = "email@email.com",
                     defaultPayment = null,
-                    isDialog = true
+                    isDialog = true,
+                    allowLogout = true,
                 ),
                 linkAppearance = null,
                 otpElement = OTPSpec.transform(),

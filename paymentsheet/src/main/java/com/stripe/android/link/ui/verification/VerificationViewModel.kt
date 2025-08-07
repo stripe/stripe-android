@@ -50,7 +50,8 @@ internal class VerificationViewModel @Inject constructor(
             isSendingNewCode = false,
             didSendNewCode = false,
             defaultPayment = null,
-            isDialog = isDialog
+            isDialog = isDialog,
+            allowLogout = !isDialog || linkLaunchMode is LinkLaunchMode.PaymentMethodSelection
         )
     )
     val viewState: StateFlow<VerificationViewState> = _viewState
@@ -183,7 +184,7 @@ internal class VerificationViewModel @Inject constructor(
             linkAccount: LinkAccount,
             isDialog: Boolean,
             onVerificationSucceeded: () -> Unit,
-            onChangeEmailClicked: () -> Unit = {},
+            onChangeEmailClicked: () -> Unit,
             onDismissClicked: () -> Unit,
             dismissWithResult: (LinkActivityResult) -> Unit,
         ): ViewModelProvider.Factory {

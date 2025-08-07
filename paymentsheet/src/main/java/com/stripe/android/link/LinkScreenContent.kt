@@ -6,7 +6,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.LinkAppearance
 import com.stripe.android.link.ui.FullScreenContent
@@ -111,6 +110,7 @@ internal fun LinkScreenContentBody(
                     .testTag(VERIFICATION_DIALOG_CONTENT_TAG),
                 linkAccount = screenState.linkAccount,
                 onVerificationSucceeded = onVerificationSucceeded,
+                changeEmail = changeEmail,
                 onDismissClicked = onDismissClicked,
                 dismissWithResult = dismissWithResult,
                 linkAppearance = appearance
