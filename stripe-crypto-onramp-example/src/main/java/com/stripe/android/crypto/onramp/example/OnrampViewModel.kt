@@ -125,7 +125,7 @@ internal class OnrampViewModel(
     fun onIdentityVerificationResult(result: OnrampIdentityVerificationResult) {
         when (result) {
             is OnrampIdentityVerificationResult.Completed -> {
-                _message.value = "Identity Verification successful"
+                _message.value = "Identity Verification completed"
                 _uiState.value = OnrampUiState.PostAuthenticationScreen
             }
             is OnrampIdentityVerificationResult.Cancelled -> {
