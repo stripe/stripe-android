@@ -32,7 +32,10 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         presentPaymentMethodsCallback = { result ->
             // Handle payment methods result if needed
         },
-        authenticationCallback = ::handleAuthenticationResult
+        authenticationCallback = ::handleAuthenticationResult,
+        authorizeCallback = {
+            // TODO
+        }
     )
 
     private val sheet = IdentityVerificationSheet.create(

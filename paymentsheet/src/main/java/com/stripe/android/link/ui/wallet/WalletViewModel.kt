@@ -100,6 +100,7 @@ internal class WalletViewModel @Inject constructor(
             is LinkLaunchMode.Confirmation -> null
             is LinkLaunchMode.PaymentMethodSelection -> selectedPayment?.id
             is LinkLaunchMode.Authentication -> null
+            is LinkLaunchMode.Authorization -> null
         }
 
     private val LinkLaunchMode.paymentSelectionHint: String?
@@ -661,6 +662,8 @@ private fun StripeIntent.secondaryButtonLabel(linkLaunchMode: LinkLaunchMode): R
             is SetupIntent -> resolvableString(R.string.stripe_wallet_continue_another_way)
         }
         is LinkLaunchMode.PaymentMethodSelection,
-        is LinkLaunchMode.Authentication -> resolvableString(R.string.stripe_wallet_continue_another_way)
+        is LinkLaunchMode.Authentication,
+        is LinkLaunchMode.Authorization ->
+            resolvableString(R.string.stripe_wallet_continue_another_way)
     }
 }

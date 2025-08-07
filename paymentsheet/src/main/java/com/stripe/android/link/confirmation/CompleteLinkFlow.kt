@@ -110,7 +110,8 @@ internal class DefaultCompleteLinkFlow @Inject constructor(
                     shippingAddress = linkAccountManager.loadDefaultShippingAddress(),
                 )
             )
-            is LinkLaunchMode.Authentication -> Result.Completed(
+            is LinkLaunchMode.Authentication,
+            is LinkLaunchMode.Authorization -> Result.Completed(
                 linkActivityResult = LinkActivityResult.Completed(
                     linkAccountUpdate = linkAccountManager.linkAccountUpdate,
                     selectedPayment = null,

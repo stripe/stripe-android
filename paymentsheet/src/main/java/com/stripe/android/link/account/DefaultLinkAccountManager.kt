@@ -7,6 +7,7 @@ import com.stripe.android.link.ConsumerState
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.NoLinkAccountFoundException
@@ -50,6 +51,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
     private val linkRepository: LinkRepository,
     private val linkEventsReporter: LinkEventsReporter,
     private val errorReporter: ErrorReporter,
+    private val linkLaunchMode: LinkLaunchMode?,
 ) : LinkAccountManager {
 
     override val linkAccountInfo: StateFlow<LinkAccountUpdate.Value>
@@ -75,11 +77,16 @@ internal class DefaultLinkAccountManager @Inject constructor(
             }
 
     override suspend fun lookupConsumer(
-        email: String,
+        email: String?,
+        linkAuthIntentId: String?,
         startSession: Boolean,
         customerId: String?
     ): Result<LinkAccount?> =
-        linkRepository.lookupConsumer(email, customerId)
+        linkRepository.lookupConsumer(
+            email = email,
+            linkAuthIntentId = linkAuthIntentId,
+            customerId = customerId
+        )
             .onFailure { error ->
                 linkEventsReporter.onAccountLookupFailure(error)
             }.map { consumerSessionLookup ->
@@ -90,8 +97,9 @@ internal class DefaultLinkAccountManager @Inject constructor(
             }
 
     override suspend fun mobileLookupConsumer(
-        email: String,
-        emailSource: EmailSource,
+        email: String?,
+        emailSource: EmailSource?,
+        linkAuthIntentId: String?,
         verificationToken: String,
         appId: String,
         startSession: Boolean,
@@ -101,6 +109,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             verificationToken = verificationToken,
             appId = appId,
             email = email,
+            linkAuthIntentId = linkAuthIntentId,
             sessionId = config.elementsSessionId,
             emailSource = emailSource,
             customerId = customerId
@@ -132,6 +141,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         when (userInput) {
             is UserInput.SignIn -> lookupConsumer(
                 email = userInput.email,
+                linkAuthIntentId = null,
                 startSession = true,
                 customerId = config.customerIdForEceDefaultValues
             ).mapCatching {
@@ -499,18 +509,44 @@ internal class DefaultLinkAccountManager @Inject constructor(
         if (linkAccount != null) {
             return linkAccount.accountStatus
         }
-        // Look up the customer email if possible.
-        return config.customerInfo.email?.takeIf { canLookupCustomerEmail }
-            ?.let { customerEmail ->
-                lookupConsumer(
-                    email = customerEmail,
-                    startSession = true,
-                    customerId = config.customerIdForEceDefaultValues
-                )
-                    .map { it?.accountStatus }
-                    .getOrElse { AccountStatus.Error }
+
+        val result =
+            when (val linkLaunchMode = this.linkLaunchMode) {
+                null,
+                is LinkLaunchMode.Authentication,
+                is LinkLaunchMode.Confirmation,
+                LinkLaunchMode.Full,
+                is LinkLaunchMode.PaymentMethodSelection -> {
+                    val email = config.customerInfo.email?.takeIf { canLookupCustomerEmail }
+                    email?.let { lookupConsumerByEmail(it) }
+                }
+                is LinkLaunchMode.Authorization -> {
+                    val linkAuthIntentId = linkLaunchMode.linkAuthIntentId
+                    lookupConsumerByAuthIntent(linkAuthIntentId)
+                }
             }
+        return result
+            ?.map { it?.accountStatus }
+            ?.getOrElse { AccountStatus.Error }
             ?: AccountStatus.SignedOut
+    }
+
+    private suspend fun lookupConsumerByEmail(email: String): Result<LinkAccount?> {
+        return lookupConsumer(
+            email = email,
+            linkAuthIntentId = null,
+            startSession = true,
+            customerId = config.customerIdForEceDefaultValues
+        )
+    }
+
+    private suspend fun lookupConsumerByAuthIntent(linkAuthIntentId: String?): Result<LinkAccount?> {
+        return lookupConsumer(
+            email = null,
+            linkAuthIntentId = linkAuthIntentId,
+            startSession = true,
+            customerId = config.customerIdForEceDefaultValues
+        )
     }
 
     private val SignUpConsentAction.consumerAction: ConsumerSignUpConsentAction

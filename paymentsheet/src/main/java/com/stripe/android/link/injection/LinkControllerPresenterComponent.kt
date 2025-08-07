@@ -20,6 +20,7 @@ internal interface LinkControllerPresenterComponent {
             @BindsInstance activityResultRegistryOwner: ActivityResultRegistryOwner,
             @BindsInstance presentPaymentMethodsCallback: LinkController.PresentPaymentMethodsCallback,
             @BindsInstance authenticationCallback: LinkController.AuthenticationCallback,
+            @BindsInstance authorizeCallback: LinkController.AuthorizeCallback,
         ): LinkControllerPresenterComponent
     }
 }

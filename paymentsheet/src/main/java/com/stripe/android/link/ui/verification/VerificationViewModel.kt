@@ -93,7 +93,6 @@ internal class VerificationViewModel @Inject constructor(
                     dismissWithResult(
                         LinkActivityResult.Completed(
                             linkAccountUpdate = linkAccountManager.linkAccountUpdate,
-                            selectedPayment = null,
                         )
                     )
                 } else {
