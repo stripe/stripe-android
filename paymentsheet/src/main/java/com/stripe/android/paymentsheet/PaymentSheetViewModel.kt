@@ -142,9 +142,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
 
     private val isConfirmingWithLinkExpress: Boolean
-        get() = (inProgressSelection as? PaymentSelection.Link)?.linkExpressMode?.let { 
-            it != LinkExpressMode.DISABLED 
-        } ?: false
+        get() = (inProgressSelection as? PaymentSelection.Link)?.linkExpressMode
+            ?.let { it != LinkExpressMode.DISABLED }
+            ?: false
 
     override var newPaymentSelection: NewPaymentOptionSelection? = null
 
