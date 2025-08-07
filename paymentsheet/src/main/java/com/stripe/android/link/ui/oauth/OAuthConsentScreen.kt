@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.oauth
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -112,8 +113,14 @@ private fun MerchantLogo(
     val modifier = Modifier
         .clip(RoundedCornerShape(16.dp))
         .size(56.dp)
+        .background(LinkTheme.colors.surfaceTertiary)
     if (merchantLogoUrl == null) {
-        Box(modifier.background(Color.Red)) // TODO.
+        Image(
+            modifier = modifier.padding(18.dp),
+            painter = painterResource(com.stripe.android.ui.core.R.drawable.stripe_ic_business),
+            contentDescription = null,
+            colorFilter = ColorFilter.tint(LinkTheme.colors.iconPrimary)
+        )
     } else {
         StripeImage(
             modifier = modifier,
