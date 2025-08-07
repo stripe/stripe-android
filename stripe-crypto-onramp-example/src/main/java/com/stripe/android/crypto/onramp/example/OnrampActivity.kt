@@ -149,7 +149,7 @@ internal fun OnrampScreen(
                     }
                 )
             }
-            is OnrampUiState.KYCScreen -> {
+            is OnrampUiState.PostAuthenticationScreen -> {
                 var firstName by remember { mutableStateOf("") }
                 var lastName by remember { mutableStateOf("") }
 
@@ -158,8 +158,12 @@ internal fun OnrampScreen(
                     onFirstNameChange = { firstName = it },
                     lastName = lastName,
                     onLastNameChange = { lastName = it },
-                    onCollectKYC = { kycInfo -> onStartVerification() }
+                    onCollectKYC = { kycInfo -> viewModel.collectKycInfo(kycInfo) }
                 )
+
+                StartVerificationScreen {
+                    onStartVerification()
+                }
             }
         }
     }
@@ -422,6 +426,30 @@ private fun KYCTextField(
             .fillMaxWidth()
             .padding(bottom = 24.dp)
     )
+}
+
+@Composable
+private fun StartVerificationScreen(
+    startVerification: () -> Unit
+) {
+    Column {
+        Text(
+            text = "Verification",
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        Button(
+            onClick = {
+                startVerification()
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp)
+        ) {
+            Text("Start Identity Verification")
+        }
+    }
 }
 
 @Composable

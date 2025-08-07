@@ -109,7 +109,7 @@ internal class OnrampViewModel(
         when (result) {
             is OnrampVerificationResult.Completed -> {
                 _message.value = "Authentication successful"
-                _uiState.value = OnrampUiState.KYCScreen
+                _uiState.value = OnrampUiState.PostAuthenticationScreen
             }
             is OnrampVerificationResult.Cancelled -> {
                 _message.value = "Authentication cancelled, please try again"
@@ -150,7 +150,7 @@ internal class OnrampViewModel(
                 }
                 is OnrampKYCResult.Failed -> {
                     _message.value = "KYC Collection failed: ${result.error.message}"
-                    _uiState.value = OnrampUiState.KYCScreen
+                    _uiState.value = OnrampUiState.PostAuthenticationScreen
                 }
             }
         }
@@ -173,5 +173,5 @@ internal sealed class OnrampUiState {
     object Loading : OnrampUiState()
     data class Registration(val email: String) : OnrampUiState()
     data class Authentication(val email: String) : OnrampUiState()
-    object KYCScreen : OnrampUiState()
+    object PostAuthenticationScreen : OnrampUiState()
 }
