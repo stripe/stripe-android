@@ -30,7 +30,8 @@ internal data class CommonConfiguration(
     val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
     val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
     val googlePlacesApiKey: String?,
-    val linkAppearance: LinkAppearance? = null
+    val linkAppearance: LinkAppearance? = null,
+    val opensCardScannerAutomaticallyConfig: Boolean
 ) : Parcelable {
 
     fun validate(isLiveMode: Boolean) {
@@ -160,6 +161,7 @@ internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfigura
     link = link,
     shopPayConfiguration = shopPayConfiguration,
     googlePlacesApiKey = googlePlacesApiKey,
+    opensCardScannerAutomaticallyConfig = opensCardScannerAutomatically,
 )
 
 internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
@@ -180,6 +182,7 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
     link = link,
     shopPayConfiguration = null,
     googlePlacesApiKey = null,
+    opensCardScannerAutomaticallyConfig = opensCardScannerAutomatically,
 )
 
 internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
@@ -204,7 +207,8 @@ internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfigu
     ),
     shopPayConfiguration = null,
     googlePlacesApiKey = null,
-    linkAppearance = linkAppearance
+    linkAppearance = linkAppearance,
+    opensCardScannerAutomaticallyConfig = false,
 )
 
 private fun String.isEKClientSecretValid(): Boolean {

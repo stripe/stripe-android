@@ -68,7 +68,8 @@ internal data class PaymentMethodMetadata(
     val financialConnectionsAvailability: FinancialConnectionsAvailability?,
     val cardBrandFilter: CardBrandFilter,
     val elementsSessionId: String,
-    val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?
+    val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
+    val openCardScanAutomaticallyConfig: Boolean,
 ) : Parcelable {
     fun hasIntentToSetup(code: PaymentMethodCode): Boolean {
         return when (stripeIntent) {
@@ -324,7 +325,8 @@ internal data class PaymentMethodMetadata(
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession),
                 elementsSessionId = elementsSession.elementsSessionId,
-                shopPayConfiguration = configuration.shopPayConfiguration
+                shopPayConfiguration = configuration.shopPayConfiguration,
+                openCardScanAutomaticallyConfig = configuration.opensCardScannerAutomaticallyConfig,
             )
         }
 
@@ -369,7 +371,8 @@ internal data class PaymentMethodMetadata(
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
                 elementsSessionId = elementsSession.elementsSessionId,
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession),
-                shopPayConfiguration = null
+                shopPayConfiguration = null,
+                openCardScanAutomaticallyConfig = configuration.opensCardScannerAutomatically,
             )
         }
 
@@ -415,7 +418,8 @@ internal data class PaymentMethodMetadata(
                 cardBrandFilter = configuration.cardBrandFilter,
                 elementsSessionId = configuration.elementsSessionId,
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),
-                shopPayConfiguration = null
+                shopPayConfiguration = null,
+                openCardScanAutomaticallyConfig = false,
             )
         }
     }
