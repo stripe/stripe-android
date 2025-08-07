@@ -6,6 +6,7 @@
     <ID>ConstructorParameterNaming:EmbeddedPaymentElement.kt$EmbeddedPaymentElement.PaymentOptionDisplayData$private val _shippingDetails: AddressDetails?</ID>
     <ID>ConstructorParameterNaming:PaymentOption.kt$PaymentOption$private val _labels: Labels</ID>
     <ID>ConstructorParameterNaming:PaymentOption.kt$PaymentOption$private val _shippingDetails: AddressDetails?</ID>
+    <ID>CyclomaticComplexMethod:CardDefinition.kt$CardUiDefinitionFactory$override fun createFormElements( metadata: PaymentMethodMetadata, arguments: UiDefinitionFactory.Arguments, ): List&lt;FormElement></ID>
     <ID>CyclomaticComplexMethod:CustomerSheetViewModel.kt$CustomerSheetViewModel$fun handleViewAction(viewAction: CustomerSheetViewAction)</ID>
     <ID>CyclomaticComplexMethod:PlaceholderHelper.kt$PlaceholderHelper$@VisibleForTesting internal fun specForPlaceholderField( field: PlaceholderField, placeholderOverrideList: List&lt;IdentifierSpec>, requiresMandate: Boolean, configuration: PaymentSheet.BillingDetailsCollectionConfiguration, )</ID>
     <ID>CyclomaticComplexMethod:TransformBankIconCodeToBankIcon.kt$internal fun transformBankIconCodeToBankIcon( iconCode: String?, fallbackIcon: Int, ): Int</ID>

@@ -10,6 +10,9 @@ internal interface PaymentMethodDefinition {
 
     val supportedAsSavedPaymentMethod: Boolean
 
+    val supportsTermDisplayConfiguration: Boolean
+        get() = false
+
     fun requiresMandate(metadata: PaymentMethodMetadata): Boolean
 
     /**

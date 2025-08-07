@@ -50,6 +50,8 @@ internal object CardDefinition : PaymentMethodDefinition {
 
     override val supportedAsSavedPaymentMethod: Boolean = true
 
+    override val supportsTermDisplayConfiguration: Boolean = true
+
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf()
@@ -146,7 +148,8 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                 null
             }
 
-            if (linkSignupOptInEnabled && signupMode != null) {
+            val mandateAllowed = metadata.mandateAllowed(CardDefinition.type)
+            if (linkSignupOptInEnabled && signupMode != null && mandateAllowed) {
                 add(
                     CombinedLinkMandateElement(
                         identifier = IdentifierSpec.Generic("card_mandate"),
@@ -156,7 +159,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                         linkSignupStateFlow = arguments.linkInlineHandler?.linkInlineState ?: stateFlowOf(null)
                     )
                 )
-            } else if (metadata.hasIntentToSetup(CardDefinition.type.code)) {
+            } else if (metadata.hasIntentToSetup(CardDefinition.type.code) && mandateAllowed) {
                 add(
                     MandateTextElement(
                         identifier = IdentifierSpec.Generic("card_mandate"),

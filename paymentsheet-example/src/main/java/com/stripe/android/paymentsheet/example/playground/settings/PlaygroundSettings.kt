@@ -538,6 +538,7 @@ internal class PlaygroundSettings private constructor(
                 FeatureFlags.forceEnableLinkPaymentSelectionHint,
                 listOf(PlaygroundConfigurationData.IntegrationType.LinkController)
             ),
+            TermsDisplaySettingsDefinition,
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(

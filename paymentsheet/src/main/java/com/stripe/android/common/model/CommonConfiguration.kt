@@ -5,9 +5,12 @@ import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.model.LinkAppearance
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodRegistry
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.TermsDisplay
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import kotlinx.parcelize.Parcelize
 
@@ -30,7 +33,8 @@ internal data class CommonConfiguration(
     val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
     val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
     val googlePlacesApiKey: String?,
-    val linkAppearance: LinkAppearance? = null
+    val linkAppearance: LinkAppearance? = null,
+    val termsDisplay: Map<PaymentMethod.Type, TermsDisplay>,
 ) : Parcelable {
 
     fun validate(isLiveMode: Boolean) {
@@ -40,6 +44,8 @@ internal data class CommonConfiguration(
         customer?.accessType?.let { customerAccessType ->
             customerAccessTypeValidate(customerAccessType)
         }
+
+        validateTermsDisplay()
     }
 
     // These exception messages are not localized as they are not intended to be displayed to a user.
@@ -140,6 +146,17 @@ internal data class CommonConfiguration(
             )
         }
     }
+
+    private fun validateTermsDisplay() {
+        termsDisplay.forEach { (key, _) ->
+            val paymentMethodDefinition = requireNotNull(PaymentMethodRegistry.definitionsByCode[key.code]) {
+                "Unsupported payment method $key"
+            }
+            if (!paymentMethodDefinition.supportsTermDisplayConfiguration) {
+                throw IllegalArgumentException("$key does not support terms display configuration.")
+            }
+        }
+    }
 }
 
 internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
@@ -160,6 +177,7 @@ internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfigura
     link = link,
     shopPayConfiguration = shopPayConfiguration,
     googlePlacesApiKey = googlePlacesApiKey,
+    termsDisplay = termsDisplay,
 )
 
 internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
@@ -180,6 +198,7 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
     link = link,
     shopPayConfiguration = null,
     googlePlacesApiKey = null,
+    termsDisplay = termsDisplay,
 )
 
 internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
@@ -204,7 +223,8 @@ internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfigu
     ),
     shopPayConfiguration = null,
     googlePlacesApiKey = null,
-    linkAppearance = linkAppearance
+    linkAppearance = linkAppearance,
+    termsDisplay = emptyMap(),
 )
 
 private fun String.isEKClientSecretValid(): Boolean {

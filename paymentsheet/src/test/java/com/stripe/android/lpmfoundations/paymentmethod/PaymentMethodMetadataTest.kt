@@ -1148,7 +1148,8 @@ internal class PaymentMethodMetadataTest {
             paymentMethodIncentive = null,
             elementsSessionId = "session_1234",
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
-            shopPayConfiguration = null
+            shopPayConfiguration = null,
+            termsDisplay = emptyMap(),
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1221,7 +1222,8 @@ internal class PaymentMethodMetadataTest {
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
             elementsSessionId = "session_1234",
-            shopPayConfiguration = null
+            shopPayConfiguration = null,
+            termsDisplay = emptyMap(),
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -1867,6 +1869,46 @@ internal class PaymentMethodMetadataTest {
         expectedWalletTypes = listOf(WalletType.GooglePay, WalletType.ShopPay),
     )
 
+    @Test
+    fun `mandateAllowed returns true when termsDisplay is AUTOMATIC`() {
+        val termsDisplay = mapOf(PaymentMethod.Type.Card to PaymentSheet.TermsDisplay.AUTOMATIC)
+        val metadata = PaymentMethodMetadataFactory.create(termsDisplay = termsDisplay)
+
+        assertThat(metadata.mandateAllowed(PaymentMethod.Type.Card)).isTrue()
+    }
+
+    @Test
+    fun `mandateAllowed returns false when termsDisplay is NEVER`() {
+        val termsDisplay = mapOf(PaymentMethod.Type.Card to PaymentSheet.TermsDisplay.NEVER)
+        val metadata = PaymentMethodMetadataFactory.create(termsDisplay = termsDisplay)
+
+        assertThat(metadata.mandateAllowed(PaymentMethod.Type.Card)).isFalse()
+    }
+
+    @Test
+    fun `mandateAllowed returns true when payment method not in termsDisplay map`() {
+        val termsDisplay = mapOf(PaymentMethod.Type.USBankAccount to PaymentSheet.TermsDisplay.NEVER)
+        val metadata = PaymentMethodMetadataFactory.create(termsDisplay = termsDisplay)
+
+        // Card is not in the map, so it should default to allowed
+        assertThat(metadata.mandateAllowed(PaymentMethod.Type.Card)).isTrue()
+    }
+
+    @Test
+    fun `mandateAllowed works with multiple payment method types`() {
+        val termsDisplay = mapOf(
+            PaymentMethod.Type.Card to PaymentSheet.TermsDisplay.NEVER,
+            PaymentMethod.Type.USBankAccount to PaymentSheet.TermsDisplay.AUTOMATIC,
+            PaymentMethod.Type.CashAppPay to PaymentSheet.TermsDisplay.NEVER
+        )
+        val metadata = PaymentMethodMetadataFactory.create(termsDisplay = termsDisplay)
+
+        assertThat(metadata.mandateAllowed(PaymentMethod.Type.Card)).isFalse()
+        assertThat(metadata.mandateAllowed(PaymentMethod.Type.USBankAccount)).isTrue()
+        assertThat(metadata.mandateAllowed(PaymentMethod.Type.CashAppPay)).isFalse()
+        assertThat(metadata.mandateAllowed(PaymentMethod.Type.Klarna)).isTrue() // Not in map
+    }
+
     private fun availableWalletsTest(
         orderedPaymentMethodTypesAndWallets: List<String>,
         isGooglePayReady: Boolean,
@@ -1921,6 +1963,7 @@ internal class PaymentMethodMetadataTest {
             .inOrder()
     }
 
+    @Test
     fun `Passes CBF along to Link`() {
         val linkConfiguration = LinkTestUtils.createLinkConfiguration(
             cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all())

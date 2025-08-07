@@ -38,6 +38,7 @@ import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
+import com.stripe.android.ui.core.elements.MANDATE_TEST_TAG
 import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
 import com.stripe.android.ui.core.elements.SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
@@ -464,5 +465,13 @@ internal class PaymentSheetPage(
         composeTestRule
             .onNode(hasText(mandateText))
             .assertExists()
+    }
+
+    fun assertMandateIsMissing() {
+        waitUntilVisible()
+        assertIsOnFormPage()
+
+        composeTestRule.onNodeWithTag(MANDATE_TEST_TAG)
+            .assertDoesNotExist()
     }
 }
