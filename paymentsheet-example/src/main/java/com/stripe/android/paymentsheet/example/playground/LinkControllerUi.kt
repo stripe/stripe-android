@@ -212,7 +212,7 @@ internal fun LinkControllerUi(
             modifier = Modifier.fillMaxWidth(),
             value = linkAuthIntentId,
             label = { Text(text = "LinkAuthIntent ID") },
-            onValueChange = { email = it }
+            onValueChange = { linkAuthIntentId = it }
         )
         AuthorizeButton(
             modifier = Modifier.fillMaxWidth(),

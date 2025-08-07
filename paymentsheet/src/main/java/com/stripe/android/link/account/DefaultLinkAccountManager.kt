@@ -193,7 +193,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         val currentEmail = currentAccount?.email ?: config.customerInfo.email
 
         return when (val status = getAccountStatus(currentAccount, canLookupCustomerEmail = true)) {
-            AccountStatus.Verified -> {
+            is AccountStatus.Verified -> {
                 linkEventsReporter.onInvalidSessionState(LinkEventsReporter.SessionState.Verified)
 
                 Result.failure(

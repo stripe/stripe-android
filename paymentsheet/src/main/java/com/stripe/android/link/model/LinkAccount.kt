@@ -51,7 +51,7 @@ internal class LinkAccount(
     @IgnoredOnParcel
     val accountStatus = when {
         isVerified -> {
-            AccountStatus.Verified
+            AccountStatus.Verified(consentNeeded = consentNeeded)
         }
         consumerSession.containsSMSSessionStarted() -> {
             AccountStatus.VerificationStarted
@@ -66,16 +66,16 @@ internal class LinkAccount(
         consumerSession.linkAuthIntent?.state
 
     @IgnoredOnParcel
-    val consentNeeded: Boolean = when (linkAuthIntentState) {
-        null,
-        LinkAuthIntentState.Unknown,
-        LinkAuthIntentState.Consented ->
-            false
-        LinkAuthIntentState.Created,
-        LinkAuthIntentState.Authenticated ->
-            true
-    }
-    // val needsConsent: Boolean = true
+    val consentNeeded: Boolean
+        get() = when (linkAuthIntentState) {
+            null,
+            LinkAuthIntentState.Unknown,
+            LinkAuthIntentState.Consented ->
+                false
+            LinkAuthIntentState.Created,
+            LinkAuthIntentState.Authenticated ->
+                true
+        }
 
     private fun ConsumerSession.containsSMSSessionStarted() = verificationSessions.find {
         it.type == ConsumerSession.VerificationSession.SessionType.Sms &&
