@@ -40,10 +40,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     private val sheet = IdentityVerificationSheet.create(
         activity,
         configuration = IdentityVerificationSheet.Configuration(
-            brandLogo = Uri.Builder()
-                .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
-                .authority("test")
-                .appendPath("1")
+            brandLogo = Uri.Builder() // Temporary until we determine how to pass this in.
                 .build()),
         identityVerificationCallback = ::handleIdentityVerificationResult,
     )
