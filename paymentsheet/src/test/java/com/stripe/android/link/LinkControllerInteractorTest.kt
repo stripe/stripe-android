@@ -376,7 +376,7 @@ class LinkControllerInteractorTest {
 
         val call = launcher.calls.awaitItem()
         val args = call.input
-        assertThat(args.linkExpressMode).isEqualTo(LinkExpressMode.DISABLED)
+        assertThat(args.linkExpressMode).isEqualTo(LinkExpressMode.ENABLED)
         assertThat(args.linkAccountInfo.account).isNull()
         assertThat(args.launchMode)
             .isEqualTo(
