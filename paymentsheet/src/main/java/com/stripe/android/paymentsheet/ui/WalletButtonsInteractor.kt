@@ -225,11 +225,13 @@ internal class DefaultWalletButtonsInteractor(
     private fun handleLinkButtonPressed(arguments: Arguments) {
         val linkConfiguration = arguments.paymentMethodMetadata.linkState?.configuration
         if (linkConfiguration != null) {
+            val selectedPayment = (arguments.paymentSelection as? PaymentSelection.Link)
+                ?.selectedPayment
             // Launch Link payment selection instead of starting confirmation
             linkPaymentLauncher.present(
                 configuration = linkConfiguration,
                 linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
-                launchMode = LinkLaunchMode.PaymentMethodSelection(null),
+                launchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment?.details),
                 useLinkExpress = true
             )
         } else {
@@ -279,6 +281,7 @@ internal class DefaultWalletButtonsInteractor(
         val appearance: PaymentSheet.Appearance,
         val initializationMode: PaymentElementLoader.InitializationMode,
         val walletsAllowedByMerchant: List<WalletType>,
+        val paymentSelection: PaymentSelection?,
     )
 
     companion object {
@@ -305,7 +308,8 @@ internal class DefaultWalletButtonsInteractor(
                             walletsAllowedByMerchant = configureRequest
                                 .configuration
                                 .walletButtons
-                                .allowedWalletTypes
+                                .allowedWalletTypes,
+                            paymentSelection = flowControllerViewModel.paymentSelection
                         )
                     } else {
                         null
@@ -345,7 +349,8 @@ internal class DefaultWalletButtonsInteractor(
                             paymentMethodMetadata = state.paymentMethodMetadata,
                             appearance = state.configuration.appearance,
                             initializationMode = state.initializationMode,
-                            walletsAllowedByMerchant = WalletType.entries
+                            walletsAllowedByMerchant = WalletType.entries,
+                            paymentSelection = state.selection
                         )
                     }
                 },

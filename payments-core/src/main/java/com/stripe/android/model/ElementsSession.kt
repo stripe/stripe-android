@@ -62,6 +62,9 @@ data class ElementsSession(
     val linkEnableDisplayableDefaultValuesInEce: Boolean
         get() = linkSettings?.linkEnableDisplayableDefaultValuesInEce ?: false
 
+    val linkMobileSkipWalletInFlowController: Boolean
+        get() = linkSettings?.linkMobileSkipWalletInFlowController ?: false
+
     val passiveCaptchaParams: PassiveCaptchaParams?
         get() = passiveCaptcha.takeIf { flags[Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA] == true }
 
@@ -84,6 +87,7 @@ data class ElementsSession(
         val suppress2faModal: Boolean,
         val disableLinkRuxInFlowController: Boolean,
         val linkEnableDisplayableDefaultValuesInEce: Boolean,
+        val linkMobileSkipWalletInFlowController: Boolean,
         val linkSignUpOptInFeatureEnabled: Boolean,
         val linkSignUpOptInInitialValue: Boolean
     ) : StripeModel

@@ -959,6 +959,59 @@ class WalletViewModelTest {
         }
     }
 
+    @Test
+    fun `marks auto-selection attempted when skipWalletInFlowController is enabled`() = runTest(dispatcher) {
+        val defaultCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(isDefault = true)
+
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(defaultCard))
+        )
+
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            skipWalletInFlowController = true
+        )
+
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            configuration = configuration,
+            linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment = null)
+        )
+
+        // Wait for async operations to complete
+        advanceUntilIdle()
+
+        // Verify auto-selection was attempted
+        assertThat(viewModel.uiState.value.hasAttemptedAutoSelection).isTrue()
+    }
+
+    @Test
+    fun `does not auto-select when skipWalletInFlowController is disabled`() = runTest(dispatcher) {
+        val defaultCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(isDefault = true)
+
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(defaultCard))
+        )
+
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            skipWalletInFlowController = false // Disabled
+        )
+
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            configuration = configuration,
+            linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment = null)
+        )
+
+        // Wait for async operations to complete
+        advanceUntilIdle()
+
+        // Verify auto-selection was NOT attempted when flag is disabled
+        assertThat(viewModel.uiState.value.hasAttemptedAutoSelection).isFalse()
+        assertThat(viewModel.uiState.value.isAutoSelecting).isFalse()
+    }
+
     private fun createViewModel(
         linkAccount: LinkAccount = TestFactory.LINK_ACCOUNT,
         linkAccountManager: WalletLinkAccountManager = WalletLinkAccountManager(),

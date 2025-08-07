@@ -821,6 +821,7 @@ class DefaultWalletButtonsInteractorTest {
             ),
             appearance = appearance,
             initializationMode = initializationMode,
+            paymentSelection = null,
             walletsAllowedByMerchant = allowedWalletTypes,
         )
     }

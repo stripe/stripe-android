@@ -36,6 +36,7 @@ internal data class LinkConfiguration(
     val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
     val allowUserEmailEdits: Boolean,
     val enableDisplayableDefaultValuesInEce: Boolean,
+    val skipWalletInFlowController: Boolean,
     val linkAppearance: LinkAppearance?,
     val linkSignUpOptInFeatureEnabled: Boolean,
     val linkSignUpOptInInitialValue: Boolean,
