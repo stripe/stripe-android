@@ -209,7 +209,7 @@ internal class VerificationScreenTest {
         onTitleField().assertIsDisplayed()
         onSubtitleTag().assertIsDisplayed()
         onOtpTag().assertIsDisplayed()
-        onEmailTag().assertDoesNotExist()
+        onEmailTag().assertIsDisplayed()
         onErrorTag().assertDoesNotExist()
         onLoaderTag().assertDoesNotExist()
         onResendCodeButtonTag()

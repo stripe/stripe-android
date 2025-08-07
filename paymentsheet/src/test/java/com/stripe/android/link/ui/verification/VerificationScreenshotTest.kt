@@ -145,7 +145,7 @@ internal class VerificationScreenshotTest(
                             didSendNewCode = false,
                             defaultPayment = null,
                             isDialog = true,
-                            allowLogout = true,
+                            allowLogout = false,
                         )
                     )
                 ),
@@ -163,7 +163,7 @@ internal class VerificationScreenshotTest(
                             didSendNewCode = false,
                             defaultPayment = null,
                             isDialog = true,
-                            allowLogout = true,
+                            allowLogout = false,
                         )
                     )
                 ),
@@ -181,7 +181,7 @@ internal class VerificationScreenshotTest(
                             didSendNewCode = false,
                             defaultPayment = null,
                             isDialog = true,
-                            allowLogout = true,
+                            allowLogout = false,
                         )
                     )
                 ),
