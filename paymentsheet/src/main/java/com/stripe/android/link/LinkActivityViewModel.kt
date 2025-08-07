@@ -345,10 +345,12 @@ internal class LinkActivityViewModel @Inject constructor(
         return ScreenState.FullScreen(
             initialDestination = when (accountStatus) {
                 AccountStatus.Verified -> {
-                    if (linkAccount?.completedSignup == true) {
+                    if (linkAccount?.completedSignup == true && linkLaunchMode.selectedPayment() == null) {
                         // We just completed signup, but haven't added a payment method yet.
                         LinkScreen.PaymentMethod
                     } else {
+                        // We have a verified account, or we're relaunching after signing up and adding a payment,
+                        // then show the wallet.
                         LinkScreen.Wallet
                     }
                 }
