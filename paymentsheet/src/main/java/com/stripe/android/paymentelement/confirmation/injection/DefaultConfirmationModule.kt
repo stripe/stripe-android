@@ -7,8 +7,8 @@ import dagger.Module
 @Module(
     includes = [
         IntentConfirmationModule::class,
+        PassiveChallengeConfirmationModule::class,
         ConfirmationHandlerModule::class,
-        PassiveChallengeConfirmationModule::class
     ]
 )
 internal interface DefaultConfirmationModule
