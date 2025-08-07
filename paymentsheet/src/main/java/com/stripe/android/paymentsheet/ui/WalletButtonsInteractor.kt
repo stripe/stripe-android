@@ -7,6 +7,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
@@ -71,7 +72,7 @@ internal interface WalletButtonsInteractor {
             val state: LinkButtonState,
         ) : WalletButton {
             override fun createSelection(): PaymentSelection {
-                return PaymentSelection.Link(useLinkExpress = false)
+                return PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED)
             }
         }
 
@@ -232,7 +233,7 @@ internal class DefaultWalletButtonsInteractor(
                 configuration = linkConfiguration,
                 linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                 launchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment?.details),
-                useLinkExpress = true
+                linkExpressMode = LinkExpressMode.ENABLED
             )
         } else {
             handleButtonPressed(

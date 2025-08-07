@@ -21,6 +21,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
@@ -141,7 +142,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
 
     private val isConfirmingWithLinkExpress: Boolean
-        get() = (inProgressSelection as? PaymentSelection.Link)?.useLinkExpress == true
+        get() = (inProgressSelection as? PaymentSelection.Link)?.linkExpressMode != LinkExpressMode.DISABLED
 
     override var newPaymentSelection: NewPaymentOptionSelection? = null
 
@@ -372,11 +373,21 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     fun checkoutWithLink() {
-        checkout(PaymentSelection.Link(useLinkExpress = false), CheckoutIdentifier.SheetTopWallet)
+        checkout(
+            PaymentSelection.Link(
+                linkExpressMode = LinkExpressMode.DISABLED
+            ),
+            CheckoutIdentifier.SheetTopWallet
+        )
     }
 
     private fun checkoutWithLinkExpress() {
-        checkout(PaymentSelection.Link(useLinkExpress = true), CheckoutIdentifier.SheetTopWallet)
+        checkout(
+            PaymentSelection.Link(
+                linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
+            ),
+            CheckoutIdentifier.SheetTopWallet
+        )
     }
 
     private fun checkout(
@@ -749,7 +760,7 @@ private val ConfirmationHandler.State.contentVisible: Boolean
                 // Hide the payment sheet for these confirmation flows that render UI
                 // on top of the payment sheet to avoid weird visual overlap.
                 is GooglePayConfirmationOption -> false
-                is LinkConfirmationOption -> option.useLinkExpress
+                is LinkConfirmationOption -> option.linkExpressMode != LinkExpressMode.DISABLED
                 else -> true
             }
         }

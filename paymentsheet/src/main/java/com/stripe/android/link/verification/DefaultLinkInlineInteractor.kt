@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountManager
@@ -106,7 +107,7 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
                     configuration = verificationState.linkConfiguration,
                     linkAccountInfo = accountManager.linkAccountInfo.value,
                     launchMode = LinkLaunchMode.PaymentMethodSelection(null),
-                    useLinkExpress = true
+                    linkExpressMode = LinkExpressMode.ENABLED
                 )
                 // No UI changes - keep the 2FA until we get a result from the Link payment selection flow.
             }.onFailure { error ->

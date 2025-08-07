@@ -61,7 +61,7 @@ internal class LinkActivityViewModel @Inject constructor(
     val linkConfiguration: LinkConfiguration,
     private val linkAttestationCheck: LinkAttestationCheck,
     val savedStateHandle: SavedStateHandle,
-    private val startWithVerificationDialog: Boolean,
+    private val linkExpressMode: LinkExpressMode,
     private val navigationManager: NavigationManager,
     val linkLaunchMode: LinkLaunchMode,
     private val autocompleteLauncher: AutocompleteActivityLauncher,
@@ -238,22 +238,24 @@ internal class LinkActivityViewModel @Inject constructor(
 
     private suspend fun loadLink() {
         val attestationCheckResult = linkAttestationCheck.invoke()
-        if (startWithVerificationDialog) {
-            updateScreenState()
-        } else {
-            when (attestationCheckResult) {
-                is LinkAttestationCheck.Result.AttestationFailed -> {
-                    moveToWeb(attestationCheckResult.error)
+        when (attestationCheckResult) {
+            is LinkAttestationCheck.Result.AttestationFailed -> {
+                when (linkExpressMode) {
+                    LinkExpressMode.DISABLED,
+                    LinkExpressMode.ENABLED -> moveToWeb(attestationCheckResult.error)
+                    LinkExpressMode.ENABLED_NO_WEB_FALLBACK -> updateScreenState()
                 }
-                LinkAttestationCheck.Result.Successful -> {
-                    updateScreenState()
-                }
-                is LinkAttestationCheck.Result.Error,
-                is LinkAttestationCheck.Result.AccountError -> {
-                    handleAccountError()
-                }
+
+            }
+            LinkAttestationCheck.Result.Successful -> {
+                updateScreenState()
+            }
+            is LinkAttestationCheck.Result.Error,
+            is LinkAttestationCheck.Result.AccountError -> {
+                handleAccountError()
             }
         }
+
     }
 
     /**
@@ -326,7 +328,7 @@ internal class LinkActivityViewModel @Inject constructor(
             }
             AccountStatus.NeedsVerification,
             AccountStatus.VerificationStarted -> {
-                if (linkAccount != null && startWithVerificationDialog) {
+                if (linkAccount != null && linkExpressMode != LinkExpressMode.DISABLED) {
                     _linkScreenState.value = ScreenState.VerificationDialog(linkAccount)
                 } else {
                     _linkScreenState.value = buildFullScreenState()
@@ -391,7 +393,7 @@ internal class LinkActivityViewModel @Inject constructor(
                     .savedStateHandle(handle)
                     .context(app)
                     .application(app)
-                    .startWithVerificationDialog(args.startWithVerificationDialog)
+                    .linkExpressMode(args.linkExpressMode)
                     .linkLaunchMode(args.launchMode)
                     .linkAccountUpdate(args.linkAccountInfo)
                     .build()

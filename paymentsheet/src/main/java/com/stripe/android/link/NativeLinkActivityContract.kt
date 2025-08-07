@@ -24,7 +24,7 @@ internal class NativeLinkActivityContract @Inject constructor(
                 configuration = input.configuration,
                 stripeAccountId = paymentConfiguration.stripeAccountId,
                 publishableKey = paymentConfiguration.publishableKey,
-                startWithVerificationDialog = input.startWithVerificationDialog,
+                linkExpressMode = input.linkExpressMode,
                 launchMode = input.launchMode,
                 paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
                 linkAccountInfo = input.linkAccountInfo,

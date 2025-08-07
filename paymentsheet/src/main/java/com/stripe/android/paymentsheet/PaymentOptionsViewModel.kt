@@ -16,6 +16,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
@@ -261,7 +262,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     configuration = linkState!!.configuration,
                     launchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment = null),
                     linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
-                    useLinkExpress = true
+                    linkExpressMode = LinkExpressMode.ENABLED
                 )
             } else {
                 _paymentOptionsActivityResult.tryEmit(
