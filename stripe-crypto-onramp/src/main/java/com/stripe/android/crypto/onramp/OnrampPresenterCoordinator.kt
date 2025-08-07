@@ -1,18 +1,14 @@
 package com.stripe.android.crypto.onramp
 
-import android.content.ContentResolver
 import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.EphemeralKey
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
-import com.stripe.android.crypto.onramp.model.OnrampIdentityVerificationCallback
 import com.stripe.android.crypto.onramp.model.OnrampIdentityVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
-import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
 import kotlinx.coroutines.CoroutineScope
@@ -41,7 +37,8 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         activity,
         configuration = IdentityVerificationSheet.Configuration(
             brandLogo = Uri.Builder() // Temporary until we determine how to pass this in.
-                .build()),
+                .build()
+        ),
         identityVerificationCallback = ::handleIdentityVerificationResult,
     )
 
@@ -60,7 +57,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     fun promptForIdentityVerification() {
         coroutineScope.launch {
-            when(val verification = interactor.startIdentityVerification()) {
+            when (val verification = interactor.startIdentityVerification()) {
                 is OnrampStartVerificationResult.Completed -> {
                     verification.response.ephemeralKey?.let {
                         sheet.present(

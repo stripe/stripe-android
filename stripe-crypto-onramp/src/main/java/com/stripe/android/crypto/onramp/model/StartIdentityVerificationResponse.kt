@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class StartIdentityVerificationResponse(
+internal class StartIdentityVerificationResponse(
 
     /**
      * The identifier for the resulting identity session
@@ -22,8 +22,8 @@ class StartIdentityVerificationResponse(
     val url: String,
 
     /** Used to authenticate the mobile Identity SDK.
-    * - NOTE: Present only if `is_mobile` was `true` in the request. `nil` otherwise.
-    */
+     * - NOTE: Present only if `is_mobile` was `true` in the request. `nil` otherwise.
+     */
     @SerialName("ephemeral_key")
     val ephemeralKey: String?
 )

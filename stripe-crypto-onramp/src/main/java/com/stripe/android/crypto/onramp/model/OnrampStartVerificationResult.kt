@@ -1,6 +1,6 @@
 package com.stripe.android.crypto.onramp.model
 
-sealed interface OnrampStartVerificationResult {
+internal sealed interface OnrampStartVerificationResult {
     /**
      * Starting verification completed successfully.
      */
