@@ -27,7 +27,7 @@ import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.LinkAppBarState
-import com.stripe.android.link.ui.signup.SignUpViewModel
+import com.stripe.android.link.ui.signup.SignUpViewModel.Companion.DID_SELECT_TO_CHANGE_EMAIL
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.addresselement.AutocompleteActivityLauncher
@@ -81,6 +81,9 @@ internal class LinkActivityViewModel @Inject constructor(
 
     private val _linkScreenState = MutableStateFlow<ScreenState>(ScreenState.Loading)
     val linkScreenState: StateFlow<ScreenState> = _linkScreenState
+
+    private val didChangeEmail: Boolean
+        get() = savedStateHandle.get<Boolean>(DID_SELECT_TO_CHANGE_EMAIL) == true
 
     val linkAccount: LinkAccount?
         get() = linkAccountManager.linkAccountInfo.value.account
@@ -191,7 +194,11 @@ internal class LinkActivityViewModel @Inject constructor(
     fun handleBackPressed() {
         dismissWithResult(
             LinkActivityResult.Canceled(
-                linkAccountUpdate = linkAccountManager.linkAccountUpdate
+                linkAccountUpdate = if (didChangeEmail) {
+                    LinkAccountUpdate.Value(null)
+                } else {
+                    LinkAccountUpdate.Value(linkAccount)
+                },
             )
         )
     }
@@ -220,7 +227,7 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     fun changeEmail() {
-        savedStateHandle[SignUpViewModel.USE_LINK_CONFIGURATION_CUSTOMER_INFO] = false
+        savedStateHandle[DID_SELECT_TO_CHANGE_EMAIL] = true
         navigate(LinkScreen.SignUp, clearStack = true)
     }
 
@@ -384,7 +391,7 @@ internal class LinkActivityViewModel @Inject constructor(
                 val args: NativeLinkArgs = getArgs(handle) ?: throw NoArgsException()
                 DaggerNativeLinkComponent
                     .builder()
-                    .configuration(args.configuration)
+                    .configuration(args.configurationWithUpdatedCustomerInfo)
                     .publishableKeyProvider { args.publishableKey }
                     .stripeAccountIdProvider { args.stripeAccountId }
                     .paymentElementCallbackIdentifier(args.paymentElementCallbackIdentifier)
@@ -408,3 +415,16 @@ internal sealed interface ScreenState {
 }
 
 internal class NoArgsException : IllegalArgumentException("NativeLinkArgs not found")
+
+private val NativeLinkArgs.configurationWithUpdatedCustomerInfo: LinkConfiguration
+    // The user might have logged out on a previous Link session. We clear the customer information
+    // to avoid us defaulting back to the account that they previously logged out of.
+    get() {
+        val clearCustomerDetails = linkAccount == null
+        val effectiveCustomerInfo = if (clearCustomerDetails) {
+            LinkConfiguration.CustomerInfo(null, null, null, null)
+        } else {
+            configuration.customerInfo
+        }
+        return configuration.copy(customerInfo = effectiveCustomerInfo)
+    }

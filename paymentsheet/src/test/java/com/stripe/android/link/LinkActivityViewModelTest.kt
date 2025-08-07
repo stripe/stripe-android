@@ -131,9 +131,33 @@ internal class LinkActivityViewModelTest {
     }
 
     @Test
-    fun `initializer creates ViewModel when args are valid`() {
-        val mockArgs = NativeLinkArgs(
-            configuration = mock(),
+    fun `initializer creates ViewModel when args are valid and a Link account is passed`() {
+        val configuration = TestFactory.LINK_CONFIGURATION
+        val args = NativeLinkArgs(
+            configuration = configuration,
+            publishableKey = "",
+            stripeAccountId = null,
+            startWithVerificationDialog = false,
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
+        )
+        val savedStateHandle = SavedStateHandle()
+        val factory = LinkActivityViewModel.factory(savedStateHandle)
+        savedStateHandle[LinkActivity.EXTRA_ARGS] = args
+
+        val viewModel = factory.create(LinkActivityViewModel::class.java, creationExtras())
+        assertThat(viewModel.activityRetainedComponent.configuration).isEqualTo(configuration)
+    }
+
+    @Test
+    fun `initializer creates ViewModel when args are valid and no Link account is passed`() {
+        val configuration = TestFactory.LINK_CONFIGURATION
+        val expectedConfiguration = configuration.copy(
+            customerInfo = LinkConfiguration.CustomerInfo(null, null, null, null)
+        )
+
+        val args = NativeLinkArgs(
+            configuration = configuration,
             publishableKey = "",
             stripeAccountId = null,
             startWithVerificationDialog = false,
@@ -146,10 +170,10 @@ internal class LinkActivityViewModelTest {
         )
         val savedStateHandle = SavedStateHandle()
         val factory = LinkActivityViewModel.factory(savedStateHandle)
-        savedStateHandle[LinkActivity.EXTRA_ARGS] = mockArgs
+        savedStateHandle[LinkActivity.EXTRA_ARGS] = args
 
         val viewModel = factory.create(LinkActivityViewModel::class.java, creationExtras())
-        assertThat(viewModel.activityRetainedComponent.configuration).isEqualTo(mockArgs.configuration)
+        assertThat(viewModel.activityRetainedComponent.configuration).isEqualTo(expectedConfiguration)
     }
 
     @Test
@@ -697,8 +721,7 @@ internal class LinkActivityViewModelTest {
 
         viewModel.changeEmail()
 
-        assertThat(savedStateHandle.get<Boolean>(SignUpViewModel.USE_LINK_CONFIGURATION_CUSTOMER_INFO)).isFalse()
-
+        assertThat(savedStateHandle.get<Boolean>(SignUpViewModel.DID_SELECT_TO_CHANGE_EMAIL)).isTrue()
         navigationManager.assertNavigatedTo(
             route = LinkScreen.SignUp.route,
             popUpTo = PopUpToBehavior.Start

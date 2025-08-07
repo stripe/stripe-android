@@ -55,9 +55,12 @@ internal class SignUpViewModel @Inject constructor(
     private val linkLaunchMode: LinkLaunchMode,
     private val dismissWithResult: (LinkActivityResult) -> Unit
 ) : ViewModel() {
-    private val useLinkConfigurationCustomerInfo =
-        savedStateHandle.get<Boolean>(USE_LINK_CONFIGURATION_CUSTOMER_INFO) ?: true
-    private val customerInfo = configuration.customerInfo.takeIf { useLinkConfigurationCustomerInfo }
+
+    private val didSelectToChangeEmail: Boolean
+        get() = savedStateHandle.get<Boolean>(DID_SELECT_TO_CHANGE_EMAIL) == true
+
+    private val customerInfo: LinkConfiguration.CustomerInfo?
+        get() = configuration.customerInfo.takeUnless { didSelectToChangeEmail }
 
     val emailController = EmailConfig.createController(
         initialValue = customerInfo?.email
@@ -291,7 +294,7 @@ internal class SignUpViewModel @Inject constructor(
     companion object {
         // How long to wait before triggering a call to lookup the email
         internal val LOOKUP_DEBOUNCE = 1.seconds
-        internal const val USE_LINK_CONFIGURATION_CUSTOMER_INFO = "use_link_configuration_customer_info"
+        internal const val DID_SELECT_TO_CHANGE_EMAIL = "did_select_to_change_email"
 
         fun factory(
             parentComponent: NativeLinkComponent,
