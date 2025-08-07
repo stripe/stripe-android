@@ -16,7 +16,7 @@ sealed class OnrampIdentityVerificationResult {
     /**
      * The user did not complete uploading their document, and should be allowed to try again.
      */
-    class Canceled internal constructor() : OnrampIdentityVerificationResult()
+    class Cancelled internal constructor() : OnrampIdentityVerificationResult()
 
     /**
      * Identity verification failed due to an error.

@@ -134,7 +134,7 @@ internal class OnrampInteractor @Inject constructor(
             OnrampIdentityVerificationResult.Completed()
         }
         is IdentityVerificationSheet.VerificationFlowResult.Failed -> OnrampIdentityVerificationResult.Failed(result.throwable)
-        is IdentityVerificationSheet.VerificationFlowResult.Canceled -> OnrampIdentityVerificationResult.Canceled()
+        is IdentityVerificationSheet.VerificationFlowResult.Canceled -> OnrampIdentityVerificationResult.Cancelled()
     }
 
     private fun consumerSessionClientSecret(): String? =
