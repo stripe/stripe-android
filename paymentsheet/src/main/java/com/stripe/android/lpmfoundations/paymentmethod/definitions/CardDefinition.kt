@@ -149,7 +149,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
             }
 
             val mandateAllowed = metadata.mandateAllowed(CardDefinition.type)
-            if (linkSignupOptInEnabled && signupMode != null && mandateAllowed) {
+            if (linkSignupOptInEnabled && signupMode != null) {
                 add(
                     CombinedLinkMandateElement(
                         identifier = IdentifierSpec.Generic("card_mandate"),

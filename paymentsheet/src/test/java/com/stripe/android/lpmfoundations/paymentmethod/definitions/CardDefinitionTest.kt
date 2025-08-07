@@ -396,6 +396,37 @@ class CardDefinitionTest {
     }
 
     @Test
+    fun `createFormElements retains Link mandate when termsDisplay is NEVER`() {
+        val termsDisplay = mapOf(
+            PaymentMethod.Type.Card to PaymentSheet.TermsDisplay.NEVER
+        )
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+            termsDisplay = termsDisplay,
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION.copy(
+                    linkSignUpOptInFeatureEnabled = true,
+                ),
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = LinkSignupMode.AlongsideSaveForFutureUse,
+            )
+        )
+
+        val formElements = CardDefinition.formElements(
+            metadata,
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+        )
+
+        // Should only include card_details and billing section, no mandate
+        assertThat(formElements).hasSize(4)
+        assertThat(formElements[0].identifier.v1).isEqualTo("card_details")
+        assertThat(formElements[1].identifier.v1).isEqualTo("credit_billing_section")
+        assertThat(formElements[2].identifier.v1).isEqualTo("link_form")
+        assertThat(formElements[3].identifier.v1).isEqualTo("card_mandate")
+        assertThat(formElements[3]).isInstanceOf<CombinedLinkMandateElement>()
+    }
+
+    @Test
     fun `createFormElements includes mandate by default when termsDisplay not specified`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
