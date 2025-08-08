@@ -27,7 +27,11 @@ internal class DefaultHCaptchaServiceTest {
         val testContext = createTestContext()
         testContext.setupSuccessfulHCaptcha("test-token")
 
-        testContext.service.performPassiveHCaptcha(testContext.activity)
+        testContext.service.performPassiveHCaptcha(
+            testContext.activity,
+            siteKey = "test-site-key",
+            rqData = null
+        )
 
         assertThat(testContext.hCaptchaProvider.getInvocations).containsExactly(testContext.activity)
     }
@@ -36,16 +40,22 @@ internal class DefaultHCaptchaServiceTest {
     fun `performPassiveHCaptcha configures HCaptcha with correct settings`() = runTest {
         val testContext = createTestContext()
         testContext.setupSuccessfulHCaptcha()
+        val testSiteKey = "test-site-key"
+        val testRqData = "test-rq-data"
 
-        testContext.service.performPassiveHCaptcha(testContext.activity)
+        testContext.service.performPassiveHCaptcha(
+            testContext.activity,
+            siteKey = testSiteKey,
+            rqData = testRqData
+        )
 
         val configCaptor = argumentCaptor<HCaptchaConfig>()
         verify(testContext.hCaptcha).setup(configCaptor.capture())
 
         with(configCaptor.firstValue) {
-            assertThat(siteKey).isEqualTo("143aadb6-fb60-4ab6-b128-f7fe53426d4a")
+            assertThat(siteKey).isEqualTo(testSiteKey)
             assertThat(size).isEqualTo(HCaptchaSize.INVISIBLE)
-            assertThat(rqdata).isNull()
+            assertThat(rqdata).isEqualTo(testRqData)
             assertThat(loading).isFalse()
             assertThat(hideDialog).isTrue()
             assertThat(disableHardwareAcceleration).isTrue()
@@ -58,7 +68,11 @@ internal class DefaultHCaptchaServiceTest {
         val expectedToken = "success-token"
         testContext.setupSuccessfulHCaptcha(expectedToken)
 
-        val result = testContext.service.performPassiveHCaptcha(testContext.activity)
+        val result = testContext.service.performPassiveHCaptcha(
+            testContext.activity,
+            siteKey = "test-site-key",
+            rqData = null
+        )
 
         assertThat(result).isInstanceOf(HCaptchaService.Result.Success::class.java)
         assertThat((result as HCaptchaService.Result.Success).token).isEqualTo(expectedToken)
@@ -70,7 +84,11 @@ internal class DefaultHCaptchaServiceTest {
         val exception = HCaptchaException(HCaptchaError.NETWORK_ERROR)
         testContext.setupFailedHCaptcha(exception)
 
-        val result = testContext.service.performPassiveHCaptcha(testContext.activity)
+        val result = testContext.service.performPassiveHCaptcha(
+            testContext.activity,
+            siteKey = "test-site-key",
+            rqData = null
+        )
 
         assertThat(result).isInstanceOf(HCaptchaService.Result.Failure::class.java)
         assertThat((result as HCaptchaService.Result.Failure).error).isEqualTo(exception)

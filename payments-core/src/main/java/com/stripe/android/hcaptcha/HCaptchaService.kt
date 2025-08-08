@@ -5,7 +5,11 @@ import androidx.fragment.app.FragmentActivity
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface HCaptchaService {
-    suspend fun performPassiveHCaptcha(activity: FragmentActivity): Result
+    suspend fun performPassiveHCaptcha(
+        activity: FragmentActivity,
+        siteKey: String,
+        rqData: String?
+    ): Result
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed interface Result {

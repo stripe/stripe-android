@@ -15,7 +15,11 @@ internal class DefaultHCaptchaService(
     private val hCaptchaProvider: HCaptchaProvider
 ) : HCaptchaService {
 
-    override suspend fun performPassiveHCaptcha(activity: FragmentActivity): HCaptchaService.Result {
+    override suspend fun performPassiveHCaptcha(
+        activity: FragmentActivity,
+        siteKey: String,
+        rqData: String?
+    ): HCaptchaService.Result {
         return suspendCoroutine { coroutine ->
             val hcaptcha = hCaptchaProvider.get(activity).apply {
                 addOnSuccessListener(object : OnSuccessListener<HCaptchaTokenResponse> {
@@ -31,9 +35,9 @@ internal class DefaultHCaptchaService(
             }
 
             val config = HCaptchaConfig(
-                siteKey = SITE_KEY,
+                siteKey = siteKey,
                 size = HCaptchaSize.INVISIBLE,
-                rqdata = null,
+                rqdata = rqData,
                 loading = false,
                 hideDialog = true,
                 disableHardwareAcceleration = true,
@@ -42,9 +46,5 @@ internal class DefaultHCaptchaService(
 
             hcaptcha.setup(config).verifyWithHCaptcha()
         }
-    }
-
-    companion object {
-        private const val SITE_KEY = "143aadb6-fb60-4ab6-b128-f7fe53426d4a"
     }
 }
