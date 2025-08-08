@@ -20,6 +20,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.elements.DirectToCardScanData
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
@@ -41,6 +42,7 @@ internal class DefaultFormHelper(
     private val eventReporter: EventReporter,
     private val savedStateHandle: SavedStateHandle,
     private val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
+    private val directToCardScanData: DirectToCardScanData?,
 ) : FormHelper {
     companion object {
         internal const val PREVIOUSLY_COMPLETED_PAYMENT_FORM = "previously_completed_payment_form"
@@ -65,6 +67,12 @@ internal class DefaultFormHelper(
                 eventReporter = viewModel.eventReporter,
                 savedStateHandle = viewModel.savedStateHandle,
                 autocompleteAddressInteractorFactory = viewModel.autocompleteAddressInteractorFactory,
+                directToCardScanData = DirectToCardScanData(
+                    onCardScanSheetResult = {
+                        // TODO
+                    },
+                    shouldOpenCardScanAutomatically = viewModel.shouldOpenCardScanAutomatically,
+                )
             )
         }
 
@@ -88,6 +96,7 @@ internal class DefaultFormHelper(
                 eventReporter = eventReporter,
                 savedStateHandle = savedStateHandle,
                 autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+                directToCardScanData = null
             )
         }
     }
@@ -161,6 +170,7 @@ internal class DefaultFormHelper(
                 },
                 setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
                 autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+                directToCardScanData = directToCardScanData,
             ),
         ) ?: emptyList()
     }

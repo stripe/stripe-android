@@ -65,6 +65,18 @@ internal abstract class BaseSheetViewModel(
     private val _paymentMethodMetadata = MutableStateFlow<PaymentMethodMetadata?>(null)
     internal val paymentMethodMetadata: StateFlow<PaymentMethodMetadata?> = _paymentMethodMetadata
 
+    private val _hasSeenDirectToCardScan = MutableStateFlow(false)
+    internal val hasSeenDirectToCardScan: StateFlow<Boolean> = _hasSeenDirectToCardScan
+
+    internal val shouldOpenCardScanAutomatically: StateFlow<Boolean> = combineAsStateFlow(
+        paymentMethodMetadata,
+        hasSeenDirectToCardScan
+    ) { metadata, hasSeenDirectToCardScan ->
+        // This is commented out for now, haven't made the settings definition
+//        metadata?.openCardScanAutomaticallyConfig == true &&
+        !hasSeenDirectToCardScan
+    }
+
     val navigationHandler: NavigationHandler<PaymentSheetScreen> = NavigationHandler(
         coroutineScope = viewModelScope,
         initialScreen = PaymentSheetScreen.Loading,
@@ -165,6 +177,10 @@ internal abstract class BaseSheetViewModel(
 
     protected fun setPaymentMethodMetadata(paymentMethodMetadata: PaymentMethodMetadata?) {
         _paymentMethodMetadata.value = paymentMethodMetadata
+    }
+
+    fun setHasSeenDirectToCardScan(hasSeenDirectToCardScan: Boolean) {
+        _hasSeenDirectToCardScan.value = hasSeenDirectToCardScan
     }
 
     abstract fun clearErrorMessages()

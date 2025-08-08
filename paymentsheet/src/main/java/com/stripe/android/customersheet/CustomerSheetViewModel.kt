@@ -468,6 +468,7 @@ internal class CustomerSheetViewModel(
                             )
                         },
                         autocompleteAddressInteractorFactory = null,
+                        directToCardScanData = null,
                     ),
                 ) ?: listOf(),
                 primaryButtonLabel = if (
@@ -815,6 +816,7 @@ internal class CustomerSheetViewModel(
                     )
                 },
                 autocompleteAddressInteractorFactory = null,
+                directToCardScanData = null,
             )
         ) ?: emptyList()
 

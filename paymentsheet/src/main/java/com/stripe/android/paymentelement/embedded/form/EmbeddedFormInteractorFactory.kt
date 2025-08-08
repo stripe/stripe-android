@@ -37,6 +37,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             },
             // If no saved payment methods, then first saved payment method is automatically set as default
             setAsDefaultMatchesSaveForFutureUse = !hasSavedPaymentMethods,
+            directToCardScanData = null // TODO
         )
 
         val usBankAccountFormArguments = USBankAccountFormArguments.createForEmbedded(
