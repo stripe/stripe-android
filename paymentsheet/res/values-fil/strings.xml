@@ -45,8 +45,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up">Sumang-ayon at magpatuloy</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">Mabilis, ligtas, 1⁠-⁠click checkout</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">Mabilis at ligtas na pag-checkout</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">I-save ang iyong impormasyon ng pagbabayad sa Link, at ligtas na mag-check out nang 1-click sa mga site na suportado ng Link.</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">Magbayad nang mas mabilis kahit saan tinatanggap ang Link.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Sa pagpapatuloy, sumasang-ayon ka sa <terms>Mga Tuntunin</terms> at <privacy>Patakaran sa Pagkapribado</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -105,6 +109,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Hindi puwedeng baguhin ang mga detalye ng kard.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Sa pagbibigay ng impormasyon ng iyong kard, pinahihintulutan mo ang %s na singilin ang iyong kard para sa mga pagbabayad sa hinaharap alinsunod sa kanilang mga tuntunin.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Sa pagpapatuloy, sumasang-ayon kang i-save ang iyong impormasyon para sa mga pagbili sa hinaharap sa %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Sa pagpapatuloy, sumasang-ayon kang i-save ang iyong impormasyon para sa mga pagbili sa hinaharap sa %s at <link>Link</link>. Sumasang-ayon ka rin sa <terms>Mga Tuntunin</terms> at <privacy>Privacy</privacy> ng Link.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Hindi na-update ang kard. Pakisubukan muli.</string>
   <!-- Title shown above a carousel containing available payment methods -->

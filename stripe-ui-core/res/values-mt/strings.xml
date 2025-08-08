@@ -42,12 +42,16 @@
   <string name="stripe_address_label_village_township">Raħal jew Belt</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="stripe_address_postal_code_incomplete">Il-kodiċi postali tiegħek mhux komplut.</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="stripe_address_postal_code_invalid">Il-kodiċi postali tiegħek mhux validu.</string>
   <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
   <string name="stripe_address_search_content_description">Fittex</string>
   <!-- Error message for when ZIP code in form is incomplete (US only) -->
   <string name="stripe_address_zip_incomplete">Iż-ZIP postali tiegħek mhux komplut.</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
   <string name="stripe_address_zip_invalid">Il-kodiċi postali tiegħek mhux validu.</string>
+  <!-- Error text indicating the zip/postal code is invalid, used for addresses of unknown country -->
+  <string name="stripe_address_zip_or_postal_invalid">Il-kodiċi postali tiegħek huwa invalidu.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="stripe_address_zip_postal_invalid">Il-Kodiċi postali tiegħek mhux validu</string>
   <!-- Label for a checkbox that makes customers billing address same as their shipping address -->
@@ -82,6 +86,4 @@
   <string name="stripe_invalid_expiry_month">Ix-xahar tal-iskadenza tal-karta tiegħek mhux tajjeb.</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="stripe_invalid_expiry_year">Is-sena tal-iskadenza tal-karta tiegħek mhix tajba.</string>
-  <!-- Error message for when postal code in form is invalid -->
-  <string name="stripe_address_postal_code_invalid">Il-kodići postali tiegħek mhux validu.</string>
 </resources>

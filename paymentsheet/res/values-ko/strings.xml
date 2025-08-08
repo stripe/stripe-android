@@ -45,8 +45,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up">동의하고 계속</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">빠른 보안 원클릭 체크아웃</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">빠르고 안전한 체크아웃</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Link에서 결제 정보를 저장하고 Link 지원 사이트에서 원클릭으로 안전하게 체크아웃하십시오.</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">Link가 허용되는 모든 곳에서 더 빠르게 결제하십시오.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[계속하면 <terms>약관</terms>과 <privacy>개인정보정책</privacy>에 동의하는 것입니다.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -105,6 +109,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">카드 세부사항은 설정되면 변경할 수 없습니다.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">카드 정보를 제공하면 %s에서 향후 결제에 대해 해당 약관에 따라 귀하의 카드에 대금을 청구할 수 있습니다.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">계속 진행하시면, 향후 구매 시 사용하기 위해 귀하의 정보를 %s에 저장하는 데 동의하시는 것입니다.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[계속 진행하시면, 향후 구매 시 사용하기 위해 귀하의 정보를 %s 및 <link>Link</link>에 저장하는 데 동의하는 것입니다. 또한 Link의 <terms>약관</terms> 및 <privacy>개인정보정책</privacy>에 동의하시는 것입니다.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">카드가 업데이트되지 않았습니다. 다시 시도하십시오.</string>
   <!-- Title shown above a carousel containing available payment methods -->

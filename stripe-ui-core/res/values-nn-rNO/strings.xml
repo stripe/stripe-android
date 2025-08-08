@@ -40,6 +40,8 @@
   <string name="stripe_address_label_suburb">Forstad</string>
   <!-- Used to describe an address field. -->
   <string name="stripe_address_label_village_township">Landsby eller township</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="stripe_address_postal_code_invalid">Postnummeret ditt er ugyldig.</string>
   <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
   <string name="stripe_address_search_content_description">Søk</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
@@ -78,6 +80,4 @@
   <string name="stripe_invalid_expiry_month">Utløpsmånaden på kortet er ugyldig.</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="stripe_invalid_expiry_year">Utløpsåret på kortet ditt er ugyldig.</string>
-  <!-- Error message for when postal code in form is invalid -->
-  <string name="stripe_address_postal_code_invalid">Postnummeret ditt er ugyldig.</string>
 </resources>

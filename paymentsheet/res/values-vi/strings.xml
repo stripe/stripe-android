@@ -45,8 +45,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up">Đồng ý và tiếp tục</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">Thanh toán nhanh, bảo mật bằng một cú nhấp chuột</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">Thanh toán nhanh chóng, an toàn</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Lưu thông tin thanh toán với Link và thanh toán an toàn bằng 1 cú nhấp chuột trên các trang web có hỗ trợ Link.</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">Thanh toán nhanh hơn ở mọi nơi chấp nhận Link.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Bằng việc tiếp tục, bạn đồng ý với <terms>Điều khoản</terms> và <privacy>Chính sách Quyền riêng tư</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -105,6 +109,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Không thể thay đổi thông tin thẻ.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Bằng việc cung cấp thông tin thẻ, bạn cho phép %s tính phí thẻ của bạn cho các khoản thanh toán trong tương lai theo điều khoản của họ.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Bằng cách tiếp tục, bạn đồng ý lưu thông tin của mình cho các giao dịch mua trong tương lai với %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Bằng cách tiếp tục, bạn đồng ý lưu thông tin của mình cho các giao dịch mua trong tương lai với %s và <link>Link</link>. Bạn cũng đồng ý với <terms>Điều khoản</terms> và <privacy>Quyền riêng tư</privacy> của Link.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Thẻ chưa được cập nhật. Vui lòng thử lại.</string>
   <!-- Title shown above a carousel containing available payment methods -->

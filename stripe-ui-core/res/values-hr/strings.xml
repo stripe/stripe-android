@@ -42,6 +42,8 @@
   <string name="stripe_address_label_village_township">Selo ili grad</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="stripe_address_postal_code_incomplete">Vaš poštanski broj nepotpun je.</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="stripe_address_postal_code_invalid">Vaš poštanski broj nije valjan.</string>
   <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
   <string name="stripe_address_search_content_description">Pretraži</string>
   <!-- Error message for when ZIP code in form is incomplete (US only) -->
@@ -82,6 +84,4 @@
   <string name="stripe_invalid_expiry_month">Mjesec isteka kartice nije valjan.</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="stripe_invalid_expiry_year">Godina isteka kartice nije valjana.</string>
-  <!-- Error message for when postal code in form is invalid -->
-  <string name="stripe_address_postal_code_invalid">Vaš poštanski broj nije valjan.</string>
 </resources>

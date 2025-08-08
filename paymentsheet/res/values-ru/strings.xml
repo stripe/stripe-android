@@ -45,8 +45,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up">Согласиться и продолжить</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">Быстрое, безопасное оформление оплаты одним щелчком</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">Быстрое и безопасное оформление заказа</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Сохраните платежные реквизиты в Link, чтобы безопасно оформлять заказы одним щелчком на всех сайтах, поддерживающих Link.</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">Платите быстрее везде, где принимают Link.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Продолжая, вы тем самым принимаете соответствующие <terms>Условия</terms> и <privacy>политику конфиденциальности</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -105,6 +109,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Реквизиты карты нельзя изменить.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Указывая реквизиты карты, вы разрешаете компании %s списывать средства с карты в рамках будущих платежей в соответствии с условиями компании.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Продолжая, вы соглашаетесь сохранить вашу информацию для будущих покупок через %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Продолжая, вы соглашаетесь сохранить вашу информацию для будущих покупок через %s и <link>Link</link>. Вы также соглашаетесь с <terms>условиями</terms> и <privacy>политикой конфиденциальности</privacy> Link.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Карта не была обновлена. Попробуйте еще раз.</string>
   <!-- Title shown above a carousel containing available payment methods -->

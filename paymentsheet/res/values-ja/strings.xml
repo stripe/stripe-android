@@ -45,8 +45,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up">同意して続行</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">スピーディーで安全なワンクリック決済</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">迅速で安全な決済</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">支払い情報を Link に保存すると、Link に対応したサイトで安全にワンクリックで決済することができます。</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">Link に対応している店舗でスピーディーに支払うことができます。</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[続行すると、<terms>規約</terms>と<privacy>プライバシーポリシー</privacy>に同意したことになります。]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -105,6 +109,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">カード詳細は変更できません。</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">カード情報を提供すると、%s がその規約に従って今後の支払いをお客様のカードに請求することを許可することになります。</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">続行することで、あなたは、%s での今後の購入のために情報を保存することに同意したことになります。</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[続行することで、今後の購入のために情報を保存することに同意したことになります <link>Link</link>.また、リンクの<terms>規約</terms>と<privacy>プライバシー</privacy>にも同意するものとします。]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">カードは更新されていません。もう一度お試しください。</string>
   <!-- Title shown above a carousel containing available payment methods -->

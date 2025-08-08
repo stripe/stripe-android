@@ -45,8 +45,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up">Accepter et continuer</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">Paiement rapide et sécurisé en un clic</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">Paiement rapide et sécurisé</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Enregistrez vos informations de paiement avec Link et payez en un clic et en toute sécurité sur les sites compatibles.</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">Réglez plus rapidement vos achats partout où Link est accepté.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[En continuant, vous acceptez les <terms>Conditions</terms> et la <privacy>Politique de confidentialité</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -105,6 +109,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Vous ne pouvez pas modifier les informations de la carte.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">En fournissant vos informations de carte bancaire, vous autorisez %s à débiter votre carte pour les paiements futurs, conformément à ses conditions.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">En continuant, vous acceptez d\'enregistrer vos informations pour de futurs achats avec %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[En continuant, vous acceptez d\'enregistrer vos informations pour de futurs achats avec %s et <link>Link</link>. Vous acceptez également les <terms>Conditions</terms> et la <privacy>Politique de confidentialité</privacy> de Link.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">La carte n\'a pas été modifiée. Veuillez réessayer.</string>
   <!-- Title shown above a carousel containing available payment methods -->
