@@ -10,7 +10,6 @@ import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.NewPaymentOptionSelection
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.ui.core.elements.DirectToCardScanData
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
 
@@ -25,7 +24,6 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
         setAsDefaultMatchesSaveForFutureUse: Boolean,
         paymentMethodMetadata: PaymentMethodMetadata,
         eventReporter: EventReporter,
-        directToCardScanData: DirectToCardScanData? = null,
         selectionUpdater: (PaymentSelection?) -> Unit,
     ): FormHelper {
         return DefaultFormHelper(
@@ -53,7 +51,6 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
             eventReporter = eventReporter,
             savedStateHandle = savedStateHandle,
             autocompleteAddressInteractorFactory = null,
-            directToCardScanData = directToCardScanData,
         )
     }
 }

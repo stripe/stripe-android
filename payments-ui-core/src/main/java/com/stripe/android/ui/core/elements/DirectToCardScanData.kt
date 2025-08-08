@@ -1,8 +1,19 @@
 package com.stripe.android.ui.core.elements
 
-import kotlinx.coroutines.flow.StateFlow
+import androidx.lifecycle.SavedStateHandle
 
 class DirectToCardScanData(
-    val shouldOpenCardScanAutomatically: StateFlow<Boolean>,
-    val onCardScanSheetResult: () -> Unit,
-)
+    shouldOpenCardScanAutomaticallyInitialValue: Boolean,
+    private val savedStateHandle: SavedStateHandle
+) {
+    var shouldOpenCardScanAutomatically: Boolean
+        get() = savedStateHandle[KEY_SHOULD_OPEN_CARD_SCAN] ?: false
+        set(value) = savedStateHandle.set(KEY_SHOULD_OPEN_CARD_SCAN, value)
+    init {
+        shouldOpenCardScanAutomatically = shouldOpenCardScanAutomaticallyInitialValue
+    }
+
+    companion object {
+        const val KEY_SHOULD_OPEN_CARD_SCAN = "KEY_SHOULD_OPEN_CARD_SCAN"
+    }
+}

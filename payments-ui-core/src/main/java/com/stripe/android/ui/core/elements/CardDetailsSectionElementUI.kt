@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Arrangement
@@ -9,9 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -29,7 +26,6 @@ import com.stripe.android.uicore.elements.SectionController
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionElementUI
 import com.stripe.android.uicore.utils.AnimationConstants
-import kotlinx.coroutines.delay
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -40,12 +36,10 @@ fun CardDetailsSectionElementUI(
     lastTextFieldIdentifier: IdentifierSpec?,
     modifier: Modifier = Modifier,
 ) {
-    val shouldOpenCardScanAutomatically =  controller.shouldOpenCardScanAutomatically.collectAsState()
-
     if (
         controller.isCardScanEnabled &&
-        controller.isStripeCardScanAvailable()
-//        && shouldOpenCardScanAutomatically.value
+        controller.isStripeCardScanAvailable() &&
+        controller.directToCardScanData?.shouldOpenCardScanAutomatically == true
     ) {
         val cardScanLauncher =
             rememberLauncherForActivityResult(CardScanContract()) { result ->
@@ -58,8 +52,9 @@ fun CardDetailsSectionElementUI(
             AnimationConstants.FADE_OUT,
         )
 
-        LaunchedEffect(true) {
-            delay(500L)
+        SideEffect {
+            controller.directToCardScanData.shouldOpenCardScanAutomatically = false
+
             cardScanLauncher.launch(
                 input = CardScanContract.Args(
                     configuration = CardScanConfiguration(

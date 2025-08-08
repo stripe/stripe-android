@@ -42,10 +42,10 @@ internal class DefaultFormHelper(
     private val eventReporter: EventReporter,
     private val savedStateHandle: SavedStateHandle,
     private val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
-    private val directToCardScanData: DirectToCardScanData?,
 ) : FormHelper {
     companion object {
         internal const val PREVIOUSLY_COMPLETED_PAYMENT_FORM = "previously_completed_payment_form"
+        internal const val KEY_SHOULD_OPEN_CARD_SCAN = "KEY_SHOULD_OPEN_CARD_SCAN"
         fun create(
             viewModel: BaseSheetViewModel,
             paymentMethodMetadata: PaymentMethodMetadata,
@@ -67,12 +67,6 @@ internal class DefaultFormHelper(
                 eventReporter = viewModel.eventReporter,
                 savedStateHandle = viewModel.savedStateHandle,
                 autocompleteAddressInteractorFactory = viewModel.autocompleteAddressInteractorFactory,
-                directToCardScanData = DirectToCardScanData(
-                    onCardScanSheetResult = {
-                        // TODO
-                    },
-                    shouldOpenCardScanAutomatically = viewModel.shouldOpenCardScanAutomatically,
-                )
             )
         }
 
@@ -96,7 +90,6 @@ internal class DefaultFormHelper(
                 eventReporter = eventReporter,
                 savedStateHandle = savedStateHandle,
                 autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
-                directToCardScanData = null
             )
         }
     }
@@ -142,6 +135,12 @@ internal class DefaultFormHelper(
             savedStateHandle[PREVIOUSLY_COMPLETED_PAYMENT_FORM] = value
         }
 
+    private var hasSeenDirectToCardScan: Boolean?
+        get() = savedStateHandle[KEY_SHOULD_OPEN_CARD_SCAN]
+        set(value) {
+            savedStateHandle[KEY_SHOULD_OPEN_CARD_SCAN] = value
+        }
+
     init {
         coroutineScope.launch {
             paymentSelection.collect { selection ->
@@ -154,6 +153,18 @@ internal class DefaultFormHelper(
     override fun formElementsForCode(code: String): List<FormElement> {
         val currentSelection = newPaymentSelectionProvider()?.takeIf { it.getType() == code }
 
+        val directToCardScanData = if (
+            paymentMethodMetadata.openCardScanAutomaticallyConfig
+            // no saved PMs
+//            customerStateHolder?.paymentMethods?.value.isNullOrEmpty() &&
+//            paymentMethodMetadata.supportedPaymentMethodTypes().size == 1 &&
+//            paymentMethodMetadata.supportedPaymentMethodTypes()[0] == PaymentMethod.Type.Card.code
+        ) {
+            DirectToCardScanData(
+                shouldOpenCardScanAutomaticallyInitialValue = true,
+                savedStateHandle = savedStateHandle,
+            )
+        } else null
         return paymentMethodMetadata.formElementsForCode(
             code = code,
             uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
