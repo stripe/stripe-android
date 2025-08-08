@@ -124,7 +124,15 @@ class FieldValuesToParamsMapConverter {
                     )
                 }
                 else -> {
-                    null
+                    val type = PaymentMethod.Type.fromCode(code)
+                    if (setupFutureUsage != null && type != null) {
+                        PaymentMethodOptionsParams.SetupFutureUsage(
+                            pmType = type,
+                            setupFutureUsage = setupFutureUsage
+                        )
+                    } else {
+                        null
+                    }
                 }
             }
         }

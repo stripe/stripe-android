@@ -17,6 +17,7 @@ import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.model.Address
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
@@ -706,7 +707,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
         val paymentMethodOptionsParams = if (resultIdentifier is ResultIdentifier.Session) {
             PaymentMethodOptionsParams.USBankAccount(
-                setupFutureUsage = customerRequestedSave.getSetupFutureUseValue(args.formArgs.hasIntentToSetup)
+                setupFutureUsage = customerRequestedSave.getSetupFutureUseValue(args.setupFutureUsage)
             )
         } else {
             null
@@ -815,6 +816,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val financialConnectionsAvailability: FinancialConnectionsAvailability?,
         val setAsDefaultPaymentMethodEnabled: Boolean,
         val setAsDefaultMatchesSaveForFutureUse: Boolean,
+        val setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?
     )
 
     private companion object {

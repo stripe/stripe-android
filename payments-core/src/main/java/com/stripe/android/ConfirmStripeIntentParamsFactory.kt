@@ -13,6 +13,7 @@ import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.setupFutureUsage
 
 /**
  * Factory class for creating [ConfirmPaymentIntentParams] or [ConfirmSetupIntentParams].
@@ -25,6 +26,7 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
         paymentMethodType: PaymentMethod.Type,
         optionsParams: PaymentMethodOptionsParams?,
         extraParams: PaymentMethodExtraParams?,
+        intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?
     ): T
 
     abstract fun create(
@@ -37,12 +39,14 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
         paymentMethod: PaymentMethod,
         optionsParams: PaymentMethodOptionsParams?,
         extraParams: PaymentMethodExtraParams?,
+        intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?
     ): T {
         return create(
             paymentMethodId = paymentMethod.id.orEmpty(),
             paymentMethodType = requireNotNull(paymentMethod.type),
             optionsParams = optionsParams,
             extraParams = extraParams,
+            intentConfigSetupFutureUsage = intentConfigSetupFutureUsage
         )
     }
 
@@ -75,16 +79,18 @@ internal class ConfirmPaymentIntentParamsFactory(
         paymentMethodId: String,
         paymentMethodType: PaymentMethod.Type,
         optionsParams: PaymentMethodOptionsParams?,
-        extraParams: PaymentMethodExtraParams?
+        extraParams: PaymentMethodExtraParams?,
+        intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?
     ): ConfirmPaymentIntentParams {
         return ConfirmPaymentIntentParams.createWithSetAsDefaultPaymentMethod(
             paymentMethodId = paymentMethodId,
             clientSecret = clientSecret,
             paymentMethodOptions = optionsParams,
-            mandateData = mandateData(intent, paymentMethodType),
+            mandateData = mandateData(intent, paymentMethodType, optionsParams, intentConfigSetupFutureUsage),
             shipping = shipping,
             setAsDefaultPaymentMethod = extraParams?.extractSetAsDefaultPaymentMethodFromExtraParams(),
             paymentMethodCode = paymentMethodType.code,
+            setupFutureUsage = intentConfigSetupFutureUsage
         )
     }
 
@@ -113,11 +119,12 @@ internal class ConfirmSetupIntentParamsFactory(
         paymentMethodType: PaymentMethod.Type,
         optionsParams: PaymentMethodOptionsParams?,
         extraParams: PaymentMethodExtraParams?,
+        intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?
     ): ConfirmSetupIntentParams {
         return ConfirmSetupIntentParams.createWithSetAsDefaultPaymentMethod(
             paymentMethodId = paymentMethodId,
             clientSecret = clientSecret,
-            mandateData = mandateData(intent, paymentMethodType),
+            mandateData = mandateData(intent, paymentMethodType, null, null),
             setAsDefaultPaymentMethod = extraParams?.extractSetAsDefaultPaymentMethodFromExtraParams(),
             paymentMethodCode = paymentMethodType.code,
         )
@@ -136,11 +143,17 @@ internal class ConfirmSetupIntentParamsFactory(
     }
 }
 
-private fun mandateData(intent: StripeIntent, paymentMethodType: PaymentMethod.Type?): MandateDataParams? {
+private fun mandateData(
+    intent: StripeIntent,
+    paymentMethodType: PaymentMethod.Type?,
+    optionsParams: PaymentMethodOptionsParams?,
+    intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?
+): MandateDataParams? {
     return paymentMethodType?.let { type ->
         val supportsAddingMandateData = when (intent) {
             is PaymentIntent ->
-                intent.canSetupFutureUsage(paymentMethodType.code) || type.requiresMandateForPaymentIntent
+                intent.canSetupFutureUsage(paymentMethodType.code) || type.requiresMandateForPaymentIntent ||
+                    optionsParams?.setupFutureUsage()?.hasIntentToSetup() == true || intentConfigSetupFutureUsage.hasIntentToSetup()
             is SetupIntent -> true
         }
 
@@ -160,5 +173,13 @@ private fun PaymentMethodExtraParams.extractSetAsDefaultPaymentMethodFromExtraPa
         is PaymentMethodExtraParams.USBankAccount -> this.setAsDefault
         is PaymentMethodExtraParams.SepaDebit -> this.setAsDefault
         else -> null
+    }
+}
+
+private fun ConfirmPaymentIntentParams.SetupFutureUsage?.hasIntentToSetup(): Boolean {
+    return when (this) {
+        ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+        ConfirmPaymentIntentParams.SetupFutureUsage.OnSession -> true
+        else -> false
     }
 }
