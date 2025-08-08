@@ -309,28 +309,6 @@ class CardDefinitionTest {
     }
 
     @Test
-    fun `createFormElements returns mandate below link_form when has intent to setup`() {
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
-            linkState = LinkState(
-                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
-                configuration = createLinkConfiguration().copy(linkSignUpOptInFeatureEnabled = true),
-                loginState = LinkState.LoginState.LoggedOut,
-            ),
-        )
-
-        val formElements = CardDefinition.formElements(
-            metadata,
-            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-        )
-
-        assertThat(formElements).hasSize(4)
-        assertThat(formElements[2].identifier.v1).isEqualTo("link_form")
-
-        testCombinedLinkMandateElement(formElements[3])
-    }
-
-    @Test
     fun `createFormElements should have autocomplete element if factory is used`() {
         val formElements = CardDefinition.formElements(
             metadata = PaymentMethodMetadataFactory.create(
@@ -418,12 +396,11 @@ class CardDefinitionTest {
         )
 
         // Should only include card_details and billing section, no mandate
-        assertThat(formElements).hasSize(4)
+        assertThat(formElements).hasSize(3)
         assertThat(formElements[0].identifier.v1).isEqualTo("card_details")
         assertThat(formElements[1].identifier.v1).isEqualTo("credit_billing_section")
-        assertThat(formElements[2].identifier.v1).isEqualTo("link_form")
-        assertThat(formElements[3].identifier.v1).isEqualTo("card_mandate")
-        assertThat(formElements[3]).isInstanceOf<CombinedLinkMandateElement>()
+        assertThat(formElements[2].identifier.v1).isEqualTo("card_mandate")
+        assertThat(formElements[2]).isInstanceOf<CombinedLinkMandateElement>()
     }
 
     @Test
