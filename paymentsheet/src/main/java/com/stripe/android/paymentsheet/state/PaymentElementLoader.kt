@@ -12,7 +12,9 @@ import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.account.LinkStore
+import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAppearance
@@ -150,6 +152,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val accountStatusProvider: LinkAccountStatusProvider,
     private val logLinkHoldbackExperiment: LogLinkHoldbackExperiment,
     private val linkStore: LinkStore,
+    private val linkCoordinator: LinkConfigurationCoordinator,
     private val linkGateFactory: LinkGate.Factory,
     private val externalPaymentMethodsRepository: ExternalPaymentMethodsRepository,
     private val userFacingLogger: UserFacingLogger,
@@ -483,6 +486,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 initializationMode = initializationMode,
                 linkAppearance = linkAppearance
             ) ?: return null
+        // Disable link if attestation is required and fails.
+        if (attestationPassed(linkConfig).not()) {
+            return null
+        }
+
         return loadLinkState(
             configuration = configuration,
             linkConfiguration = linkConfig,
@@ -490,6 +498,21 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             linkSignUpDisabled = elementsSession.disableLinkSignup,
         )
     }
+
+    private suspend fun attestationPassed(linkConfig: LinkConfiguration): Boolean = runCatching {
+        val attestationResult = linkCoordinator.linkAttestationCheck(linkConfig)
+            .invoke()
+        when (attestationResult) {
+            is LinkAttestationCheck.Result.AccountError,
+            is LinkAttestationCheck.Result.AttestationFailed,
+            is LinkAttestationCheck.Result.Error -> {
+                false
+            }
+            LinkAttestationCheck.Result.Successful -> {
+                true
+            }
+        }
+    }.getOrDefault(false)
 
     private suspend fun loadLinkState(
         configuration: CommonConfiguration,
@@ -611,8 +634,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             defaultBillingDetails = configuration.defaultBillingDetails,
             allowDefaultOptIn = elementsSession.allowLinkDefaultOptIn,
             googlePlacesApiKey = configuration.googlePlacesApiKey,
-            collectMissingBillingDetailsForExistingPaymentMethods =
-            configuration.link.collectMissingBillingDetailsForExistingPaymentMethods,
+            collectMissingBillingDetailsForExistingPaymentMethods = configuration
+                .link.collectMissingBillingDetailsForExistingPaymentMethods,
             allowUserEmailEdits = configuration.link.allowUserEmailEdits,
             skipWalletInFlowController = elementsSession.linkMobileSkipWalletInFlowController,
             customerId = elementsSession.customer?.session?.customerId,
