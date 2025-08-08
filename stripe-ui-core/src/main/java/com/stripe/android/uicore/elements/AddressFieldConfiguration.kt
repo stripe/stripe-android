@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
-enum class PhoneNumberState {
+enum class AddressFieldConfiguration {
     @SerialName("hidden")
     HIDDEN,
 

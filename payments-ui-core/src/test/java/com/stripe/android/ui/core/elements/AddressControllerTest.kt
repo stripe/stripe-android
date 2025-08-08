@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.AddressController
 import com.stripe.android.uicore.elements.EmailConfig
+import com.stripe.android.uicore.elements.EmailElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -2,8 +2,8 @@ package com.stripe.android.ui.core.elements
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.uicore.address.AutocompleteCapableInputMode
+import com.stripe.android.uicore.elements.AddressFieldConfiguration
 import com.stripe.android.uicore.elements.AddressInputMode
-import com.stripe.android.uicore.elements.PhoneNumberState
 import org.junit.Test
 
 internal class AutocompleteCapableAddressInputModeTest {
@@ -70,7 +70,8 @@ internal class AutocompleteCapableAddressInputModeTest {
         return AddressInputMode.AutocompleteExpanded(
             googleApiKey = googleApiKey,
             autocompleteCountries = autocompleteCountries,
-            phoneNumberState = PhoneNumberState.REQUIRED
+            nameConfig = AddressFieldConfiguration.REQUIRED,
+            phoneNumberConfig = AddressFieldConfiguration.REQUIRED
         ) {}
     }
 }

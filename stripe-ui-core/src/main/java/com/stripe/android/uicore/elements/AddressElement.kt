@@ -31,7 +31,6 @@ class AddressElement(
     shippingValuesMap: Map<IdentifierSpec, String?>?,
     private val isPlacesAvailable: Boolean = DefaultIsPlacesAvailable().invoke(),
     private val hideCountry: Boolean = false,
-    private val hideName: Boolean = true,
 ) : SectionMultiFieldElement(_identifier), AddressFieldsElement {
 
     override val allowsUserInteraction: Boolean = true
@@ -43,6 +42,7 @@ class AddressElement(
             textFieldConfig = SimpleTextFieldConfig(
                 label = resolvableString(CoreR.string.stripe_address_label_full_name)
             ),
+            showOptionalLabel = addressInputMode.nameConfig == AddressFieldConfiguration.OPTIONAL,
             initialValue = rawValuesMap[IdentifierSpec.Name]
         )
     )
@@ -58,8 +58,8 @@ class AddressElement(
         IdentifierSpec.Phone,
         PhoneNumberController.createPhoneNumberController(
             initialValue = rawValuesMap[IdentifierSpec.Phone] ?: "",
-            showOptionalLabel = addressInputMode.phoneNumberState == PhoneNumberState.OPTIONAL,
-            acceptAnyInput = addressInputMode.phoneNumberState != PhoneNumberState.REQUIRED,
+            showOptionalLabel = addressInputMode.phoneNumberConfig == AddressFieldConfiguration.OPTIONAL,
+            acceptAnyInput = addressInputMode.phoneNumberConfig != AddressFieldConfiguration.REQUIRED,
         )
     )
 
@@ -160,6 +160,8 @@ class AddressElement(
         sameAsShippingUpdatedFlow,
         fieldsUpdatedFlow
     ) { country, otherFields, _, _ ->
+        val hideName = addressInputMode.nameConfig == AddressFieldConfiguration.HIDDEN
+
         val condensed = listOfNotNull(
             nameElement.takeUnless { hideName },
             countryElement.takeUnless { hideCountry },
@@ -190,7 +192,7 @@ class AddressElement(
             }
         }
 
-        val fields = if (addressInputMode.phoneNumberState != PhoneNumberState.HIDDEN) {
+        val fields = if (addressInputMode.phoneNumberConfig != AddressFieldConfiguration.HIDDEN) {
             baseElements.plus(phoneNumberElement)
         } else {
             baseElements
