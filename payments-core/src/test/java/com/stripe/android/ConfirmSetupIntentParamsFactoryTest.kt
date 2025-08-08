@@ -146,6 +146,7 @@ class ConfirmSetupIntentParamsFactoryTest {
             paymentMethod = PaymentMethodFactory.cashAppPay(),
             optionsParams = null,
             extraParams = null,
+            intentConfigSetupFutureUsage = null
         )
     }
 
@@ -162,6 +163,7 @@ class ConfirmSetupIntentParamsFactoryTest {
             paymentMethod = paymentMethod,
             optionsParams = null,
             extraParams = extraParams,
+            intentConfigSetupFutureUsage = null
         )
     }
 

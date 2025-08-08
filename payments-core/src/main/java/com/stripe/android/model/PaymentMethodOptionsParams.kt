@@ -164,6 +164,25 @@ sealed class PaymentMethodOptionsParams(
             const val PARAM_SETUP_FUTURE_USAGE = "setup_future_usage"
         }
     }
+
+    /**
+     * Generic SetupFutureUsage PMO object for deferred intents.
+     */
+    @Parcelize
+    data class SetupFutureUsage(
+        var pmType: PaymentMethod.Type,
+        var setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage
+    ) : PaymentMethodOptionsParams(pmType) {
+        override fun createTypeParams(): List<Pair<String, Any?>> {
+            return listOf(
+                PARAM_SETUP_FUTURE_USAGE to setupFutureUsage.code
+            )
+        }
+
+        internal companion object {
+            const val PARAM_SETUP_FUTURE_USAGE = "setup_future_usage"
+        }
+    }
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -177,5 +196,15 @@ fun PaymentMethodOptionsParams.setupFutureUsage(): ConfirmPaymentIntentParams.Se
         is PaymentMethodOptionsParams.USBankAccount -> setupFutureUsage
         is PaymentMethodOptionsParams.WeChatPay -> null
         is PaymentMethodOptionsParams.WeChatPayH5 -> null
+        is PaymentMethodOptionsParams.SetupFutureUsage -> setupFutureUsage
+    }
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun PaymentMethodOptionsParams.hasIntentToSetup(): Boolean {
+    return when (setupFutureUsage()) {
+        ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+        ConfirmPaymentIntentParams.SetupFutureUsage.OnSession -> true
+        else -> false
     }
 }

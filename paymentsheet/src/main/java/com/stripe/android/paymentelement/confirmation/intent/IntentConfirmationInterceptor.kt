@@ -20,6 +20,7 @@ import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.hasIntentToSetup
 import com.stripe.android.model.setupFutureUsage
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
@@ -242,6 +243,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     isDeferred = false,
+                    topLevelSfu = null
                 )
             }
 
@@ -254,11 +256,13 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     isDeferred = false,
+                    topLevelSfu = null
                 )
             }
         }
     }
 
+    // here
     private suspend fun handleDeferred(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         paymentMethodCreateParams: PaymentMethodCreateParams,
@@ -287,7 +291,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     shippingValues = shippingValues,
-                    shouldSavePaymentMethod = customerRequestedSave,
+                    shouldSavePaymentMethod = customerRequestedSave || paymentMethodOptionsParams?.hasIntentToSetup() == true,
                 )
             },
             onFailure = { error ->
@@ -331,6 +335,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         shouldSavePaymentMethod: Boolean,
     ): NextStep {
+        // here
         return when (val callback = waitForIntentCallback()) {
             is CreateIntentCallback -> {
                 handleDeferredIntentCreationFromPaymentMethod(
@@ -543,6 +548,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     isDeferred = true,
+                    topLevelSfu = intentConfiguration.mode.setupFutureUse?.toConfirmParamsSetupFutureUsage()
                 )
             }
         }.getOrElse { error ->
@@ -584,6 +590,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams?,
         isDeferred: Boolean,
+        topLevelSfu: ConfirmPaymentIntentParams.SetupFutureUsage?
     ): NextStep {
         val factory = ConfirmStripeIntentParamsFactory.createFactory(
             clientSecret = clientSecret,
@@ -599,6 +606,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             paymentMethod = paymentMethod,
             optionsParams = paymentMethodOptionsParams,
             extraParams = paymentMethodExtraParams,
+            intentConfigSetupFutureUsage = topLevelSfu
         )
         return NextStep.Confirm(
             confirmParams = confirmParams,
@@ -688,6 +696,15 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 )
             }
         )
+    }
+
+    private fun PaymentSheet.IntentConfiguration.SetupFutureUse.toConfirmParamsSetupFutureUsage():
+        ConfirmPaymentIntentParams.SetupFutureUsage? {
+        return when (this) {
+            PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession -> ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession -> ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
+            else -> null
+        }
     }
 
     private companion object {

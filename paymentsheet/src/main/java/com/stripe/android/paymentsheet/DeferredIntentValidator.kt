@@ -35,11 +35,11 @@ internal object DeferredIntentValidator {
                         "(${paymentMode.currency.lowercase()})."
                 }
 
-                require(paymentMode.setupFutureUsage.isNull() == stripeIntent.setupFutureUsage.isNull()) {
-                    "Your PaymentIntent setupFutureUsage (${stripeIntent.setupFutureUsage}) " +
-                        "does not match the PaymentSheet.IntentConfiguration " +
-                        "setupFutureUsage (${paymentMode.setupFutureUsage})."
-                }
+//                require(paymentMode.setupFutureUsage.isNull() == stripeIntent.setupFutureUsage.isNull()) {
+//                    "Your PaymentIntent setupFutureUsage (${stripeIntent.setupFutureUsage}) " +
+//                        "does not match the PaymentSheet.IntentConfiguration " +
+//                        "setupFutureUsage (${paymentMode.setupFutureUsage})."
+//                }
 
                 // Manual confirmation is only available using FlowController because merchants own
                 // the final step of confirmation. Showing a successful payment in the complete flow
@@ -50,17 +50,17 @@ internal object DeferredIntentValidator {
                         "can only be used with PaymentSheet.FlowController."
                 }
 
-                require(
-                    validatePaymentMethodOptionsSetupFutureUsage(
-                        paramsPaymentMethodOptionsJsonString = paymentMode.paymentMethodOptionsJsonString,
-                        stripeIntent = stripeIntent
-                    )
-                ) {
-                    "Your PaymentIntent payment_method_options setup_future_usage values " +
-                        "(${stripeIntent.getPaymentMethodOptions()} do not match the values provided in " +
-                        "PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions " +
-                        "(${paymentMode.paymentMethodOptionsJsonString})"
-                }
+//                require(
+//                    validatePaymentMethodOptionsSetupFutureUsage(
+//                        paramsPaymentMethodOptionsJsonString = paymentMode.paymentMethodOptionsJsonString,
+//                        stripeIntent = stripeIntent
+//                    )
+//                ) {
+//                    "Your PaymentIntent payment_method_options setup_future_usage values " +
+//                        "(${stripeIntent.getPaymentMethodOptions()} do not match the values provided in " +
+//                        "PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions " +
+//                        "(${paymentMode.paymentMethodOptionsJsonString})"
+//                }
             }
             is SetupIntent -> {
                 val setupMode = requireNotNull(params.mode as? DeferredIntentParams.Mode.Setup) {

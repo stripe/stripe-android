@@ -4,6 +4,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -67,6 +68,7 @@ internal class USBankAccountFormArguments(
     val setAsDefaultPaymentMethodEnabled: Boolean,
     val financialConnectionsAvailability: FinancialConnectionsAvailability?,
     val setAsDefaultMatchesSaveForFutureUse: Boolean,
+    val setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?
 ) {
     companion object {
         fun create(
@@ -120,6 +122,9 @@ internal class USBankAccountFormArguments(
                     ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
                 financialConnectionsAvailability = paymentMethodMetadata.financialConnectionsAvailability,
                 setAsDefaultMatchesSaveForFutureUse = viewModel.customerStateHolder.paymentMethods.value.isEmpty(),
+                setupFutureUsage = paymentMethodMetadata.getPaymentMethodOptionSetupFutureUsageValue(
+                    PaymentMethod.Type.USBankAccount.code
+                )
             )
         }
 
@@ -176,6 +181,9 @@ internal class USBankAccountFormArguments(
                 financialConnectionsAvailability = paymentMethodMetadata.financialConnectionsAvailability,
                 // If no saved payment methods, then first saved payment method is automatically set as default
                 setAsDefaultMatchesSaveForFutureUse = !hasSavedPaymentMethods,
+                setupFutureUsage = paymentMethodMetadata.getPaymentMethodOptionSetupFutureUsageValue(
+                    PaymentMethod.Type.USBankAccount.code
+                )
             )
         }
     }

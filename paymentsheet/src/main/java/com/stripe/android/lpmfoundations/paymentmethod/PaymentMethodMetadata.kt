@@ -14,6 +14,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.CustomPayment
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.LinkCardBrandDefinition
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
@@ -75,6 +76,15 @@ internal data class PaymentMethodMetadata(
         return when (stripeIntent) {
             is PaymentIntent -> stripeIntent.isSetupFutureUsageSet(code)
             is SetupIntent -> true
+        }
+    }
+
+    fun getPaymentMethodOptionSetupFutureUsageValue(
+        code: PaymentMethodCode
+    ): ConfirmPaymentIntentParams.SetupFutureUsage? {
+        return when (stripeIntent) {
+            is PaymentIntent -> stripeIntent.getPaymentMethodOptionsSetupFutureUsage(code)
+            is SetupIntent -> null
         }
     }
 
