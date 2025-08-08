@@ -159,7 +159,7 @@ class DefaultLinkInlineInteractorTest {
                 configuration = any(),
                 linkAccountInfo = any(),
                 launchMode = eq(LinkLaunchMode.PaymentMethodSelection(null)),
-                useLinkExpress = any()
+                linkExpressMode = any()
             )
         }
 

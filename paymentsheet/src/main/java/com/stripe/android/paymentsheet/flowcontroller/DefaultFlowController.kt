@@ -21,6 +21,7 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentMethod
@@ -280,7 +281,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 flowControllerLinkLauncher.present(
                     configuration = linkConfiguration,
                     linkAccountInfo = linkAccountInfo,
-                    useLinkExpress = true,
+                    linkExpressMode = LinkExpressMode.ENABLED,
                     launchMode = LinkLaunchMode.PaymentMethodSelection(
                         selectedPayment = (paymentSelection as? Link)?.selectedPayment?.details
                     )
@@ -587,7 +588,7 @@ internal class DefaultFlowController @Inject internal constructor(
             }
             null,
             is PaymentOptionsActivityResult.Canceled -> {
-                viewModel.paymentSelection = (result as? PaymentOptionsActivityResult.Canceled)?.paymentSelection
+                viewModel.paymentSelection = result?.paymentSelection
                 onPaymentSelection(canceled = true)
             }
         }

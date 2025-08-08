@@ -61,7 +61,7 @@ internal class LinkActivityViewModel @Inject constructor(
     val linkConfiguration: LinkConfiguration,
     private val linkAttestationCheck: LinkAttestationCheck,
     val savedStateHandle: SavedStateHandle,
-    private val startWithVerificationDialog: Boolean,
+    private val linkExpressMode: LinkExpressMode,
     private val navigationManager: NavigationManager,
     val linkLaunchMode: LinkLaunchMode,
     private val autocompleteLauncher: AutocompleteActivityLauncher,
@@ -85,8 +85,7 @@ internal class LinkActivityViewModel @Inject constructor(
     val linkAccount: LinkAccount?
         get() = linkAccountManager.linkAccountInfo.value.account
 
-    private val _launchWebFlow = MutableSharedFlow<LinkConfiguration>(replay = 0, extraBufferCapacity = 1)
-    val launchWebFlow: SharedFlow<LinkConfiguration> = _launchWebFlow.asSharedFlow()
+    var launchWebFlow: ((LinkConfiguration) -> Unit)? = null
 
     val canDismissSheet: Boolean
         get() = activityRetainedComponent.dismissalCoordinator.canDismiss
@@ -177,9 +176,9 @@ internal class LinkActivityViewModel @Inject constructor(
             )
             // Flows that end up in confirmation -> we can launch the web flow.
             is LinkLaunchMode.Confirmation,
-            LinkLaunchMode.Full -> {
+            LinkLaunchMode.Full -> launchWebFlow?.let { launcher ->
                 navigate(LinkScreen.Loading, clearStack = true)
-                viewModelScope.launch { _launchWebFlow.emit(linkConfiguration) }
+                launcher.invoke(linkConfiguration)
             }
         }
     }
@@ -224,6 +223,10 @@ internal class LinkActivityViewModel @Inject constructor(
         navigate(LinkScreen.SignUp, clearStack = true)
     }
 
+    fun unregisterActivity() {
+        launchWebFlow = null
+    }
+
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         viewModelScope.launch {
@@ -238,20 +241,20 @@ internal class LinkActivityViewModel @Inject constructor(
 
     private suspend fun loadLink() {
         val attestationCheckResult = linkAttestationCheck.invoke()
-        if (startWithVerificationDialog) {
-            updateScreenState()
-        } else {
-            when (attestationCheckResult) {
-                is LinkAttestationCheck.Result.AttestationFailed -> {
-                    moveToWeb(attestationCheckResult.error)
+        when (attestationCheckResult) {
+            is LinkAttestationCheck.Result.AttestationFailed -> {
+                when (linkExpressMode) {
+                    LinkExpressMode.DISABLED,
+                    LinkExpressMode.ENABLED -> moveToWeb(attestationCheckResult.error)
+                    LinkExpressMode.ENABLED_NO_WEB_FALLBACK -> updateScreenState()
                 }
-                LinkAttestationCheck.Result.Successful -> {
-                    updateScreenState()
-                }
-                is LinkAttestationCheck.Result.Error,
-                is LinkAttestationCheck.Result.AccountError -> {
-                    handleAccountError()
-                }
+            }
+            LinkAttestationCheck.Result.Successful -> {
+                updateScreenState()
+            }
+            is LinkAttestationCheck.Result.Error,
+            is LinkAttestationCheck.Result.AccountError -> {
+                handleAccountError()
             }
         }
     }
@@ -326,7 +329,7 @@ internal class LinkActivityViewModel @Inject constructor(
             }
             AccountStatus.NeedsVerification,
             AccountStatus.VerificationStarted -> {
-                if (linkAccount != null && startWithVerificationDialog) {
+                if (linkAccount != null && linkExpressMode != LinkExpressMode.DISABLED) {
                     _linkScreenState.value = ScreenState.VerificationDialog(linkAccount)
                 } else {
                     _linkScreenState.value = buildFullScreenState()
@@ -391,7 +394,7 @@ internal class LinkActivityViewModel @Inject constructor(
                     .savedStateHandle(handle)
                     .context(app)
                     .application(app)
-                    .startWithVerificationDialog(args.startWithVerificationDialog)
+                    .linkExpressMode(args.linkExpressMode)
                     .linkLaunchMode(args.launchMode)
                     .linkAccountUpdate(args.linkAccountInfo)
                     .build()

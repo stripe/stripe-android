@@ -106,6 +106,8 @@ internal class LinkActivityViewModelTest {
                     }
                 )
 
+                vm.unregisterActivity()
+
                 val autocompleteRegisterCall = registerCalls.awaitItem()
                 val confirmationHandlerRegisterCall = confirmationHandler.registerTurbine.awaitItem()
 
@@ -136,7 +138,7 @@ internal class LinkActivityViewModelTest {
             configuration = mock(),
             publishableKey = "",
             stripeAccountId = null,
-            startWithVerificationDialog = false,
+            linkExpressMode = LinkExpressMode.DISABLED,
             linkAccountInfo = LinkAccountUpdate.Value(
                 account = null,
                 lastUpdateReason = null
@@ -449,44 +451,45 @@ internal class LinkActivityViewModelTest {
 
     @Test
     fun `onCreate should launch web when attestation check fails`() = runTest {
+        var launchWebConfig: LinkConfiguration? = null
         val error = Throwable("oops")
         val linkAttestationCheck = FakeLinkAttestationCheck()
         linkAttestationCheck.result = LinkAttestationCheck.Result.AttestationFailed(error)
 
         val vm = createViewModel(
-            linkAttestationCheck = linkAttestationCheck
+            linkAttestationCheck = linkAttestationCheck,
+            launchWeb = { config ->
+                launchWebConfig = config
+            }
         )
 
-        vm.launchWebFlow.test {
-            vm.onCreate(mock())
+        vm.onCreate(mock())
 
-            assertThat(vm.linkScreenState.value).isEqualTo(ScreenState.Loading)
+        assertThat(vm.linkScreenState.value).isEqualTo(ScreenState.Loading)
 
-            val launchWebConfig = awaitItem()
-            assertThat(launchWebConfig).isNotNull()
-        }
+        assertThat(launchWebConfig).isNotNull()
     }
 
     @Test
     fun `onCreate shouldn't launch web when attestationCheck fails`() =
         runTest {
+            var launchWebConfig: LinkConfiguration? = null
             val linkAttestationCheck = FakeLinkAttestationCheck()
 
             val vm = createViewModel(
-                linkAttestationCheck = linkAttestationCheck
+                linkAttestationCheck = linkAttestationCheck,
+                launchWeb = { config ->
+                    launchWebConfig = config
+                }
             )
 
-            vm.launchWebFlow.test {
-                vm.onCreate(mock())
+            vm.onCreate(mock())
 
-                advanceUntilIdle()
+            advanceUntilIdle()
 
-                val state = vm.linkScreenState.value as ScreenState.FullScreen
-                assertEquals(state.initialDestination, LinkScreen.SignUp)
-
-                // Should not emit any items since web shouldn't be launched
-                expectNoEvents()
-            }
+            val state = vm.linkScreenState.value as ScreenState.FullScreen
+            assertEquals(state.initialDestination, LinkScreen.SignUp)
+            assertThat(launchWebConfig).isNull()
         }
 
     @Test
@@ -514,13 +517,11 @@ internal class LinkActivityViewModelTest {
         val vm = createViewModel(
             linkAccountManager = linkAccountManager,
             linkAttestationCheck = linkAttestationCheck,
-            startWithVerificationDialog = true
+            linkExpressMode = LinkExpressMode.ENABLED
         )
         linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
 
         vm.onCreate(mock())
-
-        advanceUntilIdle()
 
         assertThat(vm.linkScreenState.value).isEqualTo(ScreenState.VerificationDialog(TestFactory.LINK_ACCOUNT))
         linkAttestationCheck.awaitInvokeCall()
@@ -534,7 +535,7 @@ internal class LinkActivityViewModelTest {
 
         val vm = createViewModel(
             linkAccountManager = linkAccountManager,
-            startWithVerificationDialog = true
+            linkExpressMode = LinkExpressMode.ENABLED
         )
         linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
 
@@ -558,7 +559,7 @@ internal class LinkActivityViewModelTest {
 
         val vm = createViewModel(
             linkAccountManager = linkAccountManager,
-            startWithVerificationDialog = true,
+            linkExpressMode = LinkExpressMode.ENABLED
         )
 
         vm.result.test {
@@ -732,6 +733,7 @@ internal class LinkActivityViewModelTest {
     private fun testAttestationCheckError(
         attestationCheckResult: LinkAttestationCheck.Result,
     ) = runTest {
+        var launchWebConfig: LinkConfiguration? = null
         val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
         val linkAccountManager = FakeLinkAccountManager(
             linkAccountHolder = linkAccountHolder,
@@ -749,26 +751,25 @@ internal class LinkActivityViewModelTest {
             linkAttestationCheck = linkAttestationCheck,
             linkAccountManager = linkAccountManager,
             linkAccountHolder = linkAccountHolder,
-            startWithVerificationDialog = false,
+            linkExpressMode = LinkExpressMode.DISABLED,
+            launchWeb = { config ->
+                launchWebConfig = config
+            },
         )
 
-        vm.launchWebFlow.test {
-            vm.result.test {
-                vm.onCreate(mock())
+        vm.result.test {
+            vm.onCreate(mock())
 
-                advanceUntilIdle()
+            advanceUntilIdle()
 
-                linkAccountManager.awaitLogoutCall()
-                assertThat(linkAccountHolder.linkAccountInfo.value.account).isNull()
+            linkAccountManager.awaitLogoutCall()
+            assertThat(linkAccountHolder.linkAccountInfo.value.account).isNull()
+            assertThat(launchWebConfig).isNull()
 
-                expectNoEvents()
-
-                val state = vm.linkScreenState.value as ScreenState.FullScreen
-                assertEquals(state.initialDestination, LinkScreen.SignUp)
-            }
-
-            // Should not emit any items since web shouldn't be launched for errors
             expectNoEvents()
+
+            val state = vm.linkScreenState.value as ScreenState.FullScreen
+            assertEquals(state.initialDestination, LinkScreen.SignUp)
         }
     }
 
@@ -780,10 +781,11 @@ internal class LinkActivityViewModelTest {
         eventReporter: EventReporter = FakeEventReporter(),
         navigationManager: NavigationManager = TestNavigationManager(),
         linkAttestationCheck: LinkAttestationCheck = FakeLinkAttestationCheck(),
-        startWithVerificationDialog: Boolean = false,
+        linkExpressMode: LinkExpressMode = LinkExpressMode.DISABLED,
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full,
         linkConfirmationHandler: LinkConfirmationHandler = FakeLinkConfirmationHandler(),
+        launchWeb: (LinkConfiguration) -> Unit = {},
         autocompleteLauncher: AutocompleteActivityLauncher = TestAutocompleteLauncher.noOp(),
         linkConfiguration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
     ): LinkActivityViewModel {
@@ -795,13 +797,15 @@ internal class LinkActivityViewModelTest {
             confirmationHandlerFactory = { confirmationHandler },
             linkAttestationCheck = linkAttestationCheck,
             linkConfiguration = linkConfiguration,
-            startWithVerificationDialog = startWithVerificationDialog,
+            linkExpressMode = linkExpressMode,
             navigationManager = navigationManager,
             savedStateHandle = savedStateHandle,
             linkLaunchMode = linkLaunchMode,
             linkConfirmationHandlerFactory = { linkConfirmationHandler },
             autocompleteLauncher = autocompleteLauncher,
-        )
+        ).apply {
+            this.launchWebFlow = launchWeb
+        }
     }
 
     private fun creationExtras(): CreationExtras {

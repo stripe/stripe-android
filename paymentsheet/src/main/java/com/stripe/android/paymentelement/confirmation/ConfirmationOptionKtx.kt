@@ -127,7 +127,7 @@ private fun PaymentSelection.Link.toConfirmationOption(
     return linkConfiguration?.let {
         LinkConfirmationOption(
             configuration = linkConfiguration,
-            useLinkExpress = useLinkExpress,
+            linkExpressMode = linkExpressMode,
             linkLaunchMode = when {
                 // If a payment is included in the confirmation option, launch confirmation right away
                 selectedPayment != null -> LinkLaunchMode.Confirmation(selectedPayment)

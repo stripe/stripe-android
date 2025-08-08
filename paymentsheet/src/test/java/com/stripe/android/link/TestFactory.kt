@@ -264,7 +264,7 @@ internal object TestFactory {
         configuration = LINK_CONFIGURATION,
         publishableKey = "",
         stripeAccountId = "",
-        startWithVerificationDialog = false,
+        linkExpressMode = LinkExpressMode.DISABLED,
         linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
         paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
         launchMode = LinkLaunchMode.Full,

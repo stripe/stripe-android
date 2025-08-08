@@ -21,6 +21,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
+import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.TestFactory
@@ -300,8 +301,8 @@ internal class DefaultFlowControllerTest {
                     createParams = selection.paymentMethodCreateParams,
                     optionsParams = selection.paymentMethodOptionsParams,
                     extraParams = selection.paymentMethodExtraParams,
-                    shouldSave =
-                    selection.customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse,
+                    shouldSave = selection.customerRequestedSave == PaymentSelection
+                        .CustomerRequestedSave.RequestReuse,
                 )
             )
 
@@ -518,7 +519,7 @@ internal class DefaultFlowControllerTest {
             configuration = any(),
             linkAccountInfo = anyOrNull(),
             launchMode = any(),
-            useLinkExpress = any()
+            linkExpressMode = any()
         )
 
         verify(paymentOptionActivityLauncher, never()).launch(any(), anyOrNull())
@@ -558,7 +559,7 @@ internal class DefaultFlowControllerTest {
             configuration = any(),
             linkAccountInfo = anyOrNull(),
             launchMode = any(),
-            useLinkExpress = any()
+            linkExpressMode = any()
         )
 
         // Simulate user dismissing 2FA with back press
@@ -579,7 +580,7 @@ internal class DefaultFlowControllerTest {
         verify(flowControllerLinkPaymentLauncher, never()).present(
             configuration = any(),
             linkAccountInfo = anyOrNull(),
-            useLinkExpress = any(),
+            linkExpressMode = any(),
             launchMode = any()
         )
 
@@ -909,7 +910,7 @@ internal class DefaultFlowControllerTest {
 
         assertThat(arguments.confirmationOption).isEqualTo(
             LinkConfirmationOption(
-                useLinkExpress = false,
+                linkExpressMode = LinkExpressMode.DISABLED,
                 configuration = TestFactory.LINK_CONFIGURATION,
             )
         )
@@ -1320,7 +1321,7 @@ internal class DefaultFlowControllerTest {
 
         assertThat(arguments.confirmationOption).isEqualTo(
             LinkConfirmationOption(
-                useLinkExpress = false,
+                linkExpressMode = LinkExpressMode.DISABLED,
                 configuration = TestFactory.LINK_CONFIGURATION,
             )
         )

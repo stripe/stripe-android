@@ -37,7 +37,7 @@ internal class LinkActivityContract @Inject internal constructor(
 
     data class Args internal constructor(
         internal val configuration: LinkConfiguration,
-        internal val startWithVerificationDialog: Boolean,
+        internal val linkExpressMode: LinkExpressMode,
         internal val linkAccountInfo: LinkAccountUpdate.Value,
         internal val launchMode: LinkLaunchMode
     )

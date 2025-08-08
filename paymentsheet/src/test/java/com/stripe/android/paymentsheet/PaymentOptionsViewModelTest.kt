@@ -14,6 +14,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.TestFactory
@@ -237,7 +238,7 @@ internal class PaymentOptionsViewModelTest {
             configuration = any(),
             linkAccountInfo = eq(LinkAccountUpdate.Value(unverifiedAccount)),
             launchMode = eq(LinkLaunchMode.PaymentMethodSelection(selectedPayment = null)),
-            useLinkExpress = eq(true)
+            linkExpressMode = eq(LinkExpressMode.ENABLED)
         )
     }
 
@@ -275,7 +276,7 @@ internal class PaymentOptionsViewModelTest {
             configuration = any(),
             linkAccountInfo = any(),
             launchMode = any(),
-            useLinkExpress = any()
+            linkExpressMode = any()
         )
     }
 

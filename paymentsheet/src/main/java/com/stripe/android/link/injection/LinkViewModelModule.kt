@@ -3,6 +3,7 @@ package com.stripe.android.link.injection
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
@@ -33,7 +34,7 @@ internal object LinkViewModelModule {
         savedStateHandle: SavedStateHandle,
         linkLaunchMode: LinkLaunchMode,
         autocompleteLauncher: DefaultAutocompleteLauncher,
-        @Named(START_WITH_VERIFICATION_DIALOG) startWithVerificationDialog: Boolean
+        @Named(LINK_EXPRESS_MODE) linkExpressMode: LinkExpressMode
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
             activityRetainedComponent = component,
@@ -45,7 +46,7 @@ internal object LinkViewModelModule {
             linkAttestationCheck = linkAttestationCheck,
             savedStateHandle = savedStateHandle,
             navigationManager = navigationManager,
-            startWithVerificationDialog = startWithVerificationDialog,
+            linkExpressMode = linkExpressMode,
             linkConfirmationHandlerFactory = linkConfirmationHandlerFactory,
             linkLaunchMode = linkLaunchMode,
             autocompleteLauncher = autocompleteLauncher,

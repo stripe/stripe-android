@@ -35,7 +35,7 @@ class NativeLinkActivityContractTest {
         val contract = NativeLinkActivityContract(paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER)
         val args = LinkActivityContract.Args(
             configuration = TestFactory.LINK_CONFIGURATION,
-            startWithVerificationDialog = false,
+            linkExpressMode = LinkExpressMode.DISABLED,
             linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
             launchMode = LinkLaunchMode.Full
         )
@@ -52,7 +52,7 @@ class NativeLinkActivityContractTest {
                 configuration = TestFactory.LINK_CONFIGURATION,
                 publishableKey = "pk_test_abcdefg",
                 stripeAccountId = null,
-                startWithVerificationDialog = false,
+                linkExpressMode = LinkExpressMode.DISABLED,
                 linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                 paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER,
                 launchMode = LinkLaunchMode.Full
