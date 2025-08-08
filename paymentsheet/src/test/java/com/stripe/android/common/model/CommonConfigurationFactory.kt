@@ -26,6 +26,7 @@ internal object CommonConfigurationFactory {
         shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = null,
         googlePlacesApiKey: String? = null,
         termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay> = emptyMap(),
+        walletButtons: PaymentSheet.WalletButtonsConfiguration? = null,
     ): CommonConfiguration = CommonConfiguration(
         merchantDisplayName = merchantDisplayName,
         customer = customer,
@@ -45,5 +46,6 @@ internal object CommonConfigurationFactory {
         shopPayConfiguration = shopPayConfiguration,
         googlePlacesApiKey = googlePlacesApiKey,
         termsDisplay = termsDisplay,
+        walletButtons = walletButtons,
     )
 }
