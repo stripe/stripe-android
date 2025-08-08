@@ -15,6 +15,7 @@ import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
+import com.stripe.android.crypto.onramp.model.OnrampIdentityVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampKYCResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
@@ -109,13 +110,29 @@ internal class OnrampViewModel(
         when (result) {
             is OnrampVerificationResult.Completed -> {
                 _message.value = "Authentication successful"
-                _uiState.value = OnrampUiState.KYCScreen
+                _uiState.value = OnrampUiState.PostAuthenticationScreen
             }
             is OnrampVerificationResult.Cancelled -> {
                 _message.value = "Authentication cancelled, please try again"
             }
             is OnrampVerificationResult.Failed -> {
                 _message.value = "Authentication failed: ${result.error.message}"
+                _uiState.value = OnrampUiState.EmailInput
+            }
+        }
+    }
+
+    fun onIdentityVerificationResult(result: OnrampIdentityVerificationResult) {
+        when (result) {
+            is OnrampIdentityVerificationResult.Completed -> {
+                _message.value = "Identity Verification completed"
+                _uiState.value = OnrampUiState.PostAuthenticationScreen
+            }
+            is OnrampIdentityVerificationResult.Cancelled -> {
+                _message.value = "Identity Verification cancelled, please try again"
+            }
+            is OnrampIdentityVerificationResult.Failed -> {
+                _message.value = "Identity Verification failed: ${result.error.message}"
                 _uiState.value = OnrampUiState.EmailInput
             }
         }
@@ -150,7 +167,7 @@ internal class OnrampViewModel(
                 }
                 is OnrampKYCResult.Failed -> {
                     _message.value = "KYC Collection failed: ${result.error.message}"
-                    _uiState.value = OnrampUiState.KYCScreen
+                    _uiState.value = OnrampUiState.PostAuthenticationScreen
                 }
             }
         }
@@ -173,5 +190,5 @@ internal sealed class OnrampUiState {
     object Loading : OnrampUiState()
     data class Registration(val email: String) : OnrampUiState()
     data class Authentication(val email: String) : OnrampUiState()
-    object KYCScreen : OnrampUiState()
+    object PostAuthenticationScreen : OnrampUiState()
 }

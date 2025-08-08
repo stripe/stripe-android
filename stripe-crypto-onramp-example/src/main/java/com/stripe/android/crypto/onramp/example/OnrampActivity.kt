@@ -61,6 +61,7 @@ internal class OnrampActivity : ComponentActivity() {
 
         val callbacks = OnrampCallbacks(
             authenticationCallback = viewModel::onAuthenticationResult,
+            identityVerificationCallback = viewModel::onIdentityVerificationResult
         )
 
         onrampPresenter = viewModel.onrampCoordinator
@@ -70,7 +71,12 @@ internal class OnrampActivity : ComponentActivity() {
             OnrampExampleTheme {
                 OnrampScreen(
                     viewModel = viewModel,
-                    onAuthenticateUser = { email -> onrampPresenter.authenticateExistingLinkUser(email) }
+                    onAuthenticateUser = { email ->
+                        onrampPresenter.authenticateExistingLinkUser(email)
+                    },
+                    onStartVerification = {
+                        onrampPresenter.promptForIdentityVerification()
+                    }
                 )
             }
         }
@@ -81,7 +87,8 @@ internal class OnrampActivity : ComponentActivity() {
 @Suppress("LongMethod")
 internal fun OnrampScreen(
     viewModel: OnrampViewModel,
-    onAuthenticateUser: (String) -> Unit
+    onAuthenticateUser: (String) -> Unit,
+    onStartVerification: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
@@ -143,7 +150,7 @@ internal fun OnrampScreen(
                     }
                 )
             }
-            is OnrampUiState.KYCScreen -> {
+            is OnrampUiState.PostAuthenticationScreen -> {
                 var firstName by remember { mutableStateOf("") }
                 var lastName by remember { mutableStateOf("") }
 
@@ -154,6 +161,10 @@ internal fun OnrampScreen(
                     onLastNameChange = { lastName = it },
                     onCollectKYC = { kycInfo -> viewModel.collectKycInfo(kycInfo) }
                 )
+
+                StartVerificationScreen {
+                    onStartVerification()
+                }
             }
         }
     }
@@ -416,6 +427,30 @@ private fun KYCTextField(
             .fillMaxWidth()
             .padding(bottom = 24.dp)
     )
+}
+
+@Composable
+private fun StartVerificationScreen(
+    startVerification: () -> Unit
+) {
+    Column {
+        Text(
+            text = "Verification",
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        Button(
+            onClick = {
+                startVerification()
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp)
+        ) {
+            Text("Start Identity Verification")
+        }
+    }
 }
 
 @Composable

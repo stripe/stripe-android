@@ -10,6 +10,7 @@ dependencies {
     implementation project(":paymentsheet")
     implementation project(":stripe-ui-core")
     implementation project(":payments-ui-core")
+    implementation project(":identity")
 
     implementation libs.androidx.coreKtx
     implementation libs.androidx.appCompat

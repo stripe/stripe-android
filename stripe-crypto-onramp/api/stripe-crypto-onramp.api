@@ -12,6 +12,7 @@ public final class com/stripe/android/crypto/onramp/OnrampCoordinator$Builder {
 
 public final class com/stripe/android/crypto/onramp/OnrampCoordinator$Presenter {
 	public final fun authenticateExistingLinkUser (Ljava/lang/String;)V
+	public final fun promptForIdentityVerification ()V
 }
 
 public final class com/stripe/android/crypto/onramp/model/DateOfBirth {
@@ -84,9 +85,10 @@ public final class com/stripe/android/crypto/onramp/model/LinkUserInfo$Creator :
 }
 
 public final class com/stripe/android/crypto/onramp/model/OnrampCallbacks {
-	public fun <init> (Lcom/stripe/android/crypto/onramp/model/OnrampVerificationCallback;)V
+	public fun <init> (Lcom/stripe/android/crypto/onramp/model/OnrampVerificationCallback;Lcom/stripe/android/crypto/onramp/model/OnrampIdentityVerificationCallback;)V
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAuthenticationCallback ()Lcom/stripe/android/crypto/onramp/model/OnrampVerificationCallback;
+	public final fun getIdentityVerificationCallback ()Lcom/stripe/android/crypto/onramp/model/OnrampIdentityVerificationCallback;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -111,6 +113,23 @@ public final class com/stripe/android/crypto/onramp/model/OnrampConfigurationRes
 }
 
 public final class com/stripe/android/crypto/onramp/model/OnrampConfigurationResult$Failed : com/stripe/android/crypto/onramp/model/OnrampConfigurationResult {
+	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampIdentityVerificationCallback {
+	public abstract fun onResult (Lcom/stripe/android/crypto/onramp/model/OnrampIdentityVerificationResult;)V
+}
+
+public abstract class com/stripe/android/crypto/onramp/model/OnrampIdentityVerificationResult {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampIdentityVerificationResult$Cancelled : com/stripe/android/crypto/onramp/model/OnrampIdentityVerificationResult {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampIdentityVerificationResult$Completed : com/stripe/android/crypto/onramp/model/OnrampIdentityVerificationResult {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampIdentityVerificationResult$Failed : com/stripe/android/crypto/onramp/model/OnrampIdentityVerificationResult {
 	public final fun getError ()Ljava/lang/Throwable;
 }
 

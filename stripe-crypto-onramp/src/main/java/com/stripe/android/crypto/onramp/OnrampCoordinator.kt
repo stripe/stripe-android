@@ -106,6 +106,10 @@ class OnrampCoordinator @Inject internal constructor(
         fun authenticateExistingLinkUser(email: String) {
             coordinator.authenticateExistingLinkUser(email)
         }
+
+        fun promptForIdentityVerification() {
+            coordinator.promptForIdentityVerification()
+        }
     }
 
     /**
