@@ -29,20 +29,28 @@ internal class InputAddressViewModel @Inject constructor(
     private val initialBillingAddress = args.config?.billingAddress?.toAddressDetails()
     private val initialShippingAddress = args.config?.address
 
+    private val initialInputsAreTheSame = addressesAreTheSame(initialBillingAddress, initialShippingAddress)
+
     private val unparsedBillingAddress = initialBillingAddress?.toIdentifierMap()
     private var parsedBillingAddress: Map<IdentifierSpec, String?>? = null
 
     private val _shippingSameAsBillingState = MutableStateFlow(
         if (canUseShippingSameAsBilling()) {
             ShippingSameAsBillingState.Show(
-                isChecked = initialBillingAddress != null && initialShippingAddress == null
+                isChecked = (initialBillingAddress != null && initialShippingAddress == null) ||
+                    initialInputsAreTheSame
             )
         } else {
             ShippingSameAsBillingState.Hide
         }
     )
 
-    private var previousUserInput: Map<IdentifierSpec, String?>? = initialShippingAddress?.toIdentifierMap()
+    private var previousUserInput: Map<IdentifierSpec, String?>? = if (initialInputsAreTheSame) {
+        null
+    } else {
+        initialShippingAddress?.toIdentifierMap()
+    }
+
     private var setShippingSameAsShippingAtLeastOnce: Boolean = _shippingSameAsBillingState.value.run {
         this is ShippingSameAsBillingState.Show && isChecked
     }
@@ -239,6 +247,28 @@ internal class InputAddressViewModel @Inject constructor(
             // Allow if in the allowed countries
             return allowedCountries.contains(country)
         } ?: false
+    }
+
+    private fun addressesAreTheSame(
+        addressOne: AddressDetails?,
+        addressTwo: AddressDetails?
+    ): Boolean {
+        if (addressOne == null || addressTwo == null) {
+            return false
+        }
+
+        return addressOne.name softEquals addressTwo.name &&
+            addressOne.phoneNumber softEquals addressTwo.phoneNumber &&
+            addressOne.address?.line1 softEquals addressTwo.address?.line1 &&
+            addressOne.address?.line2 softEquals addressTwo.address?.line2 &&
+            addressOne.address?.city softEquals addressTwo.address?.city &&
+            addressOne.address?.state softEquals addressTwo.address?.state &&
+            addressOne.address?.country softEquals addressTwo.address?.country &&
+            addressOne.address?.postalCode softEquals addressTwo.address?.postalCode
+    }
+
+    private infix fun String?.softEquals(other: String?): Boolean {
+        return this == other || (isNullOrEmpty() && other.isNullOrEmpty())
     }
 
     private fun PaymentSheet.BillingDetails.toAddressDetails(): AddressDetails {
