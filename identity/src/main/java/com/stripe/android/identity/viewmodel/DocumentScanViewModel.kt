@@ -1,9 +1,11 @@
 package com.stripe.android.identity.viewmodel
 
 import android.app.Application
+import android.provider.ContactsContract.CommonDataKinds.Identity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.identity.R
@@ -28,7 +30,8 @@ internal class DocumentScanViewModel(
     override val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
     modelPerformanceTracker: ModelPerformanceTracker,
     laplacianBlurDetector: LaplacianBlurDetector,
-    verificationFlowFinishable: VerificationFlowFinishable
+    verificationFlowFinishable: VerificationFlowFinishable,
+    private val identityViewModel: IdentityViewModel
 ) : IdentityScanViewModel(
     applicationContext,
     fpsTracker,
@@ -41,24 +44,48 @@ internal class DocumentScanViewModel(
     @OptIn(FlowPreview::class)
     override val scanFeedback = combine(
         scannerState,
-        targetScanTypeFlow
-    ) { scannerState, targetScanType ->
+        targetScanTypeFlow,
+        identityViewModel.verificationPage.asFlow()
+    ) { scannerState, targetScanType, verificationPage ->
         when (scannerState) {
             State.Initializing -> {
-                if (targetScanType.isNullOrFront()) {
-                    R.string.stripe_position_id_front
+                val allowlist = verificationPage.data?.documentSelect?.idDocumentTypeAllowlist?.keys?.toList()
+
+                if (allowlist?.size == 1) {
+                    when (allowlist[0]) {
+                        "passport" -> R.string.stripe_position_passport
+                        "driving_license" -> {
+                            if (targetScanType.isNullOrFront()) {
+                                R.string.stripe_position_dl_front
+                            } else {
+                                R.string.stripe_position_dl_back
+                            }
+                        }
+                        else -> {
+                            if (targetScanType.isNullOrFront()) {
+                                R.string.stripe_position_id_front
+                            } else {
+                                R.string.stripe_position_id_back
+                            }
+                        }
+                    }
                 } else {
-                    R.string.stripe_position_id_back
+                    if (targetScanType.isNullOrFront()) {
+                        R.string.stripe_position_id_front
+                    } else {
+                        R.string.stripe_position_id_back
+                    }
                 }
             }
+
             is State.Scanned -> R.string.stripe_scanned
+
             is State.Scanning -> {
                 when (scannerState.scanState) {
                     is IdentityScanState.Finished -> R.string.stripe_scanned
                     is IdentityScanState.Found -> {
                         scannerState.scanState.feedbackRes ?: R.string.stripe_hold_still
                     }
-
                     is IdentityScanState.Initial -> idleFeedback(targetScanType)
                     is IdentityScanState.Satisfied -> R.string.stripe_scanned
                     is IdentityScanState.TimeOut -> idleFeedback(targetScanType)
@@ -67,9 +94,7 @@ internal class DocumentScanViewModel(
                 }
             }
 
-            is State.Timeout -> {
-                idleFeedback(targetScanType)
-            }
+            is State.Timeout -> idleFeedback(targetScanType)
         }
     }.distinctUntilChanged()
         .debounce { value ->
@@ -81,19 +106,78 @@ internal class DocumentScanViewModel(
             initialValue = idleFeedback()
         )
 
-    private fun idleFeedback(targetScanType: IdentityScanState.ScanType? = null) =
-        if (targetScanType.isNullOrFront()) {
+    fun getDocumentPositionStringRes(targetScanType: IdentityScanState.ScanType? = null): Int {
+        val allowlist = identityViewModel.verificationPage.value
+            ?.data
+            ?.documentSelect
+            ?.idDocumentTypeAllowlist
+            ?.keys
+            ?.toList()
+
+        val idType = allowlist?.firstOrNull() ?: "id_document"
+        val isFront = targetScanType.isNullOrFront()
+
+        return when (idType) {
+            "passport" -> if (isFront) {
+                R.string.stripe_front_of_passport
+            } else {
+                R.string.stripe_back_of_passport
+            }
+            "driving_license" -> if (isFront) {
+                R.string.stripe_front_of_dl
+            } else {
+                R.string.stripe_back_of_dl
+            }
+            else -> if (isFront) {
+                R.string.stripe_front_of_id_document
+            } else {
+                R.string.stripe_back_of_id_document
+            }
+        }
+    }
+
+    private fun idleFeedback(targetScanType: IdentityScanState.ScanType? = null): Int {
+        val allowlist = identityViewModel.verificationPage.value
+            ?.data
+            ?.documentSelect
+            ?.idDocumentTypeAllowlist
+            ?.keys
+            ?.toList()
+
+        if (allowlist?.size == 1) {
+            return when (allowlist[0]) {
+                "passport" -> R.string.stripe_position_passport
+                "driving_license" -> {
+                    if (targetScanType.isNullOrFront()) {
+                        R.string.stripe_position_dl_front
+                    } else {
+                        R.string.stripe_position_dl_back
+                    }
+                }
+                else -> {
+                    if (targetScanType.isNullOrFront()) {
+                        R.string.stripe_position_id_front
+                    } else {
+                        R.string.stripe_position_id_back
+                    }
+                }
+            }
+        }
+
+        return if (targetScanType.isNullOrFront()) {
             R.string.stripe_position_id_front
         } else {
             R.string.stripe_position_id_back
         }
+    }
 
     internal class DocumentScanViewModelFactory @Inject constructor(
         private val verificationFlowFinishable: VerificationFlowFinishable,
         private val modelPerformanceTracker: ModelPerformanceTracker,
         private val laplacianBlurDetector: LaplacianBlurDetector,
         private val fpsTracker: FPSTracker,
-        private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory
+        private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
+        private val identityViewModel: IdentityViewModel
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
@@ -103,7 +187,8 @@ internal class DocumentScanViewModel(
                 identityAnalyticsRequestFactory,
                 modelPerformanceTracker,
                 laplacianBlurDetector,
-                verificationFlowFinishable
+                verificationFlowFinishable,
+                identityViewModel
             ) as T
         }
     }

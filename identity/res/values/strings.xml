@@ -16,6 +16,8 @@
   <string name="stripe_back_of_id">Back of identity card</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
   <string name="stripe_back_of_id_document">Back of identity document</string>
+  <!-- Title of ID document scanning screen when scanning the back of an passport -->
+  <string name="stripe_back_of_passport">Back of passport</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
   <string name="stripe_back_of_id_selected">Back of ID is selected</string>
   <!-- Title displayed when requesting camera permissions -->
@@ -104,6 +106,8 @@
   <string name="stripe_flash_mask">Mask for selfie animation</string>
   <!-- Description of front of driver's license image -->
   <string name="stripe_front_of_dl">Front of driver\'s license</string>
+  <!-- Description of front of passport image -->
+  <string name="stripe_front_of_passport">Front of passport</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
   <string name="stripe_front_of_dl_selected">Front of driver license is selected</string>
   <!-- Description of front of identity card image -->
