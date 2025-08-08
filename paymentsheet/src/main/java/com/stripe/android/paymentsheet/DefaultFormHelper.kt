@@ -35,6 +35,7 @@ internal class DefaultFormHelper(
     private val linkInlineHandler: LinkInlineHandler,
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     private val paymentMethodMetadata: PaymentMethodMetadata,
+    private val hasSeenDirectToCardScan: Boolean,
     private val newPaymentSelectionProvider: () -> NewPaymentOptionSelection?,
     private val selectionUpdater: (PaymentSelection?) -> Unit,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
@@ -45,7 +46,6 @@ internal class DefaultFormHelper(
 ) : FormHelper {
     companion object {
         internal const val PREVIOUSLY_COMPLETED_PAYMENT_FORM = "previously_completed_payment_form"
-        internal const val KEY_SHOULD_OPEN_CARD_SCAN = "KEY_SHOULD_OPEN_CARD_SCAN"
         fun create(
             viewModel: BaseSheetViewModel,
             paymentMethodMetadata: PaymentMethodMetadata,
@@ -67,6 +67,7 @@ internal class DefaultFormHelper(
                 eventReporter = viewModel.eventReporter,
                 savedStateHandle = viewModel.savedStateHandle,
                 autocompleteAddressInteractorFactory = viewModel.autocompleteAddressInteractorFactory,
+                hasSeenDirectToCardScan = false,
             )
         }
 
@@ -90,6 +91,7 @@ internal class DefaultFormHelper(
                 eventReporter = eventReporter,
                 savedStateHandle = savedStateHandle,
                 autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+                hasSeenDirectToCardScan = false,
             )
         }
     }
@@ -135,12 +137,6 @@ internal class DefaultFormHelper(
             savedStateHandle[PREVIOUSLY_COMPLETED_PAYMENT_FORM] = value
         }
 
-    private var hasSeenDirectToCardScan: Boolean?
-        get() = savedStateHandle[KEY_SHOULD_OPEN_CARD_SCAN]
-        set(value) {
-            savedStateHandle[KEY_SHOULD_OPEN_CARD_SCAN] = value
-        }
-
     init {
         coroutineScope.launch {
             paymentSelection.collect { selection ->
@@ -161,7 +157,7 @@ internal class DefaultFormHelper(
 //            paymentMethodMetadata.supportedPaymentMethodTypes()[0] == PaymentMethod.Type.Card.code
         ) {
             DirectToCardScanData(
-                shouldOpenCardScanAutomaticallyInitialValue = true,
+                shouldOpenCardScanAutomaticallyInitialValue = !hasSeenDirectToCardScan,
                 savedStateHandle = savedStateHandle,
             )
         } else null

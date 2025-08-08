@@ -46,6 +46,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     private val rowSelectionImmediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
     private val customerStateHolder: CustomerStateHolder,
     private val sheetStateHolder: SheetStateHolder,
+    private val hasSeenDirectToCardScanHolder: EmbeddedHasSeenDirectToCardScanHolder,
     private val errorReporter: ErrorReporter,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
@@ -82,6 +83,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
                     EmbeddedPaymentElement.Result.Canceled()
                 )
             }
+            hasSeenDirectToCardScanHolder.hasSeenDirectToCardScan = true
         }
 
     private val manageActivityLauncher: ActivityResultLauncher<ManageContract.Args> =
@@ -126,6 +128,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
             paymentSelection = currentSelection,
+            hasSeenDirectToCardScan = hasSeenDirectToCardScanHolder.hasSeenDirectToCardScan
         )
         formActivityLauncher.launch(args)
     }

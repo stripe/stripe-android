@@ -42,6 +42,7 @@ import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
 import com.stripe.android.ui.core.di.CardScanModule
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.payments.core.injection.HAS_SEEN_DIRECT_TO_CARD_SCAN
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -232,6 +233,14 @@ internal interface EmbeddedPaymentElementViewModelModule {
             @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
         ): InternalRowSelectionCallback? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.rowSelectionCallback
+        }
+
+        @Provides
+        @Named(HAS_SEEN_DIRECT_TO_CARD_SCAN)
+        fun providesHasSeenDirectToCardScan(
+            hasSeenDirectToCardScanHolder: EmbeddedHasSeenDirectToCardScanHolder
+        ): Boolean {
+            return hasSeenDirectToCardScanHolder.hasSeenDirectToCardScan
         }
     }
 }
