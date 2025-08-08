@@ -6,6 +6,7 @@ import com.stripe.android.challenge.PassiveChallengeActivityContract
 import com.stripe.android.challenge.PassiveChallengeActivityResult
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.RadarOptions
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -40,12 +41,27 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: PassiveChallengeActivityResult
     ): ConfirmationDefinition.Result {
-        return ConfirmationDefinition.Result.NextStep(
-            confirmationOption = confirmationOption.copy(
-                passiveCaptchaParams = null
-            ),
-            parameters = confirmationParameters
-        )
+        return when (result) {
+            is PassiveChallengeActivityResult.Failed -> {
+                ConfirmationDefinition.Result.NextStep(
+                    confirmationOption = confirmationOption.copy(
+                        passiveCaptchaParams = null
+                    ),
+                    parameters = confirmationParameters
+                )
+            }
+            is PassiveChallengeActivityResult.Success -> {
+                ConfirmationDefinition.Result.NextStep(
+                    confirmationOption = confirmationOption.copy(
+                        passiveCaptchaParams = null,
+                        createParams = confirmationOption.createParams.copy(
+                            radarOptions = RadarOptions(result.token)
+                        )
+                    ),
+                    parameters = confirmationParameters
+                )
+            }
+        }
     }
 
     override fun createLauncher(

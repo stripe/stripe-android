@@ -7,6 +7,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
+import com.stripe.android.model.RadarOptions
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
@@ -228,21 +229,27 @@ internal class PassiveChallengeConfirmationDefinitionTest {
     @Test
     fun `'toResult' should return 'NextStep' with passiveCaptchaParams removed for Success result`() {
         val definition = createPassiveChallengeConfirmationDefinition()
+        val testToken = "test_token"
 
         val result = definition.toResult(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
             confirmationParameters = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            result = PassiveChallengeActivityResult.Success("test_token"),
+            result = PassiveChallengeActivityResult.Success(testToken),
         )
 
         assertThat(result).isInstanceOf<ConfirmationDefinition.Result.NextStep>()
 
         val nextStepResult = result.asNextStep()
 
-        assertThat(nextStepResult.confirmationOption).isEqualTo(
-            PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(passiveCaptchaParams = null)
+        val expectedOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(
+            passiveCaptchaParams = null,
+            createParams = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.createParams.copy(
+                radarOptions = RadarOptions(testToken)
+            )
         )
+
+        assertThat(nextStepResult.confirmationOption).isEqualTo(expectedOption)
         assertThat(nextStepResult.parameters).isEqualTo(CONFIRMATION_PARAMETERS)
     }
 
