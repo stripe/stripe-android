@@ -133,15 +133,17 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
             val signupMode = if (
                 metadata.linkState?.signupMode != null && arguments.linkConfigurationCoordinator != null
             ) {
-                add(
-                    LinkFormElement(
-                        signupMode = metadata.linkState.signupMode,
-                        configuration = metadata.linkState.configuration,
-                        linkConfigurationCoordinator = arguments.linkConfigurationCoordinator,
-                        initialLinkUserInput = arguments.initialLinkUserInput,
-                        onLinkInlineSignupStateChanged = arguments.onLinkInlineSignupStateChanged,
+                if (!linkSignupOptInEnabled) {
+                    add(
+                        LinkFormElement(
+                            signupMode = metadata.linkState.signupMode,
+                            configuration = metadata.linkState.configuration,
+                            linkConfigurationCoordinator = arguments.linkConfigurationCoordinator,
+                            initialLinkUserInput = arguments.initialLinkUserInput,
+                            onLinkInlineSignupStateChanged = arguments.onLinkInlineSignupStateChanged,
+                        )
                     )
-                )
+                }
 
                 metadata.linkState.signupMode
             } else {
