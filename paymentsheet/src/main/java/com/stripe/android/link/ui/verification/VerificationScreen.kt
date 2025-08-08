@@ -43,7 +43,8 @@ fun VerificationPreview() {
                     redactedPhoneNumber = "(...)",
                     email = "email@email.com",
                     defaultPayment = null,
-                    isDialog = false
+                    isDialog = false,
+                    allowLogout = true,
                 ),
                 otpElement = OTPSpec.transform(),
                 onBack = {},
