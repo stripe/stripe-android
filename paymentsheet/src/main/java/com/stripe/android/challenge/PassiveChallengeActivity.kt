@@ -3,20 +3,35 @@ package com.stripe.android.challenge
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import androidx.activity.viewModels
+import androidx.annotation.VisibleForTesting
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
-internal class PassiveChallengeActivity : ComponentActivity() {
+internal class PassiveChallengeActivity : AppCompatActivity() {
+    @VisibleForTesting
+    internal var viewModelFactory: ViewModelProvider.Factory = PassiveChallengeViewModel.Factory
+
+    private val viewModel: PassiveChallengeViewModel by viewModels<PassiveChallengeViewModel> {
+        viewModelFactory
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        dismissWithResult(
-            result = PassiveChallengeActivityResult.Failed(
-                error = NotImplementedError("Passive challenges not implemented yet")
-            )
-        )
+        lifecycleScope.launch {
+            viewModel.result.collect { result ->
+                dismissWithResult(result)
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.startPassiveChallenge(this@PassiveChallengeActivity)
+        }
     }
 
     private fun dismissWithResult(result: PassiveChallengeActivityResult) {
