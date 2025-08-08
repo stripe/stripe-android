@@ -20,11 +20,11 @@ class AutocompleteAddressController(
         CountryConfig(countryCodes),
         initialValues[IdentifierSpec.Country]
     ),
-    private val phoneNumberState: PhoneNumberState,
+    private val phoneNumberConfig: AddressFieldConfiguration,
+    private val nameConfig: AddressFieldConfiguration,
     private val sameAsShippingElement: SameAsShippingElement?,
     private val shippingValuesMap: Map<IdentifierSpec, String?>?,
     private val hideCountry: Boolean = false,
-    private val hideName: Boolean = true,
 ) : SectionFieldErrorController, SectionFieldComposable {
     private val interactor = interactorFactory.create()
 
@@ -91,7 +91,6 @@ class AutocompleteAddressController(
             shippingValuesMap = shippingValuesMap,
             isPlacesAvailable = config.isPlacesAvailable,
             hideCountry = hideCountry,
-            hideName = hideName,
         )
     }
 
@@ -102,12 +101,13 @@ class AutocompleteAddressController(
         val googlePlacesApiKey = config.googlePlacesApiKey
 
         return if (googlePlacesApiKey == null) {
-            AddressInputMode.NoAutocomplete(phoneNumberState)
+            AddressInputMode.NoAutocomplete(phoneNumberConfig, nameConfig)
         } else if (expandForm || values[IdentifierSpec.Line1] != null) {
             AddressInputMode.AutocompleteExpanded(
                 googleApiKey = googlePlacesApiKey,
                 autocompleteCountries = config.autocompleteCountries,
-                phoneNumberState = phoneNumberState,
+                phoneNumberConfig = phoneNumberConfig,
+                nameConfig = nameConfig,
                 onNavigation = {
                     interactor.onAutocomplete(
                         country = countryDropdownFieldController.rawFieldValue.value ?: ""
@@ -118,7 +118,8 @@ class AutocompleteAddressController(
             AddressInputMode.AutocompleteCondensed(
                 googleApiKey = googlePlacesApiKey,
                 autocompleteCountries = config.autocompleteCountries,
-                phoneNumberState = phoneNumberState,
+                phoneNumberConfig = phoneNumberConfig,
+                nameConfig = nameConfig,
                 onNavigation = {
                     interactor.onAutocomplete(
                         country = countryDropdownFieldController.rawFieldValue.value ?: ""

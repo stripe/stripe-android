@@ -3,8 +3,8 @@ package com.stripe.android.paymentsheet.forms
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.uicore.elements.EmailConfig
+import com.stripe.android.uicore.elements.EmailElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionController
 import com.stripe.android.uicore.elements.SectionElement
