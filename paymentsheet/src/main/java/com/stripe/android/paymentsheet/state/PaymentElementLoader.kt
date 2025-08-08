@@ -223,6 +223,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 metadata = paymentMethodMetadata.await(),
                 customer = customer.await(),
                 isGooglePayReady = isGooglePayReady,
+                isUsingWalletButtons = configuration.walletButtons?.willDisplayExternally ?: false
             )
         }
 
@@ -677,6 +678,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         metadata: PaymentMethodMetadata,
         customer: CustomerState?,
         isGooglePayReady: Boolean,
+        isUsingWalletButtons: Boolean,
     ): PaymentSelection? {
         val isDefaultPaymentMethodEnabled = metadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled ?: false
         val primaryPaymentSelection = if (isDefaultPaymentMethodEnabled) {
@@ -685,8 +687,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             }?.toPaymentSelection()
         } else {
             when (val selection = savedSelection.await()) {
-                is SavedSelection.GooglePay -> PaymentSelection.GooglePay
-                is SavedSelection.Link -> PaymentSelection.Link()
+                is SavedSelection.GooglePay -> PaymentSelection.GooglePay.takeIf {
+                    !isUsingWalletButtons && isGooglePayReady
+                }
+                is SavedSelection.Link -> PaymentSelection.Link().takeIf {
+                    !isUsingWalletButtons
+                }
                 is SavedSelection.PaymentMethod -> {
                     customer?.paymentMethods?.find { it.id == selection.id }?.toPaymentSelection()
                 }
@@ -696,7 +702,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         return primaryPaymentSelection
             ?: customer?.paymentMethods?.firstOrNull()?.toPaymentSelection()
-            ?: PaymentSelection.GooglePay.takeIf { isGooglePayReady }
+            ?: PaymentSelection.GooglePay.takeIf {
+                !isUsingWalletButtons && isGooglePayReady
+            }
     }
 
     private suspend fun retrieveSavedSelection(
