@@ -222,6 +222,7 @@ internal class LinkActivityViewModel @Inject constructor(
     fun changeEmail() {
         savedStateHandle[SignUpViewModel.USE_LINK_CONFIGURATION_CUSTOMER_INFO] = false
         if (linkScreenState.value is ScreenState.VerificationDialog) {
+            linkAccountHolder.set(LinkAccountUpdate.Value(null))
             _linkScreenState.value = ScreenState.FullScreen(initialDestination = LinkScreen.SignUp)
         } else {
             navigate(LinkScreen.SignUp, clearStack = true)
