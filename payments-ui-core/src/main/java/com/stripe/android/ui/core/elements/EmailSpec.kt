@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.uicore.elements.EmailElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
