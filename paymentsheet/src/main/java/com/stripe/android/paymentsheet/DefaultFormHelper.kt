@@ -35,7 +35,7 @@ internal class DefaultFormHelper(
     private val linkInlineHandler: LinkInlineHandler,
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     private val paymentMethodMetadata: PaymentMethodMetadata,
-    private val hasSeenDirectToCardScan: Boolean,
+    private val directToCardScanData: DirectToCardScanData?,
     private val newPaymentSelectionProvider: () -> NewPaymentOptionSelection?,
     private val selectionUpdater: (PaymentSelection?) -> Unit,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
@@ -67,7 +67,7 @@ internal class DefaultFormHelper(
                 eventReporter = viewModel.eventReporter,
                 savedStateHandle = viewModel.savedStateHandle,
                 autocompleteAddressInteractorFactory = viewModel.autocompleteAddressInteractorFactory,
-                hasSeenDirectToCardScan = false,
+                directToCardScanData = viewModel.directToCardScanData,
             )
         }
 
@@ -91,7 +91,7 @@ internal class DefaultFormHelper(
                 eventReporter = eventReporter,
                 savedStateHandle = savedStateHandle,
                 autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
-                hasSeenDirectToCardScan = false,
+                directToCardScanData = null,
             )
         }
     }
@@ -149,18 +149,6 @@ internal class DefaultFormHelper(
     override fun formElementsForCode(code: String): List<FormElement> {
         val currentSelection = newPaymentSelectionProvider()?.takeIf { it.getType() == code }
 
-        val directToCardScanData = if (
-            paymentMethodMetadata.openCardScanAutomaticallyConfig
-            // no saved PMs
-//            customerStateHolder?.paymentMethods?.value.isNullOrEmpty() &&
-//            paymentMethodMetadata.supportedPaymentMethodTypes().size == 1 &&
-//            paymentMethodMetadata.supportedPaymentMethodTypes()[0] == PaymentMethod.Type.Card.code
-        ) {
-            DirectToCardScanData(
-                shouldOpenCardScanAutomaticallyInitialValue = !hasSeenDirectToCardScan,
-                savedStateHandle = savedStateHandle,
-            )
-        } else null
         return paymentMethodMetadata.formElementsForCode(
             code = code,
             uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(

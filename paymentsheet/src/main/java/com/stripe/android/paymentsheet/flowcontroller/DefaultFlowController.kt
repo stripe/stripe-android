@@ -324,7 +324,8 @@ internal class DefaultFlowController @Inject internal constructor(
             } else {
                 state.config.walletButtons.allowedWalletTypes
             },
-            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier
+            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
+            hasSeenDirectToCardScan = state.hasSeenDirectToCardScan
         )
 
         val options = ActivityOptionsCompat.makeCustomAnimation(
@@ -545,14 +546,20 @@ internal class DefaultFlowController @Inject internal constructor(
     internal fun onPaymentOptionResult(
         result: PaymentOptionResult?
     ) {
+        val currentState = viewModel.state
         // update the current Link account state if the selected Link payment method includes an account update.
         result?.linkAccountInfo?.let { linkAccountHolder.set(it) }
         result?.paymentMethods?.let {
-            val currentState = viewModel.state
             viewModel.state = currentState?.copyPaymentSheetState(
                 customer = currentState.paymentSheetState.customer?.copy(paymentMethods = it)
             )
         }
+
+        // update the state to stop showing DirectToCardScan
+        currentState?.let {
+            viewModel.state = it.copy(hasSeenDirectToCardScan = true)
+        }
+
         when (result) {
             is PaymentOptionResult.Succeeded -> {
                 viewModel.paymentSelection = result.paymentSelection.also { it.hasAcknowledgedSepaMandate = true }
@@ -747,7 +754,8 @@ internal class DefaultFlowController @Inject internal constructor(
     data class State(
         val paymentSheetState: PaymentSheetState.Full,
         val config: PaymentSheet.Configuration,
-        val declinedLink2FA: Boolean = false
+        val declinedLink2FA: Boolean = false,
+        val hasSeenDirectToCardScan: Boolean = false,
     ) : Parcelable {
         fun copyPaymentSheetState(
             paymentSelection: PaymentSelection? = paymentSheetState.paymentSelection,

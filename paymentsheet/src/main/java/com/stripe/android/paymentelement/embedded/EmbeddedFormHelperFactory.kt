@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.NewPaymentOptionSelection
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.payments.core.injection.HAS_SEEN_DIRECT_TO_CARD_SCAN
+import com.stripe.android.ui.core.elements.DirectToCardScanData
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
 import javax.inject.Named
@@ -54,7 +55,11 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
             eventReporter = eventReporter,
             savedStateHandle = savedStateHandle,
             autocompleteAddressInteractorFactory = null,
-            hasSeenDirectToCardScan = hasSeenDirectToCardScan,
+            directToCardScanData = DirectToCardScanData(
+                shouldOpenCardScanAutomaticallyInitialValue =
+                    !hasSeenDirectToCardScan && paymentMethodMetadata.openCardScanAutomaticallyConfig,
+                savedStateHandle = savedStateHandle,
+            ),
         )
     }
 }
