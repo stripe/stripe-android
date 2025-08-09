@@ -3,6 +3,7 @@ package com.stripe.android.stripecardscan.example
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import com.stripe.android.stripecardscan.cardscan.CardScanGoogleImpl
 import com.stripe.android.stripecardscan.cardscan.CardScanSheet
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.stripecardscan.example.databinding.ActivityCardScanFragmentDemoBinding
@@ -12,7 +13,7 @@ class CardScanFragmentDemoActivity : AppCompatActivity() {
         ActivityCardScanFragmentDemoBinding.inflate(layoutInflater)
     }
 
-    private lateinit var cardScanSheet: CardScanSheet
+    private lateinit var cardScanSheet: CardScanGoogleImpl
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,19 +22,20 @@ class CardScanFragmentDemoActivity : AppCompatActivity() {
         cardScanSheet = CardScanSheet.create(this, ::onScanFinished)
 
         viewBinding.launchScanButton.setOnClickListener {
-            attachCardScanFragment()
+//            attachCardScanFragment()
+            cardScanSheet.launch()
         }
     }
 
     private fun attachCardScanFragment() {
         viewBinding.launchScanButton.isEnabled = false
         viewBinding.fragmentContainer.visibility = View.VISIBLE
-        cardScanSheet.attachCardScanFragment(
-            this,
-            supportFragmentManager,
-            R.id.fragment_container,
-            this::onScanFinished
-        )
+//        cardScanSheet.attachCardScanFragment(
+//            this,
+//            supportFragmentManager,
+//            R.id.fragment_container,
+//            this::onScanFinished
+//        )
     }
 
     private fun onScanFinished(result: CardScanSheetResult) {

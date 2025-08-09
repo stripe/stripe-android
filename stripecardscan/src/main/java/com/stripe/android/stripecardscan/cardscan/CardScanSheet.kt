@@ -68,13 +68,18 @@ class CardScanSheet private constructor() {
             cardScanSheetResultCallback: CardScanResultCallback,
             registry: ActivityResultRegistry = from.activityResultRegistry
         ) =
-            CardScanSheet().apply {
-                launcher = from.registerForActivityResult(
-                    activityResultContract,
-                    registry,
-                    cardScanSheetResultCallback::onCardScanSheetResult
-                )
-            }
+//            CardScanSheet().apply {
+//                launcher = from.registerForActivityResult(
+//                    activityResultContract,
+//                    registry,
+//                    cardScanSheetResultCallback::onCardScanSheetResult
+//                )
+//            }
+            CardScanGoogleImpl(
+                activity = from,
+                cardScanSheetResultCallback = cardScanSheetResultCallback,
+                registry = from.activityResultRegistry
+            )
 
         /**
          * Create a [CardScanSheet] instance with [Fragment].
