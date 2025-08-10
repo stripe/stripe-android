@@ -83,6 +83,7 @@ internal class CustomerSheetScreenshotTest {
         onAnalyticsEvent = { },
         setAsDefaultMatchesSaveForFutureUse = false,
         autocompleteAddressInteractorFactory = null,
+        setupFutureUsage = null
     )
 
     private val selectPaymentMethodViewState = CustomerSheetViewState.SelectPaymentMethod(

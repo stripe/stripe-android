@@ -199,12 +199,3 @@ fun PaymentMethodOptionsParams.setupFutureUsage(): ConfirmPaymentIntentParams.Se
         is PaymentMethodOptionsParams.SetupFutureUsage -> setupFutureUsage
     }
 }
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun PaymentMethodOptionsParams.hasIntentToSetup(): Boolean {
-    return when (setupFutureUsage()) {
-        ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
-        ConfirmPaymentIntentParams.SetupFutureUsage.OnSession -> true
-        else -> false
-    }
-}

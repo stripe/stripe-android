@@ -152,8 +152,10 @@ private fun mandateData(
     return paymentMethodType?.let { type ->
         val supportsAddingMandateData = when (intent) {
             is PaymentIntent ->
-                intent.canSetupFutureUsage(paymentMethodType.code) || type.requiresMandateForPaymentIntent ||
-                    optionsParams?.setupFutureUsage()?.hasIntentToSetup() == true || intentConfigSetupFutureUsage.hasIntentToSetup()
+                intent.canSetupFutureUsage(paymentMethodType.code) ||
+                    type.requiresMandateForPaymentIntent ||
+                    optionsParams?.setupFutureUsage()?.hasIntentToSetup() == true ||
+                    intentConfigSetupFutureUsage.hasIntentToSetup()
             is SetupIntent -> true
         }
 

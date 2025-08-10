@@ -492,16 +492,21 @@ internal fun PaymentSelection.Saved.mandateTextFromPaymentMethodMetadata(
  * If setup_future_usage is set at payment_method_options level on the intent or intent
  * configuration, only take [CustomerRequestedSave.setupFutureUsage] if it is off_session as a publishable
  * key can upgrade the sfu value (e.g. on_session -> off_session) but cannot downgrade (e.g. off_session -> blank/null).
- * CustomerRequestedSave.setupFutureUsage can be off_session, blank, or null. intentSetupFutureUsage can be
- * off_session, on_session, or none.
- * @param intentSetupFutureUsage either the top level or payment_method_options setup_future_usage value.
+ * CustomerRequestedSave.setupFutureUsage can be off_session, blank, or null. paymentMethodOptionsSetupFutureUsage can
+ * be off_session, on_session, or none.
+ * @param paymentMethodOptionsSetupFutureUsage either the top level or payment_method_options setup_future_usage value.
  */
 internal fun PaymentSelection.CustomerRequestedSave.getSetupFutureUseValue(
     paymentMethodOptionsSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?
 ): ConfirmPaymentIntentParams.SetupFutureUsage? {
     return if (paymentMethodOptionsSetupFutureUsage != null) {
-        if (setupFutureUsage == ConfirmPaymentIntentParams.SetupFutureUsage.OffSession) setupFutureUsage
-        else paymentMethodOptionsSetupFutureUsage
+        when (this) {
+            PaymentSelection.CustomerRequestedSave.RequestNoReuse,
+            PaymentSelection.CustomerRequestedSave.NoRequest -> paymentMethodOptionsSetupFutureUsage
+            PaymentSelection.CustomerRequestedSave.RequestReuse -> {
+                ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            }
+        }
     } else {
         setupFutureUsage
     }

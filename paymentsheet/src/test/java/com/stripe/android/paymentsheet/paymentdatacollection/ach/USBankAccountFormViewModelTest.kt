@@ -86,7 +86,8 @@ class USBankAccountFormViewModelTest {
         linkMode = null,
         setAsDefaultPaymentMethodEnabled = false,
         setAsDefaultMatchesSaveForFutureUse = false,
-        financialConnectionsAvailability = FinancialConnectionsAvailability.Full
+        financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+        setupFutureUsage = null
     )
 
     private val mockCollectBankAccountLauncher = mock<CollectBankAccountLauncher>()

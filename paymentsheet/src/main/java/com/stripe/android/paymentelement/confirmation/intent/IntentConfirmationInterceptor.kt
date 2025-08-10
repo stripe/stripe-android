@@ -19,7 +19,6 @@ import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.model.hasIntentToSetup
 import com.stripe.android.model.setupFutureUsage
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
@@ -222,14 +221,16 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     ): NextStep {
         return when (initializationMode) {
             is PaymentElementLoader.InitializationMode.DeferredIntent -> {
-                val offSession = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                 handleDeferred(
                     intentConfiguration = initializationMode.intentConfiguration,
                     paymentMethod = paymentMethod,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     shippingValues = shippingValues,
-                    shouldSavePaymentMethod = paymentMethodOptionsParams?.setupFutureUsage() == offSession,
+                    shouldSavePaymentMethod = shouldSavePaymentMethod(
+                        paymentMethodOptionsParams = paymentMethodOptionsParams,
+                        intentConfiguration = initializationMode.intentConfiguration
+                    )
                 )
             }
 
@@ -261,7 +262,6 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         }
     }
 
-    // here
     private suspend fun handleDeferred(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         paymentMethodCreateParams: PaymentMethodCreateParams,
@@ -290,7 +290,10 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     shippingValues = shippingValues,
-                    shouldSavePaymentMethod = customerRequestedSave || paymentMethodOptionsParams?.hasIntentToSetup() == true,
+                    shouldSavePaymentMethod = customerRequestedSave || shouldSavePaymentMethod(
+                        paymentMethodOptionsParams = paymentMethodOptionsParams,
+                        intentConfiguration = intentConfiguration
+                    )
                 )
             },
             onFailure = { error ->
@@ -334,7 +337,6 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         shouldSavePaymentMethod: Boolean,
     ): NextStep {
-        // here
         return when (val callback = waitForIntentCallback()) {
             is CreateIntentCallback -> {
                 handleDeferredIntentCreationFromPaymentMethod(
@@ -537,7 +539,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             } else if (intent.requiresAction()) {
                 createHandleNextActionStep(clientSecret, intent, paymentMethod)
             } else {
-                DeferredIntentValidator.validate(intent, intentConfiguration, allowsManualConfirmation)
+                DeferredIntentValidator.validate(intent, intentConfiguration, allowsManualConfirmation, paymentMethod)
                 createConfirmStep(
                     clientSecret,
                     intent,
@@ -696,13 +698,31 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         )
     }
 
+    private fun ConfirmPaymentIntentParams.SetupFutureUsage.hasIntentToSetup() = when (this) {
+        ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+        ConfirmPaymentIntentParams.SetupFutureUsage.OnSession -> true
+        else -> false
+    }
+
     private fun PaymentSheet.IntentConfiguration.SetupFutureUse.toConfirmParamsSetupFutureUsage():
         ConfirmPaymentIntentParams.SetupFutureUsage? {
         return when (this) {
-            PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession -> ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
-            PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession -> ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
+            PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession -> {
+                ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            }
+            PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession -> {
+                ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
+            }
             else -> null
         }
+    }
+
+    private fun shouldSavePaymentMethod(
+        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+        intentConfiguration: PaymentSheet.IntentConfiguration
+    ): Boolean {
+        return paymentMethodOptionsParams?.setupFutureUsage()?.hasIntentToSetup() == true ||
+            intentConfiguration.mode.setupFutureUse?.toConfirmParamsSetupFutureUsage()?.hasIntentToSetup() == true
     }
 
     private companion object {
