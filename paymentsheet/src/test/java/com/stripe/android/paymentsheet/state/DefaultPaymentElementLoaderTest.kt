@@ -285,7 +285,7 @@ internal class DefaultPaymentElementLoaderTest {
         }
 
     @Test
-    fun `Should default to no payment method google pay is not ready`() =
+    fun `Should default to no payment method when google pay is not ready`() =
         runTest {
             prefsRepository.savePaymentSelection(null)
 
@@ -309,7 +309,7 @@ internal class DefaultPaymentElementLoaderTest {
         }
 
     @Test
-    fun `Should default to no payment method if saved selection is Google Pay & its not ready`() =
+    fun `Should default to no payment method when saved selection is Google Pay & its not ready`() =
         runTest {
             prefsRepository.savePaymentSelection(PaymentSelection.GooglePay)
 
@@ -334,7 +334,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @OptIn(WalletButtonsPreview::class)
     @Test
-    fun `Should default to no payment method is using wallet buttons`() =
+    fun `Should default to no payment method when using wallet buttons`() =
         runTest {
             prefsRepository.savePaymentSelection(null)
 
@@ -365,7 +365,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @OptIn(WalletButtonsPreview::class)
     @Test
-    fun `Should default to no payment method is using wallet buttons & google is saved selection`() =
+    fun `Should default to no payment method when using wallet buttons & google is saved selection`() =
         runTest {
             prefsRepository.savePaymentSelection(PaymentSelection.GooglePay)
 
@@ -396,7 +396,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @OptIn(WalletButtonsPreview::class)
     @Test
-    fun `Should default to no payment method is using wallet buttons & link is saved selection`() =
+    fun `Should default to no payment method when using wallet buttons & link is saved selection`() =
         runTest {
             prefsRepository.savePaymentSelection(PaymentSelection.Link())
 
@@ -426,7 +426,7 @@ internal class DefaultPaymentElementLoaderTest {
         }
 
     @Test
-    fun `Should default to no payment method google pay is not configured`() =
+    fun `Should default to no payment method when google pay is not configured`() =
         runTest {
             prefsRepository.savePaymentSelection(null)
 
