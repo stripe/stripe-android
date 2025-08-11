@@ -150,6 +150,24 @@ sealed class PaymentMethodOptionsParams(
     @Parcelize
     data class WeChatPay(
         var appId: String,
+    ) : PaymentMethodOptionsParams(PaymentMethod.Type.WeChatPay) {
+        override fun createTypeParams(): List<Pair<String, Any?>> {
+            return listOf(
+                PARAM_CLIENT to "android",
+                PARAM_APP_ID to appId,
+            )
+        }
+
+        internal companion object {
+            const val PARAM_CLIENT = "client"
+            const val PARAM_APP_ID = "app_id"
+        }
+    }
+
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class WeChatPayInternal(
+        var appId: String,
         var setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null,
     ) : PaymentMethodOptionsParams(PaymentMethod.Type.WeChatPay) {
         override fun createTypeParams(): List<Pair<String, Any?>> {
@@ -231,7 +249,8 @@ fun PaymentMethodOptionsParams.setupFutureUsage(): ConfirmPaymentIntentParams.Se
         is PaymentMethodOptionsParams.Konbini -> setupFutureUsage
         is PaymentMethodOptionsParams.Link -> setupFutureUsage
         is PaymentMethodOptionsParams.USBankAccount -> setupFutureUsage
-        is PaymentMethodOptionsParams.WeChatPay -> setupFutureUsage
+        is PaymentMethodOptionsParams.WeChatPay -> null
+        is PaymentMethodOptionsParams.WeChatPayInternal -> setupFutureUsage
         is PaymentMethodOptionsParams.WeChatPayH5 -> setupFutureUsage
         is PaymentMethodOptionsParams.SetupFutureUsage -> setupFutureUsage
     }
@@ -260,7 +279,11 @@ fun PaymentMethodOptionsParams?.updateSetupFutureUsageWithPmoSfu(
         is PaymentMethodOptionsParams.Konbini -> this.copy(setupFutureUsage = sfuValueToSet)
         is PaymentMethodOptionsParams.Link -> this.copy(setupFutureUsage = sfuValueToSet)
         is PaymentMethodOptionsParams.USBankAccount -> this.copy(setupFutureUsage = sfuValueToSet)
-        is PaymentMethodOptionsParams.WeChatPay -> this.copy(setupFutureUsage = sfuValueToSet)
+        is PaymentMethodOptionsParams.WeChatPay -> PaymentMethodOptionsParams.WeChatPayInternal(
+            appId = this.appId,
+            setupFutureUsage = sfuValueToSet
+        )
+        is PaymentMethodOptionsParams.WeChatPayInternal -> this.copy(setupFutureUsage = sfuValueToSet)
         is PaymentMethodOptionsParams.WeChatPayH5 -> this.copy(setupFutureUsage = sfuValueToSet)
         is PaymentMethodOptionsParams.SetupFutureUsage -> this.copy(setupFutureUsage = sfuValueToSet)
         null -> null
