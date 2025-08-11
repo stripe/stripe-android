@@ -41,6 +41,7 @@ internal class DefaultFormHelper(
     private val eventReporter: EventReporter,
     private val savedStateHandle: SavedStateHandle,
     private val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
+    private val isLinkUI: Boolean = false,
 ) : FormHelper {
     companion object {
         internal const val PREVIOUSLY_COMPLETED_PAYMENT_FORM = "previously_completed_payment_form"
@@ -75,6 +76,7 @@ internal class DefaultFormHelper(
             paymentMethodMetadata: PaymentMethodMetadata,
             eventReporter: EventReporter,
             savedStateHandle: SavedStateHandle,
+            isLinkUI: Boolean = false,
         ): FormHelper {
             return DefaultFormHelper(
                 coroutineScope = coroutineScope,
@@ -88,6 +90,7 @@ internal class DefaultFormHelper(
                 eventReporter = eventReporter,
                 savedStateHandle = savedStateHandle,
                 autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+                isLinkUI = isLinkUI,
             )
         }
     }
@@ -161,6 +164,7 @@ internal class DefaultFormHelper(
                 },
                 setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
                 autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+                isLinkUI = isLinkUI,
             ),
         ) ?: emptyList()
     }

@@ -123,7 +123,7 @@ private fun ConsumerPaymentDetails.PaymentDetails.makeMandateText(
         }
         is Card,
         is ConsumerPaymentDetails.Passthrough -> {
-            if (true) {
+            if (isSettingUp) {
                 if (signupToggleEnabled) {
                     resolvableString(R.string.stripe_paymentsheet_card_mandate_signup_toggle_off, merchantName)
                 } else {

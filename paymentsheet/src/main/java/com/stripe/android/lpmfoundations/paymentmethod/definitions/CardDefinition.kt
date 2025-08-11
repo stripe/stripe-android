@@ -148,13 +148,20 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                 null
             }
 
+            val shouldShowCombinedMandate = shouldShowCombinedMandate(
+                isLinkUI = arguments.isLinkUI,
+                linkSignupOptInEnabled = linkSignupOptInEnabled,
+                computedSignupMode = signupMode
+            )
+
             val mandateAllowed = metadata.mandateAllowed(CardDefinition.type)
-            if (linkSignupOptInEnabled && signupMode != null) {
+            if (shouldShowCombinedMandate) {
                 add(
                     CombinedLinkMandateElement(
                         identifier = IdentifierSpec.Generic("card_mandate"),
                         merchantName = metadata.merchantName,
                         signupMode = signupMode,
+                        isLinkUI = arguments.isLinkUI,
                         canChangeSaveForFutureUse = canChangeSaveForFutureUsage,
                         linkSignupStateFlow = arguments.linkInlineHandler?.linkInlineState ?: stateFlowOf(null)
                     )
@@ -175,6 +182,15 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                 )
             }
         }
+    }
+
+    private fun shouldShowCombinedMandate(
+        isLinkUI: Boolean,
+        linkSignupOptInEnabled: Boolean,
+        computedSignupMode: LinkSignupMode?
+    ): Boolean = when (isLinkUI) {
+        true -> linkSignupOptInEnabled
+        false -> linkSignupOptInEnabled && computedSignupMode != null
     }
 
     private fun MutableList<FormElement>.addContactInformationElement(
@@ -296,6 +312,7 @@ internal class CombinedLinkMandateElement(
     canChangeSaveForFutureUse: Boolean,
     private val merchantName: String,
     private val linkSignupStateFlow: StateFlow<InlineSignupViewState?>,
+    private val isLinkUI: Boolean,
 ) : RenderableFormElement(
     allowsUserInteraction = false,
     identifier = identifier
@@ -313,7 +330,7 @@ internal class CombinedLinkMandateElement(
     override fun ComposeUI(enabled: Boolean) {
         val linkState by linkSignupStateFlow.collectAsState()
         Mandate(
-            mandateText = if (linkState?.isExpanded == true) {
+            mandateText = if (linkState?.isExpanded == true && isLinkUI.not()) {
                 stringResource(
                     id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_on,
                     formatArgs = arrayOf(merchantName)

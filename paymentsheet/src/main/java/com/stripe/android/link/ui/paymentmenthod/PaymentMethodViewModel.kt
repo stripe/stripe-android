@@ -201,6 +201,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                                     autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
                                 )
                             ),
+                            isLinkUI = true,
                         ),
                         logger = parentComponent.logger,
                         dismissalCoordinator = parentComponent.dismissalCoordinator,
