@@ -213,6 +213,7 @@ fun PaymentMethodOptionsParams.setupFutureUsage(): ConfirmPaymentIntentParams.Se
     }
 }
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun PaymentMethodOptionsParams?.updateSetupFutureUsageWithPmoSfu(
     pmoSfu: ConfirmPaymentIntentParams.SetupFutureUsage?
 ): PaymentMethodOptionsParams? {
