@@ -35,20 +35,6 @@ class CardScanGoogleImpl(
             cardScanSheetResultCallback.onCardScanSheetResult(cardScanResult)
         }
     )
-    fun launch() {
-        val paymentsClient = createPaymentsClient(context)
-        val request = PaymentCardRecognitionIntentRequest.getDefaultInstance()
-
-        paymentsClient.getPaymentCardRecognitionIntent(request)
-            .addOnSuccessListener { intentResponse ->
-                val pendingIntent = intentResponse.paymentCardRecognitionPendingIntent
-                val intentSenderRequest = IntentSenderRequest.Builder(pendingIntent.intentSender).build()
-                launcher.launch(intentSenderRequest)
-            }
-            .addOnFailureListener { e ->
-                Log.e("SCANSCAN", "Payment card ocr not available.", e)
-            }
-    }
     private fun createPaymentsClient(activity: ComponentActivity): PaymentsClient {
         val walletOptions = Wallet.WalletOptions.Builder()
             .setEnvironment(WalletConstants.ENVIRONMENT_TEST)
@@ -56,8 +42,28 @@ class CardScanGoogleImpl(
 
         return Wallet.getPaymentsClient(activity, walletOptions)
     }
+    fun fetchIntent(onSuccess: (IntentSenderRequest) -> Unit) {
+        val paymentsClient = createPaymentsClient(context)
+        val request = PaymentCardRecognitionIntentRequest.getDefaultInstance()
+
+        paymentsClient.getPaymentCardRecognitionIntent(request)
+            .addOnSuccessListener { intentResponse ->
+                val pendingIntent = intentResponse.paymentCardRecognitionPendingIntent
+                val intentSenderRequest = IntentSenderRequest.Builder(pendingIntent.intentSender).build()
+                onSuccess(intentSenderRequest)
+            }
+            .addOnFailureListener { e ->
+                Log.e("SCANSCAN", "Payment card ocr not available.", e)
+            }
+
+    }
+    fun launch() {
+        fetchIntent { intentSenderRequest ->
+            launcher.launch(intentSenderRequest)
+        }
+    }
 }
-private fun parseActivityResult(result: ActivityResult): CardScanSheetResult {
+fun parseActivityResult(result: ActivityResult): CardScanSheetResult {
     if (result.resultCode == Activity.RESULT_OK && result.data != null) {
         val data = result.data ?: return CardScanSheetResult.Canceled(CancellationReason.Closed)
         val paymentCardRecognitionResult = PaymentCardRecognitionResult.getFromIntent(data)
