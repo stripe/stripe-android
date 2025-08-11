@@ -347,10 +347,10 @@ class AddressElementTest {
             IdentifierSpec.Generic("address"),
             countryElement = countryElement,
             addressInputMode = AddressInputMode.AutocompleteCondensed(
-                "some key",
-                setOf("US", "CA"),
-                AddressFieldConfiguration.OPTIONAL,
-                AddressFieldConfiguration.OPTIONAL
+                googleApiKey = "some key",
+                autocompleteCountries = setOf("US", "CA"),
+                nameConfig = AddressFieldConfiguration.OPTIONAL,
+                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
             shippingValuesMap = null
@@ -368,10 +368,10 @@ class AddressElementTest {
             IdentifierSpec.Generic("address"),
             countryElement = countryElement,
             addressInputMode = AddressInputMode.AutocompleteCondensed(
-                "some key",
-                setOf("US", "CA"),
-                AddressFieldConfiguration.OPTIONAL,
-                AddressFieldConfiguration.OPTIONAL
+                googleApiKey = "some key",
+                autocompleteCountries = setOf("US", "CA"),
+                nameConfig = AddressFieldConfiguration.OPTIONAL,
+                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
             shippingValuesMap = null,
@@ -395,10 +395,10 @@ class AddressElementTest {
                 controller = countryDropdownFieldController,
             ),
             addressInputMode = AddressInputMode.AutocompleteCondensed(
-                "some key",
-                setOf("US", "CA"),
-                AddressFieldConfiguration.OPTIONAL,
-                AddressFieldConfiguration.OPTIONAL
+                googleApiKey = "some key",
+                autocompleteCountries = setOf("US", "CA"),
+                nameConfig = AddressFieldConfiguration.OPTIONAL,
+                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
             shippingValuesMap = null,
@@ -423,10 +423,10 @@ class AddressElementTest {
                 controller = countryDropdownFieldController,
             ),
             addressInputMode = AddressInputMode.AutocompleteExpanded(
-                "some key",
-                setOf("US", "CA"),
-                AddressFieldConfiguration.OPTIONAL,
-                AddressFieldConfiguration.OPTIONAL
+                googleApiKey = "some key",
+                autocompleteCountries = setOf("US", "CA"),
+                nameConfig = AddressFieldConfiguration.OPTIONAL,
+                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL
             ) { onNavigationCounter.getAndIncrement() },
             sameAsShippingElement = null,
             shippingValuesMap = null,
@@ -450,10 +450,10 @@ class AddressElementTest {
                 IdentifierSpec.Generic("address"),
                 countryElement = countryElement,
                 addressInputMode = AddressInputMode.AutocompleteCondensed(
-                    null,
-                    setOf(),
-                    AddressFieldConfiguration.OPTIONAL,
-                    AddressFieldConfiguration.OPTIONAL
+                    googleApiKey = null,
+                    autocompleteCountries = setOf(),
+                    nameConfig = AddressFieldConfiguration.OPTIONAL,
+                    phoneNumberConfig = AddressFieldConfiguration.OPTIONAL
                 ) { throw AssertionError("Not Expected") },
                 sameAsShippingElement = null,
                 shippingValuesMap = null

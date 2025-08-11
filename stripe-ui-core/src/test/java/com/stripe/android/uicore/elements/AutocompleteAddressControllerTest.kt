@@ -30,7 +30,7 @@ class AutocompleteAddressControllerTest {
     }
 
     @Test
-    fun `Phone number field is shown when state iS REQUIRED`() = elementsTest(
+    fun `Phone number field is shown when state is REQUIRED`() = elementsTest(
         phoneNumberConfig = AddressFieldConfiguration.REQUIRED,
     ) { elements ->
         assertThat(elements.filterIsInstance<PhoneNumberElement>()).hasSize(1)
@@ -55,7 +55,7 @@ class AutocompleteAddressControllerTest {
     }
 
     @Test
-    fun `Name should be shown if 'hideName' is set to false`() = elementsTest(
+    fun `Name should be shown when state is REQUIRED`() = elementsTest(
         nameConfig = AddressFieldConfiguration.REQUIRED
     ) { elements ->
         assertThat(
