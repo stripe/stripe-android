@@ -130,7 +130,7 @@ internal class OnrampViewModel(
         when (result) {
             is OnrampIdentityVerificationResult.Completed -> {
                 _message.value = "Identity Verification completed"
-                _uiState.value = OnrampUiState.PostAuthenticationScreen
+                _uiState.value = OnrampUiState.AuthenticatedOperations(currentEmail, currentCustomerId)
             }
             is OnrampIdentityVerificationResult.Cancelled -> {
                 _message.value = "Identity Verification cancelled, please try again"

@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.DropdownMenu
@@ -77,6 +79,9 @@ internal class OnrampActivity : ComponentActivity() {
                     onAuthenticateUser = { email ->
                         onrampPresenter.authenticateExistingLinkUser(email)
                     },
+                    onRegisterWalletAddress = { address, network ->
+                        viewModel.registerWalletAddress(address, network)
+                    },
                     onStartVerification = {
                         onrampPresenter.promptForIdentityVerification()
                     }
@@ -91,7 +96,7 @@ internal class OnrampActivity : ComponentActivity() {
 internal fun OnrampScreen(
     viewModel: OnrampViewModel,
     onAuthenticateUser: (String) -> Unit,
-    onRegisterWalletAddress: (String, CryptoNetwork) -> Unit
+    onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onStartVerification: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -160,14 +165,11 @@ internal fun OnrampScreen(
                     customerId = currentState.customerId,
                     onRegisterWalletAddress = onRegisterWalletAddress,
                     onCollectKYC = { kycInfo -> viewModel.collectKycInfo(kycInfo) },
+                    onStartVerification = onStartVerification,
                     onBack = {
                         viewModel.onBackToEmailInput()
                     }
                 )
-
-                StartVerificationScreen {
-                    onStartVerification()
-                }
             }
         }
     }
@@ -373,13 +375,20 @@ private fun AuthenticatedOperationsScreen(
     customerId: String,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onCollectKYC: (KycInfo) -> Unit,
+    onStartVerification: () -> Unit,
     onBack: () -> Unit
 ) {
     var walletAddress by remember { mutableStateOf("") }
     var selectedNetwork by remember { mutableStateOf(CryptoNetwork.Ethereum) }
     var isDropdownExpanded by remember { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
 
-    Column {
+    Column(
+        Modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+            .padding(16.dp)
+    ) {
         Text(
             text = "Authenticated Operations",
             fontWeight = FontWeight.Bold,
@@ -465,6 +474,10 @@ private fun AuthenticatedOperationsScreen(
             onLastNameChange = { lastName = it },
             onCollectKYC = { kycInfo -> onCollectKYC(kycInfo) }
         )
+
+        StartVerificationScreen {
+            onStartVerification()
+        }
 
         TextButton(
             onClick = onBack,

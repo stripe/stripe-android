@@ -116,8 +116,8 @@ internal class CryptoApiRepository @Inject internal constructor(
             setWalletAddressUrl,
             Json.encodeToJsonElement(params).jsonObject,
             Unit.serializer()
-		)
-	}
+        )
+    }
 	
     suspend fun startIdentityVerification(
         consumerSessionClientSecret: String
@@ -186,7 +186,7 @@ internal class CryptoApiRepository @Inject internal constructor(
          */
         internal val setWalletAddressUrl: String = getApiUrl("crypto/internal/wallet")
 		
-		/**
+        /**
          * @return `https://api.stripe.com/v1/crypto/internal/start_identity_verification`
          */
         internal val startIdentityVerificationUrl: String = getApiUrl("crypto/internal/start_identity_verification")
