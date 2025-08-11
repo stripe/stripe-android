@@ -94,6 +94,7 @@ class OnrampCoordinator @Inject internal constructor(
     /**
      * Presenter for handling Link UI interactions without requiring direct activity references.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Presenter @Inject internal constructor(
         private val coordinator: OnrampPresenterCoordinator,
     ) {
@@ -115,6 +116,7 @@ class OnrampCoordinator @Inject internal constructor(
     /**
      * A Builder utility type to create an [OnrampCoordinator] with appropriate parameters.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Builder {
         /**
          * Constructs an [OnrampCoordinator] for the given parameters.
