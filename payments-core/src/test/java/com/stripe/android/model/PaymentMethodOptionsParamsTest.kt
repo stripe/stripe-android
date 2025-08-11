@@ -174,4 +174,38 @@ class PaymentMethodOptionsParamsTest {
             )
         )
     }
+
+    @Test
+    fun updateSetupFutureUsageWithPmoSfu_setsCorrectSfuValue() {
+        val params = PaymentMethodOptionsParams.SepaDebit(
+            setupFutureUsage = null
+        )
+
+        val newParams = params.updateSetupFutureUsageWithPmoSfu(
+            pmoSfu = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+        )
+
+        assertThat(newParams).isEqualTo(
+            PaymentMethodOptionsParams.SepaDebit(
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            )
+        )
+    }
+
+    @Test
+    fun updateSetupFutureUsageWithoutPmoSfu_setsCorrectSfu() {
+        val params = PaymentMethodOptionsParams.SepaDebit(
+            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+        )
+
+        val newParams = params.updateSetupFutureUsageWithPmoSfu(
+            pmoSfu = ConfirmPaymentIntentParams.SetupFutureUsage.None
+        )
+
+        assertThat(newParams).isEqualTo(
+            PaymentMethodOptionsParams.SepaDebit(
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            )
+        )
+    }
 }
