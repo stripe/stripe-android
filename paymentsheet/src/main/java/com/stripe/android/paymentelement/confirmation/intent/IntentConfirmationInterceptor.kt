@@ -708,7 +708,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     }
 
     private fun PaymentSheet.IntentConfiguration.SetupFutureUse.toConfirmParamsSetupFutureUsage():
-        ConfirmPaymentIntentParams.SetupFutureUsage? {
+        ConfirmPaymentIntentParams.SetupFutureUsage {
         return when (this) {
             PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession -> {
                 ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
@@ -716,7 +716,9 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession -> {
                 ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
             }
-            else -> null
+            PaymentSheet.IntentConfiguration.SetupFutureUse.None -> {
+                ConfirmPaymentIntentParams.SetupFutureUsage.None
+            }
         }
     }
 
