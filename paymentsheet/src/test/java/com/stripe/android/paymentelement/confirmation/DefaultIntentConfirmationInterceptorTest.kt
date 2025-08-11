@@ -1201,7 +1201,7 @@ class DefaultIntentConfirmationInterceptorTest {
             val nextStep = interceptor.intercept(
                 confirmationOption = PaymentMethodConfirmationOption.New(
                     createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                    optionsParams = null,
+                    optionsParams = PaymentMethodOptionsParams.Card(),
                     extraParams = null,
                     shouldSave = false,
                 ),
