@@ -42,12 +42,16 @@
   <string name="stripe_address_label_village_township">Kelurahan atau Kecamatan</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="stripe_address_postal_code_incomplete">Kode pos Anda tidak lengkap.</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="stripe_address_postal_code_invalid">Kode pos Anda tidak valid.</string>
   <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
   <string name="stripe_address_search_content_description">Cari</string>
   <!-- Error message for when ZIP code in form is incomplete (US only) -->
   <string name="stripe_address_zip_incomplete">Kode ZIP Anda tidak lengkap.</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
   <string name="stripe_address_zip_invalid">Kode ZIP Anda tidak valid.</string>
+  <!-- Error text indicating the zip/postal code is invalid, used for addresses of unknown country -->
+  <string name="stripe_address_zip_or_postal_invalid">Kode pos/ZIP Anda tidak valid.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="stripe_address_zip_postal_invalid">Kode Pos/ZIP Anda tidak valid</string>
   <!-- Label for a checkbox that makes customers billing address same as their shipping address -->
@@ -82,6 +86,4 @@
   <string name="stripe_invalid_expiry_month">Bulan kedaluwarsa kartu Anda tidak valid.</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="stripe_invalid_expiry_year">Tahun kedaluwarsa kartu Anda tidak valid.</string>
-  <!-- Error message for when postal code in form is invalid -->
-  <string name="stripe_address_postal_code_invalid">Kode pos Anda tidak valid.</string>
 </resources>

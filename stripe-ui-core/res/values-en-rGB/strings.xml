@@ -42,12 +42,16 @@
   <string name="stripe_address_label_village_township">Village or Township</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="stripe_address_postal_code_incomplete">Your postcode is incomplete.</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="stripe_address_postal_code_invalid">Your postcode is invalid.</string>
   <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
   <string name="stripe_address_search_content_description">Search</string>
   <!-- Error message for when ZIP code in form is incomplete (US only) -->
   <string name="stripe_address_zip_incomplete">Your postcode is incomplete.</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
   <string name="stripe_address_zip_invalid">Your ZIP code is invalid.</string>
+  <!-- Error text indicating the zip/postal code is invalid, used for addresses of unknown country -->
+  <string name="stripe_address_zip_or_postal_invalid">Your post code is invalid.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="stripe_address_zip_postal_invalid">Your ZIP/Postal code is invalid</string>
   <!-- Label for a checkbox that makes customers billing address same as their shipping address -->
@@ -82,6 +86,4 @@
   <string name="stripe_invalid_expiry_month">Your card\'s expiration month is invalid.</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="stripe_invalid_expiry_year">Your card\'s expiration year is invalid.</string>
-  <!-- Error message for when postal code in form is invalid -->
-  <string name="stripe_address_postal_code_invalid">Your postcode is invalid.</string>
 </resources>

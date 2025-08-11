@@ -45,8 +45,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up">Aqbel u kompli</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">Ħallas malajr, b\'mod sigur, b\'mossa waħda</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">Ħlas għax-xirja veloċi u sigur</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Erfa\' l-informazzjoni dwar il-pagament tiegħek permezz ta\' Link u ħallas b\'mod sigur b\'mossa waħda fuq siti tal-internet li jaċċettaw Link.</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">Ħallas aktar malajr kullimkien fejn Link huwa aċċettat.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Meta tkompli tkun qed taqbel mar-<terms>Regoli</terms> u l-<privacy>Politika tal-Privatezza</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -105,6 +109,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Id-dettalji tal-karta ma jistgħux jinbidlu.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Meta tagħti l-informazzjoni tal-karta tiegħek, tkun qed tħalli lil %s tiġbor il-pagamenti tal-ġejjieni mill-karta tiegħek skont ir-regoli tagħha.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Billi tkompli, taqbel li tissejvja l-informazzjoni tiegħek għal xiri futur ma\' %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Billi tkompli, taqbel li tissejvja l-informazzjoni tiegħek għal xiri futur ma\' %s u <link>Link</link>. Inti taqbel ukoll mat-<terms>Termini</terms> u <privacy>l-Privatezza</privacy> ta’ Link.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Il-karta ma nbidlitx. Jekk jogħġbok erġa\' pprova.</string>
   <!-- Title shown above a carousel containing available payment methods -->

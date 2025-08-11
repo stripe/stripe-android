@@ -45,8 +45,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up">ยอมรับและดำเนินการต่อ</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">การชำระเงินที่รวดเร็วและปลอดภัยในคลิกเดียว</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">การชำระเงินที่รวดเร็วและปลอดภัย</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">บันทึกข้อมูลการชำระเงินของคุณด้วย Link แล้วชำระเงินอย่างปลอดภัยในคลิกเดียวบนเว็บไซต์ที่ Link รองรับ</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">ชำระเงินได้รวดเร็วขึ้นในทุกที่ที่รองรับ Link</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[การดำเนินการต่อหมายความว่าคุณยอมรับ<terms>ข้อกำหนด</terms>และ<privacy>นโยบายความเป็นส่วนตัว</privacy>]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -105,6 +109,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">เปลี่ยนแปลงรายละเอียดบัตรไม่ได้</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">การให้ข้อมูลบัตร หมายความว่าคุณอนุญาตให้ %s เรียกเก็บเงินจากบัตรสำหรับการชำระเงินในอนาคตตามเงื่อนไขของผู้ค้ารายดังกล่าว</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">เมื่อดำเนินการต่อ จะถือว่าคุณตกลงที่จะบันทึกข้อมูลไว้สําหรับการซื้อด้วย %s ในอนาคต</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[เมื่อดำเนินการต่อ จะถือว่าคุณตกลงที่จะบันทึกข้อมูลไว้สำหรับการซื้อด้วย %s ในอนาคต และ <link>Link</link>คุณยังยอมรับ<terms>ข้อกำหนด</terms>และ<privacy>ความเป็นส่วนตัว</privacy>ของ Link ด้วย]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">บัตรไม่ได้อัปเดต โปรดลองอีกครั้ง</string>
   <!-- Title shown above a carousel containing available payment methods -->

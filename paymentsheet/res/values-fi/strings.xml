@@ -45,8 +45,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up">Hyväksy ja jatka</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">Nopea, turvallinen kerran napsautettava maksaminen</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">Nopea, turvallinen maksaminen</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Tallenna maksutiedot Link-palveluun ja maksa turvallisesti yhdellä napsautuksella Link-palvelun tukemilla sivustoilla.</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">Maksa nopeammin kaikkialla, missä Link hyväksytään.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Jatkamalla hyväksyt <terms>ehdot</terms> ja <privacy>tietosuojaselosteen</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -105,6 +109,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Kortin tietoja ei voi muuttaa.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Antamalla korttisi tiedot annat yrityksen %s veloittaa kortiltasi tulevia maksuja yrityksen ehtojen mukaisesti.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Jatkamalla hyväksyt, että tietosi tallennetaan tulevia ostoksia varten tahon %s kanssa.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Jatkamalla hyväksyt, että tietosi tallennetaan tulevia ostoksia varten tahon %s kanssa ja <link>Linkin kanssa</link>. Hyväksyt myös Linkin <terms>ehdot</terms> ja <privacy>tietosuojakäytännön</privacy>.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Korttia ei päivitetty. Yritä uudelleen.</string>
   <!-- Title shown above a carousel containing available payment methods -->

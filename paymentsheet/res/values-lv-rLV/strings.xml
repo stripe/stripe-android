@@ -45,8 +45,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up">Piekrist un turpināt</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">Ātra, droša 1 klikšķa norēķināšanās</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">Ātra un droša norēķināšanās</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Saglabājiet savu maksājuma informāciju ar Link un droši norēķinieties ar 1 klikšķi Link atbalstītās lapas.</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">Maksājiet ātrāk visur, kur tiek pieņemta saite.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Turpinot, jūs piekrītat <terms>noteikumiem</terms> un <privacy>konfidencialitātes politikai</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -105,6 +109,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Kartes informāciju nevar mainīt.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Norādot savas kartes informāciju, jūs atļaujat uzņēmumam %s saskaņā ar viņu noteikumiem iekasēt no jūsu kartes turpmākus maksājumus.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Turpinot jūs piekrītat saglabāt savu informāciju turpmākiem pirkumiem ar %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Turpinot, jūs piekrītat saglabāt savu informāciju turpmākiem pirkumiem ar %s un <link>Saite</link>. Jūs arī piekrītat saites <terms>Noteikumiem</terms> un <privacy>Konfidencialitātei</privacy>.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Karte netika atjaunināta. Lūdzu, mēģiniet vēlreiz.</string>
   <!-- Title shown above a carousel containing available payment methods -->
