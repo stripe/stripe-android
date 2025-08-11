@@ -76,8 +76,8 @@ internal class OnrampActivity : ComponentActivity() {
             OnrampExampleTheme {
                 OnrampScreen(
                     viewModel = viewModel,
-                    onAuthenticateUser = { email ->
-                        onrampPresenter.authenticateExistingLinkUser(email)
+                    onAuthenticateUser = {
+                        onrampPresenter.presentForVerification()
                     },
                     onRegisterWalletAddress = { address, network ->
                         viewModel.registerWalletAddress(address, network)
@@ -95,7 +95,7 @@ internal class OnrampActivity : ComponentActivity() {
 @Suppress("LongMethod")
 internal fun OnrampScreen(
     viewModel: OnrampViewModel,
-    onAuthenticateUser: (String) -> Unit,
+    onAuthenticateUser: () -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onStartVerification: () -> Unit
 ) {
@@ -330,7 +330,7 @@ private fun RegistrationButtons(
 @Composable
 private fun AuthenticationScreen(
     email: String,
-    onAuthenticate: (String) -> Unit,
+    onAuthenticate: () -> Unit,
     onBack: () -> Unit
 ) {
     Column {
@@ -351,7 +351,7 @@ private fun AuthenticationScreen(
         )
 
         Button(
-            onClick = { onAuthenticate(email) },
+            onClick = onAuthenticate,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 24.dp)
@@ -410,7 +410,7 @@ private fun AuthenticatedOperationsScreen(
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(bottom = 16.dp)
         )
-		
+
         // Network Selection
         Box {
             OutlinedTextField(

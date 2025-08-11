@@ -48,7 +48,7 @@ class OnrampCoordinator @Inject internal constructor(
      * @param email The email address to look up.
      * @return OnrampLinkLookupResult indicating whether the user exists.
      */
-    suspend fun isLinkUser(email: String): OnrampLinkLookupResult {
+    suspend fun lookupLinkUser(email: String): OnrampLinkLookupResult {
         return interactor.isLinkUser(email)
     }
 
@@ -58,7 +58,7 @@ class OnrampCoordinator @Inject internal constructor(
      * @param info The LinkInfo for the new user.
      * @return OnrampRegisterUserResult indicating the result of registration.
      */
-    suspend fun registerNewLinkUser(info: LinkUserInfo): OnrampRegisterUserResult {
+    suspend fun registerLinkUser(info: LinkUserInfo): OnrampRegisterUserResult {
         return interactor.registerNewLinkUser(info)
     }
 
@@ -118,15 +118,17 @@ class OnrampCoordinator @Inject internal constructor(
          * Authenticate an existing Link user via email.
          * This presents the authentication UI.
          *
-         * @param email The email address of the existing user.
+         * Requires successful lookup or registration of the user first.
          */
-        fun authenticateExistingLinkUser(email: String) {
-            coordinator.authenticateExistingLinkUser(email)
+        fun presentForVerification() {
+            coordinator.presentForVerification()
         }
 
         /**
          * Prompts a user to perform identity verification.
          * This presents the identity verification UI.
+         *
+         * Requires successful lookup or registration of the user first.
          */
         fun promptForIdentityVerification() {
             coordinator.promptForIdentityVerification()
