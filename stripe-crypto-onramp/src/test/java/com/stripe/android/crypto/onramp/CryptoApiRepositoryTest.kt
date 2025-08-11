@@ -134,4 +134,41 @@ class CryptoApiRepositoryTest {
                 .isEqualTo(true)
         }
     }
+
+    @Test
+    fun testStartIdentityVerificationSucceeds() {
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                """
+                    {
+                        "id": "test-id",
+                        "url": "https://www.google.com",
+                        "ephemeral_key": "test-key"
+                    }
+                    """,
+                emptyMap()
+            )
+
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val result = cryptoApiRepository.startIdentityVerification(consumerSessionClientSecret = "test-secret")
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val apiRequest = apiRequestArgumentCaptor.firstValue
+
+            assertThat(apiRequest.baseUrl)
+                .isEqualTo("https://api.stripe.com/v1/crypto/internal/start_identity_verification")
+
+            val params = apiRequest.params!!
+            assertThat(params["is_mobile"]).isEqualTo("true")
+            assertThat(params["credentials"]).isEqualTo(
+                mapOf("consumer_session_client_secret" to "test-secret")
+            )
+
+            assertThat(result.isSuccess)
+                .isEqualTo(true)
+        }
+    }
 }

@@ -16,6 +16,8 @@ import com.stripe.android.crypto.onramp.model.CryptoCustomerRequestParams
 import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.KycCollectionRequest
 import com.stripe.android.crypto.onramp.model.KycInfo
+import com.stripe.android.crypto.onramp.model.StartIdentityVerificationRequest
+import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
@@ -81,6 +83,22 @@ internal class CryptoApiRepository @Inject internal constructor(
         )
     }
 
+    suspend fun startIdentityVerification(
+        consumerSessionClientSecret: String
+    ): Result<StartIdentityVerificationResponse> {
+        val request = StartIdentityVerificationRequest(
+            credentials = CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret),
+        )
+
+        val json = Json { encodeDefaults = true }
+
+        return execute(
+            startIdentityVerificationUrl,
+            json.encodeToJsonElement(request).jsonObject,
+            StartIdentityVerificationResponse.serializer()
+        )
+    }
+
     private fun buildRequestOptions(): ApiRequest.Options {
         return ApiRequest.Options(
             apiKey = publishableKeyProvider(),
@@ -126,6 +144,11 @@ internal class CryptoApiRepository @Inject internal constructor(
          * @return `https://api.stripe.com/v1/crypto/internal/kyc_data_collection`
          */
         internal val collectKycDataUrl: String = getApiUrl("crypto/internal/kyc_data_collection")
+
+        /**
+         * @return `https://api.stripe.com/v1/crypto/internal/start_identity_verification`
+         */
+        internal val startIdentityVerificationUrl: String = getApiUrl("crypto/internal/start_identity_verification")
 
         private fun getApiUrl(path: String): String {
             return "${ApiRequest.API_HOST}/v1/$path"
