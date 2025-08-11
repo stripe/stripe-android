@@ -9,6 +9,7 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.model.ConsentUi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -25,13 +26,10 @@ internal class OAuthConsentViewModel @Inject constructor(
         OAuthConsentViewState(
             merchantName = linkConfiguration.merchantName,
             merchantLogoUrl = linkConfiguration.merchantLogoUrl,
-            // TODO
+            userEmail = linkAccount.email,
             consentPane = consentPanePreview.let {
                 it.copy(
                     title = "Connect ${linkConfiguration.merchantName} with Link",
-                    userSection = it.userSection.copy(
-                        label = linkAccount.email
-                    ),
                     scopesSection = it.scopesSection.copy(
                         header = "${linkConfiguration.merchantName} will have access to:"
                     ),
@@ -71,6 +69,7 @@ internal class OAuthConsentViewModel @Inject constructor(
 
 internal data class OAuthConsentViewState(
     val merchantName: String,
+    val userEmail: String,
     val merchantLogoUrl: String? = null,
-    val consentPane: ConsentPane? = null,
+    val consentPane: ConsentUi.ConsentPane? = null,
 )
