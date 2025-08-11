@@ -108,6 +108,10 @@ class OnrampCoordinator @Inject internal constructor(
             coordinator.authenticateExistingLinkUser(email)
         }
 
+        /**
+         * Prompts a user to perform identity verification.
+         * This presents the identity verification UI.
+         */
         fun promptForIdentityVerification() {
             coordinator.promptForIdentityVerification()
         }
