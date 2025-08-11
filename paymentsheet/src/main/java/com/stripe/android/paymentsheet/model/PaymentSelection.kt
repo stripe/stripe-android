@@ -489,5 +489,23 @@ internal fun PaymentSelection.Saved.mandateTextFromPaymentMethodMetadata(
     metadata.hasIntentToSetup(paymentMethod.type?.code ?: "")
 )
 
+/**
+ * If setup_future_usage is set at the top level to "off_session" the payment method will
+ * inherit this value so sending [ConfirmPaymentIntentParams.SetupFutureUsage.OnSession] and
+ * [ConfirmPaymentIntentParams.SetupFutureUsage.Blank] have no effect.
+ * If setup_future_usage is set to "on_session" at either the top level or payment_method_options level it can
+ * only be updated to "off_session". This method will always return the [ConfirmPaymentIntentParams.SetupFutureUsage]
+ * value if it is [ConfirmPaymentIntentParams.SetupFutureUsage.OffSession]. Otherwise it will return null if
+ * @param hasIntentToSetup is true
+ */
+internal fun PaymentSelection.CustomerRequestedSave.getSetupFutureUseValue(
+    hasIntentToSetup: Boolean
+): ConfirmPaymentIntentParams.SetupFutureUsage? {
+    return when (setupFutureUsage) {
+        ConfirmPaymentIntentParams.SetupFutureUsage.OffSession -> setupFutureUsage
+        else -> setupFutureUsage.takeIf { !hasIntentToSetup }
+    }
+}
+
 private val PaymentMethod.isLinkCardBrand: Boolean
     get() = type == PaymentMethod.Type.Card && linkPaymentDetails is LinkPaymentDetails.BankAccount
