@@ -301,15 +301,19 @@ internal class LinkControllerInteractor @Inject constructor(
                 component.linkAuth.lookUp(
                     email = email,
                     emailSource = EmailSource.USER_ACTION,
-                    startSession = false,
+                    startSession = true,
                     customerId = null,
                 )
                     .toResult()
-                    .map { it != null }
             }
             .fold(
-                onSuccess = { LinkController.LookupConsumerResult.Success(email, it) },
-                onFailure = { LinkController.LookupConsumerResult.Failed(email, it) }
+                onSuccess = { account ->
+                    updateStateOnAccountUpdate(LinkAccountUpdate.Value(account))
+                    LinkController.LookupConsumerResult.Success(email, account != null)
+                },
+                onFailure = {
+                    LinkController.LookupConsumerResult.Failed(email, it)
+                }
             )
     }
 
