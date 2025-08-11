@@ -21,34 +21,18 @@ class PaymentMethodOptionsParamsTest {
     }
 
     @Test
-    fun blikToParamMap_withCode_includeCode() {
+    fun blikToParamMap_hasCorrectValues() {
         val blikCode = "123456"
         assertThat(
             PaymentMethodOptionsParams.Blik(
-                code = blikCode
-            ).toParamMap()
-        ).isEqualTo(
-            mapOf(
-                PaymentMethod.Type.Blik.code to mapOf(
-                    PaymentMethodOptionsParams.Blik.PARAM_CODE to blikCode
-                )
-            )
-        )
-    }
-
-    @Test
-    fun blikInternalToParamMap_withSfu_includesSfu() {
-        val blikCode = "123456"
-        assertThat(
-            PaymentMethodOptionsParams.BlikInternal(
                 code = blikCode,
                 setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.None
             ).toParamMap()
         ).isEqualTo(
             mapOf(
                 PaymentMethod.Type.Blik.code to mapOf(
-                    PaymentMethodOptionsParams.BlikInternal.PARAM_CODE to blikCode,
-                    PaymentMethodOptionsParams.BlikInternal.PARAM_SETUP_FUTURE_USAGE to "none"
+                    PaymentMethodOptionsParams.Blik.PARAM_CODE to blikCode,
+                    PaymentMethodOptionsParams.Blik.PARAM_SETUP_FUTURE_USAGE to "none"
                 )
             )
         )
@@ -113,12 +97,14 @@ class PaymentMethodOptionsParamsTest {
         assertThat(
             PaymentMethodOptionsParams.WeChatPay(
                 appId = "some_id",
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.None
             ).toParamMap()
         ).isEqualTo(
             mapOf(
                 "wechat_pay" to mapOf(
                     PaymentMethodOptionsParams.WeChatPay.PARAM_CLIENT to "android",
                     PaymentMethodOptionsParams.WeChatPay.PARAM_APP_ID to "some_id",
+                    PaymentMethodOptionsParams.WeChatPay.PARAM_SETUP_FUTURE_USAGE to "none",
                 )
             )
         )
@@ -134,25 +120,7 @@ class PaymentMethodOptionsParamsTest {
             mapOf(
                 "wechat_pay" to mapOf(
                     PaymentMethodOptionsParams.WeChatPay.PARAM_CLIENT to "mobile_web",
-                    PaymentMethodOptionsParams.WeChatPayInternal.PARAM_SETUP_FUTURE_USAGE to "none"
-                )
-            )
-        )
-    }
-
-    @Test
-    fun weChatPayInternalToParamMap_hasCorrectValues() {
-        assertThat(
-            PaymentMethodOptionsParams.WeChatPayInternal(
-                appId = "some_id",
-                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.None
-            ).toParamMap()
-        ).isEqualTo(
-            mapOf(
-                "wechat_pay" to mapOf(
-                    PaymentMethodOptionsParams.WeChatPay.PARAM_CLIENT to "android",
-                    PaymentMethodOptionsParams.WeChatPay.PARAM_APP_ID to "some_id",
-                    PaymentMethodOptionsParams.WeChatPayInternal.PARAM_SETUP_FUTURE_USAGE to "none"
+                    PaymentMethodOptionsParams.WeChatPay.PARAM_SETUP_FUTURE_USAGE to "none"
                 )
             )
         )
@@ -221,42 +189,6 @@ class PaymentMethodOptionsParamsTest {
         assertThat(newParams).isEqualTo(
             PaymentMethodOptionsParams.SepaDebit(
                 setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
-            )
-        )
-    }
-
-    @Test
-    fun updateSetupFutureUsageWithPmoSfu_setsCorrectSfuValueForBlikInternal() {
-        val params = PaymentMethodOptionsParams.Blik(
-            code = "12345"
-        )
-
-        val newParams = params.updateSetupFutureUsageWithPmoSfu(
-            pmoSfu = ConfirmPaymentIntentParams.SetupFutureUsage.None
-        )
-
-        assertThat(newParams).isEqualTo(
-            PaymentMethodOptionsParams.BlikInternal(
-                code = "12345",
-                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.None
-            )
-        )
-    }
-
-    @Test
-    fun updateSetupFutureUsageWithPmoSfu_setsCorrectSfuValueForWeChatPayInternal() {
-        val params = PaymentMethodOptionsParams.WeChatPay(
-            appId = "some_id"
-        )
-
-        val newParams = params.updateSetupFutureUsageWithPmoSfu(
-            pmoSfu = ConfirmPaymentIntentParams.SetupFutureUsage.None
-        )
-
-        assertThat(newParams).isEqualTo(
-            PaymentMethodOptionsParams.WeChatPayInternal(
-                appId = "some_id",
-                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.None,
             )
         )
     }
