@@ -34,35 +34,10 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.image.LocalStripeImageLoader
-import com.stripe.android.paymentsheet.R
+import com.stripe.android.model.ConsentUi
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.utils.collectAsState
-
-internal data class ConsentPane(
-    val title: String,
-    val userSection: UserSection,
-    val scopesSection: ScopesSection,
-    val disclaimer: String?,
-    val denyButtonLabel: String?,
-    val allowButtonLabel: String,
-) {
-    data class UserSection(
-        val iconUrl: String,
-        val label: String,
-    )
-
-    data class ScopesSection(
-        val header: String,
-        val scopes: List<Scope>,
-    ) {
-        data class Scope(
-            val iconUrl: String,
-            val header: String?,
-            val description: String,
-        )
-    }
-}
 
 @Composable
 internal fun OAuthConsentScreen(
@@ -72,6 +47,7 @@ internal fun OAuthConsentScreen(
     val consentPane = viewState.consentPane ?: return // TODO
     OAuthConsentScreen(
         merchantLogoUrl = viewState.merchantLogoUrl,
+        userEmail = viewState.userEmail,
         pane = consentPane,
         onAllowClick = viewModel::onAllowClick,
         onDenyClick = viewModel::onDenyClick,
@@ -81,19 +57,20 @@ internal fun OAuthConsentScreen(
 @Composable
 internal fun OAuthConsentScreen(
     merchantLogoUrl: String?,
-    pane: ConsentPane,
+    userEmail: String,
+    pane: ConsentUi.ConsentPane,
     onAllowClick: () -> Unit,
     onDenyClick: (() -> Unit)? = null,
 ) {
     ScrollableTopLevelColumn {
         MerchantLogo(merchantLogoUrl)
         Title(pane.title)
-        UserSection(pane.userSection)
+        UserSection(userEmail)
         ScopesSection(pane.scopesSection)
 
-        if (pane.disclaimer != null) {
+        pane.disclaimer?.let {
             Spacer(Modifier.height(24.dp))
-            Disclaimer(pane.disclaimer)
+            Disclaimer(it)
         }
         Spacer(Modifier.height(16.dp))
         ActionButtons(
@@ -150,30 +127,16 @@ private fun Title(title: String) {
 }
 
 @Composable
-private fun UserSection(section: ConsentPane.UserSection) {
-    val imageLoader = LocalStripeImageLoader.current
+private fun UserSection(email: String) {
     Row(
         modifier = Modifier
             .border(1.dp, LinkTheme.colors.textTertiary, CircleShape)
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        val modifier = Modifier
-            .clip(CircleShape)
-            .size(24.dp)
-        StripeImage(
-            modifier = modifier,
-            url = section.iconUrl,
-            debugPainter = ColorPainter(LinkTheme.colors.iconBrand),
-            imageLoader = imageLoader,
-            contentDescription = null,
-            errorContent = {
-                Box(modifier.background(LinkTheme.colors.iconBrand)) // TODO.
-            }
-        )
         Text(
             modifier = Modifier.padding(horizontal = 8.dp),
-            text = section.label,
+            text = email,
             style = LinkTheme.typography.detail,
             color = LinkTheme.colors.textPrimary,
         )
@@ -181,7 +144,7 @@ private fun UserSection(section: ConsentPane.UserSection) {
 }
 
 @Composable
-private fun ScopesSection(section: ConsentPane.ScopesSection) {
+private fun ScopesSection(section: ConsentUi.ConsentPane.ScopesSection) {
     val imageLoader = LocalStripeImageLoader.current
     Text(
         modifier = Modifier
@@ -202,7 +165,7 @@ private fun ScopesSection(section: ConsentPane.ScopesSection) {
         section.scopes.forEach { scope ->
             ScopeItem(
                 imageLoader = imageLoader,
-                iconUrl = scope.iconUrl,
+                iconUrl = scope.icon.default,
                 header = scope.header,
                 description = scope.description,
             )
@@ -328,71 +291,59 @@ private enum class ActionButtonType {
     Primary,
 }
 
-@Composable
-private fun OAuthConsentScreenPreview(
-    merchantLogoUrl: String?,
-    pane: ConsentPane,
-) {
-    ScrollableTopLevelColumn {
-        MerchantLogo(merchantLogoUrl)
-        Title(pane.title)
-        UserSection(pane.userSection)
-        ScopesSection(pane.scopesSection)
-
-        if (pane.disclaimer != null) {
-            Spacer(Modifier.height(24.dp))
-            Disclaimer(pane.disclaimer)
-        }
-        Spacer(Modifier.height(16.dp))
-        ActionButtons(
-            denyButtonLabel = pane.denyButtonLabel,
-            allowButtonLabel = pane.allowButtonLabel,
-            onAllowClick = {},
-            onDenyClick = {},
-        )
-    }
-}
-
 @PreviewLightDark
 @Composable
-private fun OAuthConsentScreenPreviewWrapper() {
+private fun OAuthConsentScreenPreview() {
     DefaultLinkTheme {
         Surface(
             modifier = Modifier.fillMaxWidth(),
             color = LinkTheme.colors.surfacePrimary,
         ) {
-            OAuthConsentScreenPreview(
+            OAuthConsentScreenPreviewHelper(
                 merchantLogoUrl = null,
+                userEmail = "jane.diaz@example.com",
                 pane = consentPanePreview
             )
         }
     }
 }
 
+@Composable
+private fun OAuthConsentScreenPreviewHelper(
+    merchantLogoUrl: String?,
+    userEmail: String,
+    pane: ConsentUi.ConsentPane,
+) {
+    OAuthConsentScreen(
+        merchantLogoUrl = merchantLogoUrl,
+        userEmail = userEmail,
+        pane = pane,
+        onAllowClick = {},
+        onDenyClick = {},
+    )
+}
+
 internal val consentPanePreview = run {
     val scopeIconUrl =
         "https://b.stripecdn.com/connections-statics-srv/assets/SailIcon--lock-primary-3x.png"
-    ConsentPane(
+    val scopeIcon = ConsentUi.Icon(scopeIconUrl)
+    ConsentUi.ConsentPane(
         title = "Connect Powdur\nwith Link",
-        userSection = ConsentPane.UserSection(
-            iconUrl = "",
-            label = "jane.diaz@example.com",
-        ),
-        scopesSection = ConsentPane.ScopesSection(
+        scopesSection = ConsentUi.ConsentPane.ScopesSection(
             header = "Powdur will have access to:",
             scopes = listOf(
-                ConsentPane.ScopesSection.Scope(
-                    iconUrl = scopeIconUrl,
+                ConsentUi.ConsentPane.ScopesSection.Scope(
+                    icon = scopeIcon,
                     header = "Account info",
                     description = "Name, email, and profile picture",
                 ),
-                ConsentPane.ScopesSection.Scope(
-                    iconUrl = scopeIconUrl,
+                ConsentUi.ConsentPane.ScopesSection.Scope(
+                    icon = scopeIcon,
                     header = "Addresses",
                     description = "Shipping addresses",
                 ),
-                ConsentPane.ScopesSection.Scope(
-                    iconUrl = scopeIconUrl,
+                ConsentUi.ConsentPane.ScopesSection.Scope(
+                    icon = scopeIcon,
                     header = "Wallet",
                     description = "Cards, bank accounts",
                 ),
