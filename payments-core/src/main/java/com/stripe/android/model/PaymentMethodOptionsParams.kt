@@ -79,7 +79,7 @@ sealed class PaymentMethodOptionsParams(
     }
 
     @Parcelize
-    data class Blik(
+    data class Blik @JvmOverloads constructor(
         var code: String,
         var setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null,
     ) : PaymentMethodOptionsParams(PaymentMethod.Type.Blik) {
