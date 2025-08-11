@@ -257,6 +257,7 @@ constructor(
          */
         Blank(""),
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         /**
          * Use `none` to override top level setup_future_usage in payment_method_options.
          */

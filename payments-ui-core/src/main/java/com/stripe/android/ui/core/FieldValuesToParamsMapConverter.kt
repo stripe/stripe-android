@@ -116,24 +116,16 @@ class FieldValuesToParamsMapConverter {
                     }
                 }
                 PaymentMethod.Type.WeChatPay.code -> {
-                    PaymentMethodOptionsParams.WeChatPayH5
+                    PaymentMethodOptionsParams.WeChatPayH5(
+                        setupFutureUsage = setupFutureUsage
+                    )
                 }
                 PaymentMethod.Type.SepaDebit.code -> {
                     PaymentMethodOptionsParams.SepaDebit(
                         setupFutureUsage = setupFutureUsage,
                     )
                 }
-                else -> {
-                    val type = PaymentMethod.Type.fromCode(code)
-                    if (setupFutureUsage != null && type != null) {
-                        PaymentMethodOptionsParams.SetupFutureUsage(
-                            pmType = type,
-                            setupFutureUsage = setupFutureUsage
-                        )
-                    } else {
-                        null
-                    }
-                }
+                else -> null
             }
         }
 

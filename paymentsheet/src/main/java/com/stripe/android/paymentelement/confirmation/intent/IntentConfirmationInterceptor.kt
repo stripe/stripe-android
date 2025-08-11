@@ -20,7 +20,9 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.setupFutureUsage
+import com.stripe.android.model.updateSetupFutureUsageWithPmoSfu
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor.NextStep
@@ -243,7 +245,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     isDeferred = false,
-                    topLevelSfu = null
+                    intentConfigSetupFutureUsage = null
                 )
             }
 
@@ -256,7 +258,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     isDeferred = false,
-                    topLevelSfu = null
+                    intentConfigSetupFutureUsage = null
                 )
             }
         }
@@ -545,10 +547,15 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     intent,
                     shippingValues,
                     paymentMethod,
-                    paymentMethodOptionsParams = paymentMethodOptionsParams,
+                    paymentMethodOptionsParams = updatePaymentMethodOptionsParams(
+                        type = paymentMethod.type,
+                        intentConfiguration = intentConfiguration,
+                        paymentMethodOptionsParams = paymentMethodOptionsParams
+                    ),
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     isDeferred = true,
-                    topLevelSfu = intentConfiguration.mode.setupFutureUse?.toConfirmParamsSetupFutureUsage()
+                    intentConfigSetupFutureUsage = intentConfiguration
+                        .mode.setupFutureUse?.toConfirmParamsSetupFutureUsage()
                 )
             }
         }.getOrElse { error ->
@@ -590,7 +597,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams?,
         isDeferred: Boolean,
-        topLevelSfu: ConfirmPaymentIntentParams.SetupFutureUsage?
+        intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?
     ): NextStep {
         val factory = ConfirmStripeIntentParamsFactory.createFactory(
             clientSecret = clientSecret,
@@ -606,7 +613,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             paymentMethod = paymentMethod,
             optionsParams = paymentMethodOptionsParams,
             extraParams = paymentMethodExtraParams,
-            intentConfigSetupFutureUsage = topLevelSfu
+            intentConfigSetupFutureUsage = intentConfigSetupFutureUsage
         )
         return NextStep.Confirm(
             confirmParams = confirmParams,
@@ -723,6 +730,29 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     ): Boolean {
         return paymentMethodOptionsParams?.setupFutureUsage()?.hasIntentToSetup() == true ||
             intentConfiguration.mode.setupFutureUse?.toConfirmParamsSetupFutureUsage()?.hasIntentToSetup() == true
+    }
+
+    @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
+    private fun updatePaymentMethodOptionsParams(
+        type: PaymentMethod.Type?,
+        intentConfiguration: PaymentSheet.IntentConfiguration,
+        paymentMethodOptionsParams: PaymentMethodOptionsParams?
+    ): PaymentMethodOptionsParams? {
+        if (type == null) return paymentMethodOptionsParams
+        return (intentConfiguration.mode as? PaymentSheet.IntentConfiguration.Mode.Payment)
+            ?.paymentMethodOptions
+            ?.setupFutureUsageValues?.let { values ->
+                values[type]?.toConfirmParamsSetupFutureUsage()?.let { configPmoSfu ->
+                    if (paymentMethodOptionsParams != null) {
+                        paymentMethodOptionsParams.updateSetupFutureUsageWithPmoSfu(configPmoSfu)
+                    } else {
+                        PaymentMethodOptionsParams.SetupFutureUsage(
+                            paymentMethodType = type,
+                            setupFutureUsage = configPmoSfu
+                        )
+                    }
+                }
+            } ?: paymentMethodOptionsParams
     }
 
     private companion object {

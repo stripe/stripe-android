@@ -80,84 +80,6 @@ internal class AddPaymentMethodTest {
     }
 
     @Test
-    fun `transformToPaymentSelection transforms cards with PMO SFU correctly for RequestNoReuse`() {
-        val cardBrand = "visa"
-        val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
-        val formFieldValues = FormFieldValues(
-            fieldValuePairs = mapOf(
-                IdentifierSpec.CardBrand to FormFieldEntry(cardBrand, true),
-            ),
-            userRequestedReuse = customerRequestedSave,
-        )
-
-        val metadataWithPmoSfu = metadata.copy(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
-            )
-        )
-        val cardPaymentMethod = metadataWithPmoSfu.supportedPaymentMethodForCode("card")!!
-        val cardPaymentSelection = formFieldValues.transformToPaymentSelection(
-            cardPaymentMethod,
-            metadataWithPmoSfu
-        ) as PaymentSelection.New.Card
-        val options = cardPaymentSelection.paymentMethodOptionsParams as? PaymentMethodOptionsParams.Card
-        assertThat(cardPaymentSelection.customerRequestedSave).isEqualTo(customerRequestedSave)
-        assertThat(options?.setupFutureUsage).isNull()
-    }
-
-    @Test
-    fun `transformToPaymentSelection transforms cards with PMO SFU correctly for RequestReuse`() {
-        val cardBrand = "visa"
-        val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
-        val formFieldValues = FormFieldValues(
-            fieldValuePairs = mapOf(
-                IdentifierSpec.CardBrand to FormFieldEntry(cardBrand, true),
-            ),
-            userRequestedReuse = customerRequestedSave,
-        )
-
-        val metadataWithPmoSfu = metadata.copy(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
-            )
-        )
-        val cardPaymentMethod = metadataWithPmoSfu.supportedPaymentMethodForCode("card")!!
-        val cardPaymentSelection = formFieldValues.transformToPaymentSelection(
-            cardPaymentMethod,
-            metadataWithPmoSfu
-        ) as PaymentSelection.New.Card
-        val options = cardPaymentSelection.paymentMethodOptionsParams as? PaymentMethodOptionsParams.Card
-        assertThat(cardPaymentSelection.customerRequestedSave).isEqualTo(customerRequestedSave)
-        assertThat(options?.setupFutureUsage).isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.OffSession)
-    }
-
-    @Test
-    fun `transformToPaymentSelection transforms cards with PMO SFU correctly for NoRequest`() {
-        val cardBrand = "visa"
-        val customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
-        val formFieldValues = FormFieldValues(
-            fieldValuePairs = mapOf(
-                IdentifierSpec.CardBrand to FormFieldEntry(cardBrand, true),
-            ),
-            userRequestedReuse = customerRequestedSave,
-        )
-
-        val metadataWithPmoSfu = metadata.copy(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
-            )
-        )
-        val cardPaymentMethod = metadataWithPmoSfu.supportedPaymentMethodForCode("card")!!
-        val cardPaymentSelection = formFieldValues.transformToPaymentSelection(
-            cardPaymentMethod,
-            metadataWithPmoSfu
-        ) as PaymentSelection.New.Card
-        val options = cardPaymentSelection.paymentMethodOptionsParams as? PaymentMethodOptionsParams.Card
-        assertThat(cardPaymentSelection.customerRequestedSave).isEqualTo(customerRequestedSave)
-        assertThat(options?.setupFutureUsage).isNull()
-    }
-
-    @Test
     fun `transformToPaymentSelection transforms generic PM with PMO SFU sets requiresMandate to true`() {
         val formFieldValues = FormFieldValues(
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest
@@ -518,6 +440,32 @@ internal class AddPaymentMethodTest {
         assertThat(sepaDebitPaymentSelection.customerRequestedSave).isEqualTo(customerRequestedSave)
         assertThat(options?.setupFutureUsage).isNull()
     }
+
+//    @Test
+//    fun `transformToPaymentSelection transforms SepaDebit with PMO setupFutureUsage correctly for NoRequest`() {
+//        val customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+//        val formFieldValues = FormFieldValues(
+//            fieldValuePairs = mapOf(
+//                IdentifierSpec.Generic("sepa_debit[iban]") to FormFieldEntry("DE89370400440532013000", true),
+//            ),
+//            userRequestedReuse = customerRequestedSave,
+//        )
+//
+//        val metadataWithSepaDebit = metadata.copy(
+//            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+//                paymentMethodTypes = listOf("sepa_debit")
+//            )
+//        )
+//        val sepaDebitPaymentMethod = metadataWithSepaDebit.supportedPaymentMethodForCode("sepa_debit")!!
+//        val sepaDebitPaymentSelection = formFieldValues.transformToPaymentSelection(
+//            sepaDebitPaymentMethod,
+//            metadataWithSepaDebit
+//        ) as PaymentSelection.New.GenericPaymentMethod
+//
+//        val options = sepaDebitPaymentSelection.paymentMethodOptionsParams as? PaymentMethodOptionsParams.SepaDebit
+//        assertThat(sepaDebitPaymentSelection.customerRequestedSave).isEqualTo(customerRequestedSave)
+//        assertThat(options?.setupFutureUsage).isNull()
+//    }
 
     @Test
     fun `transformToExtraParams returns correct params for SepaDebit with setAsDefault`() {

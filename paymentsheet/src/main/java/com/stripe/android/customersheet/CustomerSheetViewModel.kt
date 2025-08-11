@@ -874,7 +874,6 @@ internal class CustomerSheetViewModel(
             financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),
             setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
             autocompleteAddressInteractorFactory = null,
-            setupFutureUsage = null
         )
     }
 

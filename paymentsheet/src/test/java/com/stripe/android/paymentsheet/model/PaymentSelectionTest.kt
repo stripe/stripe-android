@@ -8,7 +8,6 @@ import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.PaymentIntentFixtures
@@ -239,77 +238,5 @@ class PaymentSelectionTest {
                 isSetupFlow = true
             )
         )
-    }
-
-    @Test
-    fun `getSetupFutureUseValue returns correct value when PMO SFU is OffSession`() {
-        val noRequestSfu = PaymentSelection.CustomerRequestedSave.NoRequest.getSetupFutureUseValue(
-            paymentMethodOptionsSetupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
-        )
-        assertThat(noRequestSfu).isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.OffSession)
-
-        val noReuseSfu = PaymentSelection.CustomerRequestedSave.RequestNoReuse.getSetupFutureUseValue(
-            paymentMethodOptionsSetupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
-        )
-        assertThat(noReuseSfu).isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.OffSession)
-
-        val reuseSfu = PaymentSelection.CustomerRequestedSave.RequestReuse.getSetupFutureUseValue(
-            paymentMethodOptionsSetupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
-        )
-        assertThat(reuseSfu).isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.OffSession)
-    }
-
-    @Test
-    fun `getSetupFutureUseValue returns correct value when PMO SFU is OnSession`() {
-        val noRequestSfu = PaymentSelection.CustomerRequestedSave.NoRequest.getSetupFutureUseValue(
-            paymentMethodOptionsSetupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
-        )
-        assertThat(noRequestSfu).isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.OnSession)
-
-        val noReuseSfu = PaymentSelection.CustomerRequestedSave.RequestNoReuse.getSetupFutureUseValue(
-            paymentMethodOptionsSetupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
-        )
-        assertThat(noReuseSfu).isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.OnSession)
-
-        val reuseSfu = PaymentSelection.CustomerRequestedSave.RequestReuse.getSetupFutureUseValue(
-            paymentMethodOptionsSetupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
-        )
-        assertThat(reuseSfu).isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.OffSession)
-    }
-
-    @Test
-    fun `getSetupFutureUseValue returns correct value when PMO SFU is None`() {
-        val noRequestSfu = PaymentSelection.CustomerRequestedSave.NoRequest.getSetupFutureUseValue(
-            paymentMethodOptionsSetupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.None
-        )
-        assertThat(noRequestSfu).isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.None)
-
-        val noReuseSfu = PaymentSelection.CustomerRequestedSave.RequestNoReuse.getSetupFutureUseValue(
-            paymentMethodOptionsSetupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.None
-        )
-        assertThat(noReuseSfu).isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.None)
-
-        val reuseSfu = PaymentSelection.CustomerRequestedSave.RequestReuse.getSetupFutureUseValue(
-            paymentMethodOptionsSetupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.None
-        )
-        assertThat(reuseSfu).isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.OffSession)
-    }
-
-    @Test
-    fun `getSetupFutureUseValue returns correct value when PMO SFU is null`() {
-        val noRequestSfu = PaymentSelection.CustomerRequestedSave.NoRequest.getSetupFutureUseValue(
-            paymentMethodOptionsSetupFutureUsage = null
-        )
-        assertThat(noRequestSfu).isNull()
-
-        val noReuseSfu = PaymentSelection.CustomerRequestedSave.RequestNoReuse.getSetupFutureUseValue(
-            paymentMethodOptionsSetupFutureUsage = null
-        )
-        assertThat(noReuseSfu).isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.Blank)
-
-        val reuseSfu = PaymentSelection.CustomerRequestedSave.RequestReuse.getSetupFutureUseValue(
-            paymentMethodOptionsSetupFutureUsage = null
-        )
-        assertThat(reuseSfu).isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.OffSession)
     }
 }
