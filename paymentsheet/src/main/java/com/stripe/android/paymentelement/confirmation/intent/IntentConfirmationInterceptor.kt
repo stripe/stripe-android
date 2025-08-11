@@ -15,13 +15,16 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.setupFutureUsage
+import com.stripe.android.model.updateSetupFutureUsageWithPmoSfu
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor.NextStep
@@ -183,7 +186,11 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     intentConfiguration = initializationMode.intentConfiguration,
                     shippingValues = shippingValues,
                     paymentMethodCreateParams = paymentMethodCreateParams,
-                    paymentMethodOptionsParams = paymentMethodOptionsParams,
+                    paymentMethodOptionsParams = updatePaymentMethodOptionsParams(
+                        code = paymentMethodCreateParams.typeCode,
+                        intentConfiguration = initializationMode.intentConfiguration,
+                        paymentMethodOptionsParams = paymentMethodOptionsParams
+                    ),
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     customerRequestedSave = customerRequestedSave,
                 )
@@ -226,7 +233,11 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 handleDeferred(
                     intentConfiguration = initializationMode.intentConfiguration,
                     paymentMethod = paymentMethod,
-                    paymentMethodOptionsParams = paymentMethodOptionsParams,
+                    paymentMethodOptionsParams = updatePaymentMethodOptionsParams(
+                        code = paymentMethod.type?.code,
+                        intentConfiguration = initializationMode.intentConfiguration,
+                        paymentMethodOptionsParams = paymentMethodOptionsParams
+                    ),
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     shippingValues = shippingValues,
                     shouldSavePaymentMethod = paymentMethodOptionsParams?.setupFutureUsage() == offSession,
@@ -242,6 +253,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     isDeferred = false,
+                    intentConfigSetupFutureUsage = null
                 )
             }
 
@@ -254,6 +266,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     isDeferred = false,
+                    intentConfigSetupFutureUsage = null
                 )
             }
         }
@@ -534,7 +547,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             } else if (intent.requiresAction()) {
                 createHandleNextActionStep(clientSecret, intent, paymentMethod)
             } else {
-                DeferredIntentValidator.validate(intent, intentConfiguration, allowsManualConfirmation)
+                DeferredIntentValidator.validate(intent, intentConfiguration, allowsManualConfirmation, paymentMethod)
                 createConfirmStep(
                     clientSecret,
                     intent,
@@ -543,6 +556,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     isDeferred = true,
+                    intentConfigSetupFutureUsage = intentConfiguration
+                        .mode.setupFutureUse?.toConfirmParamsSetupFutureUsage()
                 )
             }
         }.getOrElse { error ->
@@ -584,6 +599,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams?,
         isDeferred: Boolean,
+        intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?
     ): NextStep {
         val factory = ConfirmStripeIntentParamsFactory.createFactory(
             clientSecret = clientSecret,
@@ -599,6 +615,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             paymentMethod = paymentMethod,
             optionsParams = paymentMethodOptionsParams,
             extraParams = paymentMethodExtraParams,
+            intentConfigSetupFutureUsage = intentConfigSetupFutureUsage
         )
         return NextStep.Confirm(
             confirmParams = confirmParams,
@@ -688,6 +705,46 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 )
             }
         )
+    }
+
+    private fun PaymentSheet.IntentConfiguration.SetupFutureUse.toConfirmParamsSetupFutureUsage():
+        ConfirmPaymentIntentParams.SetupFutureUsage? {
+        return when (this) {
+            PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession -> {
+                ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            }
+            PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession -> {
+                ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
+            }
+            else -> null
+        }
+    }
+
+    /**
+     * [PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions] does not require setting PMO SFU on the
+     * intent. If PMO SFU value exists in the configuration, set it in the PaymentMethodOptionsParams.
+     */
+    @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
+    private fun updatePaymentMethodOptionsParams(
+        code: PaymentMethodCode?,
+        intentConfiguration: PaymentSheet.IntentConfiguration,
+        paymentMethodOptionsParams: PaymentMethodOptionsParams?
+    ): PaymentMethodOptionsParams? {
+        val paymentMethodType = PaymentMethod.Type.fromCode(code) ?: return paymentMethodOptionsParams
+        return (intentConfiguration.mode as? PaymentSheet.IntentConfiguration.Mode.Payment)
+            ?.paymentMethodOptions
+            ?.setupFutureUsageValues?.let { values ->
+                values[paymentMethodType]?.toConfirmParamsSetupFutureUsage()?.let { configPmoSfu ->
+                    if (paymentMethodOptionsParams != null) {
+                        paymentMethodOptionsParams.updateSetupFutureUsageWithPmoSfu(configPmoSfu)
+                    } else {
+                        PaymentMethodOptionsParams.SetupFutureUsage(
+                            paymentMethodType = paymentMethodType,
+                            setupFutureUsage = configPmoSfu
+                        )
+                    }
+                }
+            } ?: paymentMethodOptionsParams
     }
 
     private companion object {

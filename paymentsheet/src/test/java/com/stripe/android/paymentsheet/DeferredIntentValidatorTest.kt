@@ -7,11 +7,11 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentsheet.PaymentSheet.IntentConfiguration
-import com.stripe.android.paymentsheet.paymentmethodoptions.setupfutureusage.toJsonObjectString
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
@@ -31,6 +31,7 @@ internal class DeferredIntentValidatorTest {
                 stripeIntent = paymentIntent,
                 intentConfiguration = intentConfiguration,
                 allowsManualConfirmation = false,
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
             )
         }
 
@@ -50,6 +51,7 @@ internal class DeferredIntentValidatorTest {
                 stripeIntent = paymentIntent,
                 intentConfiguration = intentConfiguration,
                 allowsManualConfirmation = false,
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
             )
         }
 
@@ -73,6 +75,7 @@ internal class DeferredIntentValidatorTest {
                 stripeIntent = paymentIntent,
                 intentConfiguration = intentConfiguration,
                 allowsManualConfirmation = false,
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
             )
         ).isEqualTo(paymentIntent)
     }
@@ -91,6 +94,7 @@ internal class DeferredIntentValidatorTest {
                 stripeIntent = paymentIntent,
                 intentConfiguration = intentConfiguration,
                 allowsManualConfirmation = false,
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
             )
         }
 
@@ -111,6 +115,7 @@ internal class DeferredIntentValidatorTest {
             stripeIntent = paymentIntent,
             intentConfiguration = intentConfiguration,
             allowsManualConfirmation = false,
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )
 
         assertThat(result).isEqualTo(paymentIntent)
@@ -129,6 +134,7 @@ internal class DeferredIntentValidatorTest {
                 stripeIntent = paymentIntent,
                 intentConfiguration = intentConfiguration,
                 allowsManualConfirmation = false,
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
             )
         }
 
@@ -150,6 +156,7 @@ internal class DeferredIntentValidatorTest {
             stripeIntent = paymentIntent,
             intentConfiguration = intentConfiguration,
             allowsManualConfirmation = true,
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )
 
         assertThat(result).isEqualTo(paymentIntent)
@@ -164,6 +171,7 @@ internal class DeferredIntentValidatorTest {
             stripeIntent = paymentIntent,
             intentConfiguration = intentConfiguration,
             allowsManualConfirmation = true,
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )
 
         assertThat(result).isEqualTo(paymentIntent)
@@ -180,6 +188,7 @@ internal class DeferredIntentValidatorTest {
             stripeIntent = paymentIntent,
             intentConfiguration = intentConfiguration,
             allowsManualConfirmation = true,
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )
 
         assertThat(result).isEqualTo(paymentIntent)
@@ -195,6 +204,7 @@ internal class DeferredIntentValidatorTest {
                 stripeIntent = setupIntent,
                 intentConfiguration = intentConfiguration,
                 allowsManualConfirmation = false,
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
             )
         }
 
@@ -218,6 +228,7 @@ internal class DeferredIntentValidatorTest {
                 stripeIntent = setupIntent,
                 intentConfiguration = intentConfiguration,
                 allowsManualConfirmation = false,
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
             )
         ).isEqualTo(setupIntent)
     }
@@ -231,6 +242,7 @@ internal class DeferredIntentValidatorTest {
             stripeIntent = setupIntent,
             intentConfiguration = intentConfiguration,
             allowsManualConfirmation = true,
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )
 
         assertThat(result).isEqualTo(setupIntent)
@@ -353,27 +365,25 @@ internal class DeferredIntentValidatorTest {
         }
 
     @Test
-    fun `PMO validation succeeds if intent and config PMO match`() {
+    fun `PMO validation succeeds if intent and config PMO match for PaymentMethod`() {
         val paymentIntent = PaymentIntentFactory.create(
             paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE,
-            paymentMethodTypes = listOf("card", "affirm", "amazon_pay")
         )
         val paymentMethodOptions = IntentConfiguration.Mode.Payment.PaymentMethodOptions(
             setupFutureUsageValues = mapOf(
                 PaymentMethod.Type.Card to IntentConfiguration.SetupFutureUse.OffSession,
-                PaymentMethod.Type.Affirm to IntentConfiguration.SetupFutureUse.None,
-                PaymentMethod.Type.AmazonPay to IntentConfiguration.SetupFutureUse.OffSession,
             )
         )
         paymentMethodOptionsSetupFutureUsageTest(
             intent = paymentIntent,
             paymentMethodOptions = paymentMethodOptions,
-            shouldValidateSucceed = true
+            shouldValidateSucceed = true,
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )
     }
 
     @Test
-    fun `PMO validation fails if Config PMO does not contain entry from Intent PMO`() {
+    fun `PMO validation succeeds if Config PMO and intent PMO do not match for PM not being used`() {
         val paymentIntent = PaymentIntentFactory.create(
             paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE,
             paymentMethodTypes = listOf("card", "affirm", "amazon_pay")
@@ -382,13 +392,54 @@ internal class DeferredIntentValidatorTest {
         val paymentMethodOptions = IntentConfiguration.Mode.Payment.PaymentMethodOptions(
             setupFutureUsageValues = mapOf(
                 PaymentMethod.Type.Card to IntentConfiguration.SetupFutureUse.OnSession,
-                PaymentMethod.Type.Affirm to IntentConfiguration.SetupFutureUse.None,
+                PaymentMethod.Type.AmazonPay to IntentConfiguration.SetupFutureUse.None,
             )
         )
         paymentMethodOptionsSetupFutureUsageTest(
             intent = paymentIntent,
             paymentMethodOptions = paymentMethodOptions,
-            shouldValidateSucceed = false
+            shouldValidateSucceed = true,
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        )
+    }
+
+    @Test
+    fun `SFU validation succeeds if not set on intent and using PMO SFU`() {
+        val paymentIntent = PaymentIntentFactory.create()
+
+        val paymentMethodOptions = IntentConfiguration.Mode.Payment.PaymentMethodOptions(
+            setupFutureUsageValues = mapOf(
+                PaymentMethod.Type.Card to IntentConfiguration.SetupFutureUse.OnSession,
+                PaymentMethod.Type.Affirm to IntentConfiguration.SetupFutureUse.None,
+            )
+        )
+
+        paymentMethodOptionsSetupFutureUsageTest(
+            intent = paymentIntent,
+            paymentMethodOptions = paymentMethodOptions,
+            shouldValidateSucceed = true,
+            topLevelUsage = IntentConfiguration.SetupFutureUse.OffSession,
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        )
+    }
+
+    @Test
+    fun `PMO SFU validation succeeds if only set in intent configuration`() {
+        val paymentIntent = PaymentIntentFactory.create()
+
+        val paymentMethodOptions = IntentConfiguration.Mode.Payment.PaymentMethodOptions(
+            setupFutureUsageValues = mapOf(
+                PaymentMethod.Type.Card to IntentConfiguration.SetupFutureUse.OnSession,
+                PaymentMethod.Type.Affirm to IntentConfiguration.SetupFutureUse.None,
+            )
+        )
+
+        paymentMethodOptionsSetupFutureUsageTest(
+            intent = paymentIntent,
+            paymentMethodOptions = paymentMethodOptions,
+            shouldValidateSucceed = true,
+            topLevelUsage = IntentConfiguration.SetupFutureUse.OffSession,
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )
     }
 
@@ -396,81 +447,21 @@ internal class DeferredIntentValidatorTest {
     fun `PMO validation fails if SFU values are not the same`() {
         val paymentIntent = PaymentIntentFactory.create(
             paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE,
-            paymentMethodTypes = listOf("card", "affirm", "amazon_pay")
         )
 
         val paymentMethodOptions = IntentConfiguration.Mode.Payment.PaymentMethodOptions(
             setupFutureUsageValues = mapOf(
-                PaymentMethod.Type.Card to IntentConfiguration.SetupFutureUse.OnSession,
-                PaymentMethod.Type.Affirm to IntentConfiguration.SetupFutureUse.None,
-                PaymentMethod.Type.AmazonPay to IntentConfiguration.SetupFutureUse.OffSession,
+                PaymentMethod.Type.Card to IntentConfiguration.SetupFutureUse.None,
             )
         )
 
         paymentMethodOptionsSetupFutureUsageTest(
             intent = paymentIntent,
             paymentMethodOptions = paymentMethodOptions,
-            shouldValidateSucceed = false
-        )
-    }
-
-    @Test
-    fun `PMO validation fails if config PMO not in intent PMO and PM in paymentMethodTypes`() {
-        val paymentIntent = PaymentIntentFactory.create(
-            paymentMethodTypes = listOf("card", "amazon_pay", "affirm"),
-            paymentMethodOptionsJsonString = """
-                {
-                    "card": {
-                        "setup_future_usage": "off_session"
-                    },
-                    "affirm": {
-                        "setup_future_usage": "none"
-                    }
-                }
-            """.trimIndent()
-        )
-
-        val paymentMethodOptions = IntentConfiguration.Mode.Payment.PaymentMethodOptions(
-            setupFutureUsageValues = mapOf(
-                PaymentMethod.Type.Card to IntentConfiguration.SetupFutureUse.OffSession,
-                PaymentMethod.Type.Affirm to IntentConfiguration.SetupFutureUse.None,
-                PaymentMethod.Type.AmazonPay to IntentConfiguration.SetupFutureUse.OffSession,
-            )
-        )
-        paymentMethodOptionsSetupFutureUsageTest(
-            intent = paymentIntent,
-            paymentMethodOptions = paymentMethodOptions,
-            shouldValidateSucceed = false
-        )
-    }
-
-    @Test
-    fun `PMO validation succeeds if config PMO not in intent PMO and PM not in paymentMethodTypes`() {
-        val paymentIntent = PaymentIntentFactory.create(
-            paymentMethodTypes = listOf("card", "affirm"),
-            paymentMethodOptionsJsonString = """
-                {
-                    "card": {
-                        "setup_future_usage": "off_session"
-                    },
-                    "affirm": {
-                        "setup_future_usage": "none"
-                    }
-                }
-            """.trimIndent()
-        )
-
-        val paymentMethodOptions = IntentConfiguration.Mode.Payment.PaymentMethodOptions(
-            setupFutureUsageValues = mapOf(
-                PaymentMethod.Type.Card to IntentConfiguration.SetupFutureUse.OffSession,
-                PaymentMethod.Type.Affirm to IntentConfiguration.SetupFutureUse.None,
-                PaymentMethod.Type.AmazonPay to IntentConfiguration.SetupFutureUse.OffSession,
-            )
-        )
-        paymentMethodOptionsSetupFutureUsageTest(
-            intent = paymentIntent,
-            paymentMethodOptions = paymentMethodOptions,
-            shouldValidateSucceed = true
+            shouldValidateSucceed = false,
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            failureMessage = "Your PaymentIntent payment_method_options[card][setup_future_usage] value " +
+                "off_session does not match the IntentConfiguration value none"
         )
     }
 
@@ -537,11 +528,15 @@ internal class DeferredIntentValidatorTest {
 
     private fun paymentMethodOptionsSetupFutureUsageTest(
         intent: StripeIntent,
-        paymentMethodOptions: IntentConfiguration.Mode.Payment.PaymentMethodOptions,
-        shouldValidateSucceed: Boolean
+        paymentMethodOptions: IntentConfiguration.Mode.Payment.PaymentMethodOptions?,
+        shouldValidateSucceed: Boolean,
+        topLevelUsage: IntentConfiguration.SetupFutureUse? = null,
+        paymentMethod: PaymentMethod,
+        failureMessage: String? = null
     ) {
         val configuration = makeIntentConfigurationForPayment(
-            paymentMethodOptions = paymentMethodOptions
+            paymentMethodOptions = paymentMethodOptions,
+            setupFutureUse = topLevelUsage
         )
 
         if (shouldValidateSucceed) {
@@ -549,6 +544,7 @@ internal class DeferredIntentValidatorTest {
                 stripeIntent = intent,
                 intentConfiguration = configuration,
                 allowsManualConfirmation = false,
+                paymentMethod = paymentMethod
             )
 
             assertThat(result).isNotNull()
@@ -558,15 +554,11 @@ internal class DeferredIntentValidatorTest {
                     stripeIntent = intent,
                     intentConfiguration = configuration,
                     allowsManualConfirmation = false,
+                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
                 )
             }
 
-            assertThat(failure).hasMessageThat().isEqualTo(
-                "Your PaymentIntent payment_method_options setup_future_usage values " +
-                    "(${intent.getPaymentMethodOptions()} do not match the values provided in " +
-                    "PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions " +
-                    "(${paymentMethodOptions.toJsonObjectString()})"
-            )
+            assertThat(failure).hasMessageThat().isEqualTo(failureMessage)
         }
     }
 }

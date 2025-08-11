@@ -39,7 +39,6 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.getSetupFutureUseValue
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.BankFormScreenState.ResultIdentifier
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel.AnalyticsEvent.Finished
@@ -706,7 +705,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
         val paymentMethodOptionsParams = if (resultIdentifier is ResultIdentifier.Session) {
             PaymentMethodOptionsParams.USBankAccount(
-                setupFutureUsage = customerRequestedSave.getSetupFutureUseValue(args.formArgs.hasIntentToSetup)
+                setupFutureUsage = customerRequestedSave.setupFutureUsage
             )
         } else {
             null

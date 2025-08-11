@@ -8,7 +8,6 @@ import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.PaymentIntentFixtures
@@ -239,41 +238,5 @@ class PaymentSelectionTest {
                 isSetupFlow = true
             )
         )
-    }
-
-    @Test
-    fun `getSetupFutureUseValue returns correct value when hasIntentToSetup is true`() {
-        val noRequestSfu = PaymentSelection.CustomerRequestedSave.NoRequest.getSetupFutureUseValue(
-            hasIntentToSetup = true
-        )
-        assertThat(noRequestSfu).isNull()
-
-        val noReuseSfu = PaymentSelection.CustomerRequestedSave.RequestNoReuse.getSetupFutureUseValue(
-            hasIntentToSetup = true
-        )
-        assertThat(noReuseSfu).isNull()
-
-        val reuseSfu = PaymentSelection.CustomerRequestedSave.RequestReuse.getSetupFutureUseValue(
-            hasIntentToSetup = true
-        )
-        assertThat(reuseSfu).isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.OffSession)
-    }
-
-    @Test
-    fun `getSetupFutureUseValue returns correct value when hasIntentToSetup is false`() {
-        val noRequestSfu = PaymentSelection.CustomerRequestedSave.NoRequest.getSetupFutureUseValue(
-            hasIntentToSetup = false
-        )
-        assertThat(noRequestSfu).isNull()
-
-        val noReuseSfu = PaymentSelection.CustomerRequestedSave.RequestNoReuse.getSetupFutureUseValue(
-            hasIntentToSetup = false
-        )
-        assertThat(noReuseSfu).isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.Blank)
-
-        val reuseSfu = PaymentSelection.CustomerRequestedSave.RequestReuse.getSetupFutureUseValue(
-            hasIntentToSetup = false
-        )
-        assertThat(reuseSfu).isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.OffSession)
     }
 }
