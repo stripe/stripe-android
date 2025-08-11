@@ -43,7 +43,7 @@ class OnrampCoordinator @Inject internal constructor(
     }
 
     /**
-     * Check if the given email corresponds to an existing Link user.
+     * Looks up whether the provided email is associated with an existing Link user.
      *
      * @param email The email address to look up.
      * @return OnrampLinkLookupResult indicating whether the user exists.
@@ -77,7 +77,7 @@ class OnrampCoordinator @Inject internal constructor(
     }
 
     /**
-     * Given the required information, collects information .
+     * Given the required information, collects KYC information.
      *
      * @param info The KycInfo for the user.
      * @return OnrampKYCResult indicating the result of data collection.
@@ -115,8 +115,7 @@ class OnrampCoordinator @Inject internal constructor(
         private val coordinator: OnrampPresenterCoordinator,
     ) {
         /**
-         * Authenticate an existing Link user via email.
-         * This presents the authentication UI.
+         * Presents the Link verification flow for an existing user.
          *
          * Requires successful lookup or registration of the user first.
          */
@@ -125,8 +124,7 @@ class OnrampCoordinator @Inject internal constructor(
         }
 
         /**
-         * Prompts a user to perform identity verification.
-         * This presents the identity verification UI.
+         * Creates an identity verification session and launches the verification flow.
          *
          * Requires successful lookup or registration of the user first.
          */
