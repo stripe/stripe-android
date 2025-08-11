@@ -226,7 +226,11 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 handleDeferred(
                     intentConfiguration = initializationMode.intentConfiguration,
                     paymentMethod = paymentMethod,
-                    paymentMethodOptionsParams = paymentMethodOptionsParams,
+                    paymentMethodOptionsParams = updatePaymentMethodOptionsParams(
+                        type = paymentMethod.type,
+                        intentConfiguration = initializationMode.intentConfiguration,
+                        paymentMethodOptionsParams = paymentMethodOptionsParams
+                    ),
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     shippingValues = shippingValues,
                     shouldSavePaymentMethod = shouldSavePaymentMethod(
@@ -547,11 +551,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     intent,
                     shippingValues,
                     paymentMethod,
-                    paymentMethodOptionsParams = updatePaymentMethodOptionsParams(
-                        type = paymentMethod.type,
-                        intentConfiguration = intentConfiguration,
-                        paymentMethodOptionsParams = paymentMethodOptionsParams
-                    ),
+                    paymentMethodOptionsParams = paymentMethodOptionsParams,
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     isDeferred = true,
                     intentConfigSetupFutureUsage = intentConfiguration
@@ -729,7 +729,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration
     ): Boolean {
         return paymentMethodOptionsParams?.setupFutureUsage()?.hasIntentToSetup() == true ||
-            intentConfiguration.mode.setupFutureUse?.toConfirmParamsSetupFutureUsage()?.hasIntentToSetup() == true
+            (intentConfiguration.mode as? PaymentSheet.IntentConfiguration.Mode.Payment)
+                ?.setupFutureUse?.toConfirmParamsSetupFutureUsage()?.hasIntentToSetup() == true
     }
 
     @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)

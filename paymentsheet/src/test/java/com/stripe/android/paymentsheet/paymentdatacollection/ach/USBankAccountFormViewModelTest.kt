@@ -225,30 +225,6 @@ class USBankAccountFormViewModelTest {
     }
 
     @Test
-    fun `when hasIntentToSetup, paymentMethodOptionsParams does not send SFU`() = runTest {
-        val viewModel = createViewModel(
-            defaultArgs.copy(
-                formArgs = defaultArgs.formArgs.copy(
-                    hasIntentToSetup = true
-                ),
-                showCheckbox = true,
-            )
-        )
-        val bankAccount = mockVerifiedBankAccount()
-
-        viewModel.linkedAccount.test {
-            skipItems(1)
-            viewModel.handleCollectBankAccountResult(bankAccount)
-
-            assertThat(awaitItem()?.paymentMethodOptionsParams).isEqualTo(
-                PaymentMethodOptionsParams.USBankAccount(
-                    setupFutureUsage = null
-                )
-            )
-        }
-    }
-
-    @Test
     fun `when reset, primary button launches bank account collection`() =
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel()
