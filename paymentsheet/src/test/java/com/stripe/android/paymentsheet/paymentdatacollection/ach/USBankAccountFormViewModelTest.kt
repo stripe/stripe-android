@@ -1352,6 +1352,43 @@ class USBankAccountFormViewModelTest {
     }
 
     @Test
+    fun `PaymentMethodOptionsParams does not contain SFU for RequestNoReuse if hasIntentToSetup`() = runTest {
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                showCheckbox = true,
+                formArgs = defaultArgs.formArgs.copy(
+                    hasIntentToSetup = true
+                )
+            )
+        )
+
+        viewModel.linkedAccount.test {
+            assertThat(awaitItem()).isNull()
+
+            viewModel.nameController.onValueChange("Some Name")
+            viewModel.emailController.onValueChange("email@email.com")
+            viewModel.handleCollectBankAccountResult(mockVerifiedBankAccount())
+
+            val initialAccount = awaitItem()
+            assertThat(initialAccount?.customerRequestedSave).isEqualTo(CustomerRequestedSave.RequestNoReuse)
+            assertThat(initialAccount?.paymentMethodOptionsParams).isEqualTo(
+                PaymentMethodOptionsParams.USBankAccount(
+                    setupFutureUsage = null
+                )
+            )
+
+            viewModel.saveForFutureUseElement.controller.onValueChange(true)
+            val updatedAccount = awaitItem()
+            assertThat(updatedAccount?.customerRequestedSave).isEqualTo(CustomerRequestedSave.RequestReuse)
+            assertThat(updatedAccount?.paymentMethodOptionsParams).isEqualTo(
+                PaymentMethodOptionsParams.USBankAccount(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                )
+            )
+        }
+    }
+
+    @Test
     fun `'setAsDefaultPaymentMethod' shown correctly when saveForFutureUse checked`() = runTest {
         testSetAsDefaultPaymentMethod { saveForFutureUseElement, setAsDefaultPaymentMethodElement, testContext ->
             var nextItem = testContext.awaitItem()
