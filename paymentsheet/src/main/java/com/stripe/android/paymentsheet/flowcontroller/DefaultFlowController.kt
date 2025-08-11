@@ -731,6 +731,7 @@ internal class DefaultFlowController @Inject internal constructor(
         val verifiedMerchant = viewModel.state?.linkConfiguration?.useAttestationEndpointsForLink == true
         return paymentResult is PaymentResult.Completed && selection != null &&
             selection.isLink &&
+            // Only log out non-verified merchants.
             verifiedMerchant.not()
     }
 
