@@ -92,8 +92,10 @@ internal object LinkTestUtils {
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             allowUserEmailEdits = true,
             enableDisplayableDefaultValuesInEce = false,
+            linkAppearance = null,
             linkSignUpOptInFeatureEnabled = false,
             linkSignUpOptInInitialValue = false,
+            skipWalletInFlowController = false,
             customerId = null
         )
     }

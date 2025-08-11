@@ -34,7 +34,7 @@ internal fun FullScreenContent(
     appBarState: LinkAppBarState,
     eventReporter: EventReporter,
     onBackPressed: () -> Unit,
-    moveToWeb: () -> Unit,
+    moveToWeb: (Throwable) -> Unit,
     goBack: () -> Unit,
     onNavBackStackEntryChanged: (NavBackStackEntryUpdate) -> Unit,
     navigationChannel: SharedFlow<NavigationIntent>,

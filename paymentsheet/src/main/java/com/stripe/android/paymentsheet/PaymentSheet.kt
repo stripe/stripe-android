@@ -656,6 +656,19 @@ class PaymentSheet internal constructor(
         }
     }
 
+    /**
+     * [TermsDisplay] controls how mandates and legal agreements are displayed.
+     * Use [TermsDisplay.NEVER] to never display legal agreements.
+     * The default setting is [TermsDisplay.AUTOMATIC], which causes legal agreements to be shown only when necessary.
+     */
+    enum class TermsDisplay {
+        /** Show legal agreements only when necessary */
+        AUTOMATIC,
+
+        /** Never show legal agreements */
+        NEVER
+    }
+
     /** Configuration for [PaymentSheet] **/
     @Parcelize
     data class Configuration internal constructor(
@@ -791,6 +804,8 @@ class PaymentSheet internal constructor(
         internal val shopPayConfiguration: ShopPayConfiguration? = ConfigurationDefaults.shopPayConfiguration,
 
         internal val googlePlacesApiKey: String? = ConfigurationDefaults.googlePlacesApiKey,
+
+        internal val termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap(),
     ) : Parcelable {
 
         @JvmOverloads
@@ -946,6 +961,7 @@ class PaymentSheet internal constructor(
             private var walletButtons: WalletButtonsConfiguration = ConfigurationDefaults.walletButtons
             private var shopPayConfiguration: ShopPayConfiguration? = ConfigurationDefaults.shopPayConfiguration
             private var googlePlacesApiKey: String? = ConfigurationDefaults.googlePlacesApiKey
+            private var termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap()
 
             private var customPaymentMethods: List<CustomPaymentMethod> =
                 ConfigurationDefaults.customPaymentMethods
@@ -1102,6 +1118,16 @@ class PaymentSheet internal constructor(
                 this.googlePlacesApiKey = googlePlacesApiKey
             }
 
+            /**
+             * A map for specifying when legal agreements are displayed for each payment method type.
+             * If the payment method is not specified in the list, the TermsDisplay value will default to automatic.
+             *
+             * Valid payment method types include: amazon_pay, card, cashapp, klarna, paypal, revolut_pay, satispay.
+             */
+            fun termsDisplay(termsDisplay: Map<PaymentMethod.Type, TermsDisplay>) = apply {
+                this.termsDisplay = termsDisplay
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -1125,6 +1151,7 @@ class PaymentSheet internal constructor(
                 walletButtons = walletButtons,
                 shopPayConfiguration = shopPayConfiguration,
                 googlePlacesApiKey = googlePlacesApiKey,
+                termsDisplay = termsDisplay,
             )
         }
 
@@ -3367,12 +3394,26 @@ class PaymentSheet internal constructor(
          * Builder utility to set optional callbacks for [PaymentSheet.FlowController].
          *
          * @param resultCallback Called when a [PaymentSheetResult] is available.
-         * @param paymentOptionCallback Called when the customer's desired payment method changes.
+         * @param paymentOptionResultCallback Called after the customer attempts to make a payment method change.
          */
         class Builder(
             internal val resultCallback: PaymentSheetResultCallback,
-            internal val paymentOptionCallback: PaymentOptionCallback
+            internal val paymentOptionResultCallback: PaymentOptionResultCallback,
         ) {
+            /**
+             * Builder utility to set optional callbacks for [PaymentSheet.FlowController].
+             *
+             * @param resultCallback Called when a [PaymentSheetResult] is available.
+             * @param paymentOptionCallback Called when the customer's desired payment method changes.
+             */
+            constructor(
+                resultCallback: PaymentSheetResultCallback,
+                paymentOptionCallback: PaymentOptionCallback
+            ) : this(
+                resultCallback = resultCallback,
+                paymentOptionResultCallback = paymentOptionCallback.toResultCallback(),
+            )
+
             private val callbacksBuilder = PaymentElementCallbacks.Builder()
 
             /**
@@ -3431,7 +3472,7 @@ class PaymentSheet internal constructor(
              */
             fun build(activity: ComponentActivity): FlowController {
                 initializeCallbacks()
-                return FlowControllerFactory(activity, paymentOptionCallback, resultCallback).create()
+                return FlowControllerFactory(activity, paymentOptionResultCallback, resultCallback).create()
             }
 
             /**
@@ -3441,7 +3482,7 @@ class PaymentSheet internal constructor(
              */
             fun build(fragment: Fragment): FlowController {
                 initializeCallbacks()
-                return FlowControllerFactory(fragment, paymentOptionCallback, resultCallback).create()
+                return FlowControllerFactory(fragment, paymentOptionResultCallback, resultCallback).create()
             }
 
             /**
@@ -3454,7 +3495,7 @@ class PaymentSheet internal constructor(
                  */
                 return internalRememberPaymentSheetFlowController(
                     callbacks = callbacksBuilder.build(),
-                    paymentOptionCallback = paymentOptionCallback,
+                    paymentOptionResultCallback = paymentOptionResultCallback,
                     paymentResultCallback = resultCallback,
                 )
             }
@@ -3504,7 +3545,7 @@ class PaymentSheet internal constructor(
             ): FlowController {
                 return FlowControllerFactory(
                     activity,
-                    paymentOptionCallback,
+                    paymentOptionCallback.toResultCallback(),
                     paymentResultCallback
                 ).create()
             }
@@ -3545,7 +3586,7 @@ class PaymentSheet internal constructor(
                 )
                 return FlowControllerFactory(
                     activity,
-                    paymentOptionCallback,
+                    paymentOptionCallback.toResultCallback(),
                     paymentResultCallback
                 ).create()
             }
@@ -3583,7 +3624,7 @@ class PaymentSheet internal constructor(
                 )
                 return FlowControllerFactory(
                     activity,
-                    paymentOptionCallback,
+                    paymentOptionCallback.toResultCallback(),
                     paymentResultCallback
                 ).create()
             }
@@ -3628,7 +3669,7 @@ class PaymentSheet internal constructor(
                 )
                 return FlowControllerFactory(
                     activity,
-                    paymentOptionCallback,
+                    paymentOptionCallback.toResultCallback(),
                     paymentResultCallback
                 ).create()
             }
@@ -3655,7 +3696,7 @@ class PaymentSheet internal constructor(
             ): FlowController {
                 return FlowControllerFactory(
                     fragment,
-                    paymentOptionCallback,
+                    paymentOptionCallback.toResultCallback(),
                     paymentResultCallback
                 ).create()
             }
@@ -3694,7 +3735,7 @@ class PaymentSheet internal constructor(
                 )
                 return FlowControllerFactory(
                     fragment,
-                    paymentOptionCallback,
+                    paymentOptionCallback.toResultCallback(),
                     paymentResultCallback
                 ).create()
             }
@@ -3732,7 +3773,7 @@ class PaymentSheet internal constructor(
                 )
                 return FlowControllerFactory(
                     fragment,
-                    paymentOptionCallback,
+                    paymentOptionCallback.toResultCallback(),
                     paymentResultCallback
                 ).create()
             }
@@ -3777,7 +3818,7 @@ class PaymentSheet internal constructor(
                 )
                 return FlowControllerFactory(
                     fragment,
-                    paymentOptionCallback,
+                    paymentOptionCallback.toResultCallback(),
                     paymentResultCallback
                 ).create()
             }

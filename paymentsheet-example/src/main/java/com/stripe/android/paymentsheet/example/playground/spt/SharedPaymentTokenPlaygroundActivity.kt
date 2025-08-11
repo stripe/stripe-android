@@ -232,7 +232,6 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
                             }
                         }.onFailure {
                             onConfirmingChanged(false)
-
                             Toast.makeText(
                                 applicationContext,
                                 "Failed to create SPT: ${it.message}",

@@ -92,7 +92,6 @@ internal interface LinkRepository {
         stripeIntent: StripeIntent,
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?,
-        active: Boolean,
     ): Result<LinkPaymentDetails.New>
 
     suspend fun createBankAccountPaymentDetails(

@@ -41,8 +41,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
+import com.stripe.android.crypto.onramp.model.DateOfBirth
+import com.stripe.android.crypto.onramp.model.IdType
+import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
+import com.stripe.android.paymentsheet.PaymentSheet
 
 internal class OnrampActivity : ComponentActivity() {
 
@@ -152,6 +156,18 @@ internal fun OnrampScreen(
                     onBack = {
                         viewModel.onBackToEmailInput()
                     }
+                )
+            }
+            is OnrampUiState.KYCScreen -> {
+                var firstName by remember { mutableStateOf("") }
+                var lastName by remember { mutableStateOf("") }
+
+                KYCScreen(
+                    firstName = firstName,
+                    onFirstNameChange = { firstName = it },
+                    lastName = lastName,
+                    onLastNameChange = { lastName = it },
+                    onCollectKYC = { kycInfo -> viewModel.collectKycInfo(kycInfo) }
                 )
             }
         }
@@ -382,10 +398,10 @@ private fun AuthenticatedOperationsScreen(
 
         Text(
             text = "Register Wallet Address",
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
+	        fontWeight = FontWeight.SemiBold,
+	        modifier = Modifier.padding(bottom = 16.dp)
+	    )
+		
         // Network Selection
         Box {
             OutlinedTextField(
@@ -438,14 +454,80 @@ private fun AuthenticatedOperationsScreen(
         ) {
             Text("Register Wallet Address")
         }
-
+			
         TextButton(
             onClick = onBack,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Back to Email Input")
         }
+	}
+}
+
+@Composable
+private fun KYCScreen(
+    firstName: String,
+    onFirstNameChange: (String) -> Unit,
+    lastName: String,
+    onLastNameChange: (String) -> Unit,
+    onCollectKYC: (KycInfo) -> Unit
+) {
+    Column {
+        Text(
+            text = "Collect KYC Info",
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        KYCTextField(firstName, "First Name", onFirstNameChange)
+        KYCTextField(lastName, "Last Name", onLastNameChange)
+
+        Button(
+            onClick = {
+                onCollectKYC(
+                    KycInfo(
+                        firstName = firstName,
+                        lastName = lastName,
+                        idNumber = "123456789",
+                        idType = IdType.SOCIAL_SECURITY_NUMBER,
+                        dateOfBirth = DateOfBirth(1, month = 1, year = 1990),
+                        address = PaymentSheet.Address(
+                            city = "New York",
+                            country = "US",
+                            line1 = "1234 Fake Street",
+                            postalCode = "10108",
+                            state = "New York"
+                        ),
+                        nationalities = null,
+                        birthCountry = "US",
+                        birthCity = "Chicago"
+                    )
+                )
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp)
+        ) {
+            Text("Collect KYC Info")
+        }
     }
+}
+
+@Composable
+private fun KYCTextField(
+    value: String,
+    label: String,
+    onChange: (String) -> Unit
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onChange,
+        label = { Text(label) },
+        enabled = true,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 24.dp)
+    )
 }
 
 @Composable

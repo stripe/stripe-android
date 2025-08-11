@@ -2,8 +2,10 @@ package com.stripe.android.crypto.onramp
 
 import android.app.Application
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
+import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
+import com.stripe.android.crypto.onramp.model.OnrampKYCResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
 import com.stripe.android.crypto.onramp.model.OnrampSetWalletAddressResult
@@ -29,8 +31,12 @@ internal class OnrampInteractor @Inject constructor(
 
     suspend fun configure(configuration: OnrampConfiguration) {
         _state.value = _state.value.copy(configuration = configuration)
+
         linkController.configure(
-            LinkController.Configuration.Builder("Onramp Merchant").build()
+            LinkController.Configuration.Builder(
+                merchantDisplayName = "Onramp Merchant",
+                appearance = configuration.appearance
+            ).build()
         )
     }
 
@@ -87,6 +93,20 @@ internal class OnrampInteractor @Inject constructor(
             OnrampSetWalletAddressResult.Failed(
                 IllegalStateException("Missing consumer session client secret")
             )
+		}
+	}
+
+    suspend fun collectKycInfo(kycInfo: KycInfo): OnrampKYCResult {
+        val secret = consumerSessionClientSecret()
+
+        secret?.let {
+            return cryptoApiRepository.collectKycData(kycInfo, secret)
+                .fold(
+                    onSuccess = { OnrampKYCResult.Completed },
+                    onFailure = { OnrampKYCResult.Failed(it) }
+                )
+        } ?: run {
+            return OnrampKYCResult.Failed(IllegalStateException("Missing consumer secret"))
         }
     }
 

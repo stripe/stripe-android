@@ -30,7 +30,6 @@ class ConsumerPaymentDetailsCreateParamsTest {
                     )
                 ),
                 email = "email@stripe.com",
-                active = false,
             ).toParamMap()
         ).isEqualTo(
             mapOf(
@@ -45,7 +44,7 @@ class ConsumerPaymentDetailsCreateParamsTest {
                     "country_code" to "US",
                     "postal_code" to "12345"
                 ),
-                "active" to false,
+                "active" to true,
             )
         )
     }
@@ -75,7 +74,6 @@ class ConsumerPaymentDetailsCreateParamsTest {
                     )
                 ),
                 email = "email@stripe.com",
-                active = false,
             ).toParamMap()
         ).isEqualTo(
             mapOf(
@@ -91,7 +89,7 @@ class ConsumerPaymentDetailsCreateParamsTest {
                     "country_code" to "US",
                     "postal_code" to "12345"
                 ),
-                "active" to false,
+                "active" to true,
             )
         )
     }

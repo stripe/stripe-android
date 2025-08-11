@@ -16,6 +16,7 @@ import com.stripe.android.crypto.onramp.model.CryptoCustomerRequestParams
 import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.CryptoWalletRequestParams
+import com.stripe.android.crypto.onramp.model.KycCollectionRequest
 import com.stripe.android.crypto.onramp.model.KycInfo
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.serializer
@@ -76,11 +77,17 @@ internal class CryptoApiRepository @Inject internal constructor(
      * @param kycInfo The KycInfo to attach.
      */
     suspend fun collectKycData(
-        kycInfo: KycInfo
+        kycInfo: KycInfo,
+        consumerSessionClientSecret: String
     ): Result<Unit> {
+        val apiRequest = KycCollectionRequest.fromKycInfo(
+            kycInfo = kycInfo,
+            credentials = CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret)
+        )
+
         return execute(
             collectKycDataUrl,
-            Json.encodeToJsonElement(kycInfo).jsonObject,
+            Json.encodeToJsonElement(apiRequest).jsonObject,
             Unit.serializer()
         )
     }
@@ -137,6 +144,8 @@ internal class CryptoApiRepository @Inject internal constructor(
             }
 
             val body = requireNotNull(response.body) { "No response body found" }
+
+            val json = Json { ignoreUnknownKeys = true }
             json.decodeFromString(responseSerializer, body)
         }.recoverCatching {
             throw APIConnectionException("Failed to execute $request", cause = it)

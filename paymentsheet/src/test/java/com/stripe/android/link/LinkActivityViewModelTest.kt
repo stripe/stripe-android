@@ -138,7 +138,7 @@ internal class LinkActivityViewModelTest {
             configuration = mock(),
             publishableKey = "",
             stripeAccountId = null,
-            startWithVerificationDialog = false,
+            linkExpressMode = LinkExpressMode.DISABLED,
             linkAccountInfo = LinkAccountUpdate.Value(
                 account = null,
                 lastUpdateReason = null
@@ -517,13 +517,14 @@ internal class LinkActivityViewModelTest {
         val vm = createViewModel(
             linkAccountManager = linkAccountManager,
             linkAttestationCheck = linkAttestationCheck,
-            startWithVerificationDialog = true
+            linkExpressMode = LinkExpressMode.ENABLED
         )
         linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
 
         vm.onCreate(mock())
 
         assertThat(vm.linkScreenState.value).isEqualTo(ScreenState.VerificationDialog(TestFactory.LINK_ACCOUNT))
+        linkAttestationCheck.awaitInvokeCall()
         linkAttestationCheck.ensureAllEventsConsumed()
     }
 
@@ -534,7 +535,7 @@ internal class LinkActivityViewModelTest {
 
         val vm = createViewModel(
             linkAccountManager = linkAccountManager,
-            startWithVerificationDialog = true
+            linkExpressMode = LinkExpressMode.ENABLED
         )
         linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
 
@@ -558,7 +559,7 @@ internal class LinkActivityViewModelTest {
 
         val vm = createViewModel(
             linkAccountManager = linkAccountManager,
-            startWithVerificationDialog = true,
+            linkExpressMode = LinkExpressMode.ENABLED
         )
 
         vm.result.test {
@@ -750,7 +751,7 @@ internal class LinkActivityViewModelTest {
             linkAttestationCheck = linkAttestationCheck,
             linkAccountManager = linkAccountManager,
             linkAccountHolder = linkAccountHolder,
-            startWithVerificationDialog = false,
+            linkExpressMode = LinkExpressMode.DISABLED,
             launchWeb = { config ->
                 launchWebConfig = config
             },
@@ -780,7 +781,7 @@ internal class LinkActivityViewModelTest {
         eventReporter: EventReporter = FakeEventReporter(),
         navigationManager: NavigationManager = TestNavigationManager(),
         linkAttestationCheck: LinkAttestationCheck = FakeLinkAttestationCheck(),
-        startWithVerificationDialog: Boolean = false,
+        linkExpressMode: LinkExpressMode = LinkExpressMode.DISABLED,
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full,
         linkConfirmationHandler: LinkConfirmationHandler = FakeLinkConfirmationHandler(),
@@ -796,7 +797,7 @@ internal class LinkActivityViewModelTest {
             confirmationHandlerFactory = { confirmationHandler },
             linkAttestationCheck = linkAttestationCheck,
             linkConfiguration = linkConfiguration,
-            startWithVerificationDialog = startWithVerificationDialog,
+            linkExpressMode = linkExpressMode,
             navigationManager = navigationManager,
             savedStateHandle = savedStateHandle,
             linkLaunchMode = linkLaunchMode,

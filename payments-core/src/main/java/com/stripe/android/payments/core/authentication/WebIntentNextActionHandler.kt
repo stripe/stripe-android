@@ -152,8 +152,12 @@ internal class WebIntentNextActionHandler @Inject constructor(
                 forceInAppWebView = true
             )
         } else {
+            var urlString = url.toString()
+            if (urlString.contains("followRedirectsInSDK=true")) {
+                urlString = redirectResolver(urlString)
+            }
             WebAuthParams(
-                authUrl = url.toString(),
+                authUrl = urlString,
                 returnUrl = returnUrl,
             )
         }

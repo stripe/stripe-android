@@ -7,6 +7,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
@@ -280,7 +281,7 @@ class ConfirmationHandlerOptionKtxTest {
         ).isEqualTo(
             LinkConfirmationOption(
                 configuration = LINK_CONFIGURATION,
-                useLinkExpress = false
+                linkExpressMode = LinkExpressMode.DISABLED
             )
         )
     }
@@ -289,7 +290,7 @@ class ConfirmationHandlerOptionKtxTest {
     fun `On Link selection with express configuration, should return Link confirmation option with express enabled`() {
         assertThat(
             PaymentSelection.Link(
-                useLinkExpress = true
+                linkExpressMode = LinkExpressMode.ENABLED
             ).toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = LINK_CONFIGURATION,
@@ -297,7 +298,7 @@ class ConfirmationHandlerOptionKtxTest {
         ).isEqualTo(
             LinkConfirmationOption(
                 configuration = LINK_CONFIGURATION,
-                useLinkExpress = true
+                linkExpressMode = LinkExpressMode.ENABLED
             )
         )
     }
@@ -617,6 +618,8 @@ class ConfirmationHandlerOptionKtxTest {
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             allowUserEmailEdits = true,
             enableDisplayableDefaultValuesInEce = false,
+            skipWalletInFlowController = false,
+            linkAppearance = null,
             linkSignUpOptInFeatureEnabled = false,
             linkSignUpOptInInitialValue = false,
             customerId = null

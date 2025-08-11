@@ -225,7 +225,7 @@ class ConsumersApiServiceImplTest {
             header("User-Agent", "Stripe/v1 ${StripeSdkVersion.VERSION}"),
             bodyPart(urlEncode("credentials[consumer_session_client_secret]"), "secret"),
             bodyPart("type", "card"),
-            bodyPart("active", "false"),
+            bodyPart("active", "true"),
             bodyPart("billing_email_address", urlEncode(email)),
             bodyPart(urlEncode("card[number]"), "4242424242424242"),
             bodyPart(urlEncode("card[exp_month]"), "12"),
@@ -257,7 +257,6 @@ class ConsumersApiServiceImplTest {
             paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.Card(
                 cardPaymentMethodCreateParamsMap = paymentMethodCreateParams,
                 email = email,
-                active = false,
             ),
             requestSurface = requestSurface,
             requestOptions = DEFAULT_OPTIONS,
@@ -279,7 +278,7 @@ class ConsumersApiServiceImplTest {
             header("User-Agent", "Stripe/v1 ${StripeSdkVersion.VERSION}"),
             bodyPart(urlEncode("credentials[consumer_session_client_secret]"), "secret"),
             bodyPart("type", "card"),
-            bodyPart("active", "false"),
+            bodyPart("active", "true"),
             bodyPart("billing_email_address", urlEncode(email)),
             bodyPart(urlEncode("card[number]"), "4242424242424242"),
             bodyPart(urlEncode("card[exp_month]"), "12"),
@@ -315,7 +314,6 @@ class ConsumersApiServiceImplTest {
             paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.Card(
                 cardPaymentMethodCreateParamsMap = paymentMethodCreateParams,
                 email = email,
-                active = false,
             ),
             requestSurface = requestSurface,
             requestOptions = DEFAULT_OPTIONS,

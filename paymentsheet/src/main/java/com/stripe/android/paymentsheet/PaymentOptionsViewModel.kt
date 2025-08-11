@@ -16,6 +16,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
@@ -92,8 +93,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
         },
     )
 
-    private val _paymentOptionResult = MutableSharedFlow<PaymentOptionResult>(replay = 1)
-    internal val paymentOptionResult: SharedFlow<PaymentOptionResult> = _paymentOptionResult
+    private val _paymentOptionsActivityResult = MutableSharedFlow<PaymentOptionsActivityResult>(replay = 1)
+    internal val paymentOptionsActivityResult: SharedFlow<PaymentOptionsActivityResult> = _paymentOptionsActivityResult
 
     private val _error = MutableStateFlow<ResolvableString?>(null)
     override val error: StateFlow<ResolvableString?> = _error
@@ -191,8 +192,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
             }
             // Link verification dialog completed -> close payment method selection with authenticated state
             is LinkActivityResult.Completed -> {
-                _paymentOptionResult.tryEmit(
-                    PaymentOptionResult.Succeeded(
+                _paymentOptionsActivityResult.tryEmit(
+                    PaymentOptionsActivityResult.Succeeded(
                         linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                         paymentSelection = Link(
                             selectedPayment = result.selectedPayment,
@@ -214,8 +215,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     override fun onUserCancel() {
         eventReporter.onDismiss()
-        _paymentOptionResult.tryEmit(
-            PaymentOptionResult.Canceled(
+        _paymentOptionsActivityResult.tryEmit(
+            PaymentOptionsActivityResult.Canceled(
                 linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                 mostRecentError = null,
                 paymentSelection = determinePaymentSelectionUponCancel(),
@@ -261,11 +262,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     configuration = linkState!!.configuration,
                     launchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment = null),
                     linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
-                    useLinkExpress = true
+                    linkExpressMode = LinkExpressMode.ENABLED
                 )
             } else {
-                _paymentOptionResult.tryEmit(
-                    PaymentOptionResult.Succeeded(
+                _paymentOptionsActivityResult.tryEmit(
+                    PaymentOptionsActivityResult.Succeeded(
                         linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                         paymentSelection = paymentSelection.withLinkDetails(),
                         paymentMethods = customerStateHolder.paymentMethods.value

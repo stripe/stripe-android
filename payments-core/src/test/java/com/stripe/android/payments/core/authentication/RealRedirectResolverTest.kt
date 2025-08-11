@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -70,7 +71,8 @@ internal class RealRedirectResolverTest {
                 // We need to trust all because we're resolving both the localhost URL
                 // as well as the redirect URL.
                 sslSocketFactory = networkRule.clientSocketFactory(trustAll = true)
-            }
+            },
+            ioDispatcher = Dispatchers.Unconfined,
         )
     }
 

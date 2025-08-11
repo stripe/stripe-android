@@ -116,7 +116,7 @@ internal class LinkActivity : ComponentActivity() {
         webLauncher?.launch(
             LinkActivityContract.Args(
                 configuration = configuration,
-                startWithVerificationDialog = false,
+                linkExpressMode = LinkExpressMode.DISABLED,
                 linkAccountInfo = LinkAccountUpdate.Value(
                     account = null,
                     lastUpdateReason = null

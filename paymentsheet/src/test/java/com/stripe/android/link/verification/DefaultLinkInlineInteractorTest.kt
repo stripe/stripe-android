@@ -159,7 +159,7 @@ class DefaultLinkInlineInteractorTest {
                 configuration = any(),
                 linkAccountInfo = any(),
                 launchMode = eq(LinkLaunchMode.PaymentMethodSelection(null)),
-                useLinkExpress = any()
+                linkExpressMode = any()
             )
         }
 
@@ -202,6 +202,7 @@ class DefaultLinkInlineInteractorTest {
             redactedPhoneNumber = "****1234",
             requestFocus = false,
             isDialog = true,
+            allowLogout = false,
             isSendingNewCode = false,
             defaultPayment = null,
             didSendNewCode = false
@@ -244,6 +245,7 @@ class DefaultLinkInlineInteractorTest {
             redactedPhoneNumber = "****1234",
             requestFocus = false,
             isDialog = true,
+            allowLogout = false,
             isSendingNewCode = false,
             defaultPayment = null,
             didSendNewCode = false
@@ -290,6 +292,7 @@ class DefaultLinkInlineInteractorTest {
             redactedPhoneNumber = "****1234",
             requestFocus = false,
             isDialog = true,
+            allowLogout = false,
             isSendingNewCode = false,
             defaultPayment = null,
             didSendNewCode = false
@@ -345,6 +348,7 @@ class DefaultLinkInlineInteractorTest {
             redactedPhoneNumber = "****1234",
             requestFocus = false,
             isDialog = true,
+            allowLogout = false,
             isSendingNewCode = false,
             defaultPayment = null,
             didSendNewCode = false
@@ -390,6 +394,7 @@ class DefaultLinkInlineInteractorTest {
             redactedPhoneNumber = "****1234",
             requestFocus = false,
             isDialog = true,
+            allowLogout = false,
             isSendingNewCode = false,
             defaultPayment = null,
             didSendNewCode = false
@@ -434,6 +439,7 @@ class DefaultLinkInlineInteractorTest {
             redactedPhoneNumber = "****1234",
             requestFocus = false,
             isDialog = true,
+            allowLogout = false,
             isSendingNewCode = false,
             defaultPayment = null,
             didSendNewCode = false

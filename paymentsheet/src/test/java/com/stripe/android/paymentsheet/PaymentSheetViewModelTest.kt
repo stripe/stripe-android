@@ -19,6 +19,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.attestation.FakeLinkAttestationCheck
 import com.stripe.android.link.attestation.LinkAttestationCheck
@@ -658,7 +659,7 @@ internal class PaymentSheetViewModelTest {
         val confirmationArgs = startTurbine.awaitItem()
         assertThat(confirmationArgs.confirmationOption).isInstanceOf<LinkConfirmationOption>()
         val confirmationOption = confirmationArgs.confirmationOption as? LinkConfirmationOption
-        assertThat(confirmationOption?.useLinkExpress).isTrue()
+        assertThat(confirmationOption?.linkExpressMode).isNotEqualTo(LinkExpressMode.DISABLED)
     }
 
     @Test
@@ -689,7 +690,7 @@ internal class PaymentSheetViewModelTest {
         val confirmationArgs = startTurbine.awaitItem()
         assertThat(confirmationArgs.confirmationOption).isInstanceOf<LinkConfirmationOption>()
         val confirmationOption = confirmationArgs.confirmationOption as? LinkConfirmationOption
-        assertThat(confirmationOption?.useLinkExpress).isFalse()
+        assertThat(confirmationOption?.linkExpressMode).isEqualTo(LinkExpressMode.DISABLED)
     }
 
     @Test
@@ -967,7 +968,7 @@ internal class PaymentSheetViewModelTest {
 
             assertThat(arguments.confirmationOption).isEqualTo(
                 LinkConfirmationOption(
-                    useLinkExpress = false,
+                    linkExpressMode = LinkExpressMode.DISABLED,
                     configuration = TestFactory.LINK_CONFIGURATION,
                 )
             )
@@ -1612,7 +1613,7 @@ internal class PaymentSheetViewModelTest {
             assertThat(arguments.confirmationOption).isEqualTo(
                 LinkConfirmationOption(
                     configuration = TestFactory.LINK_CONFIGURATION,
-                    useLinkExpress = true,
+                    linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
                 )
             )
 
@@ -2754,7 +2755,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(arguments.confirmationOption).isEqualTo(
             LinkConfirmationOption(
-                useLinkExpress = false,
+                linkExpressMode = LinkExpressMode.DISABLED,
                 configuration = LINK_CONFIG,
             )
         )
@@ -2768,7 +2769,8 @@ internal class PaymentSheetViewModelTest {
 
         val paymentSuccessCall = eventReporter.paymentSuccessCalls.awaitItem()
 
-        assertThat(paymentSuccessCall.paymentSelection).isEqualTo(PaymentSelection.Link(useLinkExpress = false))
+        assertThat(paymentSuccessCall.paymentSelection)
+            .isEqualTo(PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED))
     }
 
     @Test
@@ -2790,7 +2792,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(arguments.confirmationOption).isEqualTo(
             LinkConfirmationOption(
-                useLinkExpress = false,
+                linkExpressMode = LinkExpressMode.DISABLED,
                 configuration = LINK_CONFIG,
             )
         )
@@ -2805,7 +2807,8 @@ internal class PaymentSheetViewModelTest {
 
         val paymentFailureCall = eventReporter.paymentFailureCalls.awaitItem()
 
-        assertThat(paymentFailureCall.paymentSelection).isEqualTo(PaymentSelection.Link(useLinkExpress = false))
+        assertThat(paymentFailureCall.paymentSelection)
+            .isEqualTo(PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED))
     }
 
     @Test
@@ -2827,7 +2830,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(arguments.confirmationOption).isEqualTo(
             LinkConfirmationOption(
-                useLinkExpress = true,
+                linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
                 configuration = LINK_CONFIG,
             )
         )
@@ -2841,7 +2844,8 @@ internal class PaymentSheetViewModelTest {
 
         val paymentSuccessCall = eventReporter.paymentSuccessCalls.awaitItem()
 
-        assertThat(paymentSuccessCall.paymentSelection).isEqualTo(PaymentSelection.Link(useLinkExpress = true))
+        assertThat(paymentSuccessCall.paymentSelection)
+            .isEqualTo(PaymentSelection.Link(linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK))
     }
 
     @Test
@@ -2863,7 +2867,7 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(arguments.confirmationOption).isEqualTo(
             LinkConfirmationOption(
-                useLinkExpress = true,
+                linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
                 configuration = LINK_CONFIG,
             )
         )
@@ -2878,7 +2882,8 @@ internal class PaymentSheetViewModelTest {
 
         val paymentFailureCall = eventReporter.paymentFailureCalls.awaitItem()
 
-        assertThat(paymentFailureCall.paymentSelection).isEqualTo(PaymentSelection.Link(useLinkExpress = true))
+        assertThat(paymentFailureCall.paymentSelection)
+            .isEqualTo(PaymentSelection.Link(linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK))
     }
 
     @Test

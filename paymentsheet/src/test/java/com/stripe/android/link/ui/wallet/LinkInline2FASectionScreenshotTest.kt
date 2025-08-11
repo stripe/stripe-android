@@ -46,7 +46,8 @@ class LinkInline2FASectionScreenshotTest {
             redactedPhoneNumber = "***-***-1234",
             email = "user@example.com",
             defaultPayment = null,
-            isDialog = false
+            isDialog = false,
+            allowLogout = true,
         )
 
         paparazziRule.snapshot {
@@ -82,6 +83,7 @@ class LinkInline2FASectionScreenshotTest {
             redactedPhoneNumber = "***-***-5678",
             email = "test@stripe.com",
             isDialog = false,
+            allowLogout = true,
             defaultPayment = paymentUI
         )
 
@@ -118,6 +120,7 @@ class LinkInline2FASectionScreenshotTest {
             redactedPhoneNumber = "***-***-5678",
             email = "test@stripe.com",
             isDialog = false,
+            allowLogout = true,
             defaultPayment = paymentUI
         )
 
@@ -156,6 +159,7 @@ class LinkInline2FASectionScreenshotTest {
             redactedPhoneNumber = "***-***-9999",
             email = "payment@example.com",
             isDialog = false,
+            allowLogout = true,
             defaultPayment = paymentUI
         )
 
@@ -186,7 +190,8 @@ class LinkInline2FASectionScreenshotTest {
             redactedPhoneNumber = "***-***-1234",
             email = "user@example.com",
             defaultPayment = null,
-            isDialog = false
+            isDialog = false,
+            allowLogout = true,
         )
 
         paparazziRule.snapshot {

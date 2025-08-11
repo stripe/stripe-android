@@ -12,6 +12,7 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
+import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.WebLinkActivityContract
 import com.stripe.android.link.account.LinkAccountManager
@@ -94,8 +95,8 @@ internal interface NativeLinkComponent {
         fun application(application: Application): Builder
 
         @BindsInstance
-        fun startWithVerificationDialog(
-            @Named(START_WITH_VERIFICATION_DIALOG) startWithVerificationDialog: Boolean
+        fun linkExpressMode(
+            @Named(LINK_EXPRESS_MODE) linkExpressMode: LinkExpressMode
         ): Builder
 
         @BindsInstance

@@ -40,6 +40,7 @@ constructor(
     private val shopPay: ShopPay? = null,
     val billingDetails: PaymentMethod.BillingDetails? = null,
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+    private val radarOptions: RadarOptions? = null,
     private val metadata: Map<String, String>? = null,
     private val productUsage: Set<String> = emptySet(),
 
@@ -74,6 +75,7 @@ constructor(
         shopPay: ShopPay? = null,
         billingDetails: PaymentMethod.BillingDetails? = null,
         allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        radarOptions: RadarOptions? = null,
         metadata: Map<String, String>? = null,
         productUsage: Set<String> = emptySet(),
         overrideParamMap: Map<String, @RawValue Any>? = null
@@ -96,6 +98,7 @@ constructor(
         shopPay,
         billingDetails,
         allowRedisplay,
+        radarOptions,
         metadata,
         productUsage,
         overrideParamMap
@@ -303,6 +306,10 @@ constructor(
         return params.plus(
             allowRedisplay?.let {
                 mapOf(PARAM_ALLOW_REDISPLAY to allowRedisplay.value)
+            }.orEmpty()
+        ).plus(
+            radarOptions?.let {
+                mapOf(PARAM_RADAR_OPTIONS to it.toParamMap())
             }.orEmpty()
         )
     }
@@ -727,6 +734,7 @@ constructor(
         private const val PARAM_BILLING_DETAILS = "billing_details"
         private const val PARAM_ALLOW_REDISPLAY = "allow_redisplay"
         private const val PARAM_METADATA = "metadata"
+        private const val PARAM_RADAR_OPTIONS = "radar_options"
 
         /**
          * @return params for creating a [PaymentMethod.Type.Card] payment method

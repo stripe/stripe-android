@@ -8,9 +8,11 @@ import com.stripe.android.crypto.onramp.di.DaggerOnrampComponent
 import com.stripe.android.crypto.onramp.di.OnrampComponent
 import com.stripe.android.crypto.onramp.di.OnrampPresenterComponent
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
+import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
+import com.stripe.android.crypto.onramp.model.OnrampKYCResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
 import com.stripe.android.crypto.onramp.model.OnrampSetWalletAddressResult
@@ -72,6 +74,16 @@ class OnrampCoordinator @Inject internal constructor(
         network: CryptoNetwork
     ): OnrampSetWalletAddressResult {
         return interactor.registerWalletAddress(walletAddress, network)
+	}
+
+    /**
+     * Given the required information, collects information .
+     *
+     * @param info The KycInfo for the user.
+     * @return OnrampKYCResult indicating the result of data collection.
+     */
+    suspend fun collectKycInfo(info: KycInfo): OnrampKYCResult {
+        return interactor.collectKycInfo(info)
     }
 
     /**

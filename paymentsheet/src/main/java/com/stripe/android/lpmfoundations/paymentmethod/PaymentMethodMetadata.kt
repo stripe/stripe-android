@@ -68,13 +68,18 @@ internal data class PaymentMethodMetadata(
     val financialConnectionsAvailability: FinancialConnectionsAvailability?,
     val cardBrandFilter: CardBrandFilter,
     val elementsSessionId: String,
-    val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?
+    val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
+    val termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay>,
 ) : Parcelable {
     fun hasIntentToSetup(code: PaymentMethodCode): Boolean {
         return when (stripeIntent) {
             is PaymentIntent -> stripeIntent.isSetupFutureUsageSet(code)
             is SetupIntent -> true
         }
+    }
+
+    fun mandateAllowed(paymentMethodType: PaymentMethod.Type): Boolean {
+        return termsDisplay[paymentMethodType] != PaymentSheet.TermsDisplay.NEVER
     }
 
     fun requiresMandate(paymentMethodCode: String): Boolean {
@@ -324,7 +329,8 @@ internal data class PaymentMethodMetadata(
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession),
                 elementsSessionId = elementsSession.elementsSessionId,
-                shopPayConfiguration = configuration.shopPayConfiguration
+                shopPayConfiguration = configuration.shopPayConfiguration,
+                termsDisplay = configuration.termsDisplay,
             )
         }
 
@@ -369,7 +375,8 @@ internal data class PaymentMethodMetadata(
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
                 elementsSessionId = elementsSession.elementsSessionId,
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession),
-                shopPayConfiguration = null
+                shopPayConfiguration = null,
+                termsDisplay = emptyMap(),
             )
         }
 
@@ -415,7 +422,8 @@ internal data class PaymentMethodMetadata(
                 cardBrandFilter = configuration.cardBrandFilter,
                 elementsSessionId = configuration.elementsSessionId,
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),
-                shopPayConfiguration = null
+                shopPayConfiguration = null,
+                termsDisplay = emptyMap(),
             )
         }
     }

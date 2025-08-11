@@ -58,10 +58,10 @@ internal class LinkActivityViewModel @Inject constructor(
     private val linkAccountManager: LinkAccountManager,
     private val linkAccountHolder: LinkAccountHolder,
     val eventReporter: EventReporter,
-    private val linkConfiguration: LinkConfiguration,
+    val linkConfiguration: LinkConfiguration,
     private val linkAttestationCheck: LinkAttestationCheck,
     val savedStateHandle: SavedStateHandle,
-    private val startWithVerificationDialog: Boolean,
+    private val linkExpressMode: LinkExpressMode,
     private val navigationManager: NavigationManager,
     val linkLaunchMode: LinkLaunchMode,
     private val autocompleteLauncher: AutocompleteActivityLauncher,
@@ -157,14 +157,12 @@ internal class LinkActivityViewModel @Inject constructor(
         }
     }
 
-    fun moveToWeb() {
+    fun moveToWeb(error: Throwable) {
         when (linkLaunchMode) {
             // Authentication flows with existing accounts -> dismiss with an error.
             is LinkLaunchMode.Authentication -> dismissWithResult(
                 LinkActivityResult.Failed(
-                    error = IllegalStateException(
-                        "authentication only is not supported in web mode"
-                    ),
+                    error = error,
                     linkAccountUpdate = LinkAccountUpdate.None
                 )
             )
@@ -222,7 +220,12 @@ internal class LinkActivityViewModel @Inject constructor(
 
     fun changeEmail() {
         savedStateHandle[SignUpViewModel.USE_LINK_CONFIGURATION_CUSTOMER_INFO] = false
-        navigate(LinkScreen.SignUp, clearStack = true)
+        if (linkScreenState.value is ScreenState.VerificationDialog) {
+            linkAccountHolder.set(LinkAccountUpdate.Value(null))
+            _linkScreenState.value = ScreenState.FullScreen(initialDestination = LinkScreen.SignUp)
+        } else {
+            navigate(LinkScreen.SignUp, clearStack = true)
+        }
     }
 
     fun unregisterActivity() {
@@ -242,21 +245,21 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     private suspend fun loadLink() {
-        if (startWithVerificationDialog) {
-            updateScreenState()
-        } else {
-            val attestationCheckResult = linkAttestationCheck.invoke()
-            when (attestationCheckResult) {
-                is LinkAttestationCheck.Result.AttestationFailed -> {
-                    moveToWeb()
+        val attestationCheckResult = linkAttestationCheck.invoke()
+        when (attestationCheckResult) {
+            is LinkAttestationCheck.Result.AttestationFailed -> {
+                when (linkExpressMode) {
+                    LinkExpressMode.DISABLED,
+                    LinkExpressMode.ENABLED -> moveToWeb(attestationCheckResult.error)
+                    LinkExpressMode.ENABLED_NO_WEB_FALLBACK -> updateScreenState()
                 }
-                LinkAttestationCheck.Result.Successful -> {
-                    updateScreenState()
-                }
-                is LinkAttestationCheck.Result.Error,
-                is LinkAttestationCheck.Result.AccountError -> {
-                    handleAccountError()
-                }
+            }
+            LinkAttestationCheck.Result.Successful -> {
+                updateScreenState()
+            }
+            is LinkAttestationCheck.Result.Error,
+            is LinkAttestationCheck.Result.AccountError -> {
+                handleAccountError()
             }
         }
     }
@@ -331,7 +334,7 @@ internal class LinkActivityViewModel @Inject constructor(
             }
             AccountStatus.NeedsVerification,
             AccountStatus.VerificationStarted -> {
-                if (linkAccount != null && startWithVerificationDialog) {
+                if (linkAccount != null && linkExpressMode != LinkExpressMode.DISABLED) {
                     _linkScreenState.value = ScreenState.VerificationDialog(linkAccount)
                 } else {
                     _linkScreenState.value = buildFullScreenState()
@@ -350,10 +353,12 @@ internal class LinkActivityViewModel @Inject constructor(
         return ScreenState.FullScreen(
             initialDestination = when (accountStatus) {
                 AccountStatus.Verified -> {
-                    if (linkAccount?.completedSignup == true) {
+                    if (linkAccount?.completedSignup == true && linkLaunchMode.selectedPayment() == null) {
                         // We just completed signup, but haven't added a payment method yet.
                         LinkScreen.PaymentMethod
                     } else {
+                        // We have a verified account, or we're relaunching after signing up and adding a payment,
+                        // then show the wallet.
                         LinkScreen.Wallet
                     }
                 }
@@ -394,7 +399,7 @@ internal class LinkActivityViewModel @Inject constructor(
                     .savedStateHandle(handle)
                     .context(app)
                     .application(app)
-                    .startWithVerificationDialog(args.startWithVerificationDialog)
+                    .linkExpressMode(args.linkExpressMode)
                     .linkLaunchMode(args.launchMode)
                     .linkAccountUpdate(args.linkAccountInfo)
                     .build()

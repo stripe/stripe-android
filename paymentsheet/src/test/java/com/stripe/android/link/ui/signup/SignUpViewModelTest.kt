@@ -815,7 +815,7 @@ internal class SignUpViewModelTest {
         dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         navigateAndClearStack: (LinkScreen) -> Unit = {},
-        moveToWeb: () -> Unit = {},
+        moveToWeb: (Throwable) -> Unit = {},
         dismissWithResult: (LinkActivityResult) -> Unit = {},
         linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full
     ): SignUpViewModel {

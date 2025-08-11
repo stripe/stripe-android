@@ -383,7 +383,7 @@ internal class LinkControllerInteractor @Inject constructor(
                 launcher.launch(
                     LinkActivityContract.Args(
                         configuration = configuration,
-                        startWithVerificationDialog = true,
+                        linkExpressMode = LinkExpressMode.ENABLED,
                         linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                         launchMode = launchMode,
                     )

@@ -1,11 +1,11 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
-import com.stripe.android.financialconnections.R as FinancialConnectionsR
+import com.stripe.android.paymentsheet.R
 
 internal object TransformToBankIcon {
     operator fun invoke(
         bankName: String?,
-        fallbackIcon: Int = FinancialConnectionsR.drawable.stripe_ic_bank,
+        fallbackIcon: Int = R.drawable.stripe_ic_fc_bank,
     ): Int {
         if (bankName == null) {
             return fallbackIcon
@@ -31,6 +31,6 @@ internal object TransformToBankIcon {
             .filter { it.key.findAll(bankName).any() }
             .firstNotNullOfOrNull {
                 transformBankIconCodeToBankIcon(it.value, fallbackIcon)
-            } ?: FinancialConnectionsR.drawable.stripe_ic_bank
+            } ?: R.drawable.stripe_ic_fc_bank
     }
 }

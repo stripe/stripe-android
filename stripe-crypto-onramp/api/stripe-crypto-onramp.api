@@ -18,6 +18,67 @@ public final class com/stripe/android/crypto/onramp/model/CryptoNetwork$Companio
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public final class com/stripe/android/crypto/onramp/model/DateOfBirth {
+	public static final field Companion Lcom/stripe/android/crypto/onramp/model/DateOfBirth$Companion;
+	public fun <init> (III)V
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public final fun component3 ()I
+	public final fun copy (III)Lcom/stripe/android/crypto/onramp/model/DateOfBirth;
+	public static synthetic fun copy$default (Lcom/stripe/android/crypto/onramp/model/DateOfBirth;IIIILjava/lang/Object;)Lcom/stripe/android/crypto/onramp/model/DateOfBirth;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDay ()I
+	public final fun getMonth ()I
+	public final fun getYear ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public synthetic class com/stripe/android/crypto/onramp/model/DateOfBirth$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/stripe/android/crypto/onramp/model/DateOfBirth$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/crypto/onramp/model/DateOfBirth;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/crypto/onramp/model/DateOfBirth;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+}
+
+public final class com/stripe/android/crypto/onramp/model/DateOfBirth$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/crypto/onramp/model/IdType : java/lang/Enum {
+	public static final field AADHAAR Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field ABN Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field BRAZIL_CPF Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field BRAZIL_REGISTRO_GERAL Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field BUSINESS_TAX_DEDUCTION_ACCOUNT_NUMBER Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field COMPANY_REGISTRATION_NUMBER Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field CORPORATE_IDENTITY_NUMBER Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field DRIVING_LICENSE_NUMBER Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field EXPORT_LICENSE_ID Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field FISCAL_CODE Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field GOODS_AND_SERVICES_TAX_ID_NUMBER Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field INDIA_IMPORTER_EXPORTER_CODE Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field LEGACY_ID_NUMBER Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field LIMITED_LIABILITY_PARTNERSHIP_ID Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field PAN Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field PASSPORT_NUMBER Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field PHOTO_ID_NUMBER Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field REGON_NUMBER Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field SOCIAL_SECURITY_NUMBER Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field SPANISH_PERSON_NUMBER Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field TAX_ID Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field TH_LASER_CODE Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field UDYAM_NUMBER Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field VAT_ID Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static final field VOTER_ID Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/IdType;
+	public static fun values ()[Lcom/stripe/android/crypto/onramp/model/IdType;
+}
+
 public final class com/stripe/android/crypto/onramp/model/LinkUserInfo$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/crypto/onramp/model/LinkUserInfo;
@@ -54,6 +115,20 @@ public final class com/stripe/android/crypto/onramp/model/OnrampConfigurationRes
 }
 
 public final class com/stripe/android/crypto/onramp/model/OnrampConfigurationResult$Failed : com/stripe/android/crypto/onramp/model/OnrampConfigurationResult {
+	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampKYCResult {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampKYCResult$Completed : com/stripe/android/crypto/onramp/model/OnrampKYCResult {
+	public static final field INSTANCE Lcom/stripe/android/crypto/onramp/model/OnrampKYCResult$Completed;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampKYCResult$Failed : com/stripe/android/crypto/onramp/model/OnrampKYCResult {
 	public final fun getError ()Ljava/lang/Throwable;
 }
 

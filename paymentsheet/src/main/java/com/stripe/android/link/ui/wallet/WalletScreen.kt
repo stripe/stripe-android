@@ -153,7 +153,7 @@ internal fun WalletBody(
 ) {
     val coroutineScope = rememberCoroutineScope()
     AnimatedContent(
-        targetState = state.paymentDetailsList.isEmpty(),
+        targetState = state.shouldShowLoadingState,
         transitionSpec = { LinkScreenTransition },
     ) { isLoading ->
         if (isLoading) {

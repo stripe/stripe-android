@@ -12,6 +12,7 @@ import androidx.core.content.res.ResourcesCompat
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -69,7 +70,7 @@ internal sealed class PaymentSelection : Parcelable {
 
     @Parcelize
     data class Link(
-        val useLinkExpress: Boolean = false,
+        val linkExpressMode: LinkExpressMode = LinkExpressMode.DISABLED,
         val selectedPayment: LinkPaymentMethod? = null,
         val shippingAddress: ConsumerShippingAddress? = null,
     ) : PaymentSelection() {

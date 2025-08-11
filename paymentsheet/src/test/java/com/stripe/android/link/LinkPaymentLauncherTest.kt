@@ -90,7 +90,7 @@ internal class LinkPaymentLauncherTest {
             linkPaymentLauncher.present(
                 configuration = TestFactory.LINK_CONFIGURATION,
                 linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
-                useLinkExpress = true,
+                linkExpressMode = LinkExpressMode.ENABLED,
                 launchMode = LinkLaunchMode.Full
             )
 
@@ -100,7 +100,7 @@ internal class LinkPaymentLauncherTest {
                 .isEqualTo(
                     LinkActivityContract.Args(
                         configuration = TestFactory.LINK_CONFIGURATION,
-                        startWithVerificationDialog = true,
+                        linkExpressMode = LinkExpressMode.ENABLED,
                         linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                         launchMode = LinkLaunchMode.Full,
                     )
@@ -123,12 +123,12 @@ internal class LinkPaymentLauncherTest {
             linkPaymentLauncher.present(
                 configuration = TestFactory.LINK_CONFIGURATION,
                 linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
-                useLinkExpress = false,
+                linkExpressMode = LinkExpressMode.DISABLED,
                 launchMode = LinkLaunchMode.Full
             )
 
             val launchCall = awaitLaunchCall() as? LinkActivityContract.Args
-            assertThat(launchCall?.startWithVerificationDialog).isFalse()
+            assertThat(launchCall?.linkExpressMode).isEqualTo(LinkExpressMode.DISABLED)
             awaitNextRegisteredLauncher()
         }
     }
@@ -232,7 +232,7 @@ internal class LinkPaymentLauncherTest {
             linkPaymentLauncher.present(
                 configuration = TestFactory.LINK_CONFIGURATION,
                 linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
-                useLinkExpress = true,
+                linkExpressMode = LinkExpressMode.ENABLED,
                 launchMode = LinkLaunchMode.Full
             )
 
@@ -264,7 +264,7 @@ internal class LinkPaymentLauncherTest {
                 linkPaymentLauncher.present(
                     configuration = TestFactory.LINK_CONFIGURATION,
                     linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
-                    useLinkExpress = true,
+                    linkExpressMode = LinkExpressMode.ENABLED,
                     launchMode = LinkLaunchMode.Full
                 )
 

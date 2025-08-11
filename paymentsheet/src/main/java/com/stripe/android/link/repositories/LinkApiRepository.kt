@@ -178,14 +178,12 @@ internal class LinkApiRepository @Inject constructor(
         stripeIntent: StripeIntent,
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?,
-        active: Boolean,
     ): Result<LinkPaymentDetails.New> = withContext(workContext) {
         consumersApiService.createPaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.Card(
                 cardPaymentMethodCreateParamsMap = paymentMethodCreateParams.toParamMap(),
                 email = userEmail,
-                active = active,
             ),
             requestSurface = REQUEST_SURFACE,
             requestOptions = buildRequestOptions(consumerPublishableKey),

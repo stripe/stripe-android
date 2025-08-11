@@ -1,6 +1,7 @@
 package com.stripe.android.crypto.onramp.example
 
 import android.app.Application
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -12,13 +13,15 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
+import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
+import com.stripe.android.crypto.onramp.model.OnrampKYCResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
 import com.stripe.android.crypto.onramp.model.OnrampSetWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.link.model.LinkAppearance
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -50,11 +53,22 @@ internal class OnrampViewModel(
             .build(application, savedStateHandle)
 
         viewModelScope.launch {
-            onrampCoordinator.configure(
-                configuration = OnrampConfiguration(
-                    paymentSheetAppearance = PaymentSheet.Appearance()
+            val configuration = OnrampConfiguration(
+                appearance = LinkAppearance(
+                    lightColors = LinkAppearance.Colors(
+                        primary = Color.Blue,
+                        borderSelected = Color.Red
+                    ),
+                    darkColors = LinkAppearance.Colors(
+                        primary = Color.Red,
+                        borderSelected = Color.Blue
+                    ),
+                    style = LinkAppearance.Style.AUTOMATIC,
+                    primaryButton = LinkAppearance.PrimaryButton()
                 )
             )
+
+            onrampCoordinator.configure(configuration = configuration)
             // Set initial state to EmailInput after configuration
             _uiState.value = OnrampUiState.EmailInput
         }
@@ -68,6 +82,7 @@ internal class OnrampViewModel(
 
         currentEmail = email.trim()
         _uiState.value = OnrampUiState.Loading
+
         val result = onrampCoordinator.isLinkUser(currentEmail)
         when (result) {
             is OnrampLinkLookupResult.Completed -> {
@@ -85,7 +100,6 @@ internal class OnrampViewModel(
             }
         }
     }
-
     fun onBackToEmailInput() {
         _uiState.value = OnrampUiState.EmailInput
     }
@@ -144,6 +158,24 @@ internal class OnrampViewModel(
                 is OnrampSetWalletAddressResult.Failed -> {
                     _message.value = "Failed to register wallet address: ${result.error.message}"
                     _uiState.value = OnrampUiState.AuthenticatedOperations(currentEmail, currentCustomerId)
+				}
+			}
+		}
+	}
+    fun collectKycInfo(kycInfo: KycInfo) {
+        _uiState.value = OnrampUiState.Loading
+
+        viewModelScope.launch {
+            val result = onrampCoordinator.collectKycInfo(kycInfo)
+
+            when (result) {
+                is OnrampKYCResult.Completed -> {
+                    _message.value = "KYC Collection successful"
+                    _uiState.value = OnrampUiState.EmailInput
+                }
+                is OnrampKYCResult.Failed -> {
+                    _message.value = "KYC Collection failed: ${result.error.message}"
+                    _uiState.value = OnrampUiState.KYCScreen
                 }
             }
         }
@@ -167,4 +199,5 @@ internal sealed class OnrampUiState {
     data class Registration(val email: String) : OnrampUiState()
     data class Authentication(val email: String) : OnrampUiState()
     data class AuthenticatedOperations(val email: String, val customerId: String) : OnrampUiState()
+    object KYCScreen : OnrampUiState()
 }

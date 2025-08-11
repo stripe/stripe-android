@@ -15,6 +15,7 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.LinkAppearance
 import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
@@ -192,7 +193,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 configuration = configuration,
                 elementsSession = elementsSession,
                 customer = customerInfo,
-                initializationMode = initializationMode
+                initializationMode = initializationMode,
+                linkAppearance = configuration.linkAppearance
             )
         }
 
@@ -271,15 +273,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             state = state
         )
 
-        // Only log Link AB Test if Link is enabled
-        val linkEnabled = state.paymentMethodMetadata.linkState != null
-        if (linkEnabled) {
-            logLinkHoldbackExperiment(
-                elementsSession = elementsSession,
-                state = state,
-                experimentAssignment = ElementsSession.ExperimentAssignment.LINK_AB_TEST
-            )
-        }
+        logLinkHoldbackExperiment(
+            elementsSession = elementsSession,
+            state = state,
+            experimentAssignment = ElementsSession.ExperimentAssignment.LINK_AB_TEST
+        )
     }
 
     private suspend fun retrieveElementsSession(
@@ -474,14 +472,16 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         elementsSession: ElementsSession,
         configuration: CommonConfiguration,
         customer: CustomerInfo?,
-        initializationMode: PaymentElementLoader.InitializationMode
+        initializationMode: PaymentElementLoader.InitializationMode,
+        linkAppearance: LinkAppearance?
     ): LinkState? {
         val linkConfig =
             createLinkConfiguration(
                 configuration = configuration,
                 customer = customer,
                 elementsSession = elementsSession,
-                initializationMode = initializationMode
+                initializationMode = initializationMode,
+                linkAppearance = linkAppearance
             ) ?: return null
         return loadLinkState(
             configuration = configuration,
@@ -537,11 +537,13 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         )
     }
 
+    @Suppress("LongMethod")
     private suspend fun createLinkConfiguration(
         configuration: CommonConfiguration,
         customer: CustomerInfo?,
         elementsSession: ElementsSession,
-        initializationMode: PaymentElementLoader.InitializationMode
+        initializationMode: PaymentElementLoader.InitializationMode,
+        linkAppearance: LinkAppearance?,
     ): LinkConfiguration? {
         if (!configuration.link.shouldDisplay || !elementsSession.isLinkEnabled) {
             return null
@@ -612,7 +614,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             collectMissingBillingDetailsForExistingPaymentMethods =
             configuration.link.collectMissingBillingDetailsForExistingPaymentMethods,
             allowUserEmailEdits = configuration.link.allowUserEmailEdits,
+            skipWalletInFlowController = elementsSession.linkMobileSkipWalletInFlowController,
             customerId = elementsSession.customer?.session?.customerId,
+            linkAppearance = linkAppearance
         )
 
         // CBF isn't currently supported in the web flow.

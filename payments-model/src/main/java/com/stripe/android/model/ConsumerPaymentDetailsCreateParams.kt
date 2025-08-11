@@ -18,13 +18,12 @@ sealed interface ConsumerPaymentDetailsCreateParams : StripeParamsModel, Parcela
     data class Card(
         private val cardPaymentMethodCreateParamsMap: Map<String, @RawValue Any>,
         private val email: String,
-        private val active: Boolean,
     ) : ConsumerPaymentDetailsCreateParams {
 
         override fun toParamMap(): Map<String, Any> {
             val params = mutableMapOf<String, Any>(
                 "type" to "card",
-                "active" to active,
+                "active" to true,
                 LINK_PARAM_BILLING_EMAIL_ADDRESS to email,
             )
 

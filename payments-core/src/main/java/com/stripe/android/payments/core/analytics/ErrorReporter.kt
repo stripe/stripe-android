@@ -264,6 +264,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         WALLET_BUTTONS_NULL_CONFIRMATION_ARGS_ON_CONFIRM(
             partialEventName = "wallet_buttons.confirmation_arguments.null_on_confirm"
         ),
+        INTENT_CONFIRMATION_HANDLER_PASSIVE_CHALLENGE_PARAMS_NULL(
+            partialEventName = "intent_confirmation_handler.passive_challenge.params_null"
+        ),
         ;
 
         override val eventName: String

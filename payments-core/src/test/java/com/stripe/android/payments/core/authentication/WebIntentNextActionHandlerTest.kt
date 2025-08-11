@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentBrowserAuthStarter
@@ -36,7 +37,7 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class WebIntentAuthenticatorTest {
+class WebIntentNextActionHandlerTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val paymentBrowserAuthStarterFactory =
         mock<(AuthActivityStarterHost) -> PaymentBrowserAuthStarter>()
@@ -148,12 +149,34 @@ class WebIntentAuthenticatorTest {
             expectedRequestCode = PAYMENT_REQUEST_CODE,
             expectedAnalyticsEvent = null,
             expectedShouldCancelIntentOnUserNavigation = false,
-            redirectResolver = { mockResolvedUrl },
-        )
+        ) {
+            redirectResolver.turbine.add { mockResolvedUrl }
+        }
+    }
+
+    @Test
+    fun authenticate_whenRedirectingToKlarna() {
+        val beforeRedirectUrl = "https://pm-redirects.stripe.com/authorize/acct_1234/sa_nonce_SmAXX?useWebAuthSession=true&followRedirectsInSDK=true"
+        val afterRedirectUrl = "https://payments.klarna.com/na/opf/not-a-real-uuid/handover?opf_s[…]some_random_token&l=en-US"
+
+        verifyAuthenticate(
+            stripeIntent = PaymentIntentFixtures.KLARNA_REQUIRES_ACTION,
+            expectedUrl = afterRedirectUrl,
+            expectedReferrer = beforeRedirectUrl,
+            expectedForceInAppWebView = true,
+            expectedReturnUrl = "stripesdk://payment_return_url/some_package_name",
+            expectedRequestCode = PAYMENT_REQUEST_CODE,
+            expectedAnalyticsEvent = null,
+            expectedShouldCancelIntentOnUserNavigation = false,
+        ) {
+            redirectResolver.turbine.add { originalUrl ->
+                assertThat(originalUrl).isEqualTo(beforeRedirectUrl)
+                afterRedirectUrl
+            }
+        }
     }
 
     private fun verifyAuthenticate(
-        redirectResolver: RedirectResolver = RealRedirectResolver(),
         stripeIntent: StripeIntent,
         expectedUrl: String,
         expectedReferrer: String? = null,
@@ -161,8 +184,10 @@ class WebIntentAuthenticatorTest {
         expectedReturnUrl: String?,
         expectedRequestCode: Int,
         expectedShouldCancelIntentOnUserNavigation: Boolean = true,
-        expectedAnalyticsEvent: PaymentAnalyticsEvent?
+        expectedAnalyticsEvent: PaymentAnalyticsEvent?,
+        beforePerformNextAction: TestParams.() -> Unit = {},
     ) = runTest {
+        val redirectResolver = TurbineRedirectResolver()
         val authenticator = WebIntentNextActionHandler(
             paymentBrowserAuthStarterFactory = paymentBrowserAuthStarterFactory,
             analyticsRequestExecutor = analyticsRequestExecutor,
@@ -175,6 +200,12 @@ class WebIntentAuthenticatorTest {
             defaultReturnUrl = DefaultReturnUrl("some_package_name"),
             redirectResolver = redirectResolver,
         )
+
+        TestParams(
+            redirectResolver = redirectResolver,
+        ).apply {
+            beforePerformNextAction()
+        }
 
         authenticator.performNextAction(
             host,
@@ -200,6 +231,7 @@ class WebIntentAuthenticatorTest {
         expectedAnalyticsEvent?.let {
             verifyAnalytics(it)
         }
+        redirectResolver.turbine.ensureAllEventsConsumed()
     }
 
     private fun verifyAnalytics(event: PaymentAnalyticsEvent) {
@@ -220,5 +252,17 @@ class WebIntentAuthenticatorTest {
             apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccount = ACCOUNT_ID
         )
+    }
+
+    private data class TestParams(
+        val redirectResolver: TurbineRedirectResolver,
+    )
+
+    private class TurbineRedirectResolver : RedirectResolver {
+        val turbine = Turbine<(String) -> String>()
+
+        override suspend fun invoke(url: String): String {
+            return turbine.awaitItem().invoke(url)
+        }
     }
 }

@@ -14,6 +14,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.TestFactory
@@ -103,11 +104,11 @@ internal class PaymentOptionsViewModelTest {
     fun `onUserSelection() when selection has been made should set the view state to process result`() =
         runTest {
             val viewModel = createViewModel()
-            viewModel.paymentOptionResult.test {
+            viewModel.paymentOptionsActivityResult.test {
                 viewModel.updateSelection(SELECTION_SAVED_PAYMENT_METHOD)
                 viewModel.onUserSelection()
                 assertThat(awaitItem()).isEqualTo(
-                    PaymentOptionResult.Succeeded(
+                    PaymentOptionsActivityResult.Succeeded(
                         SELECTION_SAVED_PAYMENT_METHOD,
                         LinkAccountUpdate.Value(null),
                         listOf(),
@@ -126,12 +127,12 @@ internal class PaymentOptionsViewModelTest {
     fun `onUserSelection() when new card selection with no save should set the view state to process result`() =
         runTest {
             val viewModel = createViewModel()
-            viewModel.paymentOptionResult.test {
+            viewModel.paymentOptionsActivityResult.test {
                 viewModel.updateSelection(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION)
                 viewModel.onUserSelection()
                 assertThat(awaitItem())
                     .isEqualTo(
-                        PaymentOptionResult.Succeeded(
+                        PaymentOptionsActivityResult.Succeeded(
                             NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION,
                             LinkAccountUpdate.Value(null),
                             listOf()
@@ -150,12 +151,12 @@ internal class PaymentOptionsViewModelTest {
     fun `onUserSelection() when external payment method should set the view state to process result`() =
         runTest {
             val viewModel = createViewModel()
-            viewModel.paymentOptionResult.test {
+            viewModel.paymentOptionsActivityResult.test {
                 viewModel.updateSelection(EXTERNAL_PAYMENT_METHOD_PAYMENT_SELECTION)
                 viewModel.onUserSelection()
                 assertThat(awaitItem())
                     .isEqualTo(
-                        PaymentOptionResult.Succeeded(
+                        PaymentOptionsActivityResult.Succeeded(
                             EXTERNAL_PAYMENT_METHOD_PAYMENT_SELECTION,
                             LinkAccountUpdate.Value(null),
                             listOf()
@@ -174,12 +175,12 @@ internal class PaymentOptionsViewModelTest {
     fun `onUserSelection() when custom payment method should set the view state to process result`() =
         runTest {
             val viewModel = createViewModel()
-            viewModel.paymentOptionResult.test {
+            viewModel.paymentOptionsActivityResult.test {
                 viewModel.updateSelection(CUSTOM_PAYMENT_METHOD_SELECTION)
                 viewModel.onUserSelection()
                 assertThat(awaitItem())
                     .isEqualTo(
-                        PaymentOptionResult.Succeeded(
+                        PaymentOptionsActivityResult.Succeeded(
                             CUSTOM_PAYMENT_METHOD_SELECTION,
                             LinkAccountUpdate.Value(null),
                             listOf()
@@ -198,11 +199,11 @@ internal class PaymentOptionsViewModelTest {
     fun `onUserSelection() new card with save should complete with succeeded view state`() =
         runTest {
             val viewModel = createViewModel()
-            viewModel.paymentOptionResult.test {
+            viewModel.paymentOptionsActivityResult.test {
                 viewModel.updateSelection(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
                 viewModel.onUserSelection()
                 val paymentOptionResultSucceeded =
-                    awaitItem() as PaymentOptionResult.Succeeded
+                    awaitItem() as PaymentOptionsActivityResult.Succeeded
                 assertThat((paymentOptionResultSucceeded).paymentSelection)
                     .isEqualTo(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
                 verify(eventReporter)
@@ -237,7 +238,7 @@ internal class PaymentOptionsViewModelTest {
             configuration = any(),
             linkAccountInfo = eq(LinkAccountUpdate.Value(unverifiedAccount)),
             launchMode = eq(LinkLaunchMode.PaymentMethodSelection(selectedPayment = null)),
-            useLinkExpress = eq(true)
+            linkExpressMode = eq(LinkExpressMode.ENABLED)
         )
     }
 
@@ -249,11 +250,11 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.updateSelection(PaymentSelection.Link())
-        viewModel.paymentOptionResult.test {
+        viewModel.paymentOptionsActivityResult.test {
             viewModel.onUserSelection()
             val result = awaitItem()
-            assertThat(result).isInstanceOf<PaymentOptionResult.Succeeded>()
-            val succeeded = result as PaymentOptionResult.Succeeded
+            assertThat(result).isInstanceOf<PaymentOptionsActivityResult.Succeeded>()
+            val succeeded = result as PaymentOptionsActivityResult.Succeeded
             assertThat(succeeded.paymentSelection).isInstanceOf<PaymentSelection.Link>()
             ensureAllEventsConsumed()
         }
@@ -275,7 +276,7 @@ internal class PaymentOptionsViewModelTest {
             configuration = any(),
             linkAccountInfo = any(),
             launchMode = any(),
-            useLinkExpress = any()
+            linkExpressMode = any()
         )
     }
 
@@ -602,13 +603,13 @@ internal class PaymentOptionsViewModelTest {
 
             val viewModel = createViewModel().apply { updateSelection(PaymentSelection.Link()) }
 
-            viewModel.paymentOptionResult.test {
+            viewModel.paymentOptionsActivityResult.test {
                 viewModel.handlePaymentMethodSelected(selection)
                 expectNoEvents()
 
                 viewModel.handlePaymentMethodSelected(PaymentSelection.Link())
 
-                val result = awaitItem() as? PaymentOptionResult.Succeeded
+                val result = awaitItem() as? PaymentOptionsActivityResult.Succeeded
                 assertThat(result?.paymentSelection).isEqualTo(PaymentSelection.Link())
             }
         }
@@ -677,14 +678,14 @@ internal class PaymentOptionsViewModelTest {
 
         val viewModel = createViewModel(args)
 
-        viewModel.paymentOptionResult.test {
+        viewModel.paymentOptionsActivityResult.test {
             // Simulate user removing the selected payment method
             viewModel.savedPaymentMethodMutator.removePaymentMethod(selection.paymentMethod)
 
             viewModel.onUserCancel()
 
             assertThat(awaitItem()).isEqualTo(
-                PaymentOptionResult.Canceled(
+                PaymentOptionsActivityResult.Canceled(
                     mostRecentError = null,
                     paymentSelection = null,
                     paymentMethods = paymentMethods - selection.paymentMethod,
@@ -710,7 +711,7 @@ internal class PaymentOptionsViewModelTest {
 
         val viewModel = createViewModel(args)
 
-        viewModel.paymentOptionResult.test {
+        viewModel.paymentOptionsActivityResult.test {
             // Simulate user filling out a different payment method, but not confirming it
             viewModel.updateSelection(
                 PaymentSelection.New.GenericPaymentMethod(
@@ -726,7 +727,7 @@ internal class PaymentOptionsViewModelTest {
             viewModel.onUserCancel()
 
             assertThat(awaitItem()).isEqualTo(
-                PaymentOptionResult.Canceled(
+                PaymentOptionsActivityResult.Canceled(
                     mostRecentError = null,
                     paymentSelection = selection,
                     linkAccountInfo = LinkAccountUpdate.Value(null),
@@ -875,7 +876,7 @@ internal class PaymentOptionsViewModelTest {
     fun `onLinkActivityResult with Canceled does nothing`() = runTest {
         val viewModel = createViewModel()
         val linkAccountUpdate = LinkAccountUpdate.None
-        viewModel.paymentOptionResult.test {
+        viewModel.paymentOptionsActivityResult.test {
             viewModel.onLinkAuthenticationResult(LinkActivityResult.Canceled(linkAccountUpdate = linkAccountUpdate))
             expectNoEvents()
         }
@@ -906,9 +907,9 @@ internal class PaymentOptionsViewModelTest {
             selectedPayment = null
         )
         val viewModel = createViewModel()
-        viewModel.paymentOptionResult.test {
+        viewModel.paymentOptionsActivityResult.test {
             viewModel.onLinkAuthenticationResult(result)
-            val succeeded = awaitItem() as PaymentOptionResult.Succeeded
+            val succeeded = awaitItem() as PaymentOptionsActivityResult.Succeeded
             val paymentSelection = succeeded.paymentSelection
             assertThat(paymentSelection).isInstanceOf<PaymentSelection.Link>()
             assertThat(succeeded.linkAccountInfo.account).isEqualTo(linkAccountUpdate.account)
@@ -1048,7 +1049,7 @@ internal class PaymentOptionsViewModelTest {
 
         val viewModel = createViewModel(args)
 
-        viewModel.paymentOptionResult.test {
+        viewModel.paymentOptionsActivityResult.test {
             viewModel.transitionToAddPaymentScreen()
 
             preCancel(viewModel)
@@ -1056,7 +1057,7 @@ internal class PaymentOptionsViewModelTest {
             viewModel.onUserCancel()
 
             assertThat(awaitItem()).isEqualTo(
-                PaymentOptionResult.Canceled(
+                PaymentOptionsActivityResult.Canceled(
                     mostRecentError = null,
                     paymentSelection = expectedSelection,
                     linkAccountInfo = LinkAccountUpdate.Value(null),

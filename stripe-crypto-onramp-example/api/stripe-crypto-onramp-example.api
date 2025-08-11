@@ -25,6 +25,7 @@ public final class com/stripe/android/crypto/onramp/example/ComposableSingletons
 	public final fun getLambda-18$stripe_crypto_onramp_example_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-19$stripe_crypto_onramp_example_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-2$stripe_crypto_onramp_example_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-20$stripe_crypto_onramp_example_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-3$stripe_crypto_onramp_example_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-4$stripe_crypto_onramp_example_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-5$stripe_crypto_onramp_example_release ()Lkotlin/jvm/functions/Function2;

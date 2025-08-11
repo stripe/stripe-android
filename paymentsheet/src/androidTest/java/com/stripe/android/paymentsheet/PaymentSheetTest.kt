@@ -5,6 +5,7 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -449,6 +450,48 @@ internal class PaymentSheetTest {
             .onAllNodesWithTag(TEST_TAG_MODIFY_BADGE)[0]
             .assertIsFocused()
 
+        testContext.markTestSucceeded()
+    }
+
+    @Test
+    fun testTermsDisplayNeverHidesMandate() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        val configurationWithTermsDisplayNever = PaymentSheet.Configuration.Builder(
+            merchantDisplayName = "Example, Inc."
+        )
+            .termsDisplay(
+                mapOf(
+                    PaymentMethod.Type.Card to PaymentSheet.TermsDisplay.NEVER
+                )
+            )
+            .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+            .build()
+
+        testContext.presentPaymentSheet {
+            presentWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 5000,
+                        currency = "USD",
+                        setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+                    )
+                ),
+                configuration = configurationWithTermsDisplayNever,
+            )
+        }
+
+        page.assertMandateIsMissing()
         testContext.markTestSucceeded()
     }
 }

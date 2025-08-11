@@ -131,7 +131,7 @@ internal class LinkControllerCoordinatorTest {
         coordinator.linkActivityResultLauncher.launch(
             LinkActivityContract.Args(
                 configuration = TestFactory.LINK_CONFIGURATION,
-                startWithVerificationDialog = false,
+                linkExpressMode = LinkExpressMode.DISABLED,
                 linkAccountInfo = LinkAccountUpdate.Value(null),
                 launchMode = LinkLaunchMode.PaymentMethodSelection(null),
             )

@@ -17,11 +17,15 @@ internal object SatispayDefinition : PaymentMethodDefinition {
 
     override val supportedAsSavedPaymentMethod: Boolean = false
 
+    override val supportsTermDisplayConfiguration: Boolean = true
+
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf()
 
-    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup(type.code)
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean {
+        return metadata.hasIntentToSetup(type.code) && metadata.mandateAllowed(type)
+    }
 
     override fun uiDefinitionFactory(): UiDefinitionFactory = SatispayUiDefinitionFactory
 }
