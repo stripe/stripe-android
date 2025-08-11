@@ -201,7 +201,6 @@ internal class WalletViewModel @Inject constructor(
     }
 
     private fun shouldAutoSelectDefaultPaymentMethod(): Boolean {
-        return false
         return linkLaunchMode is LinkLaunchMode.PaymentMethodSelection &&
             linkLaunchMode.selectedPayment == null &&
             configuration.skipWalletInFlowController
