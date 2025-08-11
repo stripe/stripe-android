@@ -33,6 +33,7 @@ internal object CheckoutModeSettingsDefinition :
     }
 }
 
+@OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
 internal enum class CheckoutMode(override val value: String) : ValueEnum {
     SETUP("setup") {
         override fun intentConfigurationMode(
@@ -45,7 +46,6 @@ internal enum class CheckoutMode(override val value: String) : ValueEnum {
         }
     },
     PAYMENT("payment") {
-        @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
         override fun intentConfigurationMode(
             playgroundState: PlaygroundState.Payment
         ): PaymentSheet.IntentConfiguration.Mode {
@@ -64,6 +64,7 @@ internal enum class CheckoutMode(override val value: String) : ValueEnum {
                 amount = playgroundState.amount,
                 currency = playgroundState.currencyCode.value,
                 setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
+                paymentMethodOptions = playgroundState.paymentMethodOptionsSetupFutureUsage
             )
         }
     };
