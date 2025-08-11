@@ -153,21 +153,10 @@ internal fun OnrampScreen(
                     email = currentState.email,
                     customerId = currentState.customerId,
                     onRegisterWalletAddress = onRegisterWalletAddress,
+                    onCollectKYC = { kycInfo -> viewModel.collectKycInfo(kycInfo) },
                     onBack = {
                         viewModel.onBackToEmailInput()
                     }
-                )
-            }
-            is OnrampUiState.KYCScreen -> {
-                var firstName by remember { mutableStateOf("") }
-                var lastName by remember { mutableStateOf("") }
-
-                KYCScreen(
-                    firstName = firstName,
-                    onFirstNameChange = { firstName = it },
-                    lastName = lastName,
-                    onLastNameChange = { lastName = it },
-                    onCollectKYC = { kycInfo -> viewModel.collectKycInfo(kycInfo) }
                 )
             }
         }
@@ -373,6 +362,7 @@ private fun AuthenticatedOperationsScreen(
     email: String,
     customerId: String,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
+    onCollectKYC: (KycInfo) -> Unit,
     onBack: () -> Unit
 ) {
     var walletAddress by remember { mutableStateOf("") }
@@ -454,14 +444,25 @@ private fun AuthenticatedOperationsScreen(
         ) {
             Text("Register Wallet Address")
         }
-			
+
+        var firstName by remember { mutableStateOf("") }
+        var lastName by remember { mutableStateOf("") }
+
+        KYCScreen(
+            firstName = firstName,
+            onFirstNameChange = { firstName = it },
+            lastName = lastName,
+            onLastNameChange = { lastName = it },
+            onCollectKYC = { kycInfo -> onCollectKYC(kycInfo) }
+        )
+
         TextButton(
             onClick = onBack,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Back to Email Input")
         }
-	}
+    }
 }
 
 @Composable

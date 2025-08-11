@@ -162,6 +162,7 @@ internal class OnrampViewModel(
 			}
 		}
 	}
+
     fun collectKycInfo(kycInfo: KycInfo) {
         _uiState.value = OnrampUiState.Loading
 
@@ -175,7 +176,7 @@ internal class OnrampViewModel(
                 }
                 is OnrampKYCResult.Failed -> {
                     _message.value = "KYC Collection failed: ${result.error.message}"
-                    _uiState.value = OnrampUiState.KYCScreen
+                    _uiState.value = OnrampUiState.AuthenticatedOperations(currentEmail, currentCustomerId)
                 }
             }
         }
@@ -199,5 +200,4 @@ internal sealed class OnrampUiState {
     data class Registration(val email: String) : OnrampUiState()
     data class Authentication(val email: String) : OnrampUiState()
     data class AuthenticatedOperations(val email: String, val customerId: String) : OnrampUiState()
-    object KYCScreen : OnrampUiState()
 }
