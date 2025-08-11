@@ -33,6 +33,7 @@ import com.stripe.android.model.StripeIntent.Status.Canceled
 import com.stripe.android.model.StripeIntent.Status.Succeeded
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
+import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.ConfigFixtures
@@ -284,7 +285,7 @@ internal class DefaultPaymentElementLoaderTest {
         }
 
     @Test
-    fun `Should default to no payment method google pay is not ready`() =
+    fun `Should default to no payment method when google pay is not ready`() =
         runTest {
             prefsRepository.savePaymentSelection(null)
 
@@ -308,7 +309,124 @@ internal class DefaultPaymentElementLoaderTest {
         }
 
     @Test
-    fun `Should default to no payment method google pay is not configured`() =
+    fun `Should default to no payment method when saved selection is Google Pay & its not ready`() =
+        runTest {
+            prefsRepository.savePaymentSelection(PaymentSelection.GooglePay)
+
+            val loader = createPaymentElementLoader(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                isGooglePayReady = false,
+                customerRepo = FakeCustomerRepository(paymentMethods = emptyList()),
+            )
+
+            val result = loader.load(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                ),
+                paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
+            ).getOrThrow()
+
+            assertThat(result.paymentSelection).isNull()
+        }
+
+    @OptIn(WalletButtonsPreview::class)
+    @Test
+    fun `Should default to no payment method when using wallet buttons`() =
+        runTest {
+            prefsRepository.savePaymentSelection(null)
+
+            val loader = createPaymentElementLoader(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                isGooglePayReady = true,
+                customerRepo = FakeCustomerRepository(paymentMethods = emptyList()),
+            )
+
+            val result = loader.load(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                ),
+                paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                    .walletButtons(
+                        PaymentSheet.WalletButtonsConfiguration(
+                            willDisplayExternally = true,
+                        )
+                    )
+                    .build(),
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
+            ).getOrThrow()
+
+            assertThat(result.paymentSelection).isNull()
+        }
+
+    @OptIn(WalletButtonsPreview::class)
+    @Test
+    fun `Should default to no payment method when using wallet buttons & google is saved selection`() =
+        runTest {
+            prefsRepository.savePaymentSelection(PaymentSelection.GooglePay)
+
+            val loader = createPaymentElementLoader(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                isGooglePayReady = true,
+                customerRepo = FakeCustomerRepository(paymentMethods = emptyList()),
+            )
+
+            val result = loader.load(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                ),
+                paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                    .walletButtons(
+                        PaymentSheet.WalletButtonsConfiguration(
+                            willDisplayExternally = true,
+                        )
+                    )
+                    .build(),
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
+            ).getOrThrow()
+
+            assertThat(result.paymentSelection).isNull()
+        }
+
+    @OptIn(WalletButtonsPreview::class)
+    @Test
+    fun `Should default to no payment method when using wallet buttons & link is saved selection`() =
+        runTest {
+            prefsRepository.savePaymentSelection(PaymentSelection.Link())
+
+            val loader = createPaymentElementLoader(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                isGooglePayReady = true,
+                customerRepo = FakeCustomerRepository(paymentMethods = emptyList()),
+            )
+
+            val result = loader.load(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                ),
+                paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                    .walletButtons(
+                        PaymentSheet.WalletButtonsConfiguration(
+                            willDisplayExternally = true,
+                        )
+                    )
+                    .build(),
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
+            ).getOrThrow()
+
+            assertThat(result.paymentSelection).isNull()
+        }
+
+    @Test
+    fun `Should default to no payment method when google pay is not configured`() =
         runTest {
             prefsRepository.savePaymentSelection(null)
 
@@ -3287,6 +3405,10 @@ internal class DefaultPaymentElementLoaderTest {
                     id = "cus_123",
                     ephemeralKeySecret = "ek_123",
                 ),
+                googlePay = PaymentSheet.GooglePayConfiguration(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    countryCode = "US"
+                )
             ),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
