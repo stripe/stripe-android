@@ -43,7 +43,7 @@ sealed interface CardScanSheetResult : Parcelable {
 
 private const val CARD_SCAN_FRAGMENT_TAG = "CardScanFragmentTag"
 
-class CardScanSheet private constructor() {
+open class CardScanSheet internal constructor() {
 
     private lateinit var launcher: ActivityResultLauncher<CardScanSheetParams>
 
@@ -52,6 +52,10 @@ class CardScanSheet private constructor() {
      */
     fun interface CardScanResultCallback {
         fun onCardScanSheetResult(cardScanSheetResult: CardScanSheetResult)
+    }
+
+    open fun checkAvailability(onSuccess: () -> Unit) {
+        onSuccess()
     }
 
     companion object {
@@ -67,18 +71,11 @@ class CardScanSheet private constructor() {
             from: ComponentActivity,
             cardScanSheetResultCallback: CardScanResultCallback,
             registry: ActivityResultRegistry = from.activityResultRegistry
-        ) =
-//            CardScanSheet().apply {
-//                launcher = from.registerForActivityResult(
-//                    activityResultContract,
-//                    registry,
-//                    cardScanSheetResultCallback::onCardScanSheetResult
-//                )
-//            }
+        ) : CardScanSheet =
             CardScanGoogleImpl(
                 activity = from,
                 cardScanSheetResultCallback = cardScanSheetResultCallback,
-                registry = from.activityResultRegistry
+                registry = registry
             )
 
         /**
@@ -93,7 +90,7 @@ class CardScanSheet private constructor() {
             from: Fragment,
             cardScanSheetResultCallback: CardScanResultCallback,
             registry: ActivityResultRegistry? = null
-        ) =
+        ) : CardScanSheet =
             CardScanSheet().apply {
                 launcher = if (registry != null) {
                     from.registerForActivityResult(
@@ -119,6 +116,10 @@ class CardScanSheet private constructor() {
                     UnknownScanException("No data in the result intent")
                 )
 
+//        @Deprecated(
+//            message = "CardScan is no longer supported in Fragment view",
+//            level = DeprecationLevel.ERROR
+//        )
         fun removeCardScanFragment(
             supportFragmentManager: FragmentManager
         ) {
@@ -160,13 +161,21 @@ class CardScanSheet private constructor() {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun present(configuration: CardScanConfiguration) {
-        launcher.launch(CardScanSheetParams(configuration))
+        if (this is CardScanGoogleImpl) {
+            launch()
+        } else {
+            launcher.launch(CardScanSheetParams(configuration))
+        }
     }
 
     /**
      * Attach the cardscan fragment to the specified container.
      * Results will be returned in the callback function.
      */
+//    @Deprecated(
+//        message = "CardScan is no longer supported in Fragment view",
+//        level = DeprecationLevel.ERROR
+//    )
     fun attachCardScanFragment(
         lifecycleOwner: LifecycleOwner,
         supportFragmentManager: FragmentManager,

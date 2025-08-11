@@ -18,7 +18,7 @@ class CardScanDemoActivity : AppCompatActivity() {
         val cardScanSheet = CardScanSheet.create(this, ::onScanFinished)
 
         viewBinding.launchScanButton.setOnClickListener {
-            cardScanSheet.launch()
+            cardScanSheet.present()
         }
     }
 

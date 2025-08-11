@@ -2,13 +2,13 @@ package com.stripe.android.ui.core
 
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.BuildConfig
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.stripecardscan.cardscan.CardScanConfiguration
-import com.stripe.android.stripecardscan.cardscan.CardScanGoogleImpl
 import com.stripe.android.stripecardscan.cardscan.CardScanSheet
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 
@@ -27,21 +27,21 @@ internal interface StripeCardScanProxy {
     )
 
     companion object {
-//        fun create(
-//            fragment: Fragment,
-//            onFinished: (cardScanSheetResult: CardScanSheetResult) -> Unit,
-//            errorReporter: ErrorReporter,
-//            provider: () -> StripeCardScanProxy = {
-//                DefaultStripeCardScanProxy(CardScanSheet.create(fragment, onFinished))
-//            },
-//            isStripeCardScanAvailable: IsStripeCardScanAvailable = DefaultIsStripeCardScanAvailable(),
-//        ): StripeCardScanProxy {
-//            return if (isStripeCardScanAvailable()) {
-//                provider()
-//            } else {
-//                UnsupportedStripeCardScanProxy(errorReporter)
-//            }
-//        }
+        fun create(
+            fragment: Fragment,
+            onFinished: (cardScanSheetResult: CardScanSheetResult) -> Unit,
+            errorReporter: ErrorReporter,
+            provider: () -> StripeCardScanProxy = {
+                DefaultStripeCardScanProxy(CardScanSheet.create(fragment, onFinished))
+            },
+            isStripeCardScanAvailable: IsStripeCardScanAvailable = DefaultIsStripeCardScanAvailable(),
+        ): StripeCardScanProxy {
+            return if (isStripeCardScanAvailable()) {
+                provider()
+            } else {
+                UnsupportedStripeCardScanProxy(errorReporter)
+            }
+        }
 
         fun create(
             activity: AppCompatActivity,
@@ -58,25 +58,14 @@ internal interface StripeCardScanProxy {
                 UnsupportedStripeCardScanProxy(errorReporter)
             }
         }
-
-        fun removeCardScanFragment(
-            supportFragmentManager: FragmentManager,
-            isStripeCardScanAvailable: IsStripeCardScanAvailable = DefaultIsStripeCardScanAvailable()
-        ) {
-            if (isStripeCardScanAvailable()) {
-                CardScanSheet.removeCardScanFragment(supportFragmentManager)
-            }
-        }
     }
 }
 
 internal class DefaultStripeCardScanProxy(
-//    private val cardScanSheet: CardScanSheet
-    private val cardScanSheet: CardScanGoogleImpl
+    private val cardScanSheet: CardScanSheet
 ) : StripeCardScanProxy {
     override fun present(configuration: CardScanConfiguration) {
-//        cardScanSheet.present(configuration)
-        cardScanSheet.launch()
+        cardScanSheet.present(configuration)
     }
 
     override fun attachCardScanFragment(

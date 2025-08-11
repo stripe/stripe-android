@@ -25,7 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.stripe.android.stripecardscan.cardscan.CardScanGoogleImpl
+import com.stripe.android.stripecardscan.cardscan.CardScanSheet
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.stripecardscan.cardscan.parseActivityResult
 import com.stripe.android.ui.core.R
@@ -38,23 +38,20 @@ internal fun ScanCardButtonUI(
     elementsSessionId: String?,
     onResult: (CardScanSheetResult) -> Unit
 ) {
-    val context = LocalContext.current
+    val activity = LocalContext.current as ComponentActivity
     val cardScanLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult(),
-        ) { result ->
+    ) { result ->
         val cardScanResult = parseActivityResult(result)
         onResult(cardScanResult)
     }
-
-    val cardScanImpl = remember {
-        CardScanGoogleImpl(
-            context as ComponentActivity,
-            cardScanLauncher
-        )
+    val cardScanSheet = remember(activity) {
+        // TODO: fix crash caused by ActivityResultRegistry
+        CardScanSheet.create(activity, onResult)
     }
     var isCardScanAvailable by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        cardScanImpl.fetchIntent { isCardScanAvailable = true }
+        cardScanSheet.checkAvailability { isCardScanAvailable = true }
     }
     if (isCardScanAvailable) {
         Row(
@@ -64,7 +61,7 @@ internal fun ScanCardButtonUI(
                 indication = null,
                 enabled = enabled,
                 onClick = {
-                    cardScanImpl.launch()
+                    cardScanSheet.present()
                 }
             )
         ) {

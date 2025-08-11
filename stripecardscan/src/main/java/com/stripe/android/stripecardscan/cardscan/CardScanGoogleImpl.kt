@@ -1,6 +1,7 @@
 package com.stripe.android.stripecardscan.cardscan
 
 import android.app.Activity
+import android.content.Context
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResult
@@ -13,14 +14,13 @@ import com.google.android.gms.wallet.PaymentCardRecognitionResult
 import com.google.android.gms.wallet.PaymentsClient
 import com.google.android.gms.wallet.Wallet
 import com.google.android.gms.wallet.WalletConstants
-import com.stripe.android.stripecardscan.cardscan.CardScanSheet.CardScanResultCallback
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
 import com.stripe.android.stripecardscan.scanui.CancellationReason
 
-class CardScanGoogleImpl(
-    private val context: ComponentActivity,
+internal class CardScanGoogleImpl(
+    private val context: Context,
     private val launcher: ActivityResultLauncher<IntentSenderRequest>
-) {
+) : CardScanSheet(){
     constructor(
         activity: ComponentActivity,
         cardScanSheetResultCallback: CardScanResultCallback,
@@ -35,12 +35,12 @@ class CardScanGoogleImpl(
             cardScanSheetResultCallback.onCardScanSheetResult(cardScanResult)
         }
     )
-    private fun createPaymentsClient(activity: ComponentActivity): PaymentsClient {
+    private fun createPaymentsClient(context: Context): PaymentsClient {
         val walletOptions = Wallet.WalletOptions.Builder()
             .setEnvironment(WalletConstants.ENVIRONMENT_TEST)
             .build()
 
-        return Wallet.getPaymentsClient(activity, walletOptions)
+        return Wallet.getPaymentsClient(context, walletOptions)
     }
     fun fetchIntent(onSuccess: (IntentSenderRequest) -> Unit) {
         val paymentsClient = createPaymentsClient(context)
@@ -60,6 +60,12 @@ class CardScanGoogleImpl(
     fun launch() {
         fetchIntent { intentSenderRequest ->
             launcher.launch(intentSenderRequest)
+        }
+    }
+
+    override fun checkAvailability(onSuccess: () -> Unit) {
+        fetchIntent {
+            onSuccess()
         }
     }
 }
