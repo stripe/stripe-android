@@ -30,7 +30,6 @@ import com.stripe.android.link.TestFactory.VERIFICATION_STARTED_SESSION
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.model.LinkAccount
-import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
@@ -47,7 +46,6 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
-import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -63,6 +61,7 @@ import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignu
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.FakePrefsRepository
+import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResultCallback
 import com.stripe.android.paymentsheet.PaymentOptionsActivityResult
@@ -116,7 +115,7 @@ import kotlin.test.Test
 
 @Suppress("DEPRECATION")
 @RunWith(RobolectricTestRunner::class)
-@OptIn(ExperimentalCustomPaymentMethodsApi::class, SharedPaymentTokenSessionPreview::class)
+@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal class DefaultFlowControllerTest {
 
     @get:Rule
@@ -1376,47 +1375,64 @@ internal class DefaultFlowControllerTest {
         }
 
     @Test
-    fun `onPaymentResult with Link payment successful should logout when PreparePaymentMethodHandler is not configured`() =
+    fun `onPaymentResult with Link payment successful should logout when merchant is not verified`() =
         runTest {
             val linkHandler = mock<LinkHandler>()
             val viewModel = createViewModel()
-            val flowController = createFlowController(linkHandler = linkHandler, viewModel = viewModel)
 
-            // Configure with Link payment selection
-            val linkPaymentSelection = PaymentSelection.Link()
-            viewModel.paymentSelection = linkPaymentSelection
+            // Configure with Link payment selection and non-verified merchant (useAttestationEndpointsForLink = false)
+            val linkConfiguration = TestFactory.LINK_CONFIGURATION.copy(
+                useAttestationEndpointsForLink = false
+            )
+            val linkState = LinkState(
+                configuration = linkConfiguration,
+                loginState = LinkState.LoginState.LoggedIn,
+                signupMode = null,
+            )
+            val flowController = createFlowController(
+                linkHandler = linkHandler,
+                viewModel = viewModel,
+                linkState = linkState,
+                paymentSelection = PaymentSelection.Link()
+            )
+
+            flowController.configureExpectingSuccess()
 
             // Call onPaymentResult with completed payment
             flowController.onPaymentResult(PaymentResult.Completed)
 
-            // Verify that Link logout was called since no PreparePaymentMethodHandler is configured
+            // Verify that Link logout was called since merchant is not verified
             verify(linkHandler).logOut()
         }
 
     @Test
-    fun `onPaymentResult with Link payment successful should not logout when PreparePaymentMethodHandler is configured`() =
+    fun `onPaymentResult with Link payment successful should not logout when merchant is verified`() =
         runTest {
             val linkHandler = mock<LinkHandler>()
             val viewModel = createViewModel()
-            val flowController = createFlowController(linkHandler = linkHandler, viewModel = viewModel)
 
-            // Configure PaymentElementCallbacks with PreparePaymentMethodHandler
-            val mockPrepareHandler = mock<com.stripe.android.paymentelement.PreparePaymentMethodHandler>()
-            PaymentElementCallbackReferences.set(
-                key = PaymentSheetFixtures.FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
-                callbacks = PaymentElementCallbacks.Builder()
-                    .preparePaymentMethodHandler(mockPrepareHandler)
-                    .build()
+            // Configure with Link payment selection and verified merchant (useAttestationEndpointsForLink = true)
+            val linkConfiguration = TestFactory.LINK_CONFIGURATION.copy(
+                useAttestationEndpointsForLink = true
+            )
+            val linkState = LinkState(
+                configuration = linkConfiguration,
+                loginState = LinkState.LoginState.LoggedIn,
+                signupMode = null,
+            )
+            val flowController = createFlowController(
+                linkHandler = linkHandler,
+                viewModel = viewModel,
+                linkState = linkState,
+                paymentSelection = PaymentSelection.Link()
             )
 
-            // Configure with Link payment selection
-            val linkPaymentSelection = PaymentSelection.Link()
-            viewModel.paymentSelection = linkPaymentSelection
+            flowController.configureExpectingSuccess()
 
             // Call onPaymentResult with completed payment
             flowController.onPaymentResult(PaymentResult.Completed)
 
-            // Verify that Link logout was NOT called since PreparePaymentMethodHandler is configured
+            // Verify that Link logout was NOT called since merchant is verified
             verify(linkHandler, never()).logOut()
         }
 

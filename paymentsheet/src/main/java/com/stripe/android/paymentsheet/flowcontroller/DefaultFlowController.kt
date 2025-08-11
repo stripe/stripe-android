@@ -708,7 +708,9 @@ internal class DefaultFlowController @Inject internal constructor(
 
         val selection = viewModel.paymentSelection
 
-        logoutFromLinkAfterPaymentResult(paymentResult, selection)
+        if (shouldLogOutFromLink(paymentResult, selection)) {
+            linkHandler.logOut()
+        }
 
         if (paymentResult is PaymentResult.Completed && shouldResetOnCompleted) {
             viewModel.paymentSelection = null
@@ -722,22 +724,14 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    private fun logoutFromLinkAfterPaymentResult(
+    private fun shouldLogOutFromLink(
         paymentResult: PaymentResult,
         selection: PaymentSelection?
-    ) {
-        // When using [PreparePaymentMethodHandler], we don't know the actual payment result as that's
-        // handled externally, so we don't want to log out of Link in that case.
-        val usesPreparePaymentMethodHandler =
-            PaymentElementCallbackReferences[paymentElementCallbackIdentifier]
-                ?.preparePaymentMethodHandler != null
-
-        if (paymentResult is PaymentResult.Completed && selection != null &&
+    ): Boolean {
+        val verifiedMerchant = viewModel.state?.linkConfiguration?.useAttestationEndpointsForLink == true
+        return paymentResult is PaymentResult.Completed && selection != null &&
             selection.isLink &&
-            usesPreparePaymentMethodHandler.not()
-        ) {
-            linkHandler.logOut()
-        }
+            verifiedMerchant.not()
     }
 
     internal fun onSepaMandateResult(sepaMandateResult: SepaMandateResult) {
