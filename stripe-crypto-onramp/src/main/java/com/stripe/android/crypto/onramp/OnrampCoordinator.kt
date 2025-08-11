@@ -49,7 +49,7 @@ class OnrampCoordinator @Inject internal constructor(
      * @return OnrampLinkLookupResult indicating whether the user exists.
      */
     suspend fun lookupLinkUser(email: String): OnrampLinkLookupResult {
-        return interactor.isLinkUser(email)
+        return interactor.lookupLinkUser(email)
     }
 
     /**
