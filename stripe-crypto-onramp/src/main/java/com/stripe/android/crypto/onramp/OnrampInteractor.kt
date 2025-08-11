@@ -93,8 +93,8 @@ internal class OnrampInteractor @Inject constructor(
             OnrampSetWalletAddressResult.Failed(
                 IllegalStateException("Missing consumer session client secret")
             )
-		}
-	}
+        }
+    }
 
     suspend fun collectKycInfo(kycInfo: KycInfo): OnrampKYCResult {
         val secret = consumerSessionClientSecret()

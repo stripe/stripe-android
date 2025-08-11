@@ -158,10 +158,10 @@ internal class OnrampViewModel(
                 is OnrampSetWalletAddressResult.Failed -> {
                     _message.value = "Failed to register wallet address: ${result.error.message}"
                     _uiState.value = OnrampUiState.AuthenticatedOperations(currentEmail, currentCustomerId)
-				}
-			}
-		}
-	}
+                }
+            }
+        }
+    }
 
     fun collectKycInfo(kycInfo: KycInfo) {
         _uiState.value = OnrampUiState.Loading

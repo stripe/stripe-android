@@ -388,9 +388,9 @@ private fun AuthenticatedOperationsScreen(
 
         Text(
             text = "Register Wallet Address",
-	        fontWeight = FontWeight.SemiBold,
-	        modifier = Modifier.padding(bottom = 16.dp)
-	    )
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
 		
         // Network Selection
         Box {

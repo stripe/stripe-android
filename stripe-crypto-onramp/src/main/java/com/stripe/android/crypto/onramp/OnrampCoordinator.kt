@@ -74,7 +74,7 @@ class OnrampCoordinator @Inject internal constructor(
         network: CryptoNetwork
     ): OnrampSetWalletAddressResult {
         return interactor.registerWalletAddress(walletAddress, network)
-	}
+    }
 
     /**
      * Given the required information, collects information .
