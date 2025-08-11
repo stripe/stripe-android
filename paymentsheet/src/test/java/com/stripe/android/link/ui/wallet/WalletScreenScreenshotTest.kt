@@ -195,6 +195,7 @@ internal class WalletScreenScreenshotTest {
         alertMessage: ResolvableString? = null,
         addPaymentMethodOptions: List<AddPaymentMethodOption> = listOf(AddPaymentMethodOption.Card),
         userSetIsExpanded: Boolean = false,
+        signupToggleEnabled: Boolean = false,
     ): WalletUiState {
         return WalletUiState(
             paymentDetailsList = paymentDetailsList,
@@ -212,7 +213,8 @@ internal class WalletScreenScreenshotTest {
             expiryDateInput = expiryDateInput,
             cvcInput = cvcInput,
             alertMessage = alertMessage,
-            collectMissingBillingDetailsForExistingPaymentMethods = true
+            collectMissingBillingDetailsForExistingPaymentMethods = true,
+            signupToggleEnabled = signupToggleEnabled
         )
     }
 

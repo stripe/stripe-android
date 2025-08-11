@@ -763,7 +763,8 @@ internal class WalletScreenTest {
                 hasCompleted = false,
                 addPaymentMethodOptions = addPaymentMethodOptions,
                 userSetIsExpanded = true,
-                collectMissingBillingDetailsForExistingPaymentMethods = true
+                collectMissingBillingDetailsForExistingPaymentMethods = true,
+                signupToggleEnabled = false
             ),
             onItemSelected = {},
             onExpandedChanged = {},
