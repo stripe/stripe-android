@@ -30,6 +30,7 @@ import com.stripe.android.link.TestFactory.VERIFICATION_STARTED_SESSION
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
@@ -46,6 +47,7 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -115,7 +117,7 @@ import kotlin.test.Test
 
 @Suppress("DEPRECATION")
 @RunWith(RobolectricTestRunner::class)
-@OptIn(ExperimentalCustomPaymentMethodsApi::class)
+@OptIn(ExperimentalCustomPaymentMethodsApi::class, SharedPaymentTokenSessionPreview::class)
 internal class DefaultFlowControllerTest {
 
     @get:Rule
