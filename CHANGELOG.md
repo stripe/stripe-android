@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## XX.XX.XX - 20XX-XX-XX
+
+## 21.22.2 - 2025-08-11
 ### PaymentSheet
 * [ADDED][11179](https://github.com/stripe/stripe-android/pull/11179) More specific error messaging for postal codes
 * [FIXED][11280](https://github.com/stripe/stripe-android/pull/11280) Flows initiated with PaymentSheet.IntentConfiguration now show specific API error messages instead of generic fallback messages
