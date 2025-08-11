@@ -37,18 +37,18 @@ class PaymentMethodOptionsParamsTest {
     }
 
     @Test
-    fun blikToParamMap_withSfu_includesSfu() {
+    fun blikInternalToParamMap_withSfu_includesSfu() {
         val blikCode = "123456"
         assertThat(
-            PaymentMethodOptionsParams.Blik(
+            PaymentMethodOptionsParams.BlikInternal(
                 code = blikCode,
                 setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.None
             ).toParamMap()
         ).isEqualTo(
             mapOf(
                 PaymentMethod.Type.Blik.code to mapOf(
-                    PaymentMethodOptionsParams.Blik.PARAM_CODE to blikCode,
-                    PaymentMethodOptionsParams.Blik.PARAM_SETUP_FUTURE_USAGE to "none"
+                    PaymentMethodOptionsParams.BlikInternal.PARAM_CODE to blikCode,
+                    PaymentMethodOptionsParams.BlikInternal.PARAM_SETUP_FUTURE_USAGE to "none"
                 )
             )
         )
@@ -205,6 +205,24 @@ class PaymentMethodOptionsParamsTest {
         assertThat(newParams).isEqualTo(
             PaymentMethodOptionsParams.SepaDebit(
                 setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            )
+        )
+    }
+
+    @Test
+    fun updateSetupFutureUsageWithPmoSfu_setsCorrectSfuValueForBlikInternal() {
+        val params = PaymentMethodOptionsParams.Blik(
+            code = "12345"
+        )
+
+        val newParams = params.updateSetupFutureUsageWithPmoSfu(
+            pmoSfu = ConfirmPaymentIntentParams.SetupFutureUsage.None
+        )
+
+        assertThat(newParams).isEqualTo(
+            PaymentMethodOptionsParams.BlikInternal(
+                code = "12345",
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.None
             )
         )
     }

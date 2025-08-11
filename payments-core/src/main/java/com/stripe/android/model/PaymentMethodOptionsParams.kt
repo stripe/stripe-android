@@ -79,7 +79,23 @@ sealed class PaymentMethodOptionsParams(
     }
 
     @Parcelize
-    data class Blik @JvmOverloads constructor(
+    data class Blik(
+        var code: String,
+    ) : PaymentMethodOptionsParams(PaymentMethod.Type.Blik) {
+        override fun createTypeParams(): List<Pair<String, Any?>> {
+            return listOf(
+                PARAM_CODE to code
+            )
+        }
+
+        internal companion object {
+            const val PARAM_CODE = "code"
+        }
+    }
+
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class BlikInternal @JvmOverloads constructor(
         var code: String,
         var setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null,
     ) : PaymentMethodOptionsParams(PaymentMethod.Type.Blik) {
@@ -208,7 +224,8 @@ sealed class PaymentMethodOptionsParams(
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun PaymentMethodOptionsParams.setupFutureUsage(): ConfirmPaymentIntentParams.SetupFutureUsage? {
     return when (this) {
-        is PaymentMethodOptionsParams.Blik -> setupFutureUsage
+        is PaymentMethodOptionsParams.Blik -> null
+        is PaymentMethodOptionsParams.BlikInternal -> setupFutureUsage
         is PaymentMethodOptionsParams.Card -> setupFutureUsage
         is PaymentMethodOptionsParams.SepaDebit -> setupFutureUsage
         is PaymentMethodOptionsParams.Konbini -> setupFutureUsage
@@ -233,7 +250,11 @@ fun PaymentMethodOptionsParams?.updateSetupFutureUsageWithPmoSfu(
     }
 
     return when (this) {
-        is PaymentMethodOptionsParams.Blik -> this.copy(setupFutureUsage = sfuValueToSet)
+        is PaymentMethodOptionsParams.Blik -> PaymentMethodOptionsParams.BlikInternal(
+            code = this.code,
+            setupFutureUsage = sfuValueToSet
+        )
+        is PaymentMethodOptionsParams.BlikInternal -> this.copy(setupFutureUsage = sfuValueToSet)
         is PaymentMethodOptionsParams.Card -> this.copy(setupFutureUsage = sfuValueToSet)
         is PaymentMethodOptionsParams.SepaDebit -> this.copy(setupFutureUsage = sfuValueToSet)
         is PaymentMethodOptionsParams.Konbini -> this.copy(setupFutureUsage = sfuValueToSet)
