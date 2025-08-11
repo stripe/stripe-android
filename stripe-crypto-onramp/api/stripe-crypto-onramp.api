@@ -39,13 +39,3 @@ public final class com/stripe/android/crypto/onramp/model/OnrampConfiguration$Cr
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public abstract interface class com/stripe/android/crypto/onramp/model/OnrampSetWalletAddressResult {
-}
-
-public final class com/stripe/android/crypto/onramp/model/OnrampSetWalletAddressResult$Completed : com/stripe/android/crypto/onramp/model/OnrampSetWalletAddressResult {
-}
-
-public final class com/stripe/android/crypto/onramp/model/OnrampSetWalletAddressResult$Failed : com/stripe/android/crypto/onramp/model/OnrampSetWalletAddressResult {
-	public final fun getError ()Ljava/lang/Throwable;
-}
-
