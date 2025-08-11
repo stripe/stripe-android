@@ -151,7 +151,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
             val shouldShowCombinedMandate = shouldShowCombinedMandate(
                 isLinkUI = arguments.isLinkUI,
                 linkSignupOptInEnabled = linkSignupOptInEnabled,
-                computedSignupMode = signupMode
+                signupMode = signupMode
             )
 
             val mandateAllowed = metadata.mandateAllowed(CardDefinition.type)
@@ -187,10 +187,10 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
     private fun shouldShowCombinedMandate(
         isLinkUI: Boolean,
         linkSignupOptInEnabled: Boolean,
-        computedSignupMode: LinkSignupMode?
+        signupMode: LinkSignupMode?
     ): Boolean = when (isLinkUI) {
         true -> linkSignupOptInEnabled
-        false -> linkSignupOptInEnabled && computedSignupMode != null
+        false -> linkSignupOptInEnabled && signupMode != null
     }
 
     private fun MutableList<FormElement>.addContactInformationElement(
@@ -330,6 +330,8 @@ internal class CombinedLinkMandateElement(
     override fun ComposeUI(enabled: Boolean) {
         val linkState by linkSignupStateFlow.collectAsState()
         Mandate(
+            // when displaying the mandate from Link UI (add card to Link) we always want the
+            // non-signup version of the mandate text.
             mandateText = if (linkState?.isExpanded == true && isLinkUI.not()) {
                 stringResource(
                     id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_on,
