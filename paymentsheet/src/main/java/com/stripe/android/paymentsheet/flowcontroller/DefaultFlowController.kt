@@ -14,6 +14,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -77,7 +78,7 @@ import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Named
 
-@OptIn(WalletButtonsPreview::class)
+@OptIn(WalletButtonsPreview::class, SharedPaymentTokenSessionPreview::class)
 @FlowControllerScope
 internal class DefaultFlowController @Inject internal constructor(
     // Properties provided through FlowControllerComponent.Builder
@@ -707,9 +708,7 @@ internal class DefaultFlowController @Inject internal constructor(
 
         val selection = viewModel.paymentSelection
 
-        if (paymentResult is PaymentResult.Completed && selection != null && selection.isLink) {
-            linkHandler.logOut()
-        }
+        logoutFromLinkAfterPaymentResult(paymentResult, selection)
 
         if (paymentResult is PaymentResult.Completed && shouldResetOnCompleted) {
             viewModel.paymentSelection = null
@@ -720,6 +719,24 @@ internal class DefaultFlowController @Inject internal constructor(
             paymentResultCallback.onPaymentSheetResult(
                 paymentResult.convertToPaymentSheetResult()
             )
+        }
+    }
+
+    private fun logoutFromLinkAfterPaymentResult(
+        paymentResult: PaymentResult,
+        selection: PaymentSelection?
+    ) {
+        // When using [PreparePaymentMethodHandler], we don't know the actual payment result as that's
+        // handled externally, so we don't want to log out of Link in that case.
+        val usesPreparePaymentMethodHandler =
+            PaymentElementCallbackReferences[paymentElementCallbackIdentifier]
+                ?.preparePaymentMethodHandler != null
+
+        if (paymentResult is PaymentResult.Completed && selection != null &&
+            selection.isLink &&
+            usesPreparePaymentMethodHandler.not()
+        ) {
+            linkHandler.logOut()
         }
     }
 

@@ -30,6 +30,7 @@ import com.stripe.android.link.TestFactory.VERIFICATION_STARTED_SESSION
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
@@ -46,6 +47,7 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -114,7 +116,7 @@ import kotlin.test.Test
 
 @Suppress("DEPRECATION")
 @RunWith(RobolectricTestRunner::class)
-@OptIn(ExperimentalCustomPaymentMethodsApi::class)
+@OptIn(ExperimentalCustomPaymentMethodsApi::class, SharedPaymentTokenSessionPreview::class)
 internal class DefaultFlowControllerTest {
 
     @get:Rule
@@ -1374,6 +1376,51 @@ internal class DefaultFlowControllerTest {
         }
 
     @Test
+    fun `onPaymentResult with Link payment successful should logout when PreparePaymentMethodHandler is not configured`() =
+        runTest {
+            val linkHandler = mock<LinkHandler>()
+            val viewModel = createViewModel()
+            val flowController = createFlowController(linkHandler = linkHandler, viewModel = viewModel)
+
+            // Configure with Link payment selection
+            val linkPaymentSelection = PaymentSelection.Link()
+            viewModel.paymentSelection = linkPaymentSelection
+
+            // Call onPaymentResult with completed payment
+            flowController.onPaymentResult(PaymentResult.Completed)
+
+            // Verify that Link logout was called since no PreparePaymentMethodHandler is configured
+            verify(linkHandler).logOut()
+        }
+
+    @Test
+    fun `onPaymentResult with Link payment successful should not logout when PreparePaymentMethodHandler is configured`() =
+        runTest {
+            val linkHandler = mock<LinkHandler>()
+            val viewModel = createViewModel()
+            val flowController = createFlowController(linkHandler = linkHandler, viewModel = viewModel)
+
+            // Configure PaymentElementCallbacks with PreparePaymentMethodHandler
+            val mockPrepareHandler = mock<com.stripe.android.paymentelement.PreparePaymentMethodHandler>()
+            PaymentElementCallbackReferences.set(
+                key = PaymentSheetFixtures.FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
+                callbacks = PaymentElementCallbacks.Builder()
+                    .preparePaymentMethodHandler(mockPrepareHandler)
+                    .build()
+            )
+
+            // Configure with Link payment selection
+            val linkPaymentSelection = PaymentSelection.Link()
+            viewModel.paymentSelection = linkPaymentSelection
+
+            // Call onPaymentResult with completed payment
+            flowController.onPaymentResult(PaymentResult.Completed)
+
+            // Verify that Link logout was NOT called since PreparePaymentMethodHandler is configured
+            verify(linkHandler, never()).logOut()
+        }
+
+    @Test
     fun `Remembers previous new payment selection when presenting payment options again`() = runTest {
         val flowController = createFlowController()
 
@@ -2424,6 +2471,7 @@ internal class DefaultFlowControllerTest {
         errorReporter: ErrorReporter = FakeErrorReporter(),
         eventReporter: EventReporter = this.eventReporter,
         confirmationHandler: ConfirmationHandler? = null,
+        linkHandler: LinkHandler? = null,
     ): DefaultFlowController {
         return createFlowController(
             FakePaymentElementLoader(
@@ -2436,6 +2484,7 @@ internal class DefaultFlowControllerTest {
             errorReporter,
             eventReporter,
             confirmationHandler,
+            linkHandler,
         )
     }
 
@@ -2445,6 +2494,7 @@ internal class DefaultFlowControllerTest {
         errorReporter: ErrorReporter = FakeErrorReporter(),
         eventReporter: EventReporter = this.eventReporter,
         confirmationHandler: ConfirmationHandler? = null,
+        linkHandler: LinkHandler? = null,
     ): DefaultFlowController {
         return DefaultFlowController(
             viewModelScope = testScope,
@@ -2475,7 +2525,7 @@ internal class DefaultFlowControllerTest {
             ),
             errorReporter = errorReporter,
             initializedViaCompose = false,
-            linkHandler = mock(),
+            linkHandler = linkHandler ?: mock(),
             paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
             linkAccountHolder = linkAccountHolder,
             flowControllerLinkLauncher = flowControllerLinkPaymentLauncher,
