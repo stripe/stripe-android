@@ -45,8 +45,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up">Sutikti ir tęsti</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">Greitas ir saugus atsiskaitymas vienu spustelėjimu</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">Greitas ir saugus pirkimo užbaigimas</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Išsaugokite savo mokėjimų informaciją naudodami \"Link\" ir saugiai atsiskaitykite vienu spustelėjimu \"Link\" palaikomose svetainėse.</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">Mokėkite greičiau visur, kur priimama „Link“.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Tęsdami sutinkate su <terms>sąlygomis</terms> ir <privacy>privatumo politika</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -105,6 +109,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Kortelės duomenų keisti negalima.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Pateikdami kortelės duomenis sutinkate, kad \"%s\" nuskaičiuotų nuo jūsų kortelės būsimus mokėjimus pagal jų sąlygas.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Tęsdami sutinkate išsaugoti savo informaciją būsimiems pirkiniams naudojant %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Tęsdami sutinkate išsaugoti savo informaciją būsimiems pirkimams naudojant %s ir <link>Nuoroda</link>. Taip pat sutinkate su „Link“ <terms>Sąlygomis</terms> ir <privacy>Privatumo politika</privacy>.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Kortelė neatnaujinta. Bandykite dar kartą.</string>
   <!-- Title shown above a carousel containing available payment methods -->

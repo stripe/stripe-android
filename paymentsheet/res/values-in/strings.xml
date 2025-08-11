@@ -45,8 +45,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up">Setuju dan lanjutkan</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">Checkout sekali klik yang aman dan cepat</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">Checkout yang cepat dan aman</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Simpan informasi pembayaran Anda dengan Link, dan proses pembayaran secara aman dalam sekali klik pada situs yang didukung Link.</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">Bayar lebih cepat di mana saja Link diterima.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Dengan melanjutkan, berarti Anda menyetujui <terms>Ketentuan</terms> dan <privacy>Kebijakan Privasi</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -105,6 +109,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Detail kartu tidak dapat diubah.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Dengan memberikan informasi kartu, Anda berarti mengizinkan %s mengenakan charge pada kartu Anda untuk pembayaran mendatang sesuai dengan ketentuan mereka.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Dengan melanjutkan, Anda setuju untuk menyimpan informasi Anda untuk pembelian di masa mendatang dengan %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Dengan melanjutkan, Anda setuju untuk menyimpan informasi Anda untuk pembelian di masa mendatang dengan %s dan <link>Link</link>. Anda juga menyetujui <terms>Ketentuan</terms> dan <privacy>Privasi</privacy> Link.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Kartu tidak diperbarui. Cobalah lagi.</string>
   <!-- Title shown above a carousel containing available payment methods -->

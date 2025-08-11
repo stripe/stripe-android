@@ -45,8 +45,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up">Godkänn och fortsätt</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">Betala snabbt och säkert med ett klick</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">Snabb och säker kassabetalning</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Spara dina betalningsuppgifter med Link och betala på ett säkert sätt med ett klick på webbplatser som erbjuder Link.</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">Betala snabbare överallt där Link accepteras.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Genom att fortsätta godkänner du <terms>villkoren</terms> och <privacy>integritetspolicyn</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -105,6 +109,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Kortuppgifter kan inte ändras.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Genom att tillhandahålla kortinformationen ger du %s tillåtelse att debitera ditt kort för framtida betalningar enligt deras villkor.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Genom att fortsätta godkänner du att dina uppgifter sparas för framtida köp hos %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Genom att fortsätta godkänner du att dina uppgifter sparas för framtida köp hos %s och <link>Link</link>. Du samtycker också till Links <terms>villkor</terms> och <privacy>integritet</privacy>.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Kortet uppdaterades inte. Försök igen.</string>
   <!-- Title shown above a carousel containing available payment methods -->

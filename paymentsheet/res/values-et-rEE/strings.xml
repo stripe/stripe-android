@@ -45,8 +45,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up">Nõustu ja jätka</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">Kiire, turvaline ühe klõpsuga makse lõpuleviimine</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">Kiire ja turvaline kassa</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Salvestage oma makseteave Linki ja võimaldage Linki toetusega saitidel turvaline ühe klõpsuga makse lõpuleviimine.</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">Makske kiiremini kõikjal, kus Link on aktsepteeritud.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Jätkates, nõustute <terms>tingimuste</terms> ja <privacy>privaatsuseeskirjadega</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -105,6 +109,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Kaardi andmeid ei saa muuta.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Kaarditeavet esitades, lubate ettevõttel %s oma kaarti tulevasteks makseteks nende kehtestatud tingimustel debiteerida.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Jätkates nõustute salvestama oma teabe tulevaste ostude jaoks %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Jätkates nõustute salvestama oma andmed tulevaste ostude jaoks %s ja <link>Link</link>. Samuti nõustute Linki <terms>tingimuste</terms> ja <privacy>privaatsusega</privacy>.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Kaarti ei värskendatud. Palun proovige uuesti.</string>
   <!-- Title shown above a carousel containing available payment methods -->
