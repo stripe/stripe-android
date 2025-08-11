@@ -7,5 +7,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 fun ConfirmPaymentIntentParams.SetupFutureUsage?.hasIntentToSetup() = when (this) {
     ConfirmPaymentIntentParams.SetupFutureUsage.OnSession,
     ConfirmPaymentIntentParams.SetupFutureUsage.OffSession -> true
-    else -> false
+    ConfirmPaymentIntentParams.SetupFutureUsage.Blank -> false
+    ConfirmPaymentIntentParams.SetupFutureUsage.None -> false
+    null -> false
 }
