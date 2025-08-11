@@ -235,24 +235,6 @@ constructor(
             !isPaymentMethodOptionsSetupFutureUsageNone(code)
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun getPaymentMethodOptionsSetupFutureUsage(code: PaymentMethodCode): ConfirmPaymentIntentParams.SetupFutureUsage? {
-        return paymentMethodOptionsJsonString?.let { json ->
-            when (JSONObject(json).optJSONObject(code)?.optString(SETUP_FUTURE_USAGE)) {
-                ConfirmPaymentIntentParams.SetupFutureUsage.OffSession.code -> {
-                    ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
-                }
-                ConfirmPaymentIntentParams.SetupFutureUsage.OnSession.code -> {
-                    ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
-                }
-                ConfirmPaymentIntentParams.SetupFutureUsage.None.code -> {
-                    ConfirmPaymentIntentParams.SetupFutureUsage.None
-                }
-                else -> null
-            }
-        }
-    }
-
     internal fun withUnredactedClientSecret(clientSecret: String): PaymentIntent {
         if (!isRedacted) {
             return this

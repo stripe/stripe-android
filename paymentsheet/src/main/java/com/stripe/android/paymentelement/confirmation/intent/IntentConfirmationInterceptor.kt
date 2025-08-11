@@ -733,6 +733,10 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 ?.setupFutureUse?.toConfirmParamsSetupFutureUsage()?.hasIntentToSetup() == true
     }
 
+    /**
+     * [PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions] does not require setting PMO SFU on the
+     * intent. If PMO SFU value exists in the configuration, set it in the PaymentMethodOptionsParams.
+     */
     @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
     private fun updatePaymentMethodOptionsParams(
         type: PaymentMethod.Type?,

@@ -79,15 +79,6 @@ internal data class PaymentMethodMetadata(
         }
     }
 
-    fun getPaymentMethodOptionSetupFutureUsageValue(
-        code: PaymentMethodCode
-    ): ConfirmPaymentIntentParams.SetupFutureUsage? {
-        return when (stripeIntent) {
-            is PaymentIntent -> stripeIntent.getPaymentMethodOptionsSetupFutureUsage(code)
-            is SetupIntent -> null
-        }
-    }
-
     fun mandateAllowed(paymentMethodType: PaymentMethod.Type): Boolean {
         return termsDisplay[paymentMethodType] != PaymentSheet.TermsDisplay.NEVER
     }

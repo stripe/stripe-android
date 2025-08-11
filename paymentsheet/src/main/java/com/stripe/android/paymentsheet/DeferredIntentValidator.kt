@@ -136,7 +136,7 @@ internal object DeferredIntentValidator {
         paymentMethod: PaymentMethod
     ) {
         val paymentIntentPmoSfu = paymentMethod.type?.code?.let {
-            intent.getPaymentMethodOptionsSetupFutureUsage(it)
+            (intent.getPaymentMethodOptions()[it] as? Map<*, *>?)?.get("setup_future_usage") as? String
         }
 
         val intentConfigPmoSfu = paymentMode.paymentMethodOptionsJsonString?.let {
@@ -164,30 +164,22 @@ internal object DeferredIntentValidator {
 
         val intentAndConfigPmoSfuMatch = when (paymentIntentPmoSfu) {
             // Allow on_session/off_session mismatch as there is no difference in behavior client side.
-            ConfirmPaymentIntentParams.SetupFutureUsage.OnSession,
-            ConfirmPaymentIntentParams.SetupFutureUsage.OffSession -> {
+            "on_session",
+            "off_session" -> {
                 intentConfigurationPmoSfuForPaymentMethod == "on_session" ||
                     intentConfigurationPmoSfuForPaymentMethod == "off_session"
             }
-            ConfirmPaymentIntentParams.SetupFutureUsage.None -> intentConfigurationPmoSfuForPaymentMethod == "none"
-            ConfirmPaymentIntentParams.SetupFutureUsage.Blank,
+            "none" -> intentConfigurationPmoSfuForPaymentMethod == "none"
             null -> intentConfigurationPmoSfuForPaymentMethod.isNull()
+            else -> false
         }
 
         require(intentAndConfigPmoSfuMatch) {
             "Your PaymentIntent payment_method_options[${paymentMethod.type?.code}][setup_future_usage] value " +
-                "${paymentIntentPmoSfu.getCode()} does not match the IntentConfiguration value " +
+                "$paymentIntentPmoSfu does not match the IntentConfiguration value " +
                 "$intentConfigurationPmoSfuForPaymentMethod"
         }
     }
-}
-
-private fun ConfirmPaymentIntentParams.SetupFutureUsage?.getCode(): String? = when (this) {
-    ConfirmPaymentIntentParams.SetupFutureUsage.OffSession -> "off_session"
-    ConfirmPaymentIntentParams.SetupFutureUsage.OnSession -> "on_session"
-    ConfirmPaymentIntentParams.SetupFutureUsage.Blank -> ""
-    ConfirmPaymentIntentParams.SetupFutureUsage.None -> "none"
-    null -> null
 }
 
 private fun Any?.isNull(): Boolean {
