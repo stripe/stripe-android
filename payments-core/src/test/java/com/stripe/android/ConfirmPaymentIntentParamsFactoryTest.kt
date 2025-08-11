@@ -290,6 +290,54 @@ class ConfirmPaymentIntentParamsFactoryTest {
     }
 
     @Test
+    fun `create() with PMO SFU should contain value in PMO`() {
+        val factoryWithConfig = ConfirmPaymentIntentParamsFactory(
+            clientSecret = CLIENT_SECRET,
+            intent = PaymentIntentFactory.create(
+                paymentMethodTypes = listOf("klarna")
+            ),
+            shipping = null,
+        )
+
+        val result = factoryWithConfig.create(
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            optionsParams = PaymentMethodOptionsParams.SetupFutureUsage(
+                paymentMethodType = PaymentMethod.Type.Klarna,
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.None
+            ),
+            extraParams = null,
+            intentConfigSetupFutureUsage = null
+        )
+
+        assertThat(result.paymentMethodOptions).isEqualTo(
+            PaymentMethodOptionsParams.SetupFutureUsage(
+                paymentMethodType = PaymentMethod.Type.Klarna,
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.None
+            )
+        )
+    }
+
+    @Test
+    fun `create() with top level SFU should contain value`() {
+        val factoryWithConfig = ConfirmPaymentIntentParamsFactory(
+            clientSecret = CLIENT_SECRET,
+            intent = createPaymentIntent(),
+            shipping = null,
+        )
+
+        val result = factoryWithConfig.create(
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            optionsParams = null,
+            extraParams = null,
+            intentConfigSetupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+        )
+
+        assertThat(result.setupFutureUsage).isEqualTo(
+            ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+        )
+    }
+
+    @Test
     fun `create() without SFU should not contain any mandate data`() = mandateDataTest(
         setupFutureUsage = null,
         expectedMandateDataParams = null,
