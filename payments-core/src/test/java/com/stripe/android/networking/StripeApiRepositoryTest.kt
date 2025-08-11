@@ -91,8 +91,9 @@ internal class StripeApiRepositoryTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val stripeApiRepository = StripeApiRepository(
-        context,
-        { DEFAULT_OPTIONS.apiKey },
+        context = context,
+        publishableKeyProvider = { DEFAULT_OPTIONS.apiKey },
+        requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
         workContext = testDispatcher
     )
     private val fileFactory = FileFactory(context)
@@ -1016,8 +1017,9 @@ internal class StripeApiRepositoryTest {
     @Test
     fun createSource_createsObjectAndLogs() = runTest {
         val stripeApiRepository = StripeApiRepository(
-            context,
-            { DEFAULT_OPTIONS.apiKey },
+            context = context,
+            publishableKeyProvider = { DEFAULT_OPTIONS.apiKey },
+            requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
             workContext = testDispatcher,
             stripeNetworkClient = DefaultStripeNetworkClient(
                 workContext = testDispatcher
@@ -1394,8 +1396,9 @@ internal class StripeApiRepositoryTest {
             Locale.setDefault(Locale.JAPAN)
 
             val stripeRepository = StripeApiRepository(
-                context,
-                { DEFAULT_OPTIONS.apiKey },
+                context = context,
+                publishableKeyProvider = { DEFAULT_OPTIONS.apiKey },
+                requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
                 workContext = testDispatcher,
                 sdkVersion = "AndroidBindings/13.0.0"
             )
@@ -1716,8 +1719,9 @@ internal class StripeApiRepositoryTest {
     fun `createRadarSession() with FraudDetectionData should return expected value`() =
         runTest {
             val stripeRepository = StripeApiRepository(
-                context,
-                { DEFAULT_OPTIONS.apiKey },
+                context = context,
+                publishableKeyProvider = { DEFAULT_OPTIONS.apiKey },
+                requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
                 analyticsRequestExecutor = analyticsRequestExecutor,
                 fraudDetectionDataRepository = FakeFraudDetectionDataRepository(
                     FraudDetectionData(
@@ -1740,8 +1744,9 @@ internal class StripeApiRepositoryTest {
     fun `createRadarSession() with null FraudDetectionData should throw an exception`() =
         runTest {
             val stripeRepository = StripeApiRepository(
-                context,
-                { DEFAULT_OPTIONS.apiKey },
+                context = context,
+                publishableKeyProvider = { DEFAULT_OPTIONS.apiKey },
+                requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
                 fraudDetectionDataRepository = FakeFraudDetectionDataRepository(
                     null
                 ),
@@ -1789,8 +1794,9 @@ internal class StripeApiRepositoryTest {
             )
 
             val stripeRepository = StripeApiRepository(
-                context,
-                { DEFAULT_OPTIONS.apiKey },
+                context = context,
+                publishableKeyProvider = { DEFAULT_OPTIONS.apiKey },
+                requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
                 stripeNetworkClient = stripeNetworkClient,
                 analyticsRequestExecutor = analyticsRequestExecutor,
                 fraudDetectionDataRepository = FakeFraudDetectionDataRepository(
@@ -1833,8 +1839,9 @@ internal class StripeApiRepositoryTest {
     fun `createSavedPaymentMethodRadarSession() with null FraudDetectionData should throw an exception`() =
         runTest {
             val stripeRepository = StripeApiRepository(
-                context,
-                { DEFAULT_OPTIONS.apiKey },
+                context = context,
+                publishableKeyProvider = { DEFAULT_OPTIONS.apiKey },
+                requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
                 fraudDetectionDataRepository = FakeFraudDetectionDataRepository(
                     null
                 ),
@@ -3308,8 +3315,9 @@ internal class StripeApiRepositoryTest {
 
     private fun create(productUsage: Set<String> = emptySet()): StripeApiRepository {
         return StripeApiRepository(
-            context,
-            { DEFAULT_OPTIONS.apiKey },
+            context = context,
+            publishableKeyProvider = { DEFAULT_OPTIONS.apiKey },
+            requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
             workContext = testDispatcher,
             productUsageTokens = productUsage,
             stripeNetworkClient = stripeNetworkClient,

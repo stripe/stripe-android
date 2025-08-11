@@ -19,6 +19,7 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
+import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationModule
@@ -104,6 +105,11 @@ internal interface NativeLinkComponent {
 
         @BindsInstance
         fun linkAccountUpdate(linkAccountUpdate: LinkAccountUpdate.Value): Builder
+
+        @BindsInstance
+        fun requestSurface(
+            requestSurface: RequestSurface
+        ): Builder
 
         fun build(): NativeLinkComponent
     }

@@ -6,6 +6,7 @@ import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
@@ -16,6 +17,7 @@ import javax.inject.Singleton
     modules = [
         PaymentLauncherModule::class,
         StripeRepositoryModule::class,
+        PaymentElementRequestSurfaceModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class
     ]

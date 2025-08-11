@@ -8,6 +8,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceFixtures
+import com.stripe.android.networking.RequestSurface
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -196,8 +197,9 @@ internal class StripePaymentAuthTest {
     private fun createStripe(): Stripe {
         return Stripe(
             StripeApiRepository(
-                ApplicationProvider.getApplicationContext(),
-                { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+                context = ApplicationProvider.getApplicationContext(),
+                publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+                requestSurface = RequestSurface.PaymentElement,
                 stripeNetworkClient = DefaultStripeNetworkClient(
                     workContext = testDispatcher
                 ),

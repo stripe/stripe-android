@@ -20,6 +20,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.VerificationType
+import com.stripe.android.networking.RequestSurface
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.repository.ConsumersApiService
@@ -54,16 +55,7 @@ class LinkApiRepositoryTest {
         whenever(clientSecret).thenReturn("secret")
     }
 
-    private val linkRepository = LinkApiRepository(
-        application = ApplicationProvider.getApplicationContext(),
-        publishableKeyProvider = { PUBLISHABLE_KEY },
-        stripeAccountIdProvider = { STRIPE_ACCOUNT_ID },
-        stripeRepository = stripeRepository,
-        consumersApiService = consumersApiService,
-        workContext = Dispatchers.IO,
-        locale = Locale.US,
-        errorReporter = errorReporter
-    )
+    private val linkRepository = linkRepository(consumersApiService = consumersApiService)
 
     @Before
     fun clearErrorReporter() {
@@ -816,6 +808,7 @@ class LinkApiRepositoryTest {
     ): LinkApiRepository {
         return LinkApiRepository(
             application = ApplicationProvider.getApplicationContext(),
+            requestSurface = RequestSurface.PaymentElement,
             publishableKeyProvider = { PUBLISHABLE_KEY },
             stripeAccountIdProvider = { STRIPE_ACCOUNT_ID },
             stripeRepository = stripeRepository,

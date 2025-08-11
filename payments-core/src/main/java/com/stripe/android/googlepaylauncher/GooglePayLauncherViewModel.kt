@@ -268,7 +268,7 @@ internal class GooglePayLauncherViewModel(
         private val workContext: CoroutineContext = Dispatchers.IO,
     ) : ViewModelProvider.Factory {
 
-        @Suppress("UNCHECKED_CAST")
+        @Suppress("UNCHECKED_CAST", "LongMethod")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             val application = extras.requireApplication()
 
@@ -287,8 +287,9 @@ internal class GooglePayLauncherViewModel(
             )
 
             val stripeRepository = StripeApiRepository(
-                application,
-                { publishableKey },
+                context = application,
+                publishableKeyProvider = { publishableKey },
+                requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
                 logger = logger,
                 workContext = workContext,
                 productUsageTokens = productUsageTokens,
