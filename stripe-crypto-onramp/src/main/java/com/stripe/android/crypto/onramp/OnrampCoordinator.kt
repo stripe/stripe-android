@@ -110,6 +110,7 @@ class OnrampCoordinator @Inject internal constructor(
     /**
      * Presenter for handling Link UI interactions without requiring direct activity references.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Presenter @Inject internal constructor(
         private val coordinator: OnrampPresenterCoordinator,
     ) {
@@ -122,11 +123,20 @@ class OnrampCoordinator @Inject internal constructor(
         fun authenticateExistingLinkUser(email: String) {
             coordinator.authenticateExistingLinkUser(email)
         }
+
+        /**
+         * Prompts a user to perform identity verification.
+         * This presents the identity verification UI.
+         */
+        fun promptForIdentityVerification() {
+            coordinator.promptForIdentityVerification()
+        }
     }
 
     /**
      * A Builder utility type to create an [OnrampCoordinator] with appropriate parameters.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Builder {
         /**
          * Constructs an [OnrampCoordinator] for the given parameters.

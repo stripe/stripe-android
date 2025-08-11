@@ -64,6 +64,7 @@ internal class OnrampActivity : ComponentActivity() {
 
         val callbacks = OnrampCallbacks(
             authenticationCallback = viewModel::onAuthenticationResult,
+            identityVerificationCallback = viewModel::onIdentityVerificationResult
         )
 
         onrampPresenter = viewModel.onrampCoordinator
@@ -73,8 +74,12 @@ internal class OnrampActivity : ComponentActivity() {
             OnrampExampleTheme {
                 OnrampScreen(
                     viewModel = viewModel,
-                    onAuthenticateUser = onrampPresenter::authenticateExistingLinkUser,
-                    onRegisterWalletAddress = viewModel::registerWalletAddress
+                    onAuthenticateUser = { email ->
+                        onrampPresenter.authenticateExistingLinkUser(email)
+                    },
+                    onStartVerification = {
+                        onrampPresenter.promptForIdentityVerification()
+                    }
                 )
             }
         }
@@ -87,6 +92,7 @@ internal fun OnrampScreen(
     viewModel: OnrampViewModel,
     onAuthenticateUser: (String) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit
+    onStartVerification: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
@@ -158,6 +164,10 @@ internal fun OnrampScreen(
                         viewModel.onBackToEmailInput()
                     }
                 )
+
+                StartVerificationScreen {
+                    onStartVerification()
+                }
             }
         }
     }
@@ -529,6 +539,30 @@ private fun KYCTextField(
             .fillMaxWidth()
             .padding(bottom = 24.dp)
     )
+}
+
+@Composable
+private fun StartVerificationScreen(
+    startVerification: () -> Unit
+) {
+    Column {
+        Text(
+            text = "Verification",
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        Button(
+            onClick = {
+                startVerification()
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp)
+        ) {
+            Text("Start Identity Verification")
+        }
+    }
 }
 
 @Composable

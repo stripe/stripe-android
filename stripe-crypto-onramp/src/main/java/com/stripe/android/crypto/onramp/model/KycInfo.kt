@@ -18,6 +18,7 @@ data class KycInfo(
 )
 
 @Serializable
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class DateOfBirth(
     val day: Int,
     val month: Int,
@@ -25,6 +26,7 @@ data class DateOfBirth(
 )
 
 @Suppress("UnusedPrivateProperty")
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 enum class IdType(internal val value: String) {
     AADHAAR("aadhaar"),
     ABN("abn"),

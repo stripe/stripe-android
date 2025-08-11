@@ -16,6 +16,7 @@ import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
+import com.stripe.android.crypto.onramp.model.OnrampIdentityVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampKYCResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
@@ -120,6 +121,22 @@ internal class OnrampViewModel(
             }
             is OnrampVerificationResult.Failed -> {
                 _message.value = "Authentication failed: ${result.error.message}"
+                _uiState.value = OnrampUiState.EmailInput
+            }
+        }
+    }
+
+    fun onIdentityVerificationResult(result: OnrampIdentityVerificationResult) {
+        when (result) {
+            is OnrampIdentityVerificationResult.Completed -> {
+                _message.value = "Identity Verification completed"
+                _uiState.value = OnrampUiState.PostAuthenticationScreen
+            }
+            is OnrampIdentityVerificationResult.Cancelled -> {
+                _message.value = "Identity Verification cancelled, please try again"
+            }
+            is OnrampIdentityVerificationResult.Failed -> {
+                _message.value = "Identity Verification failed: ${result.error.message}"
                 _uiState.value = OnrampUiState.EmailInput
             }
         }
