@@ -36,7 +36,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
@@ -46,6 +46,7 @@ import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkSpinner
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
+import com.stripe.android.model.ConsentUi
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.SectionStyle
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -148,6 +149,10 @@ internal fun VerificationBody(
             isSendingNewCode = state.isSendingNewCode,
             onClick = onResendCodeClick,
         )
+
+        state.consentSection?.let {
+            ConsentSection(it)
+        }
 
         if (state.allowLogout) {
             Spacer(modifier = Modifier.size(24.dp))
@@ -353,7 +358,20 @@ internal fun ResendCodeButton(
     }
 }
 
-@Preview
+@Composable
+private fun ConsentSection(
+    consentSection: ConsentUi.ConsentSection,
+) {
+    Text(
+        modifier = Modifier.padding(top = 8.dp),
+        text = consentSection.disclaimer,
+        style = LinkTheme.typography.caption,
+        color = LinkTheme.colors.textTertiary,
+        textAlign = TextAlign.Center,
+    )
+}
+
+@PreviewLightDark
 @Composable
 private fun Preview() {
     DefaultLinkTheme {
@@ -374,7 +392,10 @@ private fun Preview() {
                         email = "email@email.com",
                         defaultPayment = null,
                         isDialog = true,
-                        allowLogout = true,
+                        allowLogout = false,
+                        consentSection = ConsentUi.ConsentSection(
+                            disclaimer = "By continuing you’ll share your name, email, and phone with [Merchant]"
+                        )
                     ),
                     otpElement = OTPElement(
                         identifier = IdentifierSpec.Generic("otp"),
