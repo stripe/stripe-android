@@ -102,7 +102,6 @@ internal fun FormFieldValues.transformToPaymentSelection(
     val setupFutureUsage = userRequestedReuse.getSetupFutureUseValue(
         paymentMethodMetadata.hasIntentToSetup(paymentMethod.code)
     )
-
     val params = transformToPaymentMethodCreateParams(paymentMethod.code, paymentMethodMetadata)
     val options = transformToPaymentMethodOptionsParams(paymentMethod.code, setupFutureUsage)
     val extras = transformToExtraParams(paymentMethod.code)
