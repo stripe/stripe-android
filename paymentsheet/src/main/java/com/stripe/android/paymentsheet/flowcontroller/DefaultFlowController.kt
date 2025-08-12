@@ -707,7 +707,7 @@ internal class DefaultFlowController @Inject internal constructor(
 
         val selection = viewModel.paymentSelection
 
-        if (paymentResult is PaymentResult.Completed && selection != null && selection.isLink) {
+        if (shouldLogOutFromLink(paymentResult, selection)) {
             linkHandler.logOut()
         }
 
@@ -721,6 +721,17 @@ internal class DefaultFlowController @Inject internal constructor(
                 paymentResult.convertToPaymentSheetResult()
             )
         }
+    }
+
+    private fun shouldLogOutFromLink(
+        paymentResult: PaymentResult,
+        selection: PaymentSelection?
+    ): Boolean {
+        val verifiedMerchant = viewModel.state?.linkConfiguration?.useAttestationEndpointsForLink == true
+        return paymentResult is PaymentResult.Completed && selection != null &&
+            selection.isLink &&
+            // Only log out non-verified merchants.
+            verifiedMerchant.not()
     }
 
     internal fun onSepaMandateResult(sepaMandateResult: SepaMandateResult) {
