@@ -8,8 +8,8 @@ import com.stripe.hcaptcha.config.HCaptchaConfig
 import com.stripe.hcaptcha.config.HCaptchaSize
 import com.stripe.hcaptcha.task.OnFailureListener
 import com.stripe.hcaptcha.task.OnSuccessListener
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 internal class DefaultHCaptchaService(
     private val hCaptchaProvider: HCaptchaProvider
@@ -20,19 +20,20 @@ internal class DefaultHCaptchaService(
         siteKey: String,
         rqData: String?
     ): HCaptchaService.Result {
-        return suspendCoroutine { coroutine ->
-            val hcaptcha = hCaptchaProvider.get(activity).apply {
-                addOnSuccessListener(object : OnSuccessListener<HCaptchaTokenResponse> {
-                    override fun onSuccess(result: HCaptchaTokenResponse) {
-                        coroutine.resume(HCaptchaService.Result.Success(result.tokenResult))
-                    }
-                })
-                addOnFailureListener(object : OnFailureListener {
-                    override fun onFailure(exception: HCaptchaException) {
-                        coroutine.resume(HCaptchaService.Result.Failure(exception))
-                    }
-                })
+        val hCaptcha = hCaptchaProvider.get()
+        return suspendCancellableCoroutine { continuation ->
+            continuation.invokeOnCancellation {
+                hCaptcha.reset()
             }
+            hCaptcha.addOnSuccessListener(object : OnSuccessListener<HCaptchaTokenResponse> {
+                override fun onSuccess(result: HCaptchaTokenResponse) {
+                    continuation.resume(HCaptchaService.Result.Success(result.tokenResult))
+                }
+            }).addOnFailureListener(object : OnFailureListener {
+                override fun onFailure(exception: HCaptchaException) {
+                    continuation.resume(HCaptchaService.Result.Failure(exception))
+                }
+            })
 
             val config = HCaptchaConfig(
                 siteKey = siteKey,
@@ -44,7 +45,7 @@ internal class DefaultHCaptchaService(
                 retryPredicate = { _, exception -> exception.hCaptchaError == HCaptchaError.SESSION_TIMEOUT }
             )
 
-            hcaptcha.setup(config).verifyWithHCaptcha()
+            hCaptcha.setup(activity, config).verifyWithHCaptcha(activity)
         }
     }
 }

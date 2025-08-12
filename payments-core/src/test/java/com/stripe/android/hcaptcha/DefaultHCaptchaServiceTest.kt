@@ -2,6 +2,7 @@ package com.stripe.android.hcaptcha
 
 import android.os.Handler
 import androidx.fragment.app.FragmentActivity
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.hcaptcha.HCaptcha
 import com.stripe.hcaptcha.HCaptchaError
@@ -23,7 +24,7 @@ import kotlin.test.Test
 internal class DefaultHCaptchaServiceTest {
 
     @Test
-    fun `performPassiveHCaptcha calls hCaptchaProvider with activity`() = runTest {
+    fun `performPassiveHCaptcha calls hCaptchaProvider`() = runTest {
         val testContext = createTestContext()
         testContext.setupSuccessfulHCaptcha("test-token")
 
@@ -33,7 +34,7 @@ internal class DefaultHCaptchaServiceTest {
             rqData = null
         )
 
-        assertThat(testContext.hCaptchaProvider.getInvocations).containsExactly(testContext.activity)
+        testContext.hCaptchaProvider.awaitCall()
     }
 
     @Test
@@ -50,7 +51,7 @@ internal class DefaultHCaptchaServiceTest {
         )
 
         val configCaptor = argumentCaptor<HCaptchaConfig>()
-        verify(testContext.hCaptcha).setup(configCaptor.capture())
+        verify(testContext.hCaptcha).setup(any(), configCaptor.capture())
 
         with(configCaptor.firstValue) {
             assertThat(siteKey).isEqualTo(testSiteKey)
@@ -111,13 +112,13 @@ internal class DefaultHCaptchaServiceTest {
     private fun TestContext.setupHCaptchaChaining() {
         whenever(hCaptcha.addOnSuccessListener(any())).doReturn(hCaptcha)
         whenever(hCaptcha.addOnFailureListener(any())).doReturn(hCaptcha)
-        whenever(hCaptcha.setup(any())).doReturn(hCaptcha)
+        whenever(hCaptcha.setup(any(), any())).doReturn(hCaptcha)
     }
 
     private fun TestContext.setupSuccessfulHCaptcha(token: String = "test-token") {
         setupHCaptchaChaining()
 
-        whenever(hCaptcha.verifyWithHCaptcha()).then {
+        whenever(hCaptcha.verifyWithHCaptcha(any())).then {
             val successCaptor = argumentCaptor<OnSuccessListener<HCaptchaTokenResponse>>()
             verify(hCaptcha).addOnSuccessListener(successCaptor.capture())
             successCaptor.firstValue.onSuccess(createHCaptchaTokenResponse(token))
@@ -128,7 +129,7 @@ internal class DefaultHCaptchaServiceTest {
     private fun TestContext.setupFailedHCaptcha(exception: HCaptchaException) {
         setupHCaptchaChaining()
 
-        whenever(hCaptcha.verifyWithHCaptcha()).then {
+        whenever(hCaptcha.verifyWithHCaptcha(any())).then {
             val failureCaptor = argumentCaptor<OnFailureListener>()
             verify(hCaptcha).addOnFailureListener(failureCaptor.capture())
             failureCaptor.firstValue.onFailure(exception)
@@ -150,11 +151,15 @@ internal class DefaultHCaptchaServiceTest {
     private class FakeHCaptchaProvider(
         private val hCaptcha: HCaptcha
     ) : HCaptchaProvider {
-        val getInvocations = mutableListOf<FragmentActivity>()
+        private val calls = Turbine<Unit>()
 
-        override fun get(activity: FragmentActivity): HCaptcha {
-            getInvocations.add(activity)
+        override fun get(): HCaptcha {
+            calls.add(Unit)
             return hCaptcha
+        }
+
+        suspend fun awaitCall() {
+            calls.awaitItem()
         }
     }
 }
