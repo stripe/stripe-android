@@ -344,6 +344,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
     fun testMandateIsShownInForm() {
         runEmbeddedPaymentElementRowSelectionTest(
             responseTestBodyFileName = "elements-sessions-requires_payment_method.json",
+            expectedShouldSavePaymentMethodValue = true
         ) { testContext ->
             testContext.configure(intentConfiguration = paymentWithSetupFutureUsageIntentConfiguration)
             embeddedContentPage.clickOnLpm("cashapp")
@@ -360,6 +361,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
     fun testImmediateActionCallbackIsImmediatelyInvoked() {
         runEmbeddedPaymentElementRowSelectionTest(
             responseTestBodyFileName = "elements-sessions-requires_payment_method.json",
+            expectedShouldSavePaymentMethodValue = true
         ) { testContext ->
             testContext.configure(intentConfiguration = paymentWithSetupFutureUsageIntentConfiguration) {
                 embeddedViewDisplaysMandateText(false)
@@ -375,13 +377,14 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
     private fun runEmbeddedPaymentElementRowSelectionTest(
         responseTestBodyFileName: String,
         shouldSetupV1PaymentMethodsResponse: Boolean = false,
+        expectedShouldSavePaymentMethodValue: Boolean = false,
         testBlock: suspend (EmbeddedPaymentElementTestRunnerContext) -> Unit,
     ) {
         val rowSelectionCalls = Turbine<RowSelectionCall>()
         runEmbeddedPaymentElementTest(
             networkRule = networkRule,
             createIntentCallback = { _, shouldSavePaymentMethod ->
-                assertThat(shouldSavePaymentMethod).isFalse()
+                assertThat(shouldSavePaymentMethod).isEqualTo(expectedShouldSavePaymentMethodValue)
                 CreateIntentResult.Success("pi_example_secret_12345")
             },
             builder = {

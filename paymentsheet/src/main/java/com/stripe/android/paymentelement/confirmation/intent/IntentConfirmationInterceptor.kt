@@ -36,6 +36,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.utils.hasIntentToSetup
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
@@ -229,18 +230,21 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     ): NextStep {
         return when (initializationMode) {
             is PaymentElementLoader.InitializationMode.DeferredIntent -> {
-                val offSession = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                val updatedPaymentMethodOptionsParams = updatePaymentMethodOptionsParams(
+                    code = paymentMethod.type?.code,
+                    intentConfiguration = initializationMode.intentConfiguration,
+                    paymentMethodOptionsParams = paymentMethodOptionsParams
+                )
                 handleDeferred(
                     intentConfiguration = initializationMode.intentConfiguration,
                     paymentMethod = paymentMethod,
-                    paymentMethodOptionsParams = updatePaymentMethodOptionsParams(
-                        code = paymentMethod.type?.code,
-                        intentConfiguration = initializationMode.intentConfiguration,
-                        paymentMethodOptionsParams = paymentMethodOptionsParams
-                    ),
+                    paymentMethodOptionsParams = updatedPaymentMethodOptionsParams,
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     shippingValues = shippingValues,
-                    shouldSavePaymentMethod = paymentMethodOptionsParams?.setupFutureUsage() == offSession,
+                    shouldSavePaymentMethod = shouldSavePaymentMethod(
+                        paymentMethodOptionsParams = updatedPaymentMethodOptionsParams,
+                        intentConfiguration = initializationMode.intentConfiguration
+                    ),
                 )
             }
 
@@ -300,7 +304,10 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     shippingValues = shippingValues,
-                    shouldSavePaymentMethod = customerRequestedSave,
+                    shouldSavePaymentMethod = customerRequestedSave || shouldSavePaymentMethod(
+                        paymentMethodOptionsParams = paymentMethodOptionsParams,
+                        intentConfiguration = intentConfiguration
+                    ),
                 )
             },
             onFailure = { error ->
@@ -747,6 +754,15 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     }
                 }
             } ?: paymentMethodOptionsParams
+    }
+
+    private fun shouldSavePaymentMethod(
+        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+        intentConfiguration: PaymentSheet.IntentConfiguration
+    ): Boolean {
+        return paymentMethodOptionsParams?.setupFutureUsage()?.hasIntentToSetup() == true ||
+            (intentConfiguration.mode as? PaymentSheet.IntentConfiguration.Mode.Payment)
+                ?.setupFutureUse?.toConfirmParamsSetupFutureUsage()?.hasIntentToSetup() == true
     }
 
     private companion object {
