@@ -12,6 +12,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.crypto.onramp.OnrampCoordinator
+import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
@@ -19,6 +20,7 @@ import com.stripe.android.crypto.onramp.model.OnrampIdentityVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampKYCResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
+import com.stripe.android.crypto.onramp.model.OnrampSetWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
 import com.stripe.android.link.model.LinkAppearance
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,6 +42,7 @@ internal class OnrampViewModel(
     val message: StateFlow<String?> = _message.asStateFlow()
 
     private var currentEmail: String = ""
+    private var currentCustomerId: String = ""
 
     init {
         @Suppress("MaxLineLength")
@@ -109,8 +112,9 @@ internal class OnrampViewModel(
     fun onAuthenticationResult(result: OnrampVerificationResult) {
         when (result) {
             is OnrampVerificationResult.Completed -> {
-                _message.value = "Authentication successful"
-                _uiState.value = OnrampUiState.PostAuthenticationScreen
+                currentCustomerId = result.customerId
+                _message.value = "Authentication successful! You can now perform authenticated operations."
+                _uiState.value = OnrampUiState.AuthenticatedOperations(currentEmail, currentCustomerId)
             }
             is OnrampVerificationResult.Cancelled -> {
                 _message.value = "Authentication cancelled, please try again"
@@ -126,7 +130,7 @@ internal class OnrampViewModel(
         when (result) {
             is OnrampIdentityVerificationResult.Completed -> {
                 _message.value = "Identity Verification completed"
-                _uiState.value = OnrampUiState.PostAuthenticationScreen
+                _uiState.value = OnrampUiState.AuthenticatedOperations(currentEmail, currentCustomerId)
             }
             is OnrampIdentityVerificationResult.Cancelled -> {
                 _message.value = "Identity Verification cancelled, please try again"
@@ -154,6 +158,28 @@ internal class OnrampViewModel(
         }
     }
 
+    fun registerWalletAddress(walletAddress: String, network: CryptoNetwork) {
+        viewModelScope.launch {
+            if (walletAddress.isBlank()) {
+                _message.value = "Please enter a wallet address"
+                return@launch
+            }
+
+            _uiState.value = OnrampUiState.Loading
+            val result = onrampCoordinator.registerWalletAddress(walletAddress.trim(), network)
+            when (result) {
+                is OnrampSetWalletAddressResult.Completed -> {
+                    _message.value = "Wallet address registered successfully!"
+                    _uiState.value = OnrampUiState.AuthenticatedOperations(currentEmail, currentCustomerId)
+                }
+                is OnrampSetWalletAddressResult.Failed -> {
+                    _message.value = "Failed to register wallet address: ${result.error.message}"
+                    _uiState.value = OnrampUiState.AuthenticatedOperations(currentEmail, currentCustomerId)
+                }
+            }
+        }
+    }
+
     fun collectKycInfo(kycInfo: KycInfo) {
         _uiState.value = OnrampUiState.Loading
 
@@ -167,7 +193,7 @@ internal class OnrampViewModel(
                 }
                 is OnrampKYCResult.Failed -> {
                     _message.value = "KYC Collection failed: ${result.error.message}"
-                    _uiState.value = OnrampUiState.PostAuthenticationScreen
+                    _uiState.value = OnrampUiState.AuthenticatedOperations(currentEmail, currentCustomerId)
                 }
             }
         }
@@ -190,5 +216,5 @@ internal sealed class OnrampUiState {
     object Loading : OnrampUiState()
     data class Registration(val email: String) : OnrampUiState()
     data class Authentication(val email: String) : OnrampUiState()
-    object PostAuthenticationScreen : OnrampUiState()
+    data class AuthenticatedOperations(val email: String, val customerId: String) : OnrampUiState()
 }

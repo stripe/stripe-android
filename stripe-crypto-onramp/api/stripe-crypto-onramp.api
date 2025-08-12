@@ -5,6 +5,10 @@ public final class com/stripe/android/crypto/onramp/BuildConfig {
 	public fun <init> ()V
 }
 
+public final class com/stripe/android/crypto/onramp/model/CryptoNetwork$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
 public synthetic class com/stripe/android/crypto/onramp/model/DateOfBirth$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/android/crypto/onramp/model/DateOfBirth$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;

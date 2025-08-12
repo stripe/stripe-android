@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.crypto.onramp.di.DaggerOnrampComponent
 import com.stripe.android.crypto.onramp.di.OnrampComponent
 import com.stripe.android.crypto.onramp.di.OnrampPresenterComponent
+import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
@@ -14,6 +15,7 @@ import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampKYCResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
+import com.stripe.android.crypto.onramp.model.OnrampSetWalletAddressResult
 import javax.inject.Inject
 
 /**
@@ -58,6 +60,20 @@ class OnrampCoordinator @Inject internal constructor(
      */
     suspend fun registerNewLinkUser(info: LinkUserInfo): OnrampRegisterUserResult {
         return interactor.registerNewLinkUser(info)
+    }
+
+    /**
+     * Registers a wallet address for the user.
+     *
+     * @param walletAddress The wallet address to register.
+     * @param network The crypto network for the wallet address.
+     * @return OnrampSetWalletAddressResult indicating the result of setting the wallet address.
+     */
+    suspend fun registerWalletAddress(
+        walletAddress: String,
+        network: CryptoNetwork
+    ): OnrampSetWalletAddressResult {
+        return interactor.registerWalletAddress(walletAddress, network)
     }
 
     /**
