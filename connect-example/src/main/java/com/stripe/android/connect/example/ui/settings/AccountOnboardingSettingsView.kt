@@ -165,7 +165,7 @@ private fun AccountOnboardingSettingsView(
                         RequirementsMode.EXCLUDE -> "Requirements to exclude (comma-separated)"
                         RequirementsMode.DEFAULT -> ""
                     },
-                    placeholder = "e.g., business_profile.mcc, business_profile.url",
+                    placeholder = "e.g., external_account, business_profile.url",
                     value = requirementsText,
                     onValueChange = { requirementsText = it },
                 )

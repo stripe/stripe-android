@@ -200,14 +200,18 @@ data class OnboardingSettings(
                             AccountOnboardingProps.RequirementsOption.only(
                                 text.split(",").map { it.trim() }.filter { it.isNotEmpty() }
                             )
-                        } else null
+                        } else {
+                            null
+                        }
                     }
                     RequirementsMode.EXCLUDE -> requirementsText?.let { text ->
                         if (text.isNotBlank()) {
                             AccountOnboardingProps.RequirementsOption.exclude(
                                 text.split(",").map { it.trim() }.filter { it.isNotEmpty() }
                             )
-                        } else null
+                        } else {
+                            null
+                        }
                     }
                 }
             ),
