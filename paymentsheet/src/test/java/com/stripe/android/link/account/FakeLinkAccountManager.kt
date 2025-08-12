@@ -221,7 +221,8 @@ internal open class FakeLinkAccountManager(
         paymentDetailsId: String,
         expectedPaymentMethodType: String,
         cvc: String?,
-        billingPhone: String?
+        billingPhone: String?,
+        allowRedisplay: String?,
     ): Result<SharePaymentDetails> {
         return sharePaymentDetails
     }
