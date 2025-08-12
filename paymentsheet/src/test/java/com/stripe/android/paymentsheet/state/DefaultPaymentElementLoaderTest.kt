@@ -1673,11 +1673,12 @@ internal class DefaultPaymentElementLoaderTest {
 
         val result = loader.load(
             initializationMode = DEFAULT_INITIALIZATION_MODE,
-            paymentSheetConfiguration = DEFAULT_PAYMENT_SHEET_CONFIG.copy(
-                defaultBillingDetails = PaymentSheet.BillingDetails(
-                    email = "john@doe.com",
-                ),
-            ),
+            paymentSheetConfiguration = DEFAULT_PAYMENT_SHEET_CONFIG.newBuilder()
+                .defaultBillingDetails(
+                    defaultBillingDetails = PaymentSheet.BillingDetails(
+                        email = "john@doe.com",
+                    )
+                ).build(),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
             ),
@@ -1687,36 +1688,37 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Returns InsteadOfSaveForFutureUse signup mode when linkSignUpOptInFeatureEnabled is true even with customer config`() = runTest {
-        val loader = createPaymentElementLoader(
-            linkAccountState = AccountStatus.SignedOut,
-            linkSettings = createLinkSettings(
-                passthroughModeEnabled = false,
-                linkSignUpOptInFeatureEnabled = true
+    fun `Returns InsteadOfSaveForFutureUse signup mode when linkSignUpOptInFeatureEnabled is true even with customer config`() =
+        runTest {
+            val loader = createPaymentElementLoader(
+                linkAccountState = AccountStatus.SignedOut,
+                linkSettings = createLinkSettings(
+                    passthroughModeEnabled = false,
+                    linkSignUpOptInFeatureEnabled = true
+                )
             )
-        )
 
-        val result = loader.load(
-            initializationMode = DEFAULT_INITIALIZATION_MODE,
-            paymentSheetConfiguration = PaymentSheet.Configuration(
-                merchantDisplayName = "Some Name",
-                customer = PaymentSheet.CustomerConfiguration(
-                    id = "cus_123",
-                    ephemeralKeySecret = "ek_123",
+            val result = loader.load(
+                initializationMode = DEFAULT_INITIALIZATION_MODE,
+                paymentSheetConfiguration = PaymentSheet.Configuration(
+                    merchantDisplayName = "Some Name",
+                    customer = PaymentSheet.CustomerConfiguration(
+                        id = "cus_123",
+                        ephemeralKeySecret = "ek_123",
+                    ),
+                    defaultBillingDetails = PaymentSheet.BillingDetails(
+                        email = "john@doe.com",
+                    ),
                 ),
-                defaultBillingDetails = PaymentSheet.BillingDetails(
-                    email = "john@doe.com",
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
                 ),
-            ),
-            metadata = PaymentElementLoader.Metadata(
-                initializedViaCompose = false,
-            ),
-        ).getOrThrow()
+            ).getOrThrow()
 
-        // Even with customer config that would normally trigger AlongsideSaveForFutureUse,
-        // the feature flag should override it to InsteadOfSaveForFutureUse
-        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
-    }
+            // Even with customer config that would normally trigger AlongsideSaveForFutureUse,
+            // the feature flag should override it to InsteadOfSaveForFutureUse
+            assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
+        }
 
     @Test
     fun `Returns null signup mode when linkSignUpOptInFeatureEnabled is true but user has used Link`() = runTest {
