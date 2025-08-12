@@ -15,8 +15,6 @@ import com.stripe.android.paymentsheet.example.playground.settings.CollectNameSe
 import com.stripe.android.paymentsheet.example.playground.settings.CollectPhoneSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionRedisplaySettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSaveSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
@@ -29,12 +27,8 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.PAYMENT_METHOD_
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.test.core.FieldPopulator
 import com.stripe.android.test.core.TestParameters
-import com.stripe.android.testing.ShampooRule
-import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.Timeout
 import org.junit.runner.RunWith
-import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 internal class TestCard : BasePlaygroundTest() {
@@ -45,9 +39,6 @@ internal class TestCard : BasePlaygroundTest() {
     ).copy(
         saveForFutureUseCheckboxVisible = true,
     )
-
-    @get:Rule
-    val shampooRule = ShampooRule(1000)
 
     @Test
     fun testCard() {
