@@ -12,6 +12,7 @@ import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -27,9 +28,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     private val linkPresenter = linkController.createPresenter(
         activity = activity,
-        presentPaymentMethodsCallback = { result ->
-            // Handle payment methods result if needed
-        },
+        presentPaymentMethodsCallback = ::handleSelectPaymentResult,
         authenticationCallback = ::handleAuthenticationResult
     )
 
@@ -79,6 +78,13 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
+    fun collectPaymentMethod() {
+        linkPresenter.presentPaymentMethods(clientEmail())
+    }
+
+    private fun clientEmail(): String? =
+        interactor.state.value.linkControllerState?.internalLinkAccount?.email
+
     private fun handleAuthenticationResult(result: LinkController.AuthenticationResult) {
         coroutineScope.launch {
             onrampCallbacks.authenticationCallback.onResult(
@@ -91,6 +97,14 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         coroutineScope.launch {
             onrampCallbacks.identityVerificationCallback.onResult(
                 interactor.handleIdentityVerificationResult(result)
+            )
+        }
+    }
+
+    private fun handleSelectPaymentResult(result: LinkController.PresentPaymentMethodsResult) {
+        coroutineScope.launch {
+            onrampCallbacks.selectPaymentCallback.onResult(
+                interactor.handleSelectPaymentResult(result)
             )
         }
     }

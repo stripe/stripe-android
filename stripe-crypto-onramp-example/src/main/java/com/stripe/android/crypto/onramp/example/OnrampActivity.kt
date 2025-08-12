@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -48,7 +49,9 @@ import com.stripe.android.crypto.onramp.model.IdType
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
+import com.stripe.android.crypto.onramp.model.PaymentOptionDisplayData
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.uicore.image.rememberDrawablePainter
 
 internal class OnrampActivity : ComponentActivity() {
 
@@ -66,7 +69,8 @@ internal class OnrampActivity : ComponentActivity() {
 
         val callbacks = OnrampCallbacks(
             authenticationCallback = viewModel::onAuthenticationResult,
-            identityVerificationCallback = viewModel::onIdentityVerificationResult
+            identityVerificationCallback = viewModel::onIdentityVerificationResult,
+            selectPaymentCallback = viewModel::onSelectPaymentResult
         )
 
         onrampPresenter = viewModel.onrampCoordinator
@@ -84,6 +88,9 @@ internal class OnrampActivity : ComponentActivity() {
                     },
                     onStartVerification = {
                         onrampPresenter.promptForIdentityVerification()
+                    },
+                    onCollectPayment = {
+                        onrampPresenter.collectPaymentMethod()
                     }
                 )
             }
@@ -97,7 +104,8 @@ internal fun OnrampScreen(
     viewModel: OnrampViewModel,
     onAuthenticateUser: (String) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
-    onStartVerification: () -> Unit
+    onStartVerification: () -> Unit,
+    onCollectPayment: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
@@ -163,9 +171,11 @@ internal fun OnrampScreen(
                 AuthenticatedOperationsScreen(
                     email = currentState.email,
                     customerId = currentState.customerId,
+                    selectedPaymentData = currentState.selectedPaymentData,
                     onRegisterWalletAddress = onRegisterWalletAddress,
                     onCollectKYC = { kycInfo -> viewModel.collectKycInfo(kycInfo) },
                     onStartVerification = onStartVerification,
+                    onCollectPayment = { onCollectPayment() },
                     onBack = {
                         viewModel.onBackToEmailInput()
                     }
@@ -373,9 +383,11 @@ private fun AuthenticationScreen(
 private fun AuthenticatedOperationsScreen(
     email: String,
     customerId: String,
+    selectedPaymentData: PaymentOptionDisplayData?,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onCollectKYC: (KycInfo) -> Unit,
     onStartVerification: () -> Unit,
+    onCollectPayment: () -> Unit,
     onBack: () -> Unit
 ) {
     var walletAddress by remember { mutableStateOf("") }
@@ -404,6 +416,32 @@ private fun AuthenticatedOperationsScreen(
             text = "Customer ID: $customerId",
             modifier = Modifier.padding(bottom = 24.dp)
         )
+
+
+        selectedPaymentData?.let {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 24.dp)
+            ) {
+                Image(
+                    painter = rememberDrawablePainter(selectedPaymentData.iconDrawable),
+                    contentDescription = selectedPaymentData.label,
+                    modifier = Modifier
+                        .height(24.dp)
+                        .padding(end = 8.dp)
+                )
+
+                Text(
+                    text = "Selected Payment Type: ${selectedPaymentData.label}",
+                    modifier = Modifier.padding(bottom = 24.dp)
+                )
+            }
+
+            Text(
+                text = "Selected Payment Value: ${selectedPaymentData.sublabel}",
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
+        }
 
         Text(
             text = "Register Wallet Address",
@@ -477,6 +515,21 @@ private fun AuthenticatedOperationsScreen(
 
         StartVerificationScreen {
             onStartVerification()
+        }
+
+        Text(
+            text = "Payment",
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        Button(
+            onClick = { onCollectPayment() },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp)
+        ) {
+            Text("Collect Payment Method")
         }
 
         TextButton(
