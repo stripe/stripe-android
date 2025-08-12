@@ -1,7 +1,9 @@
 package com.stripe.android.crypto.onramp
 
+import android.content.ContentResolver
 import android.net.Uri
 import androidx.activity.ComponentActivity
+import androidx.core.net.toUri
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.exception.APIException
@@ -33,11 +35,17 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         authenticationCallback = ::handleAuthenticationResult
     )
 
+    private val fallbackMerchantLogoUri: Uri = Uri.Builder()
+        .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+        .authority(activity.packageName)
+        .appendPath("drawable")
+        .appendPath("wallet_icon")
+        .build()
+
     private val sheet = IdentityVerificationSheet.create(
         activity,
         configuration = IdentityVerificationSheet.Configuration(
-            brandLogo = Uri.Builder() // Temporary until we determine how to pass this in.
-                .build()
+            brandLogo = linkController.state(activity).value.merchantLogoUrl?.toUri() ?: fallbackMerchantLogoUri,
         ),
         identityVerificationCallback = ::handleIdentityVerificationResult,
     )

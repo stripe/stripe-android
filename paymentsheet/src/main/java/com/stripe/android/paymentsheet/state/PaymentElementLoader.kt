@@ -592,6 +592,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             stripeIntent = elementsSession.stripeIntent,
             merchantName = configuration.merchantDisplayName,
             merchantCountryCode = elementsSession.merchantCountry,
+            merchantLogoUrl = elementsSession.merchantLogoUrl,
             customerInfo = customerInfo,
             shippingDetails = shippingDetails?.takeIf { it.isCheckboxSelected == true },
             passthroughModeEnabled = elementsSession.linkPassthroughModeEnabled,

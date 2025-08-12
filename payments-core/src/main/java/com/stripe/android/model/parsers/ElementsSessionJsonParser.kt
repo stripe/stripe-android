@@ -80,6 +80,7 @@ internal class ElementsSessionJsonParser(
         val googlePayPreference = json.optString(FIELD_GOOGLE_PAY_PREFERENCE)
 
         val merchantCountry = json.optString(FIELD_MERCHANT_COUNTRY)
+        val merchantLogoUrl = StripeJsonUtils.optString(json, FIELD_MERCHANT_LOGO_URL)
 
         val passiveCaptcha = json.optJSONObject(FIELD_PASSIVE_CAPTCHA)?.let {
             PassiveCaptchaJsonParser().parse(it)
@@ -92,6 +93,7 @@ internal class ElementsSessionJsonParser(
                 stripeIntent = stripeIntent,
                 customer = customer,
                 merchantCountry = merchantCountry,
+                merchantLogoUrl = merchantLogoUrl,
                 cardBrandChoice = cardBrandChoice,
                 isGooglePayEnabled = googlePayPreference != "disabled",
                 externalPaymentMethodData = externalPaymentMethodData,
@@ -470,6 +472,7 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_LINK_SIGN_UP_OPT_IN_FEATURE_ENABLED = "link_sign_up_opt_in_feature_enabled"
         private const val FIELD_LINK_SIGN_UP_OPT_IN_INITIAL_VALUE = "link_sign_up_opt_in_initial_value"
         private const val FIELD_MERCHANT_COUNTRY = "merchant_country"
+        private const val FIELD_MERCHANT_LOGO_URL = "merchant_logo_url"
         private const val FIELD_PAYMENT_METHOD_PREFERENCE = "payment_method_preference"
         private const val FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES = "unactivated_payment_method_types"
         private const val FIELD_PAYMENT_METHOD_SPECS = "payment_method_specs"
