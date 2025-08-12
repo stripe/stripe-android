@@ -417,25 +417,19 @@ private fun AuthenticatedOperationsScreen(
             modifier = Modifier.padding(bottom = 24.dp)
         )
 
-
         selectedPaymentData?.let {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(bottom = 24.dp)
-            ) {
-                Image(
-                    painter = rememberDrawablePainter(selectedPaymentData.iconDrawable),
-                    contentDescription = selectedPaymentData.label,
-                    modifier = Modifier
-                        .height(24.dp)
-                        .padding(end = 8.dp)
-                )
+            Image(
+                painter = rememberDrawablePainter(selectedPaymentData.iconDrawable),
+                contentDescription = selectedPaymentData.label,
+                modifier = Modifier
+                    .height(24.dp)
+                    .padding(end = 8.dp)
+            )
 
-                Text(
-                    text = "Selected Payment Type: ${selectedPaymentData.label}",
-                    modifier = Modifier.padding(bottom = 24.dp)
-                )
-            }
+            Text(
+                text = "Selected Payment Type: ${selectedPaymentData.label}",
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
 
             Text(
                 text = "Selected Payment Value: ${selectedPaymentData.sublabel}",

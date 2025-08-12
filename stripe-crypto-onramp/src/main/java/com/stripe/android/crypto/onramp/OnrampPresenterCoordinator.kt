@@ -12,7 +12,6 @@ import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

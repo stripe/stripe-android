@@ -4,9 +4,9 @@ import android.graphics.drawable.Drawable
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
+import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
-import com.stripe.android.common.ui.DelegateDrawable
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun interface OnrampCollectPaymentCallback {
