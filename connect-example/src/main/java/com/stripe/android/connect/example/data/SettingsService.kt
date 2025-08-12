@@ -193,29 +193,33 @@ data class OnboardingSettings(
                     FutureRequirement.OMIT -> AccountOnboardingProps.FutureRequirementOption.OMIT
                     FutureRequirement.INCLUDE -> AccountOnboardingProps.FutureRequirementOption.INCLUDE
                 },
-                requirements = when (requirementsMode) {
-                    RequirementsMode.DEFAULT -> null
-                    RequirementsMode.ONLY -> requirementsText?.let { text ->
-                        if (text.isNotBlank()) {
-                            AccountOnboardingProps.RequirementsOption.only(
-                                text.split(",").map { it.trim() }.filter { it.isNotEmpty() }
-                            )
-                        } else {
-                            null
-                        }
-                    }
-                    RequirementsMode.EXCLUDE -> requirementsText?.let { text ->
-                        if (text.isNotBlank()) {
-                            AccountOnboardingProps.RequirementsOption.exclude(
-                                text.split(",").map { it.trim() }.filter { it.isNotEmpty() }
-                            )
-                        } else {
-                            null
-                        }
-                    }
-                }
+                requirements = buildRequirementsOption()
             ),
         )
+    }
+
+    private fun buildRequirementsOption(): AccountOnboardingProps.RequirementsOption? {
+        return when (requirementsMode) {
+            RequirementsMode.DEFAULT -> null
+            RequirementsMode.ONLY -> requirementsText?.let { text ->
+                if (text.isNotBlank()) {
+                    AccountOnboardingProps.RequirementsOption.only(
+                        text.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+                    )
+                } else {
+                    null
+                }
+            }
+            RequirementsMode.EXCLUDE -> requirementsText?.let { text ->
+                if (text.isNotBlank()) {
+                    AccountOnboardingProps.RequirementsOption.exclude(
+                        text.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+                    )
+                } else {
+                    null
+                }
+            }
+        }
     }
 }
 
