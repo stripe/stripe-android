@@ -65,9 +65,24 @@ internal class OnrampInteractor @Inject constructor(
 
         return when (result) {
             is LinkController.RegisterConsumerResult.Success -> {
-                OnrampRegisterUserResult.Completed(
-                    customerId = "link_consumer" // TODO create consumer
-                )
+                val secret = consumerSessionClientSecret()
+                secret?.let {
+                    val permissionsResult = cryptoApiRepository
+                        .grantPartnerMerchantPermissions(it)
+
+                    permissionsResult.fold(
+                        onSuccess = { result ->
+                            OnrampRegisterUserResult.Completed(result.id)
+                        },
+                        onFailure = { error ->
+                            OnrampRegisterUserResult.Failed(error)
+                        }
+                    )
+                } ?: run {
+                    return OnrampRegisterUserResult.Failed(
+                        IllegalStateException("Missing consumer session client secret")
+                    )
+                }
             }
             is LinkController.RegisterConsumerResult.Failed -> {
                 OnrampRegisterUserResult.Failed(
