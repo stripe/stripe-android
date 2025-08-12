@@ -67,13 +67,18 @@ class LinkApiRepositoryTest {
         val consumersApiService = FakeConsumersApiService()
         val linkRepository = linkRepository(consumersApiService)
 
-        val result = linkRepository.lookupConsumer(TestFactory.EMAIL, customerId = null)
+        val result = linkRepository.lookupConsumer(
+            email = TestFactory.EMAIL,
+            sessionId = SESSION_ID,
+            customerId = null,
+        )
 
         assertThat(result).isEqualTo(Result.success(TestFactory.CONSUMER_SESSION_LOOKUP))
         assertThat(consumersApiService.lookupCalls.size).isEqualTo(1)
         val lookup = consumersApiService.lookupCalls.first()
         assertThat(lookup.email).isEqualTo(TestFactory.EMAIL)
         assertThat(lookup.requestSurface).isEqualTo(CONSUMER_SURFACE)
+        assertThat(lookup.sessionId).isEqualTo(SESSION_ID)
         assertThat(lookup.requestOptions.apiKey).isEqualTo(PUBLISHABLE_KEY)
         assertThat(lookup.requestOptions.stripeAccount).isEqualTo(STRIPE_ACCOUNT_ID)
     }
@@ -85,6 +90,7 @@ class LinkApiRepositoryTest {
             override suspend fun lookupConsumerSession(
                 email: String,
                 requestSurface: String,
+                sessionId: String,
                 doNotLogConsumerFunnelEvent: Boolean,
                 requestOptions: ApiRequest.Options,
                 customerId: String?
@@ -94,7 +100,7 @@ class LinkApiRepositoryTest {
         }
         val linkRepository = linkRepository(consumersApiService)
 
-        val result = linkRepository.lookupConsumer("email", customerId = null)
+        val result = linkRepository.lookupConsumer("email", sessionId = SESSION_ID, customerId = null)
 
         assertThat(result).isEqualTo(Result.failure<ConsumerSessionLookup>(error))
     }
@@ -837,5 +843,6 @@ class LinkApiRepositoryTest {
         const val PUBLISHABLE_KEY = "publishableKey"
         const val STRIPE_ACCOUNT_ID = "stripeAccountId"
         const val CONSUMER_SURFACE = "android_payment_element"
+        const val SESSION_ID = "sess_123"
     }
 }
