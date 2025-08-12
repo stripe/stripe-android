@@ -80,6 +80,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                     country = "US",
                 ),
             ),
+            allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
         )
     }
 
@@ -120,6 +121,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                     country = "US",
                 ),
             ),
+            allowRedisplay = PaymentMethod.AllowRedisplay.LIMITED,
         )
     }
 
@@ -234,6 +236,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                     country = "US",
                 ),
             ),
+            allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
         )
     }
 
@@ -516,6 +519,7 @@ internal class DefaultLinkConfirmationHandlerTest {
         linkAccount: LinkAccount,
         cvc: String?,
         billingDetails: PaymentMethod.BillingDetails?,
+        allowRedisplay: PaymentMethod.AllowRedisplay?,
     ) {
         assertThat(intent).isEqualTo(configuration.stripeIntent)
         val option = confirmationOption as PaymentMethodConfirmationOption.New
@@ -525,6 +529,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                 consumerSessionClientSecret = linkAccount.clientSecret,
                 extraParams = cvc?.let { mapOf("card" to mapOf("cvc" to cvc)) },
                 billingDetails = billingDetails,
+                allowRedisplay = allowRedisplay,
             )
         )
         assertThat(shippingDetails).isEqualTo(configuration.shippingDetails)
