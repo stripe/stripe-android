@@ -43,7 +43,7 @@ fun CardDetailsSectionElementUI(
                         heading()
                     }
             )
-            if (controller.isCardScanEnabled && controller.isStripeCardScanAvailable()) {
+            if (controller.isCardScanEnabled) {
                 ScanCardButtonUI(
                     enabled = enabled,
                     elementsSessionId = controller.elementsSessionId
