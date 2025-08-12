@@ -24,6 +24,7 @@ import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.data.FieldOption
 import com.stripe.android.connect.example.data.FutureRequirement
 import com.stripe.android.connect.example.data.OnboardingSettings
+import com.stripe.android.connect.example.data.RequirementsMode
 import com.stripe.android.connect.example.data.SkipTermsOfService
 import com.stripe.android.connect.example.ui.common.BackIconButton
 import com.stripe.android.connect.example.ui.common.ConnectExampleScaffold
@@ -68,6 +69,12 @@ private fun AccountOnboardingSettingsView(
     var futureRequirement by rememberSaveable {
         mutableStateOf(onboardingSettings.futureRequirement)
     }
+    var requirementsMode by rememberSaveable {
+        mutableStateOf(onboardingSettings.requirementsMode)
+    }
+    var requirementsText by rememberSaveable {
+        mutableStateOf(onboardingSettings.requirementsText ?: "")
+    }
     ConnectExampleScaffold(
         title = stringResource(R.string.onboarding_settings),
         navigationIcon = { BackIconButton(onBack) },
@@ -82,6 +89,8 @@ private fun AccountOnboardingSettingsView(
                             skipTermsOfService = skipTermsOfService,
                             fieldOption = fieldOption,
                             futureRequirement = futureRequirement,
+                            requirementsMode = requirementsMode,
+                            requirementsText = requirementsText.trim().takeIf { it.isNotEmpty() },
                         )
                     )
                     onBack()
@@ -141,6 +150,26 @@ private fun AccountOnboardingSettingsView(
                 selectedOption = futureRequirement,
                 onSelectOption = { futureRequirement = it }
             )
+            Spacer(Modifier.requiredHeight(8.dp))
+            SettingsDropdownField(
+                label = "Requirements mode",
+                options = RequirementsMode.entries.toList(),
+                selectedOption = requirementsMode,
+                onSelectOption = { requirementsMode = it }
+            )
+            if (requirementsMode != RequirementsMode.DEFAULT) {
+                Spacer(Modifier.requiredHeight(8.dp))
+                SettingsTextField(
+                    label = when (requirementsMode) {
+                        RequirementsMode.ONLY -> "Requirements to include (comma-separated)"
+                        RequirementsMode.EXCLUDE -> "Requirements to exclude (comma-separated)"
+                        RequirementsMode.DEFAULT -> ""
+                    },
+                    placeholder = "e.g., business_profile.mcc, business_profile.url",
+                    value = requirementsText,
+                    onValueChange = { requirementsText = it },
+                )
+            }
         }
     }
 }
