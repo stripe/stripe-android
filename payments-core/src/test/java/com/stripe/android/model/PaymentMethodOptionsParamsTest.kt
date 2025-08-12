@@ -89,4 +89,72 @@ class PaymentMethodOptionsParamsTest {
             )
         )
     }
+
+    @Test
+    fun setupFutureUsageToParamMap_hasCorrectValues() {
+        assertThat(
+            PaymentMethodOptionsParams.SetupFutureUsage(
+                paymentMethodType = PaymentMethod.Type.SepaDebit,
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
+            ).toParamMap()
+        ).isEqualTo(
+            mapOf(
+                "sepa_debit" to mapOf(
+                    "setup_future_usage" to "on_session"
+                )
+            )
+        )
+
+        assertThat(
+            PaymentMethodOptionsParams.SetupFutureUsage(
+                paymentMethodType = PaymentMethod.Type.WeChatPay,
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
+            ).toParamMap()
+        ).isEqualTo(
+            mapOf(
+                "wechat_pay" to mapOf(
+                    "setup_future_usage" to "on_session"
+                )
+            )
+        )
+
+        assertThat(
+            PaymentMethodOptionsParams.SetupFutureUsage(
+                paymentMethodType = PaymentMethod.Type.Link,
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
+            ).toParamMap()
+        ).isEqualTo(
+            mapOf(
+                "link" to mapOf(
+                    "setup_future_usage" to "on_session"
+                )
+            )
+        )
+
+        assertThat(
+            PaymentMethodOptionsParams.SetupFutureUsage(
+                paymentMethodType = PaymentMethod.Type.Card,
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
+            ).toParamMap()
+        ).isEqualTo(
+            mapOf(
+                "card" to mapOf(
+                    "setup_future_usage" to "on_session"
+                )
+            )
+        )
+
+        assertThat(
+            PaymentMethodOptionsParams.SetupFutureUsage(
+                paymentMethodType = PaymentMethod.Type.Blik,
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
+            ).toParamMap()
+        ).isEqualTo(
+            mapOf(
+                "blik" to mapOf(
+                    "setup_future_usage" to "on_session"
+                )
+            )
+        )
+    }
 }

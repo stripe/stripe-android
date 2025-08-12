@@ -80,7 +80,8 @@ sealed class PaymentMethodOptionsParams(
 
     @Parcelize
     data class Blik(
-        var code: String
+        var code: String,
+        var setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null,
     ) : PaymentMethodOptionsParams(PaymentMethod.Type.Blik) {
         override fun createTypeParams(): List<Pair<String, Any?>> {
             return listOf(
@@ -112,7 +113,8 @@ sealed class PaymentMethodOptionsParams(
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Konbini(
-        private val confirmationNumber: String
+        private val confirmationNumber: String,
+        var setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null,
     ) : PaymentMethodOptionsParams(PaymentMethod.Type.Konbini) {
         override fun createTypeParams(): List<Pair<String, Any?>> {
             return listOf(
@@ -127,7 +129,8 @@ sealed class PaymentMethodOptionsParams(
 
     @Parcelize
     data class WeChatPay(
-        var appId: String
+        var appId: String,
+        var setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null,
     ) : PaymentMethodOptionsParams(PaymentMethod.Type.WeChatPay) {
         override fun createTypeParams(): List<Pair<String, Any?>> {
             return listOf(
@@ -144,9 +147,18 @@ sealed class PaymentMethodOptionsParams(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
-    object WeChatPayH5 : PaymentMethodOptionsParams(PaymentMethod.Type.WeChatPay) {
+    data class WeChatPayH5(
+        var setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null
+    ) : PaymentMethodOptionsParams(PaymentMethod.Type.WeChatPay) {
         override fun createTypeParams(): List<Pair<String, Any?>> {
-            return listOf("client" to "mobile_web")
+            return listOf(
+                "client" to "mobile_web",
+                PARAM_SETUP_FUTURE_USAGE to setupFutureUsage?.code
+            )
+        }
+
+        internal companion object {
+            const val PARAM_SETUP_FUTURE_USAGE = "setup_future_usage"
         }
     }
 
@@ -157,6 +169,26 @@ sealed class PaymentMethodOptionsParams(
         override fun createTypeParams(): List<Pair<String, Any?>> {
             return listOf(
                 PARAM_SETUP_FUTURE_USAGE to setupFutureUsage?.code
+            )
+        }
+
+        internal companion object {
+            const val PARAM_SETUP_FUTURE_USAGE = "setup_future_usage"
+        }
+    }
+
+    /**
+     * Generic SetupFutureUsage PMO object for deferred intents.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    data class SetupFutureUsage(
+        var paymentMethodType: PaymentMethod.Type,
+        var setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage
+    ) : PaymentMethodOptionsParams(paymentMethodType) {
+        override fun createTypeParams(): List<Pair<String, Any?>> {
+            return listOf(
+                PARAM_SETUP_FUTURE_USAGE to setupFutureUsage.code
             )
         }
 
@@ -177,5 +209,37 @@ fun PaymentMethodOptionsParams.setupFutureUsage(): ConfirmPaymentIntentParams.Se
         is PaymentMethodOptionsParams.USBankAccount -> setupFutureUsage
         is PaymentMethodOptionsParams.WeChatPay -> null
         is PaymentMethodOptionsParams.WeChatPayH5 -> null
+        is PaymentMethodOptionsParams.SetupFutureUsage -> setupFutureUsage
+    }
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun PaymentMethodOptionsParams?.updateSetupFutureUsageWithPmoSfu(
+    pmoSfu: ConfirmPaymentIntentParams.SetupFutureUsage?
+): PaymentMethodOptionsParams? {
+    if (pmoSfu == null) return this
+    return when (this) {
+        is PaymentMethodOptionsParams.Blik -> this.copy(setupFutureUsage = pmoSfu)
+        is PaymentMethodOptionsParams.Card -> {
+            return if (setupFutureUsage == ConfirmPaymentIntentParams.SetupFutureUsage.OffSession) {
+                this
+            } else {
+                this.copy(setupFutureUsage = pmoSfu)
+            }
+        }
+        is PaymentMethodOptionsParams.SepaDebit -> this.copy(setupFutureUsage = pmoSfu)
+        is PaymentMethodOptionsParams.Konbini -> this.copy(setupFutureUsage = pmoSfu)
+        is PaymentMethodOptionsParams.Link -> this.copy(setupFutureUsage = pmoSfu)
+        is PaymentMethodOptionsParams.USBankAccount -> {
+            return if (setupFutureUsage == ConfirmPaymentIntentParams.SetupFutureUsage.OffSession) {
+                this
+            } else {
+                this.copy(setupFutureUsage = pmoSfu)
+            }
+        }
+        is PaymentMethodOptionsParams.WeChatPay -> this.copy(setupFutureUsage = pmoSfu)
+        is PaymentMethodOptionsParams.WeChatPayH5 -> this.copy(setupFutureUsage = pmoSfu)
+        is PaymentMethodOptionsParams.SetupFutureUsage -> this.copy(setupFutureUsage = pmoSfu)
+        null -> null
     }
 }

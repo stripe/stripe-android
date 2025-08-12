@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import com.stripe.android.core.model.StripeJsonUtils
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntent.ConfirmationMethod.Manual
@@ -19,6 +20,7 @@ internal object DeferredIntentValidator {
         stripeIntent: StripeIntent,
         intentConfiguration: PaymentSheet.IntentConfiguration,
         allowsManualConfirmation: Boolean,
+        paymentMethod: PaymentMethod
     ): StripeIntent {
         val params = intentConfiguration.toDeferredIntentParams()
 
@@ -35,12 +37,6 @@ internal object DeferredIntentValidator {
                         "(${paymentMode.currency.lowercase()})."
                 }
 
-                require(paymentMode.setupFutureUsage.isNull() == stripeIntent.setupFutureUsage.isNull()) {
-                    "Your PaymentIntent setupFutureUsage (${stripeIntent.setupFutureUsage}) " +
-                        "does not match the PaymentSheet.IntentConfiguration " +
-                        "setupFutureUsage (${paymentMode.setupFutureUsage})."
-                }
-
                 // Manual confirmation is only available using FlowController because merchants own
                 // the final step of confirmation. Showing a successful payment in the complete flow
                 // may be misleading when merchants still need to do a final confirmation which
@@ -50,17 +46,11 @@ internal object DeferredIntentValidator {
                         "can only be used with PaymentSheet.FlowController."
                 }
 
-                require(
-                    validatePaymentMethodOptionsSetupFutureUsage(
-                        paramsPaymentMethodOptionsJsonString = paymentMode.paymentMethodOptionsJsonString,
-                        stripeIntent = stripeIntent
-                    )
-                ) {
-                    "Your PaymentIntent payment_method_options setup_future_usage values " +
-                        "(${stripeIntent.getPaymentMethodOptions()} do not match the values provided in " +
-                        "PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions " +
-                        "(${paymentMode.paymentMethodOptionsJsonString})"
-                }
+                validateSfuAndPmoSfu(
+                    intent = stripeIntent,
+                    paymentMode = paymentMode,
+                    paymentMethod = paymentMethod
+                )
             }
             is SetupIntent -> {
                 val setupMode = requireNotNull(params.mode as? DeferredIntentParams.Mode.Setup) {
@@ -140,19 +130,54 @@ internal object DeferredIntentValidator {
         return firstFingerprint == secondFingerprint
     }
 
-    private fun validatePaymentMethodOptionsSetupFutureUsage(
-        paramsPaymentMethodOptionsJsonString: String?,
-        stripeIntent: StripeIntent,
-    ): Boolean {
-        val paramsMap = paramsPaymentMethodOptionsJsonString?.let {
+    private fun validateSfuAndPmoSfu(
+        intent: PaymentIntent,
+        paymentMode: DeferredIntentParams.Mode.Payment,
+        paymentMethod: PaymentMethod
+    ) {
+        val paymentIntentPmoSfu = paymentMethod.type?.code?.let {
+            (intent.getPaymentMethodOptions()[it] as? Map<*, *>?)?.get("setup_future_usage") as? String
+        }
+
+        val intentConfigPmoSfu = paymentMode.paymentMethodOptionsJsonString?.let {
             StripeJsonUtils.jsonObjectToMap(JSONObject(it))
         } ?: emptyMap()
 
-        return paramsMap.entries.all { (key, value) ->
-            val paramsSfu = (value as? Map<*, *>?)?.get("setup_future_usage") as? String
-            val intentSfu = (stripeIntent.getPaymentMethodOptions()[key] as? Map<*, *>?)?.get("setup_future_usage")
-            val isPaymentMethodInIntent = stripeIntent.paymentMethodTypes.contains(key)
-            if (isPaymentMethodInIntent) intentSfu == paramsSfu else true
+        // If using PMO SFU, not setting values on PaymentIntent is valid because the SDK will set them in the
+        // confirm params based on the IntentConfiguration
+        if (intentConfigPmoSfu.isNotEmpty() && intent.setupFutureUsage.isNull() && paymentIntentPmoSfu.isNull()) {
+            return
+        }
+
+        // If PI has top level SFU set, validate SFU is also set on IntentConfiguration
+        require(paymentMode.setupFutureUsage.isNull() == intent.setupFutureUsage.isNull()) {
+            "Your PaymentIntent setupFutureUsage (${intent.setupFutureUsage}) " +
+                "does not match the PaymentSheet.IntentConfiguration " +
+                "setupFutureUsage (${paymentMode.setupFutureUsage})."
+        }
+
+        val intentConfigurationPmoSfuForPaymentMethod = paymentMethod.type?.code?.let { code ->
+            intentConfigPmoSfu[code]?.let { value ->
+                (value as? Map<*, *>?)?.get("setup_future_usage") as? String
+            }
+        }
+
+        val intentAndConfigPmoSfuMatch = when (paymentIntentPmoSfu) {
+            // Allow on_session/off_session mismatch as there is no difference in behavior client side.
+            "on_session",
+            "off_session" -> {
+                intentConfigurationPmoSfuForPaymentMethod == "on_session" ||
+                    intentConfigurationPmoSfuForPaymentMethod == "off_session"
+            }
+            "none" -> intentConfigurationPmoSfuForPaymentMethod == "none"
+            null -> intentConfigurationPmoSfuForPaymentMethod.isNull()
+            else -> false
+        }
+
+        require(intentAndConfigPmoSfuMatch) {
+            "Your PaymentIntent payment_method_options[${paymentMethod.type?.code}][setup_future_usage] value " +
+                "$paymentIntentPmoSfu does not match the IntentConfiguration value " +
+                "$intentConfigurationPmoSfuForPaymentMethod"
         }
     }
 }
