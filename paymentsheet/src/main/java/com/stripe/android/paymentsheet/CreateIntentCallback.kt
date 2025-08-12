@@ -20,9 +20,13 @@ fun interface CreateIntentCallback {
      * server needs the payment method, send [PaymentMethod.id] to your server and have it fetch the
      * [PaymentMethod] object. Otherwise, you can ignore this. Don't send other properties besides
      * the ID to your server.
-     * @param shouldSavePaymentMethod This is `true` if the customer selected the
-     * "Save this payment method for future use" checkbox. Set `setup_future_usage` on the
-     * [PaymentIntent] to `off_session` if this is `true`.
+     * @param shouldSavePaymentMethod This is `true` if
+     * - The customer selected the "Save this payment method for future use" checkbox.
+     * - The [IntentConfiguration.Mode.Payment.setupFutureUse] is set to [SetupFutureUse.OffSession] or
+     *   [SetupFutureUse.OnSession].
+     * - The [IntentConfiguration.Mode.Payment.PaymentMethodOptions.setupFutureUsageValues] has
+     *   [SetupFutureUse.OffSession] or [SetupFutureUse.OnSession] for the [PaymentMethod.Type].
+     *   Set `setup_future_usage` on the [PaymentIntent] to `off_session` if this is `true`.
      */
     suspend fun onCreateIntent(
         paymentMethod: PaymentMethod,
