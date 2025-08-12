@@ -263,7 +263,7 @@ internal class AutocompleteViewModel @Inject constructor(
     )
 
     companion object {
-        const val SEARCH_DEBOUNCE_MS = 1000L
+        const val SEARCH_DEBOUNCE_MS = 400L
         const val MAX_DISPLAYED_RESULTS = 4
         const val MIN_CHARS_AUTOCOMPLETE = 3
     }
