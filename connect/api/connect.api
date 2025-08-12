@@ -34,8 +34,8 @@ public final class com/stripe/android/connect/AccountOnboardingProps$CollectionO
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> ()V
-	public fun <init> (Lcom/stripe/android/connect/AccountOnboardingProps$FieldOption;Lcom/stripe/android/connect/AccountOnboardingProps$FutureRequirementOption;)V
-	public synthetic fun <init> (Lcom/stripe/android/connect/AccountOnboardingProps$FieldOption;Lcom/stripe/android/connect/AccountOnboardingProps$FutureRequirementOption;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lcom/stripe/android/connect/AccountOnboardingProps$FieldOption;Lcom/stripe/android/connect/AccountOnboardingProps$FutureRequirementOption;Lcom/stripe/android/connect/AccountOnboardingProps$RequirementsOption;)V
+	public synthetic fun <init> (Lcom/stripe/android/connect/AccountOnboardingProps$FieldOption;Lcom/stripe/android/connect/AccountOnboardingProps$FutureRequirementOption;Lcom/stripe/android/connect/AccountOnboardingProps$RequirementsOption;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getFields ()Lcom/stripe/android/connect/AccountOnboardingProps$FieldOption;
@@ -75,6 +75,34 @@ public final class com/stripe/android/connect/AccountOnboardingProps$FutureRequi
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/connect/AccountOnboardingProps$FutureRequirementOption;
 	public static fun values ()[Lcom/stripe/android/connect/AccountOnboardingProps$FutureRequirementOption;
+}
+
+public abstract class com/stripe/android/connect/AccountOnboardingProps$RequirementsOption : android/os/Parcelable {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/connect/AccountOnboardingProps$RequirementsOption$Companion;
+	public static final fun exclude (Ljava/util/List;)Lcom/stripe/android/connect/AccountOnboardingProps$RequirementsOption;
+	public static final fun only (Ljava/util/List;)Lcom/stripe/android/connect/AccountOnboardingProps$RequirementsOption;
+}
+
+public final class com/stripe/android/connect/AccountOnboardingProps$RequirementsOption$Companion {
+	public final fun exclude (Ljava/util/List;)Lcom/stripe/android/connect/AccountOnboardingProps$RequirementsOption;
+	public final fun only (Ljava/util/List;)Lcom/stripe/android/connect/AccountOnboardingProps$RequirementsOption;
+}
+
+public final class com/stripe/android/connect/AccountOnboardingProps$RequirementsOption$Exclude$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/connect/AccountOnboardingProps$RequirementsOption$Exclude;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/connect/AccountOnboardingProps$RequirementsOption$Exclude;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/connect/AccountOnboardingProps$RequirementsOption$Only$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/connect/AccountOnboardingProps$RequirementsOption$Only;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/connect/AccountOnboardingProps$RequirementsOption$Only;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/connect/BuildConfig {
