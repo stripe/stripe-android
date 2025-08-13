@@ -382,7 +382,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     }
 
     private fun showsWalletsInline(walletsState: WalletsState?): Boolean {
-        return canShowWalletsInline && walletsState != null && (walletsState.googlePay != null || !canShowWalletButtons)
+        return canShowWalletsInline && walletsState != null && !canShowWalletButtons
     }
 
     private fun getDisplayedSavedPaymentMethod(

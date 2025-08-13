@@ -105,8 +105,13 @@ internal class PaymentOptionsViewModel @Inject constructor(
         linkHandler.isLinkEnabled,
         linkHandler.linkConfigurationCoordinator.emailFlow,
         buttonsEnabled,
-    ) { isLinkAvailable, linkEmail, buttonsEnabled ->
+        selection,
+        linkAccountHolder.linkAccountInfo
+
+    ) { isLinkAvailable, linkEmail, buttonsEnabled, currentSelection, linkAccountInfo ->
         val paymentMethodMetadata = args.state.paymentMethodMetadata
+        val linkConfiguration = paymentMethodMetadata.linkState?.configuration
+        val hasLinkWithSelectedPayment = currentSelection is Link && currentSelection.selectedPayment != null
         WalletsState.create(
             isLinkAvailable = isLinkAvailable == true &&
                 args.walletsToShow.contains(WalletType.Link),
@@ -125,7 +130,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 updateSelection(PaymentSelection.Link())
                 onUserSelection()
             },
-            isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent
+            isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent,
+            paymentDetails = linkAccountInfo.account?.displayablePaymentDetails,
+            enableDefaultValues = linkConfiguration?.enableDisplayableDefaultValuesInEce == true &&
+                hasLinkWithSelectedPayment.not()
         )
     }
 

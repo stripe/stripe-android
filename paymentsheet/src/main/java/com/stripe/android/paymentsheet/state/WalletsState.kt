@@ -5,6 +5,7 @@ import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher.BillingAddressConfig
 import com.stripe.android.link.ui.LinkButtonState
+import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
@@ -40,15 +41,16 @@ internal data class WalletsState(
             googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config?,
             onGooglePayPressed: () -> Unit,
             onLinkPressed: () -> Unit,
-            isSetupIntent: Boolean
+            isSetupIntent: Boolean,
+            paymentDetails: DisplayablePaymentDetails? = null,
+            enableDefaultValues: Boolean = false
         ): WalletsState? {
             val link = if (isLinkAvailable == true) {
-                // non-ECE link buttons don't support default payment details.
                 Link(
                     state = LinkButtonState.create(
                         linkEmail = linkEmail,
-                        paymentDetails = null,
-                        enableDefaultValues = false
+                        paymentDetails = paymentDetails,
+                        enableDefaultValues = enableDefaultValues
                     )
                 )
             } else {
