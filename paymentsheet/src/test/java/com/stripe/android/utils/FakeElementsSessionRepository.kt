@@ -60,7 +60,8 @@ internal class FakeElementsSessionRepository(
                     flags = emptyMap(),
                     orderedPaymentMethodTypesAndWallets = stripeIntent.paymentMethodTypes,
                     experimentsData = null,
-                    passiveCaptcha = null
+                    passiveCaptcha = null,
+                    merchantLogoUrl = null
                 )
             )
         }

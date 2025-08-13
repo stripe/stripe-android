@@ -85,7 +85,8 @@ class ElementsSessionTest {
             sessionsError = null,
             customPaymentMethods = emptyList(),
             elementsSessionId = "elements_session_test",
-            passiveCaptcha = passiveCaptcha
+            passiveCaptcha = passiveCaptcha,
+            merchantLogoUrl = null
         )
     }
 }
