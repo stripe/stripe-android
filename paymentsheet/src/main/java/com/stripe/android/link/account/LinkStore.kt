@@ -3,8 +3,8 @@ package com.stripe.android.link.account
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
-import javax.inject.Inject
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 internal class LinkStore @Inject constructor(
     context: Context,
@@ -22,7 +22,7 @@ internal class LinkStore @Inject constructor(
         sharedPrefs.edit { putBoolean(HasUsedLink, true) }
     }
 
-    fun hasPassedAttestationCheck(): Boolean {
+    fun hasPassedAttestationChecksRecently(): Boolean {
         val timestamp = sharedPrefs.getLong(AttestationCheckTimestamp, 0L)
         if (timestamp == 0L) return false
 
@@ -47,7 +47,7 @@ internal class LinkStore @Inject constructor(
         const val HasUsedLink = "has_used_link"
         const val AttestationCheckTimestamp = "attestation_check_timestamp"
 
-        // Weekly expiration: 3 days in milliseconds
-        private val ATTESTATION_EXPIRY_DURATION_MS = TimeUnit.DAYS.toMillis(3)
+        // Weekly expiration: 7 days in milliseconds
+        private val ATTESTATION_EXPIRY_DURATION_MS = TimeUnit.DAYS.toMillis(7)
     }
 }

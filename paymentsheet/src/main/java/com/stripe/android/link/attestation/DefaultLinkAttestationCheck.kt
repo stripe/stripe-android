@@ -1,5 +1,6 @@
 package com.stripe.android.link.attestation
 
+import android.util.Log
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.link.LinkConfiguration
@@ -26,11 +27,28 @@ internal class DefaultLinkAttestationCheck @Inject constructor(
     @IOContext private val workContext: CoroutineContext
 ) : LinkAttestationCheck {
     override suspend fun invoke(): LinkAttestationCheck.Result {
-        if (linkGate.useAttestationEndpoints.not()) return LinkAttestationCheck.Result.Successful
+        if (linkGate.useAttestationEndpoints.not()) {
+            Log.d(
+                "Attestation",
+                "Link attestation is disabled by the LinkGate, skipping attestation check."
+            )
+            return LinkAttestationCheck.Result.Successful
+        }
+        if (linkStore.hasPassedAttestationChecksRecently()) {
+            Log.d(
+                "Attestation",
+                "Link attestation check has been passed recently, skipping attestation check."
+            )
+            return LinkAttestationCheck.Result.Successful
+        }
         return withContext(workContext) {
             val result = integrityRequestManager.prepare()
             result.fold(
                 onSuccess = {
+                    Log.d(
+                        "Attestation",
+                        "Link attestation check is ready, proceeding with attestation."
+                    )
                     val email = linkAccountManager.linkAccountInfo.value.account?.email
                         ?: linkConfiguration.customerInfo.email
                     if (email == null) return@fold LinkAttestationCheck.Result.Successful

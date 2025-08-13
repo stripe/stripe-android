@@ -59,6 +59,7 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeElementsSessionRepository
+import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -3638,6 +3639,7 @@ internal class DefaultPaymentElementLoaderTest {
             retrieveCustomerEmail = DefaultRetrieveCustomerEmail(customerRepo),
             accountStatusProvider = { linkAccountState },
             logLinkHoldbackExperiment = logLinkHoldbackExperiment,
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             linkStore = linkStore,
             linkGateFactory = { linkGate },
             externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter = FakeErrorReporter()),
