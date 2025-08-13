@@ -45,11 +45,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import com.stripe.android.link.LinkController
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 import com.stripe.android.ui.core.R
@@ -355,7 +357,7 @@ private fun PaymentMethodButton(
                 if (preview != null) {
                     Image(
                         modifier = Modifier.size(iconSize),
-                        painter = painterResource(preview.iconRes),
+                        painter = preview.iconPainter,
                         contentDescription = null,
                     )
                     Column(
@@ -368,16 +370,12 @@ private fun PaymentMethodButton(
                             text = preview.label,
                             style = MaterialTheme.typography.h6,
                         )
-                        preview.sublabel?.let { sublabel ->
-                            Text(
-                                modifier = Modifier.padding(top = 2.dp),
-                                text = sublabel,
-                                style = MaterialTheme.typography.body2,
-                                color = MaterialTheme.colors.onSurface.copy(
-                                    alpha = 0.6f
-                                ),
-                            )
-                        }
+                        Text(
+                            modifier = Modifier.padding(top = 2.dp),
+                            text = preview.sublabel,
+                            style = MaterialTheme.typography.body2,
+                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                        )
                     }
                 } else {
                     Icon(
@@ -411,6 +409,7 @@ private fun PaymentMethodButton(
 @Preview(showBackground = true)
 @Composable
 private fun PaymentMethodButtonPreview() {
+    val context = LocalContext.current
     PaymentSheetExampleTheme {
         Column {
             PaymentMethodButton(
@@ -421,9 +420,14 @@ private fun PaymentMethodButtonPreview() {
             PaymentMethodButton(
                 modifier = Modifier.padding(16.dp),
                 preview = LinkController.PaymentMethodPreview(
+                    imageLoader = {
+                        ContextCompat.getDrawable(
+                            context,
+                            com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_link_arrow,
+                        )!!
+                    },
                     label = "Link",
                     sublabel = "Visa (Personal) •••• 4242",
-                    iconRes = com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_link_arrow,
                 ),
                 onClick = {},
             )
