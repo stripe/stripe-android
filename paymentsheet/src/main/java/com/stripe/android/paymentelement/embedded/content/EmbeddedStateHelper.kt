@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded.content
 
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.embedded.EmbeddedHasSeenAutoCardScanHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -17,6 +18,7 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
     private val customerStateHolder: CustomerStateHolder,
     private val confirmationStateHolder: EmbeddedConfirmationStateHolder,
     private val embeddedContentHelper: EmbeddedContentHelper,
+    private val hasSeenAutoCardScanHolder: EmbeddedHasSeenAutoCardScanHolder,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
 ) : EmbeddedStateHelper {
     override var state: EmbeddedPaymentElement.State?
@@ -26,6 +28,7 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
                     confirmationState = it,
                     customer = customerStateHolder.customer.value,
                     previousNewSelections = selectionHolder.previousNewSelections,
+                    hasSeenAutoCardScanOpen = hasSeenAutoCardScanHolder.hasSeenAutoCardScanOpen,
                 )
             }
         }
@@ -49,6 +52,8 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
         customerStateHolder.setCustomerState(state.customer)
         selectionHolder.setPreviousNewSelections(state.previousNewSelections)
         selectionHolder.set(state.confirmationState.selection)
+        hasSeenAutoCardScanHolder.hasSeenAutoCardScanOpen = state.hasSeenAutoCardScanOpen
+        
         embeddedContentHelper.dataLoaded(
             paymentMethodMetadata = state.confirmationState.paymentMethodMetadata,
             appearance = state.confirmationState.configuration.appearance.embeddedAppearance,

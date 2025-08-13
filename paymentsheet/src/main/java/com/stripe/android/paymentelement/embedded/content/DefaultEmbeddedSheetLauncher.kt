@@ -4,7 +4,9 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.EmbeddedHasSeenAutoCardScanHolder
@@ -21,6 +23,9 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.state.CustomerState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -69,6 +74,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     private val formActivityLauncher: ActivityResultLauncher<FormContract.Args> =
         activityResultCaller.registerForActivityResult(FormContract) { result ->
             sheetStateHolder.sheetIsOpen = false
+            val formCode = selectionHolder.temporarySelection.value
             selectionHolder.setTemporary(null)
             if (result is FormResult.Complete) {
                 selectionHolder.set(result.selection)
@@ -84,7 +90,9 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
                     EmbeddedPaymentElement.Result.Canceled()
                 )
             }
-            hasSeenAutoCardScanHolder.hasSeenAutoCardScanOpen = true
+            if (formCode != null && formCode == PaymentMethod.Type.Card.code) {
+                hasSeenAutoCardScanHolder.hasSeenAutoCardScanOpen = true
+            }
         }
 
     private val manageActivityLauncher: ActivityResultLauncher<ManageContract.Args> =

@@ -78,6 +78,7 @@ internal class DefaultEmbeddedConfigurationCoordinator @Inject constructor(
             ),
             customer = state.customer,
             previousNewSelections = Bundle(),
+            hasSeenAutoCardScanOpen = false,
         )
     }
 }

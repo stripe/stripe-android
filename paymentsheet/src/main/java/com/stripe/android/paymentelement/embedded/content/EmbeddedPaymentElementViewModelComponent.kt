@@ -240,8 +240,10 @@ internal interface EmbeddedPaymentElementViewModelModule {
 
         @Provides
         @Named(HAS_SEEN_AUTO_CARD_SCAN_OPEN)
-        fun providesHasSeenAutoCardScanOpen(): Boolean {
-            return false // this is not important for determining form type.
+        fun providesHasSeenAutoCardScanOpen(
+            hasSeenAutoCardScanHolder: EmbeddedHasSeenAutoCardScanHolder,
+        ): Boolean {
+            return hasSeenAutoCardScanHolder.hasSeenAutoCardScanOpen
         }
     }
 }
