@@ -26,6 +26,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.FormHelper
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
 import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -188,7 +189,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                             coroutineScope = parentComponent.viewModel.viewModelScope,
                             cardAccountRangeRepositoryFactory = parentComponent.cardAccountRangeRepositoryFactory,
                             paymentMethodMetadata = PaymentMethodMetadata.createForNativeLink(
-                                configuration = parentComponent.configuration,
+                                configuration = parentComponent.configuration.withLinkRequiredSettings(),
                                 linkAccount = linkAccount,
                             ),
                             eventReporter = parentComponent.eventReporter,
@@ -210,5 +211,25 @@ internal class PaymentMethodViewModel @Inject constructor(
                 }
             }
         }
+
+        private fun LinkConfiguration.withLinkRequiredSettings() = copy(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = billingDetailsCollectionConfiguration.name,
+                email = billingDetailsCollectionConfiguration.email,
+                phone = billingDetailsCollectionConfiguration.phone,
+                // Should always at least collect ZIP and postal
+                address = if (
+                    billingDetailsCollectionConfiguration.address == PaymentSheet
+                        .BillingDetailsCollectionConfiguration
+                        .AddressCollectionMode
+                        .Never
+                ) {
+                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
+                } else {
+                    billingDetailsCollectionConfiguration.address
+                },
+                attachDefaultsToPaymentMethod = billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod,
+            )
+        )
     }
 }

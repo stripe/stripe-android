@@ -38,10 +38,11 @@ import com.stripe.android.uicore.utils.collectAsState
 @Composable
 internal fun UpdateCardScreen(viewModel: UpdateCardScreenViewModel) {
     val state by viewModel.state.collectAsState()
-    when (val interactor = viewModel.interactor) {
+    val interactor by viewModel.interactor.collectAsState()
+    when (val currentInteractor = interactor) {
         null -> LinkLoadingScreen()
         else -> UpdateCardScreenBody(
-            interactor = interactor,
+            interactor = currentInteractor,
             state = state,
             onUpdateClicked = viewModel::onUpdateClicked,
         )
