@@ -179,43 +179,88 @@ internal class DocumentScanViewModel(
     private fun idleFeedback(targetScanType: IdentityScanState.ScanType? = null): Int {
         val allowlist = getAllowedDocumentTypes()
         val isFront = targetScanType.isNullOrFront()
+        return getIdleFeedbackForAllowlist(allowlist, isFront)
+    }
+
+    // Extracted logic for scan instructions to reduce cyclomatic complexity
+    private fun getIdleFeedbackForAllowlist(allowlist: List<String>, isFront: Boolean): Int {
         return when (allowlist) {
-            listOf("driving_license", "id_card") -> if (isFront) {
-                R.string.stripe_position_driver_license_or_id
-            } else {
-                R.string.stripe_flip_driver_license_or_id
-            }
-            listOf("driving_license", "passport") -> if (isFront) {
-                R.string.stripe_position_driver_license_or_passport
-            } else {
-                R.string.stripe_flip_driver_license_or_passport
-            }
-            listOf("id_card", "passport") -> if (isFront) {
-                R.string.stripe_position_passport_or_id
-            } else {
-                R.string.stripe_flip_passport_or_id
-            }
-            listOf("driving_license", "id_card", "passport") -> if (isFront) {
-                R.string.stripe_position_all_id_types
-            } else {
-                R.string.stripe_flip_all_id_types
-            }
-            listOf("driving_license") -> if (isFront) {
-                R.string.stripe_position_dl_front
-            } else {
-                R.string.stripe_position_dl_back
-            }
-            listOf("passport") -> R.string.stripe_position_passport
-            listOf("id_card") -> if (isFront) {
-                R.string.stripe_position_id_front
-            } else {
-                R.string.stripe_position_id_back
-            }
-            else -> if (isFront) {
-                R.string.stripe_position_id_front
-            } else {
-                R.string.stripe_position_id_back
-            }
+            listOf("driving_license", "id_card") -> getDriverLicenseOrIdInstructionRes(isFront)
+            listOf("driving_license", "passport") -> getDriverLicenseOrPassportInstructionRes(isFront)
+            listOf("id_card", "passport") -> getPassportOrIdInstructionRes(isFront)
+            listOf("driving_license", "id_card", "passport") -> getAllIdTypesInstructionRes(isFront)
+            listOf("driving_license") -> getDriverLicenseInstructionRes(isFront)
+            listOf("passport") -> getPassportInstructionRes()
+            listOf("id_card") -> getIdDocumentInstructionRes(isFront)
+            else -> getFallbackIdDocumentInstructionRes(isFront)
+        }
+    }
+
+    // Helper for driving_license + id_card instructions
+    private fun getDriverLicenseOrIdInstructionRes(isFront: Boolean): Int {
+        return if (isFront) {
+            R.string.stripe_position_driver_license_or_id
+        } else {
+            R.string.stripe_flip_driver_license_or_id
+        }
+    }
+
+    // Helper for driving_license + passport instructions
+    private fun getDriverLicenseOrPassportInstructionRes(isFront: Boolean): Int {
+        return if (isFront) {
+            R.string.stripe_position_driver_license_or_passport
+        } else {
+            R.string.stripe_flip_driver_license_or_passport
+        }
+    }
+
+    // Helper for id_card + passport instructions
+    private fun getPassportOrIdInstructionRes(isFront: Boolean): Int {
+        return if (isFront) {
+            R.string.stripe_position_passport_or_id
+        } else {
+            R.string.stripe_flip_passport_or_id
+        }
+    }
+
+    // Helper for all three types instructions
+    private fun getAllIdTypesInstructionRes(isFront: Boolean): Int {
+        return if (isFront) {
+            R.string.stripe_position_all_id_types
+        } else {
+            R.string.stripe_flip_all_id_types
+        }
+    }
+
+    // Helper for driving_license only instructions
+    private fun getDriverLicenseInstructionRes(isFront: Boolean): Int {
+        return if (isFront) {
+            R.string.stripe_position_dl_front
+        } else {
+            R.string.stripe_position_dl_back
+        }
+    }
+
+    // Helper for passport only instructions
+    private fun getPassportInstructionRes(): Int {
+        return R.string.stripe_position_passport
+    }
+
+    // Helper for id_card only instructions
+    private fun getIdDocumentInstructionRes(isFront: Boolean): Int {
+        return if (isFront) {
+            R.string.stripe_position_id_front
+        } else {
+            R.string.stripe_position_id_back
+        }
+    }
+
+    // Helper for fallback instructions
+    private fun getFallbackIdDocumentInstructionRes(isFront: Boolean): Int {
+        return if (isFront) {
+            R.string.stripe_position_id_front
+        } else {
+            R.string.stripe_position_id_back
         }
     }
 
