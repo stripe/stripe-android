@@ -2,10 +2,6 @@ package com.stripe.android.crypto.onramp.model
 
 import android.graphics.drawable.Drawable
 import androidx.annotation.RestrictTo
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.painter.Painter
-import com.stripe.android.common.ui.DelegateDrawable
-import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -41,22 +37,10 @@ sealed class OnrampCollectPaymentResult {
 @Poko
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PaymentOptionDisplayData internal constructor(
-    private val imageLoader: suspend () -> Drawable,
-
+    val icon: Drawable,
     /**
      * User facing strings representing payment method information
      */
     val label: String,
     val sublabel: String?
-) {
-    val iconDrawable: Drawable by lazy {
-        DelegateDrawable(imageLoader)
-    }
-
-    /**
-     * An image representing the payment method;
-     */
-    val iconPainter: Painter
-        @Composable
-        get() = rememberDrawablePainter(iconDrawable)
-}
+)

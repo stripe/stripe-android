@@ -419,7 +419,7 @@ private fun AuthenticatedOperationsScreen(
 
         selectedPaymentData?.let {
             Image(
-                painter = rememberDrawablePainter(selectedPaymentData.iconDrawable),
+                painter = rememberDrawablePainter(selectedPaymentData.icon),
                 contentDescription = selectedPaymentData.label,
                 modifier = Modifier
                     .height(24.dp)

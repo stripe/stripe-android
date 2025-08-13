@@ -189,7 +189,7 @@ internal class OnrampInteractor @Inject constructor(
             paymentMethodPreview?.let {
                 OnrampCollectPaymentResult.Completed(
                     displayData = PaymentOptionDisplayData(
-                        imageLoader = { ContextCompat.getDrawable(application.baseContext, it.iconRes)!! },
+                        icon = it.icon,
                         label = it.label,
                         sublabel = it.sublabel
                     )
