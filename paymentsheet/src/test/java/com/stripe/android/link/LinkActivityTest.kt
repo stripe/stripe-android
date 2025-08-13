@@ -27,7 +27,6 @@ import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteLauncher
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.utils.RecordingLinkStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -152,7 +151,6 @@ internal class LinkActivityTest {
                 linkAccountManager = linkAccountManager,
                 linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
                 eventReporter = FakeEventReporter(),
-                linkStore = RecordingLinkStore.noOp(),
                 linkAttestationCheck = FakeLinkAttestationCheck(),
                 savedStateHandle = SavedStateHandle(),
                 linkConfiguration = TestFactory.LINK_CONFIGURATION,

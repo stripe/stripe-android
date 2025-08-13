@@ -16,6 +16,7 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
@@ -155,6 +156,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val retrieveCustomerEmail: RetrieveCustomerEmail,
     private val accountStatusProvider: LinkAccountStatusProvider,
     private val logLinkHoldbackExperiment: LogLinkHoldbackExperiment,
+    private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val linkStore: LinkStore,
     private val linkGateFactory: LinkGate.Factory,
     private val externalPaymentMethodsRepository: ExternalPaymentMethodsRepository,
@@ -183,7 +185,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         // Preemptively prepare Integrity asynchronously if needed, as warm up can take
         // a few seconds.
         if (elementsSession.shouldWarmUpIntegrity()) {
-            launch { integrityRequestManager.prepare() }
+            launch {
+                integrityRequestManager.prepare()
+            }
         }
 
         val customerInfo = createCustomerInfo(
@@ -516,6 +520,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 initializationMode = initializationMode,
                 linkAppearance = linkAppearance
             ) ?: return null
+
         return loadLinkState(
             configuration = configuration,
             linkConfiguration = linkConfig,
@@ -646,8 +651,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             defaultBillingDetails = configuration.defaultBillingDetails,
             allowDefaultOptIn = elementsSession.allowLinkDefaultOptIn,
             googlePlacesApiKey = configuration.googlePlacesApiKey,
-            collectMissingBillingDetailsForExistingPaymentMethods =
-            configuration.link.collectMissingBillingDetailsForExistingPaymentMethods,
+            collectMissingBillingDetailsForExistingPaymentMethods = configuration.link
+                .collectMissingBillingDetailsForExistingPaymentMethods,
             allowUserEmailEdits = configuration.link.allowUserEmailEdits,
             skipWalletInFlowController = elementsSession.linkMobileSkipWalletInFlowController,
             customerId = elementsSession.customer?.session?.customerId,
@@ -658,6 +663,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         // CBF isn't currently supported in the web flow.
         val useWebLink = !linkGateFactory.create(linkConfiguration).useNativeLink
         if (isCardBrandFilteringRequired && useWebLink) {
+            return null
+        }
+
+        // If the link attestation check fails, we don't want to proceed with the flow.
+        val attestationCheck = linkConfigurationCoordinator.linkAttestationCheck(linkConfiguration)
+        if (attestationCheck.invoke().succeeded.not()) {
             return null
         }
 

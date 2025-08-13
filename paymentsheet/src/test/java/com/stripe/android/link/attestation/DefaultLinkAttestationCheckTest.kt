@@ -154,7 +154,7 @@ internal class DefaultLinkAttestationCheckTest {
     @Test
     fun `when attestation already passed in store, skips prepare and lookup`() = runTest {
         val mockLinkStore = mock<LinkStore> {
-            on { hasPassedAttestationCheck() }.thenReturn(true)
+            on { hasPassedAttestationChecksRecently() }.thenReturn(true)
         }
         val mockIntegrityManager = mock<IntegrityRequestManager>()
         val mockLinkAuth = mock<LinkAuth>()
@@ -179,7 +179,7 @@ internal class DefaultLinkAttestationCheckTest {
     @Test
     fun `when attestation succeeds, marks as passed in store`() = runTest {
         val mockLinkStore = mock<LinkStore> {
-            on { hasPassedAttestationCheck() }.thenReturn(false)
+            on { hasPassedAttestationChecksRecently() }.thenReturn(false)
         }
         val fakeIntegrityManager = FakeIntegrityRequestManager()
         val linkAccountManager = FakeLinkAccountManager()

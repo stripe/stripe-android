@@ -8,5 +8,8 @@ internal interface LinkAttestationCheck {
         data class AttestationFailed(val error: Throwable) : Result
         data class AccountError(val error: Throwable) : Result
         data class Error(val error: Throwable) : Result
+
+        val succeeded
+            get() = this is Successful
     }
 }
