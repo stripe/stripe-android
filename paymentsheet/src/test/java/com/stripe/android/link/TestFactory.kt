@@ -229,7 +229,8 @@ internal object TestFactory {
         linkAppearance = null,
         linkSignUpOptInFeatureEnabled = false,
         linkSignUpOptInInitialValue = false,
-        customerId = null
+        customerId = null,
+        merchantLogoUrl = null
     )
 
     val LINK_WALLET_PRIMARY_BUTTON_LABEL = Amount(

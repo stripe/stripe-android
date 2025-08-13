@@ -106,7 +106,8 @@ class SignUpScreenStateTest {
             linkSignUpOptInFeatureEnabled = false,
             linkSignUpOptInInitialValue = false,
             skipWalletInFlowController = false,
-            customerId = null
+            customerId = null,
+            merchantLogoUrl = null
         )
     }
 

@@ -1337,7 +1337,8 @@ internal class PaymentMethodMetadataTest {
             flags = emptyMap(),
             orderedPaymentMethodTypesAndWallets = orderedPaymentMethodTypesAndWallets,
             experimentsData = null,
-            passiveCaptcha = null
+            passiveCaptcha = null,
+            merchantLogoUrl = null
         )
     }
 
@@ -2013,7 +2014,8 @@ internal class PaymentMethodMetadataTest {
             linkAppearance = null,
             linkSignUpOptInFeatureEnabled = false,
             linkSignUpOptInInitialValue = false,
-            customerId = null
+            customerId = null,
+            merchantLogoUrl = null
         )
     }
 

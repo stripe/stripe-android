@@ -108,7 +108,8 @@ internal object CustomerSheetFixtures {
             elementsSessionId = "session_1234",
             orderedPaymentMethodTypesAndWallets = listOf("card"),
             experimentsData = null,
-            passiveCaptcha = null
+            passiveCaptcha = null,
+            merchantLogoUrl = null
         )
 
         return CustomerSheetSession(

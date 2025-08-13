@@ -703,7 +703,8 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 linkAppearance = null,
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
-                customerId = null
+                customerId = null,
+                merchantLogoUrl = null
             ),
             userInput = userInput,
         )
