@@ -10,7 +10,7 @@ interface IsStripeCardScanAvailable {
 internal class DefaultIsStripeCardScanAvailable : IsStripeCardScanAvailable {
     override fun invoke(): Boolean {
         return try {
-            Class.forName("com.stripe.android.stripecardscan.cardscan.CardScanSheet")
+            Class.forName("com.stripe.android.stripecardscan.cardscan.CardScanGoogleLauncher")
             true
         } catch (_: Exception) {
             false
