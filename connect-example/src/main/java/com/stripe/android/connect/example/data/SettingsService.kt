@@ -293,7 +293,7 @@ data class PaymentsSettings(
     private fun createAmountFilter(): PaymentsProps.AmountFilter? {
         return when (amountFilterType) {
             AmountFilterType.NONE -> null
-            AmountFilterType.EQUALS -> PaymentsProps.AmountFilter.equals(amountValue)
+            AmountFilterType.EQUALS -> PaymentsProps.AmountFilter.equalTo(amountValue)
             AmountFilterType.GREATER_THAN -> PaymentsProps.AmountFilter.greaterThan(amountValue)
             AmountFilterType.LESS_THAN -> PaymentsProps.AmountFilter.lessThan(amountValue)
             AmountFilterType.BETWEEN -> PaymentsProps.AmountFilter.between(amountLowerBound, amountUpperBound)

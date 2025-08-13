@@ -84,7 +84,7 @@ class PaymentsProps(
 
         companion object {
             @JvmStatic
-            fun equals(value: Double): AmountFilter = Equals(value)
+            fun equalTo(value: Double): AmountFilter = Equals(value)
 
             @JvmStatic
             fun greaterThan(value: Double): AmountFilter = GreaterThan(value)
