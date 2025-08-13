@@ -15,7 +15,9 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.model.LinkAppearance
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.LinkAppearanceTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.ErrorText
@@ -36,13 +38,17 @@ import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
-internal fun UpdateCardScreen(viewModel: UpdateCardScreenViewModel) {
+internal fun UpdateCardScreen(
+    viewModel: UpdateCardScreenViewModel,
+    appearance: LinkAppearance?
+) {
     val state by viewModel.state.collectAsState()
     when (val interactor = viewModel.interactor) {
         null -> LinkLoadingScreen()
         else -> UpdateCardScreenBody(
             interactor = interactor,
             state = state,
+            appearance = appearance,
             onUpdateClicked = viewModel::onUpdateClicked,
         )
     }
@@ -52,6 +58,7 @@ internal fun UpdateCardScreen(viewModel: UpdateCardScreenViewModel) {
 internal fun UpdateCardScreenBody(
     interactor: EditCardDetailsInteractor,
     state: UpdateCardScreenState,
+    appearance: LinkAppearance?,
     onUpdateClicked: () -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
@@ -81,15 +88,17 @@ internal fun UpdateCardScreenBody(
             )
         }
 
-        PrimaryButton(
-            modifier = Modifier.padding(vertical = 16.dp),
-            label = state.primaryButtonLabel.resolve(),
-            state = state.primaryButtonState,
-            onButtonClick = {
-                focusManager.clearFocus()
-                onUpdateClicked()
-            }
-        )
+        LinkAppearanceTheme(appearance = appearance) {
+            PrimaryButton(
+                modifier = Modifier.padding(vertical = 16.dp),
+                label = state.primaryButtonLabel.resolve(),
+                state = state.primaryButtonState,
+                onButtonClick = {
+                    focusManager.clearFocus()
+                    onUpdateClicked()
+                }
+            )
+        }
     }
 }
 
@@ -148,6 +157,7 @@ internal fun UpdateCardScreenBodyPreview() {
                     processing = false,
                 ),
                 onUpdateClicked = {},
+                appearance = null,
             )
         }
     }

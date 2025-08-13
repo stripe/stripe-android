@@ -20,7 +20,9 @@ import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.NoPaymentDetailsFoundException
 import com.stripe.android.link.linkViewModel
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.model.LinkAppearance
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.LinkAppearanceTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodScreen
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodViewModel
@@ -40,6 +42,7 @@ internal fun LinkContent(
     modifier: Modifier,
     navController: NavHostController,
     appBarState: LinkAppBarState,
+    appearance: LinkAppearance?,
     bottomSheetContent: BottomSheetContent?,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: suspend () -> Unit,
@@ -79,6 +82,7 @@ internal fun LinkContent(
                 Screens(
                     initialDestination = initialDestination,
                     navController = navController,
+                    appearance = appearance,
                     goBack = goBack,
                     moveToWeb = moveToWeb,
                     navigateAndClearStack = { screen ->
@@ -105,6 +109,7 @@ internal fun LinkContent(
 private fun Screens(
     navController: NavHostController,
     getLinkAccount: () -> LinkAccount?,
+    appearance: LinkAppearance?,
     goBack: () -> Unit,
     navigateAndClearStack: (route: LinkScreen) -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit,
@@ -141,6 +146,7 @@ private fun Screens(
                 ?: return@composable dismissWithResult(noPaymentDetailsResult())
             UpdateCardRoute(
                 paymentDetailsId = paymentDetailsId,
+                appearance = appearance,
                 billingDetailsUpdateFlow = backStackEntry.billingDetailsUpdateFlow(),
                 dismissWithResult = dismissWithResult
             )
@@ -165,6 +171,7 @@ private fun Screens(
             val linkAccount = getLinkAccount() ?: return@composable dismissWithResult(noLinkAccountResult())
             WalletRoute(
                 linkAccount = linkAccount,
+                appearance = appearance,
                 navigateAndClearStack = navigateAndClearStack,
                 showBottomSheetContent = showBottomSheetContent,
                 hideBottomSheetContent = hideBottomSheetContent,
@@ -177,6 +184,7 @@ private fun Screens(
             val linkAccount = getLinkAccount() ?: return@composable dismissWithResult(noLinkAccountResult())
             PaymentMethodRoute(
                 linkAccount = linkAccount,
+                appearance = appearance,
                 dismissWithResult = dismissWithResult,
             )
         }
@@ -229,6 +237,7 @@ private fun VerificationRoute(
 @Composable
 private fun UpdateCardRoute(
     paymentDetailsId: String,
+    appearance: LinkAppearance?,
     billingDetailsUpdateFlow: BillingDetailsUpdateFlow?,
     dismissWithResult: (LinkActivityResult) -> Unit
 ) {
@@ -242,12 +251,14 @@ private fun UpdateCardRoute(
     }
     UpdateCardScreen(
         viewModel = viewModel,
+        appearance = appearance
     )
 }
 
 @Composable
 private fun PaymentMethodRoute(
     linkAccount: LinkAccount,
+    appearance: LinkAppearance?,
     dismissWithResult: (LinkActivityResult) -> Unit,
 ) {
     val viewModel: PaymentMethodViewModel = linkViewModel { parentComponent ->
@@ -258,6 +269,7 @@ private fun PaymentMethodRoute(
         )
     }
     PaymentMethodScreen(
+        appearance = appearance,
         viewModel = viewModel,
     )
 }
@@ -265,6 +277,7 @@ private fun PaymentMethodRoute(
 @Composable
 private fun WalletRoute(
     linkAccount: LinkAccount,
+    appearance: LinkAppearance?,
     navigateAndClearStack: (route: LinkScreen) -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
@@ -281,6 +294,7 @@ private fun WalletRoute(
     }
     WalletScreen(
         viewModel = viewModel,
+        appearance = appearance,
         showBottomSheetContent = showBottomSheetContent,
         hideBottomSheetContent = hideBottomSheetContent,
         onLogoutClicked = onLogoutClicked,

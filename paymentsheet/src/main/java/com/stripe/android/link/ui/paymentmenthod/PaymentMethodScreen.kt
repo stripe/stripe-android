@@ -10,6 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.stripe.android.link.model.LinkAppearance
+import com.stripe.android.link.theme.LinkAppearanceTheme
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.PrimaryButton
@@ -23,12 +25,14 @@ import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 @Composable
 internal fun PaymentMethodScreen(
+    appearance: LinkAppearance?,
     viewModel: PaymentMethodViewModel,
 ) {
     val state by viewModel.state.collectAsState()
 
     PaymentMethodBody(
         state = state,
+        appearance = appearance,
         onFormFieldValuesChanged = viewModel::formValuesChanged,
         onPayClicked = viewModel::onPayClicked,
     )
@@ -37,6 +41,7 @@ internal fun PaymentMethodScreen(
 @Composable
 internal fun PaymentMethodBody(
     state: PaymentMethodState,
+    appearance: LinkAppearance?,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
     onPayClicked: () -> Unit,
 ) {
@@ -67,16 +72,18 @@ internal fun PaymentMethodBody(
             )
         }
 
-        PrimaryButton(
-            modifier = Modifier.padding(vertical = 16.dp),
-            label = state.primaryButtonLabel.resolve(),
-            state = state.primaryButtonState,
-            onButtonClick = {
-                focusManager.clearFocus()
-                onPayClicked()
-            },
-            iconEnd = PaymentsUiCoreR.drawable.stripe_ic_lock
-        )
+        LinkAppearanceTheme(appearance = appearance) {
+            PrimaryButton(
+                modifier = Modifier.padding(vertical = 16.dp),
+                label = state.primaryButtonLabel.resolve(),
+                state = state.primaryButtonState,
+                onButtonClick = {
+                    focusManager.clearFocus()
+                    onPayClicked()
+                },
+                iconEnd = PaymentsUiCoreR.drawable.stripe_ic_lock
+            )
+        }
     }
 }
 
