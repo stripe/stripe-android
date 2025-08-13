@@ -96,6 +96,7 @@ class CustomerSheet internal constructor(
             configuration = request.configuration,
             integrationType = integrationType,
             statusBarColor = statusBarColor(),
+            hasSeenAutoCardScanOpen = viewModel.hasSeenAutoCardScanOpen,
         )
 
         val options = ActivityOptionsCompat.makeCustomAnimation(
@@ -164,6 +165,9 @@ class CustomerSheet internal constructor(
     }
 
     private fun onCustomerSheetResult(result: InternalCustomerSheetResult) {
+        result.hasSeenAutoCardScanOpen?.let {
+            viewModel.hasSeenAutoCardScanOpen = it
+        }
         callback.onCustomerSheetResult(
             result.toPublicResult(paymentOptionFactory)
         )

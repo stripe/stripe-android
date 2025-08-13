@@ -3,6 +3,7 @@ package com.stripe.android.customersheet
 import android.app.Application
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
@@ -52,6 +53,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.injection.HAS_SEEN_AUTO_CARD_SCAN_OPEN
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.CardUpdateParams
@@ -71,7 +73,9 @@ import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
+import com.stripe.android.ui.core.IsStripeCardScanAvailable
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.elements.AutoCardScanData
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -108,6 +112,9 @@ internal class CustomerSheetViewModel(
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     private val customerSheetLoader: CustomerSheetLoader,
     private val errorReporter: ErrorReporter,
+    private val savedStateHandle: SavedStateHandle,
+    private val initialHasSeenAutoCardScanOpenValue: Boolean,
+    private val isStripeCardScanAvailable: IsStripeCardScanAvailable,
 ) : ViewModel() {
 
     @Inject
@@ -126,6 +133,9 @@ internal class CustomerSheetViewModel(
         confirmationHandlerFactory: ConfirmationHandler.Factory,
         customerSheetLoader: CustomerSheetLoader,
         errorReporter: ErrorReporter,
+        savedStateHandle: SavedStateHandle,
+        @Named(HAS_SEEN_AUTO_CARD_SCAN_OPEN) hasSeenAutoCardScanOpen: Boolean,
+        isStripeCardScanAvailable: IsStripeCardScanAvailable,
     ) : this(
         application = application,
         originalPaymentSelection = originalPaymentSelection,
@@ -144,6 +154,9 @@ internal class CustomerSheetViewModel(
         confirmationHandlerFactory = confirmationHandlerFactory,
         customerSheetLoader = customerSheetLoader,
         errorReporter = errorReporter,
+        savedStateHandle = savedStateHandle,
+        initialHasSeenAutoCardScanOpenValue = hasSeenAutoCardScanOpen,
+        isStripeCardScanAvailable = isStripeCardScanAvailable,
     )
 
     private val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
@@ -221,7 +234,16 @@ internal class CustomerSheetViewModel(
     private var previouslySelectedPaymentMethod: SupportedPaymentMethod? = null
     private var supportedPaymentMethods = mutableListOf<SupportedPaymentMethod>()
 
+    val autoCardScanData: AutoCardScanData
+
     init {
+        if (configuration.opensCardScannerAutomatically && !isStripeCardScanAvailable.invoke()) {
+            throw IllegalArgumentException(
+                "Card scanning must be enabled by adding the stripecardscan dependency to your app " +
+                    "to use the opensCardScannerAutomatically option."
+            )
+        }
+
         configuration.appearance.parseAppearance()
 
         eventReporter.onInit(configuration, integrationType)
@@ -231,6 +253,12 @@ internal class CustomerSheetViewModel(
                 loadCustomerSheetState()
             }
         }
+
+        autoCardScanData = AutoCardScanData(
+            openCardScanAutomaticallyConfig = configuration.opensCardScannerAutomatically,
+            hasSeenAutoCardScanInitialValue = initialHasSeenAutoCardScanOpenValue,
+            savedStateHandle = savedStateHandle
+        )
 
         viewModelScope.launch {
             selectPaymentMethodState.collectLatest { selectPaymentMethodState ->
@@ -347,7 +375,10 @@ internal class CustomerSheetViewModel(
                 onSuccess = { state ->
                     if (state.validationError != null) {
                         _result.update {
-                            InternalCustomerSheetResult.Error(state.validationError)
+                            InternalCustomerSheetResult.Error(
+                                exception = state.validationError,
+                                hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScan,
+                            )
                         }
                     } else {
                         supportedPaymentMethods.clear()
@@ -368,7 +399,10 @@ internal class CustomerSheetViewModel(
                 },
                 onFailure = { cause ->
                     _result.update {
-                        InternalCustomerSheetResult.Error(exception = cause)
+                        InternalCustomerSheetResult.Error(
+                            exception = cause,
+                            hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScan,
+                        )
                     }
                 }
             )
@@ -396,14 +430,20 @@ internal class CustomerSheetViewModel(
 
     private fun onDismissed() {
         _result.update {
-            InternalCustomerSheetResult.Canceled(originalPaymentSelection)
+            InternalCustomerSheetResult.Canceled(
+                paymentSelection = originalPaymentSelection,
+                hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScan,
+            )
         }
     }
 
     private fun onBackPressed() {
         if (backStack.value.size == 1) {
             _result.tryEmit(
-                InternalCustomerSheetResult.Canceled(originalPaymentSelection)
+                InternalCustomerSheetResult.Canceled(
+                    paymentSelection = originalPaymentSelection,
+                    hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScan,
+                )
             )
         } else {
             backStack.update {
@@ -469,6 +509,7 @@ internal class CustomerSheetViewModel(
                             )
                         },
                         autocompleteAddressInteractorFactory = null,
+                        autoCardScanData = autoCardScanData,
                     ),
                 ) ?: listOf(),
                 primaryButtonLabel = if (
@@ -759,7 +800,8 @@ internal class CustomerSheetViewModel(
                     if (paymentMethod.isUnverifiedUSBankAccount()) {
                         _result.tryEmit(
                             InternalCustomerSheetResult.Selected(
-                                paymentSelection = PaymentSelection.Saved(paymentMethod)
+                                paymentSelection = PaymentSelection.Saved(paymentMethod),
+                                hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScan,
                             )
                         )
                     } else {
@@ -816,6 +858,7 @@ internal class CustomerSheetViewModel(
                     )
                 },
                 autocompleteAddressInteractorFactory = null,
+                autoCardScanData = autoCardScanData,
             )
         ) ?: emptyList()
 
@@ -1209,6 +1252,7 @@ internal class CustomerSheetViewModel(
         _result.tryEmit(
             InternalCustomerSheetResult.Selected(
                 paymentSelection = paymentSelection,
+                hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScan,
             )
         )
     }
@@ -1317,6 +1361,7 @@ internal class CustomerSheetViewModel(
 
     internal companion object {
         const val REMOVAL_TRANSITION_DELAY = 50L
+        const val HAS_SEEN_AUTO_CARD_SCAN_OPEN_KEY = "HAS_SEEN_AUTO_CARD_SCAN_OPEN_KEY"
 
         fun shouldShowGooglePay(paymentMethodMetadata: PaymentMethodMetadata?): Boolean {
             return paymentMethodMetadata?.isGooglePayReady == true &&
@@ -1336,6 +1381,7 @@ internal class CustomerSheetViewModel(
                 .integrationType(args.integrationType)
                 .statusBarColor(args.statusBarColor)
                 .savedStateHandle(extras.createSavedStateHandle())
+                .hasSeenAutoCardScanOpen(args.hasSeenAutoCardScanOpen)
                 .build()
 
             return component.viewModel as T
