@@ -92,14 +92,46 @@ internal class DocumentScanViewModel(
         val allowlist = getAllowedDocumentTypes()
         val isFront = targetScanType.isNullOrFront()
         return when (allowlist) {
-            listOf("driving_license", "id_card") -> if (isFront) R.string.stripe_front_of_driver_license_or_id else R.string.stripe_back_of_driver_license_or_id
-            listOf("driving_license", "passport") -> if (isFront) R.string.stripe_front_of_driver_license_or_passport else R.string.stripe_back_of_driver_license_or_passport
-            listOf("id_card", "passport") -> if (isFront) R.string.stripe_front_of_passport_or_id else R.string.stripe_back_of_passport_or_id
-            listOf("driving_license", "id_card", "passport") -> if (isFront) R.string.stripe_front_of_all_id_types else R.string.stripe_back_of_all_id_types
-            listOf("driving_license") -> if (isFront) R.string.stripe_front_of_dl else R.string.stripe_back_of_dl
-            listOf("passport") -> if (isFront) R.string.stripe_front_of_passport else R.string.stripe_back_of_passport
-            listOf("id_card") -> if (isFront) R.string.stripe_front_of_id_document else R.string.stripe_back_of_id_document
-            else -> if (isFront) R.string.stripe_front_of_id_document else R.string.stripe_back_of_id_document
+            listOf("driving_license", "id_card") -> if (isFront) {
+                R.string.stripe_front_of_driver_license_or_id
+            } else {
+                R.string.stripe_back_of_driver_license_or_id
+            }
+            listOf("driving_license", "passport") -> if (isFront) {
+                R.string.stripe_front_of_driver_license_or_passport
+            } else {
+                R.string.stripe_back_of_driver_license_or_passport
+            }
+            listOf("id_card", "passport") -> if (isFront) {
+                R.string.stripe_front_of_passport_or_id
+            } else {
+                R.string.stripe_back_of_passport_or_id
+            }
+            listOf("driving_license", "id_card", "passport") -> if (isFront) {
+                R.string.stripe_front_of_all_id_types
+            } else {
+                R.string.stripe_back_of_all_id_types
+            }
+            listOf("driving_license") -> if (isFront) {
+                R.string.stripe_front_of_dl
+            } else {
+                R.string.stripe_back_of_dl
+            }
+            listOf("passport") -> if (isFront) {
+                R.string.stripe_front_of_passport
+            } else {
+                R.string.stripe_back_of_passport
+            }
+            listOf("id_card") -> if (isFront) {
+                R.string.stripe_front_of_id_document
+            } else {
+                R.string.stripe_back_of_id_document
+            }
+            else -> if (isFront) {
+                R.string.stripe_front_of_id_document
+            } else {
+                R.string.stripe_back_of_id_document
+            }
         }
     }
 
@@ -108,14 +140,42 @@ internal class DocumentScanViewModel(
         val allowlist = getAllowedDocumentTypes()
         val isFront = targetScanType.isNullOrFront()
         return when (allowlist) {
-            listOf("driving_license", "id_card") -> if (isFront) R.string.stripe_position_driver_license_or_id else R.string.stripe_flip_driver_license_or_id
-            listOf("driving_license", "passport") -> if (isFront) R.string.stripe_position_driver_license_or_passport else R.string.stripe_flip_driver_license_or_passport
-            listOf("id_card", "passport") -> if (isFront) R.string.stripe_position_passport_or_id else R.string.stripe_flip_passport_or_id
-            listOf("driving_license", "id_card", "passport") -> if (isFront) R.string.stripe_position_all_id_types else R.string.stripe_flip_all_id_types
-            listOf("driving_license") -> if (isFront) R.string.stripe_position_dl_front else R.string.stripe_position_dl_back
+            listOf("driving_license", "id_card") -> if (isFront) {
+                R.string.stripe_position_driver_license_or_id
+            } else {
+                R.string.stripe_flip_driver_license_or_id
+            }
+            listOf("driving_license", "passport") -> if (isFront) {
+                R.string.stripe_position_driver_license_or_passport
+            } else {
+                R.string.stripe_flip_driver_license_or_passport
+            }
+            listOf("id_card", "passport") -> if (isFront) {
+                R.string.stripe_position_passport_or_id
+            } else {
+                R.string.stripe_flip_passport_or_id
+            }
+            listOf("driving_license", "id_card", "passport") -> if (isFront) {
+                R.string.stripe_position_all_id_types
+            } else {
+                R.string.stripe_flip_all_id_types
+            }
+            listOf("driving_license") -> if (isFront) {
+                R.string.stripe_position_dl_front
+            } else {
+                R.string.stripe_position_dl_back
+            }
             listOf("passport") -> R.string.stripe_position_passport
-            listOf("id_card") -> if (isFront) R.string.stripe_position_id_front else R.string.stripe_position_id_back
-            else -> if (isFront) R.string.stripe_position_id_front else R.string.stripe_position_id_back
+            listOf("id_card") -> if (isFront) {
+                R.string.stripe_position_id_front
+            } else {
+                R.string.stripe_position_id_back
+            }
+            else -> if (isFront) {
+                R.string.stripe_position_id_front
+            } else {
+                R.string.stripe_position_id_back
+            }
         }
     }
 
