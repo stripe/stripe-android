@@ -55,6 +55,7 @@ import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -180,7 +181,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         // Preemptively prepare Integrity asynchronously if needed, as warm up can take
         // a few seconds.
         if (elementsSession.shouldWarmUpIntegrity()) {
-            async { integrityRequestManager.prepare() }
+            launch { integrityRequestManager.prepare() }
         }
 
         val customerInfo = createCustomerInfo(
