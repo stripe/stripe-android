@@ -84,7 +84,7 @@ internal class OnrampViewModel(
         currentEmail = email.trim()
         _uiState.value = OnrampUiState.Loading
 
-        val result = onrampCoordinator.isLinkUser(currentEmail)
+        val result = onrampCoordinator.lookupLinkUser(currentEmail)
         when (result) {
             is OnrampLinkLookupResult.Completed -> {
                 if (result.isLinkUser) {
@@ -144,7 +144,7 @@ internal class OnrampViewModel(
 
     fun registerNewLinkUser(userInfo: LinkUserInfo) {
         viewModelScope.launch {
-            val result = onrampCoordinator.registerNewLinkUser(userInfo)
+            val result = onrampCoordinator.registerLinkUser(userInfo)
             when (result) {
                 is OnrampRegisterUserResult.Completed -> {
                     _message.value = "Registration successful"

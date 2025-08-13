@@ -43,9 +43,8 @@ internal class OnrampInteractor @Inject constructor(
         )
     }
 
-    suspend fun isLinkUser(email: String): OnrampLinkLookupResult {
-        val result = linkController.lookupConsumer(email)
-        return when (result) {
+    suspend fun lookupLinkUser(email: String): OnrampLinkLookupResult {
+        return when (val result = linkController.lookupConsumer(email)) {
             is LinkController.LookupConsumerResult.Success -> OnrampLinkLookupResult.Completed(
                 isLinkUser = result.isConsumer
             )
