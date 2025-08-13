@@ -38,8 +38,9 @@ internal class OnrampInteractor @Inject constructor(
         linkController.configure(
             LinkController.Configuration.Builder(
                 merchantDisplayName = "Onramp Merchant",
-                appearance = configuration.appearance
-            ).build()
+            )
+                .appearance(configuration.appearance)
+                .build()
         )
     }
 
