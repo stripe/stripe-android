@@ -32,6 +32,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -73,6 +74,14 @@ class DocumentScanScreenTest {
         on { fpsTracker } doReturn mock()
         on { scannerState } doReturn scannerStateFlow
         on { scanFeedback } doReturn feedbackStateFlow
+        on { getDocumentPositionStringRes(any()) } doAnswer { invocation ->
+            val scanType = invocation.arguments[0] as IdentityScanState.ScanType
+            if (scanType == IdentityScanState.ScanType.DOC_BACK) {
+                R.string.stripe_back_of_id_document
+            } else {
+                R.string.stripe_front_of_id_document
+            }
+        }
     }
 
     @Test
