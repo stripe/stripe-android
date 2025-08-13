@@ -147,6 +147,7 @@ internal fun DocumentScanScreen(
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun DocumentCaptureScreen(
     documentScannerState: IdentityScanViewModel.State,
