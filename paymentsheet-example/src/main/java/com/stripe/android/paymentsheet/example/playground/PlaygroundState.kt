@@ -190,6 +190,7 @@ internal sealed interface PlaygroundState : Parcelable {
                     captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Manual,
                 ),
                 sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                    businessName = "My business, Inc.",
                     networkId = "internal",
                     externalId = "stripe_test_merchant"
                 ),

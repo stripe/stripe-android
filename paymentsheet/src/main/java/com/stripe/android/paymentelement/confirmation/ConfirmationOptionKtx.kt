@@ -162,7 +162,7 @@ private fun PaymentSelection.ShopPay.toConfirmationOption(
         ShopPayConfirmationOption(
             shopPayConfiguration = config,
             customerSessionClientSecret = customerSessionClientSecret,
-            businessName = configuration.merchantDisplayName
+            merchantDisplayName = configuration.merchantDisplayName
         )
     }
 }

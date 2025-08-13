@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.gpay
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
@@ -87,6 +88,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             factory = googlePayPaymentMethodLauncherFactory,
             activityLauncher = launcher,
             config = confirmationOption.config,
+            confirmationParameters = confirmationParameters,
         )
 
         googlePayLauncher.present(
@@ -143,6 +145,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
         factory: GooglePayPaymentMethodLauncherFactory,
         activityLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
         config: GooglePayConfirmationOption.Config,
+        confirmationParameters: ConfirmationDefinition.Parameters,
     ): GooglePayPaymentMethodLauncher {
         return factory.create(
             lifecycleScope = CoroutineScope(Dispatchers.Default),
@@ -152,7 +155,10 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
                     else -> GooglePayEnvironment.Test
                 },
                 merchantCountryCode = config.merchantCountryCode,
-                merchantName = config.merchantName,
+                merchantName = merchantName(
+                    config = config,
+                    confirmationParameters = confirmationParameters,
+                ),
                 isEmailRequired = config.billingDetailsCollectionConfiguration.collectsEmail,
                 billingAddressConfig = config.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
             ),
@@ -163,6 +169,26 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             skipReadyCheck = true,
             cardBrandFilter = config.cardBrandFilter
         )
+    }
+
+    @OptIn(SharedPaymentTokenSessionPreview::class)
+    private fun merchantName(
+        config: GooglePayConfirmationOption.Config,
+        confirmationParameters: ConfirmationDefinition.Parameters,
+    ): String {
+        val initializationMode = confirmationParameters.initializationMode
+
+        if (initializationMode !is PaymentElementLoader.InitializationMode.DeferredIntent) {
+            return config.merchantName
+        }
+
+        val intentBehavior = initializationMode.intentConfiguration.intentBehavior
+
+        if (intentBehavior !is PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken) {
+            return config.merchantName
+        }
+
+        return intentBehavior.sellerDetails?.businessName ?: config.merchantName
     }
 
     private fun StripeIntent.asPaymentIntent(): PaymentIntent? {

@@ -1161,6 +1161,7 @@ class DefaultEventReporterTest {
                 currency = "CAD",
             ),
             sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                businessName = "My business, Inc.",
                 networkId = "network_id",
                 externalId = "external_id",
             ),
