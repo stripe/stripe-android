@@ -70,6 +70,7 @@ internal data class PaymentMethodMetadata(
     val elementsSessionId: String,
     val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
     val termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay>,
+    val openCardScanAutomaticallyConfig: Boolean,
 ) : Parcelable {
     fun hasIntentToSetup(code: PaymentMethodCode): Boolean {
         return when (stripeIntent) {
@@ -340,6 +341,7 @@ internal data class PaymentMethodMetadata(
                 elementsSessionId = elementsSession.elementsSessionId,
                 shopPayConfiguration = configuration.shopPayConfiguration,
                 termsDisplay = configuration.termsDisplay,
+                openCardScanAutomaticallyConfig = configuration.opensCardScannerAutomaticallyConfig,
             )
         }
 
@@ -386,6 +388,7 @@ internal data class PaymentMethodMetadata(
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession),
                 shopPayConfiguration = null,
                 termsDisplay = emptyMap(),
+                openCardScanAutomaticallyConfig = configuration.opensCardScannerAutomatically,
             )
         }
 
@@ -437,6 +440,7 @@ internal data class PaymentMethodMetadata(
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),
                 shopPayConfiguration = null,
                 termsDisplay = emptyMap(),
+                openCardScanAutomaticallyConfig = false,
             )
         }
     }

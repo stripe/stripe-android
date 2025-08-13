@@ -4,13 +4,15 @@ import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.annotation.RestrictTo
 import androidx.core.os.BundleCompat
 import com.stripe.android.stripecardscan.cardscan.CardScanConfiguration
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
 import kotlinx.parcelize.Parcelize
 
-internal class CardScanContract : ActivityResultContract<CardScanContract.Args, CardScanSheetResult>() {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class CardScanContract : ActivityResultContract<CardScanContract.Args, CardScanSheetResult>() {
     override fun createIntent(context: Context, input: Args): Intent {
         return Intent(context, CardScanActivity::class.java)
             .apply {

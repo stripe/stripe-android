@@ -27,3 +27,8 @@ const val IS_INSTANT_APP = "isInstantApp"
 const val STATUS_BAR_COLOR = "STATUS_BAR_COLOR"
 
 internal const val INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS = "INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS"
+
+/**
+ * Name to indicate whether the user has seen auto-card-scan open.
+ */
+const val HAS_SEEN_AUTO_CARD_SCAN_OPEN = "HAS_SEEN_AUTO_CARD_SCAN_OPEN"
