@@ -8,6 +8,8 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.utils.FeatureFlag
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -49,6 +51,7 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
+import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
@@ -153,7 +156,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val linkGateFactory: LinkGate.Factory,
     private val externalPaymentMethodsRepository: ExternalPaymentMethodsRepository,
     private val userFacingLogger: UserFacingLogger,
-    private val cvcRecollectionHandler: CvcRecollectionHandler
+    private val cvcRecollectionHandler: CvcRecollectionHandler,
+    private val integrityRequestManager: IntegrityRequestManager,
 ) : PaymentElementLoader {
 
     @Suppress("LongMethod")
@@ -172,6 +176,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             externalPaymentMethods = configuration.externalPaymentMethods,
             savedPaymentMethodSelectionId = savedPaymentMethodSelection?.id,
         ).getOrThrow()
+
+        // Preemptively prepare Integrity asynchronously if needed, as warm up can take
+        // a few seconds.
+        if (elementsSession.shouldWarmUpIntegrity()) {
+            async { integrityRequestManager.prepare() }
+        }
 
         val customerInfo = createCustomerInfo(
             configuration = configuration,
@@ -262,6 +272,15 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         )
 
         return@runCatching state
+    }
+
+    private fun ElementsSession.shouldWarmUpIntegrity(): Boolean = when {
+        stripeIntent.isLiveMode -> useAttestationEndpointsForLink
+        else -> when (FeatureFlags.nativeLinkAttestationEnabled.value) {
+            FeatureFlag.Flag.Disabled -> false
+            FeatureFlag.Flag.Enabled -> true
+            FeatureFlag.Flag.NotSet -> useAttestationEndpointsForLink
+        }
     }
 
     private fun logLinkExperimentExposures(
@@ -613,7 +632,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             allowDefaultOptIn = elementsSession.allowLinkDefaultOptIn,
             googlePlacesApiKey = configuration.googlePlacesApiKey,
             collectMissingBillingDetailsForExistingPaymentMethods =
-            configuration.link.collectMissingBillingDetailsForExistingPaymentMethods,
+                configuration.link.collectMissingBillingDetailsForExistingPaymentMethods,
             allowUserEmailEdits = configuration.link.allowUserEmailEdits,
             skipWalletInFlowController = elementsSession.linkMobileSkipWalletInFlowController,
             customerId = elementsSession.customer?.session?.customerId,
