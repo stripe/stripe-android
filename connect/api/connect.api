@@ -158,7 +158,7 @@ public abstract class com/stripe/android/connect/PaymentsProps$AmountFilter : an
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/connect/PaymentsProps$AmountFilter$Companion;
 	public static final fun between (DD)Lcom/stripe/android/connect/PaymentsProps$AmountFilter;
-	public static final fun equals (D)Lcom/stripe/android/connect/PaymentsProps$AmountFilter;
+	public static final fun equalTo (D)Lcom/stripe/android/connect/PaymentsProps$AmountFilter;
 	public static final fun greaterThan (D)Lcom/stripe/android/connect/PaymentsProps$AmountFilter;
 	public static final fun lessThan (D)Lcom/stripe/android/connect/PaymentsProps$AmountFilter;
 }
@@ -173,7 +173,7 @@ public final class com/stripe/android/connect/PaymentsProps$AmountFilter$Between
 
 public final class com/stripe/android/connect/PaymentsProps$AmountFilter$Companion {
 	public final fun between (DD)Lcom/stripe/android/connect/PaymentsProps$AmountFilter;
-	public final fun equals (D)Lcom/stripe/android/connect/PaymentsProps$AmountFilter;
+	public final fun equalTo (D)Lcom/stripe/android/connect/PaymentsProps$AmountFilter;
 	public final fun greaterThan (D)Lcom/stripe/android/connect/PaymentsProps$AmountFilter;
 	public final fun lessThan (D)Lcom/stripe/android/connect/PaymentsProps$AmountFilter;
 }
