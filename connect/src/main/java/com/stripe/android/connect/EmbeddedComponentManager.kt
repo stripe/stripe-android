@@ -1,6 +1,7 @@
 package com.stripe.android.connect
 
 import android.content.Context
+import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.fragment.app.FragmentActivity
 import com.stripe.android.connect.appearance.Appearance
@@ -82,7 +83,7 @@ class EmbeddedComponentManager @JvmOverloads constructor(
         context: Context,
         listener: PayoutsListener? = null,
         cacheKey: String? = null,
-    ): PayoutsView {
+    ): View {
         return PayoutsView(
             context = context,
             embeddedComponentManager = this,
@@ -105,7 +106,7 @@ class EmbeddedComponentManager @JvmOverloads constructor(
         listener: PaymentsListener? = null,
         props: PaymentsProps? = null,
         cacheKey: String? = null,
-    ): PaymentsView {
+    ): View {
         return PaymentsView(
             context = context,
             embeddedComponentManager = this,
