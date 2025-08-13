@@ -1,6 +1,7 @@
 package com.stripe.android.link.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Surface
@@ -61,7 +62,7 @@ internal fun LinkContent(
     DefaultLinkTheme {
         Surface(
             modifier = modifier,
-            color = LinkTheme.colors.surfacePrimary,
+            color = appearance?.surfacePrimary(isSystemInDarkTheme()) ?: LinkTheme.colors.surfacePrimary
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 BackHandler {
@@ -74,10 +75,12 @@ internal fun LinkContent(
                     }
                 }
 
-                LinkAppBar(
-                    state = appBarState,
-                    onBackPressed = onBackPressed,
-                )
+                LinkAppearanceTheme(appearance) {
+                    LinkAppBar(
+                        state = appBarState,
+                        onBackPressed = onBackPressed,
+                    )
+                }
 
                 Screens(
                     initialDestination = initialDestination,
@@ -106,6 +109,7 @@ internal fun LinkContent(
 }
 
 @Composable
+@Suppress("LongMethod")
 private fun Screens(
     navController: NavHostController,
     getLinkAccount: () -> LinkAccount?,

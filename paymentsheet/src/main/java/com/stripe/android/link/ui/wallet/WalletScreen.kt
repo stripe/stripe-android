@@ -117,30 +117,30 @@ internal fun WalletScreen(
         }
     }
 
-    WalletBody(
-        state = state,
-        appearance = appearance,
-        expiryDateController = viewModel.expiryDateController,
-        cvcController = viewModel.cvcController,
-        onItemSelected = viewModel::onItemSelected,
-        onExpandedChanged = viewModel::onExpandedChanged,
-        onPrimaryButtonClick = viewModel::onPrimaryButtonClicked,
-        onPayAnotherWayClicked = viewModel::onPayAnotherWayClicked,
-        onRemoveClicked = viewModel::onRemoveClicked,
-        onUpdateClicked = viewModel::onUpdateClicked,
-        onLogoutClicked = onLogoutClicked,
-        onSetDefaultClicked = viewModel::onSetDefaultClicked,
-        showBottomSheetContent = showBottomSheetContent,
-        hideBottomSheetContent = hideBottomSheetContent,
-        onAddPaymentMethodOptionClicked = viewModel::onAddPaymentMethodOptionClicked,
-        onDismissAlert = viewModel::onDismissAlert
-    )
+    LinkAppearanceTheme(appearance) {
+        WalletBody(
+            state = state,
+            expiryDateController = viewModel.expiryDateController,
+            cvcController = viewModel.cvcController,
+            onItemSelected = viewModel::onItemSelected,
+            onExpandedChanged = viewModel::onExpandedChanged,
+            onPrimaryButtonClick = viewModel::onPrimaryButtonClicked,
+            onPayAnotherWayClicked = viewModel::onPayAnotherWayClicked,
+            onRemoveClicked = viewModel::onRemoveClicked,
+            onUpdateClicked = viewModel::onUpdateClicked,
+            onLogoutClicked = onLogoutClicked,
+            onSetDefaultClicked = viewModel::onSetDefaultClicked,
+            showBottomSheetContent = showBottomSheetContent,
+            hideBottomSheetContent = hideBottomSheetContent,
+            onAddPaymentMethodOptionClicked = viewModel::onAddPaymentMethodOptionClicked,
+            onDismissAlert = viewModel::onDismissAlert
+        )
+    }
 }
 
 @Composable
 internal fun WalletBody(
     state: WalletUiState,
-    appearance: LinkAppearance?,
     expiryDateController: TextFieldController,
     cvcController: CvcController,
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
@@ -183,7 +183,6 @@ internal fun WalletBody(
                 PaymentDetailsSection(
                     modifier = Modifier,
                     state = state,
-                    appearance = appearance,
                     isExpanded = state.isExpanded,
                     expiryDateController = expiryDateController,
                     cvcController = cvcController,
@@ -219,7 +218,6 @@ internal fun WalletBody(
 
                 ActionSection(
                     state = state,
-                    appearance = appearance,
                     onPrimaryButtonClick = onPrimaryButtonClick,
                     onPayAnotherWayClicked = onPayAnotherWayClicked
                 )
@@ -232,7 +230,6 @@ internal fun WalletBody(
 private fun PaymentDetailsSection(
     modifier: Modifier,
     state: WalletUiState,
-    appearance: LinkAppearance?,
     isExpanded: Boolean,
     expiryDateController: TextFieldController,
     cvcController: CvcController,
@@ -259,7 +256,6 @@ private fun PaymentDetailsSection(
         }
         PaymentMethodSection(
             state = state,
-            appearance = appearance,
             isExpanded = isExpanded,
             onItemSelected = onItemSelected,
             onExpandedChanged = onExpandedChanged,
@@ -316,37 +312,33 @@ private fun ErrorSection(errorMessage: ResolvableString?) {
 @Composable
 private fun ActionSection(
     state: WalletUiState,
-    appearance: LinkAppearance?,
     onPrimaryButtonClick: () -> Unit,
     onPayAnotherWayClicked: () -> Unit
 ) {
-    LinkAppearanceTheme(appearance = appearance) {
-        Column {
-            PrimaryButton(
-                modifier = Modifier
-                    .testTag(WALLET_SCREEN_PAY_BUTTON)
-                    .padding(top = 16.dp, bottom = 8.dp),
-                label = state.primaryButtonLabel.resolve(),
-                state = state.primaryButtonState,
-                onButtonClick = onPrimaryButtonClick,
-                iconEnd = PaymentsUiCoreR.drawable.stripe_ic_lock
-            )
+    Column {
+        PrimaryButton(
+            modifier = Modifier
+                .testTag(WALLET_SCREEN_PAY_BUTTON)
+                .padding(top = 16.dp, bottom = 8.dp),
+            label = state.primaryButtonLabel.resolve(),
+            state = state.primaryButtonState,
+            onButtonClick = onPrimaryButtonClick,
+            iconEnd = PaymentsUiCoreR.drawable.stripe_ic_lock
+        )
 
-            SecondaryButton(
-                modifier = Modifier
-                    .testTag(WALLET_SCREEN_PAY_ANOTHER_WAY_BUTTON),
-                enabled = !state.primaryButtonState.isBlocking,
-                label = state.secondaryButtonLabel.resolve(),
-                onClick = onPayAnotherWayClicked
-            )
-        }
+        SecondaryButton(
+            modifier = Modifier
+                .testTag(WALLET_SCREEN_PAY_ANOTHER_WAY_BUTTON),
+            enabled = !state.primaryButtonState.isBlocking,
+            label = state.secondaryButtonLabel.resolve(),
+            onClick = onPayAnotherWayClicked
+        )
     }
 }
 
 @Composable
 private fun PaymentMethodSection(
     state: WalletUiState,
-    appearance: LinkAppearance?,
     isExpanded: Boolean,
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onExpandedChanged: (Boolean) -> Unit,
@@ -379,7 +371,6 @@ private fun PaymentMethodSection(
         expandedContent = {
             ExpandedPaymentDetails(
                 uiState = state,
-                appearance = appearance,
                 onItemSelected = onItemSelected,
                 onMenuButtonClick = {
                     showBottomSheetContent {
@@ -590,7 +581,6 @@ private fun EmailDetails(
 @Composable
 private fun ExpandedPaymentDetails(
     uiState: WalletUiState,
-    appearance: LinkAppearance?,
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onMenuButtonClick: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onAddNewPaymentMethodClick: () -> Unit,
@@ -611,7 +601,6 @@ private fun ExpandedPaymentDetails(
             PaymentDetailsListItem(
                 modifier = Modifier
                     .testTag(WALLET_SCREEN_PAYMENT_METHODS_LIST),
-                appearance = appearance,
                 paymentDetails = item,
                 isClickable = isInteractionEnabled && isItemAvailable,
                 isMenuButtonClickable = isInteractionEnabled,
@@ -632,7 +621,6 @@ private fun ExpandedPaymentDetails(
         if (uiState.canAddNewPaymentMethod) {
             AddPaymentMethodRow(
                 isEnabled = isInteractionEnabled,
-                appearance = appearance,
                 onAddNewPaymentMethodClick = onAddNewPaymentMethodClick
             )
         }
@@ -673,25 +661,22 @@ private fun ExpandedRowHeader(
 @Composable
 private fun AddPaymentMethodRow(
     isEnabled: Boolean,
-    appearance: LinkAppearance?,
     onAddNewPaymentMethodClick: () -> Unit,
 ) {
-    LinkAppearanceTheme(appearance) {
-        Row(
-            modifier = Modifier
-                .testTag(WALLET_ADD_PAYMENT_METHOD_ROW)
-                .fillMaxWidth()
-                .height(60.dp)
-                .clickable(enabled = isEnabled, onClick = onAddNewPaymentMethodClick),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.stripe_add_payment_method),
-                modifier = Modifier.padding(horizontal = HorizontalPadding),
-                color = LinkTheme.colors.textBrand,
-                style = LinkTheme.typography.bodyEmphasized,
-            )
-        }
+    Row(
+        modifier = Modifier
+            .testTag(WALLET_ADD_PAYMENT_METHOD_ROW)
+            .fillMaxWidth()
+            .height(60.dp)
+            .clickable(enabled = isEnabled, onClick = onAddNewPaymentMethodClick),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = stringResource(R.string.stripe_add_payment_method),
+            modifier = Modifier.padding(horizontal = HorizontalPadding),
+            color = LinkTheme.colors.textBrand,
+            style = LinkTheme.typography.bodyEmphasized,
+        )
     }
 }
 

@@ -41,9 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.stripe.android.link.model.LinkAppearance
 import com.stripe.android.link.theme.DefaultLinkTheme
-import com.stripe.android.link.theme.LinkAppearanceTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.LinkThemeConfig.radioButtonColors
 import com.stripe.android.link.theme.MinimumTouchTargetSize
@@ -63,7 +61,6 @@ import com.stripe.android.R as StripeR
 @Composable
 internal fun PaymentDetailsListItem(
     modifier: Modifier = Modifier,
-    appearance: LinkAppearance?,
     paymentDetails: ConsumerPaymentDetails.PaymentDetails,
     isClickable: Boolean,
     isMenuButtonClickable: Boolean,
@@ -83,16 +80,14 @@ internal fun PaymentDetailsListItem(
             .clickable(enabled = isClickable, onClick = onClick)
             .padding(top = 8.dp, bottom = 8.dp, start = 20.dp),
         content = {
-            LinkAppearanceTheme(appearance) {
-                RadioButton(
-                    selected = isSelected,
-                    onClick = null,
-                    modifier = Modifier
-                        .testTag(WALLET_PAYMENT_DETAIL_ITEM_RADIO_BUTTON)
-                        .padding(end = 12.dp),
-                    colors = LinkTheme.colors.radioButtonColors
-                )
-            }
+            RadioButton(
+                selected = isSelected,
+                onClick = null,
+                modifier = Modifier
+                    .testTag(WALLET_PAYMENT_DETAIL_ITEM_RADIO_BUTTON)
+                    .padding(end = 12.dp),
+                colors = LinkTheme.colors.radioButtonColors
+            )
 
             Row(
                 modifier = Modifier.padding(vertical = 8.dp),
@@ -221,8 +216,7 @@ private fun PaymentDetailsListItemPreview() {
                 isAvailable = true,
                 isUpdating = false,
                 onClick = {},
-                onMenuButtonClick = {},
-                appearance = null
+                onMenuButtonClick = {}
             )
             PaymentDetailsListItem(
                 paymentDetails = card.copy(isDefault = true, brand = CardBrand.MasterCard, expiryYear = 0),
@@ -232,8 +226,7 @@ private fun PaymentDetailsListItemPreview() {
                 isAvailable = true,
                 isUpdating = false,
                 onClick = {},
-                onMenuButtonClick = {},
-                appearance = null
+                onMenuButtonClick = {}
             )
             PaymentDetailsListItem(
                 paymentDetails = card,
@@ -243,8 +236,7 @@ private fun PaymentDetailsListItemPreview() {
                 isAvailable = false,
                 isUpdating = true,
                 onClick = {},
-                onMenuButtonClick = {},
-                appearance = null
+                onMenuButtonClick = {}
             )
             PaymentDetailsListItem(
                 paymentDetails = bank,
@@ -254,8 +246,7 @@ private fun PaymentDetailsListItemPreview() {
                 isAvailable = false,
                 isUpdating = true,
                 onClick = {},
-                onMenuButtonClick = {},
-                appearance = null
+                onMenuButtonClick = {}
             )
         }
     }

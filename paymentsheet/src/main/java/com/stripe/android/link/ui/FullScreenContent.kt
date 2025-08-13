@@ -28,6 +28,7 @@ import com.stripe.android.uicore.navigation.rememberKeyboardController
 import kotlinx.coroutines.flow.SharedFlow
 
 @Composable
+@Suppress("LongMethod")
 internal fun FullScreenContent(
     modifier: Modifier,
     appearance: LinkAppearance?,

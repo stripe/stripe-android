@@ -48,6 +48,12 @@ class LinkAppearance(
         }
     }
 
+    fun surfacePrimary(isSystemDark: Boolean): Color {
+        return LinkThemeConfig.colors(
+            isDark = style == Style.ALWAYS_DARK || (style == Style.AUTOMATIC && isSystemDark)
+        ).surfacePrimary
+    }
+
     /**
      * The light/dark mode style of the appearance..
      */
