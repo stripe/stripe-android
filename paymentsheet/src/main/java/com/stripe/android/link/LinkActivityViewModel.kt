@@ -393,6 +393,7 @@ internal class LinkActivityViewModel @Inject constructor(
                 DaggerNativeLinkComponent
                     .builder()
                     .configuration(args.configuration)
+                    .requestSurface(args.requestSurface)
                     .publishableKeyProvider { args.publishableKey }
                     .stripeAccountIdProvider { args.stripeAccountId }
                     .paymentElementCallbackIdentifier(args.paymentElementCallbackIdentifier)

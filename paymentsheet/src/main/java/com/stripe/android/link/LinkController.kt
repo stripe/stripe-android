@@ -12,6 +12,7 @@ import com.stripe.android.link.injection.DaggerLinkControllerComponent
 import com.stripe.android.link.injection.LinkControllerPresenterComponent
 import com.stripe.android.link.model.LinkAppearance
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentsheet.PaymentSheet
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.flow.StateFlow
@@ -558,11 +559,29 @@ class LinkController @Inject internal constructor(
             application: Application,
             savedStateHandle: SavedStateHandle
         ): LinkController {
+            return create(
+                application = application,
+                savedStateHandle = savedStateHandle,
+                // Temporarily "android_crypto_onramp" until backend is ready.
+                // Should be "android_link_controller" instead.
+                requestSurface = RequestSurface.CryptoOnramp,
+            )
+        }
+
+        // Internal use only.
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @JvmStatic
+        fun create(
+            application: Application,
+            savedStateHandle: SavedStateHandle,
+            requestSurface: RequestSurface,
+        ): LinkController {
             return DaggerLinkControllerComponent.factory()
                 .build(
                     application = application,
                     savedStateHandle = savedStateHandle,
                     paymentElementCallbackIdentifier = "LinkController",
+                    requestSurface = requestSurface,
                 )
                 .linkController
         }

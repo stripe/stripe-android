@@ -8,6 +8,7 @@ import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.verification.DefaultLinkInlineInteractor
+import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
@@ -32,6 +33,7 @@ import javax.inject.Singleton
         StripeRepositoryModule::class,
         ExtendedPaymentElementConfirmationModule::class,
         PaymentSheetCommonModule::class,
+        PaymentElementRequestSurfaceModule::class,
         FlowControllerModule::class,
         GooglePayLauncherModule::class,
         CoroutineContextModule::class,

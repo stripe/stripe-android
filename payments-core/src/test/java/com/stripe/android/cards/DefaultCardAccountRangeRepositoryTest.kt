@@ -14,6 +14,7 @@ import com.stripe.android.model.BinRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -299,8 +300,9 @@ internal class DefaultCardAccountRangeRepositoryTest {
         publishableKey: String = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     ): CardAccountRangeSource {
         val stripeRepository = StripeApiRepository(
-            application,
-            { publishableKey }
+            context = application,
+            publishableKeyProvider = { publishableKey },
+            requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
         )
         return RemoteCardAccountRangeSource(
             stripeRepository,
