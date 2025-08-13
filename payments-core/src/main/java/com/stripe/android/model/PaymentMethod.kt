@@ -540,6 +540,15 @@ constructor(
             requiresMandate = false,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
+        ),
+        PayNow(
+            "paynow",
+            isReusable = false,
+            isVoucher = true,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            requiresMandateForPaymentIntent = false,
+            afterRedirectAction = AfterRedirectAction.Poll(retryCount = MAX_RETRIES),
         );
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
