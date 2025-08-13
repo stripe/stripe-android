@@ -180,7 +180,6 @@ internal class DocumentScanViewModel(
         val allowlist = getAllowedDocumentTypes()
         val isFront = targetScanType.isNullOrFront()
         return getIdleFeedbackForAllowlist(allowlist, isFront)
-        
     }
 
     // Extracted logic for scan instructions to reduce cyclomatic complexity
