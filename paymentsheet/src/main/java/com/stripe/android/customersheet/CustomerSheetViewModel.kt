@@ -256,7 +256,7 @@ internal class CustomerSheetViewModel(
 
         autoCardScanData = AutoCardScanData(
             openCardScanAutomaticallyConfig = configuration.opensCardScannerAutomatically,
-            hasSeenAutoCardScanInitialValue = initialHasSeenAutoCardScanOpenValue,
+            hasSeenAutoCardScanOpenInitialValue = initialHasSeenAutoCardScanOpenValue,
             savedStateHandle = savedStateHandle
         )
 
@@ -377,7 +377,7 @@ internal class CustomerSheetViewModel(
                         _result.update {
                             InternalCustomerSheetResult.Error(
                                 exception = state.validationError,
-                                hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScan,
+                                hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScanOpen,
                             )
                         }
                     } else {
@@ -401,7 +401,7 @@ internal class CustomerSheetViewModel(
                     _result.update {
                         InternalCustomerSheetResult.Error(
                             exception = cause,
-                            hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScan,
+                            hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScanOpen,
                         )
                     }
                 }
@@ -432,7 +432,7 @@ internal class CustomerSheetViewModel(
         _result.update {
             InternalCustomerSheetResult.Canceled(
                 paymentSelection = originalPaymentSelection,
-                hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScan,
+                hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScanOpen,
             )
         }
     }
@@ -442,7 +442,7 @@ internal class CustomerSheetViewModel(
             _result.tryEmit(
                 InternalCustomerSheetResult.Canceled(
                     paymentSelection = originalPaymentSelection,
-                    hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScan,
+                    hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScanOpen,
                 )
             )
         } else {
@@ -801,7 +801,7 @@ internal class CustomerSheetViewModel(
                         _result.tryEmit(
                             InternalCustomerSheetResult.Selected(
                                 paymentSelection = PaymentSelection.Saved(paymentMethod),
-                                hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScan,
+                                hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScanOpen,
                             )
                         )
                     } else {
@@ -1252,7 +1252,7 @@ internal class CustomerSheetViewModel(
         _result.tryEmit(
             InternalCustomerSheetResult.Selected(
                 paymentSelection = paymentSelection,
-                hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScan,
+                hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScanOpen,
             )
         )
     }

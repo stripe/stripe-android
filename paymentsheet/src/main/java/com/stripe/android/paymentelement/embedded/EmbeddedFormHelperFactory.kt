@@ -56,7 +56,7 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
             savedStateHandle = savedStateHandle,
             autocompleteAddressInteractorFactory = null,
             autoCardScanData = AutoCardScanData(
-                hasSeenAutoCardScanInitialValue = hasSeenAutoCardScanOpen,
+                hasSeenAutoCardScanOpenInitialValue = hasSeenAutoCardScanOpen,
                 openCardScanAutomaticallyConfig = paymentMethodMetadata.openCardScanAutomaticallyConfig,
                 savedStateHandle = savedStateHandle,
             )

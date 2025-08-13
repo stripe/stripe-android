@@ -162,7 +162,7 @@ internal abstract class BaseSheetViewModel(
         }
 
         autoCardScanData = AutoCardScanData(
-            hasSeenAutoCardScanInitialValue = false,
+            hasSeenAutoCardScanOpenInitialValue = false,
             openCardScanAutomaticallyConfig = config.opensCardScannerAutomatically,
             savedStateHandle = savedStateHandle
         )

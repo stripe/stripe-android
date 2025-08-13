@@ -54,7 +54,7 @@ fun CardDetailsSectionElementUI(
         )
 
         SideEffect {
-            controller.autoCardScanData.hasSeenAutoCardScan = true
+            controller.autoCardScanData.hasSeenAutoCardScanOpen = true
 
             cardScanLauncher.launch(
                 input = CardScanContract.Args(

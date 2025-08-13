@@ -49,7 +49,7 @@ internal interface CustomerSheetViewModelComponent {
         fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
 
         @BindsInstance
-        fun hasSeenAutoCardScanOpen(@Named(HAS_SEEN_AUTO_CARD_SCAN_OPEN) hasSeenAutoCardScan: Boolean): Builder
+        fun hasSeenAutoCardScanOpen(@Named(HAS_SEEN_AUTO_CARD_SCAN_OPEN) hasSeenAutoCardScanOpen: Boolean): Builder
 
         fun build(): CustomerSheetViewModelComponent
     }

@@ -3,22 +3,22 @@ package com.stripe.android.ui.core.elements
 import androidx.lifecycle.SavedStateHandle
 
 class AutoCardScanData(
-    private val hasSeenAutoCardScanInitialValue: Boolean,
+    private val hasSeenAutoCardScanOpenInitialValue: Boolean,
     private val openCardScanAutomaticallyConfig: Boolean,
     private val savedStateHandle: SavedStateHandle
 ) {
     var shouldOpenCardScanAutomatically: Boolean
-        get() = !hasSeenAutoCardScan && openCardScanAutomaticallyConfig
+        get() = !hasSeenAutoCardScanOpen && openCardScanAutomaticallyConfig
         private set(value) {}
 
-    var hasSeenAutoCardScan: Boolean
-        get() = savedStateHandle[KEY_HAS_SEEN_AUTO_CARD_SCAN] ?: hasSeenAutoCardScanInitialValue
+    var hasSeenAutoCardScanOpen: Boolean
+        get() = savedStateHandle[KEY_HAS_SEEN_AUTO_CARD_SCAN] ?: hasSeenAutoCardScanOpenInitialValue
         set(value) {
             savedStateHandle[KEY_HAS_SEEN_AUTO_CARD_SCAN] = value
         }
 
     init {
-        hasSeenAutoCardScan = hasSeenAutoCardScanInitialValue
+        hasSeenAutoCardScanOpen = hasSeenAutoCardScanOpenInitialValue
     }
 
     companion object {

@@ -158,7 +158,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
         updateSelection(args.state.paymentSelection)
 
-        autoCardScanData.hasSeenAutoCardScan = args.hasSeenAutoCardScanOpen
+        autoCardScanData.hasSeenAutoCardScanOpen = args.hasSeenAutoCardScanOpen
 
         navigationHandler.resetTo(
             determineInitialBackStack(

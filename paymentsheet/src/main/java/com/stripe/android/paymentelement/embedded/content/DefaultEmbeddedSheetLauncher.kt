@@ -128,7 +128,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             selectedPaymentMethodCode = code,
             paymentMethodMetadata = paymentMethodMetadata,
             hasSavedPaymentMethods = hasSavedPaymentMethods,
-            hasSeenDirectToCardScan = hasSeenAutoCardScanHolder.hasSeenAutoCardScanOpen,
+            hasSeenAutoCardScanOpen = hasSeenAutoCardScanHolder.hasSeenAutoCardScanOpen,
             configuration = embeddedConfirmationState.configuration,
             initializationMode = embeddedConfirmationState.initializationMode,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
