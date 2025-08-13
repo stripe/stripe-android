@@ -300,7 +300,6 @@ internal class SourceJsonParser : ModelJsonParser<Source> {
                 Source.SourceType.GIROPAY -> Source.SourceType.GIROPAY
                 Source.SourceType.SEPA_DEBIT -> Source.SourceType.SEPA_DEBIT
                 Source.SourceType.IDEAL -> Source.SourceType.IDEAL
-                Source.SourceType.SOFORT -> Source.SourceType.SOFORT
                 Source.SourceType.BANCONTACT -> Source.SourceType.BANCONTACT
                 Source.SourceType.ALIPAY -> Source.SourceType.ALIPAY
                 Source.SourceType.EPS -> Source.SourceType.EPS

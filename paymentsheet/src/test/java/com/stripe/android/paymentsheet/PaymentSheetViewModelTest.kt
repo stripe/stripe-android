@@ -1403,7 +1403,6 @@ internal class PaymentSheetViewModelTest {
                     PaymentMethod.Type.Card.code,
                     PaymentMethod.Type.Ideal.code,
                     PaymentMethod.Type.SepaDebit.code,
-                    PaymentMethod.Type.Sofort.code,
                 ),
             ),
         )
@@ -1427,14 +1426,13 @@ internal class PaymentSheetViewModelTest {
                     PaymentMethod.Type.Card.code,
                     PaymentMethod.Type.Ideal.code,
                     PaymentMethod.Type.SepaDebit.code,
-                    PaymentMethod.Type.Sofort.code,
                 ),
             ),
         )
 
         assertThat(
             viewModel.supportedPaymentMethodTypes
-        ).containsExactly("card", "ideal", "sepa_debit", "sofort")
+        ).containsExactly("card", "ideal", "sepa_debit")
     }
 
     @Test
