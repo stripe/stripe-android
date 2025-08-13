@@ -91,6 +91,7 @@ internal class WalletViewModel @Inject constructor(
             addPaymentMethodOptions = getAddPaymentMethodOptions(),
             paymentSelectionHint = linkLaunchMode.paymentSelectionHint,
             isAutoSelecting = shouldAutoSelectDefaultPaymentMethod(),
+            signupToggleEnabled = configuration.linkSignUpOptInFeatureEnabled
         )
     )
 

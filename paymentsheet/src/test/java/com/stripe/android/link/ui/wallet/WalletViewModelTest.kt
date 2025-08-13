@@ -90,7 +90,8 @@ class WalletViewModelTest {
                 addPaymentMethodOptions = listOf(AddPaymentMethodOption.Card),
                 isSettingUp = false,
                 merchantName = "merchantName",
-                collectMissingBillingDetailsForExistingPaymentMethods = true
+                collectMissingBillingDetailsForExistingPaymentMethods = true,
+                signupToggleEnabled = false
             )
         )
         assertThat(state.selectedItem).isEqualTo(TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull())

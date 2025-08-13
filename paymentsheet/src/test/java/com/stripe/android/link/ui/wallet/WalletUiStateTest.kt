@@ -255,7 +255,8 @@ class WalletUiStateTest {
         cardBeingUpdated: String? = null,
         isSettingUp: Boolean = false,
         merchantName: String = "Example Inc.",
-        collectMissingBillingDetailsForExistingPaymentMethods: Boolean = true
+        collectMissingBillingDetailsForExistingPaymentMethods: Boolean = true,
+        signupToggleEnabled: Boolean = false
     ): WalletUiState {
         return WalletUiState(
             paymentDetailsList = paymentDetailsList,
@@ -274,7 +275,8 @@ class WalletUiStateTest {
             isSettingUp = isSettingUp,
             merchantName = merchantName,
             collectMissingBillingDetailsForExistingPaymentMethods =
-            collectMissingBillingDetailsForExistingPaymentMethods
+            collectMissingBillingDetailsForExistingPaymentMethods,
+            signupToggleEnabled = signupToggleEnabled
         )
     }
 }

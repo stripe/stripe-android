@@ -35,6 +35,7 @@ internal data class WalletUiState(
     val paymentSelectionHint: String? = null,
     val isAutoSelecting: Boolean = false,
     val hasAttemptedAutoSelection: Boolean = false,
+    val signupToggleEnabled: Boolean,
 ) {
 
     val selectedItem: ConsumerPaymentDetails.PaymentDetails?
@@ -48,7 +49,11 @@ internal data class WalletUiState(
         get() = selectedItem as? Card
 
     val mandate: ResolvableString?
-        get() = selectedItem?.makeMandateText(isSettingUp, merchantName)
+        get() = selectedItem?.makeMandateText(
+            isSettingUp = isSettingUp,
+            merchantName = merchantName,
+            signupToggleEnabled = signupToggleEnabled
+        )
 
     val shouldShowLoadingState: Boolean
         get() = paymentDetailsList.isEmpty() || isAutoSelecting
@@ -110,18 +115,23 @@ internal data class WalletUiState(
 private fun ConsumerPaymentDetails.PaymentDetails.makeMandateText(
     isSettingUp: Boolean,
     merchantName: String,
+    signupToggleEnabled: Boolean
 ): ResolvableString? {
     return when (this) {
         is ConsumerPaymentDetails.BankAccount -> {
             resolvableString(R.string.stripe_wallet_bank_account_terms)
         }
         is Card,
-        is ConsumerPaymentDetails.Passthrough -> {
-            if (isSettingUp) {
-                resolvableString(R.string.stripe_paymentsheet_card_mandate, merchantName)
-            } else {
-                null
-            }
+        is ConsumerPaymentDetails.Passthrough -> when {
+            signupToggleEnabled -> resolvableString(
+                id = R.string.stripe_paymentsheet_card_mandate_signup_toggle_off,
+                merchantName
+            )
+            isSettingUp -> resolvableString(
+                id = R.string.stripe_paymentsheet_card_mandate,
+                merchantName
+            )
+            else -> null
         }
     }
 }
