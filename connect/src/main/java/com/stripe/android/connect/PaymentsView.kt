@@ -8,9 +8,7 @@ import androidx.core.content.withStyledAttributes
 import com.stripe.android.connect.webview.StripeConnectWebViewContainer
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
-import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.Locale
 
 @PrivateBetaConnectSDK
 class PaymentsView internal constructor(
@@ -57,7 +55,6 @@ class PaymentsView internal constructor(
     }
 }
 
-// props
 @PrivateBetaConnectSDK
 @Parcelize
 @Poko
@@ -65,54 +62,52 @@ class PaymentsProps(
     /**
      * On load, show the payments matching the filter criteria.
      */
-    val defaultFilters: PaymentsListDefaultFilters? = null,
-): Parcelable {
-    // defaultFilters
+    internal val defaultFilters: PaymentsListDefaultFilters? = null,
+) : Parcelable {
     @PrivateBetaConnectSDK
     @Parcelize
-    sealed class AmountFilter: Parcelable {
+    sealed class AmountFilter : Parcelable {
         @Poko
         @Parcelize
-        internal class Equals(val value: Int) : AmountFilter()
-        
+        internal class Equals(val value: Double) : AmountFilter()
+
         @Poko
         @Parcelize
-        internal class GreaterThan(val value: Int) : AmountFilter()
-        
+        internal class GreaterThan(val value: Double) : AmountFilter()
+
         @Poko
         @Parcelize
-        internal class LessThan(val value: Int) : AmountFilter()
-        
-        @Poko
+        internal class LessThan(val value: Double) : AmountFilter()
+
         @Parcelize
-        internal class Between(val lowerBound: Int, val upperBound: Int) : AmountFilter()
+        internal class Between(val lowerBound: Double, val upperBound: Double) : AmountFilter()
 
         companion object {
             @JvmStatic
-            fun equals(value: Int): AmountFilter = Equals(value)
-            
+            fun equals(value: Double): AmountFilter = Equals(value)
+
             @JvmStatic
-            fun greaterThan(value: Int): AmountFilter = GreaterThan(value)
-            
+            fun greaterThan(value: Double): AmountFilter = GreaterThan(value)
+
             @JvmStatic
-            fun lessThan(value: Int): AmountFilter = LessThan(value)
-            
+            fun lessThan(value: Double): AmountFilter = LessThan(value)
+
             @JvmStatic
-            fun between(lowerBound: Int, upperBound: Int): AmountFilter = Between(lowerBound, upperBound)
+            fun between(lowerBound: Double, upperBound: Double): AmountFilter = Between(lowerBound, upperBound)
         }
     }
 
     @PrivateBetaConnectSDK
     @Parcelize
-    sealed class DateFilter: Parcelable {
+    sealed class DateFilter : Parcelable {
         @Poko
         @Parcelize
         internal class Before(val date: Date) : DateFilter()
-        
+
         @Poko
         @Parcelize
         internal class After(val date: Date) : DateFilter()
-        
+
         @Poko
         @Parcelize
         internal class Between(val start: Date, val end: Date) : DateFilter()
@@ -120,10 +115,10 @@ class PaymentsProps(
         companion object {
             @JvmStatic
             fun before(date: Date): DateFilter = Before(date)
-            
+
             @JvmStatic
             fun after(date: Date): DateFilter = After(date)
-            
+
             @JvmStatic
             fun between(start: Date, end: Date): DateFilter = Between(start, end)
         }
@@ -151,7 +146,86 @@ class PaymentsProps(
         ACH_DEBIT("ach_debit"),
         ACSS_DEBIT("acss_debit"),
         AFFIRM("affirm"),
-        // ...TODO: add more more values here
+        AFTERPAY_CLEARPAY("afterpay_clearpay"),
+        ALIPAY("alipay"),
+        ALMA("alma"),
+        AMAZON_PAY("amazon_pay"),
+        AMEX_EXPRESS_CHECKOUT("amex_express_checkout"),
+        ANDROID_PAY("android_pay"),
+        APPLE_PAY("apple_pay"),
+        AU_BECS_DEBIT("au_becs_debit"),
+        NZ_BANK_ACCOUNT("nz_bank_account"),
+        BANCONTACT("bancontact"),
+        BACS_DEBIT("bacs_debit"),
+        BITCOIN_SOURCE("bitcoin_source"),
+        BITCOIN("bitcoin"),
+        BLIK("blik"),
+        BOLETO("boleto"),
+        BOLETO_PILOT("boleto_pilot"),
+        CARD_PRESENT("card_present"),
+        CARD("card"),
+        CASHAPP("cashapp"),
+        CRYPTO("crypto"),
+        CUSTOMER_BALANCE("customer_balance"),
+        DEMO_PAY("demo_pay"),
+        DUMMY_PASSTHROUGH_CARD("dummy_passthrough_card"),
+        GBP_CREDIT_TRANSFER("gbp_credit_transfer"),
+        GOOGLE_PAY("google_pay"),
+        EPS("eps"),
+        FPX("fpx"),
+        GIROPAY("giropay"),
+        GRABPAY("grabpay"),
+        IDEAL("ideal"),
+        ID_BANK_TRANSFER("id_bank_transfer"),
+        ID_CREDIT_TRANSFER("id_credit_transfer"),
+        JP_CREDIT_TRANSFER("jp_credit_transfer"),
+        INTERAC_PRESENT("interac_present"),
+        KAKAO_PAY("kakao_pay"),
+        KLARNA("klarna"),
+        KONBINI("konbini"),
+        KR_CARD("kr_card"),
+        KR_MARKET("kr_market"),
+        LINK("link"),
+        MASTERPASS("masterpass"),
+        MB_WAY("mb_way"),
+        META_PAY("meta_pay"),
+        MULTIBANCO("multibanco"),
+        MOBILEPAY("mobilepay"),
+        NAVER_PAY("naver_pay"),
+        NETBANKING("netbanking"),
+        NG_BANK("ng_bank"),
+        NG_BANK_TRANSFER("ng_bank_transfer"),
+        NG_CARD("ng_card"),
+        NG_MARKET("ng_market"),
+        NG_USSD("ng_ussd"),
+        VIPPS("vipps"),
+        OXXO("oxxo"),
+        P24("p24"),
+        PAYTO("payto"),
+        PAY_BY_BANK("pay_by_bank"),
+        PAPER_CHECK("paper_check"),
+        PAYCO("payco"),
+        PAYNOW("paynow"),
+        PAYPAL("paypal"),
+        PIX("pix"),
+        PROMPTPAY("promptpay"),
+        REVOLUT_PAY("revolut_pay"),
+        SAMSUNG_PAY("samsung_pay"),
+        SEPA_CREDIT_TRANSFER("sepa_credit_transfer"),
+        SEPA_DEBIT("sepa_debit"),
+        SOFORT("sofort"),
+        SOUTH_KOREA_MARKET("south_korea_market"),
+        SWISH("swish"),
+        THREE_D_SECURE("three_d_secure"),
+        THREE_D_SECURE_2("three_d_secure_2"),
+        THREE_D_SECURE_2_EAP("three_d_secure_2_eap"),
+        TWINT("twint"),
+        UPI("upi"),
+        US_BANK_ACCOUNT("us_bank_account"),
+        VISA_CHECKOUT("visa_checkout"),
+        WECHAT("wechat"),
+        WECHAT_PAY("wechat_pay"),
+        ZIP("zip"),
     }
 
     @PrivateBetaConnectSDK
@@ -162,7 +236,7 @@ class PaymentsProps(
         val date: DateFilter? = null,
         val status: List<Status>? = null,
         val paymentMethod: PaymentMethod? = null,
-    ): Parcelable
+    ) : Parcelable
 }
 
 @PrivateBetaConnectSDK

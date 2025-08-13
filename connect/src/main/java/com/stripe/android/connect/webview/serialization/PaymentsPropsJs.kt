@@ -18,18 +18,29 @@ internal data class PaymentsPropsJs(
 
     @Serializable
     data class AmountFilterJs(
-        val type: String,
-        val value: Int? = null,
-        val lowerBound: Int? = null,
-        val upperBound: Int? = null,
+        val equals: Double? = null,
+        val greaterThan: Double? = null,
+        val lessThan: Double? = null,
+        val between: BetweenRangeJs? = null,
+    )
+
+    @Serializable
+    data class BetweenRangeJs(
+        val lowerBound: Double,
+        val upperBound: Double,
     )
 
     @Serializable
     data class DateFilterJs(
-        val type: String,
-        val value: String? = null,
-        val start: String? = null,
-        val end: String? = null,
+        val before: Long? = null,
+        val after: Long? = null,
+        val between: BetweenDateRangeJs? = null,
+    )
+
+    @Serializable
+    data class BetweenDateRangeJs(
+        val start: Long,
+        val end: Long,
     )
 }
 
@@ -41,38 +52,35 @@ internal fun PaymentsProps.toJs(): PaymentsPropsJs {
                 amount = filters.amount?.let { amountFilter ->
                     when (amountFilter) {
                         is PaymentsProps.AmountFilter.Equals -> PaymentsPropsJs.AmountFilterJs(
-                            type = "equals",
-                            value = amountFilter.value
+                            equals = amountFilter.value
                         )
                         is PaymentsProps.AmountFilter.GreaterThan -> PaymentsPropsJs.AmountFilterJs(
-                            type = "greaterThan",
-                            value = amountFilter.value
+                            greaterThan = amountFilter.value
                         )
                         is PaymentsProps.AmountFilter.LessThan -> PaymentsPropsJs.AmountFilterJs(
-                            type = "lessThan",
-                            value = amountFilter.value
+                            lessThan = amountFilter.value
                         )
                         is PaymentsProps.AmountFilter.Between -> PaymentsPropsJs.AmountFilterJs(
-                            type = "between",
-                            lowerBound = amountFilter.lowerBound,
-                            upperBound = amountFilter.upperBound
+                            between = PaymentsPropsJs.BetweenRangeJs(
+                                lowerBound = amountFilter.lowerBound,
+                                upperBound = amountFilter.upperBound
+                            )
                         )
                     }
                 },
                 date = filters.date?.let { dateFilter ->
                     when (dateFilter) {
                         is PaymentsProps.DateFilter.Before -> PaymentsPropsJs.DateFilterJs(
-                            type = "before",
-                            value = dateFilter.date.toString()
+                            before = dateFilter.date.time
                         )
                         is PaymentsProps.DateFilter.After -> PaymentsPropsJs.DateFilterJs(
-                            type = "after",
-                            value = dateFilter.date.toString()
+                            after = dateFilter.date.time
                         )
                         is PaymentsProps.DateFilter.Between -> PaymentsPropsJs.DateFilterJs(
-                            type = "between",
-                            start = dateFilter.start.toString(),
-                            end = dateFilter.end.toString()
+                            between = PaymentsPropsJs.BetweenDateRangeJs(
+                                start = dateFilter.start.time,
+                                end = dateFilter.end.time
+                            )
                         )
                     }
                 },
