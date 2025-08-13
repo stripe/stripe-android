@@ -58,13 +58,13 @@ internal abstract class NextActionHandlerModule {
         voucherNextActionHandler: VoucherNextActionHandler
     ): PaymentNextActionHandler<StripeIntent>
 
-    @IntentAuthenticatorMap
-    @Binds
-    @IntoMap
-    @IntentAuthenticatorKey(NextActionData.DisplayPayNowDetails::class)
-    abstract fun bindsPayNowNextActionHandler(
-        voucherNextActionHandler: VoucherNextActionHandler
-    ): PaymentNextActionHandler<StripeIntent>
+//    @IntentAuthenticatorMap
+//    @Binds
+//    @IntoMap
+//    @IntentAuthenticatorKey(NextActionData.DisplayPayNowDetails::class)
+//    abstract fun bindsPayNowNextActionHandler(
+//        voucherNextActionHandler: VoucherNextActionHandler
+//    ): PaymentNextActionHandler<StripeIntent>
 
     @IntentAuthenticatorMap
     @Binds

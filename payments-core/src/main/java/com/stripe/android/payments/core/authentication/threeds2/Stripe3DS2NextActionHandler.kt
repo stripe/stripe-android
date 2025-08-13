@@ -11,6 +11,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.authentication.PaymentNextActionHandler
+import com.stripe.android.payments.core.authentication.WebIntentNextActionHandler
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import com.stripe.android.view.AuthActivityStarterHost
@@ -45,7 +46,8 @@ internal class Stripe3DS2NextActionHandler @Inject constructor(
 
     override fun onNewActivityResultCaller(
         activityResultCaller: ActivityResultCaller,
-        activityResultCallback: ActivityResultCallback<PaymentFlowResult.Unvalidated>
+        activityResultCallback: ActivityResultCallback<PaymentFlowResult.Unvalidated>,
+        webIntentNextActionHandler: WebIntentNextActionHandler?
     ) {
         stripe3ds2CompletionLauncher = activityResultCaller.registerForActivityResult(
             Stripe3ds2TransactionContract(),

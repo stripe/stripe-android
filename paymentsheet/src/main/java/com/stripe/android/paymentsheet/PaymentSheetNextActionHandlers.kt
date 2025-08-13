@@ -4,6 +4,7 @@ import androidx.annotation.Keep
 import androidx.annotation.RestrictTo
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.authentication.PaymentNextActionHandler
+import com.stripe.android.paymentsheet.paymentdatacollection.polling.PayNowNextActionHandler
 import com.stripe.android.paymentsheet.paymentdatacollection.polling.PollingNextActionHandler
 
 // This class is used via reflection in DefaultPaymentNextActionHandlerRegistry.
@@ -14,6 +15,7 @@ object PaymentSheetNextActionHandlers {
         return mapOf(
             StripeIntent.NextActionData.UpiAwaitNotification::class.java to PollingNextActionHandler(),
             StripeIntent.NextActionData.BlikAuthorize::class.java to PollingNextActionHandler(),
+            StripeIntent.NextActionData.DisplayPayNowDetails::class.java to PayNowNextActionHandler(),
         )
     }
 }

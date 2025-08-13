@@ -10,6 +10,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.getRequestCode
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.authentication.PaymentNextActionHandler
+import com.stripe.android.payments.core.authentication.WebIntentNextActionHandler
 import com.stripe.android.payments.wechatpay.reflection.DefaultWeChatPayReflectionHelper
 import com.stripe.android.payments.wechatpay.reflection.WeChatPayReflectionHelper
 import com.stripe.android.view.AuthActivityStarterHost
@@ -39,7 +40,8 @@ class WeChatPayNextActionHandler : PaymentNextActionHandler<StripeIntent>() {
 
     override fun onNewActivityResultCaller(
         activityResultCaller: ActivityResultCaller,
-        activityResultCallback: ActivityResultCallback<PaymentFlowResult.Unvalidated>
+        activityResultCallback: ActivityResultCallback<PaymentFlowResult.Unvalidated>,
+        webIntentNextActionHandler: WebIntentNextActionHandler?
     ) {
         weChatPayAuthLauncher = activityResultCaller.registerForActivityResult(
             WeChatPayAuthContract(),

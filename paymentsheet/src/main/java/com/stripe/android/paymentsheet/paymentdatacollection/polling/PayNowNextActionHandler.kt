@@ -12,16 +12,17 @@ import com.stripe.android.payments.core.authentication.WebIntentNextActionHandle
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.view.AuthActivityStarterHost
 
-private const val UPI_TIME_LIMIT_IN_SECONDS = 5 * 60
-private const val UPI_INITIAL_DELAY_IN_SECONDS = 5
-private const val UPI_MAX_ATTEMPTS = 12
-private const val BLIK_TIME_LIMIT_IN_SECONDS = 60
-private const val BLIK_INITIAL_DELAY_IN_SECONDS = 5
-private const val BLIK_MAX_ATTEMPTS = 12
+// TODO: find correct vals. 60 min?
+private const val PAY_NOW_TIME_LIMIT_IN_SECONDS = 60 * 60
+private const val PAY_NOW_INITIAL_DELAY_IN_SECONDS = 5
+// TODO: probably more attempts here.
+// TODO: how does our polling logic behave when we have such a long timeout?
+private const val PAY_NOW_MAX_ATTEMPTS = 12
 
-internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>() {
+internal class PayNowNextActionHandler : PaymentNextActionHandler<StripeIntent>() {
 
     private var pollingLauncher: ActivityResultLauncher<PollingContract.Args>? = null
+    private var webIntentAuthenticator: WebIntentNextActionHandler? = null
 
     override suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
@@ -29,24 +30,14 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
         requestOptions: ApiRequest.Options
     ) {
         val args = when (actionable.paymentMethod?.type) {
-            PaymentMethod.Type.Upi ->
+            PaymentMethod.Type.PayNow ->
                 PollingContract.Args(
                     clientSecret = requireNotNull(actionable.clientSecret),
                     statusBarColor = host.statusBarColor,
-                    timeLimitInSeconds = UPI_TIME_LIMIT_IN_SECONDS,
-                    initialDelayInSeconds = UPI_INITIAL_DELAY_IN_SECONDS,
-                    maxAttempts = UPI_MAX_ATTEMPTS,
-                    ctaText = R.string.stripe_upi_polling_message,
-                    stripeAccountId = requestOptions.stripeAccount,
-                )
-            // TODO: add custom logic for PayNow.
-            PaymentMethod.Type.Blik, PaymentMethod.Type.PayNow ->
-                PollingContract.Args(
-                    clientSecret = requireNotNull(actionable.clientSecret),
-                    statusBarColor = host.statusBarColor,
-                    timeLimitInSeconds = BLIK_TIME_LIMIT_IN_SECONDS,
-                    initialDelayInSeconds = BLIK_INITIAL_DELAY_IN_SECONDS,
-                    maxAttempts = BLIK_MAX_ATTEMPTS,
+                    timeLimitInSeconds = PAY_NOW_TIME_LIMIT_IN_SECONDS,
+                    initialDelayInSeconds = PAY_NOW_INITIAL_DELAY_IN_SECONDS,
+                    maxAttempts = PAY_NOW_MAX_ATTEMPTS,
+                    // TODO: add correct CTA text.
                     ctaText = R.string.stripe_blik_confirm_payment,
                     stripeAccountId = requestOptions.stripeAccount,
                 )
@@ -58,9 +49,20 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                 )
         }
 
-        PollingUtils.launchPollingAuthenticator(pollingLauncher, host, args)
+        PollingUtils.launchPollingAuthenticator(
+            pollingLauncher,
+            host,
+            args,
+        )
+
+        webIntentAuthenticator?.performNextAction(
+            host,
+            actionable,
+            requestOptions,
+        )
     }
 
+    // TODO: potentially this should implement polling next action handler so that all this is shared.
     override fun onNewActivityResultCaller(
         activityResultCaller: ActivityResultCaller,
         activityResultCallback: ActivityResultCallback<PaymentFlowResult.Unvalidated>,
@@ -70,10 +72,13 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
             PollingContract(),
             activityResultCallback
         )
+
+        webIntentAuthenticator = webIntentNextActionHandler
     }
 
     override fun onLauncherInvalidated() {
         pollingLauncher?.unregister()
         pollingLauncher = null
     }
+
 }

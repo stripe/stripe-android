@@ -7,6 +7,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.authentication.PaymentNextActionHandler
+import com.stripe.android.payments.core.authentication.WebIntentNextActionHandler
 import com.stripe.android.view.AuthActivityStarter
 
 /**
@@ -25,7 +26,8 @@ interface ActivityResultLauncherHost {
      */
     fun onNewActivityResultCaller(
         activityResultCaller: ActivityResultCaller,
-        activityResultCallback: ActivityResultCallback<PaymentFlowResult.Unvalidated>
+        activityResultCallback: ActivityResultCallback<PaymentFlowResult.Unvalidated>,
+        webIntentNextActionHandler: WebIntentNextActionHandler? = null
     ) {
     }
 
