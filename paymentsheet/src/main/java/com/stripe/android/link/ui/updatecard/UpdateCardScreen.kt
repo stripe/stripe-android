@@ -64,7 +64,7 @@ internal fun UpdateCardScreenBody(
     val focusManager = LocalFocusManager.current
 
     ScrollableTopLevelColumn {
-        StripeThemeForLink {
+        StripeThemeForLink(appearance = appearance) {
             CardDetailsEditUI(
                 editCardDetailsInteractor = interactor,
             )

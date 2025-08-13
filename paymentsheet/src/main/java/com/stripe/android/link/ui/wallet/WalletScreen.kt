@@ -120,6 +120,7 @@ internal fun WalletScreen(
     LinkAppearanceTheme(appearance) {
         WalletBody(
             state = state,
+            appearance = appearance,
             expiryDateController = viewModel.expiryDateController,
             cvcController = viewModel.cvcController,
             onItemSelected = viewModel::onItemSelected,
@@ -141,6 +142,7 @@ internal fun WalletScreen(
 @Composable
 internal fun WalletBody(
     state: WalletUiState,
+    appearance: LinkAppearance?,
     expiryDateController: TextFieldController,
     cvcController: CvcController,
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
@@ -182,6 +184,7 @@ internal fun WalletBody(
             ScrollableTopLevelColumn {
                 PaymentDetailsSection(
                     modifier = Modifier,
+                    appearance = appearance,
                     state = state,
                     isExpanded = state.isExpanded,
                     expiryDateController = expiryDateController,
@@ -229,6 +232,7 @@ internal fun WalletBody(
 @Composable
 private fun PaymentDetailsSection(
     modifier: Modifier,
+    appearance: LinkAppearance?,
     state: WalletUiState,
     isExpanded: Boolean,
     expiryDateController: TextFieldController,
@@ -279,7 +283,7 @@ private fun PaymentDetailsSection(
         state.selectedCard?.let { selectedCard ->
             if (selectedCard.requiresCardDetailsRecollection) {
                 Spacer(modifier = Modifier.height(16.dp))
-                StripeThemeForLink {
+                StripeThemeForLink(appearance = appearance) {
                     CardDetailsRecollectionForm(
                         paymentDetails = selectedCard,
                         expiryDateController = expiryDateController,

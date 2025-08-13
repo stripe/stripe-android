@@ -49,7 +49,7 @@ internal fun PaymentMethodBody(
     val uuid = rememberSaveable { UUID.randomUUID().toString() }
 
     ScrollableTopLevelColumn {
-        StripeThemeForLink {
+        StripeThemeForLink(appearance = appearance) {
             PaymentMethodForm(
                 uuid = uuid,
                 args = state.formArguments,

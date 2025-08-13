@@ -4,6 +4,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.stripe.android.link.model.LinkAppearance
 import com.stripe.android.uicore.SectionStyle
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
@@ -142,21 +143,24 @@ internal object LinkThemeConfig {
 
 @Composable
 internal fun StripeThemeForLink(
+    appearance: LinkAppearance? = null,
     sectionStyle: SectionStyle = SectionStyle.Borderless,
     content: @Composable () -> Unit
 ) {
-    val stripeDefaultColors = StripeThemeDefaults.colors(isSystemInDarkTheme())
+    val isDark = appearance?.style == LinkAppearance.Style.ALWAYS_DARK || isSystemInDarkTheme()
+    val stripeDefaultColors = StripeThemeDefaults.colors(isDark)
+    val colors = if (appearance != null) LinkThemeConfig.colors(isDark) else LinkTheme.colors
 
     StripeTheme(
         colors = stripeDefaultColors.copy(
-            component = LinkTheme.colors.surfaceSecondary,
-            onComponent = LinkTheme.colors.textPrimary,
-            placeholderText = LinkTheme.colors.textTertiary,
-            componentDivider = LinkTheme.colors.borderDefault,
-            componentBorder = LinkTheme.colors.surfaceSecondary,
+            component = colors.surfaceSecondary,
+            onComponent = colors.textPrimary,
+            placeholderText = colors.textTertiary,
+            componentDivider = colors.borderDefault,
+            componentBorder = colors.surfaceSecondary,
             materialColors = stripeDefaultColors.materialColors.copy(
-                primary = LinkTheme.colors.borderSelected,
-                error = LinkTheme.colors.textCritical,
+                primary = colors.borderSelected,
+                error = colors.textCritical,
             )
         ),
         shapes = StripeThemeDefaults.shapes.copy(
