@@ -1,9 +1,9 @@
 package com.stripe.android.link.model
 
 import android.os.Parcelable
+import com.stripe.android.model.ConsentUi
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.DisplayablePaymentDetails
-import com.stripe.android.model.LinkAuthIntentState
 import com.stripe.android.uicore.elements.convertPhoneNumberToE164
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.IgnoredOnParcel
@@ -18,6 +18,7 @@ internal class LinkAccount(
     private val consumerSession: ConsumerSession,
     val consumerPublishableKey: String? = null,
     val displayablePaymentDetails: DisplayablePaymentDetails? = null,
+    val consentUi: ConsentUi? = null,
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -62,20 +63,8 @@ internal class LinkAccount(
     }
 
     @IgnoredOnParcel
-    val linkAuthIntentState: LinkAuthIntentState? =
-        consumerSession.linkAuthIntent?.state
-
-    @IgnoredOnParcel
     val consentNeeded: Boolean
-        get() = when (linkAuthIntentState) {
-            null,
-            LinkAuthIntentState.Unknown,
-            LinkAuthIntentState.Consented ->
-                false
-            LinkAuthIntentState.Created,
-            LinkAuthIntentState.Authenticated ->
-                true
-        }
+        get() = consentUi != null
 
     private fun ConsumerSession.containsSMSSessionStarted() = verificationSessions.find {
         it.type == ConsumerSession.VerificationSession.SessionType.Sms &&

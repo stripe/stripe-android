@@ -25,8 +25,6 @@ data class ConsumerSession(
     val phoneNumberCountry: String? = null,
     @SerialName("verification_sessions")
     val verificationSessions: List<VerificationSession> = emptyList(),
-    @SerialName("link_auth_intent")
-    val linkAuthIntent: LinkAuthIntent? = null,
 ) : StripeModel {
 
     @Parcelize
