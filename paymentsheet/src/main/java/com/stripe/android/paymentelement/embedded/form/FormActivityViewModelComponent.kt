@@ -59,8 +59,9 @@ internal interface FormActivityViewModelComponent {
             @BindsInstance paymentMethodMetadata: PaymentMethodMetadata,
             @BindsInstance selectedPaymentMethodCode: PaymentMethodCode,
             @BindsInstance hasSavedPaymentMethods: Boolean,
+            @BindsInstance
             @Named(HAS_SEEN_AUTO_CARD_SCAN_OPEN)
-            @BindsInstance hasSeenAutoCardScanOpen: Boolean,
+            hasSeenAutoCardScanOpen: Boolean,
             @BindsInstance
             @Named(STATUS_BAR_COLOR)
             statusBarColor: Int?,

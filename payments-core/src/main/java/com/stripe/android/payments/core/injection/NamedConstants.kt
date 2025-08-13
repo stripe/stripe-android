@@ -31,4 +31,5 @@ internal const val INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS = "INCLUDE_PAYMENT
 /**
  * Name to indicate whether the user has seen auto-card-scan open.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val HAS_SEEN_AUTO_CARD_SCAN_OPEN = "HAS_SEEN_AUTO_CARD_SCAN_OPEN"

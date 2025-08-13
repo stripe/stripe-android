@@ -60,7 +60,6 @@ import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFac
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.ui.core.IsStripeCardScanAvailable
-import com.stripe.android.ui.core.elements.AutoCardScanData
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Dispatchers

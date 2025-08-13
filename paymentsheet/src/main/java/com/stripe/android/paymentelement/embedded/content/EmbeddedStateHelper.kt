@@ -55,7 +55,7 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
         selectionHolder.setPreviousNewSelections(state.previousNewSelections)
         selectionHolder.set(state.confirmationState.selection)
         hasSeenAutoCardScanHolder.hasSeenAutoCardScanOpen = state.hasSeenAutoCardScanOpen
-        
+
         embeddedContentHelper.dataLoaded(
             paymentMethodMetadata = state.confirmationState.paymentMethodMetadata,
             appearance = state.confirmationState.configuration.appearance.embeddedAppearance,

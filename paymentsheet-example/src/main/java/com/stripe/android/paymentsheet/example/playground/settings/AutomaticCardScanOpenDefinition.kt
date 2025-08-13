@@ -6,7 +6,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 
-internal object AutomaticCardScanOpenDefinition: BooleanSettingsDefinition(
+internal object AutomaticCardScanOpenDefinition : BooleanSettingsDefinition(
     key = "autoCardScanOpen",
     displayName = "Open Card Scan Automatically",
     defaultValue = false

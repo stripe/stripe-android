@@ -27,6 +27,7 @@ import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionElementUI
 import com.stripe.android.uicore.utils.AnimationConstants
 
+@Suppress("LongMethod")
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun CardDetailsSectionElementUI(

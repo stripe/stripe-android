@@ -260,6 +260,7 @@ class CustomerSheet internal constructor(
                 .paymentMethodOrder(paymentMethodOrder)
         }
 
+        @Suppress("TooManyFunctions")
         class Builder internal constructor(private val merchantDisplayName: String) {
             private var appearance: PaymentSheet.Appearance = ConfigurationDefaults.appearance
             private var googlePayEnabled: Boolean = ConfigurationDefaults.googlePayEnabled
@@ -337,7 +338,8 @@ class CustomerSheet internal constructor(
 
             /**
              * By default, the customer sheet offers a card scan button within the new card entry form.
-             * When opensCardScannerAutomatically is set to true, the card entry form will initialize with the card scanner already open.
+             * When opensCardScannerAutomatically is set to true,
+             * the card entry form will initialize with the card scanner already open.
              * **Note**: The stripecardscan dependency must be added to set `opensCardScannerAutomatically` to true
              */
             fun opensCardScannerAutomatically(opensCardScannerAutomatically: Boolean) = apply {

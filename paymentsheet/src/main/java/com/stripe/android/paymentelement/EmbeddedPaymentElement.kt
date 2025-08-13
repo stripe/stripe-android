@@ -477,9 +477,11 @@ class EmbeddedPaymentElement @Inject internal constructor(
             fun termsDisplay(termsDisplay: Map<PaymentMethod.Type, TermsDisplay>) = apply {
                 this.termsDisplay = termsDisplay
             }
+
             /**
              * By default, the embedded payment element offers a card scan button within the new card entry form.
-             * When opensCardScannerAutomatically is set to true, the card entry form will initialize with the card scanner already open.
+             * When opensCardScannerAutomatically is set to true,
+             * the card entry form will initialize with the card scanner already open.
              * **Note**: The stripecardscan dependency must be added to set `opensCardScannerAutomatically` to true
              */
             fun opensCardScannerAutomatically(opensCardScannerAutomatically: Boolean) = apply {
