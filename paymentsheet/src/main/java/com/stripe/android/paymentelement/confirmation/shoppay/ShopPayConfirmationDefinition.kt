@@ -2,13 +2,11 @@ package com.stripe.android.paymentelement.confirmation.shoppay
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
-import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentelement.confirmation.utils.sellerBusinessName
 import com.stripe.android.shoppay.ShopPayActivityContract
 import com.stripe.android.shoppay.ShopPayActivityResult
 import javax.inject.Inject
@@ -77,10 +75,8 @@ internal class ShopPayConfirmationDefinition @Inject constructor(
             ShopPayActivityContract.Args(
                 shopPayConfiguration = confirmationOption.shopPayConfiguration,
                 customerSessionClientSecret = confirmationOption.customerSessionClientSecret,
-                businessName = merchantName(
-                    confirmationOption = confirmationOption,
-                    confirmationParameters = confirmationParameters,
-                )
+                businessName = confirmationParameters.initializationMode.sellerBusinessName
+                    ?: confirmationOption.merchantDisplayName
             )
         )
     }
@@ -94,25 +90,5 @@ internal class ShopPayConfirmationDefinition @Inject constructor(
             receivesResultInProcess = false,
             deferredIntentConfirmationType = null,
         )
-    }
-
-    @OptIn(SharedPaymentTokenSessionPreview::class)
-    private fun merchantName(
-        confirmationOption: ShopPayConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
-    ): String {
-        val initializationMode = confirmationParameters.initializationMode
-
-        if (initializationMode !is PaymentElementLoader.InitializationMode.DeferredIntent) {
-            return confirmationOption.merchantDisplayName
-        }
-
-        val intentBehavior = initializationMode.intentConfiguration.intentBehavior
-
-        if (intentBehavior !is PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken) {
-            return confirmationOption.merchantDisplayName
-        }
-
-        return intentBehavior.sellerDetails?.businessName ?: confirmationOption.merchantDisplayName
     }
 }
