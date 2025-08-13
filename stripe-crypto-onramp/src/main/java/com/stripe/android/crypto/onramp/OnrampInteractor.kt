@@ -1,6 +1,7 @@
 package com.stripe.android.crypto.onramp
 
 import android.app.Application
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
@@ -35,9 +36,15 @@ internal class OnrampInteractor @Inject constructor(
     suspend fun configure(configuration: OnrampConfiguration) {
         _state.value = _state.value.copy(configuration = configuration)
 
+        PaymentConfiguration.init(
+            context = application,
+            publishableKey = configuration.publishableKey,
+            stripeAccountId = configuration.stripeAccountId,
+        )
         linkController.configure(
             LinkController.Configuration.Builder(
-                merchantDisplayName = "Onramp Merchant",
+                merchantDisplayName = configuration.merchantDisplayName,
+                publishableKey = configuration.publishableKey,
             )
                 .appearance(configuration.appearance)
                 .build()

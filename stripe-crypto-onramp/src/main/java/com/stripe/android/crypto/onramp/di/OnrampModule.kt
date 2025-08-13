@@ -10,6 +10,8 @@ import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
@@ -18,6 +20,7 @@ import com.stripe.android.networking.RequestSurface
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -45,6 +48,16 @@ internal class OnrampModule {
     fun providePaymentConfiguration(appContext: Context): PaymentConfiguration {
         return PaymentConfiguration.getInstance(appContext)
     }
+
+    @Provides
+    @Named(PUBLISHABLE_KEY)
+    fun providePublishableKey(paymentConfiguration: Provider<PaymentConfiguration>): () -> String =
+        { paymentConfiguration.get().publishableKey }
+
+    @Provides
+    @Named(STRIPE_ACCOUNT_ID)
+    fun provideStripeAccountId(paymentConfiguration: Provider<PaymentConfiguration>): () -> String? =
+        { paymentConfiguration.get().stripeAccountId }
 
     @Provides
     fun provideCryptoApiRepository(

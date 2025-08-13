@@ -149,12 +149,11 @@ class OnrampCoordinator @Inject internal constructor(
             savedStateHandle: SavedStateHandle
         ): OnrampCoordinator {
             val onrampComponent: OnrampComponent =
-                DaggerOnrampComponent
-                    .builder()
-                    .application(application)
-                    .savedStateHandle(savedStateHandle)
-                    .build()
-
+                DaggerOnrampComponent.factory()
+                    .build(
+                        application = application,
+                        savedStateHandle = savedStateHandle
+                    )
             return onrampComponent.onrampCoordinator
         }
     }
