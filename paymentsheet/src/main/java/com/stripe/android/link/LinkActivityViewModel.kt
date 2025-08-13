@@ -29,7 +29,6 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
-import com.stripe.android.model.LinkAuthIntentState
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.addresselement.AutocompleteActivityLauncher
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -344,7 +343,7 @@ internal class LinkActivityViewModel @Inject constructor(
 
         if (linkLaunchMode is LinkLaunchMode.Authorization &&
             accountStatus is AccountStatus.Verified &&
-            linkAccount?.linkAuthIntentState == LinkAuthIntentState.Consented
+            linkAccount?.consentNeeded != true
         ) {
             dismissWithResult(LinkActivityResult.Completed(linkAccountManager.linkAccountUpdate))
             return

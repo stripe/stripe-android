@@ -80,6 +80,7 @@ class ElementsSessionTest {
             experimentsData = null,
             customer = null,
             merchantCountry = null,
+            merchantLogoUrl = null,
             cardBrandChoice = null,
             isGooglePayEnabled = false,
             sessionsError = null,

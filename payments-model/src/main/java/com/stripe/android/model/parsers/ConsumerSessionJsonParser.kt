@@ -19,9 +19,6 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
                         .mapNotNull { parseVerificationSession(it) }
                 } ?: emptyList()
 
-        val linkAuthIntent = consumerSessionJson.optJSONObject("link_auth_intent")
-            ?.let { LinkAuthIntentJsonParser.parse(it) }
-
         return ConsumerSession(
             clientSecret = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_SECRET),
             emailAddress = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_EMAIL),
@@ -30,7 +27,6 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
             unredactedPhoneNumber = optString(consumerSessionJson, FIELD_CONSUMER_SESSION_UNREDACTED_PHONE),
             phoneNumberCountry = optString(consumerSessionJson, FIELD_CONSUMER_SESSION_PHONE_COUNTRY),
             verificationSessions = verificationSession,
-            linkAuthIntent = linkAuthIntent,
         )
     }
 
