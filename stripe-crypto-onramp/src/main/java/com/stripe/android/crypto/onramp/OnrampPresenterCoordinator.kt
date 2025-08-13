@@ -39,7 +39,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
         .authority(activity.packageName)
         .appendPath("drawable")
-        .appendPath("wallet_icon")
+        .appendPath("stripe_ic_business")
         .build()
 
     private val sheet = IdentityVerificationSheet.create(
