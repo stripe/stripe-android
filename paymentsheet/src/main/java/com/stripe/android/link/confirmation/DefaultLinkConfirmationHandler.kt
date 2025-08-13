@@ -138,7 +138,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         val confirmationOption = if (configuration.passthroughModeEnabled) {
             LinkPassthroughConfirmationOption(
                 paymentDetailsId = paymentDetails.id,
-                expectedPaymentMethodType = computeExpectedPaymentMethodType(configuration, paymentDetails),
+                expectedPaymentMethodType = paymentMethodType,
                 cvc = cvc,
                 billingPhone = billingPhone,
                 allowRedisplay = allowRedisplay,
