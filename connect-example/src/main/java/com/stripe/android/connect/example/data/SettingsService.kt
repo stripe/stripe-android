@@ -324,7 +324,9 @@ data class PaymentsSettings(
                 android.util.Log.w("SettingsService", "Invalid date: $dateString", e)
                 null
             }
-        } else null
+        } else {
+            null
+        }
     }
 
     private fun createDateRangeFilter(): PaymentsProps.DateFilter? {
@@ -338,7 +340,9 @@ data class PaymentsSettings(
                 android.util.Log.w("SettingsService", "Invalid date range: $dateStart-$dateEnd", e)
                 null
             }
-        } else null
+        } else {
+            null
+        }
     }
 
     fun toProps(): PaymentsProps {
