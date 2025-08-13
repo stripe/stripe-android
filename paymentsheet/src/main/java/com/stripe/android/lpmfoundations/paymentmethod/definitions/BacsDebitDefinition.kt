@@ -78,7 +78,8 @@ private object BacsDebitUiDefinitionFactory : UiDefinitionFactory.RequiresShared
                 IdentifierSpec.Name,
                 IdentifierSpec.Email,
                 IdentifierSpec.BillingAddress
-            )
+            ),
+            termsDisplay = metadata.termsDisplayForType(BacsDebitDefinition.type),
         )
     }
 }

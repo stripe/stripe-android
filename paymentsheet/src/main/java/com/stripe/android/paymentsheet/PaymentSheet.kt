@@ -1121,8 +1121,6 @@ class PaymentSheet internal constructor(
             /**
              * A map for specifying when legal agreements are displayed for each payment method type.
              * If the payment method is not specified in the list, the TermsDisplay value will default to automatic.
-             *
-             * Valid payment method types include: amazon_pay, card, cashapp, klarna, paypal, revolut_pay, satispay.
              */
             fun termsDisplay(termsDisplay: Map<PaymentMethod.Type, TermsDisplay>) = apply {
                 this.termsDisplay = termsDisplay

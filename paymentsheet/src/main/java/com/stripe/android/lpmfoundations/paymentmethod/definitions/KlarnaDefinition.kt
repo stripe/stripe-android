@@ -56,7 +56,8 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDat
         }
         return transformSpecToElements.transform(
             metadata = metadata,
-            specs = sharedDataSpec.fields + localLayoutSpecs
+            specs = sharedDataSpec.fields + localLayoutSpecs,
+            termsDisplay = metadata.termsDisplayForType(KlarnaDefinition.type),
         )
     }
 }

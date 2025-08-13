@@ -63,4 +63,13 @@ enum class TermsDisplay(
             PaymentMethod.Type.AmazonPay to PaymentSheet.TermsDisplay.AUTOMATIC,
         )
     ),
+    NEVER_SEPA_FAMILY(
+        "Never Sepa Family",
+        mapOf(
+            PaymentMethod.Type.SepaDebit to PaymentSheet.TermsDisplay.NEVER,
+            PaymentMethod.Type.Ideal to PaymentSheet.TermsDisplay.NEVER,
+            PaymentMethod.Type.Bancontact to PaymentSheet.TermsDisplay.NEVER,
+            PaymentMethod.Type.Sofort to PaymentSheet.TermsDisplay.NEVER,
+        )
+    ),
 }

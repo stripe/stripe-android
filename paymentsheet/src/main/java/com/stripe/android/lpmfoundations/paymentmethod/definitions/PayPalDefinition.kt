@@ -57,6 +57,7 @@ private object PayPalUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDat
         return transformSpecToElements.transform(
             metadata = metadata,
             specs = sharedDataSpec.fields + localLayoutSpecs,
+            termsDisplay = metadata.termsDisplayForType(PayPalDefinition.type),
         )
     }
 }
