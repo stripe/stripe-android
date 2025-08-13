@@ -217,7 +217,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                 name = billingDetailsCollectionConfiguration.name,
                 email = billingDetailsCollectionConfiguration.email,
                 phone = billingDetailsCollectionConfiguration.phone,
-                // Should always at least collect ZIP and postal
+                // Should always collect ZIP/postal code at minimum
                 address = if (
                     billingDetailsCollectionConfiguration.address == PaymentSheet
                         .BillingDetailsCollectionConfiguration

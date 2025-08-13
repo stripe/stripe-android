@@ -194,6 +194,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                 phone = defaultConfiguration.phone.takeIf {
                     state.value.isBillingDetailsUpdateFlow
                 } ?: PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                // Should always allow updating ZIP/postal code at minimum
                 address = if (
                     paymentDetails.type == PaymentMethod.Type.Card.code &&
                     defaultConfiguration.address ==
