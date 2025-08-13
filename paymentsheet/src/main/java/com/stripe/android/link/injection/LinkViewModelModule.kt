@@ -7,6 +7,7 @@ import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.DefaultConfirmationHandler
@@ -33,6 +34,7 @@ internal object LinkViewModelModule {
         navigationManager: NavigationManager,
         savedStateHandle: SavedStateHandle,
         linkLaunchMode: LinkLaunchMode,
+        linkStore: LinkStore,
         autocompleteLauncher: DefaultAutocompleteLauncher,
         @Named(LINK_EXPRESS_MODE) linkExpressMode: LinkExpressMode
     ): LinkActivityViewModel {
@@ -50,6 +52,7 @@ internal object LinkViewModelModule {
             linkConfirmationHandlerFactory = linkConfirmationHandlerFactory,
             linkLaunchMode = linkLaunchMode,
             autocompleteLauncher = autocompleteLauncher,
+            linkStore = linkStore
         )
     }
 }
