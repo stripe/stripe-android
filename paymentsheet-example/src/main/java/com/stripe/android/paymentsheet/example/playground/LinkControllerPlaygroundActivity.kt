@@ -25,7 +25,7 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
 
         @Suppress("DEPRECATION")
         val playgroundState = intent.getParcelableExtra<PlaygroundState.Payment?>(PLAYGROUND_STATE_KEY)!!
-        val linkControllerConfig = playgroundState.asPaymentState()?.linkControllerConfiguration()
+        val linkControllerConfig = playgroundState.asPaymentState()?.linkControllerConfiguration(this)
 
         if (linkControllerConfig == null) {
             finish()

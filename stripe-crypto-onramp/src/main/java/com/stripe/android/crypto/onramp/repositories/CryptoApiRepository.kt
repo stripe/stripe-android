@@ -28,12 +28,14 @@ import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Singleton
 
 /*
 * Repository interface for crypto-related operations.
 */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-internal class CryptoApiRepository @Inject internal constructor(
+@Singleton
+internal class CryptoApiRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,

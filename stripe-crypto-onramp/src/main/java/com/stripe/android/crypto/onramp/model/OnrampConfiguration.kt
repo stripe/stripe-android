@@ -15,5 +15,8 @@ import kotlinx.parcelize.Parcelize
 @Poko
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class OnrampConfiguration(
+    val merchantDisplayName: String,
+    val publishableKey: String,
+    val stripeAccountId: String? = null,
     val appearance: LinkAppearance
 ) : Parcelable

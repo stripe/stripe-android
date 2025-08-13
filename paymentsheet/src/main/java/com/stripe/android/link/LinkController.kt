@@ -128,6 +128,8 @@ class LinkController @Inject internal constructor(
     @Poko
     class Configuration internal constructor(
         internal val merchantDisplayName: String,
+        internal val publishableKey: String,
+        internal val stripeAccountId: String?,
         internal val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
         internal val defaultBillingDetails: PaymentSheet.BillingDetails?,
         internal val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
@@ -146,6 +148,8 @@ class LinkController @Inject internal constructor(
              * Your customer-facing business name.
              */
             private val merchantDisplayName: String,
+            private val publishableKey: String,
+            private val stripeAccountId: String? = null,
         ) {
             private var appearance: LinkAppearance? = null
             private var cardBrandAcceptance: PaymentSheet.CardBrandAcceptance =
@@ -218,19 +222,24 @@ class LinkController @Inject internal constructor(
              * @return A new [Configuration] with the specified settings.
              */
             fun build(): Configuration = Configuration(
-                allowUserEmailEdits = allowUserEmailEdits,
                 merchantDisplayName = merchantDisplayName,
+                publishableKey = publishableKey,
+                stripeAccountId = stripeAccountId,
                 cardBrandAcceptance = cardBrandAcceptance,
                 defaultBillingDetails = defaultBillingDetails,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                allowUserEmailEdits = allowUserEmailEdits,
                 linkAppearance = appearance
             )
         }
 
         internal companion object {
-            fun default(context: Context): Configuration {
+            fun default(context: Context, publishableKey: String): Configuration {
                 val appName = context.applicationInfo.loadLabel(context.packageManager).toString()
-                return Builder(appName).build()
+                return Builder(
+                    merchantDisplayName = appName,
+                    publishableKey = publishableKey
+                ).build()
             }
         }
     }

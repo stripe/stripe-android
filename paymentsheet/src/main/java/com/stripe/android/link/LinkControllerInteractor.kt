@@ -1,8 +1,10 @@
 package com.stripe.android.link
 
+import android.app.Application
 import android.content.Context
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.flatMapCatching
 import com.stripe.android.link.LinkController.AuthenticationResult
@@ -36,6 +38,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class LinkControllerInteractor @Inject constructor(
+    private val application: Application,
     private val logger: Logger,
     private val linkConfigurationLoader: LinkConfigurationLoader,
     private val linkAccountHolder: LinkAccountHolder,
@@ -87,6 +90,11 @@ internal class LinkControllerInteractor @Inject constructor(
     suspend fun configure(configuration: LinkController.Configuration): LinkController.ConfigureResult {
         logger.debug("$tag: updating configuration")
         updateState { State() }
+        PaymentConfiguration.init(
+            context = application,
+            publishableKey = configuration.publishableKey,
+            stripeAccountId = configuration.stripeAccountId,
+        )
         return linkConfigurationLoader.load(configuration)
             .flatMapCatching { config ->
                 val component = linkComponentBuilderProvider.get()
