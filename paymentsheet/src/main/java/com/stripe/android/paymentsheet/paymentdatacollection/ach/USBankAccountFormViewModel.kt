@@ -747,7 +747,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private fun buildMandateText(
         isVerifyWithMicrodeposits: Boolean,
         isSaveForFutureUseSelected: Boolean = saveForFutureUseCheckedFlow.value,
-    ): ResolvableString {
+    ): ResolvableString? {
+        if (args.termsDisplay == PaymentSheet.TermsDisplay.NEVER) {
+            return null
+        }
         return USBankAccountTextBuilder.buildMandateAndMicrodepositsText(
             merchantName = formattedMerchantName(),
             isVerifyingMicrodeposits = isVerifyWithMicrodeposits,
@@ -815,6 +818,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val financialConnectionsAvailability: FinancialConnectionsAvailability?,
         val setAsDefaultPaymentMethodEnabled: Boolean,
         val setAsDefaultMatchesSaveForFutureUse: Boolean,
+        val termsDisplay: PaymentSheet.TermsDisplay,
     )
 
     private companion object {
