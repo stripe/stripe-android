@@ -59,6 +59,8 @@ import com.stripe.android.paymentsheet.utils.toConfirmationError
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
+import com.stripe.android.ui.core.IsStripeCardScanAvailable
+import com.stripe.android.ui.core.elements.AutoCardScanData
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Dispatchers
@@ -91,7 +93,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val errorReporter: ErrorReporter,
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
-    @Named(IS_LIVE_MODE) val isLiveModeProvider: () -> Boolean
+    @Named(IS_LIVE_MODE) val isLiveModeProvider: () -> Boolean,
+    isStripeCardScanAvailableProvider: IsStripeCardScanAvailable,
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -101,6 +104,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     linkHandler = linkHandler,
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = true,
+    isStripeCardScanAvailable = isStripeCardScanAvailableProvider,
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(

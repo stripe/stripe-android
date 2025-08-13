@@ -43,6 +43,8 @@ import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsIntera
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
+import com.stripe.android.ui.core.IsStripeCardScanAvailable
+import com.stripe.android.ui.core.elements.AutoCardScanData
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -65,6 +67,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+    isStripeCardScanAvailableProvider: IsStripeCardScanAvailable,
 ) : BaseSheetViewModel(
     config = args.configuration,
     eventReporter = eventReporter,
@@ -74,6 +77,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     linkHandler = linkHandler,
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = false,
+    isStripeCardScanAvailable = isStripeCardScanAvailableProvider,
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
@@ -154,6 +158,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
         customerStateHolder.setCustomerState(args.state.customer)
 
         updateSelection(args.state.paymentSelection)
+
+        autoCardScanData.hasSeenAutoCardScan = args.hasSeenAutoCardScanOpen
 
         navigationHandler.resetTo(
             determineInitialBackStack(
