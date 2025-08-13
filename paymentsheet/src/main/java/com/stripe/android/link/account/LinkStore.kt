@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import javax.inject.Inject
+import java.util.concurrent.TimeUnit
 
 internal class LinkStore @Inject constructor(
     context: Context,
@@ -22,11 +23,19 @@ internal class LinkStore @Inject constructor(
     }
 
     fun hasPassedAttestationCheck(): Boolean {
-        return sharedPrefs.getBoolean(PassedAttestationCheck, false)
+        val timestamp = sharedPrefs.getLong(AttestationCheckTimestamp, 0L)
+        if (timestamp == 0L) return false
+
+        val currentTime = System.currentTimeMillis()
+        val elapsedTime = currentTime - timestamp
+
+        return elapsedTime < ATTESTATION_EXPIRY_DURATION_MS
     }
 
     fun markAttestationCheckAsPassed() {
-        sharedPrefs.edit { putBoolean(PassedAttestationCheck, true) }
+        sharedPrefs.edit {
+            putLong(AttestationCheckTimestamp, System.currentTimeMillis())
+        }
     }
 
     fun clear() {
@@ -36,6 +45,9 @@ internal class LinkStore @Inject constructor(
     internal companion object {
         const val FileName = "PaymentSheet_LinkStore"
         const val HasUsedLink = "has_used_link"
-        const val PassedAttestationCheck = "passed_attestation_check"
+        const val AttestationCheckTimestamp = "attestation_check_timestamp"
+
+        // Weekly expiration: 3 days in milliseconds
+        private val ATTESTATION_EXPIRY_DURATION_MS = TimeUnit.DAYS.toMillis(3)
     }
 }

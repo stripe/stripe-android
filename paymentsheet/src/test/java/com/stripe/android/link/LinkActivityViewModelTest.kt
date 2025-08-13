@@ -43,6 +43,7 @@ import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
 import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.navigation.PopUpToBehavior
 import com.stripe.android.utils.DummyActivityResultCaller
+import com.stripe.android.utils.RecordingLinkStore
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -796,6 +797,7 @@ internal class LinkActivityViewModelTest {
             linkAccountHolder = linkAccountHolder,
             activityRetainedComponent = activityRetainedComponent,
             eventReporter = eventReporter,
+            linkStore = RecordingLinkStore.noOp(),
             confirmationHandlerFactory = { confirmationHandler },
             linkAttestationCheck = linkAttestationCheck,
             linkConfiguration = linkConfiguration,
