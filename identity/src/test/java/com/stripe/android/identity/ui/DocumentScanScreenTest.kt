@@ -82,6 +82,7 @@ class DocumentScanScreenTest {
                 R.string.stripe_front_of_id_document
             }
         }
+        on { getDocumentPositionStringRes(null) } doReturn R.string.stripe_front_of_id_document
     }
 
     @Test
