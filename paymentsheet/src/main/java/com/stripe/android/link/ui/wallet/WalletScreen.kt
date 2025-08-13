@@ -140,6 +140,7 @@ internal fun WalletScreen(
 }
 
 @Composable
+@Suppress("LongMethod")
 internal fun WalletBody(
     state: WalletUiState,
     appearance: LinkAppearance?,

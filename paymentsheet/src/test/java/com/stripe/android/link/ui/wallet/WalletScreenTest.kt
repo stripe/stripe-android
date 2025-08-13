@@ -90,6 +90,7 @@ internal class WalletScreenTest {
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {},
                     onLogoutClicked = {},
+                    appearance = null,
                 )
             }
         }
@@ -124,6 +125,7 @@ internal class WalletScreenTest {
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {},
                     onLogoutClicked = {},
+                    appearance = null,
                 )
             }
         }
@@ -166,6 +168,7 @@ internal class WalletScreenTest {
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {},
                     onLogoutClicked = {},
+                    appearance = null,
                 )
             }
         }
@@ -262,6 +265,7 @@ internal class WalletScreenTest {
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {},
                     onLogoutClicked = {},
+                    appearance = null,
                 )
             }
         }
@@ -294,6 +298,7 @@ internal class WalletScreenTest {
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {},
                     onLogoutClicked = {},
+                    appearance = null,
                 )
             }
         }
@@ -319,6 +324,7 @@ internal class WalletScreenTest {
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {},
                     onLogoutClicked = {},
+                    appearance = null,
                 )
             }
         }
@@ -347,6 +353,7 @@ internal class WalletScreenTest {
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {},
                     onLogoutClicked = {},
+                    appearance = null,
                 )
             }
         }
@@ -373,6 +380,7 @@ internal class WalletScreenTest {
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {},
                     onLogoutClicked = {},
+                    appearance = null,
                 )
             }
         }
@@ -406,6 +414,7 @@ internal class WalletScreenTest {
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {},
                     onLogoutClicked = {},
+                    appearance = null,
                 )
             }
         }
@@ -454,6 +463,7 @@ internal class WalletScreenTest {
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {},
                     onLogoutClicked = {},
+                    appearance = null,
                 )
             }
         }
@@ -493,6 +503,7 @@ internal class WalletScreenTest {
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {},
                     onLogoutClicked = {},
+                    appearance = null,
                 )
             }
         }
@@ -534,6 +545,7 @@ internal class WalletScreenTest {
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {},
                     onLogoutClicked = {},
+                    appearance = null,
                 )
             }
         }
@@ -568,6 +580,7 @@ internal class WalletScreenTest {
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {},
                     onLogoutClicked = {},
+                    appearance = null,
                 )
             }
         }
@@ -600,6 +613,7 @@ internal class WalletScreenTest {
                             sheetContent = null
                         },
                         onLogoutClicked = {},
+                        appearance = null,
                     )
 
                     sheetContent?.let {
@@ -647,6 +661,7 @@ internal class WalletScreenTest {
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {},
                     onLogoutClicked = {},
+                    appearance = null,
                 )
             }
         }
@@ -765,6 +780,7 @@ internal class WalletScreenTest {
                 userSetIsExpanded = true,
                 collectMissingBillingDetailsForExistingPaymentMethods = true
             ),
+            appearance = null,
             onItemSelected = {},
             onExpandedChanged = {},
             onPrimaryButtonClick = {},
