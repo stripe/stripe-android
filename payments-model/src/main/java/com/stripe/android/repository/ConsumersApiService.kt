@@ -48,6 +48,7 @@ interface ConsumersApiService {
     suspend fun lookupConsumerSession(
         email: String,
         requestSurface: String,
+        sessionId: String,
         doNotLogConsumerFunnelEvent: Boolean,
         requestOptions: ApiRequest.Options,
         customerId: String?
@@ -180,6 +181,7 @@ class ConsumersApiServiceImpl(
     override suspend fun lookupConsumerSession(
         email: String,
         requestSurface: String,
+        sessionId: String,
         doNotLogConsumerFunnelEvent: Boolean,
         requestOptions: ApiRequest.Options,
         customerId: String?
@@ -197,6 +199,7 @@ class ConsumersApiServiceImpl(
                 requestOptions,
                 mapOf(
                     "request_surface" to requestSurface,
+                    "session_id" to sessionId,
                     "email_address" to email.lowercase(),
                     "customer_id" to customerId
                 ).filterValues { it != null } + avoidConsumerLoggingParams

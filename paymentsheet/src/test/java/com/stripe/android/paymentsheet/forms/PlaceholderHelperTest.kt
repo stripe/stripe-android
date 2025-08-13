@@ -44,6 +44,7 @@ class PlaceholderHelperTest {
                 PhoneSpec(),
                 AddressSpec(),
             ),
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         )
         assertThat(specs).isEmpty()
     }
@@ -68,6 +69,7 @@ class PlaceholderHelperTest {
                 PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Phone),
                 PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.BillingAddress),
             ),
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         )
         assertThat(specs).isEmpty()
     }
@@ -96,6 +98,7 @@ class PlaceholderHelperTest {
                     label = StripeR.string.stripe_affirm_buy_now_pay_later,
                 ),
             ),
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         )
 
         // Email should replace the placeholder, phone and address should be added at the end.
@@ -120,6 +123,7 @@ class PlaceholderHelperTest {
             specs = listOf(
                 NameSpec(),
             ),
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         )
 
         assertThat(specs).containsExactly(
@@ -134,6 +138,7 @@ class PlaceholderHelperTest {
                 NameSpec(),
                 SepaMandateTextSpec()
             ),
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         )
 
         assertThat(specsWithSepa).containsExactly(
@@ -151,11 +156,47 @@ class PlaceholderHelperTest {
                     field = PlaceholderSpec.PlaceholderField.SepaMandate,
                 )
             ),
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         )
 
         assertThat(specsWithSepaPlaceholder).containsExactly(
             NameSpec(),
             SepaMandateTextSpec()
+        )
+    }
+
+    @Test
+    fun `Test when termsDisplay=NEVER, SepaMandateSpec is not added`() {
+        val specsWithSepa = specsForConfiguration(
+            configuration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+            placeholderOverrideList = emptyList(),
+            requiresMandate = true,
+            specs = listOf(
+                NameSpec(),
+                SepaMandateTextSpec()
+            ),
+            termsDisplay = PaymentSheet.TermsDisplay.NEVER,
+        )
+
+        assertThat(specsWithSepa).containsExactly(
+            NameSpec(),
+        )
+
+        val specsWithSepaPlaceholder = specsForConfiguration(
+            configuration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+            placeholderOverrideList = emptyList(),
+            requiresMandate = true,
+            specs = listOf(
+                NameSpec(),
+                PlaceholderSpec(
+                    field = PlaceholderSpec.PlaceholderField.SepaMandate,
+                )
+            ),
+            termsDisplay = PaymentSheet.TermsDisplay.NEVER,
+        )
+
+        assertThat(specsWithSepaPlaceholder).containsExactly(
+            NameSpec(),
         )
     }
 
@@ -175,6 +216,7 @@ class PlaceholderHelperTest {
                 placeholderOverrideList = emptyList(),
                 requiresMandate = false,
                 configuration = billingDetailsCollectionConfiguration,
+                termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
             )
         ).isEqualTo(NameSpec())
         assertThat(
@@ -183,6 +225,7 @@ class PlaceholderHelperTest {
                 placeholderOverrideList = emptyList(),
                 requiresMandate = false,
                 configuration = billingDetailsCollectionConfiguration,
+                termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
             )
         ).isEqualTo(EmailSpec())
         assertThat(
@@ -191,6 +234,7 @@ class PlaceholderHelperTest {
                 placeholderOverrideList = emptyList(),
                 requiresMandate = false,
                 configuration = billingDetailsCollectionConfiguration,
+                termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
             )
         ).isEqualTo(PhoneSpec())
         assertThat(
@@ -199,6 +243,7 @@ class PlaceholderHelperTest {
                 placeholderOverrideList = emptyList(),
                 requiresMandate = false,
                 configuration = billingDetailsCollectionConfiguration,
+                termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
             )
         ).isEqualTo(AddressSpec())
         assertThat(
@@ -207,6 +252,7 @@ class PlaceholderHelperTest {
                 placeholderOverrideList = emptyList(),
                 requiresMandate = false,
                 configuration = billingDetailsCollectionConfiguration,
+                termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
             )
         ).isEqualTo(AddressSpec(hideCountry = true))
         assertThat(
@@ -215,6 +261,7 @@ class PlaceholderHelperTest {
                 placeholderOverrideList = emptyList(),
                 requiresMandate = true,
                 configuration = billingDetailsCollectionConfiguration,
+                termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
             )
         ).isEqualTo(SepaMandateTextSpec())
     }
@@ -235,6 +282,7 @@ class PlaceholderHelperTest {
                 placeholderOverrideList = emptyList(),
                 requiresMandate = false,
                 configuration = billingDetailsCollectionConfiguration,
+                termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
             )
         ).isNull()
         assertThat(
@@ -243,6 +291,7 @@ class PlaceholderHelperTest {
                 placeholderOverrideList = emptyList(),
                 requiresMandate = false,
                 configuration = billingDetailsCollectionConfiguration,
+                termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
             )
         ).isNull()
         assertThat(
@@ -251,6 +300,7 @@ class PlaceholderHelperTest {
                 placeholderOverrideList = emptyList(),
                 requiresMandate = false,
                 configuration = billingDetailsCollectionConfiguration,
+                termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
             )
         ).isNull()
         assertThat(
@@ -259,6 +309,7 @@ class PlaceholderHelperTest {
                 placeholderOverrideList = emptyList(),
                 requiresMandate = false,
                 configuration = billingDetailsCollectionConfiguration,
+                termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
             )
         ).isNull()
         assertThat(
@@ -267,6 +318,7 @@ class PlaceholderHelperTest {
                 placeholderOverrideList = emptyList(),
                 requiresMandate = false,
                 configuration = billingDetailsCollectionConfiguration,
+                termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
             )
         ).isNull()
     }
@@ -399,6 +451,7 @@ class PlaceholderHelperTest {
                 placeholderOverrideList = emptyList(),
                 requiresMandate = false,
                 configuration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+                termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
             )
         ).isNull()
         assertThat(
@@ -407,6 +460,7 @@ class PlaceholderHelperTest {
                 placeholderOverrideList = emptyList(),
                 requiresMandate = true,
                 configuration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+                termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
             )
         ).isInstanceOf<
             SepaMandateTextSpec
@@ -429,6 +483,7 @@ class PlaceholderHelperTest {
                 placeholderOverrideList = listOf(IdentifierSpec.Name),
                 requiresMandate = false,
                 configuration = billingDetailsCollectionConfiguration,
+                termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
             )
         ).isInstanceOf<
             NameSpec
@@ -439,6 +494,7 @@ class PlaceholderHelperTest {
                 placeholderOverrideList = listOf(IdentifierSpec.Email),
                 requiresMandate = false,
                 configuration = billingDetailsCollectionConfiguration,
+                termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
             )
         ).isInstanceOf<
             EmailSpec
@@ -449,6 +505,7 @@ class PlaceholderHelperTest {
                 placeholderOverrideList = listOf(IdentifierSpec.Phone),
                 requiresMandate = false,
                 configuration = billingDetailsCollectionConfiguration,
+                termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
             )
         ).isInstanceOf<
             PhoneSpec
@@ -459,6 +516,7 @@ class PlaceholderHelperTest {
                 placeholderOverrideList = listOf(IdentifierSpec.Generic("billing_details[address]")),
                 requiresMandate = false,
                 configuration = billingDetailsCollectionConfiguration,
+                termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
             )
         ).isInstanceOf<
             AddressSpec
@@ -488,6 +546,7 @@ class PlaceholderHelperTest {
                 exampleTextSpec,
                 mandateTextSpec,
             ),
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         )
 
         assertThat(specs).containsExactly(
@@ -523,6 +582,7 @@ class PlaceholderHelperTest {
                 exampleTextSpec,
                 mandateTextSpec,
             ),
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         )
 
         assertThat(specs).containsExactly(

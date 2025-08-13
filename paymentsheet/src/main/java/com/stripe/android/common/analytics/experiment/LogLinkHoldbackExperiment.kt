@@ -74,13 +74,14 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
             elementsSession.experimentsData
         ) { "Experiments data required to log exposures" }
         val experimentGroup: String = elementsSession.experimentsData
-            ?.experimentAssignments[experimentAssignment] ?: "control"
+            ?.experimentAssignments?.get(experimentAssignment) ?: "control"
 
         val customerEmail = state.getEmail()
 
         val defaultValues = state.getDefaultValues()
 
-        val isReturningUser: Boolean = customerEmail != null && isReturningUser(customerEmail)
+        val isReturningUser = customerEmail != null &&
+            isReturningUser(email = customerEmail, sessionId = elementsSession.elementsSessionId)
 
         val useLinkNative: Boolean = state.paymentMethodMetadata.linkState?.configuration?.let {
             linkConfigurationCoordinator.linkGate(it).useNativeLink
@@ -124,11 +125,15 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
      *
      * If lookup fails, we populate the error as we don't want to log exposures on these cases.
      */
-    suspend fun isReturningUser(
+    private suspend fun isReturningUser(
         email: String,
+        sessionId: String,
     ): Boolean {
         return linkDisabledApiRepository
-            .lookupConsumerWithoutBackendLoggingForExposure(email)
+            .lookupConsumerWithoutBackendLoggingForExposure(
+                email = email,
+                sessionId = sessionId,
+            )
             .map { it.exists }
             .onFailure {
                 logger.error("Failed to check if user is returning", it)

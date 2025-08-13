@@ -96,6 +96,7 @@ class ConsumersApiServiceImplTest {
             header("User-Agent", "Stripe/v1 ${StripeSdkVersion.VERSION}"),
             bodyPart("email_address", "email%40example.com"),
             bodyPart("request_surface", requestSurface),
+            bodyPart("session_id", DEFAULT_SESSION_ID),
         ) { response ->
             response.setBody(ConsumerFixtures.EXISTING_CONSUMER_JSON.toString())
         }
@@ -103,6 +104,7 @@ class ConsumersApiServiceImplTest {
         val lookup = consumersApiService.lookupConsumerSession(
             email = email,
             requestSurface = requestSurface,
+            sessionId = DEFAULT_SESSION_ID,
             requestOptions = DEFAULT_OPTIONS,
             doNotLogConsumerFunnelEvent = false,
             customerId = null
@@ -134,6 +136,7 @@ class ConsumersApiServiceImplTest {
             consumersApiService.lookupConsumerSession(
                 email = email,
                 requestSurface = requestSurface,
+                sessionId = DEFAULT_SESSION_ID,
                 doNotLogConsumerFunnelEvent = false,
                 requestOptions = DEFAULT_OPTIONS,
                 customerId = null
@@ -343,5 +346,6 @@ class ConsumersApiServiceImplTest {
 
     private companion object {
         private val DEFAULT_OPTIONS = ApiRequest.Options("pk_test_vOo1umqsYxSrP5UXfOeL3ecm")
+        private const val DEFAULT_SESSION_ID = "sess_123"
     }
 }

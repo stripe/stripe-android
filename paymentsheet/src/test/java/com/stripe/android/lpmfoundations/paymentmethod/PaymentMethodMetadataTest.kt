@@ -1895,6 +1895,13 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
+    fun `mandateAllowed returns true when payment method is null`() {
+        val termsDisplay = mapOf(PaymentMethod.Type.USBankAccount to PaymentSheet.TermsDisplay.NEVER)
+        val metadata = PaymentMethodMetadataFactory.create(termsDisplay = termsDisplay)
+        assertThat(metadata.mandateAllowed(null)).isTrue()
+    }
+
+    @Test
     fun `mandateAllowed works with multiple payment method types`() {
         val termsDisplay = mapOf(
             PaymentMethod.Type.Card to PaymentSheet.TermsDisplay.NEVER,
@@ -1907,6 +1914,70 @@ internal class PaymentMethodMetadataTest {
         assertThat(metadata.mandateAllowed(PaymentMethod.Type.USBankAccount)).isTrue()
         assertThat(metadata.mandateAllowed(PaymentMethod.Type.CashAppPay)).isFalse()
         assertThat(metadata.mandateAllowed(PaymentMethod.Type.Klarna)).isTrue() // Not in map
+    }
+
+    @Test
+    fun termsDisplayForType_returnsConfiguredValues_whenPresentInMap() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            termsDisplay = mapOf(
+                PaymentMethod.Type.Card to PaymentSheet.TermsDisplay.AUTOMATIC,
+                PaymentMethod.Type.Klarna to PaymentSheet.TermsDisplay.NEVER,
+            )
+        )
+
+        assertThat(metadata.termsDisplayForType(PaymentMethod.Type.Card))
+            .isEqualTo(PaymentSheet.TermsDisplay.AUTOMATIC)
+        assertThat(metadata.termsDisplayForType(PaymentMethod.Type.Klarna))
+            .isEqualTo(PaymentSheet.TermsDisplay.NEVER)
+    }
+
+    @Test
+    fun termsDisplayForType_returnsAutomatic_whenTypeMissingFromMap() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            termsDisplay = mapOf(
+                PaymentMethod.Type.Card to PaymentSheet.TermsDisplay.AUTOMATIC,
+            )
+        )
+
+        assertThat(metadata.termsDisplayForType(PaymentMethod.Type.Ideal))
+            .isEqualTo(PaymentSheet.TermsDisplay.AUTOMATIC)
+    }
+
+    @Test
+    fun termsDisplayForType_returnsAutomatic_whenTypeIsNull() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            termsDisplay = emptyMap()
+        )
+
+        assertThat(metadata.termsDisplayForType(null))
+            .isEqualTo(PaymentSheet.TermsDisplay.AUTOMATIC)
+    }
+
+    @Test
+    fun termsDisplayForCode_mapsCodeToType_andReturnsConfiguredValue() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            termsDisplay = mapOf(
+                PaymentMethod.Type.Card to PaymentSheet.TermsDisplay.AUTOMATIC,
+                PaymentMethod.Type.Klarna to PaymentSheet.TermsDisplay.NEVER,
+            )
+        )
+
+        assertThat(metadata.termsDisplayForCode("card"))
+            .isEqualTo(PaymentSheet.TermsDisplay.AUTOMATIC)
+        assertThat(metadata.termsDisplayForCode("klarna"))
+            .isEqualTo(PaymentSheet.TermsDisplay.NEVER)
+    }
+
+    @Test
+    fun termsDisplayForCode_returnsAutomatic_forUnknownCode() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            termsDisplay = mapOf(
+                PaymentMethod.Type.Card to PaymentSheet.TermsDisplay.AUTOMATIC,
+            )
+        )
+
+        assertThat(metadata.termsDisplayForCode("made_up_code"))
+            .isEqualTo(PaymentSheet.TermsDisplay.AUTOMATIC)
     }
 
     private fun availableWalletsTest(

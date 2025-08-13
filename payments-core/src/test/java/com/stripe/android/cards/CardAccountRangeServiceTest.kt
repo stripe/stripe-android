@@ -17,6 +17,7 @@ import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.networking.RequestSurface
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.TestUtils
@@ -316,7 +317,7 @@ class CardAccountRangeServiceTest {
 
     private fun createRemoteCardAccountRangeSource(): CardAccountRangeSource {
         return RemoteCardAccountRangeSource(
-            StripeApiRepository(applicationContext, { publishableKey }),
+            StripeApiRepository(applicationContext, { publishableKey }, RequestSurface.PaymentElement),
             ApiRequest.Options(publishableKey),
             DefaultCardAccountRangeStore(applicationContext),
             DefaultAnalyticsRequestExecutor(),

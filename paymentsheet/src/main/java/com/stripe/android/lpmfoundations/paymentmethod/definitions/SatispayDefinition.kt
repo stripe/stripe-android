@@ -54,7 +54,8 @@ private object SatispayUiDefinitionFactory : UiDefinitionFactory.RequiresSharedD
         }
         return transformSpecToElements.transform(
             metadata = metadata,
-            specs = sharedDataSpec.fields + localLayoutSpecs
+            specs = sharedDataSpec.fields + localLayoutSpecs,
+            termsDisplay = metadata.termsDisplayForType(SatispayDefinition.type),
         )
     }
 }

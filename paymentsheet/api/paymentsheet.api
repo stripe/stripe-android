@@ -2524,9 +2524,10 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$IntentConfigurat
 public final class com/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$SellerDetails : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBusinessName ()Ljava/lang/String;
 	public final fun getExternalId ()Ljava/lang/String;
 	public final fun getNetworkId ()Ljava/lang/String;
 	public fun hashCode ()I

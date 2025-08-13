@@ -32,6 +32,7 @@ internal interface LinkRepository {
      */
     suspend fun lookupConsumer(
         email: String,
+        sessionId: String,
         customerId: String?
     ): Result<ConsumerSessionLookup>
 
@@ -41,7 +42,8 @@ internal interface LinkRepository {
      * Link global holdback to look up consumers in the event Link is disabled.
      */
     suspend fun lookupConsumerWithoutBackendLoggingForExposure(
-        email: String
+        email: String,
+        sessionId: String,
     ): Result<ConsumerSessionLookup>
 
     /**

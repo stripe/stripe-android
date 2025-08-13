@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequest
+import com.stripe.android.networking.StripeRepository
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
@@ -18,9 +19,9 @@ class DefaultCardAccountRangeRepositoryFactoryTest {
     private val factory = DefaultCardAccountRangeRepositoryFactory(
         context = context,
         productUsageTokens = setOf("SomeProduct"),
-    ) {
-        analyticsRequests.add(it)
-    }
+        requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
+        analyticsRequestExecutor = { analyticsRequests.add(it) }
+    )
 
     @BeforeTest
     fun setup() {

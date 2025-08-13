@@ -28,9 +28,11 @@ import com.stripe.android.link.withDismissalDisabled
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParams.Card.Networks
 import com.stripe.android.paymentsheet.CardUpdateParams
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.CardEditConfiguration
 import com.stripe.android.paymentsheet.ui.DefaultEditCardDetailsInteractor
@@ -67,7 +69,9 @@ internal class UpdateCardScreenViewModel @Inject constructor(
 
     val state: StateFlow<UpdateCardScreenState> = _state.asStateFlow()
 
-    var interactor: EditCardDetailsInteractor? = null
+    private val _interactor = MutableStateFlow<EditCardDetailsInteractor?>(null)
+
+    val interactor: StateFlow<EditCardDetailsInteractor?> = _interactor.asStateFlow()
 
     init {
         runCatching {
@@ -81,7 +85,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                     isDefault = paymentDetails.isDefault
                 )
             }
-            interactor = initializeInteractor(paymentDetails)
+            _interactor.value = initializeInteractor(paymentDetails)
         }.onFailure {
             logger.error("Failed to render payment update screen", it)
             navigationManager.tryNavigateBack()
@@ -174,6 +178,8 @@ internal class UpdateCardScreenViewModel @Inject constructor(
             )
         }
 
+        val defaultConfiguration = configuration.billingDetailsCollectionConfiguration
+
         return DefaultEditCardDetailsInteractor.Factory().create(
             coroutineScope = viewModelScope,
             cardEditConfiguration = cardEditConfiguration,
@@ -181,7 +187,25 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                 details = paymentDetails,
                 billingPhoneNumber = linkAccountManager.linkAccountInfo.value.account?.unredactedPhoneNumber
             ),
-            billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = defaultConfiguration.name,
+                email = defaultConfiguration.email,
+                // Cannot update phone number when not in the billing details update flow
+                phone = defaultConfiguration.phone.takeIf {
+                    state.value.isBillingDetailsUpdateFlow
+                } ?: PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                // Should always allow updating ZIP/postal code at minimum
+                address = if (
+                    paymentDetails.type == PaymentMethod.Type.Card.code &&
+                    defaultConfiguration.address ==
+                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+                ) {
+                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
+                } else {
+                    defaultConfiguration.address
+                },
+                attachDefaultsToPaymentMethod = defaultConfiguration.attachDefaultsToPaymentMethod,
+            ),
             onCardUpdateParamsChanged = ::onCardUpdateParamsChanged,
             onBrandChoiceChanged = ::onBrandChoiceChanged,
             // We prefill in the billing details update flow, so the form might

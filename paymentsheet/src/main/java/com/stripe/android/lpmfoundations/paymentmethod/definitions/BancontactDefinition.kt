@@ -17,6 +17,8 @@ internal object BancontactDefinition : PaymentMethodDefinition {
 
     override val supportedAsSavedPaymentMethod: Boolean = false
 
+    override val supportsTermDisplayConfiguration: Boolean = true
+
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOfNotNull(
@@ -52,7 +54,8 @@ private object BancontactUiDefinitionFactory : UiDefinitionFactory.RequiresShare
                 listOf(IdentifierSpec.Name, IdentifierSpec.Email)
             } else {
                 emptyList()
-            }
+            },
+            termsDisplay = metadata.termsDisplayForType(BancontactDefinition.type),
         )
     }
 }

@@ -102,10 +102,11 @@ class Stripe internal constructor(
     ) : this(
         context.applicationContext,
         StripeApiRepository(
-            context.applicationContext,
-            { publishableKey },
-            appInfo,
-            Logger.getInstance(enableLogging),
+            context = context.applicationContext,
+            publishableKeyProvider = { publishableKey },
+            requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
+            appInfo = appInfo,
+            logger = Logger.getInstance(enableLogging),
             betas = betas
         ),
         ApiKeyValidator.get().requireValid(publishableKey),

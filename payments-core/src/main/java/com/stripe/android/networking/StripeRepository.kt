@@ -440,4 +440,10 @@ interface StripeRepository {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun buildPaymentUserAgent(attribution: Set<String> = emptySet()): String
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val DEFAULT_REQUEST_SURFACE = RequestSurface.PaymentElement
+    }
 }

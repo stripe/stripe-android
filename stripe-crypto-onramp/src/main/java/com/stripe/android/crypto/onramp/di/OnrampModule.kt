@@ -3,6 +3,7 @@ package com.stripe.android.crypto.onramp.di
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.link.LinkController
+import com.stripe.android.networking.RequestSurface
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -20,7 +21,8 @@ internal class OnrampModule {
     ): LinkController {
         return LinkController.create(
             application = application,
-            savedStateHandle = savedStateHandle
+            savedStateHandle = savedStateHandle,
+            requestSurface = RequestSurface.CryptoOnramp
         )
     }
 }

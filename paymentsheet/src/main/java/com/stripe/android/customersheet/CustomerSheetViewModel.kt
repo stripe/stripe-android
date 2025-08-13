@@ -56,6 +56,7 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -874,6 +875,7 @@ internal class CustomerSheetViewModel(
             financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),
             setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
             autocompleteAddressInteractorFactory = null,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         )
     }
 
