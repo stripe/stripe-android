@@ -86,7 +86,8 @@ class USBankAccountFormViewModelTest {
         linkMode = null,
         setAsDefaultPaymentMethodEnabled = false,
         setAsDefaultMatchesSaveForFutureUse = false,
-        financialConnectionsAvailability = FinancialConnectionsAvailability.Full
+        financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+        termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
     )
 
     private val mockCollectBankAccountLauncher = mock<CollectBankAccountLauncher>()
@@ -1102,6 +1103,21 @@ class USBankAccountFormViewModelTest {
 
             val mandateCollectionViewState = awaitItem()
             assertThat(mandateCollectionViewState.linkedBankAccount?.mandateText).isEqualTo(expectedResult)
+        }
+    }
+
+    @Test
+    fun `Produces null mandate text when termsDisplay=NEVER`() = runTest {
+        val viewModel = createViewModel(args = defaultArgs.copy(termsDisplay = PaymentSheet.TermsDisplay.NEVER))
+
+        viewModel.currentScreenState.test {
+            assertThat(awaitItem().linkedBankAccount).isNull()
+
+            val unverifiedAccount = mockManuallyEnteredBankAccount(usesMicrodeposits = false)
+            viewModel.handleCollectBankAccountResult(unverifiedAccount)
+
+            val mandateCollectionViewState = awaitItem()
+            assertThat(mandateCollectionViewState.linkedBankAccount?.mandateText).isNull()
         }
     }
 

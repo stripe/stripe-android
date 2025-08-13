@@ -48,7 +48,7 @@ internal data class BankFormScreenState(
         val last4: String?,
         val intentId: String?,
         val financialConnectionsSessionId: String?,
-        val mandateText: ResolvableString,
+        val mandateText: ResolvableString?,
         val isVerifyingWithMicrodeposits: Boolean,
         val eligibleForIncentive: Boolean = false,
     ) : Parcelable
