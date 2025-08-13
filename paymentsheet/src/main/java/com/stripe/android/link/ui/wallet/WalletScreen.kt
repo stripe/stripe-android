@@ -202,16 +202,18 @@ internal fun WalletBody(
                             onAddPaymentMethodOptionClicked(state.addPaymentMethodOptions[0])
                         } else {
                             showBottomSheetContent {
-                                AddPaymentMethodMenu(
-                                    modifier = Modifier.testTag(WALLET_SCREEN_ADD_PAYMENT_METHOD_MENU),
-                                    options = state.addPaymentMethodOptions,
-                                    onOptionClick = { option ->
-                                        onAddPaymentMethodOptionClicked(option)
-                                        coroutineScope.launch {
-                                            hideBottomSheetContent()
-                                        }
-                                    },
-                                )
+                                LinkAppearanceTheme(appearance) {
+                                    AddPaymentMethodMenu(
+                                        modifier = Modifier.testTag(WALLET_SCREEN_ADD_PAYMENT_METHOD_MENU),
+                                        options = state.addPaymentMethodOptions,
+                                        onOptionClick = { option ->
+                                            onAddPaymentMethodOptionClicked(option)
+                                            coroutineScope.launch {
+                                                hideBottomSheetContent()
+                                            }
+                                        },
+                                    )
+                                }
                             }
                         }
                     },
@@ -261,6 +263,7 @@ private fun PaymentDetailsSection(
         }
         PaymentMethodSection(
             state = state,
+            appearance = appearance,
             isExpanded = isExpanded,
             onItemSelected = onItemSelected,
             onExpandedChanged = onExpandedChanged,
@@ -342,8 +345,10 @@ private fun ActionSection(
 }
 
 @Composable
+@Suppress("LongMethod")
 private fun PaymentMethodSection(
     state: WalletUiState,
+    appearance: LinkAppearance?,
     isExpanded: Boolean,
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onExpandedChanged: (Boolean) -> Unit,
@@ -379,28 +384,30 @@ private fun PaymentMethodSection(
                 onItemSelected = onItemSelected,
                 onMenuButtonClick = {
                     showBottomSheetContent {
-                        WalletPaymentMethodMenu(
-                            modifier = Modifier.testTag(WALLET_SCREEN_MENU_SHEET_TAG),
-                            paymentDetails = it,
-                            onSetDefaultClick = {
-                                coroutineScope.launch {
-                                    hideBottomSheetContent()
-                                    onSetDefaultClicked(it)
+                        LinkAppearanceTheme(appearance) {
+                            WalletPaymentMethodMenu(
+                                modifier = Modifier.testTag(WALLET_SCREEN_MENU_SHEET_TAG),
+                                paymentDetails = it,
+                                onSetDefaultClick = {
+                                    coroutineScope.launch {
+                                        hideBottomSheetContent()
+                                        onSetDefaultClicked(it)
+                                    }
+                                },
+                                onRemoveClick = {
+                                    coroutineScope.launch {
+                                        hideBottomSheetContent()
+                                        onRemoveClicked(it)
+                                    }
+                                },
+                                onUpdateClick = {
+                                    coroutineScope.launch {
+                                        hideBottomSheetContent()
+                                        onUpdateClicked(it)
+                                    }
                                 }
-                            },
-                            onRemoveClick = {
-                                coroutineScope.launch {
-                                    hideBottomSheetContent()
-                                    onRemoveClicked(it)
-                                }
-                            },
-                            onUpdateClick = {
-                                coroutineScope.launch {
-                                    hideBottomSheetContent()
-                                    onUpdateClicked(it)
-                                }
-                            }
-                        )
+                            )
+                        }
                     }
                 },
                 onAddNewPaymentMethodClick = onAddNewPaymentMethodClicked,
