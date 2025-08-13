@@ -122,16 +122,16 @@ private fun ConsumerPaymentDetails.PaymentDetails.makeMandateText(
             resolvableString(R.string.stripe_wallet_bank_account_terms)
         }
         is Card,
-        is ConsumerPaymentDetails.Passthrough -> {
-            if (isSettingUp) {
-                if (signupToggleEnabled) {
-                    resolvableString(R.string.stripe_paymentsheet_card_mandate_signup_toggle_off, merchantName)
-                } else {
-                    resolvableString(R.string.stripe_paymentsheet_card_mandate, merchantName)
-                }
-            } else {
-                null
-            }
+        is ConsumerPaymentDetails.Passthrough -> when {
+            signupToggleEnabled -> resolvableString(
+                id = R.string.stripe_paymentsheet_card_mandate_signup_toggle_off,
+                merchantName
+            )
+            isSettingUp -> resolvableString(
+                id = R.string.stripe_paymentsheet_card_mandate,
+                merchantName
+            )
+            else -> null
         }
     }
 }
