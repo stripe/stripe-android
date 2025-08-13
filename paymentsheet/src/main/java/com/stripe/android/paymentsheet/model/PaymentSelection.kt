@@ -487,7 +487,7 @@ internal fun PaymentSelection.Saved.mandateTextFromPaymentMethodMetadata(
 ): ResolvableString? = mandateText(
     metadata.merchantName,
     metadata.hasIntentToSetup(paymentMethod.type?.code ?: "")
-)
+).takeIf { metadata.mandateAllowed(paymentMethod.type) }
 
 /**
  * If setup_future_usage is set at the top level to "off_session" the payment method will

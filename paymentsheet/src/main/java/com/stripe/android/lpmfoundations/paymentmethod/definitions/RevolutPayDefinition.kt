@@ -57,6 +57,7 @@ private object RevolutPayUiDefinitionFactory : UiDefinitionFactory.RequiresShare
         return transformSpecToElements.transform(
             metadata = metadata,
             specs = sharedDataSpec.fields + localLayoutSpecs,
+            termsDisplay = metadata.termsDisplayForType(RevolutPayDefinition.type),
         )
     }
 }

@@ -17,6 +17,8 @@ internal object SofortDefinition : PaymentMethodDefinition {
 
     override val supportedAsSavedPaymentMethod: Boolean = false
 
+    override val supportsTermDisplayConfiguration: Boolean = true
+
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf(
@@ -52,7 +54,8 @@ private object SofortUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDat
                 listOf(IdentifierSpec.Name, IdentifierSpec.Email)
             } else {
                 emptyList()
-            }
+            },
+            termsDisplay = metadata.termsDisplayForType(SofortDefinition.type),
         )
     }
 }

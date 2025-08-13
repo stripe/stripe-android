@@ -56,6 +56,7 @@ private object AmazonPayUiDefinitionFactory : UiDefinitionFactory.RequiresShared
         return transformSpecToElements.transform(
             metadata = metadata,
             specs = sharedDataSpec.fields + localLayoutSpecs,
+            termsDisplay = metadata.termsDisplayForType(AmazonPayDefinition.type),
         )
     }
 }

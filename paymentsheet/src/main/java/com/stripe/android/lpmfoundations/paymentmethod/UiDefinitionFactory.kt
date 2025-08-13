@@ -133,6 +133,7 @@ internal sealed interface UiDefinitionFactory {
             return transformSpecToElements.transform(
                 metadata = metadata,
                 specs = sharedDataSpec.fields,
+                termsDisplay = metadata.termsDisplayForCode(sharedDataSpec.type),
             )
         }
     }
