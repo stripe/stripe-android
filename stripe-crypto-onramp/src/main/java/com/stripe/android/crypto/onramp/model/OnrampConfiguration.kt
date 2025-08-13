@@ -2,7 +2,7 @@ package com.stripe.android.crypto.onramp.model
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.stripe.android.link.model.LinkAppearance
+import com.stripe.android.link.LinkAppearance
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 

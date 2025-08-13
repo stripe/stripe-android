@@ -2,7 +2,6 @@ package com.stripe.android.link
 
 import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
-import com.stripe.android.link.model.LinkAppearance
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability

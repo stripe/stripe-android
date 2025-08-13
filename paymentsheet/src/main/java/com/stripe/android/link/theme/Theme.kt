@@ -11,7 +11,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.stripe.android.link.model.LinkAppearance
+import com.stripe.android.link.LinkAppearance
 
 internal val LocalLinkTypography = staticCompositionLocalOf<LinkTypography> {
     error("No Typography provided")
