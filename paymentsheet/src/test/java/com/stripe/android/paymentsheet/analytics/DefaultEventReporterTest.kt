@@ -28,6 +28,7 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.paymentsheet.FakeIsStripeCardScanAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -1331,11 +1332,5 @@ class DefaultEventReporterTest {
             ).takeIf { it.linkMode != null },
             screenState = mock(),
         )
-    }
-
-    private class FakeIsStripeCardScanAvailable(
-        private val value: Boolean = true
-    ) : IsStripeCardScanAvailable {
-        override fun invoke() = value
     }
 }

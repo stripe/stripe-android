@@ -26,7 +26,6 @@ import javax.inject.Singleton
         CoroutineContextModule::class,
         CoreCommonModule::class,
         ResourceRepositoryModule::class,
-        CardScanModule::class
     ]
 )
 internal interface PaymentOptionsViewModelFactoryComponent {
