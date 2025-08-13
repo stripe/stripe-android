@@ -99,6 +99,7 @@ sealed interface StripeIntent : StripeModel {
         DisplayBoletoDetails("boleto_display_details"),
         DisplayKonbiniDetails("konbini_display_details"),
         DisplayMultibancoDetails("multibanco_display_details"),
+        DisplayPayNowDetails("paynow_display_qr_code"),
         SwishRedirect("swish_handle_redirect_or_display_qr_code");
 
         @Keep
@@ -218,6 +219,17 @@ sealed interface StripeIntent : StripeModel {
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class DisplayMultibancoDetails(
             /**
+             * URL of a webpage containing the voucher for this payment.
+             */
+            override val hostedVoucherUrl: String? = null,
+        ) : NextActionData(), DisplayVoucherDetails
+
+        @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class DisplayPayNowDetails(
+            /**
+             * TODO: is voucher the right term here? probably now.
+             * TODO: consider cancelling on user navigation
              * URL of a webpage containing the voucher for this payment.
              */
             override val hostedVoucherUrl: String? = null,
