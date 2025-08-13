@@ -57,6 +57,7 @@ internal object FormContract : ActivityResultContract<FormContract.Args, FormRes
         val selectedPaymentMethodCode: String,
         val paymentMethodMetadata: PaymentMethodMetadata,
         val hasSavedPaymentMethods: Boolean,
+        val hasSeenDirectToCardScan: Boolean,
         val configuration: EmbeddedPaymentElement.Configuration,
         val initializationMode: PaymentElementLoader.InitializationMode,
         val paymentElementCallbackIdentifier: String,

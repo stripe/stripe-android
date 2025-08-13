@@ -7,6 +7,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.embedded.EmbeddedHasSeenAutoCardScanHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -46,6 +47,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     private val rowSelectionImmediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
     private val customerStateHolder: CustomerStateHolder,
     private val sheetStateHolder: SheetStateHolder,
+    private val hasSeenAutoCardScanHolder: EmbeddedHasSeenAutoCardScanHolder,
     private val errorReporter: ErrorReporter,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
@@ -82,6 +84,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
                     EmbeddedPaymentElement.Result.Canceled()
                 )
             }
+            hasSeenAutoCardScanHolder.hasSeenAutoCardScanOpen = true
         }
 
     private val manageActivityLauncher: ActivityResultLauncher<ManageContract.Args> =
@@ -121,6 +124,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             selectedPaymentMethodCode = code,
             paymentMethodMetadata = paymentMethodMetadata,
             hasSavedPaymentMethods = hasSavedPaymentMethods,
+            hasSeenDirectToCardScan = hasSeenAutoCardScanHolder.hasSeenAutoCardScanOpen,
             configuration = embeddedConfirmationState.configuration,
             initializationMode = embeddedConfirmationState.initializationMode,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
