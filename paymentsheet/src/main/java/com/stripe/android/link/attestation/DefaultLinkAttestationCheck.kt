@@ -6,6 +6,7 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.account.LinkAuthResult
+import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.model.EmailSource
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -20,6 +21,7 @@ internal class DefaultLinkAttestationCheck @Inject constructor(
     private val integrityRequestManager: IntegrityRequestManager,
     private val linkAccountManager: LinkAccountManager,
     private val linkConfiguration: LinkConfiguration,
+    private val linkStore: LinkStore,
     private val errorReporter: ErrorReporter,
     @IOContext private val workContext: CoroutineContext
 ) : LinkAttestationCheck {
@@ -38,7 +40,11 @@ internal class DefaultLinkAttestationCheck @Inject constructor(
                         startSession = false,
                         customerId = linkConfiguration.customerIdForEceDefaultValues
                     )
-                    handleLookupResult(lookupResult)
+                    val attestationResult = handleLookupResult(lookupResult)
+                    if (attestationResult is LinkAttestationCheck.Result.Successful) {
+                        linkStore.markAttestationCheckAsPassed()
+                    }
+                    attestationResult
                 },
                 onFailure = { error ->
                     errorReporter.report(

@@ -4,9 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
 internal class LinkStore @Inject constructor(
     context: Context,
 ) {
@@ -23,6 +21,14 @@ internal class LinkStore @Inject constructor(
         sharedPrefs.edit { putBoolean(HasUsedLink, true) }
     }
 
+    fun hasPassedAttestationCheck(): Boolean {
+        return sharedPrefs.getBoolean(PassedAttestationCheck, false)
+    }
+
+    fun markAttestationCheckAsPassed() {
+        sharedPrefs.edit { putBoolean(PassedAttestationCheck, true) }
+    }
+
     fun clear() {
         sharedPrefs.edit { clear() }
     }
@@ -30,5 +36,6 @@ internal class LinkStore @Inject constructor(
     internal companion object {
         const val FileName = "PaymentSheet_LinkStore"
         const val HasUsedLink = "has_used_link"
+        const val PassedAttestationCheck = "passed_attestation_check"
     }
 }

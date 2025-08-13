@@ -19,6 +19,7 @@ import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.PaymentConfi
 import com.stripe.android.link.LinkActivity.Companion.getArgs
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.account.linkAccountUpdate
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
@@ -58,6 +59,7 @@ internal class LinkActivityViewModel @Inject constructor(
     private val linkAccountManager: LinkAccountManager,
     private val linkAccountHolder: LinkAccountHolder,
     val eventReporter: EventReporter,
+    private val linkStore: LinkStore,
     val linkConfiguration: LinkConfiguration,
     private val linkAttestationCheck: LinkAttestationCheck,
     val savedStateHandle: SavedStateHandle,
@@ -245,7 +247,7 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     private suspend fun loadLink() {
-        val attestationCheckResult = linkAttestationCheck.invoke()
+        val attestationCheckResult = linkAttestationCheckResult()
         when (attestationCheckResult) {
             is LinkAttestationCheck.Result.AttestationFailed -> {
                 when (linkExpressMode) {
@@ -261,6 +263,15 @@ internal class LinkActivityViewModel @Inject constructor(
             is LinkAttestationCheck.Result.AccountError -> {
                 handleAccountError()
             }
+        }
+    }
+
+    private suspend fun linkAttestationCheckResult(): LinkAttestationCheck.Result {
+        // Do not rerun attestation to launch web if attestation succeeded in the past.
+        return if (linkStore.hasPassedAttestationCheck()) {
+            LinkAttestationCheck.Result.Successful
+        } else {
+            linkAttestationCheck.invoke()
         }
     }
 
