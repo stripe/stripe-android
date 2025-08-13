@@ -48,7 +48,6 @@ import com.stripe.android.identity.camera.DocumentScanCameraManager
 import com.stripe.android.identity.camera.IdentityCameraManager
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.IdentityScanState.Companion.isFront
-import com.stripe.android.identity.states.IdentityScanState.Companion.isNullOrFront
 import com.stripe.android.identity.utils.startScanning
 import com.stripe.android.identity.viewmodel.DocumentScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel

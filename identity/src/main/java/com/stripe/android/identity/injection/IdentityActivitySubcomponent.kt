@@ -15,9 +15,9 @@ import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.IdentityImageHandler
 import com.stripe.android.identity.viewmodel.DocumentScanViewModel
+import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.identity.viewmodel.SelfieScanViewModel
 import com.stripe.android.mlcore.base.InterpreterInitializer
-import com.stripe.android. identity.viewmodel.IdentityViewModel
 import dagger.BindsInstance
 import dagger.Module
 import dagger.Provides

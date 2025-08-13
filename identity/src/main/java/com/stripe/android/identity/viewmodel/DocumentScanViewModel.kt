@@ -1,11 +1,10 @@
 package com.stripe.android.identity.viewmodel
 
 import android.app.Application
-import android.provider.ContactsContract.CommonDataKinds.Identity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.asFlow
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.identity.R
