@@ -622,6 +622,7 @@ class PaymentSheet internal constructor(
         @Parcelize
         @Poko
         class SellerDetails(
+            val businessName: String,
             val networkId: String,
             val externalId: String,
         ) : Parcelable

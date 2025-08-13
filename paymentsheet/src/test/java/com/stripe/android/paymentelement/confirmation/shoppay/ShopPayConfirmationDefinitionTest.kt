@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation.shoppay
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
@@ -109,7 +110,40 @@ internal class ShopPayConfirmationDefinitionTest {
         assertThat(launchCall.input.shopPayConfiguration).isEqualTo(SHOP_PAY_CONFIRMATION_OPTION.shopPayConfiguration)
         assertThat(launchCall.input.customerSessionClientSecret)
             .isEqualTo(SHOP_PAY_CONFIRMATION_OPTION.customerSessionClientSecret)
-        assertThat(launchCall.input.businessName).isEqualTo(SHOP_PAY_CONFIRMATION_OPTION.businessName)
+        assertThat(launchCall.input.businessName).isEqualTo(SHOP_PAY_CONFIRMATION_OPTION.merchantDisplayName)
+    }
+
+    @OptIn(SharedPaymentTokenSessionPreview::class)
+    @Test
+    fun `'launch' should launch properly with merchant name as seller`() = runTest {
+        val definition = createShopPayConfirmationDefinition()
+
+        val launcher = FakeActivityResultLauncher<ShopPayActivityContract.Args>()
+
+        definition.launch(
+            confirmationOption = SHOP_PAY_CONFIRMATION_OPTION,
+            confirmationParameters = CONFIRMATION_PARAMETERS.copy(
+                initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                    intentConfiguration = PaymentSheet.IntentConfiguration(
+                        sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                            amount = 5000,
+                            currency = "CAD",
+                        ),
+                        sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                            businessName = "My business, Inc.",
+                            networkId = "network_123",
+                            externalId = "external_123"
+                        )
+                    )
+                )
+            ),
+            launcher = launcher,
+            arguments = Unit,
+        )
+
+        val launchCall = launcher.calls.awaitItem()
+
+        assertThat(launchCall.input.businessName).isEqualTo("My business, Inc.")
     }
 
     @Test
@@ -215,7 +249,7 @@ internal class ShopPayConfirmationDefinitionTest {
         private val SHOP_PAY_CONFIRMATION_OPTION = ShopPayConfirmationOption(
             shopPayConfiguration = SHOP_PAY_CONFIGURATION,
             customerSessionClientSecret = "customer_secret",
-            businessName = "Example Inc.",
+            merchantDisplayName = "Example Inc.",
         )
     }
 }

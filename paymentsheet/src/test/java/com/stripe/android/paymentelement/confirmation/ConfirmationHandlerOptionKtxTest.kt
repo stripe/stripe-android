@@ -487,7 +487,7 @@ class ConfirmationHandlerOptionKtxTest {
             ShopPayConfirmationOption(
                 shopPayConfiguration = SHOP_PAY_CONFIGURATION,
                 customerSessionClientSecret = "css_test_123",
-                businessName = "Merchant, Inc."
+                merchantDisplayName = "Merchant, Inc."
             )
         )
     }
