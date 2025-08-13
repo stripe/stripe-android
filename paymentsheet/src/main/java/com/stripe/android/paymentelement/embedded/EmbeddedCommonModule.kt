@@ -12,6 +12,7 @@ import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.link.injection.PaymentsIntegrityModule
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEventCallback
@@ -44,6 +45,7 @@ import kotlin.coroutines.CoroutineContext
     includes = [
         StripeRepositoryModule::class,
         CoreCommonModule::class,
+        PaymentsIntegrityModule::class,
     ],
 )
 internal interface EmbeddedCommonModule {

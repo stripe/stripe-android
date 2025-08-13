@@ -9,6 +9,7 @@ import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.FakeIntegrityRequestManager
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.gate.FakeLinkGate
@@ -58,6 +59,7 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeElementsSessionRepository
+import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -1687,36 +1689,37 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Returns InsteadOfSaveForFutureUse signup mode when linkSignUpOptInFeatureEnabled is true even with customer config`() = runTest {
-        val loader = createPaymentElementLoader(
-            linkAccountState = AccountStatus.SignedOut,
-            linkSettings = createLinkSettings(
-                passthroughModeEnabled = false,
-                linkSignUpOptInFeatureEnabled = true
+    fun `Returns InsteadOfSaveForFutureUse signup mode when linkSignUpOptInFeatureEnabled is true even with customer config`() =
+        runTest {
+            val loader = createPaymentElementLoader(
+                linkAccountState = AccountStatus.SignedOut,
+                linkSettings = createLinkSettings(
+                    passthroughModeEnabled = false,
+                    linkSignUpOptInFeatureEnabled = true
+                )
             )
-        )
 
-        val result = loader.load(
-            initializationMode = DEFAULT_INITIALIZATION_MODE,
-            paymentSheetConfiguration = PaymentSheet.Configuration(
-                merchantDisplayName = "Some Name",
-                customer = PaymentSheet.CustomerConfiguration(
-                    id = "cus_123",
-                    ephemeralKeySecret = "ek_123",
+            val result = loader.load(
+                initializationMode = DEFAULT_INITIALIZATION_MODE,
+                paymentSheetConfiguration = PaymentSheet.Configuration(
+                    merchantDisplayName = "Some Name",
+                    customer = PaymentSheet.CustomerConfiguration(
+                        id = "cus_123",
+                        ephemeralKeySecret = "ek_123",
+                    ),
+                    defaultBillingDetails = PaymentSheet.BillingDetails(
+                        email = "john@doe.com",
+                    ),
                 ),
-                defaultBillingDetails = PaymentSheet.BillingDetails(
-                    email = "john@doe.com",
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
                 ),
-            ),
-            metadata = PaymentElementLoader.Metadata(
-                initializedViaCompose = false,
-            ),
-        ).getOrThrow()
+            ).getOrThrow()
 
-        // Even with customer config that would normally trigger AlongsideSaveForFutureUse,
-        // the feature flag should override it to InsteadOfSaveForFutureUse
-        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
-    }
+            // Even with customer config that would normally trigger AlongsideSaveForFutureUse,
+            // the feature flag should override it to InsteadOfSaveForFutureUse
+            assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
+        }
 
     @Test
     fun `Returns null signup mode when linkSignUpOptInFeatureEnabled is true but user has used Link`() = runTest {
@@ -3205,6 +3208,93 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
+    fun `Should call prepare on integrity manager when attestation endpoints are enabled`() = runTest {
+        val integrityRequestManager = FakeIntegrityRequestManager()
+
+        val loader = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                isLiveMode = true // In live mode, shouldWarmUpIntegrity depends on useAttestationEndpointsForLink
+            ),
+            linkSettings = createLinkSettings(
+                passthroughModeEnabled = false
+            ).copy(useAttestationEndpoints = true),
+            integrityRequestManager = integrityRequestManager,
+        )
+
+        loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        )
+
+        // Verify prepare was called
+        integrityRequestManager.awaitPrepareCall()
+        integrityRequestManager.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `Should not call prepare on integrity manager when attestation endpoints are disabled`() = runTest {
+        val integrityRequestManager = FakeIntegrityRequestManager()
+
+        val loader = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                isLiveMode = true // In live mode, shouldWarmUpIntegrity depends on useAttestationEndpointsForLink
+            ),
+            linkSettings = createLinkSettings(
+                passthroughModeEnabled = false
+            ).copy(useAttestationEndpoints = false),
+            integrityRequestManager = integrityRequestManager,
+        )
+
+        loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        )
+
+        // Verify prepare was not called by ensuring all events are consumed (no calls made)
+        integrityRequestManager.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `Should call prepare on integrity manager in test mode when attestation endpoints are enabled`() = runTest {
+        val integrityRequestManager = FakeIntegrityRequestManager()
+
+        val loader = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                isLiveMode = false // In test mode, behavior depends on feature flag + useAttestationEndpointsForLink
+            ),
+            linkSettings = createLinkSettings(
+                passthroughModeEnabled = false
+            ).copy(useAttestationEndpoints = true),
+            integrityRequestManager = integrityRequestManager,
+        )
+
+        loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        )
+
+        // In test mode with attestation endpoints enabled, prepare should still be called
+        // (the exact behavior depends on the feature flag, but this tests the useAttestationEndpoints path)
+        integrityRequestManager.awaitPrepareCall()
+        integrityRequestManager.ensureAllEventsConsumed()
+    }
+
+    @Test
     fun `Emits correct load event for setup future usage'`() = runTest {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -3531,6 +3621,7 @@ internal class DefaultPaymentElementLoaderTest {
             externalPaymentMethodData = externalPaymentMethodData,
         ),
         userFacingLogger: FakeUserFacingLogger = FakeUserFacingLogger(),
+        integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
     ): PaymentElementLoader {
         return DefaultPaymentElementLoader(
             prefsRepositoryFactory = { prefsRepository },
@@ -3544,14 +3635,15 @@ internal class DefaultPaymentElementLoaderTest {
             eventReporter = eventReporter,
             errorReporter = errorReporter,
             workContext = testDispatcher,
+            retrieveCustomerEmail = DefaultRetrieveCustomerEmail(customerRepo),
             accountStatusProvider = { linkAccountState },
+            logLinkHoldbackExperiment = logLinkHoldbackExperiment,
             linkStore = linkStore,
             linkGateFactory = { linkGate },
             externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter = FakeErrorReporter()),
             userFacingLogger = userFacingLogger,
             cvcRecollectionHandler = CvcRecollectionHandlerImpl(),
-            logLinkHoldbackExperiment = logLinkHoldbackExperiment,
-            retrieveCustomerEmail = DefaultRetrieveCustomerEmail(customerRepo)
+            integrityRequestManager = integrityRequestManager,
         )
     }
 

@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground
 
 import android.app.Application
-import android.util.Patterns
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
@@ -56,12 +55,10 @@ internal class LinkControllerPlaygroundViewModel(
         state.update { it.copy(presentPaymentMethodsResult = result) }
     }
 
-    fun onEmailChange(email: String) {
+    fun onLookupClick(email: String) {
         viewModelScope.launch {
-            if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                val result = linkController.lookupConsumer(email)
-                state.update { it.copy(lookupConsumerResult = result) }
-            }
+            val result = linkController.lookupConsumer(email)
+            state.update { it.copy(lookupConsumerResult = result) }
         }
     }
 

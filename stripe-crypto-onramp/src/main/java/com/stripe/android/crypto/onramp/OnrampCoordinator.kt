@@ -43,13 +43,13 @@ class OnrampCoordinator @Inject internal constructor(
     }
 
     /**
-     * Check if the given email corresponds to an existing Link user.
+     * Looks up whether the provided email is associated with an existing Link user.
      *
      * @param email The email address to look up.
      * @return OnrampLinkLookupResult indicating whether the user exists.
      */
-    suspend fun isLinkUser(email: String): OnrampLinkLookupResult {
-        return interactor.isLinkUser(email)
+    suspend fun lookupLinkUser(email: String): OnrampLinkLookupResult {
+        return interactor.lookupLinkUser(email)
     }
 
     /**
@@ -58,7 +58,7 @@ class OnrampCoordinator @Inject internal constructor(
      * @param info The LinkInfo for the new user.
      * @return OnrampRegisterUserResult indicating the result of registration.
      */
-    suspend fun registerNewLinkUser(info: LinkUserInfo): OnrampRegisterUserResult {
+    suspend fun registerLinkUser(info: LinkUserInfo): OnrampRegisterUserResult {
         return interactor.registerNewLinkUser(info)
     }
 
@@ -77,7 +77,7 @@ class OnrampCoordinator @Inject internal constructor(
     }
 
     /**
-     * Given the required information, collects information .
+     * Given the required information, collects KYC information.
      *
      * @param info The KycInfo for the user.
      * @return OnrampKYCResult indicating the result of data collection.
@@ -115,18 +115,18 @@ class OnrampCoordinator @Inject internal constructor(
         private val coordinator: OnrampPresenterCoordinator,
     ) {
         /**
-         * Authenticate an existing Link user via email.
-         * This presents the authentication UI.
+         * Presents the Link verification flow for an existing user.
          *
-         * @param email The email address of the existing user.
+         * Requires successful lookup or registration of the user first.
          */
-        fun authenticateExistingLinkUser(email: String) {
-            coordinator.authenticateExistingLinkUser(email)
+        fun presentForVerification() {
+            coordinator.presentForVerification()
         }
 
         /**
-         * Prompts a user to perform identity verification.
-         * This presents the identity verification UI.
+         * Creates an identity verification session and launches the verification flow.
+         *
+         * Requires successful lookup or registration of the user first.
          */
         fun promptForIdentityVerification() {
             coordinator.promptForIdentityVerification()

@@ -180,9 +180,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 displaysMandatesInFormScreen = false,
             ).also { interactor ->
                 viewModel.viewModelScope.launch {
-                    interactor.state.collect { state ->
+                    interactor.state.mapAsStateFlow { it.mandate }.collect { mandate ->
                         viewModel.mandateHandler.updateMandateText(
-                            mandateText = state.mandate,
+                            mandateText = mandate,
                             showAbove = true,
                         )
                     }

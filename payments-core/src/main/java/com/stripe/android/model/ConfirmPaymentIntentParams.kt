@@ -255,7 +255,13 @@ constructor(
          * Use `` if you want to clear reusable from the payment intent.  Note: this
          * only works if the PaymentIntent was created with no setup_future_usage.
          */
-        Blank("")
+        Blank(""),
+
+        /**
+         * Use `none` to override top level setup_future_usage in payment_method_options.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        None("none")
     }
 
     /**

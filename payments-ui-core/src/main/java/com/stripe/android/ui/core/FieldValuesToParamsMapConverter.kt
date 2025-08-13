@@ -116,7 +116,7 @@ class FieldValuesToParamsMapConverter {
                     }
                 }
                 PaymentMethod.Type.WeChatPay.code -> {
-                    PaymentMethodOptionsParams.WeChatPayH5
+                    PaymentMethodOptionsParams.WeChatPayH5()
                 }
                 PaymentMethod.Type.SepaDebit.code -> {
                     PaymentMethodOptionsParams.SepaDebit(

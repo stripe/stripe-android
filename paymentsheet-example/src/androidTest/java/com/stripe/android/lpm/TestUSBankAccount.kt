@@ -1,7 +1,10 @@
 package com.stripe.android.lpm
 
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
+import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -11,12 +14,17 @@ import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.FeatureFlagSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TEST_TAG_ACCOUNT_DETAILS
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
 import com.stripe.android.test.core.TestParameters
@@ -54,6 +62,91 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
                 ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
                     .waitFor(isEnabled())
             }
+        )
+    }
+
+    /**
+     * Tests that save checkbox SFU (which is still present when customer session is enabled) does not override
+     * PMO SFU.
+     */
+    @Test
+    fun testUSBankAccountSuccessWithPmoSfuAndCustomerSession() {
+        testDriver.confirmUSBankAccount(
+            financialConnectionsLiteEnabled = false,
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
+                settings[PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition] = "us_bank_account:off_session"
+                settings[CustomerSessionSettingsDefinition] = true
+                settings[CustomerSettingsDefinition] = CustomerType.NEW
+            },
+            afterAuthorization = { _, _ ->
+                ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
+                    .waitFor(isEnabled())
+            }
+        )
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun testUSBankAccountSuccessWithPmoSfu() {
+        val state = testDriver.confirmUSBankAccount(
+            financialConnectionsLiteEnabled = false,
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
+                settings[PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition] = "us_bank_account:off_session"
+                settings[CustomerSettingsDefinition] = CustomerType.NEW
+            },
+            afterAuthorization = { _, _ ->
+                ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
+                    .waitFor(isEnabled())
+            }
+        )
+
+        testDriver.confirmCompleteWithDefaultSavedPaymentMethod(
+            customerId = state?.asPaymentState()?.customerConfig?.id,
+            testParameters = testParameters.copy(
+                authorizationAction = null
+            ),
+            beforeBuyAction = { selectors ->
+                selectors.composeTestRule.waitUntilExactlyOneExists(
+                    matcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
+                        .and(isSelected())
+                        .and(hasText("6789", substring = true)),
+                    timeoutMillis = 5000L
+                )
+            },
+        )
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun testUSBankAccountSuccessWithPmoSfuDeferred() {
+        val state = testDriver.confirmUSBankAccount(
+            financialConnectionsLiteEnabled = false,
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
+                settings[PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition] = "us_bank_account:off_session"
+                settings[CustomerSettingsDefinition] = CustomerType.NEW
+            },
+            afterAuthorization = { _, _ ->
+                ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
+                    .waitFor(isEnabled())
+            }
+        )
+
+        testDriver.confirmCompleteWithDefaultSavedPaymentMethod(
+            customerId = state?.asPaymentState()?.customerConfig?.id,
+            testParameters = testParameters.copy(
+                authorizationAction = null
+            ),
+            beforeBuyAction = { selectors ->
+                selectors.composeTestRule.waitUntilExactlyOneExists(
+                    matcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
+                        .and(isSelected())
+                        .and(hasText("6789", substring = true)),
+                    timeoutMillis = 5000L
+                )
+            },
         )
     }
 

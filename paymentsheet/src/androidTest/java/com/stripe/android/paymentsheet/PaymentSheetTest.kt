@@ -10,6 +10,7 @@ import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.utils.IntegrationType
@@ -367,6 +368,73 @@ internal class PaymentSheetTest {
 
         page.fillCvcRecollection("123")
         page.clickPrimaryButton()
+    }
+
+    @Test
+    fun testSavedUsBankAccountMandateNotDisplayDuringCardCheckout() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/payment_methods"),
+            query("type", "card"),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-get-success-empty.json")
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/payment_methods"),
+            query("type", "us_bank_account"),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-get-success-us-bank.json")
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = PaymentSheet.Configuration.Builder(
+                    merchantDisplayName = "Merchant, Inc."
+                )
+                    .customer(
+                        customer = PaymentSheet.CustomerConfiguration(
+                            id = "cus_1",
+                            ephemeralKeySecret = "ek_123",
+                        )
+                    )
+                    .allowsDelayedPaymentMethods(true)
+                    .link(PaymentSheet.LinkConfiguration.Builder().display(PaymentSheet.LinkConfiguration.Display.Never).build())
+                    .build()
+            )
+        }
+
+        page.assertSavedSelection("pm_6789")
+        page.assertHasMandate("By continuing, you agree to authorize payments", substring = true)
+        page.clickOnLpm("card", forVerticalMode = true)
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+        ) { response ->
+            response.setResponseCode(500)
+        }
+
+        page.clickPrimaryButton()
+        page.assertMandateIsMissing()
+        testContext.markTestSucceeded()
     }
 
     @Test
