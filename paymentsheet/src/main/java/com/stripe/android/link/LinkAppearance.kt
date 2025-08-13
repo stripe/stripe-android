@@ -1,4 +1,4 @@
-package com.stripe.android.link.model
+package com.stripe.android.link
 
 import android.os.Parcel
 import android.os.Parcelable
