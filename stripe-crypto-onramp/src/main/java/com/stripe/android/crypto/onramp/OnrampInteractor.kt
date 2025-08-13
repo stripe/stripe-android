@@ -1,7 +1,6 @@
 package com.stripe.android.crypto.onramp
 
 import android.app.Application
-import androidx.core.content.ContextCompat
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
