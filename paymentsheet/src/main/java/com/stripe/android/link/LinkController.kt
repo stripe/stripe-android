@@ -152,8 +152,8 @@ class LinkController @Inject internal constructor(
              * Your customer-facing business name.
              */
             private val merchantDisplayName: String,
-            private val appearance: LinkAppearance? = null
         ) {
+            private var appearance: LinkAppearance? = null
             private var cardBrandAcceptance: PaymentSheet.CardBrandAcceptance =
                 ConfigurationDefaults.cardBrandAcceptance
             private var defaultBillingDetails: PaymentSheet.BillingDetails? =
@@ -161,6 +161,16 @@ class LinkController @Inject internal constructor(
             private var billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
                 ConfigurationDefaults.billingDetailsCollectionConfiguration
             private var allowUserEmailEdits: Boolean = true
+
+            /**
+             * Configure the appearance of Link UI components.
+             *
+             * @param appearance The [LinkAppearance] configuration for customizing Link UI styling.
+             * @return This builder instance for method chaining.
+             */
+            fun appearance(appearance: LinkAppearance) = apply {
+                this.appearance = appearance
+            }
 
             /**
              * Configuration for which card brands should be accepted or blocked.
