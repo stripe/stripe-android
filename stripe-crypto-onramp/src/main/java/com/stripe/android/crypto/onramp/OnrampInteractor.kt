@@ -1,9 +1,11 @@
 package com.stripe.android.crypto.onramp
 
 import android.app.Application
+import androidx.core.content.ContextCompat
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
+import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampIdentityVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampKYCResult
@@ -12,6 +14,7 @@ import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
 import com.stripe.android.crypto.onramp.model.OnrampSetWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
+import com.stripe.android.crypto.onramp.model.PaymentOptionDisplayData
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
@@ -177,9 +180,37 @@ internal class OnrampInteractor @Inject constructor(
             OnrampIdentityVerificationResult.Cancelled()
     }
 
+    fun handleSelectPaymentResult(
+        result: LinkController.PresentPaymentMethodsResult
+    ): OnrampCollectPaymentResult = when (result) {
+        is LinkController.PresentPaymentMethodsResult.Success -> {
+            val paymentMethodPreview = paymentMethodPreview()
+
+            paymentMethodPreview?.let {
+                OnrampCollectPaymentResult.Completed(
+                    displayData = PaymentOptionDisplayData(
+                        icon = it.icon,
+                        label = it.label,
+                        sublabel = it.sublabel
+                    )
+                )
+            } ?: run {
+                OnrampCollectPaymentResult.Failed(IllegalStateException("Missing selected payment preview"))
+            }
+        }
+        is LinkController.PresentPaymentMethodsResult.Failed ->
+            OnrampCollectPaymentResult.Failed(result.error)
+        is LinkController.PresentPaymentMethodsResult.Canceled ->
+            OnrampCollectPaymentResult.Cancelled()
+    }
+
     private fun consumerSessionClientSecret(): String? =
         _state.value.linkControllerState?.internalLinkAccount?.consumerSessionClientSecret
             ?: linkController.state(application).value.internalLinkAccount?.consumerSessionClientSecret
+
+    private fun paymentMethodPreview(): LinkController.PaymentMethodPreview? =
+        _state.value.linkControllerState?.selectedPaymentMethodPreview
+            ?: linkController.state(application).value.selectedPaymentMethodPreview
 
     fun onLinkControllerState(linkState: LinkController.State) {
         _state.value = _state.value.copy(linkControllerState = linkState)

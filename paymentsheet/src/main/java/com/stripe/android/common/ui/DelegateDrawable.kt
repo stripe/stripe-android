@@ -14,17 +14,24 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.ShapeDrawable
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.annotation.RestrictTo
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal class DelegateDrawable(
     private val imageLoader: suspend () -> Drawable,
 ) : Drawable() {
     @Volatile
     private var delegate: Drawable = ShapeDrawable()
+        .apply {
+            // Non-zero dimensions to avoid crashing before `delegate` has been initialized.
+            intrinsicHeight = 1
+            intrinsicWidth = 1
+        }
 
     init {
         @OptIn(DelicateCoroutinesApi::class)
