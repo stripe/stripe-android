@@ -346,7 +346,7 @@ internal class LinkActivityViewModel @Inject constructor(
             accountStatus is AccountStatus.Verified &&
             linkAccount?.consentPresentation is ConsentPresentation.Inline
         ) {
-            // Completed verification with inline consent.
+            // Already completed verification with inline consent.
             dismissWithResult(LinkActivityResult.Completed(linkAccountManager.linkAccountUpdate))
             return
         }

@@ -519,6 +519,9 @@ class LinkController @Inject internal constructor(
         data object Consented : AuthorizeResult
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data object Denied : AuthorizeResult
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data object Canceled : AuthorizeResult
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

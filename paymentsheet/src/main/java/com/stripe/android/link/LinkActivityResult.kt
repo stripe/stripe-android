@@ -18,6 +18,7 @@ internal sealed class LinkActivityResult : Parcelable {
         override val linkAccountUpdate: LinkAccountUpdate,
         val selectedPayment: LinkPaymentMethod? = null,
         val shippingAddress: ConsumerShippingAddress? = null,
+        val authorizationConsentGranted: Boolean? = null,
     ) : LinkActivityResult()
 
     /**
