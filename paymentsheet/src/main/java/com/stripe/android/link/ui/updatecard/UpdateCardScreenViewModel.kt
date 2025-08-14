@@ -31,6 +31,7 @@ import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParams.Card.Networks
+import com.stripe.android.paymentelement.AllowedBillingCountriesInPaymentElementPreview
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
@@ -178,6 +179,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
 
         val defaultConfiguration = configuration.billingDetailsCollectionConfiguration
 
+        @OptIn(AllowedBillingCountriesInPaymentElementPreview::class)
         return DefaultEditCardDetailsInteractor.Factory().create(
             coroutineScope = viewModelScope,
             cardEditConfiguration = cardEditConfiguration,
@@ -203,6 +205,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                     defaultConfiguration.address
                 },
                 attachDefaultsToPaymentMethod = defaultConfiguration.attachDefaultsToPaymentMethod,
+                allowedCountries = defaultConfiguration.allowedCountries,
             ),
             onCardUpdateParamsChanged = ::onCardUpdateParamsChanged,
             onBrandChoiceChanged = ::onBrandChoiceChanged,

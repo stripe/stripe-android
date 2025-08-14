@@ -2,12 +2,14 @@ package com.stripe.android.link.ui.wallet
 
 import androidx.compose.runtime.Immutable
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.common.validation.isSupportedWithBillingConfig
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.Card
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.forms.FormFieldEntry
 
@@ -36,6 +38,7 @@ internal data class WalletUiState(
     val isAutoSelecting: Boolean = false,
     val hasAttemptedAutoSelection: Boolean = false,
     val signupToggleEnabled: Boolean,
+    val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
 ) {
 
     val selectedItem: ConsumerPaymentDetails.PaymentDetails?
@@ -98,7 +101,9 @@ internal data class WalletUiState(
         get() = addPaymentMethodOptions.isNotEmpty()
 
     fun isItemAvailable(item: ConsumerPaymentDetails.PaymentDetails): Boolean {
-        return item !is Card || cardBrandFilter.isAccepted(item.brand)
+        return (
+            item !is Card || cardBrandFilter.isAccepted(item.brand)
+            ) && item.isSupportedWithBillingConfig(billingDetailsCollectionConfiguration)
     }
 
     fun updateWithResponse(

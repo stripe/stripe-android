@@ -28,6 +28,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.AddressAutocompletePreview
+import com.stripe.android.paymentelement.AllowedBillingCountriesInPaymentElementPreview
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
@@ -2740,7 +2741,7 @@ class PaymentSheet internal constructor(
      * Configuration for how billing details are collected during checkout.
      */
     @Parcelize
-    data class BillingDetailsCollectionConfiguration(
+    data class BillingDetailsCollectionConfiguration @AllowedBillingCountriesInPaymentElementPreview constructor(
         /**
          * How to collect the name field.
          */
@@ -2768,7 +2769,52 @@ class PaymentSheet internal constructor(
          * If `false` (the default), those values will only be used to prefill the corresponding fields in the form.
          */
         val attachDefaultsToPaymentMethod: Boolean = false,
+
+        /**
+         * A list of two-letter country codes representing countries the customers can select.
+         *
+         * If the set is empty (the default), we display all countries.
+         */
+        val allowedCountries: Set<String> = emptySet(),
     ) : Parcelable {
+        @OptIn(AllowedBillingCountriesInPaymentElementPreview::class)
+        constructor(
+            /**
+             * How to collect the name field.
+             */
+            name: CollectionMode = CollectionMode.Automatic,
+
+            /**
+             * How to collect the phone field.
+             */
+            phone: CollectionMode = CollectionMode.Automatic,
+
+            /**
+             * How to collect the email field.
+             */
+            email: CollectionMode = CollectionMode.Automatic,
+
+            /**
+             * How to collect the billing address.
+             */
+            address: AddressCollectionMode = AddressCollectionMode.Automatic,
+
+            /**
+             * Whether the values included in [PaymentSheet.Configuration.defaultBillingDetails]
+             * should be attached to the payment method, this includes fields that aren't displayed in the form.
+             *
+             * If `false` (the default), those values will only be used to prefill the corresponding fields in the
+             * form.
+             */
+            attachDefaultsToPaymentMethod: Boolean = false,
+        ) : this(
+            name = name,
+            phone = phone,
+            email = email,
+            address = address,
+            attachDefaultsToPaymentMethod = attachDefaultsToPaymentMethod,
+            allowedCountries = emptySet(),
+        )
 
         internal val collectsName: Boolean
             get() = name == CollectionMode.Always

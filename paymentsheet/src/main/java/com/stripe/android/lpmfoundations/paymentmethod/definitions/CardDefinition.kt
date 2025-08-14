@@ -6,7 +6,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -195,6 +194,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
         ) {
             addAll(
                 cardBillingElements(
+                    billingDetailsCollectionConfiguration.allowedCountries,
                     billingDetailsCollectionConfiguration.toInternal(),
                     arguments.autocompleteAddressInteractorFactory,
                     arguments.initialValues,
@@ -226,6 +226,7 @@ internal fun PaymentSheet.BillingDetailsCollectionConfiguration.toInternal(): Bi
 }
 
 private fun cardBillingElements(
+    allowedCountries: Set<String>,
     collectionConfiguration: BillingDetailsCollectionConfiguration,
     autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
     initialValues: Map<IdentifierSpec, String?>,
@@ -242,7 +243,7 @@ private fun cardBillingElements(
             }
     val addressElement = CardBillingAddressElement(
         IdentifierSpec.Generic("credit_billing"),
-        countryCodes = CountryUtils.supportedBillingCountries,
+        countryCodes = allowedCountries,
         rawValuesMap = initialValues,
         sameAsShippingElement = sameAsShippingElement,
         shippingValuesMap = shippingValues,
