@@ -99,10 +99,17 @@ internal class VerificationViewModel @Inject constructor(
                 val completedAuthorizationConsent =
                     linkLaunchMode is LinkLaunchMode.Authorization &&
                         account.consentPresentation is ConsentPresentation.Inline
-                if (isAuthenticationMode || completedAuthorizationConsent) {
+                if (isAuthenticationMode) {
                     dismissWithResult(
                         LinkActivityResult.Completed(
                             linkAccountUpdate = linkAccountManager.linkAccountUpdate,
+                        )
+                    )
+                } else if (completedAuthorizationConsent) {
+                    dismissWithResult(
+                        LinkActivityResult.Completed(
+                            linkAccountUpdate = linkAccountManager.linkAccountUpdate,
+                            authorizationConsentGranted = true,
                         )
                     )
                 } else {

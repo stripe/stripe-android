@@ -329,7 +329,13 @@ internal class LinkControllerInteractor @Inject constructor(
             }
             is LinkActivityResult.Completed -> {
                 logger.debug("$tag: authorization completed")
-                _authorizeResultFlow.tryEmit(LinkController.AuthorizeResult.Consented)
+                _authorizeResultFlow.tryEmit(
+                    when (result.authorizationConsentGranted) {
+                        true -> LinkController.AuthorizeResult.Consented
+                        false -> LinkController.AuthorizeResult.Denied
+                        null -> LinkController.AuthorizeResult.Canceled // Shouldn't happen.
+                    }
+                )
             }
             is LinkActivityResult.Failed -> {
                 logger.debug("$tag: authorization failed")

@@ -49,7 +49,10 @@ internal class OAuthConsentViewModel @Inject constructor(
         // TODO: Submit consent result
         // TODO: Error handling
         dismissWithResult(
-            LinkActivityResult.Completed(linkAccountUpdate = LinkAccountUpdate.Value(linkAccount))
+            LinkActivityResult.Completed(
+                linkAccountUpdate = LinkAccountUpdate.Value(linkAccount),
+                authorizationConsentGranted = true,
+            )
         )
     }
 
@@ -57,7 +60,10 @@ internal class OAuthConsentViewModel @Inject constructor(
         // TODO: Submit consent result
         // TODO: Error handling
         dismissWithResult(
-            LinkActivityResult.Canceled(linkAccountUpdate = LinkAccountUpdate.Value(linkAccount))
+            LinkActivityResult.Completed(
+                linkAccountUpdate = LinkAccountUpdate.Value(linkAccount),
+                authorizationConsentGranted = false,
+            )
         )
     }
 
