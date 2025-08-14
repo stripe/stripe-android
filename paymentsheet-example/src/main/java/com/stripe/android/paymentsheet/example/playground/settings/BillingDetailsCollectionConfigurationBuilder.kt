@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
+import com.stripe.android.paymentelement.AllowedBillingCountriesInPaymentElementPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
@@ -10,7 +11,9 @@ internal class BillingDetailsCollectionConfigurationBuilder(
     var email: CollectionMode = CollectionMode.Automatic,
     var address: AddressCollectionMode = AddressCollectionMode.Automatic,
     var attachDefaultsToPaymentMethod: Boolean = false,
+    var allowedCountries: Set<String> = emptySet()
 ) {
+    @OptIn(AllowedBillingCountriesInPaymentElementPreview::class)
     fun build(): PaymentSheet.BillingDetailsCollectionConfiguration {
         return PaymentSheet.BillingDetailsCollectionConfiguration(
             name = name,
@@ -18,6 +21,7 @@ internal class BillingDetailsCollectionConfigurationBuilder(
             email = email,
             address = address,
             attachDefaultsToPaymentMethod = attachDefaultsToPaymentMethod,
+            allowedCountries = allowedCountries,
         )
     }
 }
