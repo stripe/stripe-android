@@ -8,7 +8,6 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import com.google.android.gms.wallet.PaymentCardRecognitionIntentRequest
@@ -21,18 +20,27 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.parcelize.Parcelize
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class CardScanGoogleLauncher(
+internal class CardScanGoogleLauncher(
     context: Context,
-    private val activityLauncher: ActivityResultLauncher<IntentSenderRequest>
+    private val eventsReporter: CardScanEventsReporter
 ) {
+    private val implementation = "google_pay"
     private val _isAvailable = MutableStateFlow(false)
     val isAvailable: StateFlow<Boolean> = _isAvailable.asStateFlow()
 
+    private lateinit var activityLauncher: ActivityResultLauncher<IntentSenderRequest>
     init {
-        fetchIntent(context) {
-            _isAvailable.value = true
-        }
+        fetchIntent(
+            context = context,
+            onFailure = { e ->
+                _isAvailable.value = false
+                eventsReporter.apiCheck(implementation, false, e.message)
+            },
+            onSuccess = {
+                _isAvailable.value = true
+                eventsReporter.apiCheck(implementation, true)
+            }
+        )
     }
 
     private fun isStripeExampleApp(context: Context): Boolean {
@@ -56,7 +64,11 @@ class CardScanGoogleLauncher(
         return Wallet.getPaymentsClient(context, walletOptions)
     }
 
-    private fun fetchIntent(context: Context, onSuccess: (IntentSenderRequest) -> Unit) {
+    private fun fetchIntent(
+        context: Context,
+        onFailure: (Exception) -> Unit = {},
+        onSuccess: (IntentSenderRequest) -> Unit
+    ) {
         val paymentsClient = createPaymentsClient(context)
         val request = PaymentCardRecognitionIntentRequest.getDefaultInstance()
 
@@ -67,28 +79,52 @@ class CardScanGoogleLauncher(
                 onSuccess(intentSenderRequest)
             }
             .addOnFailureListener { e ->
+                onFailure(e)
             }
     }
 
     fun launch(context: Context) {
+        eventsReporter.scanStarted("google_pay")
         fetchIntent(context) { intentSenderRequest ->
             activityLauncher.launch(intentSenderRequest)
         }
     }
 
+    private fun parseActivityResult(result: ActivityResult): CardScanSheetResult {
+        if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+            val data = result.data ?: return CardScanSheetResult.Canceled(CancellationReason.Closed).also {
+                eventsReporter.scanCancelled(implementation, CancellationReason.Closed)
+            }
+            val paymentCardRecognitionResult = PaymentCardRecognitionResult.getFromIntent(data)
+            val pan = paymentCardRecognitionResult?.pan
+            return if (pan != null) {
+                eventsReporter.scanSucceeded(implementation)
+                CardScanSheetResult.Completed(ScannedCard(pan))
+            } else {
+                val error = Throwable("Failed to parse card data")
+                eventsReporter.scanFailed("google_pay", error)
+                CardScanSheetResult.Failed(error)
+            }
+        }
+        eventsReporter.scanCancelled(implementation, CancellationReason.Closed)
+        return CardScanSheetResult.Canceled(CancellationReason.Closed)
+    }
+
     companion object {
         @Composable
-        fun rememberCardScanGoogleLauncher(
+        internal fun rememberCardScanGoogleLauncher(
             context: Context,
+            eventsReporter: CardScanEventsReporter,
             onResult: (CardScanSheetResult) -> Unit
         ): CardScanGoogleLauncher {
+            val launcher = remember(context, eventsReporter) { CardScanGoogleLauncher(context, eventsReporter) }
             val activityLauncher = rememberLauncherForActivityResult(
                 ActivityResultContracts.StartIntentSenderForResult(),
-            ) {
-                onResult(parseActivityResult(it))
+            ) { result ->
+                onResult(launcher.parseActivityResult(result))
             }
             return remember(activityLauncher) {
-                CardScanGoogleLauncher(context, activityLauncher)
+                launcher.apply { this.activityLauncher = activityLauncher }
             }
         }
     }
@@ -131,18 +167,4 @@ sealed interface CancellationReason : Parcelable {
 
     @Parcelize
     data object CameraPermissionDenied : CancellationReason
-}
-
-private fun parseActivityResult(result: ActivityResult): CardScanSheetResult {
-    if (result.resultCode == Activity.RESULT_OK && result.data != null) {
-        val data = result.data ?: return CardScanSheetResult.Canceled(CancellationReason.Closed)
-        val paymentCardRecognitionResult = PaymentCardRecognitionResult.getFromIntent(data)
-        val pan = paymentCardRecognitionResult?.pan
-        return if (pan != null) {
-            CardScanSheetResult.Completed(ScannedCard(pan))
-        } else {
-            CardScanSheetResult.Failed(Throwable("Failed to parse card data"))
-        }
-    }
-    return CardScanSheetResult.Canceled(CancellationReason.Closed)
 }

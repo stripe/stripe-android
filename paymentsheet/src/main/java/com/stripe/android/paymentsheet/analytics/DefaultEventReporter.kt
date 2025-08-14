@@ -635,6 +635,70 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
+    override fun onCardScanStarted(implementation: String) {
+        fireEvent(
+            PaymentSheetEvent.CardScanStarted(
+                implementation = implementation,
+                isDeferred = isDeferred,
+                isSpt = isSpt,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
+    override fun onCardScanSucceeded(implementation: String) {
+        fireEvent(
+            PaymentSheetEvent.CardScanSucceeded(
+                implementation = implementation,
+                isDeferred = isDeferred,
+                isSpt = isSpt,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
+    override fun onCardScanFailed(implementation: String, error: Throwable?) {
+        fireEvent(
+            PaymentSheetEvent.CardScanFailed(
+                implementation = implementation,
+                error = error,
+                isDeferred = isDeferred,
+                isSpt = isSpt,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
+    override fun onCardScanCancelled(implementation: String, reason: com.stripe.android.ui.core.cardscan.CancellationReason) {
+        fireEvent(
+            PaymentSheetEvent.CardScanCancelled(
+                implementation = implementation,
+                reason = reason,
+                isDeferred = isDeferred,
+                isSpt = isSpt,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
+    override fun onCardScanApiCheck(implementation: String, available: Boolean, reason: String?) {
+        fireEvent(
+            PaymentSheetEvent.CardScanApiCheck(
+                implementation = implementation,
+                available = available,
+                reason = reason,
+                isDeferred = isDeferred,
+                isSpt = isSpt,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
     private fun fireEvent(event: PaymentSheetEvent) {
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(

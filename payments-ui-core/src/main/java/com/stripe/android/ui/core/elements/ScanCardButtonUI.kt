@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cardscan.CardScanGoogleLauncher.Companion.rememberCardScanGoogleLauncher
 import com.stripe.android.ui.core.cardscan.CardScanSheetResult
+import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
 import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.LocalIconStyle
 
@@ -33,7 +34,8 @@ internal fun ScanCardButtonUI(
     onResult: (CardScanSheetResult) -> Unit
 ) {
     val context = LocalContext.current
-    val cardScanLauncher = rememberCardScanGoogleLauncher(context, onResult)
+    val eventsReporter = LocalCardScanEventsReporter.current
+    val cardScanLauncher = rememberCardScanGoogleLauncher(context, eventsReporter, onResult)
     val isCardScanAvailable by cardScanLauncher.isAvailable.collectAsState()
     if (isCardScanAvailable) {
         Row(

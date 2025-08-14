@@ -23,6 +23,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFo
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.asPaymentSheetLoadingException
 import com.stripe.android.paymentsheet.utils.getSetAsDefaultPaymentMethodFromPaymentSelection
+import com.stripe.android.ui.core.cardscan.CancellationReason
 import com.stripe.android.utils.filterNotNullValues
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -704,6 +705,81 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val additionalParams: Map<String, Any?> = mapOf(
             "did_receive_ece_click" to didReceiveECEClick
         )
+    }
+
+    class CardScanStarted(
+        implementation: String,
+        override val isDeferred: Boolean,
+        override val isSpt: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "cardscan_scan_started"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            "implementation" to implementation
+        )
+    }
+
+    class CardScanSucceeded(
+        implementation: String,
+        override val isDeferred: Boolean,
+        override val isSpt: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "cardscan_success"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            "implementation" to implementation
+        )
+    }
+
+    class CardScanFailed(
+        implementation: String,
+        error: Throwable?,
+        override val isDeferred: Boolean,
+        override val isSpt: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "cardscan_failed"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            "implementation" to implementation,
+            FIELD_ERROR_MESSAGE to error?.message
+        )
+    }
+
+    class CardScanCancelled(
+        implementation: String,
+        reason: CancellationReason,
+        override val isDeferred: Boolean,
+        override val isSpt: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "cardscan_cancel"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            "implementation" to implementation,
+            "cancellation_reason" to reason::class.simpleName?.lowercase()
+        )
+    }
+
+    class CardScanApiCheck(
+        implementation: String,
+        available: Boolean,
+        reason: String?,
+        override val isDeferred: Boolean,
+        override val isSpt: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "cardscan_api_check"
+        override val additionalParams: Map<String, Any?> = buildMap {
+            if (reason!= null) {
+                put("reason", reason)
+            }
+            put("implementation", implementation)
+            put("available", available)
+        }
     }
 
     private fun standardParams(

@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.ui.core.cardscan.CancellationReason
 
 internal interface EventReporter {
 
@@ -250,6 +251,31 @@ internal interface EventReporter {
      * Shop Pay webView has been cancelled by the user.
      */
     fun onShopPayWebViewCancelled(didReceiveECEClick: Boolean)
+
+    /**
+     * Card scan has started.
+     */
+    fun onCardScanStarted(implementation: String)
+
+    /**
+     * Card scan completed successfully.
+     */
+    fun onCardScanSucceeded(implementation: String)
+
+    /**
+     * Card scan failed with an error.
+     */
+    fun onCardScanFailed(implementation: String, error: Throwable?)
+
+    /**
+     * Card scan was cancelled by the user.
+     */
+    fun onCardScanCancelled(implementation: String, reason: CancellationReason)
+
+    /**
+     * Card scan API availability check.
+     */
+    fun onCardScanApiCheck(implementation: String, available: Boolean, reason: String?)
 
     enum class Mode(val code: String) {
         Complete("complete"),
