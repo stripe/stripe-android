@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,7 +53,7 @@ fun CardDetailsSectionElementUI(
             AnimationConstants.FADE_OUT,
         )
 
-        SideEffect {
+        LaunchedEffect(Unit) {
             controller.setHasSeenAutoCardScanOpen()
 
             cardScanLauncher.launch(
