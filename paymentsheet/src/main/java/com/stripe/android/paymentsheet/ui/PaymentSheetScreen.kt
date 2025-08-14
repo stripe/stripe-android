@@ -353,7 +353,8 @@ private fun PaymentSheetContent(
                 onLinkPressed = state.onLinkPressed,
                 dividerSpacing = currentScreen.walletsDividerSpacing,
                 modifier = Modifier.padding(bottom = bottomSpacing),
-                cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance)
+                cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
+                isCompleteFlow = viewModel.isCompleteFlow
             )
         }
 
@@ -409,28 +410,40 @@ internal fun Wallet(
     onLinkPressed: () -> Unit,
     dividerSpacing: Dp,
     modifier: Modifier = Modifier,
-    cardBrandFilter: CardBrandFilter
+    cardBrandFilter: CardBrandFilter,
+    isCompleteFlow: Boolean
 ) {
     val padding = StripeTheme.getOuterFormInsets()
 
     Column(modifier = modifier.padding(padding)) {
-        state.googlePay?.let { googlePay ->
-            GooglePayButton(
-                state = PrimaryButton.State.Ready,
-                allowCreditCards = googlePay.allowCreditCards,
-                buttonType = googlePay.buttonType,
-                billingAddressParameters = googlePay.billingAddressParameters,
-                isEnabled = state.buttonsEnabled,
-                onPressed = onGooglePayPressed,
-                cardBrandFilter = cardBrandFilter
-            )
+        // PaymentSheet: Both Google Pay and Link in wallet
+        // FlowController: Only Link in wallet (Google Pay goes to payment methods list)
+        // Embedded: No wallet buttons (handled by not calling this composable)
+        val showGooglePayInWallet = isCompleteFlow // Only complete flows show Google Pay in wallet
+        
+        var hasWalletButtons = false
+        
+        if (showGooglePayInWallet) {
+            state.googlePay?.let { googlePay ->
+                hasWalletButtons = true
+                GooglePayButton(
+                    state = PrimaryButton.State.Ready,
+                    allowCreditCards = googlePay.allowCreditCards,
+                    buttonType = googlePay.buttonType,
+                    billingAddressParameters = googlePay.billingAddressParameters,
+                    isEnabled = state.buttonsEnabled,
+                    onPressed = onGooglePayPressed,
+                    cardBrandFilter = cardBrandFilter
+                )
+            }
         }
-
+        
         state.link?.let {
-            if (state.googlePay != null) {
+            if (showGooglePayInWallet && state.googlePay != null) {
                 Spacer(modifier = Modifier.requiredHeight(8.dp))
             }
-
+            
+            hasWalletButtons = true
             LinkButton(
                 state = it.state,
                 enabled = state.buttonsEnabled,
@@ -448,10 +461,13 @@ internal fun Wallet(
             else -> Unit
         }
 
-        Spacer(modifier = Modifier.requiredHeight(dividerSpacing))
+        // Only show divider if there are wallet buttons to separate from payment methods
+        if (hasWalletButtons) {
+            Spacer(modifier = Modifier.requiredHeight(dividerSpacing))
 
-        val text = stringResource(state.dividerTextResource)
-        WalletsDivider(text)
+            val text = stringResource(state.dividerTextResource)
+            WalletsDivider(text)
+        }
     }
 }
 

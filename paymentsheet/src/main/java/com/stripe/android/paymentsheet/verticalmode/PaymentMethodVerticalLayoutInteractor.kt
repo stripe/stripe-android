@@ -359,23 +359,24 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     },
                 )
             }
+        }
 
-            walletsState?.googlePay?.let {
-                wallets += DisplayablePaymentMethod(
-                    code = "google_pay",
-                    displayName = PaymentsCoreR.string.stripe_google_pay.resolvableString,
-                    iconResource = PaymentsCoreR.drawable.stripe_google_pay_mark,
-                    iconResourceNight = null,
-                    lightThemeIconUrl = null,
-                    darkThemeIconUrl = null,
-                    iconRequiresTinting = false,
-                    subtitle = null,
-                    onClick = {
-                        updateSelection(PaymentSelection.GooglePay, false)
-                        invokeRowSelectionCallback?.invoke()
-                    },
-                )
-            }
+        // Add Google Pay to payment methods list for custom flows (flow controller), skip for complete flows
+        if (canShowWalletsInline && paymentMethodMetadata.isGooglePayReady) {
+            wallets += DisplayablePaymentMethod(
+                code = "google_pay",
+                displayName = PaymentsCoreR.string.stripe_google_pay.resolvableString,
+                iconResource = PaymentsCoreR.drawable.stripe_google_pay_mark,
+                iconResourceNight = null,
+                lightThemeIconUrl = null,
+                darkThemeIconUrl = null,
+                iconRequiresTinting = false,
+                subtitle = null,
+                onClick = {
+                    updateSelection(PaymentSelection.GooglePay, false)
+                    invokeRowSelectionCallback?.invoke()
+                },
+            )
         }
 
         return wallets + lpms
