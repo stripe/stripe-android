@@ -64,6 +64,27 @@ class AutocompleteAddressControllerTest {
     }
 
     @Test
+    fun `Email field is hidden when state is HIDDEN`() = elementsTest(
+        emailConfig = AddressFieldConfiguration.HIDDEN
+    ) { elements ->
+        assertThat(elements.filterIsInstance<EmailElement>()).isEmpty()
+    }
+
+    @Test
+    fun `Email field is shown when state is OPTIONAL`() = elementsTest(
+        emailConfig = AddressFieldConfiguration.OPTIONAL
+    ) { elements ->
+        assertThat(elements.filterIsInstance<EmailElement>()).hasSize(1)
+    }
+
+    @Test
+    fun `Email should be shown when state is REQUIRED`() = elementsTest(
+        emailConfig = AddressFieldConfiguration.REQUIRED
+    ) { elements ->
+        assertThat(elements.filterIsInstance<EmailElement>()).hasSize(1)
+    }
+
+    @Test
     fun `Country should be hidden if 'hideCountry' is set to true`() = elementsTest(
         hideCountry = true
     ) { elements ->
@@ -537,6 +558,7 @@ class AutocompleteAddressControllerTest {
         values: Map<IdentifierSpec, String?> = emptyMap(),
         nameConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
         phoneNumberConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
+        emailConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
         sameAsShippingElement: SameAsShippingElement? = null,
         shippingValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
         autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
@@ -554,6 +576,7 @@ class AutocompleteAddressControllerTest {
                 values = values,
                 nameConfig = nameConfig,
                 phoneNumberConfig = phoneNumberConfig,
+                emailConfig = emailConfig,
                 sameAsShippingElement = sameAsShippingElement,
                 shippingValuesMap = shippingValuesMap,
                 interactor = interactor,
@@ -601,6 +624,7 @@ class AutocompleteAddressControllerTest {
         values: Map<IdentifierSpec, String?> = emptyMap(),
         phoneNumberConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
         nameConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
+        emailConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
         sameAsShippingElement: SameAsShippingElement? = null,
         shippingValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
         autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
@@ -619,6 +643,7 @@ class AutocompleteAddressControllerTest {
             sameAsShippingElement = sameAsShippingElement,
             shippingValuesMap = shippingValuesMap,
             phoneNumberConfig = phoneNumberConfig,
+            emailConfig = emailConfig,
             nameConfig = nameConfig,
             hideCountry = hideCountry,
             interactorFactory = { interactor },

@@ -150,7 +150,8 @@ class AddressElementTest {
                 googleApiKey = null,
                 autocompleteCountries = setOf(),
                 nameConfig = AddressFieldConfiguration.REQUIRED,
-                phoneNumberConfig = AddressFieldConfiguration.REQUIRED
+                phoneNumberConfig = AddressFieldConfiguration.REQUIRED,
+                emailConfig = AddressFieldConfiguration.REQUIRED,
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
             shippingValuesMap = null
@@ -161,6 +162,7 @@ class AddressElementTest {
         }
         assertThat(identifierSpecs.contains(IdentifierSpec.Name)).isTrue()
         assertThat(identifierSpecs.contains(IdentifierSpec.Phone)).isTrue()
+        assertThat(identifierSpecs.contains(IdentifierSpec.Email)).isTrue()
     }
 
     @Test
@@ -172,7 +174,8 @@ class AddressElementTest {
                 googleApiKey = null,
                 autocompleteCountries = setOf(),
                 nameConfig = AddressFieldConfiguration.HIDDEN,
-                phoneNumberConfig = AddressFieldConfiguration.HIDDEN
+                phoneNumberConfig = AddressFieldConfiguration.HIDDEN,
+                emailConfig = AddressFieldConfiguration.HIDDEN,
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
             shippingValuesMap = null
@@ -183,6 +186,7 @@ class AddressElementTest {
         }
         assertThat(identifierSpecs.contains(IdentifierSpec.Name)).isFalse()
         assertThat(identifierSpecs.contains(IdentifierSpec.Phone)).isFalse()
+        assertThat(identifierSpecs.contains(IdentifierSpec.Email)).isFalse()
     }
 
     @Test
@@ -194,7 +198,8 @@ class AddressElementTest {
                 googleApiKey = null,
                 autocompleteCountries = setOf(),
                 nameConfig = AddressFieldConfiguration.OPTIONAL,
-                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL
+                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
+                emailConfig = AddressFieldConfiguration.OPTIONAL,
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
             shippingValuesMap = null
@@ -205,6 +210,7 @@ class AddressElementTest {
         }
         assertThat(identifierSpecs.contains(IdentifierSpec.Name)).isTrue()
         assertThat(identifierSpecs.contains(IdentifierSpec.Phone)).isTrue()
+        assertThat(identifierSpecs.contains(IdentifierSpec.Email)).isTrue()
     }
 
     @Test
@@ -253,6 +259,7 @@ class AddressElementTest {
                 autocompleteCountries = null,
                 nameConfig = AddressFieldConfiguration.REQUIRED,
                 phoneNumberConfig = AddressFieldConfiguration.REQUIRED,
+                emailConfig = AddressFieldConfiguration.REQUIRED,
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
             shippingValuesMap = null
@@ -263,6 +270,7 @@ class AddressElementTest {
         }
         assertThat(identifierSpecs.contains(IdentifierSpec.Name)).isTrue()
         assertThat(identifierSpecs.contains(IdentifierSpec.Phone)).isTrue()
+        assertThat(identifierSpecs.contains(IdentifierSpec.Email)).isTrue()
     }
 
     @Test
@@ -275,6 +283,7 @@ class AddressElementTest {
                 autocompleteCountries = null,
                 nameConfig = AddressFieldConfiguration.HIDDEN,
                 phoneNumberConfig = AddressFieldConfiguration.HIDDEN,
+                emailConfig = AddressFieldConfiguration.HIDDEN,
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
             shippingValuesMap = null
@@ -285,6 +294,7 @@ class AddressElementTest {
         }
         assertThat(identifierSpecs.contains(IdentifierSpec.Name)).isFalse()
         assertThat(identifierSpecs.contains(IdentifierSpec.Phone)).isFalse()
+        assertThat(identifierSpecs.contains(IdentifierSpec.Email)).isFalse()
     }
 
     @Test
@@ -297,6 +307,7 @@ class AddressElementTest {
                 autocompleteCountries = null,
                 nameConfig = AddressFieldConfiguration.HIDDEN,
                 phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
+                emailConfig = AddressFieldConfiguration.HIDDEN,
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
             shippingValuesMap = null
@@ -309,7 +320,7 @@ class AddressElementTest {
     }
 
     @Test
-    fun `normal address element should not have name and phone number fields`() = runTest {
+    fun `normal address element should not have name, email, and phone number fields`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
             countryElement = countryElement,
@@ -323,6 +334,7 @@ class AddressElementTest {
         }
         assertThat(identifierSpecs.contains(IdentifierSpec.Name)).isFalse()
         assertThat(identifierSpecs.contains(IdentifierSpec.Phone)).isFalse()
+        assertThat(identifierSpecs.contains(IdentifierSpec.Email)).isFalse()
     }
 
     @Test
@@ -350,7 +362,8 @@ class AddressElementTest {
                 googleApiKey = "some key",
                 autocompleteCountries = setOf("US", "CA"),
                 nameConfig = AddressFieldConfiguration.OPTIONAL,
-                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL
+                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
+                emailConfig = AddressFieldConfiguration.OPTIONAL,
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
             shippingValuesMap = null
@@ -371,7 +384,8 @@ class AddressElementTest {
                 googleApiKey = "some key",
                 autocompleteCountries = setOf("US", "CA"),
                 nameConfig = AddressFieldConfiguration.OPTIONAL,
-                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL
+                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
+                emailConfig = AddressFieldConfiguration.OPTIONAL,
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
             shippingValuesMap = null,
@@ -398,7 +412,8 @@ class AddressElementTest {
                 googleApiKey = "some key",
                 autocompleteCountries = setOf("US", "CA"),
                 nameConfig = AddressFieldConfiguration.OPTIONAL,
-                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL
+                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
+                emailConfig = AddressFieldConfiguration.OPTIONAL,
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
             shippingValuesMap = null,
@@ -426,7 +441,8 @@ class AddressElementTest {
                 googleApiKey = "some key",
                 autocompleteCountries = setOf("US", "CA"),
                 nameConfig = AddressFieldConfiguration.OPTIONAL,
-                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL
+                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
+                emailConfig = AddressFieldConfiguration.OPTIONAL,
             ) { onNavigationCounter.getAndIncrement() },
             sameAsShippingElement = null,
             shippingValuesMap = null,
@@ -453,7 +469,8 @@ class AddressElementTest {
                     googleApiKey = null,
                     autocompleteCountries = setOf(),
                     nameConfig = AddressFieldConfiguration.OPTIONAL,
-                    phoneNumberConfig = AddressFieldConfiguration.OPTIONAL
+                    phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
+                    emailConfig = AddressFieldConfiguration.OPTIONAL,
                 ) { throw AssertionError("Not Expected") },
                 sameAsShippingElement = null,
                 shippingValuesMap = null
@@ -475,6 +492,7 @@ class AddressElementTest {
                 autocompleteCountries = null,
                 nameConfig = AddressFieldConfiguration.OPTIONAL,
                 phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
+                emailConfig = AddressFieldConfiguration.OPTIONAL,
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
             shippingValuesMap = null
@@ -557,7 +575,8 @@ class AddressElementTest {
                 googleApiKey = null,
                 autocompleteCountries = setOf(),
                 nameConfig = AddressFieldConfiguration.OPTIONAL,
-                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL
+                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
+                emailConfig = AddressFieldConfiguration.OPTIONAL,
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
             shippingValuesMap = null,

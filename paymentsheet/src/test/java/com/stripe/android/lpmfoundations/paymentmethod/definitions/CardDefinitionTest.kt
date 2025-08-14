@@ -26,8 +26,10 @@ import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.AutocompleteAddressController
 import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.uicore.elements.filterOutHiddenIdentifiers
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -68,15 +70,66 @@ class CardDefinitionTest {
                 )
             )
         )
-        assertThat(formElements).hasSize(3)
-        assertThat(formElements[0].identifier.v1).isEqualTo("billing_details[email]_section")
-        assertThat(formElements[1].identifier.v1).isEqualTo("card_details")
-        assertThat(formElements[2].identifier.v1).isEqualTo("credit_billing_section")
+        assertThat(formElements).hasSize(2)
+        assertThat(formElements[0].identifier.v1).isEqualTo("card_details")
+        assertThat(formElements[1].identifier.v1).isEqualTo("credit_billing_section")
 
-        val contactElement = formElements[0] as SectionElement
-        assertThat(contactElement.fields).hasSize(2)
-        assertThat(contactElement.fields[0].identifier.v1).isEqualTo("billing_details[email]")
-        assertThat(contactElement.fields[1].identifier.v1).isEqualTo("billing_details[phone]")
+        val contactElement = formElements[1] as SectionElement
+        assertThat(contactElement.fields).hasSize(1)
+
+        val cardBillingElement = contactElement.fields[0] as CardBillingAddressElement
+        val billingElements = cardBillingElement.addressController.value.fieldsFlowable.value
+
+        assertThat(billingElements.size).isEqualTo(7)
+
+        assertThat(billingElements[0].identifier.v1).isEqualTo("billing_details[address][country]")
+        assertThat(billingElements[1].identifier.v1).isEqualTo("billing_details[address][line1]")
+        assertThat(billingElements[2].identifier.v1).isEqualTo("billing_details[address][line2]")
+
+        assertThat(billingElements[3]).isInstanceOf<RowElement>()
+
+        val rowElement = billingElements[3] as RowElement
+
+        assertThat(rowElement.fields[0].identifier.v1).isEqualTo("billing_details[address][city]")
+        assertThat(rowElement.fields[1].identifier.v1).isEqualTo("billing_details[address][postal_code]")
+
+        assertThat(billingElements[4].identifier.v1).isEqualTo("billing_details[address][state]")
+        assertThat(billingElements[5].identifier.v1).isEqualTo("billing_details[email]")
+        assertThat(billingElements[6].identifier.v1).isEqualTo("billing_details[phone]")
+    }
+
+    @Test
+    fun `createFormElements returns requested contact information fields`() {
+        val formElements = CardDefinition.formElements(
+            PaymentMethodMetadataFactory.create(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                )
+            )
+        )
+        assertThat(formElements).hasSize(2)
+        assertThat(formElements[0].identifier.v1).isEqualTo("card_details")
+        assertThat(formElements[1].identifier.v1).isEqualTo("credit_billing_section")
+
+        val contactInformationElement = formElements[1] as SectionElement
+        val contactInformationFields = contactInformationElement.fields
+
+        val cardBillingElement = contactInformationFields[0] as CardBillingAddressElement
+        val billingElements = cardBillingElement.addressController.value.fieldsFlowable.value
+
+        assertThat(billingElements.size).isEqualTo(6)
+
+        val billingElementsWithHiddenIdentifiers = billingElements
+            .filterOutHiddenIdentifiers(cardBillingElement.hiddenIdentifiers.value)
+
+        assertThat(billingElementsWithHiddenIdentifiers.size).isEqualTo(2)
+
+        assertThat(billingElementsWithHiddenIdentifiers[0].identifier.v1)
+            .isEqualTo("billing_details[email]")
+        assertThat(billingElementsWithHiddenIdentifiers[1].identifier.v1)
+            .isEqualTo("billing_details[phone]")
     }
 
     @Test
