@@ -69,8 +69,8 @@ internal fun OAuthConsentScreen(
         UserSection(userEmail)
         ScopesSection(pane.scopesSection)
 
+        Spacer(Modifier.height(24.dp))
         pane.disclaimer?.let {
-            Spacer(Modifier.height(24.dp))
             Disclaimer(it)
         }
         Spacer(Modifier.height(16.dp))
@@ -91,7 +91,7 @@ private fun MerchantLogo(
     val modifier = Modifier
         .clip(RoundedCornerShape(16.dp))
         .size(56.dp)
-        .background(LinkTheme.colors.surfaceTertiary)
+        .background(LinkTheme.colors.surfaceSecondary)
     if (merchantLogoUrl == null) {
         Image(
             modifier = modifier.padding(18.dp),
@@ -186,7 +186,10 @@ private fun ScopeItem(
     ) {
         val modifier = Modifier
             .padding(top = 2.dp)
-            .size(16.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .size(32.dp)
+            .background(LinkTheme.colors.surfaceSecondary)
+            .padding(10.dp)
         // TODO: Center align with top row.
         StripeImage(
             modifier = modifier,
@@ -200,17 +203,19 @@ private fun ScopeItem(
                 Box(modifier) // TODO.
             }
         )
-        Column(modifier = Modifier.weight(1f)) {
+        Column(
+            modifier = Modifier
+            .weight(1f)
+            .padding(start = 8.dp)
+        ) {
             if (header != null) {
                 Text(
-                    modifier = Modifier.padding(horizontal = 8.dp),
                     text = header,
                     style = LinkTheme.typography.detailEmphasized,
                     color = LinkTheme.colors.textPrimary,
                 )
             }
             Text(
-                modifier = Modifier.padding(horizontal = 8.dp),
                 text = description,
                 style = LinkTheme.typography.detail,
                 color = LinkTheme.colors.textTertiary,
@@ -335,23 +340,23 @@ internal val consentPanePreview = run {
             scopes = listOf(
                 ConsentUi.ConsentPane.ScopesSection.Scope(
                     icon = scopeIcon,
-                    header = "Account info",
-                    description = "Name, email, and profile picture",
-                ),
-                ConsentUi.ConsentPane.ScopesSection.Scope(
-                    icon = scopeIcon,
-                    header = "Addresses",
-                    description = "Shipping addresses",
+                    header = "Account",
+                    description = "View and manage your name, email, phone, and shipping addresses",
                 ),
                 ConsentUi.ConsentPane.ScopesSection.Scope(
                     icon = scopeIcon,
                     header = "Wallet",
-                    description = "Cards, bank accounts",
+                    description = "View and manage your cards and bank accounts",
+                ),
+                ConsentUi.ConsentPane.ScopesSection.Scope(
+                    icon = scopeIcon,
+                    header = "Identity",
+                    description = "View your identity information (date of birth, address, ID documents)",
                 ),
             ),
         ),
         denyButtonLabel = "Cancel",
-        allowButtonLabel = "Allow",
+        allowButtonLabel = "Continue",
         disclaimer = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " +
             "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
     )
