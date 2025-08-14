@@ -82,6 +82,7 @@ interface ConsumersApiService {
         verificationCode: String,
         requestSurface: String,
         type: VerificationType,
+        consentGranted: Boolean?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession
 
@@ -288,6 +289,7 @@ class ConsumersApiServiceImpl(
         verificationCode: String,
         requestSurface: String,
         type: VerificationType,
+        consentGranted: Boolean?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession = executeRequestWithModelJsonParser(
         stripeErrorJsonParser = stripeErrorJsonParser,
@@ -301,8 +303,9 @@ class ConsumersApiServiceImpl(
                     "consumer_session_client_secret" to consumerSessionClientSecret
                 ),
                 "type" to type.value,
-                "code" to verificationCode
-            )
+                "code" to verificationCode,
+                "consent_granted" to consentGranted
+            ).filterValues { it != null }
         ),
         responseJsonParser = ConsumerSessionJsonParser()
     )

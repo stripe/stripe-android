@@ -13,11 +13,12 @@ import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.ConsentPresentation
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.model.toPresentation
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
-import com.stripe.android.model.ConsentUi
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
@@ -245,7 +246,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     consumerSession = consumerSessionSignup.consumerSession,
                     publishableKey = consumerSessionSignup.publishableKey,
                     displayablePaymentDetails = null,
-                    consentUi = null,
+                    consentPresentation = null,
                 )
             }
 
@@ -274,7 +275,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 consumerSession = consumerSessionSignUp.consumerSession,
                 publishableKey = consumerSessionSignUp.publishableKey,
                 displayablePaymentDetails = null,
-                consentUi = null,
+                consentPresentation = null,
             )
         }
     }
@@ -373,7 +374,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         consumerSession: ConsumerSession,
         publishableKey: String?,
         displayablePaymentDetails: DisplayablePaymentDetails?,
-        consentUi: ConsentUi?,
+        consentPresentation: ConsentPresentation?,
     ): LinkAccount {
         val currentAccount = linkAccountHolder.linkAccountInfo.value.account
         val newConsumerPublishableKey = publishableKey
@@ -382,15 +383,15 @@ internal class DefaultLinkAccountManager @Inject constructor(
         val newPaymentDetails = displayablePaymentDetails
             ?: currentAccount?.displayablePaymentDetails
                 ?.takeIf { currentAccount.email == consumerSession.emailAddress }
-        val newConsentUi = consentUi
-            ?: currentAccount?.consentUi
+        val newConsentPresentation = consentPresentation
+            ?: currentAccount?.consentPresentation
                 ?.takeIf { currentAccount.email == consumerSession.emailAddress }
 
         val newAccount = LinkAccount(
             consumerSession = consumerSession,
             consumerPublishableKey = newConsumerPublishableKey,
             displayablePaymentDetails = newPaymentDetails,
-            consentUi = newConsentUi
+            consentPresentation = newConsentPresentation
         )
         withContext(Dispatchers.Main.immediate) {
             linkAccountHolder.set(LinkAccountUpdate.Value(newAccount))
@@ -408,14 +409,14 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     consumerSession = consumerSession,
                     publishableKey = lookup.publishableKey,
                     displayablePaymentDetails = lookup.displayablePaymentDetails,
-                    consentUi = lookup.consentUi,
+                    consentPresentation = lookup.consentUi?.toPresentation(),
                 )
             } else {
                 LinkAccount(
                     consumerSession = consumerSession,
                     consumerPublishableKey = lookup.publishableKey,
                     displayablePaymentDetails = lookup.displayablePaymentDetails,
-                    consentUi = lookup.consentUi,
+                    consentPresentation = lookup.consentUi?.toPresentation(),
                 )
             }
         }
@@ -436,18 +437,22 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     consumerSession = consumerSession,
                     publishableKey = null,
                     displayablePaymentDetails = null,
-                    consentUi = linkAccount.consentUi, // Keep consent UI.
+                    consentPresentation = linkAccount.consentPresentation, // Keep consent UI.
                 )
             }
     }
 
-    override suspend fun confirmVerification(code: String): Result<LinkAccount> {
+    override suspend fun confirmVerification(
+        code: String,
+        consentGranted: Boolean?
+    ): Result<LinkAccount> {
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
             ?: return Result.failure(NoLinkAccountFoundException())
         return linkRepository.confirmVerification(
             verificationCode = code,
             consumerSessionClientSecret = linkAccount.clientSecret,
-            consumerPublishableKey = linkAccount.consumerPublishableKey
+            consumerPublishableKey = linkAccount.consumerPublishableKey,
+            consentGranted = consentGranted,
         )
             .onSuccess {
                 linkEventsReporter.on2FAComplete()
@@ -458,7 +463,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     consumerSession = consumerSession,
                     publishableKey = null,
                     displayablePaymentDetails = null,
-                    consentUi = linkAccount.consentUi, // Keep consent UI.
+                    consentPresentation = linkAccount.consentPresentation, // Keep consent UI.
                 )
             }
     }

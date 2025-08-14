@@ -68,6 +68,7 @@ internal fun VerificationBody(
     didShowCodeSentNotification: () -> Unit,
     onChangeEmailClick: () -> Unit,
     onResendCodeClick: () -> Unit,
+    onConsentShown: () -> Unit,
 ) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
@@ -143,15 +144,18 @@ internal fun VerificationBody(
             )
         }
 
-        Spacer(modifier = Modifier.size(36.dp))
+        Spacer(modifier = Modifier.size(24.dp))
         ResendCodeButton(
             isProcessing = state.isProcessing,
             isSendingNewCode = state.isSendingNewCode,
             onClick = onResendCodeClick,
         )
 
-        state.consentSection?.let {
-            ConsentSection(it)
+        state.consentSection?.let { consentSection ->
+            ConsentSection(consentSection)
+            LaunchedEffect(consentSection) {
+                onConsentShown()
+            }
         }
 
         if (state.allowLogout) {
@@ -406,6 +410,7 @@ private fun Preview() {
                     didShowCodeSentNotification = {},
                     onChangeEmailClick = {},
                     onResendCodeClick = {},
+                    onConsentShown = {}
                 )
             }
         }

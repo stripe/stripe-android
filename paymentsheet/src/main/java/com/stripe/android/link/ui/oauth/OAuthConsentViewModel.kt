@@ -5,9 +5,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
+import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.NativeLinkComponent
+import com.stripe.android.link.model.ConsentPresentation
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.ConsentUi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,31 +23,42 @@ internal class OAuthConsentViewModel @Inject constructor(
     private val linkConfiguration: LinkConfiguration,
     private val linkAccountManager: LinkAccountManager,
     private val logger: Logger,
+    private val dismissWithResult: (LinkActivityResult) -> Unit,
 ) : ViewModel() {
+
+    private val consentPane = (linkAccount.consentPresentation as? ConsentPresentation.FullScreen)?.consentPane
 
     private val _viewState = MutableStateFlow(
         OAuthConsentViewState(
             merchantName = linkConfiguration.merchantName,
             merchantLogoUrl = linkConfiguration.merchantLogoUrl,
             userEmail = linkAccount.email,
-            consentPane = consentPanePreview.let {
-                it.copy(
-                    title = "Connect ${linkConfiguration.merchantName} with Link",
-                    scopesSection = it.scopesSection.copy(
-                        header = "${linkConfiguration.merchantName} will have access to:"
-                    ),
-                )
-            }
+            consentPane = consentPane
         )
     )
     val viewState: StateFlow<OAuthConsentViewState> = _viewState
 
+    init {
+        if (consentPane == null) {
+            // Shouldn't happen, if consent data is not available, we can assume it's not needed.
+            dismissWithResult(LinkActivityResult.Completed(LinkAccountUpdate.Value(linkAccount)))
+        }
+    }
+
     fun onAllowClick() {
-        // TODO
+        // TODO: Submit consent result
+        // TODO: Error handling
+        dismissWithResult(
+            LinkActivityResult.Completed(linkAccountUpdate = LinkAccountUpdate.Value(linkAccount))
+        )
     }
 
     fun onDenyClick() {
-        // TODO
+        // TODO: Submit consent result
+        // TODO: Error handling
+        dismissWithResult(
+            LinkActivityResult.Canceled(linkAccountUpdate = LinkAccountUpdate.Value(linkAccount))
+        )
     }
 
     private fun updateViewState(block: (OAuthConsentViewState) -> OAuthConsentViewState) {
@@ -55,11 +69,15 @@ internal class OAuthConsentViewModel @Inject constructor(
         fun factory(
             parentComponent: NativeLinkComponent,
             linkAccount: LinkAccount,
+            dismissWithResult: (LinkActivityResult) -> Unit,
         ): ViewModelProvider.Factory {
             return viewModelFactory {
                 initializer {
                     parentComponent.oAuthConsentViewModelComponentFactory
-                        .build(linkAccount)
+                        .build(
+                            linkAccount = linkAccount,
+                            dismissWithResult = dismissWithResult,
+                        )
                         .viewModel
                 }
             }
@@ -70,6 +88,6 @@ internal class OAuthConsentViewModel @Inject constructor(
 internal data class OAuthConsentViewState(
     val merchantName: String,
     val userEmail: String,
-    val merchantLogoUrl: String? = null,
-    val consentPane: ConsentUi.ConsentPane? = null,
+    val merchantLogoUrl: String?,
+    val consentPane: ConsentUi.ConsentPane?
 )

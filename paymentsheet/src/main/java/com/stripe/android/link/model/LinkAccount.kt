@@ -1,7 +1,6 @@
 package com.stripe.android.link.model
 
 import android.os.Parcelable
-import com.stripe.android.model.ConsentUi
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.uicore.elements.convertPhoneNumberToE164
@@ -18,7 +17,7 @@ internal class LinkAccount(
     private val consumerSession: ConsumerSession,
     val consumerPublishableKey: String? = null,
     val displayablePaymentDetails: DisplayablePaymentDetails? = null,
-    val consentUi: ConsentUi? = null,
+    val consentPresentation: ConsentPresentation? = null,
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -52,7 +51,7 @@ internal class LinkAccount(
     @IgnoredOnParcel
     val accountStatus = when {
         isVerified -> {
-            AccountStatus.Verified(consentNeeded = consentNeeded)
+            AccountStatus.Verified(consentPresentation = consentPresentation)
         }
         consumerSession.containsSMSSessionStarted() -> {
             AccountStatus.VerificationStarted
@@ -61,10 +60,6 @@ internal class LinkAccount(
             AccountStatus.NeedsVerification
         }
     }
-
-    @IgnoredOnParcel
-    val consentNeeded: Boolean
-        get() = consentUi != null
 
     private fun ConsumerSession.containsSMSSessionStarted() = verificationSessions.find {
         it.type == ConsumerSession.VerificationSession.SessionType.Sms &&

@@ -44,7 +44,8 @@ internal fun OAuthConsentScreen(
     viewModel: OAuthConsentViewModel,
 ) {
     val viewState by viewModel.viewState.collectAsState()
-    val consentPane = viewState.consentPane ?: return // TODO
+    val consentPane = viewState.consentPane
+        ?: return // Invalid. VM will dismiss.
     OAuthConsentScreen(
         merchantLogoUrl = viewState.merchantLogoUrl,
         userEmail = viewState.userEmail,

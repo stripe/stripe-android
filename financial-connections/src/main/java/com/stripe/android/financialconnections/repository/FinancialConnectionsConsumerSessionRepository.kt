@@ -233,6 +233,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             verificationCode = verificationCode,
             type = type,
             requestSurface = requestSurface,
+            consentGranted = null,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
         ).also { session ->
             updateCachedConsumerSession("confirmConsumerVerification", session)

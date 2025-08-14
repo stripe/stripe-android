@@ -28,6 +28,47 @@ class ConsumerSessionLookupJsonParser : ModelJsonParser<ConsumerSessionLookup> {
         val consentUi = optString(json, FIELD_CONSENT_UI)?.let {
             format.decodeFromString<ConsentUi>(it)
         }
+            // TESTING
+            ?: run {
+                val scopeIconUrl =
+                    "https://b.stripecdn.com/connections-statics-srv/assets/SailIcon--lock-primary-3x.png"
+                val scopeIcon = ConsentUi.Icon(scopeIconUrl)
+                ConsentUi(
+                    consentPane = ConsentUi.ConsentPane(
+                        title = "Connect Powdur\nwith Link",
+                        scopesSection = ConsentUi.ConsentPane.ScopesSection(
+                            header = "Powdur will have access to:",
+                            scopes = listOf(
+                                ConsentUi.ConsentPane.ScopesSection.Scope(
+                                    icon = scopeIcon,
+                                    header = "Account info",
+                                    description = "Name, email, and profile picture",
+                                ),
+                                ConsentUi.ConsentPane.ScopesSection.Scope(
+                                    icon = scopeIcon,
+                                    header = "Addresses",
+                                    description = "Shipping addresses",
+                                ),
+                                ConsentUi.ConsentPane.ScopesSection.Scope(
+                                    icon = scopeIcon,
+                                    header = "Wallet",
+                                    description = "Cards, bank accounts",
+                                ),
+                            ),
+                        ),
+                        denyButtonLabel = "Cancel",
+                        allowButtonLabel = "Allow",
+//                        disclaimer = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " +
+//                            "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+                        disclaimer = null
+                    ),
+                    consentSection = null,
+//                    consentPane = null,
+//                    consentSection = ConsentUi.ConsentSection(
+//                        disclaimer = "By continuing, you’ll be remembered next time on [Merchant]."
+//                    ),
+                )
+            }
         return ConsumerSessionLookup(
             exists = exists,
             consumerSession = consumerSession,
