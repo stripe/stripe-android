@@ -509,6 +509,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             )
         ),
         canShowWalletsInline = true,
+        canShowWalletButtons = false,
     ) {
         walletsState.value = WalletsState(
             link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
@@ -525,7 +526,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         interactor.state.test {
             awaitItem().run {
                 assertThat(displayablePaymentMethods.map { it.code })
-                    .isEqualTo(listOf("link", "google_pay", "card", "cashapp"))
+                    .isEqualTo(listOf("google_pay", "link", "card", "cashapp"))
             }
         }
         interactor.showsWalletsHeader.test {
@@ -639,6 +640,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             )
         ),
         canShowWalletsInline = true,
+        canShowWalletButtons = false,
     ) {
         walletsState.value = WalletsState(
             link = null,

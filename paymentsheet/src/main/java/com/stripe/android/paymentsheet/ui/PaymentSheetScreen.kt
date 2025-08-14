@@ -414,15 +414,10 @@ internal fun Wallet(
     isCompleteFlow: Boolean
 ) {
     val padding = StripeTheme.getOuterFormInsets()
+    var hasWalletButtons = false
 
     Column(modifier = modifier.padding(padding)) {
-        // PaymentSheet: Both Google Pay and Link in wallet
-        // FlowController: Only Link in wallet (Google Pay goes to payment methods list)
-        // Embedded: No wallet buttons (handled by not calling this composable)
         val showGooglePayInWallet = isCompleteFlow // Only complete flows show Google Pay in wallet
-        
-        var hasWalletButtons = false
-        
         if (showGooglePayInWallet) {
             state.googlePay?.let { googlePay ->
                 hasWalletButtons = true
@@ -437,12 +432,12 @@ internal fun Wallet(
                 )
             }
         }
-        
+
         state.link?.let {
             if (showGooglePayInWallet && state.googlePay != null) {
                 Spacer(modifier = Modifier.requiredHeight(8.dp))
             }
-            
+
             hasWalletButtons = true
             LinkButton(
                 state = it.state,
@@ -461,7 +456,6 @@ internal fun Wallet(
             else -> Unit
         }
 
-        // Only show divider if there are wallet buttons to separate from payment methods
         if (hasWalletButtons) {
             Spacer(modifier = Modifier.requiredHeight(dividerSpacing))
 

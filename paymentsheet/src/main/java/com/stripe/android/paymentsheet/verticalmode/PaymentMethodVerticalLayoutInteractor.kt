@@ -335,6 +335,25 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         }
 
         val wallets = mutableListOf<DisplayablePaymentMethod>()
+
+        // Add Google Pay to payment methods list for custom flows (flow controller), skip for complete flows
+        if (canShowWalletsInline && walletsState?.googlePay != null) {
+            wallets += DisplayablePaymentMethod(
+                code = "google_pay",
+                displayName = PaymentsCoreR.string.stripe_google_pay.resolvableString,
+                iconResource = PaymentsCoreR.drawable.stripe_google_pay_mark,
+                iconResourceNight = null,
+                lightThemeIconUrl = null,
+                darkThemeIconUrl = null,
+                iconRequiresTinting = false,
+                subtitle = null,
+                onClick = {
+                    updateSelection(PaymentSelection.GooglePay, false)
+                    invokeRowSelectionCallback?.invoke()
+                },
+            )
+        }
+
         if (showsWalletsInline(walletsState)) {
             walletsState?.link?.let {
                 val subtitle = when (val state = it.state) {
@@ -359,24 +378,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     },
                 )
             }
-        }
-
-        // Add Google Pay to payment methods list for custom flows (flow controller), skip for complete flows
-        if (canShowWalletsInline && paymentMethodMetadata.isGooglePayReady) {
-            wallets += DisplayablePaymentMethod(
-                code = "google_pay",
-                displayName = PaymentsCoreR.string.stripe_google_pay.resolvableString,
-                iconResource = PaymentsCoreR.drawable.stripe_google_pay_mark,
-                iconResourceNight = null,
-                lightThemeIconUrl = null,
-                darkThemeIconUrl = null,
-                iconRequiresTinting = false,
-                subtitle = null,
-                onClick = {
-                    updateSelection(PaymentSelection.GooglePay, false)
-                    invokeRowSelectionCallback?.invoke()
-                },
-            )
         }
 
         return wallets + lpms
