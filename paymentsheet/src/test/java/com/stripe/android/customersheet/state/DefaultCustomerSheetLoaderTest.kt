@@ -625,7 +625,6 @@ internal class DefaultCustomerSheetLoaderTest {
 
         assertThat(customerPaymentMethods).isNotNull()
         assertThat(customerPaymentMethods).containsExactly(
-            paymentMethods[0],
             paymentMethods[1],
             paymentMethods[4],
         )

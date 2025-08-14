@@ -14,7 +14,7 @@ internal fun PaymentMethod.isSupportedWithBillingConfig(
         return true
     }
 
-    return billingDetails?.address?.country?.let { allowedCountries.contains(it) } ?: true
+    return billingDetails?.address?.country?.let { allowedCountries.contains(it) } ?: false
 }
 
 internal fun ConsumerPaymentDetails.PaymentDetails.isSupportedWithBillingConfig(
