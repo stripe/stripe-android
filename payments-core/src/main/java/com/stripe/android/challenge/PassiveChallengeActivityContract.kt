@@ -3,10 +3,12 @@ package com.stripe.android.challenge
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.annotation.RestrictTo
 import androidx.core.os.BundleCompat
 import com.stripe.android.model.PassiveCaptchaParams
 
-internal class PassiveChallengeActivityContract :
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class PassiveChallengeActivityContract :
     ActivityResultContract<PassiveChallengeActivityContract.Args, PassiveChallengeActivityResult>() {
 
     override fun createIntent(context: Context, input: Args): Intent {
@@ -20,11 +22,12 @@ internal class PassiveChallengeActivityContract :
         return result ?: PassiveChallengeActivityResult.Failed(Throwable("No result"))
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Args(
         val passiveCaptchaParams: PassiveCaptchaParams
     )
 
-    companion object {
-        internal const val EXTRA_RESULT = "com.stripe.android.challenge.PassiveChallengeActivityContract.extra_result"
+    internal companion object {
+        const val EXTRA_RESULT = "com.stripe.android.challenge.PassiveChallengeActivityContract.extra_result"
     }
 }
