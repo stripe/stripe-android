@@ -38,9 +38,8 @@ fun CardDetailsSectionElementUI(
     modifier: Modifier = Modifier,
 ) {
     if (
-        controller.isCardScanEnabled &&
-        controller.isStripeCardScanAvailable() &&
-        controller.autoCardScanData?.shouldOpenCardScanAutomatically == true
+        controller.isCardScanEnabledAndAvailable &&
+        controller.shouldSeeAutomaticCardScanOpen
     ) {
         val cardScanLauncher =
             rememberLauncherForActivityResult(CardScanContract()) { result ->
@@ -54,7 +53,7 @@ fun CardDetailsSectionElementUI(
         )
 
         SideEffect {
-            controller.autoCardScanData.hasSeenAutoCardScanOpen = true
+            controller.setHasSeenAutoCardScanOpen()
 
             cardScanLauncher.launch(
                 input = CardScanContract.Args(
@@ -80,7 +79,7 @@ fun CardDetailsSectionElementUI(
                         heading()
                     }
             )
-            if (controller.isCardScanEnabled && controller.isStripeCardScanAvailable()) {
+            if (controller.isCardScanEnabledAndAvailable) {
                 ScanCardButtonUI(
                     enabled = enabled,
                     elementsSessionId = controller.elementsSessionId
