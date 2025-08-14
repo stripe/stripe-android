@@ -204,7 +204,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
                             selectedPayment = result.selectedPayment,
                             shippingAddress = result.shippingAddress,
                         ),
-                        paymentMethods = customerStateHolder.paymentMethods.value
+                        paymentMethods = customerStateHolder.paymentMethods.value,
+                        hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScanOpen,
                     )
                 )
             }
@@ -226,6 +227,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 mostRecentError = null,
                 paymentSelection = determinePaymentSelectionUponCancel(),
                 paymentMethods = customerStateHolder.paymentMethods.value,
+                hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScanOpen,
             )
         )
     }
@@ -274,7 +276,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     PaymentOptionsActivityResult.Succeeded(
                         linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                         paymentSelection = paymentSelection.withLinkDetails(),
-                        paymentMethods = customerStateHolder.paymentMethods.value
+                        paymentMethods = customerStateHolder.paymentMethods.value,
+                        hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScanOpen,
                     )
                 )
             }

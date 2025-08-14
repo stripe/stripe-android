@@ -584,8 +584,10 @@ internal class DefaultFlowController @Inject internal constructor(
         }
 
         // update the state to stop showing AutomaticCardScan
-        currentState?.let {
-            viewModel.state = it.copy(hasSeenAutoCardScanOpen = true)
+        currentState?.let { state ->
+            result?.let { result ->
+                viewModel.state = state.copy(hasSeenAutoCardScanOpen = result.hasSeenAutoCardScanOpen)
+            }
         }
 
         when (result) {

@@ -23,9 +23,12 @@ internal sealed class PaymentOptionsActivityResult(
      */
     abstract val linkAccountInfo: LinkAccountUpdate.Value
 
+    abstract val hasSeenAutoCardScanOpen: Boolean
+
     @Parcelize
     data class Succeeded(
         val paymentSelection: PaymentSelection,
+        override val hasSeenAutoCardScanOpen: Boolean,
         override val linkAccountInfo: LinkAccountUpdate.Value,
         override val paymentMethods: List<PaymentMethod>? = null
     ) : PaymentOptionsActivityResult(Activity.RESULT_OK)
@@ -34,6 +37,7 @@ internal sealed class PaymentOptionsActivityResult(
     data class Canceled(
         val mostRecentError: Throwable?,
         val paymentSelection: PaymentSelection?,
+        override val hasSeenAutoCardScanOpen: Boolean,
         // The user could have removed a payment method and canceled the flow. We should update
         // the list of paymentMethods
         override val paymentMethods: List<PaymentMethod>? = null,
