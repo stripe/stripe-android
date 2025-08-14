@@ -8,22 +8,26 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import com.google.android.gms.wallet.PaymentCardRecognitionIntentRequest
 import com.google.android.gms.wallet.PaymentCardRecognitionResult
 import com.google.android.gms.wallet.PaymentsClient
 import com.google.android.gms.wallet.Wallet
 import com.google.android.gms.wallet.WalletConstants
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.parcelize.Parcelize
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CardScanGoogleLauncher(
     context: Context,
     private val activityLauncher: ActivityResultLauncher<IntentSenderRequest>
 ) {
-    private var _isAvailable = mutableStateOf(false)
-    val isAvailable = _isAvailable
+    private val _isAvailable = MutableStateFlow(false)
+    val isAvailable: StateFlow<Boolean> = _isAvailable.asStateFlow()
 
     init {
         fetchIntent(context) {
@@ -31,9 +35,22 @@ class CardScanGoogleLauncher(
         }
     }
 
+    private fun isStripeExampleApp(context: Context): Boolean {
+        val packageName = context.packageName
+
+        // Only Stripe's official example apps
+        return packageName.startsWith("com.stripe.android.") &&
+            packageName.contains("example")
+    }
+
     private fun createPaymentsClient(context: Context): PaymentsClient {
         val walletOptions = Wallet.WalletOptions.Builder()
-            .setEnvironment(WalletConstants.ENVIRONMENT_TEST)
+            .setEnvironment(
+                if (isStripeExampleApp(context))
+                    WalletConstants.ENVIRONMENT_TEST
+                else
+                    WalletConstants.ENVIRONMENT_PRODUCTION
+            )
             .build()
 
         return Wallet.getPaymentsClient(context, walletOptions)

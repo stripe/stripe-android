@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -33,7 +34,7 @@ internal fun ScanCardButtonUI(
 ) {
     val context = LocalContext.current
     val cardScanLauncher = rememberCardScanGoogleLauncher(context, onResult)
-    val isCardScanAvailable by cardScanLauncher.isAvailable
+    val isCardScanAvailable by cardScanLauncher.isAvailable.collectAsState()
     if (isCardScanAvailable) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
