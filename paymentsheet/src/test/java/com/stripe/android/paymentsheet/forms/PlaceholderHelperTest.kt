@@ -220,6 +220,25 @@ class PlaceholderHelperTest {
     }
 
     @Test
+    fun `Test when termsDisplay=AUTOMATIC, AuBecsDebitMandateTextSpec is retained`() {
+        val specs = specsForConfiguration(
+            configuration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+            placeholderOverrideList = emptyList(),
+            requiresMandate = true,
+            specs = listOf(
+                NameSpec(),
+                AuBecsDebitMandateTextSpec(),
+            ),
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        )
+
+        assertThat(specs).containsExactly(
+            NameSpec(),
+            AuBecsDebitMandateTextSpec(),
+        )
+    }
+
+    @Test
     fun `Test correct spec is returned for placeholder fields`() {
         val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
             name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
