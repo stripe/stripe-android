@@ -2943,7 +2943,6 @@ class PaymentSheet internal constructor(
      */
     @Poko
     @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class CustomPaymentMethod internal constructor(
         val id: String,
         internal val subtitle: ResolvableString?,
