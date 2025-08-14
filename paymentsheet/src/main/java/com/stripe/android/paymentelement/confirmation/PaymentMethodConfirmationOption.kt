@@ -20,6 +20,6 @@ internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.
         val optionsParams: PaymentMethodOptionsParams?,
         val extraParams: PaymentMethodExtraParams?,
         val shouldSave: Boolean,
-        val passiveCaptchaParams: PassiveCaptchaParams? = null,
+        val passiveCaptchaParams: PassiveCaptchaParams?,
     ) : PaymentMethodConfirmationOption
 }
