@@ -1,30 +1,6 @@
 public abstract interface annotation class com/stripe/android/ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi : java/lang/annotation/Annotation {
 }
 
-public final class com/stripe/android/challenge/PassiveChallengeActivityResult$Failed$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/challenge/PassiveChallengeActivityResult$Failed;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/challenge/PassiveChallengeActivityResult$Failed;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/challenge/PassiveChallengeActivityResult$Success$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/challenge/PassiveChallengeActivityResult$Success;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/challenge/PassiveChallengeActivityResult$Success;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/challenge/PassiveChallengeArgs$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/challenge/PassiveChallengeArgs;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/challenge/PassiveChallengeArgs;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public final class com/stripe/android/common/model/CommonConfiguration$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/common/model/CommonConfiguration;
