@@ -20,6 +20,8 @@ internal object BacsDebitDefinition : PaymentMethodDefinition {
 
     override val supportedAsSavedPaymentMethod: Boolean = false
 
+    override val supportsTermDisplayConfiguration: Boolean = true
+
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf(
@@ -68,7 +70,7 @@ private object BacsDebitUiDefinitionFactory : UiDefinitionFactory.RequiresShared
                 apiPath = IdentifierSpec.BillingAddress,
                 field = PlaceholderSpec.PlaceholderField.BillingAddress
             ),
-            BacsDebitConfirmSpec()
+            BacsDebitConfirmSpec().takeIf { metadata.mandateAllowed(BacsDebitDefinition.type) }
         )
 
         return transformSpecToElements.transform(

@@ -5,6 +5,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.ui.core.elements.AddressSpec
+import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextSpec
 import com.stripe.android.ui.core.elements.CashAppPayMandateTextSpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.FormItemSpec
@@ -68,6 +69,10 @@ internal object PlaceholderHelper {
                 )
 
                 is SepaMandateTextSpec -> it.takeUnless {
+                    termsDisplay == PaymentSheet.TermsDisplay.NEVER
+                }
+
+                is AuBecsDebitMandateTextSpec -> it.takeUnless {
                     termsDisplay == PaymentSheet.TermsDisplay.NEVER
                 }
 

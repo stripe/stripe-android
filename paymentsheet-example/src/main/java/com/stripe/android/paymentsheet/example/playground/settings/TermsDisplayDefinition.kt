@@ -72,4 +72,11 @@ enum class TermsDisplay(
             PaymentMethod.Type.Sofort to PaymentSheet.TermsDisplay.NEVER,
         )
     ),
+    NEVER_BECS_BACS(
+        "Never AuBecsDebit/BacsDebit",
+        mapOf(
+            PaymentMethod.Type.AuBecsDebit to PaymentSheet.TermsDisplay.NEVER,
+            PaymentMethod.Type.BacsDebit to PaymentSheet.TermsDisplay.NEVER,
+        )
+    ),
 }

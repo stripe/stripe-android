@@ -7,6 +7,7 @@ import com.stripe.android.paymentsheet.forms.PlaceholderHelper.removeCorrespondi
 import com.stripe.android.paymentsheet.forms.PlaceholderHelper.specForPlaceholderField
 import com.stripe.android.paymentsheet.forms.PlaceholderHelper.specsForConfiguration
 import com.stripe.android.ui.core.elements.AddressSpec
+import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextSpec
 import com.stripe.android.ui.core.elements.CashAppPayMandateTextSpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
@@ -196,6 +197,24 @@ class PlaceholderHelperTest {
         )
 
         assertThat(specsWithSepaPlaceholder).containsExactly(
+            NameSpec(),
+        )
+    }
+
+    @Test
+    fun `Test when termsDisplay=NEVER, AuBecsDebitMandateTextSpec is not added`() {
+        val specs = specsForConfiguration(
+            configuration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+            placeholderOverrideList = emptyList(),
+            requiresMandate = true,
+            specs = listOf(
+                NameSpec(),
+                AuBecsDebitMandateTextSpec()
+            ),
+            termsDisplay = PaymentSheet.TermsDisplay.NEVER,
+        )
+
+        assertThat(specs).containsExactly(
             NameSpec(),
         )
     }
