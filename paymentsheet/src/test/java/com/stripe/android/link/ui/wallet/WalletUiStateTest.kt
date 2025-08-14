@@ -242,6 +242,7 @@ class WalletUiStateTest {
         assertThat(state.isItemAvailable(paymentDetailsList[2])).isTrue()
         assertThat(state.isItemAvailable(paymentDetailsList[3])).isTrue()
         assertThat(state.isItemAvailable(paymentDetailsList[4])).isTrue()
+        assertThat(state.isItemAvailable(paymentDetailsList[5])).isTrue()
     }
 
     @OptIn(AllowedBillingCountriesInPaymentElementPreview::class)
@@ -257,11 +258,12 @@ class WalletUiStateTest {
             )
         )
 
-        assertThat(state.isItemAvailable(paymentDetailsList[0])).isTrue()
+        assertThat(state.isItemAvailable(paymentDetailsList[0])).isFalse()
         assertThat(state.isItemAvailable(paymentDetailsList[1])).isFalse()
         assertThat(state.isItemAvailable(paymentDetailsList[2])).isFalse()
-        assertThat(state.isItemAvailable(paymentDetailsList[3])).isTrue()
+        assertThat(state.isItemAvailable(paymentDetailsList[3])).isFalse()
         assertThat(state.isItemAvailable(paymentDetailsList[4])).isTrue()
+        assertThat(state.isItemAvailable(paymentDetailsList[5])).isTrue()
     }
 
     @Test
@@ -346,11 +348,10 @@ class WalletUiStateTest {
                 countryCode = CountryCode.US,
             ),
         ),
-        TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
-            brand = CardBrand.MasterCard,
+        TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH.copy(
             last4 = "1234",
             billingAddress = createBillingAddress(
-                countryCode = CountryCode.GB,
+                countryCode = CountryCode.US,
             ),
         ),
         TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
@@ -358,6 +359,13 @@ class WalletUiStateTest {
             last4 = "8902",
             billingAddress = createBillingAddress(
                 countryCode = CountryCode.CA,
+            ),
+        ),
+        TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+            brand = CardBrand.MasterCard,
+            last4 = "8902",
+            billingAddress = createBillingAddress(
+                countryCode = CountryCode.GB,
             ),
         )
     )
