@@ -113,7 +113,7 @@ internal class CustomerSheetViewModel(
     private val customerSheetLoader: CustomerSheetLoader,
     private val errorReporter: ErrorReporter,
     private val savedStateHandle: SavedStateHandle,
-    private val initialHasSeenAutoCardScanOpenValue: Boolean,
+    private val hasSeenAutoCardScanOpenInitialValue: Boolean, // TODO rename to hasSeenAutoCardScanOpenInitialValue
     private val isStripeCardScanAvailable: IsStripeCardScanAvailable,
 ) : ViewModel() {
 
@@ -155,7 +155,7 @@ internal class CustomerSheetViewModel(
         customerSheetLoader = customerSheetLoader,
         errorReporter = errorReporter,
         savedStateHandle = savedStateHandle,
-        initialHasSeenAutoCardScanOpenValue = hasSeenAutoCardScanOpen,
+        hasSeenAutoCardScanOpenInitialValue = hasSeenAutoCardScanOpen,
         isStripeCardScanAvailable = isStripeCardScanAvailable,
     )
 
@@ -237,13 +237,6 @@ internal class CustomerSheetViewModel(
     val autoCardScanData: AutoCardScanData
 
     init {
-        if (configuration.opensCardScannerAutomatically && !isStripeCardScanAvailable.invoke()) {
-            throw IllegalArgumentException(
-                "Card scanning must be enabled by adding the stripecardscan dependency to your app " +
-                    "to use the opensCardScannerAutomatically option."
-            )
-        }
-
         configuration.appearance.parseAppearance()
 
         eventReporter.onInit(configuration, integrationType)
@@ -254,9 +247,16 @@ internal class CustomerSheetViewModel(
             }
         }
 
+        if (configuration.opensCardScannerAutomatically && !isStripeCardScanAvailable.invoke()) {
+            throw IllegalArgumentException(
+                "Card scanning must be enabled by adding the stripecardscan dependency to your app " +
+                    "to use the opensCardScannerAutomatically option."
+            )
+        }
+
         autoCardScanData = AutoCardScanData(
             openCardScanAutomaticallyConfig = configuration.opensCardScannerAutomatically,
-            hasSeenAutoCardScanOpenInitialValue = initialHasSeenAutoCardScanOpenValue,
+            hasSeenAutoCardScanOpenInitialValue = hasSeenAutoCardScanOpenInitialValue,
             savedStateHandle = savedStateHandle
         )
 
