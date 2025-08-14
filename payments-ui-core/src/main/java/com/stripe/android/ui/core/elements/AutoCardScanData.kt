@@ -12,9 +12,9 @@ class AutoCardScanData(
         private set(value) {}
 
     var hasSeenAutoCardScanOpen: Boolean
-        get() = savedStateHandle[KEY_HAS_SEEN_AUTO_CARD_SCAN] ?: hasSeenAutoCardScanOpenInitialValue
+        get() = savedStateHandle[KEY_HAS_SEEN_AUTO_CARD_SCAN_OPEN] ?: hasSeenAutoCardScanOpenInitialValue
         set(value) {
-            savedStateHandle[KEY_HAS_SEEN_AUTO_CARD_SCAN] = value
+            savedStateHandle[KEY_HAS_SEEN_AUTO_CARD_SCAN_OPEN] = value
         }
 
     init {
@@ -22,6 +22,6 @@ class AutoCardScanData(
     }
 
     companion object {
-        const val KEY_HAS_SEEN_AUTO_CARD_SCAN = "KEY_HAS_SEEN_AUTO_CARD_SCAN"
+        const val KEY_HAS_SEEN_AUTO_CARD_SCAN_OPEN = "KEY_HAS_SEEN_AUTO_CARD_SCAN_OPEN"
     }
 }
