@@ -19,6 +19,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -49,6 +50,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     context: Context,
     private val googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository,
     @Assisted private val cardBrandFilter: CardBrandFilter,
+    @Assisted private val passiveCaptchaParams: PassiveCaptchaParams?,
     paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
         context,
         PaymentConfiguration.getInstance(context).publishableKey,
@@ -84,7 +86,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         },
         config,
         readyCallback,
-        DefaultCardBrandFilter
+        DefaultCardBrandFilter,
+        null
     )
 
     /**
@@ -113,7 +116,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         },
         config,
         readyCallback,
-        DefaultCardBrandFilter
+        DefaultCardBrandFilter,
+        null
     )
 
     internal constructor(
@@ -122,7 +126,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
         config: Config,
         readyCallback: ReadyCallback,
-        cardBrandFilter: CardBrandFilter
+        cardBrandFilter: CardBrandFilter,
+        passiveCaptchaParams: PassiveCaptchaParams?
     ) : this(
         lifecycleScope,
         config,
@@ -143,7 +148,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
                 )
             )
         },
-        cardBrandFilter = cardBrandFilter
+        cardBrandFilter = cardBrandFilter,
+        passiveCaptchaParams = passiveCaptchaParams
     )
 
     init {
@@ -228,7 +234,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
                 amount = amount,
                 label = label,
                 transactionId = transactionId,
-                cardBrandFilter = cardBrandFilter
+                cardBrandFilter = cardBrandFilter,
+                passiveCaptchaParams = passiveCaptchaParams
             )
         )
     }
@@ -420,7 +427,8 @@ fun rememberGooglePayPaymentMethodLauncher(
             readyCallback = {
                 currentReadyCallback.onReady(it)
             },
-            cardBrandFilter = DefaultCardBrandFilter
+            cardBrandFilter = DefaultCardBrandFilter,
+            passiveCaptchaParams = null
         )
     }
 }

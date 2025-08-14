@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wallet.PaymentData
@@ -13,16 +14,22 @@ import com.google.android.gms.wallet.PaymentsClient
 import com.stripe.android.BuildConfig
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.challenge.PassiveChallengeActivityResult
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.injection.DaggerGooglePayPaymentMethodLauncherViewModelFactoryComponent
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.RadarOptions
 import com.stripe.android.networking.StripeRepository
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.util.Locale
 import javax.inject.Inject
@@ -47,6 +54,11 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
 
     private val _googleResult = MutableStateFlow<GooglePayPaymentMethodLauncher.Result?>(null)
     internal val googlePayResult = _googleResult.asStateFlow()
+
+    private val _effects = MutableSharedFlow<Effect>(replay = 1)
+    internal val effects = _effects.asSharedFlow()
+
+    private var paymentData: PaymentData? = null
 
     fun updateResult(result: GooglePayPaymentMethodLauncher.Result) {
         _googleResult.value = result
@@ -119,11 +131,17 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
     }
 
     suspend fun createPaymentMethod(
-        paymentData: PaymentData
+        paymentData: PaymentData,
+        passiveCaptchaToken: String?
     ): GooglePayPaymentMethodLauncher.Result {
         val paymentDataJson = JSONObject(paymentData.toJson())
 
         val params = PaymentMethodCreateParams.createFromGooglePay(paymentDataJson)
+            .copy(
+                radarOptions = passiveCaptchaToken?.let {
+                    RadarOptions(hCaptchaToken = passiveCaptchaToken)
+                }
+            )
 
         return stripeRepository.createPaymentMethod(params, requestOptions).fold(
             onSuccess = {
@@ -140,6 +158,41 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
                 )
             }
         )
+    }
+
+    fun handlePaymentData(paymentData: PaymentData) {
+        this.paymentData = paymentData
+        viewModelScope.launch {
+            if (args.passiveCaptchaParams != null) {
+                _effects.emit(Effect.RunPassiveChallenge(args.passiveCaptchaParams))
+            } else {
+                updateResult(
+                    result = createPaymentMethod(paymentData, passiveCaptchaToken = null)
+                )
+            }
+        }
+    }
+
+    fun handlePassiveChallengeResult(result: PassiveChallengeActivityResult) {
+        val paymentData = paymentData ?: return run {
+            updateResult(
+                result = GooglePayPaymentMethodLauncher.Result.Failed(
+                    error = IllegalStateException("PaymentData is null after passive challenge"),
+                    errorCode = GooglePayPaymentMethodLauncher.INTERNAL_ERROR
+                )
+            )
+        }
+        viewModelScope.launch {
+            val launcherResult = when (result) {
+                is PassiveChallengeActivityResult.Failed -> {
+                    createPaymentMethod(paymentData, passiveCaptchaToken = null)
+                }
+                is PassiveChallengeActivityResult.Success -> {
+                    createPaymentMethod(paymentData, passiveCaptchaToken = result.token)
+                }
+            }
+            updateResult(launcherResult)
+        }
     }
 
     internal class Factory(
@@ -170,6 +223,10 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
                 .savedStateHandle(savedStateHandle)
                 .build().viewModel as T
         }
+    }
+
+    sealed interface Effect {
+        data class RunPassiveChallenge(val passiveCaptchaParams: PassiveCaptchaParams) : Effect
     }
 
     private companion object {

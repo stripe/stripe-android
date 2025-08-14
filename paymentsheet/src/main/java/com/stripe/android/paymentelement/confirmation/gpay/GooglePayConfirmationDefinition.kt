@@ -8,6 +8,7 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -89,6 +90,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             activityLauncher = launcher,
             config = confirmationOption.config,
             confirmationParameters = confirmationParameters,
+            passiveCaptchaParams = confirmationOption.passiveCaptchaParams
         )
 
         googlePayLauncher.present(
@@ -146,6 +148,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
         activityLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
         config: GooglePayConfirmationOption.Config,
         confirmationParameters: ConfirmationDefinition.Parameters,
+        passiveCaptchaParams: PassiveCaptchaParams?
     ): GooglePayPaymentMethodLauncher {
         return factory.create(
             lifecycleScope = CoroutineScope(Dispatchers.Default),
@@ -165,7 +168,8 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             },
             activityResultLauncher = activityLauncher,
             skipReadyCheck = true,
-            cardBrandFilter = config.cardBrandFilter
+            cardBrandFilter = config.cardBrandFilter,
+            passiveCaptchaParams = passiveCaptchaParams
         )
     }
 

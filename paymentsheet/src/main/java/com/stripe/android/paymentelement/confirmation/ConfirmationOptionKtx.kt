@@ -4,6 +4,7 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
 import com.stripe.android.paymentelement.confirmation.cpms.CustomPaymentMethodConfirmationOption
@@ -26,7 +27,7 @@ internal fun PaymentSelection.toConfirmationOption(
         is PaymentSelection.New.USBankAccount -> toConfirmationOption()
         is PaymentSelection.New.LinkInline -> toConfirmationOption(linkConfiguration)
         is PaymentSelection.New -> toConfirmationOption()
-        is PaymentSelection.GooglePay -> toConfirmationOption(configuration)
+        is PaymentSelection.GooglePay -> toConfirmationOption(configuration, passiveCaptchaParams = null)
         is PaymentSelection.Link -> toConfirmationOption(linkConfiguration)
         is PaymentSelection.ShopPay -> toConfirmationOption(configuration)
     }
@@ -104,6 +105,7 @@ private fun PaymentSelection.New.toConfirmationOption(): ConfirmationHandler.Opt
 
 private fun PaymentSelection.GooglePay.toConfirmationOption(
     configuration: CommonConfiguration,
+    passiveCaptchaParams: PassiveCaptchaParams?
 ): GooglePayConfirmationOption? {
     return configuration.googlePay?.let { googlePay ->
         GooglePayConfirmationOption(
@@ -116,7 +118,8 @@ private fun PaymentSelection.GooglePay.toConfirmationOption(
                 customLabel = googlePay.label,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
-            )
+            ),
+            passiveCaptchaParams = passiveCaptchaParams
         )
     }
 }
