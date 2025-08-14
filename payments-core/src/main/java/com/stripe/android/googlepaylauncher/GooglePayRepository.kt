@@ -87,7 +87,7 @@ internal class DefaultGooglePayRepository(
      * for more details.
      */
     override fun isReady(): Flow<Boolean> = flow {
-        emit(true)
+        emit(isReadyAsync())
     }
 
     private suspend fun isReadyAsync(): Boolean {
