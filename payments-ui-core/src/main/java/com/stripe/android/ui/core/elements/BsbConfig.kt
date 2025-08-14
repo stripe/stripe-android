@@ -30,6 +30,7 @@ class BsbConfig(private val banks: List<BecsDebitBanks.Bank>) : TextFieldConfig 
     override val loading: StateFlow<Boolean> = MutableStateFlow(false)
 
     override val label = resolvableString(StripeR.string.stripe_becs_widget_bsb)
+    override val optional: Boolean = false
     override val keyboard = KeyboardType.Number
 
     // Displays the BSB number in 2 groups of 3 characters with a dash added between them

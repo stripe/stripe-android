@@ -105,7 +105,7 @@ internal class SimpleTextFieldControllerTest {
 
     @Test
     fun `Verify is blank optional fields are considered complete`() = runTest {
-        val controller = createControllerWithState(showOptionalLabel = true)
+        val controller = createControllerWithState(isOptional = true)
         controller.onValueChange("invalid")
 
         controller.isComplete.test {
@@ -207,13 +207,27 @@ internal class SimpleTextFieldControllerTest {
         assertThat(controller.placeHolder.value).isNotNull()
     }
 
+    @Test
+    fun `Verify 'showOptionalLabel' is true when 'optional' is true in config`() {
+        val controller = createControllerWithState(isOptional = true)
+        assertThat(controller.showOptionalLabel).isTrue()
+    }
+
+    @Test
+    fun `Verify 'showOptionalLabel' is false when 'optional' is false in config`() {
+        val controller = createControllerWithState(isOptional = false)
+        assertThat(controller.showOptionalLabel).isFalse()
+    }
+
     private fun createControllerWithState(
-        showOptionalLabel: Boolean = false,
-        nullPlaceHolder: Boolean = true
+        isOptional: Boolean = false,
+        nullPlaceHolder: Boolean = true,
     ): SimpleTextFieldController {
         val config: TextFieldConfig = mock {
             on { determineState("full") } doReturn Full
             on { filter("full") } doReturn "full"
+
+            on { optional } doReturn isOptional
 
             on { determineState("limitless") } doReturn Limitless
             on { filter("limitless") } doReturn "limitless"
@@ -238,7 +252,7 @@ internal class SimpleTextFieldControllerTest {
             }
         }
 
-        return SimpleTextFieldController(config, showOptionalLabel)
+        return SimpleTextFieldController(config)
     }
 
     companion object {

@@ -28,6 +28,8 @@ class AuBankAccountNumberConfig : TextFieldConfig {
     override val label = resolvableString(StripeR.string.stripe_becs_widget_account_number)
     override val keyboard = KeyboardType.Number
 
+    override val optional: Boolean = false
+
     override fun filter(userTyped: String) =
         userTyped.filter { VALID_INPUT_RANGES.contains(it) }.take(MAXIMUM_LENGTH)
 

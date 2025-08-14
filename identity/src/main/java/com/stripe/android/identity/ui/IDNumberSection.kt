@@ -219,6 +219,7 @@ private object BRIDConfig : SimpleTextFieldConfig(
     override val placeHolder = BRAZIL_ID_PLACEHOLDER
     override val keyboard = KeyboardType.Number
     override val visualTransformation = BRVisualTransformation
+    override val optional: Boolean = false
     override fun determineState(input: String): TextFieldState = object : TextFieldState {
         override fun shouldShowError(hasFocus: Boolean) = !hasFocus && input.length < 11
 
@@ -236,6 +237,7 @@ private object SGIDConfig : SimpleTextFieldConfig(
     label = resolvableString(R.string.stripe_nric_or_fin)
 ) {
     override val placeHolder = SINGAPORE_ID_PLACEHOLDER
+    override val optional: Boolean = false
     override fun determineState(input: String): TextFieldState = object : TextFieldState {
         override fun shouldShowError(hasFocus: Boolean) = false
 

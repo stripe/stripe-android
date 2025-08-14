@@ -15,7 +15,8 @@ import java.util.regex.Pattern
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class EmailConfig(
-    override val label: ResolvableString = resolvableString(R.string.stripe_email)
+    override val label: ResolvableString = resolvableString(R.string.stripe_email),
+    override val optional: Boolean = false,
 ) : TextFieldConfig {
 
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
@@ -57,9 +58,8 @@ class EmailConfig(
             initialValue: String?,
             showOptionalLabel: Boolean = false,
         ) = SimpleTextFieldController(
-            textFieldConfig = EmailConfig(),
+            textFieldConfig = EmailConfig(optional = showOptionalLabel),
             initialValue = initialValue,
-            showOptionalLabel = showOptionalLabel,
         )
 
         // This is copied from Patterns.EMAIL_ADDRESS because it is not defined for unit tests

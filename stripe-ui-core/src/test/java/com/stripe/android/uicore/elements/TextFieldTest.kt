@@ -166,6 +166,7 @@ class TextFieldTest {
         override val visualTransformation: VisualTransformation? = null
         override val trailingIcon: StateFlow<TextFieldIcon?> = MutableStateFlow(null)
         override val loading: StateFlow<Boolean> = MutableStateFlow(false)
+        override val optional: Boolean = false
 
         override fun determineState(input: String): TextFieldState {
             return if (input.length == maxInputLength) {

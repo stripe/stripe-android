@@ -28,7 +28,6 @@ class CvcController constructor(
     private val cvcTextFieldConfig: CvcConfig = CvcConfig(),
     cardBrandFlow: StateFlow<CardBrand>,
     override val initialValue: String? = null,
-    override val showOptionalLabel: Boolean = false
 ) : TextFieldController {
     override val capitalization: KeyboardCapitalization = cvcTextFieldConfig.capitalization
     override val keyboardType: KeyboardType = cvcTextFieldConfig.keyboard
@@ -47,6 +46,8 @@ class CvcController constructor(
     override val debugLabel = cvcTextFieldConfig.debugLabel
 
     override val layoutDirection: LayoutDirection = LayoutDirection.Ltr
+
+    override val showOptionalLabel: Boolean = false
 
     @OptIn(ExperimentalComposeUiApi::class)
     override val autofillType: AutofillType = AutofillType.CreditCardSecurityCode

@@ -31,6 +31,7 @@ class IbanConfig : TextFieldConfig {
     override val debugLabel = "iban"
 
     override val label = resolvableString(R.string.stripe_iban)
+    override val optional: Boolean = false
     override val keyboard = KeyboardType.Ascii
 
     override val trailingIcon: MutableStateFlow<TextFieldIcon?> = MutableStateFlow(
