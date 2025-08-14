@@ -69,7 +69,6 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     private val formActivityLauncher: ActivityResultLauncher<FormContract.Args> =
         activityResultCaller.registerForActivityResult(FormContract) { result ->
             sheetStateHolder.sheetIsOpen = false
-            val formCode = selectionHolder.temporarySelection.value
             selectionHolder.setTemporary(null)
             if (result is FormResult.Complete) {
                 selectionHolder.set(result.selection)
@@ -85,8 +84,10 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
                     EmbeddedPaymentElement.Result.Canceled()
                 )
             }
-            if (formCode != null && formCode == PaymentMethod.Type.Card.code) {
+            if (hasSeenAutoCardScanHolder.isLaunchingCardFormWithCardScanEnabled) {
+                // Only set hasSeenAutoCardScanOpen to true if we actually see the card scan
                 hasSeenAutoCardScanHolder.hasSeenAutoCardScanOpen = true
+                hasSeenAutoCardScanHolder.isLaunchingCardFormWithCardScanEnabled = false
             }
         }
 
@@ -123,6 +124,12 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         val currentSelection = (selectionHolder.selection.value as? PaymentSelection.New?)
             .takeIf { it?.paymentMethodType == code }
             ?: selectionHolder.getPreviousNewSelection(code)
+        if (paymentMethodMetadata.openCardScanAutomaticallyConfig &&
+            code == PaymentMethod.Type.Card.code &&
+            !hasSeenAutoCardScanHolder.hasSeenAutoCardScanOpen
+        ) {
+            hasSeenAutoCardScanHolder.isLaunchingCardFormWithCardScanEnabled = true
+        }
         val args = FormContract.Args(
             selectedPaymentMethodCode = code,
             paymentMethodMetadata = paymentMethodMetadata,
