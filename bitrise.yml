@@ -254,7 +254,7 @@ workflows:
     steps:
       - script@1:
           title: Assemble Instrumentation tests
-          timeout: 600
+          timeout: 1200
           inputs:
             - content: ./gradlew assembleAndroidTest -x :paymentsheet-example:assembleAndroidTest -x :paymentsheet:assembleAndroidTest -x :example:assembleAndroidTest -x :financial-connections:assembleAndroidTest -x :financial-connections-example:assembleAndroidTest -x :camera-core:assembleAndroidTest -x :stripecardscan:assembleAndroidTest -x :stripecardscan-example:assembleAndroidTest
       - wait-for-android-emulator@1:
