@@ -30,11 +30,8 @@ import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.RenderableFormElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
-import com.stripe.android.uicore.elements.EmailElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.elements.PhoneNumberController
-import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
@@ -90,11 +87,6 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
     ): List<FormElement> {
         val billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration
         return buildList {
-            addContactInformationElement(
-                arguments = arguments,
-                billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
-            )
-
             add(
                 CardDetailsSectionElement(
                     cardAccountRangeRepositoryFactory = arguments.cardAccountRangeRepositoryFactory,
@@ -191,62 +183,50 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
         false -> linkSignupOptInEnabled && signupMode != null
     }
 
-    private fun MutableList<FormElement>.addContactInformationElement(
-        arguments: UiDefinitionFactory.Arguments,
-        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
-    ): Boolean {
-        val contactInformationElement = contactInformationElement(
-            initialValues = arguments.initialValues,
-            collectEmail = billingDetailsCollectionConfiguration.collectsEmail,
-            collectPhone = billingDetailsCollectionConfiguration.collectsPhone,
-        )
-
-        return if (contactInformationElement != null) {
-            add(contactInformationElement)
-        } else {
-            false
-        }
-    }
-
     private fun MutableList<FormElement>.addCardBillingElements(
         arguments: UiDefinitionFactory.Arguments,
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
-    ): Boolean {
-        return if (billingDetailsCollectionConfiguration.address
-            != PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+    ) {
+        if (
+            billingDetailsCollectionConfiguration.address !=
+            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never ||
+            billingDetailsCollectionConfiguration.collectsEmail ||
+            billingDetailsCollectionConfiguration.collectsPhone
         ) {
             addAll(
                 cardBillingElements(
-                    billingDetailsCollectionConfiguration.address.toInternal(),
+                    billingDetailsCollectionConfiguration.toInternal(),
                     arguments.autocompleteAddressInteractorFactory,
                     arguments.initialValues,
                     arguments.shippingValues,
                 )
             )
-        } else {
-            false
         }
     }
 }
 
-internal fun PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.toInternal(): BillingDetailsCollectionConfiguration.AddressCollectionMode {
-    return when (this) {
-        PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
-            BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
+internal fun PaymentSheet.BillingDetailsCollectionConfiguration.toInternal(): BillingDetailsCollectionConfiguration {
+    return BillingDetailsCollectionConfiguration(
+        // Should never collect name from the billing details form since its collected in card information form
+        collectName = false,
+        collectEmail = collectsEmail,
+        collectPhone = collectsPhone,
+        address = when (address) {
+            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
+                BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
+            }
+            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> {
+                BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+            }
+            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> {
+                BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+            }
         }
-
-        PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> {
-            BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
-        }
-
-        PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> {
-            BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
-        }
-    }
+    )
 }
 
 private fun cardBillingElements(
-    collectionMode: BillingDetailsCollectionConfiguration.AddressCollectionMode,
+    collectionConfiguration: BillingDetailsCollectionConfiguration,
     autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
     initialValues: Map<IdentifierSpec, String?>,
     shippingValues: Map<IdentifierSpec, String?>?,
@@ -266,41 +246,24 @@ private fun cardBillingElements(
         rawValuesMap = initialValues,
         sameAsShippingElement = sameAsShippingElement,
         shippingValuesMap = shippingValues,
-        collectionMode = collectionMode,
+        collectionConfiguration = collectionConfiguration,
         autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
     )
+
+    val title = when {
+        collectionConfiguration.address ==
+            BillingDetailsCollectionConfiguration.AddressCollectionMode.Never &&
+            (collectionConfiguration.collectPhone || collectionConfiguration.collectEmail) ->
+            resolvableString(PaymentsUiCoreR.string.stripe_contact_information)
+        else -> resolvableString(PaymentsUiCoreR.string.stripe_billing_details)
+    }
 
     return listOfNotNull(
         SectionElement.wrap(
             addressElement,
-            resolvableString(PaymentsUiCoreR.string.stripe_billing_details),
+            title,
         ),
         sameAsShippingElement,
-    )
-}
-
-private fun contactInformationElement(
-    initialValues: Map<IdentifierSpec, String?>,
-    collectEmail: Boolean,
-    collectPhone: Boolean,
-): FormElement? {
-    val elements = listOfNotNull(
-        EmailElement(
-            initialValue = initialValues[IdentifierSpec.Email]
-        ).takeIf { collectEmail },
-        PhoneNumberElement(
-            identifier = IdentifierSpec.Phone,
-            controller = PhoneNumberController.createPhoneNumberController(
-                initialValue = initialValues[IdentifierSpec.Phone] ?: "",
-            )
-        ).takeIf { collectPhone },
-    )
-
-    if (elements.isEmpty()) return null
-
-    return SectionElement.wrap(
-        label = resolvableString(PaymentsUiCoreR.string.stripe_contact_information),
-        sectionFieldElements = elements,
     )
 }
 

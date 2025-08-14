@@ -123,18 +123,6 @@ internal interface EditCardDetailsInteractor {
         val cardDetailsState: CardDetailsState?,
         val billingDetailsForm: BillingDetailsForm?,
     ) {
-        val contactSectionElements: List<SectionFieldElement>
-            get() = buildList {
-                val hasCardSection = cardDetailsState != null
-
-                // Name goes in contact section only if there's NO card section
-                if (!hasCardSection && billingDetailsForm?.nameElement != null) {
-                    add(billingDetailsForm.nameElement)
-                }
-                billingDetailsForm?.emailElement?.let { add(it) }
-                billingDetailsForm?.phoneElement?.let { add(it) }
-            }
-
         val nameElementForCardSection: SectionFieldElement?
             get() {
                 // Name goes in card section if there's a card section
@@ -146,7 +134,7 @@ internal interface EditCardDetailsInteractor {
             }
 
         val needsSpacerBeforeBilling: Boolean
-            get() = (contactSectionElements.isNotEmpty() || cardDetailsState != null) && billingDetailsForm != null
+            get() = cardDetailsState != null && billingDetailsForm != null
     }
 
     @Immutable
@@ -342,7 +330,12 @@ internal class DefaultEditCardDetailsInteractor(
         return BillingDetailsForm(
             addressCollectionMode = billingDetailsCollectionConfiguration.address,
             billingDetails = payload.billingDetails,
-            collectName = billingDetailsCollectionConfiguration.collectsName,
+            nameCollection = when {
+                billingDetailsCollectionConfiguration.collectsName && cardEditConfiguration != null ->
+                    NameCollection.OutsideBillingDetailsForm
+                billingDetailsCollectionConfiguration.collectsName -> NameCollection.InBillingDetailsForm
+                else -> NameCollection.Disabled
+            },
             collectEmail = billingDetailsCollectionConfiguration.collectsEmail,
             collectPhone = billingDetailsCollectionConfiguration.collectsPhone,
         )

@@ -71,7 +71,8 @@ internal class AutocompleteCapableAddressInputModeTest {
             googleApiKey = googleApiKey,
             autocompleteCountries = autocompleteCountries,
             nameConfig = AddressFieldConfiguration.REQUIRED,
-            phoneNumberConfig = AddressFieldConfiguration.REQUIRED
+            phoneNumberConfig = AddressFieldConfiguration.REQUIRED,
+            emailConfig = AddressFieldConfiguration.REQUIRED,
         ) {}
     }
 }

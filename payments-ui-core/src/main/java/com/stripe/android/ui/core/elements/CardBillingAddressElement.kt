@@ -6,6 +6,7 @@ import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.uicore.address.FieldType
 import com.stripe.android.uicore.elements.AddressController
 import com.stripe.android.uicore.elements.AddressElement
+import com.stripe.android.uicore.elements.AddressFieldConfiguration
 import com.stripe.android.uicore.elements.AddressFieldsElement
 import com.stripe.android.uicore.elements.AddressInputMode
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
@@ -35,16 +36,38 @@ class CardBillingAddressElement(
     autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
     sameAsShippingElement: SameAsShippingElement?,
     shippingValuesMap: Map<IdentifierSpec, String?>?,
-    private val collectionMode: BillingDetailsCollectionConfiguration.AddressCollectionMode =
-        BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+    private val collectionConfiguration: BillingDetailsCollectionConfiguration =
+        BillingDetailsCollectionConfiguration(),
+    private val shouldHideCountryOnNoAddressCollection: Boolean = true,
 ) : AddressFieldsElement {
+    private val nameConfig = if (collectionConfiguration.collectName) {
+        AddressFieldConfiguration.REQUIRED
+    } else {
+        AddressFieldConfiguration.HIDDEN
+    }
+
+    private val emailConfig = if (collectionConfiguration.collectEmail) {
+        AddressFieldConfiguration.REQUIRED
+    } else {
+        AddressFieldConfiguration.HIDDEN
+    }
+
+    private val phoneNumberConfig = if (collectionConfiguration.collectPhone) {
+        AddressFieldConfiguration.REQUIRED
+    } else {
+        AddressFieldConfiguration.HIDDEN
+    }
+
     private val addressElement = autocompleteAddressInteractorFactory?.takeIf {
-        collectionMode == BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+        collectionConfiguration.address == BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
     }?.let { factory ->
         AutocompleteAddressElement(
             identifier = identifier,
             initialValues = rawValuesMap,
             countryCodes = countryCodes,
+            nameConfig = nameConfig,
+            phoneNumberConfig = phoneNumberConfig,
+            emailConfig = emailConfig,
             countryDropdownFieldController = countryDropdownFieldController,
             interactorFactory = factory,
             shippingValuesMap = shippingValuesMap,
@@ -55,13 +78,19 @@ class CardBillingAddressElement(
             _identifier = identifier,
             rawValuesMap = rawValuesMap,
             countryCodes = countryCodes,
-            addressInputMode = AddressInputMode.NoAutocomplete(),
+            addressInputMode = AddressInputMode.NoAutocomplete(
+                nameConfig = nameConfig,
+                phoneNumberConfig = phoneNumberConfig,
+                emailConfig = emailConfig,
+            ),
             countryElement = CountryElement(
                 identifier = IdentifierSpec.Country,
                 controller = countryDropdownFieldController,
             ),
             shippingValuesMap = shippingValuesMap,
             sameAsShippingElement = sameAsShippingElement,
+            hideCountry = shouldHideCountryOnNoAddressCollection &&
+                collectionConfiguration.address == BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
         )
     }
 
@@ -73,9 +102,10 @@ class CardBillingAddressElement(
     // card and achv2 uses save for future use
     val hiddenIdentifiers: StateFlow<Set<IdentifierSpec>> =
         countryDropdownFieldController.rawFieldValue.mapAsStateFlow { countryCode ->
-            when (collectionMode) {
+            when (collectionConfiguration.address) {
                 BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> {
                     FieldType.entries
+                        .filterNot { it == FieldType.Name }
                         .map { it.identifierSpec }
                         .toSet()
                 }

@@ -158,7 +158,20 @@ class UpdateCardScreenViewModelTest {
                 assertThat(interactor).isNotNull()
 
                 requireNotNull(interactor).state.test {
-                    val doesNotHavePhoneElement = awaitItem().contactSectionElements.none { element ->
+                    val billingElements = awaitItem().billingDetailsForm?.addressSectionElement?.fields
+
+                    assertThat(billingElements).isNotNull()
+
+                    val nonNullBillingElements = requireNotNull(billingElements)
+
+                    assertThat(nonNullBillingElements).hasSize(1)
+                    assertThat(nonNullBillingElements[0]).isInstanceOf<CardBillingAddressElement>()
+
+                    val cardBillingAddressElement = nonNullBillingElements[0] as CardBillingAddressElement
+
+                    val addressFields = cardBillingAddressElement.addressController.value.fieldsFlowable.value
+
+                    val doesNotHavePhoneElement = addressFields.none { element ->
                         element.identifier == IdentifierSpec.Phone
                     }
 
@@ -191,7 +204,20 @@ class UpdateCardScreenViewModelTest {
                 assertThat(interactor).isNotNull()
 
                 requireNotNull(interactor).state.test {
-                    val hasPhoneElement = awaitItem().contactSectionElements.any { element ->
+                    val billingElements = awaitItem().billingDetailsForm?.addressSectionElement?.fields
+
+                    assertThat(billingElements).isNotNull()
+
+                    val nonNullBillingElements = requireNotNull(billingElements)
+
+                    assertThat(nonNullBillingElements).hasSize(1)
+                    assertThat(nonNullBillingElements[0]).isInstanceOf<CardBillingAddressElement>()
+
+                    val cardBillingAddressElement = nonNullBillingElements[0] as CardBillingAddressElement
+
+                    val addressFields = cardBillingAddressElement.addressController.value.fieldsFlowable.value
+
+                    val hasPhoneElement = addressFields.any { element ->
                         element.identifier == IdentifierSpec.Phone
                     }
 
