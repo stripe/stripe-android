@@ -121,7 +121,6 @@ sealed class TextFieldIcon {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 class SimpleTextFieldController(
     val textFieldConfig: TextFieldConfig,
-    override val showOptionalLabel: Boolean = false,
     override val initialValue: String? = null,
     private val overrideContentDescriptionProvider: ((fieldValue: String) -> ResolvableString)? = null,
 ) : TextFieldController {
@@ -131,6 +130,7 @@ class SimpleTextFieldController(
     override val visualTransformation = stateFlowOf(
         value = textFieldConfig.visualTransformation ?: VisualTransformation.None
     )
+    override val showOptionalLabel: Boolean = textFieldConfig.optional
 
     override val label = MutableStateFlow(textFieldConfig.label)
     override val debugLabel = textFieldConfig.debugLabel
@@ -177,7 +177,7 @@ class SimpleTextFieldController(
     }
 
     override val isComplete: StateFlow<Boolean> = _fieldState.mapAsStateFlow {
-        it.isValid() || (!it.isValid() && showOptionalLabel && it.isBlank())
+        it.isValid() || (!it.isValid() && textFieldConfig.optional && it.isBlank())
     }
 
     override val formFieldValue: StateFlow<FormFieldEntry> =

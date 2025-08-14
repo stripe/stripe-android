@@ -12,7 +12,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 class PostalCodeConfig(
     override val label: ResolvableString,
     override val trailingIcon: MutableStateFlow<TextFieldIcon?> = MutableStateFlow(null),
-    private val country: String
+    private val country: String,
+    override val optional: Boolean = false,
 ) : TextFieldConfig {
     private val format = CountryPostalFormat.forCountry(country)
 

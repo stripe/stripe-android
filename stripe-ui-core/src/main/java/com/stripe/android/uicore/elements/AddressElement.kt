@@ -40,9 +40,9 @@ class AddressElement(
         IdentifierSpec.Name,
         SimpleTextFieldController(
             textFieldConfig = SimpleTextFieldConfig(
-                label = resolvableString(CoreR.string.stripe_address_label_full_name)
+                label = resolvableString(CoreR.string.stripe_address_label_full_name),
+                optional = addressInputMode.nameConfig == AddressFieldConfiguration.OPTIONAL,
             ),
-            showOptionalLabel = addressInputMode.nameConfig == AddressFieldConfiguration.OPTIONAL,
             initialValue = rawValuesMap[IdentifierSpec.Name]
         )
     )
