@@ -131,6 +131,13 @@ class OnrampCoordinator @Inject internal constructor(
         fun promptForIdentityVerification() {
             coordinator.promptForIdentityVerification()
         }
+
+        /**
+         * Presents a payment selection UI to the user.
+         */
+        fun collectPaymentMethod() {
+            coordinator.collectPaymentMethod()
+        }
     }
 
     /**
