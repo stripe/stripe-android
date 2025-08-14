@@ -12,7 +12,6 @@ import com.stripe.hcaptcha.config.HCaptchaConfig
 import com.stripe.hcaptcha.config.HCaptchaSize
 import com.stripe.hcaptcha.task.OnFailureListener
 import com.stripe.hcaptcha.task.OnSuccessListener
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.mockito.kotlin.any
@@ -132,27 +131,36 @@ internal class DefaultHCaptchaServiceTest {
         val testContext = createTestContext()
         testContext.setupHangingHCaptcha()
 
-        var exception: Throwable? = null
-
         val job = launch {
-            try {
-                testContext.service.performPassiveHCaptcha(
-                    testContext.activity,
-                    siteKey = "test-site-key",
-                    rqData = null
-                )
-            } catch (e: CancellationException) {
-                exception = e
-                throw e
-            }
+            testContext.service.performPassiveHCaptcha(
+                testContext.activity,
+                siteKey = "test-site-key",
+                rqData = null
+            )
         }
 
         testContext.hCaptchaProvider.awaitCall()
         job.cancel()
         job.join()
 
-        assertThat(exception).isInstanceOf(CancellationException::class.java)
         verify(testContext.hCaptcha, times(2)).reset()
+    }
+
+    @Test
+    fun `performPassiveHCaptcha returns failure when startVerification throws exception`() = runTest {
+        val testContext = createTestContext()
+        val expectedException = RuntimeException("Test exception")
+        testContext.setupExceptionDuringSetup(expectedException)
+
+        val result = testContext.service.performPassiveHCaptcha(
+            testContext.activity,
+            siteKey = "test-site-key",
+            rqData = null
+        )
+
+        assertThat(result).isInstanceOf(HCaptchaService.Result.Failure::class.java)
+        assertThat((result as HCaptchaService.Result.Failure).error).isEqualTo(expectedException)
+        verify(testContext.hCaptcha).reset()
     }
 
     private fun createTestContext(): TestContext {
@@ -200,6 +208,12 @@ internal class DefaultHCaptchaServiceTest {
     private fun TestContext.setupHangingHCaptcha() {
         setupHCaptchaChaining()
         whenever(hCaptcha.verifyWithHCaptcha(any())).doReturn(hCaptcha)
+    }
+
+    private fun TestContext.setupExceptionDuringSetup(exception: Throwable) {
+        whenever(hCaptcha.addOnSuccessListener(any())).doReturn(hCaptcha)
+        whenever(hCaptcha.addOnFailureListener(any())).doReturn(hCaptcha)
+        whenever(hCaptcha.setup(any(), any())).thenThrow(exception)
     }
 
     private fun createHCaptchaTokenResponse(token: String): HCaptchaTokenResponse {
