@@ -7,6 +7,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
@@ -21,6 +22,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.paymentelement.AllowedBillingCountriesInPaymentElementPreview
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal
@@ -1552,6 +1554,54 @@ class USBankAccountFormViewModelTest {
             viewModel.emailController.onValueChange("email@email.com")
             assertThat(awaitItem()?.paymentMethodCreateParams?.billingDetails?.email).isEqualTo("email@email.com")
         }
+    }
+
+    @OptIn(AllowedBillingCountriesInPaymentElementPreview::class)
+    @Test
+    fun `Contains all supported billing countries when allowed countries is empty`() {
+        val viewModel = createViewModel(
+            args = defaultArgs.run {
+                copy(
+                    formArgs = formArgs.copy(
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            name = CollectionMode.Automatic,
+                            phone = CollectionMode.Automatic,
+                            email = CollectionMode.Automatic,
+                            address = AddressCollectionMode.Full,
+                            allowedCountries = emptySet()
+                        )
+                    )
+                )
+            }
+        )
+
+        assertThat(viewModel.addressElement.countryElement.controller.displayItems)
+            .hasSize(CountryUtils.supportedBillingCountries.size)
+    }
+
+    @OptIn(AllowedBillingCountriesInPaymentElementPreview::class)
+    @Test
+    fun `Contains only countries provided through billing configuration`() {
+        val viewModel = createViewModel(
+            args = defaultArgs.run {
+                copy(
+                    formArgs = formArgs.copy(
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            name = CollectionMode.Automatic,
+                            phone = CollectionMode.Automatic,
+                            email = CollectionMode.Automatic,
+                            address = AddressCollectionMode.Full,
+                            allowedCountries = setOf("US", "CA")
+                        )
+                    )
+                )
+            }
+        )
+
+        assertThat(viewModel.addressElement.countryElement.controller.displayItems).containsExactly(
+            "\uD83C\uDDFA\uD83C\uDDF8 United States",
+            "\uD83C\uDDE8\uD83C\uDDE6 Canada"
+        )
     }
 
     @Test

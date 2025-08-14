@@ -2,6 +2,7 @@ package com.stripe.android.link.ui.wallet
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.TestFactory
@@ -11,6 +12,8 @@ import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
+import com.stripe.android.paymentelement.AllowedBillingCountriesInPaymentElementPreview
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.forms.FormFieldEntry
 import org.junit.Test
@@ -221,6 +224,46 @@ class WalletUiStateTest {
         assertThat(state.isItemAvailable(paymentDetailsList[2])).isTrue()
     }
 
+    @OptIn(AllowedBillingCountriesInPaymentElementPreview::class)
+    @Test
+    fun testPaymentMethodAvailabilityForAllAllowedBillingCountries() {
+        val paymentDetailsList = createPaymentMethodsWithDifferentBillingDetails()
+
+        val state = walletUiState(
+            paymentDetailsList = paymentDetailsList,
+            selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                allowedCountries = emptySet(),
+            )
+        )
+
+        assertThat(state.isItemAvailable(paymentDetailsList[0])).isTrue()
+        assertThat(state.isItemAvailable(paymentDetailsList[1])).isTrue()
+        assertThat(state.isItemAvailable(paymentDetailsList[2])).isTrue()
+        assertThat(state.isItemAvailable(paymentDetailsList[3])).isTrue()
+        assertThat(state.isItemAvailable(paymentDetailsList[4])).isTrue()
+    }
+
+    @OptIn(AllowedBillingCountriesInPaymentElementPreview::class)
+    @Test
+    fun testPaymentMethodAvailabilityForLimitedAllowedBillingCountries() {
+        val paymentDetailsList = createPaymentMethodsWithDifferentBillingDetails()
+
+        val state = walletUiState(
+            paymentDetailsList = paymentDetailsList,
+            selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                allowedCountries = setOf("CA", "GB"),
+            )
+        )
+
+        assertThat(state.isItemAvailable(paymentDetailsList[0])).isTrue()
+        assertThat(state.isItemAvailable(paymentDetailsList[1])).isFalse()
+        assertThat(state.isItemAvailable(paymentDetailsList[2])).isFalse()
+        assertThat(state.isItemAvailable(paymentDetailsList[3])).isTrue()
+        assertThat(state.isItemAvailable(paymentDetailsList[4])).isTrue()
+    }
+
     @Test
     fun testIsExpanded() {
         val state = walletUiState(
@@ -256,7 +299,9 @@ class WalletUiStateTest {
         isSettingUp: Boolean = false,
         merchantName: String = "Example Inc.",
         collectMissingBillingDetailsForExistingPaymentMethods: Boolean = true,
-        signupToggleEnabled: Boolean = false
+        signupToggleEnabled: Boolean = false,
+        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
+            PaymentSheet.BillingDetailsCollectionConfiguration(),
     ): WalletUiState {
         return WalletUiState(
             paymentDetailsList = paymentDetailsList,
@@ -276,7 +321,56 @@ class WalletUiStateTest {
             merchantName = merchantName,
             collectMissingBillingDetailsForExistingPaymentMethods =
             collectMissingBillingDetailsForExistingPaymentMethods,
-            signupToggleEnabled = signupToggleEnabled
+            signupToggleEnabled = signupToggleEnabled,
+            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
         )
     }
+
+    private fun createPaymentMethodsWithDifferentBillingDetails() = listOf(
+        TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+            id = "pm_1",
+            last4 = "1235",
+            billingAddress = null,
+        ),
+        TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+            id = "pm_2",
+            last4 = "4235",
+            billingAddress = createBillingAddress(
+                countryCode = CountryCode.US,
+            ),
+        ),
+        TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT.copy(
+            id = "pm_3",
+            last4 = "9382",
+            billingAddress = createBillingAddress(
+                countryCode = CountryCode.US,
+            ),
+        ),
+        TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+            brand = CardBrand.MasterCard,
+            last4 = "1234",
+            billingAddress = createBillingAddress(
+                countryCode = CountryCode.GB,
+            ),
+        ),
+        TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+            brand = CardBrand.MasterCard,
+            last4 = "8902",
+            billingAddress = createBillingAddress(
+                countryCode = CountryCode.CA,
+            ),
+        )
+    )
+
+    private fun createBillingAddress(
+        countryCode: CountryCode,
+    ) = ConsumerPaymentDetails.BillingAddress(
+        name = null,
+        line1 = null,
+        line2 = null,
+        locality = null,
+        administrativeArea = null,
+        countryCode = countryCode,
+        postalCode = null,
+    )
 }

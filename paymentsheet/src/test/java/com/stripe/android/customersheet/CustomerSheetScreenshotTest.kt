@@ -372,6 +372,7 @@ internal class CustomerSheetScreenshotTest {
                 // This checkbox is never displayed in CustomerSheet.
                 shouldShowSetAsDefaultCheckbox = false,
                 isDefaultPaymentMethod = false,
+                allowedBillingCountries = emptySet(),
                 onUpdateSuccess = {},
             ),
             isLiveMode = true,

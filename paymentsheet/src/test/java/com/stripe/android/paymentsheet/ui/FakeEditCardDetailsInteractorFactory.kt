@@ -4,6 +4,9 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.CoroutineScope
 
 internal class FakeEditCardDetailsInteractorFactory : EditCardDetailsInteractor.Factory {
+    var billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration? = null
+        private set
+
     var onCardUpdateParamsChanged: CardUpdateParamsCallback? = null
         private set
 
@@ -17,6 +20,7 @@ internal class FakeEditCardDetailsInteractorFactory : EditCardDetailsInteractor.
         onCardUpdateParamsChanged: CardUpdateParamsCallback
     ): EditCardDetailsInteractor {
         this.onCardUpdateParamsChanged = onCardUpdateParamsChanged
+        this.billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration
         return FakeEditCardDetailsInteractor(
             payload = payload,
             shouldShowCardBrandDropdown = cardEditConfiguration?.isCbcModifiable ?: false,

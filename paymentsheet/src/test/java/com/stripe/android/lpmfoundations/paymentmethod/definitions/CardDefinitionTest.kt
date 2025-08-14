@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
@@ -15,6 +16,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.paymentelement.AllowedBillingCountriesInPaymentElementPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -403,6 +405,68 @@ class CardDefinitionTest {
         assertThat(cardBillingAddressElements).hasSize(1)
         assertThat(cardBillingAddressElements.firstOrNull()?.sectionFieldErrorController())
             .isInstanceOf<AutocompleteAddressController>()
+    }
+
+    @OptIn(AllowedBillingCountriesInPaymentElementPreview::class)
+    @Test
+    fun `createFormElements contains all supported billing countries when allowed countries is empty`() {
+        val formElements = CardDefinition.formElements(
+            metadata = PaymentMethodMetadataFactory.create(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                    phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    allowedCountries = emptySet(),
+                )
+            ),
+        )
+
+        assertThat(formElements).hasSize(2)
+        assertThat(formElements.getOrNull(1)).isInstanceOf<SectionElement>()
+
+        val sectionElement = formElements[1] as SectionElement
+        val sectionFields = sectionElement.fields
+
+        assertThat(sectionFields.size).isEqualTo(1)
+        assertThat(sectionFields.firstOrNull()).isInstanceOf<CardBillingAddressElement>()
+
+        val addressElement = sectionFields.first() as CardBillingAddressElement
+
+        assertThat(addressElement.countryElement.controller.displayItems)
+            .hasSize(CountryUtils.supportedBillingCountries.size)
+    }
+
+    @OptIn(AllowedBillingCountriesInPaymentElementPreview::class)
+    @Test
+    fun `createFormElements contains only countries provided through billing configuration`() {
+        val formElements = CardDefinition.formElements(
+            metadata = PaymentMethodMetadataFactory.create(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                    phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    allowedCountries = setOf("US", "CA")
+                )
+            ),
+        )
+
+        assertThat(formElements).hasSize(2)
+        assertThat(formElements.getOrNull(1)).isInstanceOf<SectionElement>()
+
+        val sectionElement = formElements[1] as SectionElement
+        val sectionFields = sectionElement.fields
+
+        assertThat(sectionFields.size).isEqualTo(1)
+        assertThat(sectionFields.firstOrNull()).isInstanceOf<CardBillingAddressElement>()
+
+        val addressElement = sectionFields.first() as CardBillingAddressElement
+
+        assertThat(addressElement.countryElement.controller.displayItems).containsExactly(
+            "\uD83C\uDDFA\uD83C\uDDF8 United States",
+            "\uD83C\uDDE8\uD83C\uDDE6 Canada"
+        )
     }
 
     @Test
