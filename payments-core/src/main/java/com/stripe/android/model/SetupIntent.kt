@@ -150,6 +150,7 @@ constructor(
             null -> {
                 null
             }
+            is StripeIntent.NextActionData.DisplayPayNowDetails -> TODO()
         }
 
     override val isConfirmed: Boolean
