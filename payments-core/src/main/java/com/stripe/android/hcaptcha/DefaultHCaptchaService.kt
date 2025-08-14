@@ -15,25 +15,24 @@ import kotlin.coroutines.resume
 internal class DefaultHCaptchaService(
     private val hCaptchaProvider: HCaptchaProvider
 ) : HCaptchaService {
-    @SuppressWarnings("TooGenericExceptionCaught")
     override suspend fun performPassiveHCaptcha(
         activity: FragmentActivity,
         siteKey: String,
         rqData: String?
     ): HCaptchaService.Result {
         val hCaptcha = hCaptchaProvider.get()
-        return try {
+        val result = runCatching {
             startVerification(
                 activity = activity,
                 siteKey = siteKey,
                 rqData = rqData,
                 hCaptcha = hCaptcha
             )
-        } catch (e: Throwable) {
+        }.getOrElse { e ->
             HCaptchaService.Result.Failure(e)
-        } finally {
-            hCaptcha.reset()
         }
+        hCaptcha.reset()
+        return result
     }
 
     private suspend fun startVerification(
