@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.material.Checkbox
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
@@ -165,6 +166,7 @@ fun <T> SettingsDropdownField(
             DropdownMenu(
                 expanded = isExpanded,
                 onDismissRequest = { isExpanded = false },
+                modifier = Modifier.sizeIn(maxHeight = 400.dp, minWidth = 300.dp)
             ) {
                 options.forEach { option ->
                     DropdownMenuItem(
@@ -191,6 +193,92 @@ fun <T> SettingsDropdownField(
                             } else {
                                 Spacer(modifier = Modifier.size(iconSize))
                             }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private const val MAX_DISPLAY_OPTIONS = 3
+
+@Suppress("LongMethod")
+@Composable
+fun <T> SettingsMultiSelectField(
+    label: String,
+    options: List<T>,
+    selectedOptions: List<T>,
+    onSelectedOptionsChange: (List<T>) -> Unit,
+    modifier: Modifier = Modifier,
+    optionToString: (T) -> String = { it.toString() },
+) {
+    var isExpanded by remember { mutableStateOf(false) }
+
+    val displayText = when {
+        selectedOptions.isEmpty() -> "NONE"
+        selectedOptions.size == 1 -> optionToString(selectedOptions.first())
+        selectedOptions.size <= MAX_DISPLAY_OPTIONS -> selectedOptions.joinToString(", ") { optionToString(it) }
+        else -> "${selectedOptions.size} selected"
+    }
+
+    Row(
+        modifier = modifier
+            .padding(
+                start = 16.dp,
+                end = 8.dp,
+                top = 8.dp,
+                bottom = 8.dp,
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            modifier = Modifier
+                .weight(1f),
+            text = label,
+            color = MaterialTheme.colors.onSurface,
+        )
+        Box(
+            modifier = Modifier
+                .clickable { isExpanded = true }
+                .padding(4.dp)
+        ) {
+            Row {
+                Text(
+                    text = displayText,
+                    color = MaterialTheme.colors.onSurface,
+                )
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    tint = MaterialTheme.colors.onSurface,
+                    contentDescription = null,
+                )
+            }
+            DropdownMenu(
+                expanded = isExpanded,
+                onDismissRequest = { isExpanded = false },
+                modifier = Modifier.sizeIn(maxHeight = 400.dp, minWidth = 300.dp)
+            ) {
+                options.forEach { option ->
+                    val isSelected = selectedOptions.contains(option)
+                    DropdownMenuItem(
+                        onClick = {
+                            val newSelection = if (isSelected) {
+                                selectedOptions - option
+                            } else {
+                                selectedOptions + option
+                            }
+                            onSelectedOptionsChange(newSelection)
+                        },
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(
+                                checked = isSelected,
+                                onCheckedChange = null, // Handled by DropdownMenuItem onClick
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(Modifier.size(8.dp))
+                            Text(text = optionToString(option))
                         }
                     }
                 }
