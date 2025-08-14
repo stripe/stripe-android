@@ -509,7 +509,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             )
         ),
         canShowWalletsInline = true,
-        canShowWalletButtons = false,
     ) {
         walletsState.value = WalletsState(
             link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
@@ -525,12 +524,13 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         )
         interactor.state.test {
             awaitItem().run {
+                // Link is not included because it'd show in the wallet, not in the list.
                 assertThat(displayablePaymentMethods.map { it.code })
-                    .isEqualTo(listOf("google_pay", "link", "card", "cashapp"))
+                    .isEqualTo(listOf("google_pay", "card", "cashapp"))
             }
         }
         interactor.showsWalletsHeader.test {
-            assertThat(awaitItem()).isFalse()
+            assertThat(awaitItem()).isTrue()
         }
     }
 
@@ -543,6 +543,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 )
             ),
             canShowWalletsInline = true,
+            canShowWalletButtons = false,
         ) {
             walletsState.value = WalletsState(
                 link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
@@ -575,6 +576,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             invokeRowSelectionCallback = { rowSelectionCallbackInvoked = true },
             paymentMethodMetadata = metadataWithOnlyPaymentMethodTypes,
             canShowWalletsInline = true,
+            canShowWalletButtons = false,
         ) {
             walletsState.value = linkAndGooglePayWalletState
 
@@ -593,6 +595,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             invokeRowSelectionCallback = { rowSelectionCallbackInvoked = true },
             paymentMethodMetadata = metadataWithOnlyPaymentMethodTypes,
             canShowWalletsInline = true,
+            canShowWalletButtons = false,
         ) {
             walletsState.value = linkAndGooglePayWalletState
 
@@ -1422,6 +1425,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         runScenario(
             initialWalletsState = walletsState,
             canShowWalletsInline = true,
+            canShowWalletButtons = false,
         ) {
             interactor.state.test {
                 val linkPaymentMethod = awaitItem().displayablePaymentMethods.firstOrNull { it.code == "link" }
@@ -1447,6 +1451,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         runScenario(
             initialWalletsState = walletsState,
             canShowWalletsInline = true,
+            canShowWalletButtons = false,
         ) {
             interactor.state.test {
                 val linkPaymentMethod = awaitItem().displayablePaymentMethods.firstOrNull { it.code == "link" }
