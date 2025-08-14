@@ -48,6 +48,7 @@ interface IHCaptcha {
     /**
      * Constructs a new client which allows to display a challenge dialog
      *
+     * @param activity The FragmentActivity context required for starting the challenge
      * @param config Config to customize: size, theme, locale, endpoint, rqdata, etc.
      * @return new [HCaptcha] object
      */
@@ -60,6 +61,7 @@ interface IHCaptcha {
      * Presents a captcha challenge. Depending on the configuration passed in setup, this will be either a passive
      * challenge or a dialog to be completed by the user.
      *
+     * @param activity The FragmentActivity context required for starting the challenge
      * @return [HCaptcha]
      */
     fun verifyWithHCaptcha(activity: FragmentActivity): HCaptcha?
