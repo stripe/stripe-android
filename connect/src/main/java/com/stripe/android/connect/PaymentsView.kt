@@ -11,7 +11,7 @@ import kotlinx.parcelize.Parcelize
 import java.util.Date
 
 @PrivateBetaConnectSDK
-class PaymentsView internal constructor(
+internal class PaymentsView internal constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,

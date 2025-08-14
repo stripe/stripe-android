@@ -7,7 +7,7 @@ import androidx.core.content.withStyledAttributes
 import com.stripe.android.connect.webview.StripeConnectWebViewContainer
 
 @PrivateBetaConnectSDK
-class PayoutsView internal constructor(
+internal class PayoutsView internal constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
