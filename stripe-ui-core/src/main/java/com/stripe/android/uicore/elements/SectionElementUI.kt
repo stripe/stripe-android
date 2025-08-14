@@ -41,7 +41,7 @@ fun SectionElementUI(
             sectionErrorString,
             modifier = modifier,
         ) {
-            element.fields.forEachIndexed { index, field ->
+            element.fields.filterOutHiddenIdentifiers(hiddenIdentifiers).forEachIndexed { index, field ->
                 SectionFieldElementUI(
                     enabled,
                     field,

@@ -36,6 +36,10 @@ class AddressElement(
     override val allowsUserInteraction: Boolean = true
     override val mandateText: ResolvableString? = null
 
+    private val emailElement = EmailElement(
+        initialValue = rawValuesMap[IdentifierSpec.Email]
+    )
+
     private val nameElement = SimpleTextElement(
         IdentifierSpec.Name,
         SimpleTextFieldController(
@@ -192,13 +196,18 @@ class AddressElement(
             }
         }
 
-        val fields = if (addressInputMode.phoneNumberConfig != AddressFieldConfiguration.HIDDEN) {
-            baseElements.plus(phoneNumberElement)
-        } else {
-            baseElements
-        }
+        baseElements
+            .toMutableList()
+            .apply {
+                if (addressInputMode.emailConfig != AddressFieldConfiguration.HIDDEN) {
+                    add(emailElement)
+                }
 
-        fields
+                if (addressInputMode.phoneNumberConfig != AddressFieldConfiguration.HIDDEN) {
+                    add(phoneNumberElement)
+                }
+            }
+            .toList()
     }
 
     private val controller = AddressController(fields)
