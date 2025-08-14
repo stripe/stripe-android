@@ -17,9 +17,9 @@ internal class CustomerSheetConfigViewModel(
 
     var hasSeenAutoCardScanOpen: Boolean
         set(value) {
-            savedStateHandle[CUSTOMER_SHEET_HAS_SEEN_AUTO_CARD_SCAN_KEY] = value
+            savedStateHandle[CUSTOMER_SHEET_HAS_SEEN_AUTO_CARD_SCAN_OPEN_KEY] = value
         }
-        get() = savedStateHandle[CUSTOMER_SHEET_HAS_SEEN_AUTO_CARD_SCAN_KEY] ?: false
+        get() = savedStateHandle[CUSTOMER_SHEET_HAS_SEEN_AUTO_CARD_SCAN_OPEN_KEY] ?: false
 
     object Factory : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
@@ -33,6 +33,7 @@ internal class CustomerSheetConfigViewModel(
     private companion object {
         private const val CUSTOMER_SHEET_CONFIGURE_REQUEST_KEY = "CustomerSheetConfigureRequest"
 
-        private const val CUSTOMER_SHEET_HAS_SEEN_AUTO_CARD_SCAN_KEY = "CUSTOMER_SHEET_HAS_SEEN_AUTO_CARD_SCAN_KEY"
+        private const val CUSTOMER_SHEET_HAS_SEEN_AUTO_CARD_SCAN_OPEN_KEY =
+            "CUSTOMER_SHEET_HAS_SEEN_AUTO_CARD_SCAN_OPEN_KEY"
     }
 }
