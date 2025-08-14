@@ -1131,6 +1131,9 @@ public final class com/stripe/android/paymentelement/EmbeddedPaymentElementKtxKt
 public abstract interface annotation class com/stripe/android/paymentelement/ExperimentalAnalyticEventCallbackApi : java/lang/annotation/Annotation {
 }
 
+public abstract interface annotation class com/stripe/android/paymentelement/ExtendedLabelsInPaymentOptionPreview : java/lang/annotation/Annotation {
+}
+
 public abstract interface annotation class com/stripe/android/paymentelement/PaymentMethodOptionsSetupFutureUsagePreview : java/lang/annotation/Annotation {
 }
 
@@ -1138,7 +1141,13 @@ public abstract interface class com/stripe/android/paymentelement/PreparePayment
 	public abstract fun onPreparePaymentMethod (Lcom/stripe/android/model/PaymentMethod;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public abstract interface annotation class com/stripe/android/paymentelement/ShippingDetailsInPaymentOptionPreview : java/lang/annotation/Annotation {
+}
+
 public abstract interface annotation class com/stripe/android/paymentelement/ShopPayPreview : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class com/stripe/android/paymentelement/WalletButtonsPreview : java/lang/annotation/Annotation {
 }
 
 public final class com/stripe/android/paymentelement/confirmation/ConfirmationDefinition$Parameters$Creator : android/os/Parcelable$Creator {
