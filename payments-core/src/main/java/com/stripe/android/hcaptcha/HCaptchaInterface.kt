@@ -27,7 +27,7 @@ suspend fun performPassiveHCaptcha(
     // TODO(awush): in the future, we should convert the hCaptcha SDK to use a suspend interface instead of callbacks,
     //  then we can eliminate the {{suspendCancelableCoroutine}} here.
     return suspendCancellableCoroutine { coroutine ->
-        val hcaptcha = HCaptcha.getClient(activity).apply {
+        val hcaptcha = HCaptcha.getClient().apply {
             addOnSuccessListener(object : OnSuccessListener<HCaptchaTokenResponse> {
                 override fun onSuccess(result: HCaptchaTokenResponse) {
                     coroutine.resume(result.tokenResult) { _ -> }
@@ -50,6 +50,6 @@ suspend fun performPassiveHCaptcha(
             retryPredicate = { _, exception -> exception.hCaptchaError == HCaptchaError.SESSION_TIMEOUT }
         )
 
-        hcaptcha.setup(config).verifyWithHCaptcha()
+        hcaptcha.setup(activity, config).verifyWithHCaptcha(activity)
     }
 }
