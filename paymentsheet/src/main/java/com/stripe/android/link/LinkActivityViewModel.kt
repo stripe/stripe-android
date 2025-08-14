@@ -25,6 +25,7 @@ import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.injection.DaggerNativeLinkComponent
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.ConsentPresentation
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.link.ui.signup.SignUpViewModel
@@ -343,8 +344,9 @@ internal class LinkActivityViewModel @Inject constructor(
 
         if (linkLaunchMode is LinkLaunchMode.Authorization &&
             accountStatus is AccountStatus.Verified &&
-            linkAccount?.consentNeeded != true
+            linkAccount?.consentPresentation is ConsentPresentation.Inline
         ) {
+            // Completed verification with inline consent.
             dismissWithResult(LinkActivityResult.Completed(linkAccountManager.linkAccountUpdate))
             return
         }

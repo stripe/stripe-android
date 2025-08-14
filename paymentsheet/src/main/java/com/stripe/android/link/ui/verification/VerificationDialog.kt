@@ -61,6 +61,7 @@ internal fun VerificationDialog(
         onResendCodeClick = viewModel::resendCode,
         onFocusRequested = viewModel::onFocusRequested,
         didShowCodeSentNotification = viewModel::didShowCodeSentNotification,
+        onConsentShown = viewModel::onConsentShown
     )
 }
 
@@ -75,6 +76,7 @@ internal fun VerificationDialogBody(
     didShowCodeSentNotification: () -> Unit,
     onChangeEmailClick: () -> Unit,
     onResendCodeClick: () -> Unit,
+    onConsentShown: () -> Unit,
 ) {
     Box(
         modifier = modifier
@@ -104,6 +106,7 @@ internal fun VerificationDialogBody(
                         onResendCodeClick = onResendCodeClick,
                         onFocusRequested = onFocusRequested,
                         didShowCodeSentNotification = didShowCodeSentNotification,
+                        onConsentShown = onConsentShown,
                     )
                 }
             }
@@ -142,6 +145,7 @@ fun VerificationDialogPreview() {
                 onResendCodeClick = {},
                 onFocusRequested = {},
                 didShowCodeSentNotification = {},
+                onConsentShown = {}
             )
         }
     }

@@ -13,6 +13,7 @@ import com.stripe.android.link.account.linkAccountUpdate
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.ConsentPresentation
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.ui.core.elements.OTPSpec
@@ -51,7 +52,8 @@ internal class VerificationViewModel @Inject constructor(
             didSendNewCode = false,
             defaultPayment = null,
             isDialog = isDialog,
-            allowLogout = !isDialog || linkLaunchMode is LinkLaunchMode.PaymentMethodSelection
+            allowLogout = !isDialog || linkLaunchMode is LinkLaunchMode.PaymentMethodSelection,
+            consentSection = (linkAccount.consentPresentation as? ConsentPresentation.Inline)?.consentSection
         )
     )
     val viewState: StateFlow<VerificationViewState> = _viewState
@@ -60,6 +62,8 @@ internal class VerificationViewModel @Inject constructor(
 
     private val otpCode: StateFlow<String?> =
         otpElement.otpCompleteFlow.stateIn(viewModelScope, SharingStarted.Lazily, null)
+
+    private var didSeeConsentSection = false
 
     init {
         setUp()
@@ -85,13 +89,17 @@ internal class VerificationViewModel @Inject constructor(
             )
         }
 
-        linkAccountManager.confirmVerification(code).fold(
+        linkAccountManager.confirmVerification(
+            code = code,
+            consentGranted = didSeeConsentSection.takeIf { it },
+        ).fold(
             onSuccess = { account ->
                 updateViewState { it.copy(isProcessing = false) }
-                // Handle Authentication mode logic in ViewModel
-                if ((linkLaunchMode is LinkLaunchMode.Authentication) ||
-                    (linkLaunchMode is LinkLaunchMode.Authorization && !account.consentNeeded)
-                ) {
+                val isAuthenticationMode = linkLaunchMode is LinkLaunchMode.Authentication
+                val completedAuthorizationConsent =
+                    linkLaunchMode is LinkLaunchMode.Authorization &&
+                        account.consentPresentation is ConsentPresentation.Inline
+                if (isAuthenticationMode || completedAuthorizationConsent) {
                     dismissWithResult(
                         LinkActivityResult.Completed(
                             linkAccountUpdate = linkAccountManager.linkAccountUpdate,
@@ -136,6 +144,10 @@ internal class VerificationViewModel @Inject constructor(
         updateViewState {
             it.copy(didSendNewCode = false)
         }
+    }
+
+    fun onConsentShown() {
+        didSeeConsentSection = true
     }
 
     fun onBack() {

@@ -364,7 +364,8 @@ internal class LinkApiRepository @Inject constructor(
     override suspend fun confirmVerification(
         verificationCode: String,
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
+        consumerPublishableKey: String?,
+        consentGranted: Boolean?
     ): Result<ConsumerSession> {
         return runCatching {
             requireNotNull(
@@ -373,6 +374,7 @@ internal class LinkApiRepository @Inject constructor(
                     verificationCode = verificationCode,
                     requestSurface = REQUEST_SURFACE,
                     type = VerificationType.SMS,
+                    consentGranted = consentGranted,
                     requestOptions = consumerPublishableKey?.let {
                         ApiRequest.Options(it)
                     } ?: ApiRequest.Options(

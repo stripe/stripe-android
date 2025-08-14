@@ -186,7 +186,10 @@ private fun Screens(
 
         composable(LinkScreen.OAuthConsent.route) {
             val linkAccount = getLinkAccount() ?: return@composable dismissWithResult(noLinkAccountResult())
-            OAuthConsentRoute(linkAccount)
+            OAuthConsentRoute(
+                linkAccount = linkAccount,
+                dismissWithResult = dismissWithResult,
+            )
         }
     }
 }
@@ -298,11 +301,13 @@ private fun WalletRoute(
 @Composable
 private fun OAuthConsentRoute(
     linkAccount: LinkAccount,
+    dismissWithResult: (LinkActivityResult) -> Unit,
 ) {
     val viewModel: OAuthConsentViewModel = linkViewModel { parentComponent ->
         OAuthConsentViewModel.factory(
             parentComponent = parentComponent,
             linkAccount = linkAccount,
+            dismissWithResult = dismissWithResult,
         )
     }
     OAuthConsentScreen(

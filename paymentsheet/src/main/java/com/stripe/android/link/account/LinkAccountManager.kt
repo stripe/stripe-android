@@ -145,7 +145,7 @@ internal interface LinkAccountManager {
     /**
      * Confirms a verification code sent to the user.
      */
-    suspend fun confirmVerification(code: String): Result<LinkAccount>
+    suspend fun confirmVerification(code: String, consentGranted: Boolean?): Result<LinkAccount>
 
     /**
      * Fetch all saved payment methods for the signed in consumer.

@@ -25,6 +25,7 @@ internal fun VerificationScreen(
         onResendCodeClick = viewModel::resendCode,
         onFocusRequested = viewModel::onFocusRequested,
         didShowCodeSentNotification = viewModel::didShowCodeSentNotification,
+        onConsentShown = viewModel::onConsentShown
     )
 }
 
@@ -52,6 +53,7 @@ fun VerificationPreview() {
                 onResendCodeClick = {},
                 onFocusRequested = {},
                 didShowCodeSentNotification = {},
+                onConsentShown = {},
             )
         }
     }

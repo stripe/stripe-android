@@ -141,6 +141,7 @@ internal interface LinkRepository {
         verificationCode: String,
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?,
+        consentGranted: Boolean?,
     ): Result<ConsumerSession>
 
     /**
