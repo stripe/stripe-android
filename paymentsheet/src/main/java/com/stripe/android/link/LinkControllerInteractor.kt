@@ -25,6 +25,7 @@ import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformToBankIcon
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.transformBankIconCodeToBankIcon
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.getCardBrandIconForVerticalMode
 import com.stripe.android.paymentsheet.ui.getLinkIcon
@@ -88,7 +89,7 @@ internal class LinkControllerInteractor @Inject constructor(
         return combineAsStateFlow(_internalLinkAccount, _state) { account, state ->
             LinkController.State(
                 internalLinkAccount = account,
-                selectedPaymentMethodPreview = state.selectedPaymentMethod?.toPreview(context, iconLoader),
+                selectedPaymentMethodPreview = state.selectedPaymentMethod?.details?.toPreview(context, iconLoader),
                 createdPaymentMethod = state.createdPaymentMethod,
             )
         }
@@ -474,17 +475,20 @@ internal class LinkControllerInteractor @Inject constructor(
     }
 }
 
-internal fun LinkPaymentMethod.toPreview(
+internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
     context: Context,
     iconLoader: PaymentSelection.IconLoader
 ): LinkController.PaymentMethodPreview {
     val label = context.getString(com.stripe.android.R.string.stripe_link)
     val sublabel = buildString {
-        append(details.displayName.resolve(context))
+        // It should never be `Passthrough`, but handling it here just in case.
+        if (this@toPreview !is ConsumerPaymentDetails.Passthrough) {
+            append(displayName.resolve(context))
+        }
         append(" •••• ")
-        append(details.last4)
+        append(last4)
     }
-    val drawableResourceId = details.getIconDrawableRes(context.isSystemDarkTheme())
+    val drawableResourceId = getIconDrawableRes(context.isSystemDarkTheme())
 
     return LinkController.PaymentMethodPreview(
         imageLoader = {
@@ -509,10 +513,17 @@ internal fun ConsumerPaymentDetails.PaymentDetails.getIconDrawableRes(isDarkThem
                 } else {
                     R.drawable.stripe_link_bank_with_bg_night
                 }
-            TransformToBankIcon(
-                bankName = bankName,
-                fallbackIcon = fallbackIcon
-            )
+            bankIconCode
+                ?.let {
+                    transformBankIconCodeToBankIcon(
+                        iconCode = it,
+                        fallbackIcon = fallbackIcon
+                    )
+                }
+                ?: TransformToBankIcon(
+                    bankName = bankName,
+                    fallbackIcon = fallbackIcon
+                )
         }
         is ConsumerPaymentDetails.Card ->
             brand.getCardBrandIconForVerticalMode()
