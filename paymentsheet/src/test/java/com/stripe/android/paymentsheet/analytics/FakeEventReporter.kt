@@ -15,7 +15,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.ui.core.cardscan.CancellationReason
 
 @Suppress("EmptyFunctionBlock")
 internal class FakeEventReporter : EventReporter {
@@ -285,7 +284,7 @@ internal class FakeEventReporter : EventReporter {
     override fun onCardScanFailed(implementation: String, error: Throwable?) {
     }
 
-    override fun onCardScanCancelled(implementation: String, reason: CancellationReason) {
+    override fun onCardScanCancelled(implementation: String) {
     }
 
     override fun onCardScanApiCheck(implementation: String, available: Boolean, reason: String?) {

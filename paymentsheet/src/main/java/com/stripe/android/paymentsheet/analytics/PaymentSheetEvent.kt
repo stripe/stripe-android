@@ -23,7 +23,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFo
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.asPaymentSheetLoadingException
 import com.stripe.android.paymentsheet.utils.getSetAsDefaultPaymentMethodFromPaymentSelection
-import com.stripe.android.ui.core.cardscan.CancellationReason
 import com.stripe.android.utils.filterNotNullValues
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -750,7 +749,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
     class CardScanCancelled(
         implementation: String,
-        reason: CancellationReason,
         override val isDeferred: Boolean,
         override val isSpt: Boolean,
         override val linkEnabled: Boolean,
@@ -758,8 +756,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     ) : PaymentSheetEvent() {
         override val eventName: String = "cardscan_cancel"
         override val additionalParams: Map<String, Any?> = mapOf(
-            "implementation" to implementation,
-            "cancellation_reason" to reason::class.simpleName?.lowercase()
+            "implementation" to implementation
         )
     }
 

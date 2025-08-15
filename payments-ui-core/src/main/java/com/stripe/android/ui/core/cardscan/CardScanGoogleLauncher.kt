@@ -2,7 +2,6 @@ package com.stripe.android.ui.core.cardscan
 
 import android.app.Activity
 import android.content.Context
-import android.os.Parcelable
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -14,7 +13,6 @@ import com.google.android.gms.wallet.PaymentCardRecognitionResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.parcelize.Parcelize
 
 internal class CardScanGoogleLauncher(
     context: Context,
@@ -49,24 +47,24 @@ internal class CardScanGoogleLauncher(
         }
     }
 
-    internal fun parseActivityResult(result: ActivityResult): CardScanSheetResult {
+    internal fun parseActivityResult(result: ActivityResult): CardScanResult {
         if (result.resultCode == Activity.RESULT_OK && result.data != null) {
-            val data = result.data ?: return CardScanSheetResult.Canceled(CancellationReason.Closed).also {
-                eventsReporter.scanCancelled(implementation, CancellationReason.Closed)
+            val data = result.data ?: return CardScanResult.Canceled.also {
+                eventsReporter.scanCancelled(implementation)
             }
             val paymentCardRecognitionResult = PaymentCardRecognitionResult.getFromIntent(data)
             val pan = paymentCardRecognitionResult?.pan
             return if (pan != null) {
                 eventsReporter.scanSucceeded(implementation)
-                CardScanSheetResult.Completed(ScannedCard(pan))
+                CardScanResult.Completed(ScannedCard(pan))
             } else {
                 val error = Throwable("Failed to parse card data")
                 eventsReporter.scanFailed("google_pay", error)
-                CardScanSheetResult.Failed(error)
+                CardScanResult.Failed(error)
             }
         }
-        eventsReporter.scanCancelled(implementation, CancellationReason.Closed)
-        return CardScanSheetResult.Canceled(CancellationReason.Closed)
+        eventsReporter.scanCancelled(implementation)
+        return CardScanResult.Canceled
     }
 
     companion object {
@@ -74,7 +72,7 @@ internal class CardScanGoogleLauncher(
         internal fun rememberCardScanGoogleLauncher(
             context: Context,
             eventsReporter: CardScanEventsReporter,
-            onResult: (CardScanSheetResult) -> Unit
+            onResult: (CardScanResult) -> Unit
         ): CardScanGoogleLauncher {
             val launcher = remember(context, eventsReporter) { CardScanGoogleLauncher(context, eventsReporter) }
             val activityLauncher = rememberLauncherForActivityResult(
@@ -89,41 +87,20 @@ internal class CardScanGoogleLauncher(
     }
 }
 
-sealed interface CardScanSheetResult : Parcelable {
+internal sealed interface CardScanResult {
 
-    @Parcelize
     data class Completed(
         val scannedCard: ScannedCard
-    ) : CardScanSheetResult
+    ) : CardScanResult
 
-    @Parcelize
-    data class Canceled(
-        val reason: CancellationReason
-    ) : CardScanSheetResult
+    data object Canceled : CardScanResult
 
-    @Parcelize
-    data class Failed(val error: Throwable) : CardScanSheetResult
+    data class Failed(val error: Throwable) : CardScanResult
 }
 
 /**
  * Card details from the scanner
  */
-@Parcelize
-data class ScannedCard(
+internal data class ScannedCard(
     val pan: String
-) : Parcelable
-
-sealed interface CancellationReason : Parcelable {
-
-    @Parcelize
-    data object Closed : CancellationReason
-
-    @Parcelize
-    data object Back : CancellationReason
-
-    @Parcelize
-    data object UserCannotScan : CancellationReason
-
-    @Parcelize
-    data object CameraPermissionDenied : CancellationReason
-}
+)

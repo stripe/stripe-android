@@ -14,7 +14,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.ui.core.cardscan.CancellationReason
 
 internal interface EventReporter {
 
@@ -270,7 +269,7 @@ internal interface EventReporter {
     /**
      * Card scan was cancelled by the user.
      */
-    fun onCardScanCancelled(implementation: String, reason: CancellationReason)
+    fun onCardScanCancelled(implementation: String)
 
     /**
      * Card scan API availability check.

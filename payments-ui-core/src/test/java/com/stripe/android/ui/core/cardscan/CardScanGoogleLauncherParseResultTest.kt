@@ -28,12 +28,10 @@ class CardScanGoogleLauncherParseResultTest {
 
         val scanResult = launcher.parseActivityResult(result)
 
-        assertThat(scanResult).isInstanceOf(CardScanSheetResult.Canceled::class.java)
-        assertThat((scanResult as CardScanSheetResult.Canceled).reason).isEqualTo(CancellationReason.Closed)
+        assertThat(scanResult).isInstanceOf(CardScanResult.Canceled::class.java)
 
         val call = fakeEventsReporter.scanCancelledCalls.awaitItem()
         assertThat(call.implementation).isEqualTo("google_pay")
-        assertThat(call.reason).isEqualTo(CancellationReason.Closed)
 
         fakeEventsReporter.validate()
     }
@@ -44,12 +42,10 @@ class CardScanGoogleLauncherParseResultTest {
 
         val scanResult = launcher.parseActivityResult(result)
 
-        assertThat(scanResult).isInstanceOf(CardScanSheetResult.Canceled::class.java)
-        assertThat((scanResult as CardScanSheetResult.Canceled).reason).isEqualTo(CancellationReason.Closed)
+        assertThat(scanResult).isInstanceOf(CardScanResult.Canceled::class.java)
 
         val call = fakeEventsReporter.scanCancelledCalls.awaitItem()
         assertThat(call.implementation).isEqualTo("google_pay")
-        assertThat(call.reason).isEqualTo(CancellationReason.Closed)
 
         fakeEventsReporter.validate()
     }
@@ -64,8 +60,8 @@ class CardScanGoogleLauncherParseResultTest {
 
         val scanResult = launcher.parseActivityResult(result)
 
-        assertThat(scanResult).isInstanceOf(CardScanSheetResult.Failed::class.java)
-        val failedResult = scanResult as CardScanSheetResult.Failed
+        assertThat(scanResult).isInstanceOf(CardScanResult.Failed::class.java)
+        val failedResult = scanResult as CardScanResult.Failed
         assertThat(failedResult.error.message).isEqualTo("Failed to parse card data")
 
         val call = fakeEventsReporter.scanFailedCalls.awaitItem()
@@ -81,12 +77,10 @@ class CardScanGoogleLauncherParseResultTest {
 
         val scanResult = launcher.parseActivityResult(result)
 
-        assertThat(scanResult).isInstanceOf(CardScanSheetResult.Canceled::class.java)
-        assertThat((scanResult as CardScanSheetResult.Canceled).reason).isEqualTo(CancellationReason.Closed)
+        assertThat(scanResult).isInstanceOf(CardScanResult.Canceled::class.java)
 
         val call = fakeEventsReporter.scanCancelledCalls.awaitItem()
         assertThat(call.implementation).isEqualTo("google_pay")
-        assertThat(call.reason).isEqualTo(CancellationReason.Closed)
 
         fakeEventsReporter.validate()
     }
@@ -144,7 +138,7 @@ class CardScanGoogleLauncherParseResultTest {
     }
 
     private class FakeCardScanEventsReporter : CardScanEventsReporter {
-        data class ScanCancelledCall(val implementation: String, val reason: CancellationReason)
+        data class ScanCancelledCall(val implementation: String)
         data class ScanFailedCall(val implementation: String, val error: Throwable?)
         data class ScanSucceededCall(val implementation: String)
         data class ScanStartedCall(val implementation: String)
@@ -173,8 +167,8 @@ class CardScanGoogleLauncherParseResultTest {
             _apiCheckCalls.ensureAllEventsConsumed()
         }
 
-        override fun scanCancelled(implementation: String, reason: CancellationReason) {
-            _scanCancelledCalls.add(ScanCancelledCall(implementation, reason))
+        override fun scanCancelled(implementation: String) {
+            _scanCancelledCalls.add(ScanCancelledCall(implementation))
         }
 
         override fun scanFailed(implementation: String, error: Throwable?) {

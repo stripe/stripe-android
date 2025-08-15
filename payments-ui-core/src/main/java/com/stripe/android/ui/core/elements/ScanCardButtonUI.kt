@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -22,15 +21,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cardscan.CardScanGoogleLauncher.Companion.rememberCardScanGoogleLauncher
-import com.stripe.android.ui.core.cardscan.CardScanSheetResult
+import com.stripe.android.ui.core.cardscan.CardScanResult
 import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
 import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.LocalIconStyle
+import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
 internal fun ScanCardButtonUI(
     enabled: Boolean,
-    onResult: (CardScanSheetResult) -> Unit
+    onResult: (CardScanResult) -> Unit
 ) {
     val context = LocalContext.current
     val eventsReporter = LocalCardScanEventsReporter.current

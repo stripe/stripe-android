@@ -35,7 +35,6 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.IsStripeCardScanAvailable
-import com.stripe.android.ui.core.cardscan.CancellationReason
 import com.stripe.android.utils.AnalyticEventCallbackRule
 import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -1282,13 +1281,12 @@ class DefaultEventReporterTest {
             simulateInit()
         }
 
-        completeEventReporter.onCardScanCancelled("google_pay", CancellationReason.Back)
+        completeEventReporter.onCardScanCancelled("google_pay")
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "cardscan_cancel" &&
-                    req.params["implementation"] == "google_pay" &&
-                    req.params["cancellation_reason"] == "back"
+                    req.params["implementation"] == "google_pay"
             }
         )
     }
@@ -1338,7 +1336,6 @@ class DefaultEventReporterTest {
         completeEventReporter.onCardScanStarted("bouncer")
         completeEventReporter.onCardScanSucceeded("stripe")
         completeEventReporter.onCardScanFailed("custom", null)
-        completeEventReporter.onCardScanCancelled("test", CancellationReason.UserCannotScan)
         completeEventReporter.onCardScanApiCheck("ml_kit", true, null)
 
         verify(analyticsRequestExecutor).executeAsync(

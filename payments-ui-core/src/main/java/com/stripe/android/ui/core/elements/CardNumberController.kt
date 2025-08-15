@@ -26,7 +26,7 @@ import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.cardscan.CardScanSheetResult
+import com.stripe.android.ui.core.cardscan.CardScanResult
 import com.stripe.android.ui.core.elements.events.LocalAnalyticsEventReporter
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
@@ -61,9 +61,9 @@ internal sealed class CardNumberController : TextFieldController {
     @OptIn(ExperimentalComposeUiApi::class)
     override val autofillType: AutofillType = AutofillType.CreditCardNumber
 
-    fun onCardScanResult(cardScanSheetResult: CardScanSheetResult) {
+    fun onCardScanResult(cardScanSheetResult: CardScanResult) {
         // Don't need to populate the card number if the result is Canceled or Failed
-        if (cardScanSheetResult is CardScanSheetResult.Completed) {
+        if (cardScanSheetResult is CardScanResult.Completed) {
             onRawValueChange(cardScanSheetResult.scannedCard.pan)
         }
     }
