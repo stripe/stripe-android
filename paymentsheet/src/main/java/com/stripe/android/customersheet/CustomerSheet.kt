@@ -273,7 +273,8 @@ class CustomerSheet internal constructor(
                 ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod
             private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
             private var cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
-            private var opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomaticallyConfig
+            private var opensCardScannerAutomatically: Boolean =
+                ConfigurationDefaults.opensCardScannerAutomaticallyConfig
 
             fun appearance(appearance: PaymentSheet.Appearance) = apply {
                 this.appearance = appearance
