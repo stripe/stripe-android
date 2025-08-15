@@ -984,7 +984,7 @@ internal class PaymentOptionsViewModelTest {
                 ),
                 isGooglePayReady = true,
             ).copy(
-                walletsToShow = listOf(WalletType.GooglePay, WalletType.Link)
+                walletsToShow = WalletType.entries
             )
         )
 
@@ -1010,7 +1010,7 @@ internal class PaymentOptionsViewModelTest {
                     ),
                     isGooglePayReady = true,
                 ).copy(
-                    walletsToShow = listOf(WalletType.GooglePay, WalletType.Link)
+                    walletsToShow = WalletType.entries
                 )
             )
 

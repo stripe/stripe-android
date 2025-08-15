@@ -240,8 +240,6 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             canRemove = customerStateHolder.canRemove,
             canUpdateFullPaymentMethodDetails = customerStateHolder.canUpdateFullPaymentMethodDetails,
             walletsState = walletsState,
-            canShowWalletsInline = true,
-            canShowWalletButtons = false,
             updateSelection = { updatedSelection, requiresConfirmation ->
                 setSelection(updatedSelection)
             },
