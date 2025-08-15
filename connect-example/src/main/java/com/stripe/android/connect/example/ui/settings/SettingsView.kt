@@ -40,6 +40,7 @@ fun SettingsView(
     onDismiss: () -> Unit,
     onReloadRequested: () -> Unit,
     openOnboardingSettings: () -> Unit,
+    openPaymentsSettings: () -> Unit,
     openPresentationSettings: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
@@ -86,7 +87,10 @@ fun SettingsView(
                 )
             }
             item {
-                ComponentSettings(openOnboardingSettings = openOnboardingSettings)
+                ComponentSettings(
+                    openOnboardingSettings = openOnboardingSettings,
+                    openPaymentsSettings = openPaymentsSettings
+                )
             }
             item {
                 PresentationSettingsSection(openPresentationSettings = openPresentationSettings)
@@ -165,12 +169,17 @@ private fun SelectAnAccount(
 @Composable
 private fun ComponentSettings(
     openOnboardingSettings: () -> Unit,
+    openPaymentsSettings: () -> Unit,
 ) {
     SettingsSectionHeader(stringResource(R.string.component_settings))
     Spacer(modifier = Modifier.height(8.dp))
     SettingsNavigationItem(
         text = stringResource(R.string.account_onboarding),
         onClick = openOnboardingSettings
+    )
+    SettingsNavigationItem(
+        text = "Payments",
+        onClick = openPaymentsSettings
     )
 }
 

@@ -92,6 +92,30 @@ class EmbeddedComponentManager @JvmOverloads constructor(
         )
     }
 
+    /**
+     * Create a new [PaymentsView] for inclusion in the view hierarchy.
+     *
+     * @param context The [Context] to use for creating the view.
+     * @param listener Optional [PaymentsListener] to use for handling events from the view.
+     * @param props Optional [PaymentsProps] to use for configuring the view.
+     * @param cacheKey Key to use for caching the internal WebView within an Activity across configuration changes.
+     */
+    @PrivateBetaConnectSDK
+    fun createPaymentsView(
+        context: Context,
+        listener: PaymentsListener? = null,
+        props: PaymentsProps? = null,
+        cacheKey: String? = null,
+    ): View {
+        return PaymentsView(
+            context = context,
+            embeddedComponentManager = this,
+            listener = listener,
+            props = props,
+            cacheKey = cacheKey,
+        )
+    }
+
     fun update(appearance: Appearance) {
         coordinator.update(appearance)
     }
