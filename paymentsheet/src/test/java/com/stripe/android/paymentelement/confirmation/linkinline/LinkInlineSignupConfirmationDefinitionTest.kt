@@ -706,6 +706,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 linkAppearance = null,
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
+                linkMobileDisableCacheAttestationResult = false,
                 customerId = null,
                 saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             ),

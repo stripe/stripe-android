@@ -232,6 +232,8 @@ internal object TestFactory {
         linkAppearance = null,
         linkSignUpOptInFeatureEnabled = false,
         linkSignUpOptInInitialValue = false,
+        linkMobileDisableCacheAttestationResult = false,
+        linkMobileKeepLinkOnAttestationFailure = false,
         customerId = null,
         saveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(null),
     )

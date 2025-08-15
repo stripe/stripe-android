@@ -163,8 +163,10 @@ class LinkFormElementTest {
             linkAppearance = null,
             linkSignUpOptInFeatureEnabled = false,
             linkSignUpOptInInitialValue = false,
+            linkMobileDisableCacheAttestationResult = false,
+            linkMobileKeepLinkOnAttestationFailure = false,
             customerId = null,
-            saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+            saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy
         )
     }
 

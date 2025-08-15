@@ -184,8 +184,16 @@ internal class ElementsSessionJsonParser(
             FIELD_LINK_MOBILE_SKIP_WALLET_IN_FLOW_CONTROLLER
         ) == true
 
+        val linkMobileDisableCacheAttestationResult = json?.optBoolean(
+            FIELD_LINK_MOBILE_DISABLE_CACHE_ATTESTATION_RESULT
+        ) == true
+
         val linkSignUpOptInFeatureEnabled = json?.optBoolean(FIELD_LINK_SIGN_UP_OPT_IN_FEATURE_ENABLED) == true
         val linkSignUpOptInInitialValue = json?.optBoolean(FIELD_LINK_SIGN_UP_OPT_IN_INITIAL_VALUE) == true
+
+        val linkMobileKeepLinkOnAttestationFailure = json?.optBoolean(
+            FIELD_LINK_MOBILE_KEEP_LINK_ON_ATTESTATION_FAILURE
+        ) == true
 
         val linkMode = json?.optString(FIELD_LINK_MODE)?.let { mode ->
             LinkMode.entries.firstOrNull { it.value == mode }
@@ -214,8 +222,10 @@ internal class ElementsSessionJsonParser(
             disableLinkRuxInFlowController = disableLinkRuxInFlowController,
             linkEnableDisplayableDefaultValuesInEce = linkEnableDisplayableDefaultValuesInEce,
             linkMobileSkipWalletInFlowController = linkMobileSkipWalletInFlowController,
+            linkMobileDisableCacheAttestationResult = linkMobileDisableCacheAttestationResult,
             linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
-            linkSignUpOptInInitialValue = linkSignUpOptInInitialValue
+            linkSignUpOptInInitialValue = linkSignUpOptInInitialValue,
+            linkMobileKeepLinkOnAttestationFailure = linkMobileKeepLinkOnAttestationFailure
         )
     }
 
@@ -473,6 +483,8 @@ internal class ElementsSessionJsonParser(
             "link_mobile_skip_wallet_in_flow_controller"
         private const val FIELD_LINK_SIGN_UP_OPT_IN_FEATURE_ENABLED = "link_sign_up_opt_in_feature_enabled"
         private const val FIELD_LINK_SIGN_UP_OPT_IN_INITIAL_VALUE = "link_sign_up_opt_in_initial_value"
+        private const val FIELD_LINK_MOBILE_DISABLE_CACHE_ATTESTATION_RESULT = "link_mobile_disable_cache_attestation_result"
+        private const val FIELD_LINK_MOBILE_KEEP_LINK_ON_ATTESTATION_FAILURE = "link_mobile_keep_link_on_attestation_failure"
         private const val FIELD_MERCHANT_COUNTRY = "merchant_country"
         private const val FIELD_MERCHANT_LOGO_URL = "merchant_logo_url"
         private const val FIELD_PAYMENT_METHOD_PREFERENCE = "payment_method_preference"

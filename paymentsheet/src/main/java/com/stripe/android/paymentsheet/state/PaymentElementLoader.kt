@@ -9,8 +9,6 @@ import com.stripe.android.common.validation.isSupportedWithBillingConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.utils.FeatureFlag
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -54,11 +52,9 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
-import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -162,7 +158,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val externalPaymentMethodsRepository: ExternalPaymentMethodsRepository,
     private val userFacingLogger: UserFacingLogger,
     private val cvcRecollectionHandler: CvcRecollectionHandler,
-    private val integrityRequestManager: IntegrityRequestManager,
 ) : PaymentElementLoader {
 
     @Suppress("LongMethod")
@@ -181,14 +176,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             externalPaymentMethods = configuration.externalPaymentMethods,
             savedPaymentMethodSelectionId = savedPaymentMethodSelection?.id,
         ).getOrThrow()
-
-        // Preemptively prepare Integrity asynchronously if needed, as warm up can take
-        // a few seconds.
-        if (elementsSession.shouldWarmUpIntegrity()) {
-            launch {
-                integrityRequestManager.prepare()
-            }
-        }
 
         val customerInfo = createCustomerInfo(
             configuration = configuration,
@@ -281,15 +268,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         )
 
         return@runCatching state
-    }
-
-    private fun ElementsSession.shouldWarmUpIntegrity(): Boolean = when {
-        stripeIntent.isLiveMode -> useAttestationEndpointsForLink
-        else -> when (FeatureFlags.nativeLinkAttestationEnabled.value) {
-            FeatureFlag.Flag.Disabled -> false
-            FeatureFlag.Flag.Enabled -> true
-            FeatureFlag.Flag.NotSet -> useAttestationEndpointsForLink
-        }
     }
 
     private fun logLinkExperimentExposures(
@@ -655,6 +633,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 .collectMissingBillingDetailsForExistingPaymentMethods,
             allowUserEmailEdits = configuration.link.allowUserEmailEdits,
             skipWalletInFlowController = elementsSession.linkMobileSkipWalletInFlowController,
+            linkMobileDisableCacheAttestationResult = elementsSession.linkMobileDisableCacheAttestationResult,
+            linkMobileKeepLinkOnAttestationFailure = elementsSession.linkMobileKeepLinkOnAttestationFailure,
             customerId = elementsSession.customer?.session?.customerId,
             linkAppearance = linkAppearance,
             saveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
@@ -666,9 +646,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             return null
         }
 
-        // If the link attestation check fails, we don't want to proceed with the flow.
+        // If the link attestation check fails, we don't want to proceed with the flow unless
+        // linkMobileKeepLinkOnAttestationFailure is enabled.
         val attestationCheck = linkConfigurationCoordinator.linkAttestationCheck(linkConfiguration)
-        if (attestationCheck.invoke().succeeded.not()) {
+        if (attestationCheck.invoke().succeeded.not() && !elementsSession.linkMobileKeepLinkOnAttestationFailure) {
             return null
         }
 

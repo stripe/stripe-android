@@ -108,6 +108,7 @@ class SignUpScreenStateTest {
             linkAppearance = null,
             linkSignUpOptInFeatureEnabled = false,
             linkSignUpOptInInitialValue = false,
+            linkMobileDisableCacheAttestationResult = false,
             skipWalletInFlowController = false,
             customerId = null,
             saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
