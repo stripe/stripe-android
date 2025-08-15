@@ -37,8 +37,11 @@ class EmailConfig(
     override fun convertFromRaw(rawValue: String) = rawValue
 
     override fun determineState(input: String): TextFieldState {
+        val isEmpty = input.isEmpty()
+
         return when {
-            input.isEmpty() -> Error.Blank
+            optional && isEmpty -> Valid.Limitless
+            input.isBlank() -> Error.Blank
             PATTERN.matcher(input).matches() -> Valid.Limitless
             containsNameAndDomain(input) || cannotBecomeValid(input) ->
                 Error.Invalid(R.string.stripe_email_is_invalid)

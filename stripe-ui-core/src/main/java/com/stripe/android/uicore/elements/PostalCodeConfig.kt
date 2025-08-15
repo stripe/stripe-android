@@ -41,11 +41,17 @@ class PostalCodeConfig(
         override fun shouldShowError(hasFocus: Boolean) = getError() != null && !hasFocus
 
         override fun isValid(): Boolean {
+            val canBeEmpty = optional && input.isEmpty()
+
             return when (format) {
-                is CountryPostalFormat.Other -> input.isNotBlank()
+                is CountryPostalFormat.Other -> canBeEmpty || input.isNotBlank()
                 else -> {
-                    input.length in format.minimumLength..format.maximumLength &&
-                        input.matches(format.regexPattern)
+                    canBeEmpty ||
+                        (
+                            input.length in format.minimumLength..format.maximumLength &&
+                                input.isNotBlank() &&
+                                input.matches(format.regexPattern)
+                            )
                 }
             }
         }
@@ -64,6 +70,13 @@ class PostalCodeConfig(
                     // Check if it's too short (incomplete) vs invalid format
                     if (input.length < format.minimumLength) {
                         FieldError(R.string.stripe_address_postal_code_incomplete)
+                    } else {
+                        FieldError(R.string.stripe_address_postal_code_invalid)
+                    }
+                }
+                input.isNotEmpty() && !isValid() -> {
+                    if (country == "US") {
+                        FieldError(R.string.stripe_address_zip_invalid)
                     } else {
                         FieldError(R.string.stripe_address_postal_code_invalid)
                     }

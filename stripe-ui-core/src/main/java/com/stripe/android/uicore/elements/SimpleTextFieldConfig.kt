@@ -5,6 +5,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.uicore.R
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -22,9 +23,13 @@ open class SimpleTextFieldConfig(
     override fun determineState(input: String): TextFieldState = object : TextFieldState {
         override fun shouldShowError(hasFocus: Boolean) = false
 
-        override fun isValid(): Boolean = input.isNotBlank()
+        override fun isValid(): Boolean = optional && input.isEmpty() || input.isNotBlank()
 
-        override fun getError(): FieldError? = null
+        override fun getError(): FieldError? = if (isValid()) {
+            null
+        } else {
+            FieldError(R.string.stripe_blank_and_required)
+        }
 
         override fun isFull(): Boolean = false
 
