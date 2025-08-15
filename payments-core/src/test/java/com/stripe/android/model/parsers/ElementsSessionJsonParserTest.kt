@@ -936,6 +936,14 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
+    fun `when 'payment_method_remove' is 'partial', 'canRemovePaymentMethods' should be true`() {
+        permissionsTest(
+            paymentMethodRemoveFeatureValue = "partial",
+            canRemovePaymentMethods = true,
+        )
+    }
+
+    @Test
     fun `when 'payment_method_remove' is 'disabled', 'canRemovePaymentMethods' should be false`() {
         permissionsTest(
             paymentMethodRemoveFeatureValue = "disabled",
