@@ -300,9 +300,7 @@ data class PresentationSettings(
 enum class SkipTermsOfService { DEFAULT, SKIP, SHOW }
 enum class FieldOption { DEFAULT, CURRENTLY_DUE, EVENTUALLY_DUE }
 enum class FutureRequirement { DEFAULT, OMIT, INCLUDE }
-<<<<<<< HEAD
 enum class RequirementsMode { DEFAULT, ONLY, EXCLUDE }
-=======
 
 @OptIn(PrivateBetaConnectSDK::class)
 data class PaymentsSettings(
