@@ -49,7 +49,7 @@ internal object LinkViewModelModule {
             linkExpressMode = linkExpressMode,
             linkConfirmationHandlerFactory = linkConfirmationHandlerFactory,
             linkLaunchMode = linkLaunchMode,
-            autocompleteLauncher = autocompleteLauncher,
+            autocompleteLauncher = autocompleteLauncher
         )
     }
 }

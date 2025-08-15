@@ -40,6 +40,7 @@ internal data class LinkConfiguration(
     val linkAppearance: LinkAppearance?,
     val linkSignUpOptInFeatureEnabled: Boolean,
     val linkSignUpOptInInitialValue: Boolean,
+    val linkMobileDisableCacheAttestationResult: Boolean,
     private val customerId: String?
 ) : Parcelable {
 
