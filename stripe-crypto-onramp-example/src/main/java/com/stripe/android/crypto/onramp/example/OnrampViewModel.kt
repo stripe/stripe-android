@@ -54,6 +54,7 @@ internal class OnrampViewModel(
             .build(application, savedStateHandle)
 
         viewModelScope.launch {
+            @Suppress("MagicNumber")
             val configuration = OnrampConfiguration(
                 appearance = LinkAppearance(
                     lightColors = LinkAppearance.Colors(
@@ -61,8 +62,8 @@ internal class OnrampViewModel(
                         borderSelected = Color.Red
                     ),
                     darkColors = LinkAppearance.Colors(
-                        primary = Color.Red,
-                        borderSelected = Color.Blue
+                        primary = Color(0xFF9886E6),
+                        borderSelected = Color.White
                     ),
                     style = LinkAppearance.Style.AUTOMATIC,
                     primaryButton = LinkAppearance.PrimaryButton()
