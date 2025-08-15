@@ -92,6 +92,7 @@ class WalletViewModelTest {
                 addPaymentMethodOptions = listOf(AddPaymentMethodOption.Card),
                 isSettingUp = false,
                 merchantName = "merchantName",
+                sellerBusinessName = null,
                 collectMissingBillingDetailsForExistingPaymentMethods = true,
                 signupToggleEnabled = false,
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
