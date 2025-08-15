@@ -23,7 +23,7 @@ class AutoCardScanData(
         hasSeenAutoCardScanOpen = hasSeenAutoCardScanOpenInitialValue
     }
 
-    companion object {
+    private companion object {
         const val KEY_HAS_SEEN_AUTO_CARD_SCAN_OPEN = "KEY_HAS_SEEN_AUTO_CARD_SCAN_OPEN"
     }
 }
