@@ -130,11 +130,6 @@ internal interface LinkAccountManager {
         cvc: String?,
     ): Result<SharePaymentDetails>
 
-    suspend fun setLinkAccountFromLookupResult(
-        lookup: ConsumerSessionLookup,
-        startSession: Boolean,
-    ): LinkAccount?
-
     suspend fun createLinkAccountSession(): Result<LinkAccountSession>
 
     /**

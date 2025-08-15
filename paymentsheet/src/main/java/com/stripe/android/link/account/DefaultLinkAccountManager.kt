@@ -1,5 +1,6 @@
 package com.stripe.android.link.account
 
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
@@ -13,8 +14,8 @@ import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.AccountStatus
-import com.stripe.android.link.model.ConsentPresentation
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.model.LinkAuthIntentInfo
 import com.stripe.android.link.model.toPresentation
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.inline.SignUpConsentAction
@@ -95,6 +96,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 setLinkAccountFromLookupResult(
                     lookup = consumerSessionLookup,
                     startSession = startSession,
+                    linkAuthIntentId = linkAuthIntentId,
                 )
             }
 
@@ -120,7 +122,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }.map { consumerSessionLookup ->
             setLinkAccountFromLookupResult(
                 lookup = consumerSessionLookup,
-                startSession = startSession
+                startSession = startSession,
+                linkAuthIntentId = linkAuthIntentId,
             )
         }
     }
@@ -245,7 +248,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     consumerSession = consumerSessionSignup.consumerSession,
                     publishableKey = consumerSessionSignup.publishableKey,
                     displayablePaymentDetails = null,
-                    consentPresentation = null,
+                    linkAuthIntentInfo = null,
                 )
             }
 
@@ -274,7 +277,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 consumerSession = consumerSessionSignUp.consumerSession,
                 publishableKey = consumerSessionSignUp.publishableKey,
                 displayablePaymentDetails = null,
-                consentPresentation = null,
+                linkAuthIntentInfo = null,
             )
         }
     }
@@ -371,7 +374,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         consumerSession: ConsumerSession,
         publishableKey: String?,
         displayablePaymentDetails: DisplayablePaymentDetails?,
-        consentPresentation: ConsentPresentation?,
+        linkAuthIntentInfo: LinkAuthIntentInfo?,
     ): LinkAccount {
         val currentAccount = linkAccountHolder.linkAccountInfo.value.account
         val newConsumerPublishableKey = publishableKey
@@ -380,15 +383,15 @@ internal class DefaultLinkAccountManager @Inject constructor(
         val newPaymentDetails = displayablePaymentDetails
             ?: currentAccount?.displayablePaymentDetails
                 ?.takeIf { currentAccount.email == consumerSession.emailAddress }
-        val newConsentPresentation = consentPresentation
-            ?: currentAccount?.consentPresentation
+        val newLaiInfo = linkAuthIntentInfo
+            ?: currentAccount?.linkAuthIntentInfo
                 ?.takeIf { currentAccount.email == consumerSession.emailAddress }
 
         val newAccount = LinkAccount(
             consumerSession = consumerSession,
             consumerPublishableKey = newConsumerPublishableKey,
             displayablePaymentDetails = newPaymentDetails,
-            consentPresentation = newConsentPresentation
+            linkAuthIntentInfo = newLaiInfo
         )
         withContext(Dispatchers.Main.immediate) {
             linkAccountHolder.set(LinkAccountUpdate.Value(newAccount))
@@ -396,24 +399,32 @@ internal class DefaultLinkAccountManager @Inject constructor(
         return newAccount
     }
 
-    override suspend fun setLinkAccountFromLookupResult(
+    @VisibleForTesting
+    internal suspend fun setLinkAccountFromLookupResult(
         lookup: ConsumerSessionLookup,
         startSession: Boolean,
+        linkAuthIntentId: String?,
     ): LinkAccount? {
+        val linkAuthIntentInfo = linkAuthIntentId?.let {
+            LinkAuthIntentInfo(
+                linkAuthIntentId = it,
+                consentPresentation = lookup.consentUi?.toPresentation(),
+            )
+        }
         return lookup.consumerSession?.let { consumerSession ->
             if (startSession) {
                 setAccount(
                     consumerSession = consumerSession,
                     publishableKey = lookup.publishableKey,
                     displayablePaymentDetails = lookup.displayablePaymentDetails,
-                    consentPresentation = lookup.consentUi?.toPresentation(),
+                    linkAuthIntentInfo = linkAuthIntentInfo,
                 )
             } else {
                 LinkAccount(
                     consumerSession = consumerSession,
                     consumerPublishableKey = lookup.publishableKey,
                     displayablePaymentDetails = lookup.displayablePaymentDetails,
-                    consentPresentation = lookup.consentUi?.toPresentation(),
+                    linkAuthIntentInfo = linkAuthIntentInfo,
                 )
             }
         }
@@ -436,7 +447,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     consumerSession = consumerSession,
                     publishableKey = null,
                     displayablePaymentDetails = null,
-                    consentPresentation = linkAccount.consentPresentation, // Keep consent UI.
+                    linkAuthIntentInfo = linkAccount.linkAuthIntentInfo, // Keep LAI info.
                 )
             }
     }
@@ -464,7 +475,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     consumerSession = consumerSession,
                     publishableKey = null,
                     displayablePaymentDetails = null,
-                    consentPresentation = linkAccount.consentPresentation, // Keep consent UI.
+                    linkAuthIntentInfo = linkAccount.linkAuthIntentInfo, // Keep LAI info.
                 )
             }
     }
@@ -526,11 +537,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
         linkAccount: LinkAccount?,
         canLookupCustomerEmail: Boolean
     ): AccountStatus {
-        // If we already have an account, return its status.
-        if (linkAccount != null) {
-            return linkAccount.accountStatus
-        }
-
         val result =
             when (val linkLaunchMode = this.linkLaunchMode) {
                 null,
@@ -538,12 +544,21 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 is LinkLaunchMode.Confirmation,
                 LinkLaunchMode.Full,
                 is LinkLaunchMode.PaymentMethodSelection -> {
-                    val email = config.customerInfo.email?.takeIf { canLookupCustomerEmail }
-                    email?.let { lookupConsumerByEmail(it) }
+                    linkAccount
+                        // If we already have an account, return it.
+                        ?.let { Result.success(it) }
+                        ?: run {
+                            val email = config.customerInfo.email?.takeIf { canLookupCustomerEmail }
+                            email?.let { lookupConsumerByEmail(it) }
+                        }
                 }
                 is LinkLaunchMode.Authorization -> {
                     val linkAuthIntentId = linkLaunchMode.linkAuthIntentId
-                    lookupConsumerByAuthIntent(linkAuthIntentId)
+                    linkAccount
+                        // If we already have an account for the LAI, return it.
+                        ?.takeIf { it.linkAuthIntentInfo?.linkAuthIntentId == linkAuthIntentId }
+                        ?.let { Result.success(it) }
+                        ?: lookupConsumerByAuthIntent(linkAuthIntentId)
                 }
             }
         return result
