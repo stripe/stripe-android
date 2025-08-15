@@ -18,7 +18,7 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
     private val customerStateHolder: CustomerStateHolder,
     private val confirmationStateHolder: EmbeddedConfirmationStateHolder,
     private val embeddedContentHelper: EmbeddedContentHelper,
-    private val hasSeenAutoCardScanHolder: EmbeddedHasSeenAutoCardScanHolder,
+    private val hasAutomaticallyLaunchedCardScanHolder: EmbeddedHasAutomaticallyLaunchedCardScanHolder,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
     private val isStripeCardScanAvailable: IsStripeCardScanAvailable,
 ) : EmbeddedStateHelper {
@@ -29,7 +29,8 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
                     confirmationState = it,
                     customer = customerStateHolder.customer.value,
                     previousNewSelections = selectionHolder.previousNewSelections,
-                    hasSeenAutoCardScanOpen = hasSeenAutoCardScanHolder.hasSeenAutoCardScanOpen,
+                    hasAutomaticallyLaunchedCardScan =
+                    hasAutomaticallyLaunchedCardScanHolder.hasAutomaticallyLaunchedCardScan,
                 )
             }
         }
@@ -53,7 +54,8 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
         customerStateHolder.setCustomerState(state.customer)
         selectionHolder.setPreviousNewSelections(state.previousNewSelections)
         selectionHolder.set(state.confirmationState.selection)
-        hasSeenAutoCardScanHolder.hasSeenAutoCardScanOpen = state.hasSeenAutoCardScanOpen
+        hasAutomaticallyLaunchedCardScanHolder.hasAutomaticallyLaunchedCardScan =
+            state.hasAutomaticallyLaunchedCardScan
 
         embeddedContentHelper.dataLoaded(
             paymentMethodMetadata = state.confirmationState.paymentMethodMetadata,

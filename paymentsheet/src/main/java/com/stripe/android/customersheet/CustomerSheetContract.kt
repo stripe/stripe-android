@@ -18,7 +18,7 @@ internal class CustomerSheetContract :
     override fun parseResult(resultCode: Int, intent: Intent?): InternalCustomerSheetResult {
         return InternalCustomerSheetResult.fromIntent(intent) ?: InternalCustomerSheetResult.Error(
             exception = IllegalArgumentException("Failed to retrieve a CustomerSheetResult"),
-            hasSeenAutoCardScanOpen = null
+            hasAutomaticallyLaunchedCardScan = null
         )
     }
 
@@ -27,7 +27,7 @@ internal class CustomerSheetContract :
         val integrationType: CustomerSheetIntegration.Type,
         val configuration: CustomerSheet.Configuration,
         val statusBarColor: Int?,
-        val hasSeenAutoCardScanOpen: Boolean,
+        val hasAutomaticallyLaunchedCardScan: Boolean,
     ) : Parcelable {
 
         companion object {

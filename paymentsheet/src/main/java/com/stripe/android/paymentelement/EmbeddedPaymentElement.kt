@@ -694,7 +694,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val confirmationState: EmbeddedConfirmationStateHolder.State,
         internal val customer: CustomerState?,
         internal val previousNewSelections: Bundle,
-        internal val hasSeenAutoCardScanOpen: Boolean,
+        internal val hasAutomaticallyLaunchedCardScan: Boolean,
     ) : Parcelable
 
     internal companion object {

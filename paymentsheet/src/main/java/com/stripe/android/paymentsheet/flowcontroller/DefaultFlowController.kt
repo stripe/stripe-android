@@ -327,7 +327,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 state.config.walletButtons.allowedWalletTypes
             },
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
-            hasSeenAutoCardScanOpen = state.hasSeenAutoCardScanOpen
+            hasAutomaticallyLaunchedCardScan = state.hasAutomaticallyLaunchedCardScan
         )
 
         val options = ActivityOptionsCompat.makeCustomAnimation(
@@ -586,7 +586,8 @@ internal class DefaultFlowController @Inject internal constructor(
         // update the state to stop showing AutomaticCardScan
         currentState?.let { state ->
             result?.let { result ->
-                viewModel.state = state.copy(hasSeenAutoCardScanOpen = result.hasSeenAutoCardScanOpen)
+                viewModel.state =
+                    state.copy(hasAutomaticallyLaunchedCardScan = result.hasAutomaticallyLaunchedCardScan)
             }
         }
 
@@ -799,7 +800,7 @@ internal class DefaultFlowController @Inject internal constructor(
         val paymentSheetState: PaymentSheetState.Full,
         val config: PaymentSheet.Configuration,
         val declinedLink2FA: Boolean = false,
-        val hasSeenAutoCardScanOpen: Boolean = false,
+        val hasAutomaticallyLaunchedCardScan: Boolean = false,
     ) : Parcelable {
         fun copyPaymentSheetState(
             paymentSelection: PaymentSelection? = paymentSheetState.paymentSelection,

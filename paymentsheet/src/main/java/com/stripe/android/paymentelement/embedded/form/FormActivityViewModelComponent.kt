@@ -21,7 +21,7 @@ import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentE
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.payments.core.injection.HAS_SEEN_AUTO_CARD_SCAN_OPEN
+import com.stripe.android.payments.core.injection.HAS_AUTOMATICALLY_LAUNCHED_CARD_SCAN
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
@@ -60,8 +60,8 @@ internal interface FormActivityViewModelComponent {
             @BindsInstance selectedPaymentMethodCode: PaymentMethodCode,
             @BindsInstance hasSavedPaymentMethods: Boolean,
             @BindsInstance
-            @Named(HAS_SEEN_AUTO_CARD_SCAN_OPEN)
-            hasSeenAutoCardScanOpen: Boolean,
+            @Named(HAS_AUTOMATICALLY_LAUNCHED_CARD_SCAN)
+            hasAutomaticallyLaunchedCardScan: Boolean,
             @BindsInstance
             @Named(STATUS_BAR_COLOR)
             statusBarColor: Int?,

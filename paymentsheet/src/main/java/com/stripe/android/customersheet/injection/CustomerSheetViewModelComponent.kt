@@ -8,7 +8,7 @@ import com.stripe.android.customersheet.CustomerSheetViewModel
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
-import com.stripe.android.payments.core.injection.HAS_SEEN_AUTO_CARD_SCAN_OPEN
+import com.stripe.android.payments.core.injection.HAS_AUTOMATICALLY_LAUNCHED_CARD_SCAN
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.ui.core.di.CardScanModule
@@ -49,7 +49,9 @@ internal interface CustomerSheetViewModelComponent {
         fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
 
         @BindsInstance
-        fun hasSeenAutoCardScanOpen(@Named(HAS_SEEN_AUTO_CARD_SCAN_OPEN) hasSeenAutoCardScanOpen: Boolean): Builder
+        fun hasAutomaticallyLaunchedCardScan(
+            @Named(HAS_AUTOMATICALLY_LAUNCHED_CARD_SCAN) hasAutomaticallyLaunchedCardScan: Boolean
+        ): Builder
 
         fun build(): CustomerSheetViewModelComponent
     }

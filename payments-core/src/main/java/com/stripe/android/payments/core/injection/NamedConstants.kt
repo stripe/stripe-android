@@ -29,7 +29,7 @@ const val STATUS_BAR_COLOR = "STATUS_BAR_COLOR"
 internal const val INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS = "INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS"
 
 /**
- * Name to indicate whether the user has seen auto-card-scan open.
+ * Name to indicate whether the user has automatically launched card-scan.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-const val HAS_SEEN_AUTO_CARD_SCAN_OPEN = "HAS_SEEN_AUTO_CARD_SCAN_OPEN"
+const val HAS_AUTOMATICALLY_LAUNCHED_CARD_SCAN = "HAS_AUTOMATICALLY_LAUNCHED_CARD_SCAN"

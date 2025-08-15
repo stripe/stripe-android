@@ -47,7 +47,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     private val rowSelectionImmediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
     private val customerStateHolder: CustomerStateHolder,
     private val sheetStateHolder: SheetStateHolder,
-    private val hasSeenAutoCardScanHolder: EmbeddedHasSeenAutoCardScanHolder,
+    private val hasAutomaticallyLaunchedCardScanHolder: EmbeddedHasAutomaticallyLaunchedCardScanHolder,
     private val errorReporter: ErrorReporter,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
@@ -84,10 +84,10 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
                     EmbeddedPaymentElement.Result.Canceled()
                 )
             }
-            if (hasSeenAutoCardScanHolder.isLaunchingCardFormWithCardScanEnabled) {
-                // Only set hasSeenAutoCardScanOpen to true if we actually see the card scan
-                hasSeenAutoCardScanHolder.hasSeenAutoCardScanOpen = true
-                hasSeenAutoCardScanHolder.isLaunchingCardFormWithCardScanEnabled = false
+            if (hasAutomaticallyLaunchedCardScanHolder.isLaunchingCardFormWithCardScanEnabled) {
+                // Only set hasAutomaticallyLaunchedCardScan to true if we actually see the card scan
+                hasAutomaticallyLaunchedCardScanHolder.hasAutomaticallyLaunchedCardScan = true
+                hasAutomaticallyLaunchedCardScanHolder.isLaunchingCardFormWithCardScanEnabled = false
             }
         }
 
@@ -126,15 +126,15 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             ?: selectionHolder.getPreviousNewSelection(code)
         if (paymentMethodMetadata.openCardScanAutomaticallyConfig &&
             code == PaymentMethod.Type.Card.code &&
-            !hasSeenAutoCardScanHolder.hasSeenAutoCardScanOpen
+            !hasAutomaticallyLaunchedCardScanHolder.hasAutomaticallyLaunchedCardScan
         ) {
-            hasSeenAutoCardScanHolder.isLaunchingCardFormWithCardScanEnabled = true
+            hasAutomaticallyLaunchedCardScanHolder.isLaunchingCardFormWithCardScanEnabled = true
         }
         val args = FormContract.Args(
             selectedPaymentMethodCode = code,
             paymentMethodMetadata = paymentMethodMetadata,
             hasSavedPaymentMethods = hasSavedPaymentMethods,
-            hasSeenAutoCardScanOpen = hasSeenAutoCardScanHolder.hasSeenAutoCardScanOpen,
+            hasAutomaticallyLaunchedCardScan = hasAutomaticallyLaunchedCardScanHolder.hasAutomaticallyLaunchedCardScan,
             configuration = embeddedConfirmationState.configuration,
             initializationMode = embeddedConfirmationState.initializationMode,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,

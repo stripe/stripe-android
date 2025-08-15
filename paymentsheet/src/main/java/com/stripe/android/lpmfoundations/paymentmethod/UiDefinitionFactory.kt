@@ -19,7 +19,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.ui.core.elements.AutoCardScanData
+import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormData
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -44,7 +44,7 @@ internal sealed interface UiDefinitionFactory {
         val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
         val linkInlineHandler: LinkInlineHandler?,
         val isLinkUI: Boolean = false,
-        val autoCardScanData: AutoCardScanData?,
+        val automaticallyLaunchedCardScanFormData: AutomaticallyLaunchedCardScanFormData?,
     ) {
         interface Factory {
             fun create(
@@ -65,7 +65,7 @@ internal sealed interface UiDefinitionFactory {
                     FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
                 private val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
                 private val isLinkUI: Boolean = false,
-                private val autoCardScanData: AutoCardScanData? = null,
+                private val automaticallyLaunchedCardScanFormData: AutomaticallyLaunchedCardScanFormData? = null,
             ) : Factory {
                 override fun create(
                     metadata: PaymentMethodMetadata,
@@ -92,7 +92,7 @@ internal sealed interface UiDefinitionFactory {
                         autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
                         linkInlineHandler = linkInlineHandler,
                         isLinkUI = isLinkUI,
-                        autoCardScanData = autoCardScanData,
+                        automaticallyLaunchedCardScanFormData = automaticallyLaunchedCardScanFormData,
                     )
                 }
 

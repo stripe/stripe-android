@@ -32,7 +32,7 @@ internal class PaymentOptionContract :
         val configuration: PaymentSheet.Configuration,
         val linkAccountInfo: LinkAccountUpdate.Value,
         val enableLogging: Boolean,
-        val hasSeenAutoCardScanOpen: Boolean,
+        val hasAutomaticallyLaunchedCardScan: Boolean,
         val walletsToShow: List<WalletType>,
         val productUsage: Set<String>,
         val paymentElementCallbackIdentifier: String,

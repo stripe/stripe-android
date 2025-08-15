@@ -96,7 +96,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                     cbcEligibility = arguments.cbcEligibility,
                     cardBrandFilter = arguments.cardBrandFilter,
                     elementsSessionId = metadata.elementsSessionId,
-                    autoCardScanData = arguments.autoCardScanData,
+                    automaticallyLaunchedCardScanFormData = arguments.automaticallyLaunchedCardScanFormData,
                 )
             )
 

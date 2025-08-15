@@ -11,7 +11,7 @@ import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
 internal sealed class InternalCustomerSheetResult : Parcelable {
-    abstract val hasSeenAutoCardScanOpen: Boolean?
+    abstract val hasAutomaticallyLaunchedCardScan: Boolean?
 
     abstract fun toPublicResult(
         paymentOptionFactory: PaymentOptionFactory,
@@ -23,7 +23,7 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
     @Parcelize
     data class Selected internal constructor(
         val paymentSelection: PaymentSelection?,
-        override val hasSeenAutoCardScanOpen: Boolean?,
+        override val hasAutomaticallyLaunchedCardScan: Boolean?,
     ) : InternalCustomerSheetResult() {
         override fun toPublicResult(
             paymentOptionFactory: PaymentOptionFactory,
@@ -40,7 +40,7 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
     @Parcelize
     data class Canceled(
         val paymentSelection: PaymentSelection?,
-        override val hasSeenAutoCardScanOpen: Boolean?,
+        override val hasAutomaticallyLaunchedCardScan: Boolean?,
     ) : InternalCustomerSheetResult() {
         override fun toPublicResult(
             paymentOptionFactory: PaymentOptionFactory,
@@ -57,7 +57,7 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
     @Parcelize
     class Error internal constructor(
         val exception: Throwable,
-        override val hasSeenAutoCardScanOpen: Boolean?,
+        override val hasAutomaticallyLaunchedCardScan: Boolean?,
     ) : InternalCustomerSheetResult() {
         override fun toPublicResult(
             paymentOptionFactory: PaymentOptionFactory,

@@ -511,7 +511,7 @@ internal class PlaygroundSettings private constructor(
             CustomPaymentMethodsSettingDefinition,
             LayoutSettingsDefinition,
             CardBrandAcceptanceSettingsDefinition,
-            AutomaticCardScanOpenDefinition,
+            AutomaticCardScanLaunchDefinition,
             FeatureFlagSettingsDefinition(
                 FeatureFlags.instantDebitsIncentives,
                 PlaygroundConfigurationData.IntegrationType.paymentFlows().toList(),

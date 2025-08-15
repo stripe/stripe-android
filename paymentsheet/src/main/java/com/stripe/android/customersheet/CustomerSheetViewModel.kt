@@ -53,7 +53,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.core.injection.HAS_SEEN_AUTO_CARD_SCAN_OPEN
+import com.stripe.android.payments.core.injection.HAS_AUTOMATICALLY_LAUNCHED_CARD_SCAN
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.CardUpdateParams
@@ -75,7 +75,7 @@ import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.ui.core.IsStripeCardScanAvailable
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.ui.core.elements.AutoCardScanData
+import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormData
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -113,7 +113,7 @@ internal class CustomerSheetViewModel(
     private val customerSheetLoader: CustomerSheetLoader,
     private val errorReporter: ErrorReporter,
     private val savedStateHandle: SavedStateHandle,
-    private val hasSeenAutoCardScanOpenInitialValue: Boolean, // TODO rename to hasSeenAutoCardScanOpenInitialValue
+    private val hasAutomaticallyLaunchedCardScanInitialValue: Boolean,
     private val isStripeCardScanAvailable: IsStripeCardScanAvailable,
 ) : ViewModel() {
 
@@ -134,7 +134,7 @@ internal class CustomerSheetViewModel(
         customerSheetLoader: CustomerSheetLoader,
         errorReporter: ErrorReporter,
         savedStateHandle: SavedStateHandle,
-        @Named(HAS_SEEN_AUTO_CARD_SCAN_OPEN) hasSeenAutoCardScanOpen: Boolean,
+        @Named(HAS_AUTOMATICALLY_LAUNCHED_CARD_SCAN) hasAutomaticallyLaunchedCardScan: Boolean,
         isStripeCardScanAvailable: IsStripeCardScanAvailable,
     ) : this(
         application = application,
@@ -155,7 +155,7 @@ internal class CustomerSheetViewModel(
         customerSheetLoader = customerSheetLoader,
         errorReporter = errorReporter,
         savedStateHandle = savedStateHandle,
-        hasSeenAutoCardScanOpenInitialValue = hasSeenAutoCardScanOpen,
+        hasAutomaticallyLaunchedCardScanInitialValue = hasAutomaticallyLaunchedCardScan,
         isStripeCardScanAvailable = isStripeCardScanAvailable,
     )
 
@@ -234,7 +234,7 @@ internal class CustomerSheetViewModel(
     private var previouslySelectedPaymentMethod: SupportedPaymentMethod? = null
     private var supportedPaymentMethods = mutableListOf<SupportedPaymentMethod>()
 
-    val autoCardScanData: AutoCardScanData
+    val automaticallyLaunchedCardScanFormData: AutomaticallyLaunchedCardScanFormData
 
     init {
         configuration.appearance.parseAppearance()
@@ -254,9 +254,9 @@ internal class CustomerSheetViewModel(
             )
         }
 
-        autoCardScanData = AutoCardScanData(
+        automaticallyLaunchedCardScanFormData = AutomaticallyLaunchedCardScanFormData(
             openCardScanAutomaticallyConfig = configuration.opensCardScannerAutomatically,
-            hasSeenAutoCardScanOpenInitialValue = hasSeenAutoCardScanOpenInitialValue,
+            hasAutomaticallyLaunchedCardScanInitialValue = hasAutomaticallyLaunchedCardScanInitialValue,
             savedStateHandle = savedStateHandle
         )
 
@@ -403,7 +403,8 @@ internal class CustomerSheetViewModel(
         _result.tryEmit(
             InternalCustomerSheetResult.Selected(
                 paymentSelection = paymentSelection,
-                hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScanOpen,
+                hasAutomaticallyLaunchedCardScan =
+                automaticallyLaunchedCardScanFormData.hasAutomaticallyLaunchedCardScan,
             )
         )
     }
@@ -411,7 +412,8 @@ internal class CustomerSheetViewModel(
     private fun getCancelledCustomerSheetResult(): InternalCustomerSheetResult.Canceled {
         return InternalCustomerSheetResult.Canceled(
             paymentSelection = originalPaymentSelection,
-            hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScanOpen,
+            hasAutomaticallyLaunchedCardScan =
+            automaticallyLaunchedCardScanFormData.hasAutomaticallyLaunchedCardScan,
         )
     }
 
@@ -419,7 +421,8 @@ internal class CustomerSheetViewModel(
         _result.update {
             InternalCustomerSheetResult.Error(
                 exception = cause,
-                hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScanOpen,
+                hasAutomaticallyLaunchedCardScan =
+                automaticallyLaunchedCardScanFormData.hasAutomaticallyLaunchedCardScan,
             )
         }
     }
@@ -514,7 +517,7 @@ internal class CustomerSheetViewModel(
                             )
                         },
                         autocompleteAddressInteractorFactory = null,
-                        autoCardScanData = autoCardScanData,
+                        automaticallyLaunchedCardScanFormData = automaticallyLaunchedCardScanFormData,
                     ),
                 ) ?: listOf(),
                 primaryButtonLabel = if (
@@ -860,7 +863,7 @@ internal class CustomerSheetViewModel(
                     )
                 },
                 autocompleteAddressInteractorFactory = null,
-                autoCardScanData = autoCardScanData,
+                automaticallyLaunchedCardScanFormData = automaticallyLaunchedCardScanFormData,
             )
         ) ?: emptyList()
 
@@ -1378,7 +1381,7 @@ internal class CustomerSheetViewModel(
                 .integrationType(args.integrationType)
                 .statusBarColor(args.statusBarColor)
                 .savedStateHandle(extras.createSavedStateHandle())
-                .hasSeenAutoCardScanOpen(args.hasSeenAutoCardScanOpen)
+                .hasAutomaticallyLaunchedCardScan(args.hasAutomaticallyLaunchedCardScan)
                 .build()
 
             return component.viewModel as T

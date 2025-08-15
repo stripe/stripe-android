@@ -18,7 +18,7 @@ class CardDetailsSectionController(
     cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
     val elementsSessionId: String? = null,
-    private val autoCardScanData: AutoCardScanData?,
+    private val automaticallyLaunchedCardScanFormData: AutomaticallyLaunchedCardScanFormData?,
 ) : SectionFieldErrorController {
 
     internal val cardDetailsElement = CardDetailsElement(
@@ -33,14 +33,14 @@ class CardDetailsSectionController(
     internal val isCardScanEnabledAndAvailable = cardDetailsElement.isCardScanEnabled &&
         DefaultIsStripeCardScanAvailable().invoke()
 
-    fun shouldSeeAutomaticCardScanOpen(): Boolean {
+    fun shouldAutomaticallyLaunchCardScan(): Boolean {
         return isCardScanEnabledAndAvailable &&
-            autoCardScanData?.shouldOpenCardScanAutomatically == true
+            automaticallyLaunchedCardScanFormData?.shouldLaunchCardScanAutomatically == true
     }
 
-    fun setHasSeenAutoCardScanOpen() {
-        this.autoCardScanData?.let {
-            it.hasSeenAutoCardScanOpen = true
+    fun setHasAutomaticallyLaunchedCardScan() {
+        this.automaticallyLaunchedCardScanFormData?.let {
+            it.hasAutomaticallyLaunchedCardScan = true
         }
     }
 

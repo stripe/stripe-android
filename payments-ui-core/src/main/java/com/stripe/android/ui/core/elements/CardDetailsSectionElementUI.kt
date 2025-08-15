@@ -37,7 +37,7 @@ fun CardDetailsSectionElementUI(
     lastTextFieldIdentifier: IdentifierSpec?,
     modifier: Modifier = Modifier,
 ) {
-    if (controller.shouldSeeAutomaticCardScanOpen()) {
+    if (controller.shouldAutomaticallyLaunchCardScan()) {
         val cardScanLauncher =
             rememberLauncherForActivityResult(CardScanContract()) { result ->
                 controller.onCardScanResult(result)
@@ -50,7 +50,7 @@ fun CardDetailsSectionElementUI(
         )
 
         LaunchedEffect(Unit) {
-            controller.setHasSeenAutoCardScanOpen()
+            controller.setHasAutomaticallyLaunchedCardScan()
 
             cardScanLauncher.launch(
                 input = CardScanContract.Args(

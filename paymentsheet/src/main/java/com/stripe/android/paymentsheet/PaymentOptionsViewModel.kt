@@ -158,7 +158,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
         updateSelection(args.state.paymentSelection)
 
-        autoCardScanData.hasSeenAutoCardScanOpen = args.hasSeenAutoCardScanOpen
+        automaticallyLaunchedCardScanFormData.hasAutomaticallyLaunchedCardScan = args.hasAutomaticallyLaunchedCardScan
 
         navigationHandler.resetTo(
             determineInitialBackStack(
@@ -205,7 +205,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
                             shippingAddress = result.shippingAddress,
                         ),
                         paymentMethods = customerStateHolder.paymentMethods.value,
-                        hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScanOpen,
+                        hasAutomaticallyLaunchedCardScan =
+                        automaticallyLaunchedCardScanFormData.hasAutomaticallyLaunchedCardScan,
                     )
                 )
             }
@@ -227,7 +228,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 mostRecentError = null,
                 paymentSelection = determinePaymentSelectionUponCancel(),
                 paymentMethods = customerStateHolder.paymentMethods.value,
-                hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScanOpen,
+                hasAutomaticallyLaunchedCardScan =
+                automaticallyLaunchedCardScanFormData.hasAutomaticallyLaunchedCardScan,
             )
         )
     }
@@ -277,7 +279,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
                         linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                         paymentSelection = paymentSelection.withLinkDetails(),
                         paymentMethods = customerStateHolder.paymentMethods.value,
-                        hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScanOpen,
+                        hasAutomaticallyLaunchedCardScan =
+                        automaticallyLaunchedCardScanFormData.hasAutomaticallyLaunchedCardScan,
                     )
                 )
             }

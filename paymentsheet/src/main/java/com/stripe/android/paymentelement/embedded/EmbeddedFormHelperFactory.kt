@@ -4,14 +4,14 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.payments.core.injection.HAS_SEEN_AUTO_CARD_SCAN_OPEN
+import com.stripe.android.payments.core.injection.HAS_AUTOMATICALLY_LAUNCHED_CARD_SCAN
 import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.NewPaymentOptionSelection
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.ui.core.elements.AutoCardScanData
+import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormData
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
 import javax.inject.Named
@@ -21,7 +21,7 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
     private val embeddedSelectionHolder: EmbeddedSelectionHolder,
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     private val savedStateHandle: SavedStateHandle,
-    @Named(HAS_SEEN_AUTO_CARD_SCAN_OPEN) private val hasSeenAutoCardScanOpen: Boolean,
+    @Named(HAS_AUTOMATICALLY_LAUNCHED_CARD_SCAN) private val hasAutomaticallyLaunchedCardScan: Boolean,
 ) {
     fun create(
         coroutineScope: CoroutineScope,
@@ -55,8 +55,8 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
             eventReporter = eventReporter,
             savedStateHandle = savedStateHandle,
             autocompleteAddressInteractorFactory = null,
-            autoCardScanData = AutoCardScanData(
-                hasSeenAutoCardScanOpenInitialValue = hasSeenAutoCardScanOpen,
+            automaticallyLaunchedCardScanFormData = AutomaticallyLaunchedCardScanFormData(
+                hasAutomaticallyLaunchedCardScanInitialValue = hasAutomaticallyLaunchedCardScan,
                 openCardScanAutomaticallyConfig = paymentMethodMetadata.openCardScanAutomaticallyConfig,
                 savedStateHandle = savedStateHandle,
             )
