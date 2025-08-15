@@ -2084,6 +2084,7 @@ internal class PaymentMethodMetadataTest {
             linkAppearance = null,
             linkSignUpOptInFeatureEnabled = false,
             linkSignUpOptInInitialValue = false,
+            linkMobileDisableCacheAttestationResult = false,
             customerId = null
         )
     }

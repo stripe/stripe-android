@@ -230,6 +230,7 @@ internal object TestFactory {
         linkAppearance = null,
         linkSignUpOptInFeatureEnabled = false,
         linkSignUpOptInInitialValue = false,
+        linkMobileDisableCacheAttestationResult = false,
         customerId = null
     )
 

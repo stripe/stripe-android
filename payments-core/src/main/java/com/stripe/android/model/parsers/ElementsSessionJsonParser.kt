@@ -182,6 +182,10 @@ internal class ElementsSessionJsonParser(
             FIELD_LINK_MOBILE_SKIP_WALLET_IN_FLOW_CONTROLLER
         ) == true
 
+        val linkMobileDisableCacheAttestationResult = json?.optBoolean(
+            FIELD_LINK_MOBILE_DISABLE_CACHE_ATTESTATION_RESULT
+        ) == true
+
         val linkSignUpOptInFeatureEnabled = json?.optBoolean(FIELD_LINK_SIGN_UP_OPT_IN_FEATURE_ENABLED) == true
         val linkSignUpOptInInitialValue = json?.optBoolean(FIELD_LINK_SIGN_UP_OPT_IN_INITIAL_VALUE) == true
 
@@ -212,6 +216,7 @@ internal class ElementsSessionJsonParser(
             disableLinkRuxInFlowController = disableLinkRuxInFlowController,
             linkEnableDisplayableDefaultValuesInEce = linkEnableDisplayableDefaultValuesInEce,
             linkMobileSkipWalletInFlowController = linkMobileSkipWalletInFlowController,
+            linkMobileDisableCacheAttestationResult = linkMobileDisableCacheAttestationResult,
             linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
             linkSignUpOptInInitialValue = linkSignUpOptInInitialValue
         )
@@ -467,6 +472,8 @@ internal class ElementsSessionJsonParser(
             "link_enable_displayable_default_values_in_ece"
         private const val FIELD_LINK_MOBILE_SKIP_WALLET_IN_FLOW_CONTROLLER =
             "link_mobile_skip_wallet_in_flow_controller"
+        private const val FIELD_LINK_MOBILE_DISABLE_CACHE_ATTESTATION_RESULT =
+            "link_mobile_disable_cache_attestation_result"
         private const val FIELD_LINK_SIGN_UP_OPT_IN_FEATURE_ENABLED = "link_sign_up_opt_in_feature_enabled"
         private const val FIELD_LINK_SIGN_UP_OPT_IN_INITIAL_VALUE = "link_sign_up_opt_in_initial_value"
         private const val FIELD_MERCHANT_COUNTRY = "merchant_country"

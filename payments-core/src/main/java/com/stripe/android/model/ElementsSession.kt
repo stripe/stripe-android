@@ -74,6 +74,9 @@ data class ElementsSession(
     val linkSignUpOptInInitialValue: Boolean
         get() = linkSettings?.linkSignUpOptInInitialValue ?: false
 
+    val linkMobileDisableCacheAttestationResult: Boolean
+        get() = linkSettings?.linkMobileDisableCacheAttestationResult ?: false
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class LinkSettings(
@@ -88,6 +91,7 @@ data class ElementsSession(
         val disableLinkRuxInFlowController: Boolean,
         val linkEnableDisplayableDefaultValuesInEce: Boolean,
         val linkMobileSkipWalletInFlowController: Boolean,
+        val linkMobileDisableCacheAttestationResult: Boolean,
         val linkSignUpOptInFeatureEnabled: Boolean,
         val linkSignUpOptInInitialValue: Boolean
     ) : StripeModel

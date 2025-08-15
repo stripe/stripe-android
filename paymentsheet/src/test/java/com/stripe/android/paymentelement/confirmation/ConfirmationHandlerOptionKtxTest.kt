@@ -622,6 +622,7 @@ class ConfirmationHandlerOptionKtxTest {
             linkAppearance = null,
             linkSignUpOptInFeatureEnabled = false,
             linkSignUpOptInInitialValue = false,
+            linkMobileDisableCacheAttestationResult = false,
             customerId = null
         )
     }
