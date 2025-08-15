@@ -393,7 +393,8 @@ class LinkControllerInteractorTest {
             .isEqualTo(
                 LinkLaunchMode.PaymentMethodSelection(
                     selectedPayment = null,
-                    sharePaymentDetailsImmediatelyAfterCreation = false
+                    sharePaymentDetailsImmediatelyAfterCreation = false,
+                    shouldShowSecondaryCta = false,
                 )
             )
 

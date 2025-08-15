@@ -23,7 +23,7 @@ internal data class WalletUiState(
     val isSettingUp: Boolean,
     val merchantName: String,
     val primaryButtonLabel: ResolvableString,
-    val secondaryButtonLabel: ResolvableString,
+    val secondaryButtonLabel: ResolvableString?,
     val hasCompleted: Boolean,
     val addPaymentMethodOptions: List<AddPaymentMethodOption>,
     val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
