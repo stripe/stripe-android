@@ -566,7 +566,7 @@ internal class CustomerSheetViewModel(
                     displayableSavedPaymentMethod = paymentMethod,
                     addressCollectionMode = configuration.billingDetailsCollectionConfiguration.address,
                     allowedBillingCountries =
-                        configuration.billingDetailsCollectionConfiguration.allowedBillingCountries,
+                    configuration.billingDetailsCollectionConfiguration.allowedBillingCountries,
                     cardBrandFilter = PaymentSheetCardBrandFilter(customerState.configuration.cardBrandAcceptance),
                     removeExecutor = ::removeExecutor,
                     onBrandChoiceSelected = { brand ->

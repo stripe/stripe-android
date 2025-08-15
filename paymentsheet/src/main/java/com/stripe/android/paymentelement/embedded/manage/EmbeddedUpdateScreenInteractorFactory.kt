@@ -37,7 +37,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
             cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
             addressCollectionMode = paymentMethodMetadata.billingDetailsCollectionConfiguration.address,
             allowedBillingCountries =
-                paymentMethodMetadata.billingDetailsCollectionConfiguration.allowedBillingCountries,
+            paymentMethodMetadata.billingDetailsCollectionConfiguration.allowedBillingCountries,
             removeExecutor = { method ->
                 val result = savedPaymentMethodMutatorProvider.get().removePaymentMethodInEditScreen(method)
                 if (result == null) {
