@@ -54,6 +54,7 @@ internal class OnrampViewModel(
             .build(application, savedStateHandle)
 
         viewModelScope.launch {
+            @Suppress("MagicNumber")
             val configuration = OnrampConfiguration(
                 appearance = LinkAppearance(
                     lightColors = LinkAppearance.Colors(
