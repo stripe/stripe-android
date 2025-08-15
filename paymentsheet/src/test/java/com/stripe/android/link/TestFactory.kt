@@ -206,6 +206,7 @@ internal object TestFactory {
     val LINK_CONFIGURATION = LinkConfiguration(
         stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
         merchantName = MERCHANT_NAME,
+        sellerBusinessName = null,
         merchantCountryCode = "",
         customerInfo = LINK_CUSTOMER_INFO,
         shippingDetails = null,

@@ -878,6 +878,8 @@ internal class CustomerSheetViewModel(
             setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
             autocompleteAddressInteractorFactory = null,
             termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+            sellerBusinessName = null,
+            linkSignUpOptInFeatureEnabled = false,
         )
     }
 

@@ -318,6 +318,7 @@ class WalletUiStateTest {
             cardBeingUpdated = cardBeingUpdated,
             isSettingUp = isSettingUp,
             merchantName = merchantName,
+            sellerBusinessName = null,
             collectMissingBillingDetailsForExistingPaymentMethods =
             collectMissingBillingDetailsForExistingPaymentMethods,
             signupToggleEnabled = signupToggleEnabled,
