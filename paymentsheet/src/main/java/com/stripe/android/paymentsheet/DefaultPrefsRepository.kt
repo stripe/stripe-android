@@ -27,7 +27,8 @@ internal class DefaultPrefsRepository(
             "google_pay" -> SavedSelection.GooglePay.takeIf { isGooglePayAvailable }
             "link" -> SavedSelection.Link.takeIf { isLinkAvailable }
             "payment_method" -> prefData.getOrNull(1)?.let {
-                SavedSelection.PaymentMethod(id = it)
+                val isLinkOrigin = prefData.getOrNull(2)?.toBoolean() == true
+                SavedSelection.PaymentMethod(id = it, isLinkOrigin = isLinkOrigin)
             }
             else -> null
         } ?: SavedSelection.None
@@ -38,7 +39,7 @@ internal class DefaultPrefsRepository(
         when (savedSelection) {
             SavedSelection.GooglePay -> "google_pay"
             SavedSelection.Link -> "link"
-            is SavedSelection.PaymentMethod -> "payment_method:${savedSelection.id}"
+            is SavedSelection.PaymentMethod -> "payment_method:${savedSelection.id}:${savedSelection.isLinkOrigin}"
             else -> null
         }?.let { value ->
             apply(value)
@@ -49,7 +50,7 @@ internal class DefaultPrefsRepository(
         return when (savedSelection) {
             SavedSelection.GooglePay -> "google_pay"
             SavedSelection.Link -> "link"
-            is SavedSelection.PaymentMethod -> "payment_method:${savedSelection.id}"
+            is SavedSelection.PaymentMethod -> "payment_method:${savedSelection.id}:${savedSelection.isLinkOrigin}"
             else -> ""
         }.let { value ->
             commit(value)

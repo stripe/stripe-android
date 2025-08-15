@@ -12,15 +12,16 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 
 internal fun PaymentSelection.New.canSave(
-    initializationMode: PaymentElementLoader.InitializationMode
+    initializationMode: PaymentElementLoader.InitializationMode,
+    forceSave: Boolean = false,
 ): Boolean {
     val requestedToSave = customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse
 
     return when (initializationMode) {
-        is PaymentElementLoader.InitializationMode.PaymentIntent -> requestedToSave
+        is PaymentElementLoader.InitializationMode.PaymentIntent -> requestedToSave || forceSave
         is PaymentElementLoader.InitializationMode.SetupIntent -> true
         is PaymentElementLoader.InitializationMode.DeferredIntent -> {
-            requestedToSave || canSaveIfNotRequested(initializationMode.intentConfiguration)
+            requestedToSave || canSaveIfNotRequested(initializationMode.intentConfiguration) || forceSave
         }
     }
 }

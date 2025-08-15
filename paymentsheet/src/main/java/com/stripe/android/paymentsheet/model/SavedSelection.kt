@@ -12,7 +12,8 @@ internal sealed class SavedSelection : Parcelable {
 
     @Parcelize
     data class PaymentMethod(
-        val id: String
+        val id: String,
+        val isLinkOrigin: Boolean,
     ) : SavedSelection()
 
     @Parcelize
@@ -23,7 +24,10 @@ internal fun PaymentSelection.toSavedSelection(): SavedSelection? {
     return when (this) {
         is PaymentSelection.GooglePay -> SavedSelection.GooglePay
         is PaymentSelection.Link -> SavedSelection.Link
-        is PaymentSelection.Saved -> SavedSelection.PaymentMethod(paymentMethod.id.orEmpty())
+        is PaymentSelection.Saved -> SavedSelection.PaymentMethod(
+            id = paymentMethod.id.orEmpty(),
+            isLinkOrigin = paymentMethod.isLinkPaymentMethod || paymentMethod.isLinkPassthroughMode,
+        )
         else -> null
     }
 }
