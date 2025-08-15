@@ -490,7 +490,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             dividerTextResource = 0,
             onGooglePayPressed = {},
             onLinkPressed = {},
-            walletsAllowedInHeader = listOf(WalletType.GooglePay, WalletType.Link), // PaymentSheet: wallets in header
+            walletsAllowedInHeader = WalletType.entries, // PaymentSheet: wallets in header
         )
         interactor.state.test {
             awaitItem().run {
