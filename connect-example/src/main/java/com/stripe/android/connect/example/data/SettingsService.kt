@@ -403,4 +403,3 @@ data class PaymentsSettings(
 
 enum class AmountFilterType { NONE, EQUALS, GREATER_THAN, LESS_THAN, BETWEEN }
 enum class DateFilterType { NONE, BEFORE, AFTER, BETWEEN }
->>>>>>> 79ce1363a3 (feat: add payments)
