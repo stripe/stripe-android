@@ -26,8 +26,8 @@ internal class InputAddressViewModel @Inject constructor(
 ) : ViewModel(), AutocompleteAddressInteractor {
     private var eventListener: ((AutocompleteAddressInteractor.Event) -> Unit)? = null
 
-    private val initialBillingAddress = args.config?.billingAddress?.toAddressDetails()
-    private val initialShippingAddress = args.config?.address
+    private val initialBillingAddress = args.config?.billingAddress?.toAddressDetails()?.takeIfUsable()
+    private val initialShippingAddress = args.config?.address?.takeIfUsable()
 
     private val initialInputsAreTheSame = addressesAreTheSame(initialBillingAddress, initialShippingAddress)
 
@@ -277,6 +277,16 @@ internal class InputAddressViewModel @Inject constructor(
             phoneNumber = phone,
             address = address,
         )
+    }
+
+    private fun AddressDetails.takeIfUsable(): AddressDetails? {
+        val allowedCountries = args.config?.allowedCountries?.takeIf {
+            it.isNotEmpty()
+        } ?: CountryUtils.supportedBillingCountries
+
+        return takeIf {
+            address?.country == null || allowedCountries.contains(address.country)
+        }
     }
 
     override fun onAutocomplete(country: String) {
