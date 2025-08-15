@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.inline.InlineSignupViewState
@@ -290,6 +291,7 @@ internal class CombinedLinkMandateElement(
                     formatArgs = arrayOf(merchantName)
                 ).replaceHyperlinks()
             },
+            textAlign = if (isLinkUI) TextAlign.Center else TextAlign.Start,
             modifier = Modifier.padding(top = topPadding)
         )
     }
