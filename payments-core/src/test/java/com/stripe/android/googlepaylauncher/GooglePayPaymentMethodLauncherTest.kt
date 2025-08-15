@@ -57,7 +57,8 @@ class GooglePayPaymentMethodLauncherTest {
                     publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 ),
                 analyticsRequestExecutor = { firedEvents += it.params["event"].toString() },
-                cardBrandFilter = DefaultCardBrandFilter
+                cardBrandFilter = DefaultCardBrandFilter,
+                passiveCaptchaParams = null
             )
             launcher.present(currencyCode = "usd")
 
@@ -88,7 +89,8 @@ class GooglePayPaymentMethodLauncherTest {
                     publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 ),
                 analyticsRequestExecutor = { firedEvents += it.params["event"].toString() },
-                cardBrandFilter = DefaultCardBrandFilter
+                cardBrandFilter = DefaultCardBrandFilter,
+                passiveCaptchaParams = null
             )
 
             GooglePayPaymentMethodLauncher(
@@ -104,7 +106,8 @@ class GooglePayPaymentMethodLauncherTest {
                     publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 ),
                 analyticsRequestExecutor = { firedEvents += it.params["event"].toString() },
-                cardBrandFilter = DefaultCardBrandFilter
+                cardBrandFilter = DefaultCardBrandFilter,
+                passiveCaptchaParams = null
             )
 
             assertThat(firedEvents).containsExactly("stripe_android.googlepaypaymentmethodlauncher_init")

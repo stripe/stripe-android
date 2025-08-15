@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentMethod
 import kotlinx.parcelize.Parcelize
 
@@ -50,6 +51,7 @@ class GooglePayPaymentMethodLauncherContract :
         internal val amount: Int,
         internal val transactionId: String? = null,
         internal val injectionParams: InjectionParams? = null,
+        internal val passiveCaptchaParams: PassiveCaptchaParams?
     ) : Parcelable {
         @JvmOverloads
         constructor(
@@ -57,7 +59,7 @@ class GooglePayPaymentMethodLauncherContract :
             currencyCode: String,
             amount: Int,
             transactionId: String? = null,
-        ) : this(config, currencyCode, amount, transactionId, null)
+        ) : this(config, currencyCode, amount, transactionId, null, null)
 
         internal fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
@@ -90,6 +92,7 @@ private fun GooglePayPaymentMethodLauncherContract.Args.toV2(): GooglePayPayment
         currencyCode = currencyCode,
         amount = amount.toLong(),
         transactionId = transactionId,
-        cardBrandFilter = DefaultCardBrandFilter
+        cardBrandFilter = DefaultCardBrandFilter,
+        passiveCaptchaParams = passiveCaptchaParams
     )
 }

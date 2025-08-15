@@ -5,6 +5,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
+import com.stripe.android.model.PassiveCaptchaParams
 import dagger.assisted.AssistedFactory
 import kotlinx.coroutines.CoroutineScope
 
@@ -17,6 +18,7 @@ interface GooglePayPaymentMethodLauncherFactory {
         readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
         activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
         skipReadyCheck: Boolean = false,
-        cardBrandFilter: CardBrandFilter
+        cardBrandFilter: CardBrandFilter,
+        passiveCaptchaParams: PassiveCaptchaParams?
     ): GooglePayPaymentMethodLauncher
 }

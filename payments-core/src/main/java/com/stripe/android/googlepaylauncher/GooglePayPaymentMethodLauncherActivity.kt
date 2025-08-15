@@ -10,6 +10,7 @@ import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.wallet.PaymentData
 import com.google.android.gms.wallet.contract.ApiTaskResult
 import com.google.android.gms.wallet.contract.TaskResultContracts.GetPaymentDataResult
+import com.stripe.android.challenge.PassiveChallengeActivityContract
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.uicore.utils.fadeOut
@@ -71,6 +72,20 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
             onGooglePayResult(it)
         }
 
+        val challengeLauncher = registerForActivityResult(PassiveChallengeActivityContract()) { result ->
+            viewModel.handlePassiveChallengeResult(result)
+        }
+
+        lifecycleScope.launch {
+            viewModel.effects.collect { effect ->
+                when (effect) {
+                    is GooglePayPaymentMethodLauncherViewModel.Effect.RunPassiveChallenge -> {
+                        challengeLauncher.launch(PassiveChallengeActivityContract.Args(effect.passiveCaptchaParams))
+                    }
+                }
+            }
+        }
+
         if (!viewModel.hasLaunched) {
             lifecycleScope.launch {
                 runCatching {
@@ -105,7 +120,7 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
             CommonStatusCodes.SUCCESS -> {
                 val result = taskResult.result
                 if (result != null) {
-                    onGooglePayResult(result)
+                    viewModel.handlePaymentData(result)
                 } else {
                     errorReporter.report(ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_MISSING_INTENT_DATA)
                     updateResult(
@@ -145,14 +160,6 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
                     )
                 )
             }
-        }
-    }
-
-    private fun onGooglePayResult(paymentData: PaymentData) {
-        lifecycleScope.launch {
-            finishWithResult(
-                viewModel.createPaymentMethod(paymentData)
-            )
         }
     }
 
