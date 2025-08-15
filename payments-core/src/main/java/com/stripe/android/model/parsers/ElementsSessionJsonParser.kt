@@ -338,7 +338,8 @@ internal class ElementsSessionJsonParser(
 
             ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                 isPaymentMethodSaveEnabled = paymentMethodSaveFeature == VALUE_ENABLED,
-                isPaymentMethodRemoveEnabled = paymentMethodRemoveFeature == VALUE_ENABLED,
+                isPaymentMethodRemoveEnabled = paymentMethodRemoveFeature == VALUE_ENABLED ||
+                    paymentMethodRemoveFeature == VALUE_PARTIAL,
                 canRemoveLastPaymentMethod = paymentMethodRemoveLastFeature == VALUE_ENABLED,
                 isPaymentMethodSetAsDefaultEnabled = paymentMethodSetAsDefaultFeature == VALUE_ENABLED,
                 allowRedisplayOverride = allowRedisplayOverride,
@@ -364,7 +365,8 @@ internal class ElementsSessionJsonParser(
             val paymentMethodSyncDefaultFeature = customerSheetFeatures.optString(FIELD_PAYMENT_METHOD_SYNC_DEFAULT)
 
             ElementsSession.Customer.Components.CustomerSheet.Enabled(
-                isPaymentMethodRemoveEnabled = paymentMethodRemoveFeature == VALUE_ENABLED,
+                isPaymentMethodRemoveEnabled = paymentMethodRemoveFeature == VALUE_ENABLED ||
+                    paymentMethodRemoveFeature == VALUE_PARTIAL,
                 canRemoveLastPaymentMethod = paymentMethodRemoveLastFeature == VALUE_ENABLED,
                 isPaymentMethodSyncDefaultEnabled = paymentMethodSyncDefaultFeature == VALUE_ENABLED,
             )
@@ -501,6 +503,7 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_PAYMENT_METHOD_SET_AS_DEFAULT = "payment_method_set_as_default"
         private const val FIELD_PAYMENT_METHOD_SYNC_DEFAULT = "payment_method_sync_default"
         private const val VALUE_ENABLED = FIELD_ENABLED
+        private const val VALUE_PARTIAL = "partial"
         const val FIELD_GOOGLE_PAY_PREFERENCE = "google_pay_preference"
         private const val FIELD_EXPERIMENTS_DATA = "experiments_data"
         private const val FIELD_EXPERIMENTS_ASSIGNMENTS = "experiment_assignments"
