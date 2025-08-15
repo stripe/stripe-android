@@ -50,6 +50,7 @@ import com.stripe.android.paymentsheet.state.DefaultRetrieveCustomerEmail
 import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
+import com.stripe.android.ui.core.di.CardScanModule
 import dagger.Binds
 import dagger.Lazy
 import dagger.Module
@@ -68,6 +69,7 @@ import kotlin.coroutines.CoroutineContext
     includes = [
         LinkCommonModule::class,
         PaymentsIntegrityModule::class,
+        CardScanModule::class
     ]
 )
 internal abstract class PaymentSheetCommonModule {

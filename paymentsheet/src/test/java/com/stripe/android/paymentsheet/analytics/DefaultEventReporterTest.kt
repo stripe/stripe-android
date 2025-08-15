@@ -28,13 +28,13 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.paymentsheet.FakeIsStripeCardScanAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentMethodFactory
-import com.stripe.android.ui.core.IsStripeCardScanAvailable
 import com.stripe.android.utils.AnalyticEventCallbackRule
 import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -1331,11 +1331,5 @@ class DefaultEventReporterTest {
             ).takeIf { it.linkMode != null },
             screenState = mock(),
         )
-    }
-
-    private class FakeIsStripeCardScanAvailable(
-        private val value: Boolean = true
-    ) : IsStripeCardScanAvailable {
-        override fun invoke() = value
     }
 }

@@ -43,6 +43,7 @@ import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsIntera
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
+import com.stripe.android.ui.core.IsStripeCardScanAvailable
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -65,6 +66,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+    isStripeCardScanAvailableProvider: IsStripeCardScanAvailable,
 ) : BaseSheetViewModel(
     config = args.configuration,
     eventReporter = eventReporter,
@@ -74,6 +76,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     linkHandler = linkHandler,
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = false,
+    isStripeCardScanAvailable = isStripeCardScanAvailableProvider,
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
@@ -155,6 +158,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
         updateSelection(args.state.paymentSelection)
 
+        automaticallyLaunchedCardScanFormData.hasAutomaticallyLaunchedCardScan = args.hasAutomaticallyLaunchedCardScan
+
         navigationHandler.resetTo(
             determineInitialBackStack(
                 paymentMethodMetadata = args.state.paymentMethodMetadata,
@@ -199,7 +204,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
                             selectedPayment = result.selectedPayment,
                             shippingAddress = result.shippingAddress,
                         ),
-                        paymentMethods = customerStateHolder.paymentMethods.value
+                        paymentMethods = customerStateHolder.paymentMethods.value,
+                        hasAutomaticallyLaunchedCardScan =
+                        automaticallyLaunchedCardScanFormData.hasAutomaticallyLaunchedCardScan,
                     )
                 )
             }
@@ -221,6 +228,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 mostRecentError = null,
                 paymentSelection = determinePaymentSelectionUponCancel(),
                 paymentMethods = customerStateHolder.paymentMethods.value,
+                hasAutomaticallyLaunchedCardScan =
+                automaticallyLaunchedCardScanFormData.hasAutomaticallyLaunchedCardScan,
             )
         )
     }
@@ -269,7 +278,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     PaymentOptionsActivityResult.Succeeded(
                         linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                         paymentSelection = paymentSelection.withLinkDetails(),
-                        paymentMethods = customerStateHolder.paymentMethods.value
+                        paymentMethods = customerStateHolder.paymentMethods.value,
+                        hasAutomaticallyLaunchedCardScan =
+                        automaticallyLaunchedCardScanFormData.hasAutomaticallyLaunchedCardScan,
                     )
                 )
             }

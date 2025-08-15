@@ -55,6 +55,7 @@ internal class CustomerSheetActivity : AppCompatActivity() {
             finishWithResult(
                 InternalCustomerSheetResult.Error(
                     exception = IllegalStateException("No CustomerSheetContract.Args provided"),
+                    hasAutomaticallyLaunchedCardScan = null
                 )
             )
             return

@@ -5,6 +5,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.parseAppearance
+import com.stripe.android.ui.core.IsStripeCardScanAvailable
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -17,7 +18,9 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
     private val customerStateHolder: CustomerStateHolder,
     private val confirmationStateHolder: EmbeddedConfirmationStateHolder,
     private val embeddedContentHelper: EmbeddedContentHelper,
+    private val hasAutomaticallyLaunchedCardScanHolder: EmbeddedHasAutomaticallyLaunchedCardScanHolder,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
+    private val isStripeCardScanAvailable: IsStripeCardScanAvailable,
 ) : EmbeddedStateHelper {
     override var state: EmbeddedPaymentElement.State?
         get() {
@@ -26,6 +29,8 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
                     confirmationState = it,
                     customer = customerStateHolder.customer.value,
                     previousNewSelections = selectionHolder.previousNewSelections,
+                    hasAutomaticallyLaunchedCardScan =
+                    hasAutomaticallyLaunchedCardScanHolder.hasAutomaticallyLaunchedCardScan,
                 )
             }
         }
@@ -49,6 +54,9 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
         customerStateHolder.setCustomerState(state.customer)
         selectionHolder.setPreviousNewSelections(state.previousNewSelections)
         selectionHolder.set(state.confirmationState.selection)
+        hasAutomaticallyLaunchedCardScanHolder.hasAutomaticallyLaunchedCardScan =
+            state.hasAutomaticallyLaunchedCardScan
+
         embeddedContentHelper.dataLoaded(
             paymentMethodMetadata = state.confirmationState.paymentMethodMetadata,
             appearance = state.confirmationState.configuration.appearance.embeddedAppearance,
@@ -61,6 +69,13 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
     ) {
         val isRowSelectionImmediateAction = internalRowSelectionCallback.get() != null
         val hasGooglePayOrCustomerConfig = configuration.googlePay != null || configuration.customer != null
+
+        if (configuration.opensCardScannerAutomatically && !isStripeCardScanAvailable()) {
+            throw IllegalArgumentException(
+                "Card scanning must be enabled by adding the stripecardscan dependency to your app " +
+                    "to use the opensCardScannerAutomatically option."
+            )
+        }
 
         if (isRowSelectionImmediateAction &&
             configuration.formSheetAction == EmbeddedPaymentElement.FormSheetAction.Confirm &&

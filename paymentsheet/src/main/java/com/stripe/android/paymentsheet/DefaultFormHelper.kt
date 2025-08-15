@@ -20,6 +20,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormData
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
@@ -34,6 +35,7 @@ internal class DefaultFormHelper(
     private val linkInlineHandler: LinkInlineHandler,
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     private val paymentMethodMetadata: PaymentMethodMetadata,
+    private val automaticallyLaunchedCardScanFormData: AutomaticallyLaunchedCardScanFormData?,
     private val newPaymentSelectionProvider: () -> NewPaymentOptionSelection?,
     private val selectionUpdater: (PaymentSelection?) -> Unit,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
@@ -66,6 +68,7 @@ internal class DefaultFormHelper(
                 eventReporter = viewModel.eventReporter,
                 savedStateHandle = viewModel.savedStateHandle,
                 autocompleteAddressInteractorFactory = viewModel.autocompleteAddressInteractorFactory,
+                automaticallyLaunchedCardScanFormData = viewModel.automaticallyLaunchedCardScanFormData,
             )
         }
 
@@ -91,6 +94,7 @@ internal class DefaultFormHelper(
                 savedStateHandle = savedStateHandle,
                 autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
                 isLinkUI = isLinkUI,
+                automaticallyLaunchedCardScanFormData = null,
             )
         }
     }
@@ -165,6 +169,7 @@ internal class DefaultFormHelper(
                 setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
                 autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
                 isLinkUI = isLinkUI,
+                automaticallyLaunchedCardScanFormData = automaticallyLaunchedCardScanFormData,
             ),
         ) ?: emptyList()
     }

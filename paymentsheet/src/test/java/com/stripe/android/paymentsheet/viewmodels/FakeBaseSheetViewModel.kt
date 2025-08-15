@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentsheet.FakeIsStripeCardScanAvailable
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.NewPaymentOptionSelection
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -44,6 +45,7 @@ internal class FakeBaseSheetViewModel private constructor(
     linkHandler = linkHandler,
     cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
     isCompleteFlow = true,
+    isStripeCardScanAvailable = FakeIsStripeCardScanAvailable(),
 ) {
     companion object {
         fun create(

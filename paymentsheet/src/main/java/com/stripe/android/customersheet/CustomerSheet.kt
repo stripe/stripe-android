@@ -96,6 +96,7 @@ class CustomerSheet internal constructor(
             configuration = request.configuration,
             integrationType = integrationType,
             statusBarColor = statusBarColor(),
+            hasAutomaticallyLaunchedCardScan = viewModel.hasAutomaticallyLaunchedCardScan,
         )
 
         val options = ActivityOptionsCompat.makeCustomAnimation(
@@ -164,6 +165,9 @@ class CustomerSheet internal constructor(
     }
 
     private fun onCustomerSheetResult(result: InternalCustomerSheetResult) {
+        result.hasAutomaticallyLaunchedCardScan?.let {
+            viewModel.hasAutomaticallyLaunchedCardScan = it
+        }
         callback.onCustomerSheetResult(
             result.toPublicResult(paymentOptionFactory)
         )
@@ -229,6 +233,8 @@ class CustomerSheet internal constructor(
         internal val paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder,
 
         internal val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
+
+        internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically
     ) : Parcelable {
 
         // Hide no-argument constructor init
@@ -254,6 +260,7 @@ class CustomerSheet internal constructor(
                 .paymentMethodOrder(paymentMethodOrder)
         }
 
+        @Suppress("TooManyFunctions")
         class Builder internal constructor(private val merchantDisplayName: String) {
             private var appearance: PaymentSheet.Appearance = ConfigurationDefaults.appearance
             private var googlePayEnabled: Boolean = ConfigurationDefaults.googlePayEnabled
@@ -266,6 +273,8 @@ class CustomerSheet internal constructor(
                 ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod
             private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
             private var cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
+            private var opensCardScannerAutomatically: Boolean =
+                ConfigurationDefaults.opensCardScannerAutomatically
 
             fun appearance(appearance: PaymentSheet.Appearance) = apply {
                 this.appearance = appearance
@@ -328,6 +337,16 @@ class CustomerSheet internal constructor(
                 this.cardBrandAcceptance = cardBrandAcceptance
             }
 
+            /**
+             * By default, the customer sheet offers a card scan button within the new card entry form.
+             * When opensCardScannerAutomatically is set to true,
+             * the card entry form will initialize with the card scanner already open.
+             * **Note**: The stripecardscan dependency must be added to set `opensCardScannerAutomatically` to true
+             */
+            fun opensCardScannerAutomatically(opensCardScannerAutomatically: Boolean) = apply {
+                this.opensCardScannerAutomatically = opensCardScannerAutomatically
+            }
+
             fun build() = Configuration(
                 appearance = appearance,
                 googlePayEnabled = googlePayEnabled,
@@ -338,7 +357,8 @@ class CustomerSheet internal constructor(
                 preferredNetworks = preferredNetworks,
                 allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
                 paymentMethodOrder = paymentMethodOrder,
-                cardBrandAcceptance = cardBrandAcceptance
+                cardBrandAcceptance = cardBrandAcceptance,
+                opensCardScannerAutomatically = opensCardScannerAutomatically,
             )
         }
 

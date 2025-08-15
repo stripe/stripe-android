@@ -326,7 +326,8 @@ internal class DefaultFlowController @Inject internal constructor(
             } else {
                 state.config.walletButtons.allowedWalletTypes
             },
-            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier
+            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
+            hasAutomaticallyLaunchedCardScan = state.hasAutomaticallyLaunchedCardScan
         )
 
         val options = ActivityOptionsCompat.makeCustomAnimation(
@@ -573,14 +574,23 @@ internal class DefaultFlowController @Inject internal constructor(
     internal fun onPaymentOptionResult(
         result: PaymentOptionsActivityResult?
     ) {
+        val currentState = viewModel.state
         // update the current Link account state if the selected Link payment method includes an account update.
         result?.linkAccountInfo?.let { linkAccountHolder.set(it) }
         result?.paymentMethods?.let {
-            val currentState = viewModel.state
             viewModel.state = currentState?.copyPaymentSheetState(
                 customer = currentState.paymentSheetState.customer?.copy(paymentMethods = it)
             )
         }
+
+        // update the state to stop showing AutomaticCardScan
+        currentState?.let { state ->
+            result?.let { result ->
+                viewModel.state =
+                    state.copy(hasAutomaticallyLaunchedCardScan = result.hasAutomaticallyLaunchedCardScan)
+            }
+        }
+
         when (result) {
             is PaymentOptionsActivityResult.Succeeded -> {
                 viewModel.paymentSelection = result.paymentSelection.also { it.hasAcknowledgedSepaMandate = true }
@@ -789,7 +799,8 @@ internal class DefaultFlowController @Inject internal constructor(
     data class State(
         val paymentSheetState: PaymentSheetState.Full,
         val config: PaymentSheet.Configuration,
-        val declinedLink2FA: Boolean = false
+        val declinedLink2FA: Boolean = false,
+        val hasAutomaticallyLaunchedCardScan: Boolean = false,
     ) : Parcelable {
         fun copyPaymentSheetState(
             paymentSelection: PaymentSelection? = paymentSheetState.paymentSelection,

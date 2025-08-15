@@ -30,6 +30,8 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.ui.core.IsStripeCardScanAvailable
+import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormData
 import com.stripe.android.ui.core.elements.CvcConfig
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -57,6 +59,7 @@ internal abstract class BaseSheetViewModel(
     val linkHandler: LinkHandler,
     val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     val isCompleteFlow: Boolean,
+    val isStripeCardScanAvailable: IsStripeCardScanAvailable,
 ) : ViewModel() {
     private val autocompleteLauncher = DefaultAutocompleteLauncher(
         AutocompleteAppearanceContext.PaymentElement(config.appearance)
@@ -64,6 +67,8 @@ internal abstract class BaseSheetViewModel(
 
     private val _paymentMethodMetadata = MutableStateFlow<PaymentMethodMetadata?>(null)
     internal val paymentMethodMetadata: StateFlow<PaymentMethodMetadata?> = _paymentMethodMetadata
+
+    val automaticallyLaunchedCardScanFormData: AutomaticallyLaunchedCardScanFormData
 
     val navigationHandler: NavigationHandler<PaymentSheetScreen> = NavigationHandler(
         coroutineScope = viewModelScope,
@@ -148,6 +153,19 @@ internal abstract class BaseSheetViewModel(
                 clearErrorMessages()
             }
         }
+
+        if (config.opensCardScannerAutomatically && !isStripeCardScanAvailable.invoke()) {
+            throw IllegalArgumentException(
+                "Card scanning must be enabled by adding the stripecardscan dependency to your app " +
+                    "to use the opensCardScannerAutomatically option."
+            )
+        }
+
+        automaticallyLaunchedCardScanFormData = AutomaticallyLaunchedCardScanFormData(
+            hasAutomaticallyLaunchedCardScanInitialValue = false,
+            openCardScanAutomaticallyConfig = config.opensCardScannerAutomatically,
+            savedStateHandle = savedStateHandle
+        )
     }
 
     fun registerForActivityResult(
