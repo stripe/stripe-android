@@ -9,7 +9,7 @@ internal class EmbeddedHasSeenAutoCardScanHolder @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
 ) {
     var hasSeenAutoCardScanOpen: Boolean
-        get() = savedStateHandle.get<Boolean>(HAS_SEEN_AUTO_CARD_SCAN_OPEN_KEY) == true
+        get() = savedStateHandle.get<Boolean>(HAS_SEEN_AUTO_CARD_SCAN_OPEN_KEY) ?: false
         set(value) = savedStateHandle.set(HAS_SEEN_AUTO_CARD_SCAN_OPEN_KEY, value)
 
     var isLaunchingCardFormWithCardScanEnabled: Boolean

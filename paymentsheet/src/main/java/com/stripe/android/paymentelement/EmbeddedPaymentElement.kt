@@ -238,7 +238,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val link: PaymentSheet.LinkConfiguration,
         internal val formSheetAction: FormSheetAction,
         internal val termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap(),
-        internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomaticallyConfig,
+        internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
     ) : Parcelable {
         @Suppress("TooManyFunctions")
         class Builder(
@@ -272,7 +272,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private var formSheetAction: FormSheetAction = FormSheetAction.Continue
             private var termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap()
             private var opensCardScannerAutomatically: Boolean =
-                ConfigurationDefaults.opensCardScannerAutomaticallyConfig
+                ConfigurationDefaults.opensCardScannerAutomatically
 
             /**
              * If set, the customer can select a previously saved payment method.

@@ -808,7 +808,7 @@ class PaymentSheet internal constructor(
 
         internal val termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap(),
 
-        internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomaticallyConfig,
+        internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
     ) : Parcelable {
 
         @JvmOverloads
@@ -966,7 +966,7 @@ class PaymentSheet internal constructor(
             private var googlePlacesApiKey: String? = ConfigurationDefaults.googlePlacesApiKey
             private var termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap()
             private var opensCardScannerAutomatically: Boolean =
-                ConfigurationDefaults.opensCardScannerAutomaticallyConfig
+                ConfigurationDefaults.opensCardScannerAutomatically
 
             private var customPaymentMethods: List<CustomPaymentMethod> =
                 ConfigurationDefaults.customPaymentMethods

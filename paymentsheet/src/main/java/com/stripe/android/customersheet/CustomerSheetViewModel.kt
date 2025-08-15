@@ -373,14 +373,9 @@ internal class CustomerSheetViewModel(
         withContext(viewModelScope.coroutineContext) {
             result.fold(
                 onSuccess = { state ->
-                    if (state.validationError != null) {
-                        _result.update {
-                            InternalCustomerSheetResult.Error(
-                                exception = state.validationError,
-                                hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScanOpen,
-                            )
-                        }
-                    } else {
+                    state.validationError?.let {
+                        updateResultWithError(it)
+                    } ?: {
                         supportedPaymentMethods.clear()
                         supportedPaymentMethods.addAll(state.supportedPaymentMethods)
 
@@ -397,14 +392,34 @@ internal class CustomerSheetViewModel(
                         transitionToInitialScreen()
                     }
                 },
-                onFailure = { cause ->
-                    _result.update {
-                        InternalCustomerSheetResult.Error(
-                            exception = cause,
-                            hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScanOpen,
-                        )
-                    }
+                onFailure = {
+                    updateResultWithError(it)
                 }
+            )
+        }
+    }
+
+    private fun updateResultWithSuccess(paymentSelection: PaymentSelection?) {
+        _result.tryEmit(
+            InternalCustomerSheetResult.Selected(
+                paymentSelection = paymentSelection,
+                hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScanOpen,
+            )
+        )
+    }
+
+    private fun getCancelledCustomerSheetResult(): InternalCustomerSheetResult.Canceled {
+        return InternalCustomerSheetResult.Canceled(
+            paymentSelection = originalPaymentSelection,
+            hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScanOpen,
+        )
+    }
+
+    private fun updateResultWithError(cause: Throwable) {
+        _result.update {
+            InternalCustomerSheetResult.Error(
+                exception = cause,
+                hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScanOpen,
             )
         }
     }
@@ -429,22 +444,12 @@ internal class CustomerSheetViewModel(
     }
 
     private fun onDismissed() {
-        _result.update {
-            InternalCustomerSheetResult.Canceled(
-                paymentSelection = originalPaymentSelection,
-                hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScanOpen,
-            )
-        }
+        _result.update { getCancelledCustomerSheetResult() }
     }
 
     private fun onBackPressed() {
         if (backStack.value.size == 1) {
-            _result.tryEmit(
-                InternalCustomerSheetResult.Canceled(
-                    paymentSelection = originalPaymentSelection,
-                    hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScanOpen,
-                )
-            )
+            _result.tryEmit(getCancelledCustomerSheetResult())
         } else {
             backStack.update {
                 it.last().eventReporterScreen?.let { screen ->
@@ -798,11 +803,8 @@ internal class CustomerSheetViewModel(
             createPaymentMethod(paymentMethodCreateParams)
                 .onSuccess { paymentMethod ->
                     if (paymentMethod.isUnverifiedUSBankAccount()) {
-                        _result.tryEmit(
-                            InternalCustomerSheetResult.Selected(
-                                paymentSelection = PaymentSelection.Saved(paymentMethod),
-                                hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScanOpen,
-                            )
+                        updateResultWithSuccess(
+                            paymentSelection = PaymentSelection.Saved(paymentMethod)
                         )
                     } else {
                         attachPaymentMethodToCustomer(paymentMethod)
@@ -1249,12 +1251,7 @@ internal class CustomerSheetViewModel(
                 syncDefaultEnabled = syncDefaultEnabled
             )
         }
-        _result.tryEmit(
-            InternalCustomerSheetResult.Selected(
-                paymentSelection = paymentSelection,
-                hasSeenAutoCardScanOpen = autoCardScanData.hasSeenAutoCardScanOpen,
-            )
-        )
+        updateResultWithSuccess(paymentSelection)
     }
 
     private fun confirmPaymentSelectionError(

@@ -234,7 +234,7 @@ class CustomerSheet internal constructor(
 
         internal val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
 
-        internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomaticallyConfig
+        internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically
     ) : Parcelable {
 
         // Hide no-argument constructor init
@@ -274,7 +274,7 @@ class CustomerSheet internal constructor(
             private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
             private var cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
             private var opensCardScannerAutomatically: Boolean =
-                ConfigurationDefaults.opensCardScannerAutomaticallyConfig
+                ConfigurationDefaults.opensCardScannerAutomatically
 
             fun appearance(appearance: PaymentSheet.Appearance) = apply {
                 this.appearance = appearance

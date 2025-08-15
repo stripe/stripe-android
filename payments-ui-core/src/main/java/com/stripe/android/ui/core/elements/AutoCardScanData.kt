@@ -1,7 +1,9 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
 import androidx.lifecycle.SavedStateHandle
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AutoCardScanData(
     private val hasSeenAutoCardScanOpenInitialValue: Boolean,
     private val openCardScanAutomaticallyConfig: Boolean,

@@ -11,7 +11,6 @@ dependencies {
     api project(":payments-core")
     implementation project(':payments-ui-core')
     implementation project(':stripe-ui-core')
-    compileOnly project(':stripecardscan')
     compileOnly project(':financial-connections')
     implementation project(":stripe-attestation")
 

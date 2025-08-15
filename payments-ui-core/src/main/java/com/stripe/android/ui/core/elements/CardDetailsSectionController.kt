@@ -32,8 +32,11 @@ class CardDetailsSectionController(
 
     internal val isCardScanEnabledAndAvailable = cardDetailsElement.isCardScanEnabled &&
         DefaultIsStripeCardScanAvailable().invoke()
-    internal val shouldSeeAutomaticCardScanOpen = isCardScanEnabledAndAvailable &&
-        autoCardScanData?.shouldOpenCardScanAutomatically == true
+
+    fun shouldSeeAutomaticCardScanOpen(): Boolean {
+        return isCardScanEnabledAndAvailable &&
+            autoCardScanData?.shouldOpenCardScanAutomatically == true
+    }
 
     fun setHasSeenAutoCardScanOpen() {
         this.autoCardScanData?.let {
