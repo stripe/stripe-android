@@ -41,10 +41,16 @@ internal class CardScanGoogleLauncher(
     }
 
     fun launch(context: Context) {
-        eventsReporter.scanStarted("google_pay")
-        paymentCardRecognitionClient.fetchIntent(context) { intentSenderRequest ->
-            activityLauncher.launch(intentSenderRequest)
-        }
+        paymentCardRecognitionClient.fetchIntent(
+            context = context,
+            onFailure = { e ->
+                eventsReporter.scanFailed("google_pay", e)
+            },
+            onSuccess = { intentSenderRequest ->
+                eventsReporter.scanStarted("google_pay")
+                activityLauncher.launch(intentSenderRequest)
+            }
+        )
     }
 
     internal fun parseActivityResult(result: ActivityResult): CardScanResult {

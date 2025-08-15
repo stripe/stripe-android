@@ -21,39 +21,29 @@ internal class DefaultPaymentCardRecognitionClient : PaymentCardRecognitionClien
         onFailure: (Exception) -> Unit,
         onSuccess: (IntentSenderRequest) -> Unit
     ) {
-        val paymentsClient = createPaymentsClient(context)
-        val request = PaymentCardRecognitionIntentRequest.getDefaultInstance()
+        try {
+            val paymentsClient = createPaymentsClient(context)
+            val request = PaymentCardRecognitionIntentRequest.getDefaultInstance()
 
-        paymentsClient.getPaymentCardRecognitionIntent(request)
-            .addOnSuccessListener { intentResponse ->
-                val pendingIntent = intentResponse.paymentCardRecognitionPendingIntent
-                val intentSenderRequest = IntentSenderRequest.Builder(pendingIntent.intentSender).build()
-                onSuccess(intentSenderRequest)
-            }
-            .addOnFailureListener { e ->
-                onFailure(e)
-            }
+            paymentsClient.getPaymentCardRecognitionIntent(request)
+                .addOnSuccessListener { intentResponse ->
+                    val pendingIntent = intentResponse.paymentCardRecognitionPendingIntent
+                    val intentSenderRequest = IntentSenderRequest.Builder(pendingIntent.intentSender).build()
+                    onSuccess(intentSenderRequest)
+                }
+                .addOnFailureListener { e ->
+                    onFailure(e)
+                }
+        } catch (e: Exception) {
+            onFailure(e)
+        }
     }
 
     private fun createPaymentsClient(context: Context): PaymentsClient {
         val walletOptions = Wallet.WalletOptions.Builder()
-            .setEnvironment(
-                if (isStripeExampleApp(context)) {
-                    WalletConstants.ENVIRONMENT_TEST
-                } else {
-                    WalletConstants.ENVIRONMENT_PRODUCTION
-                }
-            )
+            .setEnvironment(WalletConstants.ENVIRONMENT_PRODUCTION)
             .build()
 
         return Wallet.getPaymentsClient(context, walletOptions)
-    }
-
-    private fun isStripeExampleApp(context: Context): Boolean {
-        val packageName = context.packageName
-
-        // Only Stripe's official example apps
-        return packageName.startsWith("com.stripe.android.") &&
-            packageName.contains("example")
     }
 }
