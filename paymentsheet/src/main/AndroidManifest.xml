@@ -31,6 +31,10 @@
             android:theme="@style/StripePaymentSheetDefaultTheme"
             android:exported="false" />
         <activity
+            android:name=".paymentdatacollection.polling.PayNowActivity"
+            android:theme="@style/StripePaymentSheetDefaultTheme"
+            android:exported="false" />
+        <activity
             android:name=".ui.SepaMandateActivity"
             android:theme="@style/StripePaymentSheetDefaultTheme"
             android:exported="false" />

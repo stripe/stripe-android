@@ -49,7 +49,8 @@ internal enum class PollingState {
 }
 
 internal fun PollingState.toFlowResult(
-    args: PollingContract.Args,
+    clientSecret: String,
+    stripeAccountId: String?,
 ): PaymentFlowResult.Unvalidated? {
     return when (this) {
         PollingState.Active -> {
@@ -60,17 +61,17 @@ internal fun PollingState.toFlowResult(
         }
         PollingState.Success -> {
             PaymentFlowResult.Unvalidated(
-                clientSecret = args.clientSecret,
+                clientSecret = clientSecret,
                 flowOutcome = StripeIntentResult.Outcome.SUCCEEDED,
-                stripeAccountId = args.stripeAccountId,
+                stripeAccountId = stripeAccountId,
             )
         }
         PollingState.Canceled -> {
             PaymentFlowResult.Unvalidated(
-                clientSecret = args.clientSecret,
+                clientSecret = clientSecret,
                 flowOutcome = StripeIntentResult.Outcome.CANCELED,
                 canCancelSource = false,
-                stripeAccountId = args.stripeAccountId,
+                stripeAccountId = stripeAccountId,
             )
         }
     }

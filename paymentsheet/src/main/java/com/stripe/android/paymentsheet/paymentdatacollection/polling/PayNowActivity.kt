@@ -20,10 +20,10 @@ import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.fadeOut
 import kotlin.time.Duration.Companion.seconds
 
-internal class PollingActivity : AppCompatActivity() {
+internal class PayNowActivity : AppCompatActivity() {
 
-    private val args: PollingContract.Args by lazy {
-        requireNotNull(PollingContract.Args.fromIntent(intent))
+    private val args: PayNowContract.Args by lazy {
+        requireNotNull(PayNowContract.Args.fromIntent(intent))
     }
 
     internal var viewModelFactory: ViewModelProvider.Factory = PollingViewModel.Factory {

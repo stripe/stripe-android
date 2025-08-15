@@ -3,13 +3,16 @@ package com.stripe.android.paymentsheet.paymentdatacollection.polling
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.core.app.ActivityOptionsCompat
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.authentication.PaymentNextActionHandler
 import com.stripe.android.payments.core.authentication.WebIntentNextActionHandler
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.uicore.utils.AnimationConstants
 import com.stripe.android.view.AuthActivityStarterHost
 
 // TODO: find correct vals. 60 min?
@@ -21,7 +24,7 @@ private const val PAY_NOW_MAX_ATTEMPTS = 12
 
 internal class PayNowNextActionHandler : PaymentNextActionHandler<StripeIntent>() {
 
-    private var pollingLauncher: ActivityResultLauncher<PollingContract.Args>? = null
+    private var pollingLauncher: ActivityResultLauncher<PayNowContract.Args>? = null
     private var webIntentAuthenticator: WebIntentNextActionHandler? = null
 
     override suspend fun performNextActionOnResumed(
@@ -31,7 +34,7 @@ internal class PayNowNextActionHandler : PaymentNextActionHandler<StripeIntent>(
     ) {
         val args = when (actionable.paymentMethod?.type) {
             PaymentMethod.Type.PayNow ->
-                PollingContract.Args(
+                PayNowContract.Args(
                     clientSecret = requireNotNull(actionable.clientSecret),
                     statusBarColor = host.statusBarColor,
                     timeLimitInSeconds = PAY_NOW_TIME_LIMIT_IN_SECONDS,
@@ -49,11 +52,19 @@ internal class PayNowNextActionHandler : PaymentNextActionHandler<StripeIntent>(
                 )
         }
 
-        PollingUtils.launchPollingAuthenticator(
-            pollingLauncher,
-            host,
-            args,
+        val options = ActivityOptionsCompat.makeCustomAnimation(
+            host.application.applicationContext,
+            AnimationConstants.FADE_IN,
+            AnimationConstants.FADE_OUT,
         )
+
+        val localPollingLauncher = pollingLauncher
+        if (localPollingLauncher == null) {
+            ErrorReporter.createFallbackInstance(host.application)
+                .report(ErrorReporter.UnexpectedErrorEvent.MISSING_POLLING_AUTHENTICATOR)
+        } else {
+            localPollingLauncher.launch(args, options)
+        }
 
         webIntentAuthenticator?.performNextAction(
             host,
@@ -69,7 +80,7 @@ internal class PayNowNextActionHandler : PaymentNextActionHandler<StripeIntent>(
         webIntentNextActionHandler: WebIntentNextActionHandler?
     ) {
         pollingLauncher = activityResultCaller.registerForActivityResult(
-            PollingContract(),
+            PayNowContract(),
             activityResultCallback
         )
 
