@@ -166,7 +166,7 @@ interface CustomerAdapter {
             return when (this) {
                 is GooglePay -> SavedSelection.GooglePay
                 is Link -> SavedSelection.Link
-                is StripeId -> SavedSelection.PaymentMethod(id)
+                is StripeId -> SavedSelection.PaymentMethod(id, isLinkOrigin = false)
             }
         }
 
