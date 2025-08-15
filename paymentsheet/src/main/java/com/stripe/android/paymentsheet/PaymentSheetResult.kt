@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.os.Parcelable
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -21,20 +22,27 @@ sealed class PaymentSheetResult : Parcelable {
      * See [Stripe's documentation](https://stripe.com/docs/payments/handling-payment-events)
      */
     @Parcelize
-    data object Completed : PaymentSheetResult()
+    @Poko
+    class Completed internal constructor(
+        @Suppress("unused") private val irrelevantValueForGeneratedCode: Boolean = true
+    ) : PaymentSheetResult()
 
     /**
      * The customer canceled the payment or setup attempt.
      */
     @Parcelize
-    data object Canceled : PaymentSheetResult()
+    @Poko
+    class Canceled internal constructor(
+        @Suppress("unused") private val irrelevantValueForGeneratedCode: Boolean = true
+    ) : PaymentSheetResult()
 
     /**
      * The payment or setup attempt failed.
      * @param error The error encountered by the customer.
      */
     @Parcelize
-    data class Failed(
+    @Poko
+    class Failed internal constructor(
         val error: Throwable
     ) : PaymentSheetResult()
 }

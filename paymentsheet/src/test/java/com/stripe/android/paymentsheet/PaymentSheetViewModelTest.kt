@@ -1030,7 +1030,7 @@ internal class PaymentSheetViewModelTest {
             (finishedProcessingState as PaymentSheetViewState.FinishProcessing).onComplete()
 
             assertThat(resultTurbine.awaitItem())
-                .isEqualTo(PaymentSheetResult.Completed)
+                .isEqualTo(PaymentSheetResult.Completed())
 
             verify(eventReporter)
                 .onPaymentSuccess(
@@ -1098,7 +1098,7 @@ internal class PaymentSheetViewModelTest {
 
             (finishedProcessingState as PaymentSheetViewState.FinishProcessing).onComplete()
 
-            assertThat(resultTurbine.awaitItem()).isEqualTo(PaymentSheetResult.Completed)
+            assertThat(resultTurbine.awaitItem()).isEqualTo(PaymentSheetResult.Completed())
 
             verify(eventReporter)
                 .onPaymentSuccess(
@@ -1682,7 +1682,7 @@ internal class PaymentSheetViewModelTest {
             assertThat(awaitItem()).isInstanceOf<AddFirstPaymentMethod>()
             viewModel.paymentSheetResult.test {
                 viewModel.handleBackPressed()
-                assertThat(awaitItem()).isEqualTo(PaymentSheetResult.Canceled)
+                assertThat(awaitItem()).isEqualTo(PaymentSheetResult.Canceled())
             }
         }
     }
@@ -2129,7 +2129,7 @@ internal class PaymentSheetViewModelTest {
             val finishingState = viewModel.viewState.value as PaymentSheetViewState.FinishProcessing
             finishingState.onComplete()
 
-            assertThat(awaitItem()).isEqualTo(PaymentSheetResult.Completed)
+            assertThat(awaitItem()).isEqualTo(PaymentSheetResult.Completed())
         }
     }
 
@@ -3495,7 +3495,7 @@ internal class PaymentSheetViewModelTest {
                 loadState()
             }
 
-            assertThat(awaitItem()).isEqualTo(PaymentSheetResult.Completed)
+            assertThat(awaitItem()).isEqualTo(PaymentSheetResult.Completed())
         }
     }
 
@@ -3570,7 +3570,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     private fun FakeConfirmationHandler.Scenario.createViewModel(
-        args: PaymentSheetContractV2.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
+        args: PaymentSheetContract.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         stripeIntent: StripeIntent = PAYMENT_INTENT,
         customer: CustomerState? = EMPTY_CUSTOMER_STATE.copy(paymentMethods = PAYMENT_METHODS),
         linkConfigurationCoordinator: LinkConfigurationCoordinator =
@@ -3623,7 +3623,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     private fun createViewModel(
-        args: PaymentSheetContractV2.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
+        args: PaymentSheetContract.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         stripeIntent: StripeIntent = PAYMENT_INTENT,
         customer: CustomerState? = EMPTY_CUSTOMER_STATE.copy(paymentMethods = PAYMENT_METHODS),
         linkConfigurationCoordinator: LinkConfigurationCoordinator = this.linkConfigurationCoordinator,
@@ -3709,7 +3709,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     private fun FakeConfirmationHandler.Scenario.createViewModelForDeferredIntent(
-        args: PaymentSheetContractV2.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
+        args: PaymentSheetContract.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         paymentIntent: PaymentIntent = PAYMENT_INTENT,
     ): PaymentSheetViewModel {
         return createViewModelForDeferredIntent(
@@ -3720,7 +3720,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     private fun createViewModelForDeferredIntent(
-        args: PaymentSheetContractV2.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
+        args: PaymentSheetContract.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         confirmationHandlerFactory: ConfirmationHandler.Factory? = null,
         paymentIntent: PaymentIntent = PAYMENT_INTENT,
     ): PaymentSheetViewModel {
