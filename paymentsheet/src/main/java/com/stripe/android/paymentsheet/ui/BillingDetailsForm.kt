@@ -25,6 +25,7 @@ internal class BillingDetailsForm(
     private val nameCollection: NameCollection,
     private val collectEmail: Boolean,
     private val collectPhone: Boolean,
+    allowedBillingCountries: Set<String>
 ) {
     val nameElement: SimpleTextElement? = if (nameCollection == NameCollection.OutsideBillingDetailsForm) {
         SimpleTextElement(
@@ -39,6 +40,7 @@ internal class BillingDetailsForm(
         identifier = IdentifierSpec.BillingAddress,
         sameAsShippingElement = null,
         shippingValuesMap = null,
+        countryCodes = allowedBillingCountries,
         collectionConfiguration = BillingDetailsCollectionConfiguration(
             address = when (addressCollectionMode) {
                 AddressCollectionMode.Automatic ->

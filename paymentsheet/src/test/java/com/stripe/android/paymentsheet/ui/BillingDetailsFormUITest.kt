@@ -84,6 +84,7 @@ internal class BillingDetailsFormUITest {
             nameCollection = NameCollection.Disabled,
             collectEmail = false,
             collectPhone = false,
+            allowedBillingCountries = emptySet(),
         )
         composeRule.setContent {
             BillingDetailsFormUI(

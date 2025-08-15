@@ -203,6 +203,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                     defaultConfiguration.address
                 },
                 attachDefaultsToPaymentMethod = defaultConfiguration.attachDefaultsToPaymentMethod,
+                allowedCountries = defaultConfiguration.allowedBillingCountries,
             ),
             onCardUpdateParamsChanged = ::onCardUpdateParamsChanged,
             onBrandChoiceChanged = ::onBrandChoiceChanged,

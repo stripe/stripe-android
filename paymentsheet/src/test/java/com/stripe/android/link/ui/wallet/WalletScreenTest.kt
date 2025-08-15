@@ -46,6 +46,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.ui.core.elements.CvcController
@@ -764,7 +765,8 @@ internal class WalletScreenTest {
                 addPaymentMethodOptions = addPaymentMethodOptions,
                 userSetIsExpanded = true,
                 collectMissingBillingDetailsForExistingPaymentMethods = true,
-                signupToggleEnabled = false
+                signupToggleEnabled = false,
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
             ),
             onItemSelected = {},
             onExpandedChanged = {},

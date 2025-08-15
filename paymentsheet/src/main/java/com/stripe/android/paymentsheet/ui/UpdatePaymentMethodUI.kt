@@ -334,6 +334,7 @@ private fun PreviewUpdatePaymentMethodUI() {
             canUpdateFullPaymentMethodDetails = true,
             displayableSavedPaymentMethod = exampleCard,
             addressCollectionMode = AddressCollectionMode.Automatic,
+            allowedBillingCountries = emptySet(),
             removeExecutor = { null },
             updatePaymentMethodExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
             setDefaultPaymentMethodExecutor = { _ -> Result.success(Unit) },

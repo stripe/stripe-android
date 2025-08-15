@@ -158,7 +158,9 @@ internal object PlaceholderHelper {
                     )
         }
 
-        PlaceholderField.BillingAddress -> AddressSpec().takeIf {
+        PlaceholderField.BillingAddress -> AddressSpec(
+            allowedCountryCodes = configuration.allowedBillingCountries,
+        ).takeIf {
             configuration.address == AddressCollectionMode.Full ||
                 (
                     placeholderOverrideList.contains(it.apiPath) &&
@@ -167,7 +169,7 @@ internal object PlaceholderHelper {
         }
 
         PlaceholderField.BillingAddressWithoutCountry ->
-            AddressSpec(hideCountry = true).takeIf {
+            AddressSpec(allowedCountryCodes = configuration.allowedBillingCountries, hideCountry = true).takeIf {
                 configuration.address == AddressCollectionMode.Full ||
                     (
                         placeholderOverrideList.contains(it.apiPath) &&

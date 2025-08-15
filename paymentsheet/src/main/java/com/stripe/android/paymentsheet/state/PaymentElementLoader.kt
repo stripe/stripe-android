@@ -5,6 +5,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.common.validation.isSupportedWithBillingConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
@@ -221,6 +222,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         val customer = async {
             createCustomerState(
+                configuration = configuration,
                 customerInfo = customerInfo,
                 metadata = paymentMethodMetadata.await(),
                 savedSelection = savedSelection,
@@ -425,6 +427,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     }
 
     private suspend fun createCustomerState(
+        configuration: CommonConfiguration,
         customerInfo: CustomerInfo?,
         metadata: PaymentMethodMetadata,
         savedSelection: Deferred<SavedSelection>,
@@ -460,7 +463,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                         isPaymentMethodSetAsDefaultEnabled = metadata.customerMetadata
                             ?.isPaymentMethodSetAsDefaultEnabled
                             ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
-                    ).filter { cardBrandFilter.isAccepted(it) },
+                    ).filter { paymentMethod ->
+                        cardBrandFilter.isAccepted(paymentMethod) &&
+                            paymentMethod.isSupportedWithBillingConfig(
+                                configuration.billingDetailsCollectionConfiguration
+                            )
+                    },
             )
         }
     }

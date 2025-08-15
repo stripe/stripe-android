@@ -111,7 +111,7 @@ class PlaceholderHelperTest {
                 label = StripeR.string.stripe_affirm_buy_now_pay_later,
             ),
             PhoneSpec(),
-            AddressSpec(),
+            AddressSpec(allowedCountryCodes = emptySet()),
         )
     }
 
@@ -283,7 +283,7 @@ class PlaceholderHelperTest {
                 configuration = billingDetailsCollectionConfiguration,
                 termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
             )
-        ).isEqualTo(AddressSpec())
+        ).isEqualTo(AddressSpec(allowedCountryCodes = emptySet()),)
         assertThat(
             specForPlaceholderField(
                 field = PlaceholderField.BillingAddressWithoutCountry,
@@ -292,7 +292,7 @@ class PlaceholderHelperTest {
                 configuration = billingDetailsCollectionConfiguration,
                 termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
             )
-        ).isEqualTo(AddressSpec(hideCountry = true))
+        ).isEqualTo(AddressSpec(allowedCountryCodes = emptySet(), hideCountry = true))
         assertThat(
             specForPlaceholderField(
                 field = PlaceholderField.SepaMandate,
@@ -562,6 +562,88 @@ class PlaceholderHelperTest {
     }
 
     @Test
+    fun `Test with empty set of allowed billing countries`() {
+        val billingDetailsCollectionConfigurationWithAllCountries =
+            PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+                attachDefaultsToPaymentMethod = false,
+                allowedCountries = emptySet()
+            )
+
+        val placeholderSpecForBillingAddress = specForPlaceholderField(
+            field = PlaceholderField.BillingAddress,
+            placeholderOverrideList = listOf(IdentifierSpec.BillingAddress),
+            requiresMandate = false,
+            configuration = billingDetailsCollectionConfigurationWithAllCountries,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        )
+
+        assertThat(placeholderSpecForBillingAddress).isInstanceOf<AddressSpec>()
+
+        val addressSpec = placeholderSpecForBillingAddress as AddressSpec
+
+        assertThat(addressSpec.allowedCountryCodes).isEmpty()
+
+        val placeholderSpecForBillingAddressWithoutCountry = specForPlaceholderField(
+            field = PlaceholderField.BillingAddressWithoutCountry,
+            placeholderOverrideList = listOf(IdentifierSpec.BillingAddress),
+            requiresMandate = false,
+            configuration = billingDetailsCollectionConfigurationWithAllCountries,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        )
+
+        assertThat(placeholderSpecForBillingAddressWithoutCountry).isInstanceOf<AddressSpec>()
+
+        val addressSpecWithoutCountry = placeholderSpecForBillingAddressWithoutCountry as AddressSpec
+
+        assertThat(addressSpecWithoutCountry.allowedCountryCodes).isEmpty()
+    }
+
+    @Test
+    fun `Test with limited set of allowed billing countries`() {
+        val billingDetailsCollectionConfigurationWithAllCountries =
+            PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+                attachDefaultsToPaymentMethod = false,
+                allowedCountries = setOf("US", "CA"),
+            )
+
+        val placeholderSpecForBillingAddress = specForPlaceholderField(
+            field = PlaceholderField.BillingAddress,
+            placeholderOverrideList = listOf(IdentifierSpec.BillingAddress),
+            requiresMandate = false,
+            configuration = billingDetailsCollectionConfigurationWithAllCountries,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        )
+
+        assertThat(placeholderSpecForBillingAddress).isInstanceOf<AddressSpec>()
+
+        val addressSpec = placeholderSpecForBillingAddress as AddressSpec
+
+        assertThat(addressSpec.allowedCountryCodes).containsExactly("US", "CA")
+
+        val placeholderSpecForBillingAddressWithoutCountry = specForPlaceholderField(
+            field = PlaceholderField.BillingAddressWithoutCountry,
+            placeholderOverrideList = listOf(IdentifierSpec.BillingAddress),
+            requiresMandate = false,
+            configuration = billingDetailsCollectionConfigurationWithAllCountries,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        )
+
+        assertThat(placeholderSpecForBillingAddressWithoutCountry).isInstanceOf<AddressSpec>()
+
+        val addressSpecWithoutCountry = placeholderSpecForBillingAddressWithoutCountry as AddressSpec
+
+        assertThat(addressSpecWithoutCountry.allowedCountryCodes).containsExactly("US", "CA")
+    }
+
+    @Test
     fun `Test mandate is moved to the end of the list`() {
         val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
             name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
@@ -592,7 +674,7 @@ class PlaceholderHelperTest {
             NameSpec(),
             EmailSpec(),
             PhoneSpec(),
-            AddressSpec(),
+            AddressSpec(allowedCountryCodes = emptySet()),
             mandateTextSpec
         )
     }
@@ -628,7 +710,7 @@ class PlaceholderHelperTest {
             NameSpec(),
             EmailSpec(),
             PhoneSpec(),
-            AddressSpec(),
+            AddressSpec(allowedCountryCodes = emptySet()),
             mandateTextSpec
         )
     }
