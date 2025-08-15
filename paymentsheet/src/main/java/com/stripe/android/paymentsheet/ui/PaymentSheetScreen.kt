@@ -56,6 +56,7 @@ import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.ui.LinkButton
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
@@ -352,9 +353,9 @@ private fun PaymentSheetContent(
                 onGooglePayPressed = state.onGooglePayPressed,
                 onLinkPressed = state.onLinkPressed,
                 dividerSpacing = currentScreen.walletsDividerSpacing,
+                walletsAllowedInHeader = state.walletsAllowedInHeader,
                 modifier = Modifier.padding(bottom = bottomSpacing),
-                cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
-                isCompleteFlow = viewModel.isCompleteFlow
+                cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance)
             )
         }
 
@@ -409,16 +410,16 @@ internal fun Wallet(
     onGooglePayPressed: () -> Unit,
     onLinkPressed: () -> Unit,
     dividerSpacing: Dp,
+    walletsAllowedInHeader: List<WalletType>,
     modifier: Modifier = Modifier,
-    cardBrandFilter: CardBrandFilter,
-    isCompleteFlow: Boolean
+    cardBrandFilter: CardBrandFilter
 ) {
     val padding = StripeTheme.getOuterFormInsets()
     var hasWalletButtons = false
 
     Column(modifier = modifier.padding(padding)) {
-        val showGooglePayInWallet = isCompleteFlow // Only complete flows show Google Pay in wallet
-        if (showGooglePayInWallet) {
+        // Only show Google Pay if allowed in header
+        if (walletsAllowedInHeader.contains(WalletType.GooglePay)) {
             state.googlePay?.let { googlePay ->
                 hasWalletButtons = true
                 GooglePayButton(
@@ -433,17 +434,19 @@ internal fun Wallet(
             }
         }
 
-        state.link?.let {
-            if (showGooglePayInWallet && state.googlePay != null) {
-                Spacer(modifier = Modifier.requiredHeight(8.dp))
+        // Only show Link if allowed in header
+        if (walletsAllowedInHeader.contains(WalletType.Link)) {
+            state.link?.let {
+                if (hasWalletButtons) {
+                    Spacer(modifier = Modifier.requiredHeight(8.dp))
+                }
+                hasWalletButtons = true
+                LinkButton(
+                    state = it.state,
+                    enabled = state.buttonsEnabled,
+                    onClick = onLinkPressed,
+                )
             }
-
-            hasWalletButtons = true
-            LinkButton(
-                state = it.state,
-                enabled = state.buttonsEnabled,
-                onClick = onLinkPressed,
-            )
         }
 
         when (processingState) {

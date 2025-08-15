@@ -6,6 +6,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -149,6 +150,7 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
             dividerTextResource = R.string.stripe_paymentsheet_or_pay_using,
             onGooglePayPressed = { throw AssertionError("Not expected.") },
             onLinkPressed = { throw AssertionError("Not expected.") },
+            walletsAllowedInHeader = WalletType.entries,
         )
 
         paparazziRule.snapshot {
