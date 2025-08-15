@@ -230,7 +230,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                     billingDetailsCollectionConfiguration.address
                 },
                 attachDefaultsToPaymentMethod = billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod,
-                allowedCountries = billingDetailsCollectionConfiguration.allowedCountries,
+                allowedCountries = billingDetailsCollectionConfiguration.allowedBillingCountries,
             )
         )
     }

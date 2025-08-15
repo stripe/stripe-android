@@ -15,7 +15,8 @@ internal class FormElementsBuilder(
     private val requiredContactInformationCollectionModes: MutableSet<ContactInformationCollectionMode> = mutableSetOf()
 
     private var requireBillingAddressCollection: Boolean = false
-    private var availableCountries: Set<String> = arguments.billingDetailsCollectionConfiguration.allowedCountries
+    private var availableCountries: Set<String> =
+        arguments.billingDetailsCollectionConfiguration.allowedBillingCountries
 
     init {
         // Setup the required contact information fields based on the merchant billingDetailsCollectionConfiguration.

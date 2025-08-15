@@ -194,7 +194,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
         ) {
             addAll(
                 cardBillingElements(
-                    billingDetailsCollectionConfiguration.allowedCountries,
+                    billingDetailsCollectionConfiguration.allowedBillingCountries,
                     billingDetailsCollectionConfiguration.toInternal(),
                     arguments.autocompleteAddressInteractorFactory,
                     arguments.initialValues,

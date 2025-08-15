@@ -616,7 +616,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         runScenario(
             displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
             addressCollectionMode = AddressCollectionMode.Full,
-            allowedBillingCountries = setOf("US", "CA"),
+            allowedBillingCountries = setOf("us", "CA"),
             editCardDetailsInteractorFactory = editCardDetailsInteractorFactory
         ) {
             assertThat(interactor.editCardDetailsInteractor.state.value).isNotNull()
@@ -631,7 +631,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
                 .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never)
 
             assertThat(configuration?.address).isEqualTo(AddressCollectionMode.Full)
-            assertThat(configuration?.allowedCountries).isEqualTo(setOf("US", "CA"))
+            assertThat(configuration?.allowedBillingCountries).isEqualTo(setOf("US", "CA"))
             assertThat(configuration?.attachDefaultsToPaymentMethod).isFalse()
         }
     }
@@ -642,7 +642,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         runScenario(
             displayableSavedPaymentMethod = PaymentMethodFixtures.displayableLinkPaymentMethod(),
             addressCollectionMode = AddressCollectionMode.Full,
-            allowedBillingCountries = setOf("US", "CA"),
+            allowedBillingCountries = setOf("us", "CA"),
             editCardDetailsInteractorFactory = editCardDetailsInteractorFactory
         ) {
             assertThat(interactor.editCardDetailsInteractor.state.value).isNotNull()
@@ -657,7 +657,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
                 .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never)
 
             assertThat(configuration?.address).isEqualTo(AddressCollectionMode.Never)
-            assertThat(configuration?.allowedCountries).isEqualTo(setOf("US", "CA"))
+            assertThat(configuration?.allowedBillingCountries).isEqualTo(setOf("US", "CA"))
             assertThat(configuration?.attachDefaultsToPaymentMethod).isFalse()
         }
     }

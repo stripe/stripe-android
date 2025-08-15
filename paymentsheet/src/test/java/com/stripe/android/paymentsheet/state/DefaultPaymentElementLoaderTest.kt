@@ -1847,7 +1847,7 @@ internal class DefaultPaymentElementLoaderTest {
             ),
             configuration = CommonConfigurationFactory.create(
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    allowedCountries = setOf("CA", "MX"),
+                    allowedCountries = setOf("CA", "mx"),
                 ),
                 customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
                     id = "cus_1",

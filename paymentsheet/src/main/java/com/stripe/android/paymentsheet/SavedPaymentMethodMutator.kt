@@ -387,7 +387,7 @@ internal class SavedPaymentMethodMutator(
                             cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
                             addressCollectionMode = viewModel.config.billingDetailsCollectionConfiguration.address,
                             allowedBillingCountries =
-                            viewModel.config.billingDetailsCollectionConfiguration.allowedCountries,
+                            viewModel.config.billingDetailsCollectionConfiguration.allowedBillingCountries,
                             removeExecutor = { method ->
                                 performRemove()
                             },

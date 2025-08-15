@@ -2774,7 +2774,7 @@ class PaymentSheet internal constructor(
          *
          * If the set is empty (the default), we display all countries.
          */
-        val allowedCountries: Set<String> = emptySet(),
+        private val allowedCountries: Set<String> = emptySet(),
     ) : Parcelable {
         constructor(
             /**
@@ -2831,6 +2831,11 @@ class PaymentSheet internal constructor(
 
         private val collectsFullAddress: Boolean
             get() = address == AddressCollectionMode.Full
+
+        @IgnoredOnParcel
+        internal val allowedBillingCountries by lazy {
+            allowedCountries.map { it.uppercase() }.toSet()
+        }
 
         internal fun toBillingAddressParameters(): GooglePayJsonFactory.BillingAddressParameters {
             val format = when (address) {

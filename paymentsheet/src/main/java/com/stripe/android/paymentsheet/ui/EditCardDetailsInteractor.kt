@@ -338,7 +338,7 @@ internal class DefaultEditCardDetailsInteractor(
             },
             collectEmail = billingDetailsCollectionConfiguration.collectsEmail,
             collectPhone = billingDetailsCollectionConfiguration.collectsPhone,
-            allowedBillingCountries = billingDetailsCollectionConfiguration.allowedCountries,
+            allowedBillingCountries = billingDetailsCollectionConfiguration.allowedBillingCountries,
         )
     }
 

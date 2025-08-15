@@ -612,7 +612,7 @@ internal class DefaultCustomerSheetLoaderTest {
             )
                 .billingDetailsCollectionConfiguration(
                     PaymentSheet.BillingDetailsCollectionConfiguration(
-                        allowedCountries = setOf("CA", "MX"),
+                        allowedCountries = setOf("CA", "mx"),
                     ),
                 )
                 .build(),
