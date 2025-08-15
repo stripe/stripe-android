@@ -99,7 +99,15 @@ internal fun FormFieldValues.transformToPaymentSelection(
     paymentMethod: SupportedPaymentMethod,
     paymentMethodMetadata: PaymentMethodMetadata,
 ): PaymentSelection {
-    val setupFutureUsage = userRequestedReuse.getSetupFutureUseValue(
+    // Special behavior: if linkSignUpOptInFeatureEnabled is true, assume user request reuse.
+    val effectiveCustomerRequestedSave = if (paymentMethodMetadata
+        .linkState?.configuration?.linkSignUpOptInFeatureEnabled == true) {
+        PaymentSelection.CustomerRequestedSave.RequestReuse
+    } else {
+        userRequestedReuse
+    }
+    
+    val setupFutureUsage = effectiveCustomerRequestedSave.getSetupFutureUseValue(
         paymentMethodMetadata.hasIntentToSetup(paymentMethod.code)
     )
     val params = transformToPaymentMethodCreateParams(paymentMethod.code, paymentMethodMetadata)
@@ -111,7 +119,7 @@ internal fun FormFieldValues.transformToPaymentSelection(
             paymentMethodCreateParams = params,
             paymentMethodExtraParams = extras,
             brand = CardBrand.fromCode(fieldValuePairs[IdentifierSpec.CardBrand]?.value),
-            customerRequestedSave = userRequestedReuse,
+            customerRequestedSave = effectiveCustomerRequestedSave,
         )
     } else if (paymentMethodMetadata.isExternalPaymentMethod(paymentMethod.code)) {
         PaymentSelection.ExternalPaymentMethod(
@@ -139,7 +147,7 @@ internal fun FormFieldValues.transformToPaymentSelection(
             paymentMethodCreateParams = params,
             paymentMethodOptionsParams = options,
             paymentMethodExtraParams = extras,
-            customerRequestedSave = userRequestedReuse,
+            customerRequestedSave = effectiveCustomerRequestedSave,
         )
     }
 }
