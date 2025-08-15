@@ -131,11 +131,6 @@ internal interface LinkAccountManager {
         allowRedisplay: String? = null,
     ): Result<SharePaymentDetails>
 
-    suspend fun setLinkAccountFromLookupResult(
-        lookup: ConsumerSessionLookup,
-        startSession: Boolean,
-    ): LinkAccount?
-
     suspend fun createLinkAccountSession(): Result<LinkAccountSession>
 
     /**
