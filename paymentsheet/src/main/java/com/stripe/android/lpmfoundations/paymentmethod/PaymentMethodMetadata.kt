@@ -53,6 +53,7 @@ internal data class PaymentMethodMetadata(
     val paymentMethodOrder: List<String>,
     val cbcEligibility: CardBrandChoiceEligibility,
     val merchantName: String,
+    val sellerBusinessName: String?,
     val defaultBillingDetails: PaymentSheet.BillingDetails?,
     val shippingDetails: AddressDetails?,
     val sharedDataSpecs: List<SharedDataSpec>,
@@ -311,6 +312,7 @@ internal data class PaymentMethodMetadata(
             isGooglePayReady: Boolean,
             linkState: LinkState?,
             customerMetadata: CustomerMetadata,
+            sellerBusinessName: String? = null,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
             return PaymentMethodMetadata(
@@ -332,6 +334,7 @@ internal data class PaymentMethodMetadata(
                     preferredNetworks = configuration.preferredNetworks,
                 ),
                 merchantName = configuration.merchantDisplayName,
+                sellerBusinessName = sellerBusinessName,
                 defaultBillingDetails = configuration.defaultBillingDetails,
                 shippingDetails = configuration.shippingDetails,
                 customerMetadata = customerMetadata,
@@ -378,6 +381,7 @@ internal data class PaymentMethodMetadata(
                     preferredNetworks = configuration.preferredNetworks,
                 ),
                 merchantName = configuration.merchantDisplayName,
+                sellerBusinessName = null,
                 defaultBillingDetails = configuration.defaultBillingDetails,
                 shippingDetails = null,
                 customerMetadata = customerMetadata,
@@ -417,6 +421,7 @@ internal data class PaymentMethodMetadata(
                     }.orEmpty(),
                 ),
                 merchantName = configuration.merchantName,
+                sellerBusinessName = configuration.sellerBusinessName,
                 // Use effective billing details to prefill billing details in new card flows
                 defaultBillingDetails = effectiveBillingDetails(
                     configuration = configuration,

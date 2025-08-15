@@ -22,6 +22,7 @@ internal data class WalletUiState(
     val isProcessing: Boolean,
     val isSettingUp: Boolean,
     val merchantName: String,
+    val sellerBusinessName: String?,
     val primaryButtonLabel: ResolvableString,
     val secondaryButtonLabel: ResolvableString?,
     val hasCompleted: Boolean,
@@ -55,6 +56,7 @@ internal data class WalletUiState(
         get() = selectedItem?.makeMandateText(
             isSettingUp = isSettingUp,
             merchantName = merchantName,
+            sellerBusinessName = sellerBusinessName,
             signupToggleEnabled = signupToggleEnabled
         )
 
@@ -120,11 +122,16 @@ internal data class WalletUiState(
 private fun ConsumerPaymentDetails.PaymentDetails.makeMandateText(
     isSettingUp: Boolean,
     merchantName: String,
+    sellerBusinessName: String?,
     signupToggleEnabled: Boolean
 ): ResolvableString? {
     return when (this) {
-        is ConsumerPaymentDetails.BankAccount -> {
-            resolvableString(R.string.stripe_wallet_bank_account_terms)
+        is ConsumerPaymentDetails.BankAccount -> when {
+            signupToggleEnabled && sellerBusinessName != null -> resolvableString(
+                R.string.stripe_wallet_bank_account_terms_seller,
+                sellerBusinessName
+            )
+            else -> resolvableString(R.string.stripe_wallet_bank_account_terms)
         }
         is Card,
         is ConsumerPaymentDetails.Passthrough -> when {

@@ -673,6 +673,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
             linkConfiguration = LinkConfiguration(
                 stripeIntent = PaymentIntentFactory.create(),
                 merchantName = "Merchant Inc.",
+                sellerBusinessName = null,
                 merchantCountryCode = "CA",
                 merchantLogoUrl = null,
                 customerInfo = LinkConfiguration.CustomerInfo(

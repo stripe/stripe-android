@@ -270,6 +270,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">View more</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[By continuing, you agree to authorize payments pursuant to these <terms>terms</terms>.]]></string>
+    <!-- Mandate text displayed when paying via Link instant debit with seller information. -->
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[By submitting your order to %s you agree to authorize payments pursuant to these <terms>terms</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Payment</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->

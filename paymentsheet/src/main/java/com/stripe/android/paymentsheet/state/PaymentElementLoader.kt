@@ -35,6 +35,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.confirmation.utils.sellerBusinessName
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -217,6 +218,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 customerInfo = customerInfo,
                 isGooglePayReady = isGooglePayReady,
                 linkState = linkState.await(),
+                initializationMode = initializationMode,
             )
         }
 
@@ -325,6 +327,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         customerInfo: CustomerInfo?,
         linkState: LinkState?,
         isGooglePayReady: Boolean,
+        initializationMode: PaymentElementLoader.InitializationMode,
     ): PaymentMethodMetadata {
         val sharedDataSpecsResult = lpmRepository.getSharedDataSpecs(
             stripeIntent = elementsSession.stripeIntent,
@@ -358,6 +361,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 elementsSession = elementsSession,
                 customerInfo = customerInfo,
             ),
+            sellerBusinessName = initializationMode.sellerBusinessName
         )
     }
 
@@ -619,6 +623,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val linkConfiguration = LinkConfiguration(
             stripeIntent = elementsSession.stripeIntent,
             merchantName = configuration.merchantDisplayName,
+            sellerBusinessName = initializationMode.sellerBusinessName,
             merchantCountryCode = elementsSession.merchantCountry,
             merchantLogoUrl = elementsSession.merchantLogoUrl,
             customerInfo = customerInfo,
