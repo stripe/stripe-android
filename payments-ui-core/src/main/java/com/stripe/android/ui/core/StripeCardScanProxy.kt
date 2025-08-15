@@ -58,15 +58,6 @@ internal interface StripeCardScanProxy {
                 UnsupportedStripeCardScanProxy(errorReporter)
             }
         }
-
-        fun removeCardScanFragment(
-            supportFragmentManager: FragmentManager,
-            isStripeCardScanAvailable: IsStripeCardScanAvailable = DefaultIsStripeCardScanAvailable()
-        ) {
-            if (isStripeCardScanAvailable()) {
-                CardScanSheet.removeCardScanFragment(supportFragmentManager)
-            }
-        }
     }
 }
 
@@ -83,7 +74,7 @@ internal class DefaultStripeCardScanProxy(
         fragmentContainer: Int,
         onFinished: (cardScanSheetResult: CardScanSheetResult) -> Unit
     ) {
-        cardScanSheet.attachCardScanFragment(lifecycleOwner, supportFragmentManager, fragmentContainer, onFinished)
+//        cardScanSheet.attachCardScanFragment(lifecycleOwner, supportFragmentManager, fragmentContainer, onFinished)
     }
 }
 

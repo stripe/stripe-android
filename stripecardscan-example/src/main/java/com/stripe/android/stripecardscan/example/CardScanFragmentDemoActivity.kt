@@ -22,6 +22,7 @@ class CardScanFragmentDemoActivity : AppCompatActivity() {
 
         viewBinding.launchScanButton.setOnClickListener {
             attachCardScanFragment()
+            cardScanSheet.present()
         }
     }
 

@@ -21,7 +21,7 @@ dependencies {
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid
     implementation libs.kotlin.serialization
-
+    implementation libs.playServicesWallet
 
     testImplementation project(':payments-core-testing')
 
