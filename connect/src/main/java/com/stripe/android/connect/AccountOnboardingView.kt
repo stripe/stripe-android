@@ -99,6 +99,7 @@ class AccountOnboardingProps(
      * Customizes collecting `currently_due` or `eventually_due` requirements and controls whether to include
      * [future requirements](https://docs.stripe.com/api/accounts/object#account_object-future_requirements).
      * Specifying `eventually_due` collects both `eventually_due` and `currently_due` requirements.
+     * Additionally, `requirements` can be used to collect only some requirements or exclude them.
      */
     val collectionOptions: CollectionOptions? = null,
 ) : Parcelable {
@@ -108,6 +109,7 @@ class AccountOnboardingProps(
     class CollectionOptions(
         val fields: FieldOption? = null,
         val futureRequirements: FutureRequirementOption? = null,
+        internal val requirements: RequirementsOption? = null,
     ) : Parcelable
 
     enum class FieldOption(internal val value: String) {
@@ -118,6 +120,25 @@ class AccountOnboardingProps(
     enum class FutureRequirementOption(internal val value: String) {
         OMIT("omit"),
         INCLUDE("include"),
+    }
+
+    @Parcelize
+    sealed class RequirementsOption : Parcelable {
+        @Poko
+        @Parcelize
+        internal class Only(val only: List<String>) : RequirementsOption()
+
+        @Poko
+        @Parcelize
+        internal class Exclude(val exclude: List<String>) : RequirementsOption()
+
+        companion object {
+            @JvmStatic
+            fun only(only: List<String>): RequirementsOption = Only(only)
+
+            @JvmStatic
+            fun exclude(exclude: List<String>): RequirementsOption = Exclude(exclude)
+        }
     }
 }
 

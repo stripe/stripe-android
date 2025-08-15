@@ -71,6 +71,11 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
                 sharedPreferences.getString(ONBOARDING_FUTURE_REQUIREMENTS, FutureRequirement.DEFAULT.name)
                     ?: FutureRequirement.DEFAULT.name,
             ),
+            requirementsMode = RequirementsMode.valueOf(
+                sharedPreferences.getString(ONBOARDING_REQUIREMENTS_MODE, RequirementsMode.DEFAULT.name)
+                    ?: RequirementsMode.DEFAULT.name,
+            ),
+            requirementsText = sharedPreferences.getString(ONBOARDING_REQUIREMENTS_TEXT, null),
         )
     }
 
@@ -82,6 +87,8 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
             putString(ONBOARDING_SKIP_TERMS_OF_SERVICE, value.skipTermsOfService.name)
             putString(ONBOARDING_FIELD_OPTION, value.fieldOption.name)
             putString(ONBOARDING_FUTURE_REQUIREMENTS, value.futureRequirement.name)
+            putString(ONBOARDING_REQUIREMENTS_MODE, value.requirementsMode.name)
+            putString(ONBOARDING_REQUIREMENTS_TEXT, value.requirementsText)
         }
     }
 
@@ -150,6 +157,8 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
         private const val ONBOARDING_SKIP_TERMS_OF_SERVICE = "OnboardingSkipTermsOfService"
         private const val ONBOARDING_FIELD_OPTION = "OnboardingFieldOption"
         private const val ONBOARDING_FUTURE_REQUIREMENTS = "OnboardingFutureRequirements"
+        private const val ONBOARDING_REQUIREMENTS_MODE = "OnboardingRequirementsMode"
+        private const val ONBOARDING_REQUIREMENTS_TEXT = "OnboardingRequirementsText"
     }
 }
 
@@ -160,6 +169,8 @@ data class OnboardingSettings(
     val skipTermsOfService: SkipTermsOfService = SkipTermsOfService.DEFAULT,
     val fieldOption: FieldOption = FieldOption.DEFAULT,
     val futureRequirement: FutureRequirement = FutureRequirement.DEFAULT,
+    val requirementsMode: RequirementsMode = RequirementsMode.DEFAULT,
+    val requirementsText: String? = null,
 ) {
     fun toProps(): AccountOnboardingProps {
         return AccountOnboardingProps(
@@ -181,9 +192,34 @@ data class OnboardingSettings(
                     FutureRequirement.DEFAULT -> null
                     FutureRequirement.OMIT -> AccountOnboardingProps.FutureRequirementOption.OMIT
                     FutureRequirement.INCLUDE -> AccountOnboardingProps.FutureRequirementOption.INCLUDE
-                }
+                },
+                requirements = buildRequirementsOption()
             ),
         )
+    }
+
+    private fun buildRequirementsOption(): AccountOnboardingProps.RequirementsOption? {
+        return when (requirementsMode) {
+            RequirementsMode.DEFAULT -> null
+            RequirementsMode.ONLY -> requirementsText?.let { text ->
+                if (text.isNotBlank()) {
+                    AccountOnboardingProps.RequirementsOption.only(
+                        text.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+                    )
+                } else {
+                    null
+                }
+            }
+            RequirementsMode.EXCLUDE -> requirementsText?.let { text ->
+                if (text.isNotBlank()) {
+                    AccountOnboardingProps.RequirementsOption.exclude(
+                        text.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+                    )
+                } else {
+                    null
+                }
+            }
+        }
     }
 }
 
@@ -197,3 +233,4 @@ data class PresentationSettings(
 enum class SkipTermsOfService { DEFAULT, SKIP, SHOW }
 enum class FieldOption { DEFAULT, CURRENTLY_DUE, EVENTUALLY_DUE }
 enum class FutureRequirement { DEFAULT, OMIT, INCLUDE }
+enum class RequirementsMode { DEFAULT, ONLY, EXCLUDE }
