@@ -759,6 +759,7 @@ internal class WalletScreenTest {
                 isProcessing = false,
                 isSettingUp = false,
                 merchantName = "Example Inc.",
+                sellerBusinessName = null,
                 primaryButtonLabel = "Buy".resolvableString,
                 secondaryButtonLabel = "Pay another way".resolvableString,
                 hasCompleted = false,
