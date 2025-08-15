@@ -99,6 +99,8 @@ internal fun USBankAccountForm(
                 financialConnectionsAvailability = usBankAccountFormArgs.financialConnectionsAvailability,
                 setAsDefaultMatchesSaveForFutureUse = usBankAccountFormArgs.setAsDefaultMatchesSaveForFutureUse,
                 termsDisplay = usBankAccountFormArgs.termsDisplay,
+                sellerBusinessName = usBankAccountFormArgs.sellerBusinessName,
+                linkSignUpOptInFeatureEnabled = usBankAccountFormArgs.linkSignUpOptInFeatureEnabled,
             )
         },
     )

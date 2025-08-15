@@ -1112,6 +1112,7 @@ internal class PaymentMethodMetadataTest {
                 )
             ),
             merchantName = "Merchant Inc.",
+            sellerBusinessName = null,
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = shippingDetails,
             sharedDataSpecs = sharedDataSpecs,
@@ -1205,6 +1206,7 @@ internal class PaymentMethodMetadataTest {
                 preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa)
             ),
             merchantName = "Merchant Inc.",
+            sellerBusinessName = null,
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = null,
             sharedDataSpecs = listOf(SharedDataSpec("card")),
@@ -2058,6 +2060,7 @@ internal class PaymentMethodMetadataTest {
                 phone = "1234567890"
             ),
             merchantName = "Merchant Inc.",
+            sellerBusinessName = null,
             merchantCountryCode = "CA",
             shippingDetails = null,
             flags = mapOf(),

@@ -129,6 +129,7 @@ class LinkFormElementTest {
         return LinkConfiguration(
             stripeIntent = PaymentIntentFactory.create(),
             merchantName = "Merchant, Inc.",
+            sellerBusinessName = null,
             merchantCountryCode = "CA",
             customerInfo = LinkConfiguration.CustomerInfo(
                 name = "John Doe",
