@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.forms
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
-import com.stripe.android.paymentelement.AllowedBillingCountriesInPaymentElementPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.forms.PlaceholderHelper.removeCorrespondingPlaceholder
 import com.stripe.android.paymentsheet.forms.PlaceholderHelper.specForPlaceholderField
@@ -562,7 +561,6 @@ class PlaceholderHelperTest {
             >()
     }
 
-    @OptIn(AllowedBillingCountriesInPaymentElementPreview::class)
     @Test
     fun `Test with empty set of allowed billing countries`() {
         val billingDetailsCollectionConfigurationWithAllCountries =
@@ -604,7 +602,6 @@ class PlaceholderHelperTest {
         assertThat(addressSpecWithoutCountry.allowedCountryCodes).isEmpty()
     }
 
-    @OptIn(AllowedBillingCountriesInPaymentElementPreview::class)
     @Test
     fun `Test with limited set of allowed billing countries`() {
         val billingDetailsCollectionConfigurationWithAllCountries =

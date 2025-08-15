@@ -8,7 +8,6 @@ import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
-import com.stripe.android.paymentelement.AllowedBillingCountriesInPaymentElementPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -157,7 +156,6 @@ class FormElementsBuilderTest {
         assertThat(sectionElement.fields.firstOrNull()).isInstanceOf<AutocompleteAddressElement>()
     }
 
-    @OptIn(AllowedBillingCountriesInPaymentElementPreview::class)
     @Test
     fun `build contains all supported billing countries when allowed countries is empty`() {
         val arguments = arguments(
@@ -186,7 +184,6 @@ class FormElementsBuilderTest {
             .hasSize(CountryUtils.supportedBillingCountries.size)
     }
 
-    @OptIn(AllowedBillingCountriesInPaymentElementPreview::class)
     @Test
     fun `build contains only countries provided through billing configuration`() {
         val arguments = arguments(

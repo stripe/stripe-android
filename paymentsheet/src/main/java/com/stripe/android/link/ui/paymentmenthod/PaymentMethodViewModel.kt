@@ -24,7 +24,6 @@ import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.link.withDismissalDisabled
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentelement.AllowedBillingCountriesInPaymentElementPreview
 import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -214,7 +213,6 @@ internal class PaymentMethodViewModel @Inject constructor(
             }
         }
 
-        @OptIn(AllowedBillingCountriesInPaymentElementPreview::class)
         private fun LinkConfiguration.withLinkRequiredSettings() = copy(
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                 name = billingDetailsCollectionConfiguration.name,

@@ -16,7 +16,6 @@ import com.stripe.android.link.confirmation.DefaultCompleteLinkFlow
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerPaymentDetails
-import com.stripe.android.paymentelement.AllowedBillingCountriesInPaymentElementPreview
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.CoroutineTestRule
@@ -281,7 +280,6 @@ class UpdateCardScreenViewModelTest {
             }
         }
 
-    @OptIn(AllowedBillingCountriesInPaymentElementPreview::class)
     @Test
     fun `when providing an empty set of allowed billing countries, should use all countries`() =
         runTest(dispatcher) {
@@ -323,7 +321,6 @@ class UpdateCardScreenViewModelTest {
             }
         }
 
-    @OptIn(AllowedBillingCountriesInPaymentElementPreview::class)
     @Test
     fun `when providing an limited set of allowed billing countries, should use limited countries`() =
         runTest(dispatcher) {

@@ -12,7 +12,6 @@ import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
-import com.stripe.android.paymentelement.AllowedBillingCountriesInPaymentElementPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -224,7 +223,6 @@ class WalletUiStateTest {
         assertThat(state.isItemAvailable(paymentDetailsList[2])).isTrue()
     }
 
-    @OptIn(AllowedBillingCountriesInPaymentElementPreview::class)
     @Test
     fun testPaymentMethodAvailabilityForAllAllowedBillingCountries() {
         val paymentDetailsList = createPaymentMethodsWithDifferentBillingDetails()
@@ -245,7 +243,6 @@ class WalletUiStateTest {
         assertThat(state.isItemAvailable(paymentDetailsList[5])).isTrue()
     }
 
-    @OptIn(AllowedBillingCountriesInPaymentElementPreview::class)
     @Test
     fun testPaymentMethodAvailabilityForLimitedAllowedBillingCountries() {
         val paymentDetailsList = createPaymentMethodsWithDifferentBillingDetails()

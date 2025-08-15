@@ -8,7 +8,6 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentelement.AllowedBillingCountriesInPaymentElementPreview
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
@@ -165,7 +164,6 @@ internal class DefaultUpdatePaymentMethodInteractor(
         }
     }
 
-    @OptIn(AllowedBillingCountriesInPaymentElementPreview::class)
     private fun createEditCardDetailsInteractorForCard(
         savedPaymentMethodCard: SavedPaymentMethod.Card,
     ): EditCardDetailsInteractor {
@@ -196,7 +194,6 @@ internal class DefaultUpdatePaymentMethodInteractor(
         )
     }
 
-    @OptIn(AllowedBillingCountriesInPaymentElementPreview::class)
     private fun createEditCardDetailsInteractorForLink(
         savedPaymentMethodCard: LinkPaymentDetails.Card,
     ): EditCardDetailsInteractor {

@@ -22,7 +22,6 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
-import com.stripe.android.paymentelement.AllowedBillingCountriesInPaymentElementPreview
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal
@@ -1556,7 +1555,6 @@ class USBankAccountFormViewModelTest {
         }
     }
 
-    @OptIn(AllowedBillingCountriesInPaymentElementPreview::class)
     @Test
     fun `Contains all supported billing countries when allowed countries is empty`() {
         val viewModel = createViewModel(
@@ -1579,7 +1577,6 @@ class USBankAccountFormViewModelTest {
             .hasSize(CountryUtils.supportedBillingCountries.size)
     }
 
-    @OptIn(AllowedBillingCountriesInPaymentElementPreview::class)
     @Test
     fun `Contains only countries provided through billing configuration`() {
         val viewModel = createViewModel(

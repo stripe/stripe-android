@@ -35,7 +35,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.Status.Canceled
 import com.stripe.android.model.StripeIntent.Status.Succeeded
 import com.stripe.android.model.wallets.Wallet
-import com.stripe.android.paymentelement.AllowedBillingCountriesInPaymentElementPreview
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -1796,7 +1795,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
     }
 
-    @OptIn(AllowedBillingCountriesInPaymentElementPreview::class, ExperimentalCustomerSessionApi::class)
+    @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
     fun `Retains all payment method when 'allowedCountries' is empty`() = runTest {
         val paymentMethods = createCardsWithDifferentBillingDetails()
@@ -1831,7 +1830,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(customerPaymentMethods).containsExactlyElementsIn(paymentMethods)
     }
 
-    @OptIn(AllowedBillingCountriesInPaymentElementPreview::class, ExperimentalCustomerSessionApi::class)
+    @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
     fun `Filters out countries not in 'allowedCountries' array`() = runTest {
         val paymentMethods = createCardsWithDifferentBillingDetails()

@@ -823,9 +823,6 @@ public abstract interface annotation class com/stripe/android/paymentelement/Add
 public abstract interface annotation class com/stripe/android/paymentelement/AddressElementSameAsBillingPreview : java/lang/annotation/Annotation {
 }
 
-public abstract interface annotation class com/stripe/android/paymentelement/AllowedBillingCountriesInPaymentElementPreview : java/lang/annotation/Annotation {
-}
-
 public abstract class com/stripe/android/paymentelement/AnalyticEvent {
 	public static final field $stable I
 }

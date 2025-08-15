@@ -16,7 +16,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
-import com.stripe.android.paymentelement.AllowedBillingCountriesInPaymentElementPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -407,7 +406,6 @@ class CardDefinitionTest {
             .isInstanceOf<AutocompleteAddressController>()
     }
 
-    @OptIn(AllowedBillingCountriesInPaymentElementPreview::class)
     @Test
     fun `createFormElements contains all supported billing countries when allowed countries is empty`() {
         val formElements = CardDefinition.formElements(
@@ -437,7 +435,6 @@ class CardDefinitionTest {
             .hasSize(CountryUtils.supportedBillingCountries.size)
     }
 
-    @OptIn(AllowedBillingCountriesInPaymentElementPreview::class)
     @Test
     fun `createFormElements contains only countries provided through billing configuration`() {
         val formElements = CardDefinition.formElements(

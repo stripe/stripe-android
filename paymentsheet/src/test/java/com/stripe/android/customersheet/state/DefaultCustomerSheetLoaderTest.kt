@@ -28,7 +28,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentelement.AllowedBillingCountriesInPaymentElementPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -573,7 +572,6 @@ internal class DefaultCustomerSheetLoaderTest {
         assertThat(eventReporter.onLoadFailedCalls.awaitItem().message).isEqualTo("oops")
     }
 
-    @OptIn(AllowedBillingCountriesInPaymentElementPreview::class)
     @Test
     fun `Retains all payment method when 'allowedCountries' is empty`() = runTest {
         val paymentMethods = createCardsWithDifferentBillingDetails()
@@ -600,7 +598,6 @@ internal class DefaultCustomerSheetLoaderTest {
         assertThat(customerPaymentMethods).containsExactlyElementsIn(paymentMethods)
     }
 
-    @OptIn(AllowedBillingCountriesInPaymentElementPreview::class)
     @Test
     fun `Filters out countries not in 'allowedCountries' array`() = runTest {
         val paymentMethods = createCardsWithDifferentBillingDetails()

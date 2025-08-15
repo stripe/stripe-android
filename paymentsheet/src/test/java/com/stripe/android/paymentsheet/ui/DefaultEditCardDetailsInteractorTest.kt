@@ -9,7 +9,6 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentelement.AllowedBillingCountriesInPaymentElementPreview
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
@@ -591,7 +590,6 @@ internal class DefaultEditCardDetailsInteractorTest {
     private val EditCardDetailsInteractor.selectedBrand
         get() = uiState.cardDetailsState?.selectedCardBrand?.brand ?: CardBrand.Unknown
 
-    @OptIn(AllowedBillingCountriesInPaymentElementPreview::class)
     private fun handler(
         card: PaymentMethod.Card = PaymentMethodFixtures.CARD_WITH_NETWORKS,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,

@@ -28,7 +28,6 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.AddressAutocompletePreview
-import com.stripe.android.paymentelement.AllowedBillingCountriesInPaymentElementPreview
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
@@ -2741,7 +2740,7 @@ class PaymentSheet internal constructor(
      * Configuration for how billing details are collected during checkout.
      */
     @Parcelize
-    data class BillingDetailsCollectionConfiguration @AllowedBillingCountriesInPaymentElementPreview constructor(
+    data class BillingDetailsCollectionConfiguration(
         /**
          * How to collect the name field.
          */
@@ -2777,7 +2776,6 @@ class PaymentSheet internal constructor(
          */
         val allowedCountries: Set<String> = emptySet(),
     ) : Parcelable {
-        @OptIn(AllowedBillingCountriesInPaymentElementPreview::class)
         constructor(
             /**
              * How to collect the name field.
