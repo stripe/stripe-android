@@ -10,11 +10,7 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import com.google.android.gms.wallet.PaymentCardRecognitionIntentRequest
 import com.google.android.gms.wallet.PaymentCardRecognitionResult
-import com.google.android.gms.wallet.PaymentsClient
-import com.google.android.gms.wallet.Wallet
-import com.google.android.gms.wallet.WalletConstants
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,15 +18,18 @@ import kotlinx.parcelize.Parcelize
 
 internal class CardScanGoogleLauncher(
     context: Context,
-    private val eventsReporter: CardScanEventsReporter
+    private val eventsReporter: CardScanEventsReporter,
+    private val paymentCardRecognitionClient: PaymentCardRecognitionClient =
+        DefaultPaymentCardRecognitionClient()
 ) {
     private val implementation = "google_pay"
     private val _isAvailable = MutableStateFlow(false)
     val isAvailable: StateFlow<Boolean> = _isAvailable.asStateFlow()
 
     private lateinit var activityLauncher: ActivityResultLauncher<IntentSenderRequest>
+
     init {
-        fetchIntent(
+        paymentCardRecognitionClient.fetchIntent(
             context = context,
             onFailure = { e ->
                 _isAvailable.value = false
@@ -43,54 +42,14 @@ internal class CardScanGoogleLauncher(
         )
     }
 
-    private fun isStripeExampleApp(context: Context): Boolean {
-        val packageName = context.packageName
-
-        // Only Stripe's official example apps
-        return packageName.startsWith("com.stripe.android.") &&
-            packageName.contains("example")
-    }
-
-    private fun createPaymentsClient(context: Context): PaymentsClient {
-        val walletOptions = Wallet.WalletOptions.Builder()
-            .setEnvironment(
-                if (isStripeExampleApp(context))
-                    WalletConstants.ENVIRONMENT_TEST
-                else
-                    WalletConstants.ENVIRONMENT_PRODUCTION
-            )
-            .build()
-
-        return Wallet.getPaymentsClient(context, walletOptions)
-    }
-
-    private fun fetchIntent(
-        context: Context,
-        onFailure: (Exception) -> Unit = {},
-        onSuccess: (IntentSenderRequest) -> Unit
-    ) {
-        val paymentsClient = createPaymentsClient(context)
-        val request = PaymentCardRecognitionIntentRequest.getDefaultInstance()
-
-        paymentsClient.getPaymentCardRecognitionIntent(request)
-            .addOnSuccessListener { intentResponse ->
-                val pendingIntent = intentResponse.paymentCardRecognitionPendingIntent
-                val intentSenderRequest = IntentSenderRequest.Builder(pendingIntent.intentSender).build()
-                onSuccess(intentSenderRequest)
-            }
-            .addOnFailureListener { e ->
-                onFailure(e)
-            }
-    }
-
     fun launch(context: Context) {
         eventsReporter.scanStarted("google_pay")
-        fetchIntent(context) { intentSenderRequest ->
+        paymentCardRecognitionClient.fetchIntent(context) { intentSenderRequest ->
             activityLauncher.launch(intentSenderRequest)
         }
     }
 
-    private fun parseActivityResult(result: ActivityResult): CardScanSheetResult {
+    internal fun parseActivityResult(result: ActivityResult): CardScanSheetResult {
         if (result.resultCode == Activity.RESULT_OK && result.data != null) {
             val data = result.data ?: return CardScanSheetResult.Canceled(CancellationReason.Closed).also {
                 eventsReporter.scanCancelled(implementation, CancellationReason.Closed)

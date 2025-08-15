@@ -774,7 +774,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     ) : PaymentSheetEvent() {
         override val eventName: String = "cardscan_api_check"
         override val additionalParams: Map<String, Any?> = buildMap {
-            if (reason!= null) {
+            if (reason != null) {
                 put("reason", reason)
             }
             put("implementation", implementation)

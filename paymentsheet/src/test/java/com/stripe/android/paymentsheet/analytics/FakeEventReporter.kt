@@ -275,6 +275,21 @@ internal class FakeEventReporter : EventReporter {
     override fun onShopPayWebViewCancelled(didReceiveECEClick: Boolean) {
     }
 
+    override fun onCardScanStarted(implementation: String) {
+    }
+
+    override fun onCardScanSucceeded(implementation: String) {
+    }
+
+    override fun onCardScanFailed(implementation: String, error: Throwable?) {
+    }
+
+    override fun onCardScanCancelled(implementation: String, reason: com.stripe.android.ui.core.cardscan.CancellationReason) {
+    }
+
+    override fun onCardScanApiCheck(implementation: String, available: Boolean, reason: String?) {
+    }
+
     data class PaymentFailureCall(
         val paymentSelection: PaymentSelection,
         val error: PaymentSheetConfirmationError
