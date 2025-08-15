@@ -5,6 +5,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -96,8 +97,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString,
     private val canRemove: StateFlow<Boolean>,
     private val walletsState: StateFlow<WalletsState?>,
-    private val canShowWalletsInline: Boolean,
-    private val canShowWalletButtons: Boolean,
     private val canUpdateFullPaymentMethodDetails: StateFlow<Boolean>,
     private val updateSelection: (PaymentSelection?, Boolean) -> Unit,
     private val isCurrentScreen: StateFlow<Boolean>,
@@ -166,8 +165,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     }
                 },
                 walletsState = viewModel.walletsState,
-                canShowWalletsInline = !viewModel.isCompleteFlow,
-                canShowWalletButtons = true,
                 canUpdateFullPaymentMethodDetails = viewModel.customerStateHolder.canUpdateFullPaymentMethodDetails,
                 isCurrentScreen = isCurrentScreen,
                 reportPaymentMethodTypeSelected = viewModel.eventReporter::onSelectPaymentMethod,
@@ -276,7 +273,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     }
 
     override val showsWalletsHeader: StateFlow<Boolean> = walletsState.mapAsStateFlow { walletsState ->
-        !showsWalletsInline(walletsState)
+        walletsState != null && walletsState.walletsAllowedInHeader.isNotEmpty()
     }
 
     init {
@@ -336,34 +333,33 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
         val wallets = mutableListOf<DisplayablePaymentMethod>()
 
-        if (showsWalletsInline(walletsState)) {
-            walletsState?.link?.let {
-                val subtitle = when (val state = it.state) {
-                    is LinkButtonState.Email -> state.email.resolvableString
-                    is LinkButtonState.DefaultPayment,
-                    is LinkButtonState.Default ->
-                        PaymentsCoreR.string.stripe_link_simple_secure_payments.resolvableString
-                }
-
-                wallets += DisplayablePaymentMethod(
-                    code = PaymentMethod.Type.Link.code,
-                    displayName = PaymentsCoreR.string.stripe_link.resolvableString,
-                    iconResource = R.drawable.stripe_ic_paymentsheet_link_arrow,
-                    iconResourceNight = null,
-                    lightThemeIconUrl = null,
-                    darkThemeIconUrl = null,
-                    iconRequiresTinting = false,
-                    subtitle = subtitle,
-                    onClick = {
-                        updateSelection(PaymentSelection.Link(), false)
-                        invokeRowSelectionCallback?.invoke()
-                    },
-                )
+        // Add Link inline if NOT allowed in header
+        if (walletsState?.link != null && !(walletsState.walletsAllowedInHeader.contains(WalletType.Link))) {
+            val subtitle = when (val state = walletsState.link.state) {
+                is LinkButtonState.Email -> state.email.resolvableString
+                is LinkButtonState.DefaultPayment,
+                is LinkButtonState.Default ->
+                    PaymentsCoreR.string.stripe_link_simple_secure_payments.resolvableString
             }
+
+            wallets += DisplayablePaymentMethod(
+                code = PaymentMethod.Type.Link.code,
+                displayName = PaymentsCoreR.string.stripe_link.resolvableString,
+                iconResource = R.drawable.stripe_ic_paymentsheet_link_arrow,
+                iconResourceNight = null,
+                lightThemeIconUrl = null,
+                darkThemeIconUrl = null,
+                iconRequiresTinting = false,
+                subtitle = subtitle,
+                onClick = {
+                    updateSelection(PaymentSelection.Link(), false)
+                    invokeRowSelectionCallback?.invoke()
+                },
+            )
         }
 
-        // Add Google Pay to payment methods list for custom flows (flow controller), skip for complete flows
-        if (canShowWalletsInline && walletsState?.googlePay != null) {
+        // Add Google Pay inline if NOT allowed in header
+        if (walletsState?.googlePay != null && !(walletsState.walletsAllowedInHeader.contains(WalletType.GooglePay))) {
             wallets += DisplayablePaymentMethod(
                 code = "google_pay",
                 displayName = PaymentsCoreR.string.stripe_google_pay.resolvableString,
@@ -381,10 +377,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         }
 
         return wallets + lpms
-    }
-
-    private fun showsWalletsInline(walletsState: WalletsState?): Boolean {
-        return canShowWalletsInline && walletsState != null && !canShowWalletButtons
     }
 
     private fun getDisplayedSavedPaymentMethod(

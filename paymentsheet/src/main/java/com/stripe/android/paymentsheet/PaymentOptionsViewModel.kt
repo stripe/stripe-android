@@ -131,10 +131,23 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 onUserSelection()
             },
             isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent,
+            walletsAllowedInHeader = walletsAllowedInHeader(paymentMethodMetadata),
             paymentDetails = linkAccountInfo.account?.displayablePaymentDetails,
             enableDefaultValues = linkConfiguration?.enableDisplayableDefaultValuesInEce == true &&
                 hasLinkWithSelectedPayment.not()
         )
+    }
+
+    private fun walletsAllowedInHeader(paymentMethodMetadata: PaymentMethodMetadata): List<WalletType> {
+        val showsDirectForm = paymentMethodMetadata.supportedPaymentMethodTypes().size == 1 &&
+            customerStateHolder.paymentMethods.value.isEmpty()
+        return if (showsDirectForm) {
+            // Direct to form: show wallets in header
+            WalletType.entries
+        } else {
+            // Regular FlowController payment options list: show Link wallet in header.
+            listOf(WalletType.Link)
+        }
     }
 
     // Only used to determine if we should skip the list and go to the add card view and how to populate that view.
