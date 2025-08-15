@@ -137,14 +137,8 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                 null
             }
 
-            val shouldShowCombinedMandate = shouldShowCombinedMandate(
-                isLinkUI = arguments.isLinkUI,
-                linkSignupOptInEnabled = linkSignupOptInEnabled,
-                signupMode = signupMode
-            )
-
             val mandateAllowed = metadata.mandateAllowed(CardDefinition.type)
-            if (shouldShowCombinedMandate) {
+            if (linkSignupOptInEnabled) {
                 add(
                     CombinedLinkMandateElement(
                         identifier = IdentifierSpec.Generic("card_mandate"),
@@ -171,15 +165,6 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                 )
             }
         }
-    }
-
-    private fun shouldShowCombinedMandate(
-        isLinkUI: Boolean,
-        linkSignupOptInEnabled: Boolean,
-        signupMode: LinkSignupMode?
-    ): Boolean = when (isLinkUI) {
-        true -> linkSignupOptInEnabled
-        false -> linkSignupOptInEnabled && signupMode != null
     }
 
     private fun MutableList<FormElement>.addCardBillingElements(
