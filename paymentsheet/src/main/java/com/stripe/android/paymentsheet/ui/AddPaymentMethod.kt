@@ -100,13 +100,14 @@ internal fun FormFieldValues.transformToPaymentSelection(
     paymentMethodMetadata: PaymentMethodMetadata,
 ): PaymentSelection {
     // Special behavior: if linkSignUpOptInFeatureEnabled is true, assume user request reuse.
-    val effectiveCustomerRequestedSave = if (paymentMethodMetadata
-        .linkState?.configuration?.linkSignUpOptInFeatureEnabled == true) {
+    val configuration = paymentMethodMetadata.linkState?.configuration
+    val signupOptInMerchant = configuration?.linkSignUpOptInFeatureEnabled == true
+    val effectiveCustomerRequestedSave = if (signupOptInMerchant) {
         PaymentSelection.CustomerRequestedSave.RequestReuse
     } else {
         userRequestedReuse
     }
-    
+
     val setupFutureUsage = effectiveCustomerRequestedSave.getSetupFutureUseValue(
         paymentMethodMetadata.hasIntentToSetup(paymentMethod.code)
     )
