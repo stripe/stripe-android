@@ -429,6 +429,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
         return linkRepository.startVerification(
             consumerSessionClientSecret = linkAccount.clientSecret,
             consumerPublishableKey = linkAccount.consumerPublishableKey
+                // TODO: Remove this.
+                .takeIf { linkAccount.consentPresentation == null }
         )
             .onFailure {
                 linkEventsReporter.on2FAStartFailure()
@@ -451,7 +453,9 @@ internal class DefaultLinkAccountManager @Inject constructor(
         return linkRepository.confirmVerification(
             verificationCode = code,
             consumerSessionClientSecret = linkAccount.clientSecret,
-            consumerPublishableKey = linkAccount.consumerPublishableKey,
+            consumerPublishableKey = linkAccount.consumerPublishableKey
+                // TODO: Remove this.
+                .takeIf { linkAccount.consentPresentation == null },
             consentGranted = consentGranted,
         )
             .onSuccess {
