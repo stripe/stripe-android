@@ -1,0 +1,11 @@
+
+stripe-v25-migration:
+  active: true
+  RememberPaymentSheetMigration:
+    active: false
+  RememberPaymentSheetFlowControllerMigration:
+    active: false
+  ClassMigration:
+    active: true
+  UnusedImportRemoval:
+    active: true
