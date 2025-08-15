@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.utils
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.ui.core.cardscan.CardScanEventReporterWrapper
 import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
 import com.stripe.android.ui.core.elements.events.LocalAnalyticsEventReporter
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
@@ -20,13 +19,7 @@ internal fun EventReporterProvider(
         LocalCardNumberCompletedEventReporter provides eventReporter::onCardNumberCompleted,
         LocalCardBrandDisallowedReporter provides eventReporter::onDisallowedCardBrandEntered,
         LocalAnalyticsEventReporter provides eventReporter::onAnalyticsEvent,
-        LocalCardScanEventsReporter provides CardScanEventReporterWrapper(
-            onCardScanStarted = eventReporter::onCardScanStarted,
-            onCardScanSucceeded = eventReporter::onCardScanSucceeded,
-            onCardScanFailed = eventReporter::onCardScanFailed,
-            onCardScanCancelled = eventReporter::onCardScanCancelled,
-            onCardScanApiCheck = eventReporter::onCardScanApiCheck
-        ),
+        LocalCardScanEventsReporter provides eventReporter
     ) {
         content()
     }

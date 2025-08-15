@@ -28,6 +28,7 @@ import com.stripe.android.paymentsheet.model.isSaved
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.IsStripeCardScanAvailable
+import com.stripe.android.ui.core.cardscan.CardScanEventsReporter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -47,7 +48,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     @IOContext private val workContext: CoroutineContext,
     private val isStripeCardScanAvailable: IsStripeCardScanAvailable,
     private val logger: UserFacingLogger,
-) : EventReporter {
+) : EventReporter, CardScanEventsReporter {
 
     private var isDeferred: Boolean = false
     private var isSpt: Boolean = false

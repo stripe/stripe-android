@@ -5,36 +5,30 @@ import androidx.compose.runtime.compositionLocalOf
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface CardScanEventsReporter {
-    fun scanStarted(implementation: String)
+    /**
+     * Card scan has started.
+     */
+    fun onCardScanStarted(implementation: String)
 
-    fun scanSucceeded(implementation: String)
+    /**
+     * Card scan completed successfully.
+     */
+    fun onCardScanSucceeded(implementation: String)
 
-    fun scanFailed(implementation: String, error: Throwable?)
+    /**
+     * Card scan failed with an error.
+     */
+    fun onCardScanFailed(implementation: String, error: Throwable?)
 
-    fun scanCancelled(implementation: String)
+    /**
+     * Card scan was cancelled by the user.
+     */
+    fun onCardScanCancelled(implementation: String)
 
-    fun apiCheck(implementation: String, available: Boolean, reason: String? = null)
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class CardScanEventReporterWrapper(
-    private val onCardScanStarted: (String) -> Unit,
-    private val onCardScanSucceeded: (String) -> Unit,
-    private val onCardScanFailed: (String, Throwable?) -> Unit,
-    private val onCardScanCancelled: (String) -> Unit,
-    private val onCardScanApiCheck: (String, Boolean, String?) -> Unit
-) : CardScanEventsReporter {
-    override fun scanStarted(implementation: String) = onCardScanStarted(implementation)
-    override fun scanSucceeded(implementation: String) = onCardScanSucceeded(implementation)
-    override fun scanFailed(implementation: String, error: Throwable?) = onCardScanFailed(implementation, error)
-    override fun scanCancelled(
-        implementation: String
-    ) = onCardScanCancelled(implementation)
-    override fun apiCheck(
-        implementation: String,
-        available: Boolean,
-        reason: String?
-    ) = onCardScanApiCheck(implementation, available, reason)
+    /**
+     * Card scan API availability check.
+     */
+    fun onCardScanApiCheck(implementation: String, available: Boolean, reason: String? = null)
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

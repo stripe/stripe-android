@@ -31,11 +31,11 @@ internal class CardScanGoogleLauncher(
             context = context,
             onFailure = { e ->
                 _isAvailable.value = false
-                eventsReporter.apiCheck(implementation, false, e.message)
+                eventsReporter.onCardScanApiCheck(implementation, false, e.message)
             },
             onSuccess = {
                 _isAvailable.value = true
-                eventsReporter.apiCheck(implementation, true)
+                eventsReporter.onCardScanApiCheck(implementation, true)
             }
         )
     }
@@ -44,10 +44,10 @@ internal class CardScanGoogleLauncher(
         paymentCardRecognitionClient.fetchIntent(
             context = context,
             onFailure = { e ->
-                eventsReporter.scanFailed("google_pay", e)
+                eventsReporter.onCardScanFailed("google_pay", e)
             },
             onSuccess = { intentSenderRequest ->
-                eventsReporter.scanStarted("google_pay")
+                eventsReporter.onCardScanStarted("google_pay")
                 activityLauncher.launch(intentSenderRequest)
             }
         )
@@ -56,20 +56,20 @@ internal class CardScanGoogleLauncher(
     internal fun parseActivityResult(result: ActivityResult): CardScanResult {
         if (result.resultCode == Activity.RESULT_OK && result.data != null) {
             val data = result.data ?: return CardScanResult.Canceled.also {
-                eventsReporter.scanCancelled(implementation)
+                eventsReporter.onCardScanCancelled(implementation)
             }
             val paymentCardRecognitionResult = PaymentCardRecognitionResult.getFromIntent(data)
             val pan = paymentCardRecognitionResult?.pan
             return if (pan != null) {
-                eventsReporter.scanSucceeded(implementation)
+                eventsReporter.onCardScanSucceeded(implementation)
                 CardScanResult.Completed(ScannedCard(pan))
             } else {
                 val error = Throwable("Failed to parse card data")
-                eventsReporter.scanFailed("google_pay", error)
+                eventsReporter.onCardScanFailed("google_pay", error)
                 CardScanResult.Failed(error)
             }
         }
-        eventsReporter.scanCancelled(implementation)
+        eventsReporter.onCardScanCancelled(implementation)
         return CardScanResult.Canceled
     }
 

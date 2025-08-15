@@ -167,23 +167,23 @@ class CardScanGoogleLauncherParseResultTest {
             _apiCheckCalls.ensureAllEventsConsumed()
         }
 
-        override fun scanCancelled(implementation: String) {
+        override fun onCardScanCancelled(implementation: String) {
             _scanCancelledCalls.add(ScanCancelledCall(implementation))
         }
 
-        override fun scanFailed(implementation: String, error: Throwable?) {
+        override fun onCardScanFailed(implementation: String, error: Throwable?) {
             _scanFailedCalls.add(ScanFailedCall(implementation, error))
         }
 
-        override fun scanSucceeded(implementation: String) {
+        override fun onCardScanSucceeded(implementation: String) {
             _scanSucceededCalls.add(ScanSucceededCall(implementation))
         }
 
-        override fun scanStarted(implementation: String) {
+        override fun onCardScanStarted(implementation: String) {
             _scanStartedCalls.add(ScanStartedCall(implementation))
         }
 
-        override fun apiCheck(implementation: String, available: Boolean, reason: String?) {
+        override fun onCardScanApiCheck(implementation: String, available: Boolean, reason: String?) {
             _apiCheckCalls.add(ApiCheckCall(implementation, available, reason))
         }
     }
