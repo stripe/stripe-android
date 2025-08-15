@@ -1,7 +1,8 @@
-package com.stripe.android.link.model
+package com.stripe.android.link
 
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.link.theme.LinkThemeConfig
@@ -20,6 +21,7 @@ import kotlinx.parcelize.TypeParceler
  */
 @Poko
 @Parcelize
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class LinkAppearance(
     val lightColors: Colors = Colors.default(isDark = false),
     val darkColors: Colors = Colors.default(isDark = true),
@@ -36,6 +38,7 @@ class LinkAppearance(
     @Poko
     @Parcelize
     @TypeParceler<Color, ColorParceler>()
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Colors(
         val primary: Color,
         val borderSelected: Color
@@ -52,6 +55,7 @@ class LinkAppearance(
      * The light/dark mode style of the appearance..
      */
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class Style : Parcelable {
         /**
          * Automatic based on system preference
@@ -79,6 +83,7 @@ class LinkAppearance(
      */
     @Poko
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class PrimaryButton(
         val cornerRadiusDp: Float? = null,
         val heightDp: Float? = null

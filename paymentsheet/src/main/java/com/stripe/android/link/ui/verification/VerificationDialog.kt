@@ -17,9 +17,9 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.linkViewModel
 import com.stripe.android.link.model.LinkAccount
-import com.stripe.android.link.model.LinkAppearance
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkAppearanceTheme
 import com.stripe.android.link.theme.LinkTheme
