@@ -33,6 +33,7 @@ internal class PayNowContract :
         val maxAttempts: Int,
         @StringRes val ctaText: Int,
         val stripeAccountId: String?,
+        val qrCodeUrl: String,
     ) : Parcelable {
 
         internal companion object {

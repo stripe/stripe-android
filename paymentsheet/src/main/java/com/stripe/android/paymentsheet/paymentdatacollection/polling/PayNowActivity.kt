@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.payments.PaymentFlowResult
@@ -18,6 +17,7 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.fadeOut
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.time.Duration.Companion.seconds
 
 internal class PayNowActivity : AppCompatActivity() {
@@ -25,6 +25,8 @@ internal class PayNowActivity : AppCompatActivity() {
     private val args: PayNowContract.Args by lazy {
         requireNotNull(PayNowContract.Args.fromIntent(intent))
     }
+
+    private val _shouldShowWebView = MutableStateFlow(true)
 
     internal var viewModelFactory: ViewModelProvider.Factory = PollingViewModel.Factory {
         PollingViewModel.Args(
@@ -42,11 +44,11 @@ internal class PayNowActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-
         setContent {
             StripeTheme {
                 val uiState by viewModel.uiState.collectAsState()
+                // TODO: move this into uiState?
+                val shouldShowWebView by _shouldShowWebView.collectAsState()
 
                 val state = rememberStripeBottomSheetState(
                     confirmValueChange = { proposedValue ->
@@ -60,6 +62,7 @@ internal class PayNowActivity : AppCompatActivity() {
 
                 BackHandler(enabled = true) {
                     if (uiState.pollingState == PollingState.Failed) {
+                        _shouldShowWebView.value = false
                         viewModel.handleCancel()
                     } else {
                         // Ignore back presses while polling for the result
@@ -70,8 +73,9 @@ internal class PayNowActivity : AppCompatActivity() {
                     val result = uiState.pollingState.toFlowResult(
                         clientSecret = args.clientSecret,
                         stripeAccountId = args.stripeAccountId,
-                        )
+                    )
                     if (result != null) {
+                        _shouldShowWebView.value = false
                         state.hide()
                         finishWithResult(result)
                     }
@@ -81,7 +85,13 @@ internal class PayNowActivity : AppCompatActivity() {
                     state = state,
                     onDismissed = { /* Not applicable here */ },
                 ) {
-                    PollingScreen(viewModel)
+                    if (shouldShowWebView) {
+                        PayNowWebView(args.qrCodeUrl) {
+                            _shouldShowWebView.value = false
+                        }
+                    } else {
+                        PollingScreen(viewModel)
+                    }
                 }
             }
         }

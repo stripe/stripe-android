@@ -25,7 +25,6 @@ private const val PAY_NOW_MAX_ATTEMPTS = 12
 internal class PayNowNextActionHandler : PaymentNextActionHandler<StripeIntent>() {
 
     private var pollingLauncher: ActivityResultLauncher<PayNowContract.Args>? = null
-    private var webIntentAuthenticator: WebIntentNextActionHandler? = null
 
     override suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
@@ -43,6 +42,7 @@ internal class PayNowNextActionHandler : PaymentNextActionHandler<StripeIntent>(
                     // TODO: add correct CTA text.
                     ctaText = R.string.stripe_blik_confirm_payment,
                     stripeAccountId = requestOptions.stripeAccount,
+                    qrCodeUrl = (actionable.nextActionData as StripeIntent.NextActionData.DisplayPayNowDetails).hostedVoucherUrl!!,
                 )
             else ->
                 error(
@@ -65,12 +65,6 @@ internal class PayNowNextActionHandler : PaymentNextActionHandler<StripeIntent>(
         } else {
             localPollingLauncher.launch(args, options)
         }
-
-        webIntentAuthenticator?.performNextAction(
-            host,
-            actionable,
-            requestOptions,
-        )
     }
 
     // TODO: potentially this should implement polling next action handler so that all this is shared.
@@ -83,8 +77,6 @@ internal class PayNowNextActionHandler : PaymentNextActionHandler<StripeIntent>(
             PayNowContract(),
             activityResultCallback
         )
-
-        webIntentAuthenticator = webIntentNextActionHandler
     }
 
     override fun onLauncherInvalidated() {

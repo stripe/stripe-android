@@ -11,7 +11,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.payments.DefaultReturnUrl
 import kotlinx.coroutines.flow.MutableStateFlow
 
-internal class PaymentAuthWebViewClient(
+class PaymentAuthWebViewClient(
     private val logger: Logger,
     private val isPageLoaded: MutableStateFlow<Boolean>,
     private val clientSecret: String,
@@ -160,11 +160,6 @@ internal class PaymentAuthWebViewClient(
         }
     }
 
-    // pre-defined return URLs
-    private fun isPredefinedReturnUrl(uri: Uri): Boolean {
-        return "stripejs://use_stripe_sdk/return_url" == uri.toString() ||
-            uri.toString().startsWith(DefaultReturnUrl.PREFIX)
-    }
 
     /**
      * Invoked when authentication flow has completed, whether succeeded or failed.
@@ -176,7 +171,7 @@ internal class PaymentAuthWebViewClient(
         activityFinisher(error)
     }
 
-    internal companion object {
+    companion object {
         internal const val PARAM_PAYMENT_CLIENT_SECRET = "payment_intent_client_secret"
         internal const val PARAM_SETUP_CLIENT_SECRET = "setup_intent_client_secret"
 
@@ -206,5 +201,12 @@ internal class PaymentAuthWebViewClient(
         ): Boolean {
             return AUTHENTICATE_URLS.any(url::startsWith)
         }
+
+        // pre-defined return URLs
+        fun isPredefinedReturnUrl(uri: Uri): Boolean {
+            return "stripejs://use_stripe_sdk/return_url" == uri.toString() ||
+                uri.toString().startsWith(DefaultReturnUrl.PREFIX)
+        }
+
     }
 }
