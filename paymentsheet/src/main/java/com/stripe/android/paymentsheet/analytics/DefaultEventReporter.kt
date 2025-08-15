@@ -28,12 +28,14 @@ import com.stripe.android.paymentsheet.model.isSaved
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.IsStripeCardScanAvailable
+import com.stripe.android.ui.core.cardscan.CancellationReason
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
+@Suppress("LargeClass")
 @OptIn(ExperimentalAnalyticEventCallbackApi::class)
 internal class DefaultEventReporter @Inject internal constructor(
     context: Context,
@@ -672,7 +674,10 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onCardScanCancelled(implementation: String, reason: com.stripe.android.ui.core.cardscan.CancellationReason) {
+    override fun onCardScanCancelled(
+        implementation: String,
+        reason: CancellationReason
+    ) {
         fireEvent(
             PaymentSheetEvent.CardScanCancelled(
                 implementation = implementation,

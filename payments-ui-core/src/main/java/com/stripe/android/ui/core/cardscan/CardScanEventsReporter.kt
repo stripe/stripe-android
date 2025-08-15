@@ -27,10 +27,15 @@ class CardScanEventReporterWrapper(
     override fun scanStarted(implementation: String) = onCardScanStarted(implementation)
     override fun scanSucceeded(implementation: String) = onCardScanSucceeded(implementation)
     override fun scanFailed(implementation: String, error: Throwable?) = onCardScanFailed(implementation, error)
-    override fun scanCancelled(implementation: String, reason: CancellationReason)
-        = onCardScanCancelled(implementation, reason)
-    override fun apiCheck(implementation: String, available: Boolean, reason: String?)
-        = onCardScanApiCheck(implementation, available, reason)
+    override fun scanCancelled(
+        implementation: String,
+        reason: CancellationReason
+    ) = onCardScanCancelled(implementation, reason)
+    override fun apiCheck(
+        implementation: String,
+        available: Boolean,
+        reason: String?
+    ) = onCardScanApiCheck(implementation, available, reason)
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

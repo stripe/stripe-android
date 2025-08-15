@@ -30,7 +30,6 @@ import com.stripe.android.uicore.LocalIconStyle
 @Composable
 internal fun ScanCardButtonUI(
     enabled: Boolean,
-    elementsSessionId: String?,
     onResult: (CardScanSheetResult) -> Unit
 ) {
     val context = LocalContext.current
@@ -74,4 +73,3 @@ internal fun ScanCardButtonUI(
         }
     }
 }
-

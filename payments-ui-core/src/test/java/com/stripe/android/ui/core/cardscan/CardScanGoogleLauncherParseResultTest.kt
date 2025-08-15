@@ -25,32 +25,32 @@ class CardScanGoogleLauncherParseResultTest {
     @Test
     fun `parseActivityResult with RESULT_CANCELED returns Canceled`() = runTest {
         val result = ActivityResult(Activity.RESULT_CANCELED, null)
-        
+
         val scanResult = launcher.parseActivityResult(result)
-        
+
         assertThat(scanResult).isInstanceOf(CardScanSheetResult.Canceled::class.java)
         assertThat((scanResult as CardScanSheetResult.Canceled).reason).isEqualTo(CancellationReason.Closed)
-        
+
         val call = fakeEventsReporter.scanCancelledCalls.awaitItem()
         assertThat(call.implementation).isEqualTo("google_pay")
         assertThat(call.reason).isEqualTo(CancellationReason.Closed)
-        
+
         fakeEventsReporter.validate()
     }
 
     @Test
     fun `parseActivityResult with RESULT_OK but null data returns Canceled`() = runTest {
         val result = ActivityResult(Activity.RESULT_OK, null)
-        
+
         val scanResult = launcher.parseActivityResult(result)
-        
+
         assertThat(scanResult).isInstanceOf(CardScanSheetResult.Canceled::class.java)
         assertThat((scanResult as CardScanSheetResult.Canceled).reason).isEqualTo(CancellationReason.Closed)
-        
+
         val call = fakeEventsReporter.scanCancelledCalls.awaitItem()
         assertThat(call.implementation).isEqualTo("google_pay")
         assertThat(call.reason).isEqualTo(CancellationReason.Closed)
-        
+
         fakeEventsReporter.validate()
     }
 
@@ -61,43 +61,43 @@ class CardScanGoogleLauncherParseResultTest {
             // Don't put any PaymentCardRecognitionResult data
         }
         val result = ActivityResult(Activity.RESULT_OK, intent)
-        
+
         val scanResult = launcher.parseActivityResult(result)
-        
+
         assertThat(scanResult).isInstanceOf(CardScanSheetResult.Failed::class.java)
         val failedResult = scanResult as CardScanSheetResult.Failed
         assertThat(failedResult.error.message).isEqualTo("Failed to parse card data")
-        
+
         val call = fakeEventsReporter.scanFailedCalls.awaitItem()
         assertThat(call.implementation).isEqualTo("google_pay")
         assertThat(call.error?.message).isEqualTo("Failed to parse card data")
-        
+
         fakeEventsReporter.validate()
     }
 
     @Test
     fun `parseActivityResult with custom result code returns Canceled`() = runTest {
         val result = ActivityResult(123, null) // Some other result code
-        
+
         val scanResult = launcher.parseActivityResult(result)
-        
+
         assertThat(scanResult).isInstanceOf(CardScanSheetResult.Canceled::class.java)
         assertThat((scanResult as CardScanSheetResult.Canceled).reason).isEqualTo(CancellationReason.Closed)
-        
+
         val call = fakeEventsReporter.scanCancelledCalls.awaitItem()
         assertThat(call.implementation).isEqualTo("google_pay")
         assertThat(call.reason).isEqualTo(CancellationReason.Closed)
-        
+
         fakeEventsReporter.validate()
     }
 
     @Test
     fun `launch calls scanStarted event`() = runTest {
         launcher.launch(ApplicationProvider.getApplicationContext())
-        
+
         val call = fakeEventsReporter.scanStartedCalls.awaitItem()
         assertThat(call.implementation).isEqualTo("google_pay")
-        
+
         // Note: We can't test activityLauncher.launch() directly because it's lateinit
         // and requires Compose initialization, but we can verify the observable behavior
         fakeEventsReporter.validate()
@@ -111,15 +111,15 @@ class CardScanGoogleLauncherParseResultTest {
             eventsReporter = fakeEventsReporter,
             paymentCardRecognitionClient = FakePaymentCardRecognitionClient(false)
         )
-        
+
         // Check that isAvailable is false (due to Google Play Services not being available in tests)
         assertThat(localLauncher.isAvailable.value).isFalse()
-        
+
         val apiCheckCall = fakeEventsReporter.apiCheckCalls.awaitItem()
         assertThat(apiCheckCall.implementation).isEqualTo("google_pay")
         assertThat(apiCheckCall.available).isFalse()
         assertThat(apiCheckCall.reason).isNotNull() // Will contain Google Play Services error
-        
+
         fakeEventsReporter.validate()
     }
 
@@ -131,10 +131,10 @@ class CardScanGoogleLauncherParseResultTest {
             eventsReporter = fakeEventsReporter,
             paymentCardRecognitionClient = FakePaymentCardRecognitionClient(true)
         )
-        
+
         // Check that isAvailable is true (success case)
         assertThat(localLauncher.isAvailable.value).isTrue()
-        
+
         val apiCheckCall = fakeEventsReporter.apiCheckCalls.awaitItem()
         assertThat(apiCheckCall.implementation).isEqualTo("google_pay")
         assertThat(apiCheckCall.available).isTrue()
@@ -142,13 +142,6 @@ class CardScanGoogleLauncherParseResultTest {
 
         fakeEventsReporter.validate()
     }
-
-    // Note: Testing the success case with valid PaymentCardRecognitionResult 
-    // is challenging because it requires Google Play Services data structures
-    // that are difficult to mock. In a real scenario, you'd either:
-    // 1. Use instrumentation tests with actual Google Play Services
-    // 2. Extract the PaymentCardRecognitionResult parsing to a separate testable method
-    // 3. Use dependency injection to make the parsing logic testable
 
     private class FakeCardScanEventsReporter : CardScanEventsReporter {
         data class ScanCancelledCall(val implementation: String, val reason: CancellationReason)

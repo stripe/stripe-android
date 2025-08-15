@@ -38,10 +38,11 @@ internal class DefaultPaymentCardRecognitionClient : PaymentCardRecognitionClien
     private fun createPaymentsClient(context: Context): PaymentsClient {
         val walletOptions = Wallet.WalletOptions.Builder()
             .setEnvironment(
-                if (isStripeExampleApp(context))
+                if (isStripeExampleApp(context)) {
                     WalletConstants.ENVIRONMENT_TEST
-                else
+                } else {
                     WalletConstants.ENVIRONMENT_PRODUCTION
+                }
             )
             .build()
 
