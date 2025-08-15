@@ -1361,7 +1361,6 @@ internal class CustomerSheetViewModel(
 
     internal companion object {
         const val REMOVAL_TRANSITION_DELAY = 50L
-        const val HAS_SEEN_AUTO_CARD_SCAN_OPEN_KEY = "HAS_SEEN_AUTO_CARD_SCAN_OPEN_KEY"
 
         fun shouldShowGooglePay(paymentMethodMetadata: PaymentMethodMetadata?): Boolean {
             return paymentMethodMetadata?.isGooglePayReady == true &&
