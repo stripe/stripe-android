@@ -13,7 +13,7 @@ internal sealed class SavedSelection : Parcelable {
     @Parcelize
     data class PaymentMethod(
         val id: String,
-        val isLinkOrigin: Boolean,
+        val isLinkOrigin: Boolean = false,
     ) : SavedSelection()
 
     @Parcelize
