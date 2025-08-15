@@ -3,6 +3,7 @@ apply from: configs.androidLibrary
 apply plugin: 'com.google.devtools.ksp'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 dependencies {
     api project(":stripe-core")
@@ -14,6 +15,11 @@ dependencies {
     implementation libs.dagger
     ksp libs.daggerCompiler
 
+    // Compose
+    implementation libs.compose.foundation
+    implementation libs.compose.activity
+    implementation libs.compose.runtime
+
     implementation libs.androidx.appCompat
     implementation libs.androidx.constraintLayout
     implementation libs.androidx.coreKtx
@@ -22,6 +28,7 @@ dependencies {
     implementation libs.kotlin.coroutinesAndroid
     implementation libs.kotlin.serialization
 
+    implementation libs.playServicesWallet
 
     testImplementation project(':payments-core-testing')
 
