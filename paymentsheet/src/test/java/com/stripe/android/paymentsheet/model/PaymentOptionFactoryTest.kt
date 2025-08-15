@@ -95,7 +95,7 @@ class PaymentOptionFactoryTest {
                 walletType = PaymentSelection.Saved.WalletType.Link
             )
         )
-        assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link_ref)
+        assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link_arrow)
         assertThat(paymentOption.label).isEqualTo("···· 4242")
         assertThat(paymentOption.paymentMethodType).isEqualTo("card")
         assertThat(paymentOption.billingDetails).isNull()
@@ -109,7 +109,7 @@ class PaymentOptionFactoryTest {
                 walletType = PaymentSelection.Saved.WalletType.Link
             )
         )
-        assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link_ref)
+        assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link_arrow)
         assertThat(paymentOption.label).isEqualTo("Link")
         assertThat(paymentOption.paymentMethodType).isEqualTo("card")
         assertThat(paymentOption.billingDetails).isNull()
