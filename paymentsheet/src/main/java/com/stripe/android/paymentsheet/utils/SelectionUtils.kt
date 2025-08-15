@@ -3,7 +3,11 @@
 package com.stripe.android.paymentsheet.utils
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
+import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 
@@ -16,9 +20,31 @@ internal fun PaymentSelection.New.canSave(
         is PaymentElementLoader.InitializationMode.PaymentIntent -> requestedToSave
         is PaymentElementLoader.InitializationMode.SetupIntent -> true
         is PaymentElementLoader.InitializationMode.DeferredIntent -> {
-            initializationMode.intentConfiguration.mode.setupFutureUse != null || requestedToSave
+            requestedToSave || canSaveIfNotRequested(initializationMode.intentConfiguration)
         }
     }
+}
+
+private fun PaymentSelection.New.canSaveIfNotRequested(
+    intentConfiguration: PaymentSheet.IntentConfiguration
+): Boolean {
+    return intentConfiguration.mode.setupFutureUse != null || intentConfiguration.run {
+        when (mode) {
+            is PaymentSheet.IntentConfiguration.Mode.Payment -> mode.canSave(paymentMethodCreateParams)
+            is PaymentSheet.IntentConfiguration.Mode.Setup -> false
+        }
+    }
+}
+
+@OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
+private fun PaymentSheet.IntentConfiguration.Mode.Payment.canSave(
+    createParams: PaymentMethodCreateParams
+): Boolean {
+    return paymentMethodOptions?.setupFutureUsageValues?.let { setupFutureUsageValues ->
+        PaymentMethod.Type.fromCode(createParams.typeCode)?.let {
+            setupFutureUsageValues.containsKey(it)
+        } ?: false
+    } ?: false
 }
 
 internal fun PaymentSelection.getSetAsDefaultPaymentMethodFromPaymentSelection(): Boolean? {
