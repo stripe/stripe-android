@@ -36,6 +36,8 @@ dependencies {
     // Tooling support (Previews, etc.)
     debugImplementation libs.compose.uiTooling
 
+    implementation libs.playServicesWallet
+
     testImplementation project(':payments-core-testing')
     testImplementation project(':stripecardscan')
     testImplementation libs.places

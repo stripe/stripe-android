@@ -251,6 +251,31 @@ internal interface EventReporter {
      */
     fun onShopPayWebViewCancelled(didReceiveECEClick: Boolean)
 
+    /**
+     * Card scan has started.
+     */
+    fun onCardScanStarted(implementation: String)
+
+    /**
+     * Card scan completed successfully.
+     */
+    fun onCardScanSucceeded(implementation: String)
+
+    /**
+     * Card scan failed with an error.
+     */
+    fun onCardScanFailed(implementation: String, error: Throwable?)
+
+    /**
+     * Card scan was cancelled by the user.
+     */
+    fun onCardScanCancelled(implementation: String)
+
+    /**
+     * Card scan API availability check.
+     */
+    fun onCardScanApiCheck(implementation: String, available: Boolean, reason: String?)
+
     enum class Mode(val code: String) {
         Complete("complete"),
         Custom("custom"),
