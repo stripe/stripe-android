@@ -150,7 +150,8 @@ internal open class FakeLinkRepository : LinkRepository {
         paymentDetailsId: String,
         expectedPaymentMethodType: String,
         cvc: String?,
-        billingPhone: String?
+        billingPhone: String?,
+        allowRedisplay: String?,
     ) = sharePaymentDetails
 
     override suspend fun createPaymentMethod(

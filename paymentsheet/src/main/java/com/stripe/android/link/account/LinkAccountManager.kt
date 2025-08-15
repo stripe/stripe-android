@@ -126,6 +126,7 @@ internal interface LinkAccountManager {
         expectedPaymentMethodType: String,
         billingPhone: String?,
         cvc: String?,
+        allowRedisplay: String? = null,
     ): Result<SharePaymentDetails>
 
     suspend fun setLinkAccountFromLookupResult(
