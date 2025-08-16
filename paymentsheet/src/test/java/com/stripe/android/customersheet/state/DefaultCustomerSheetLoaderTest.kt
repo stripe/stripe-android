@@ -36,6 +36,7 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
+import com.stripe.android.ui.core.cardscan.CardScanEvent
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.CompletableSingle
 import com.stripe.android.utils.FakeElementsSessionRepository
@@ -772,4 +773,6 @@ private class FakeCustomerSheetEventReporter : CustomerSheetEventReporter {
     override fun onDisallowedCardBrandEntered(brand: CardBrand) = Unit
 
     override fun onAnalyticsEvent(event: AnalyticsEvent) = Unit
+
+    override fun onCardScanEvent(event: CardScanEvent) = Unit
 }

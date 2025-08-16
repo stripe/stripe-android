@@ -713,7 +713,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
     ) : PaymentSheetEvent() {
-        override val eventName: String = "cardscan_scan_started"
+        override val eventName: String = "mc_cardscan_scan_started"
         override val additionalParams: Map<String, Any?> = mapOf(
             "implementation" to implementation
         )
@@ -726,7 +726,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
     ) : PaymentSheetEvent() {
-        override val eventName: String = "cardscan_success"
+        override val eventName: String = "mc_cardscan_success"
         override val additionalParams: Map<String, Any?> = mapOf(
             "implementation" to implementation
         )
@@ -740,7 +740,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
     ) : PaymentSheetEvent() {
-        override val eventName: String = "cardscan_failed"
+        override val eventName: String = "mc_cardscan_failed"
         override val additionalParams: Map<String, Any?> = mapOf(
             "implementation" to implementation,
             FIELD_ERROR_MESSAGE to error?.message
@@ -754,7 +754,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
     ) : PaymentSheetEvent() {
-        override val eventName: String = "cardscan_cancel"
+        override val eventName: String = "mc_cardscan_cancel"
         override val additionalParams: Map<String, Any?> = mapOf(
             "implementation" to implementation
         )
@@ -769,7 +769,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
     ) : PaymentSheetEvent() {
-        override val eventName: String = "cardscan_api_check"
+        override val eventName: String = "mc_cardscan_api_check"
         override val additionalParams: Map<String, Any?> = buildMap {
             if (reason != null) {
                 put("reason", reason)

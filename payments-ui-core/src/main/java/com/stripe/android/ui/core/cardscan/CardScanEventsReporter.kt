@@ -35,3 +35,5 @@ interface CardScanEventsReporter {
 val LocalCardScanEventsReporter = compositionLocalOf<CardScanEventsReporter> {
     error("CardScanEventsReporter not provided")
 }
+
+interface CardScanEvent
