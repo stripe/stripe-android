@@ -26,6 +26,7 @@ import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmation
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.ButtonThemes.LinkButtonTheme
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -210,6 +211,7 @@ class DefaultWalletButtonsInteractorTest {
             WalletButtonsInteractor.ViewAction.OnButtonPressed(
                 WalletButtonsInteractor.WalletButton.Link(
                     state = LinkButtonState.Default,
+                    theme = LinkButtonTheme.DEFAULT,
                 )
             )
         )
@@ -237,7 +239,10 @@ class DefaultWalletButtonsInteractorTest {
 
         interactor.handleViewAction(
             WalletButtonsInteractor.ViewAction.OnButtonPressed(
-                WalletButtonsInteractor.WalletButton.Link(state = LinkButtonState.Default)
+                WalletButtonsInteractor.WalletButton.Link(
+                    state = LinkButtonState.Default,
+                    theme = LinkButtonTheme.DEFAULT,
+                )
             )
         )
 

@@ -17,6 +17,7 @@ class WalletButtonsScreenshotTest {
             walletButtons = listOf(
                 WalletButtonsInteractor.WalletButton.Link(
                     state = LinkButtonState.Email("email@email.com"),
+                    theme = PaymentSheet.ButtonThemes.LinkButtonTheme.DEFAULT,
                 )
             ),
             buttonsEnabled = true,
@@ -33,6 +34,7 @@ class WalletButtonsScreenshotTest {
             walletButtons = listOf(
                 WalletButtonsInteractor.WalletButton.Link(
                     state = LinkButtonState.Email("email@email.com"),
+                    theme = PaymentSheet.ButtonThemes.LinkButtonTheme.DEFAULT,
                 ),
             ),
             buttonsEnabled = false,
