@@ -421,8 +421,6 @@ internal class CustomerSheetViewModel(
         _result.update {
             InternalCustomerSheetResult.Error(
                 exception = cause,
-                hasAutomaticallyLaunchedCardScan =
-                automaticallyLaunchedCardScanFormData.hasAutomaticallyLaunchedCardScan,
             )
         }
     }

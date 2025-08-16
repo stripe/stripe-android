@@ -57,7 +57,7 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
     @Parcelize
     class Error internal constructor(
         val exception: Throwable,
-        override val hasAutomaticallyLaunchedCardScan: Boolean?,
+        override val hasAutomaticallyLaunchedCardScan: Boolean? = null,
     ) : InternalCustomerSheetResult() {
         override fun toPublicResult(
             paymentOptionFactory: PaymentOptionFactory,
