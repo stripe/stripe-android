@@ -1,5 +1,7 @@
 package com.stripe.android.screenshottesting
 
+import androidx.activity.compose.LocalActivityResultRegistryOwner
+import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -8,9 +10,12 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.core.app.ActivityOptionsCompat
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import com.android.ide.common.rendering.api.SessionParams
+import com.stripe.android.ui.core.cardscan.CardScanEventsReporter
+import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
 import com.stripe.android.uicore.StripeTheme
 import org.junit.rules.TestRule
 import org.junit.runner.Description
@@ -67,7 +72,28 @@ class PaparazziRule(
                             }
 
                             paparazzi.snapshot {
-                                CompositionLocalProvider(LocalInspectionMode provides true) {
+                                CompositionLocalProvider(
+                                    LocalInspectionMode provides true,
+                                    LocalActivityResultRegistryOwner provides object : androidx.activity.result.ActivityResultRegistryOwner {
+                                        override val activityResultRegistry = object : androidx.activity.result.ActivityResultRegistry() {
+                                            override fun <I, O> onLaunch(
+                                                requestCode: Int,
+                                                contract: ActivityResultContract<I, O>,
+                                                input: I,
+                                                options: ActivityOptionsCompat?
+                                            ) {
+                                                // No-op implementation for testing purposes
+                                            }
+                                        }
+                                    },
+                                    LocalCardScanEventsReporter provides object : CardScanEventsReporter {
+                                        override fun onCardScanStarted(implementation: String) {}
+                                        override fun onCardScanSucceeded(implementation: String) {}
+                                        override fun onCardScanFailed(implementation: String, error: Throwable?) {}
+                                        override fun onCardScanCancelled(implementation: String) {}
+                                        override fun onCardScanApiCheck(implementation: String, available: Boolean, reason: String?) {}
+                                    },
+                                ) {
                                     @Composable
                                     fun boxContent() {
                                         Box(

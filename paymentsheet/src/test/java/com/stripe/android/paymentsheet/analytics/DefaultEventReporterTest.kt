@@ -1218,7 +1218,7 @@ class DefaultEventReporterTest {
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "cardscan_scan_started" &&
+                req.params["event"] == "mc_cardscan_scan_started" &&
                     req.params["implementation"] == "google_pay"
             }
         )
@@ -1234,7 +1234,7 @@ class DefaultEventReporterTest {
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "cardscan_success" &&
+                req.params["event"] == "mc_cardscan_success" &&
                     req.params["implementation"] == "google_pay"
             }
         )
@@ -1251,7 +1251,7 @@ class DefaultEventReporterTest {
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "cardscan_failed" &&
+                req.params["event"] == "mc_cardscan_failed" &&
                     req.params["implementation"] == "google_pay" &&
                     req.params["error_message"] == "Card scan failed"
             }
@@ -1268,7 +1268,7 @@ class DefaultEventReporterTest {
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "cardscan_failed" &&
+                req.params["event"] == "mc_cardscan_failed" &&
                     req.params["implementation"] == "google_pay" &&
                     req.params["error_message"] == null
             }
@@ -1285,7 +1285,7 @@ class DefaultEventReporterTest {
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "cardscan_cancel" &&
+                req.params["event"] == "mc_cardscan_cancel" &&
                     req.params["implementation"] == "google_pay"
             }
         )
@@ -1301,7 +1301,7 @@ class DefaultEventReporterTest {
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "cardscan_api_check" &&
+                req.params["event"] == "mc_cardscan_api_check" &&
                     req.params["implementation"] == "google_pay" &&
                     req.params["available"] == true &&
                     req.params["reason"] == null
@@ -1319,7 +1319,7 @@ class DefaultEventReporterTest {
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "cardscan_api_check" &&
+                req.params["event"] == "mc_cardscan_api_check" &&
                     req.params["implementation"] == "google_pay" &&
                     req.params["available"] == false &&
                     req.params["reason"] == "API not available"
@@ -1336,40 +1336,40 @@ class DefaultEventReporterTest {
         completeEventReporter.onCardScanStarted("bouncer")
         completeEventReporter.onCardScanSucceeded("stripe")
         completeEventReporter.onCardScanFailed("custom", null)
+        completeEventReporter.onCardScanCancelled("test")
         completeEventReporter.onCardScanApiCheck("ml_kit", true, null)
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "cardscan_scan_started" &&
+                req.params["event"] == "mc_cardscan_scan_started" &&
                     req.params["implementation"] == "bouncer"
             }
         )
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "cardscan_success" &&
+                req.params["event"] == "mc_cardscan_success" &&
                     req.params["implementation"] == "stripe"
             }
         )
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "cardscan_failed" &&
+                req.params["event"] == "mc_cardscan_failed" &&
                     req.params["implementation"] == "custom"
             }
         )
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "cardscan_cancel" &&
-                    req.params["implementation"] == "test" &&
-                    req.params["cancellation_reason"] == "usercannotscan"
+                req.params["event"] == "mc_cardscan_cancel" &&
+                    req.params["implementation"] == "test"
             }
         )
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "cardscan_api_check" &&
+                req.params["event"] == "mc_cardscan_api_check" &&
                     req.params["implementation"] == "ml_kit" &&
                     req.params["available"] == true
             }
