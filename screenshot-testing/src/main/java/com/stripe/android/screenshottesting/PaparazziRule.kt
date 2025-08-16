@@ -1,6 +1,8 @@
 package com.stripe.android.screenshottesting
 
 import androidx.activity.compose.LocalActivityResultRegistryOwner
+import androidx.activity.result.ActivityResultRegistry
+import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.MaterialTheme
@@ -74,8 +76,8 @@ class PaparazziRule(
                             paparazzi.snapshot {
                                 CompositionLocalProvider(
                                     LocalInspectionMode provides true,
-                                    LocalActivityResultRegistryOwner provides object : androidx.activity.result.ActivityResultRegistryOwner {
-                                        override val activityResultRegistry = object : androidx.activity.result.ActivityResultRegistry() {
+                                    LocalActivityResultRegistryOwner provides object : ActivityResultRegistryOwner {
+                                        override val activityResultRegistry = object : ActivityResultRegistry() {
                                             override fun <I, O> onLaunch(
                                                 requestCode: Int,
                                                 contract: ActivityResultContract<I, O>,
@@ -87,11 +89,29 @@ class PaparazziRule(
                                         }
                                     },
                                     LocalCardScanEventsReporter provides object : CardScanEventsReporter {
-                                        override fun onCardScanStarted(implementation: String) {}
-                                        override fun onCardScanSucceeded(implementation: String) {}
-                                        override fun onCardScanFailed(implementation: String, error: Throwable?) {}
-                                        override fun onCardScanCancelled(implementation: String) {}
-                                        override fun onCardScanApiCheck(implementation: String, available: Boolean, reason: String?) {}
+                                        override fun onCardScanStarted(implementation: String) {
+                                            // No-op implementation for testing purposes
+                                        }
+
+                                        override fun onCardScanSucceeded(implementation: String) {
+                                            // No-op implementation for testing purposes
+                                        }
+
+                                        override fun onCardScanFailed(implementation: String, error: Throwable?) {
+                                            // No-op implementation for testing purposes
+                                        }
+
+                                        override fun onCardScanCancelled(implementation: String) {
+                                            // No-op implementation for testing purposes
+                                        }
+
+                                        override fun onCardScanApiCheck(
+                                            implementation: String,
+                                            available: Boolean,
+                                            reason: String?
+                                        ) {
+                                            // No-op implementation for testing purposes
+                                        }
                                     },
                                 ) {
                                     @Composable

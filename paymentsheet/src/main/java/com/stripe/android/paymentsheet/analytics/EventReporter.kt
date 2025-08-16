@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFo
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.cardscan.CardScanEventsReporter
 
+@Suppress("TooManyFunctions")
 internal interface EventReporter : CardScanEventsReporter {
 
     /**

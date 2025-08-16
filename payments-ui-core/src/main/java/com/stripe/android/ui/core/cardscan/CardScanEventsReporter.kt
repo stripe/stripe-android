@@ -1,3 +1,5 @@
+@file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+
 package com.stripe.android.ui.core.cardscan
 
 import androidx.annotation.RestrictTo
@@ -36,4 +38,5 @@ val LocalCardScanEventsReporter = compositionLocalOf<CardScanEventsReporter> {
     error("CardScanEventsReporter not provided")
 }
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface CardScanEvent

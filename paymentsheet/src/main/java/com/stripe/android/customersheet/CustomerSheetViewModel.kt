@@ -274,7 +274,7 @@ internal class CustomerSheetViewModel(
             is CustomerSheetViewAction.OnCardNumberInputCompleted -> onCardNumberInputCompleted()
             is CustomerSheetViewAction.OnDisallowedCardBrandEntered -> onDisallowedCardBrandEntered(viewAction.brand)
             is CustomerSheetViewAction.OnAnalyticsEvent -> onAnalyticsEvent(viewAction.event)
-            is CustomerSheetViewAction.OnCardScanEvent-> onCardScanEvent(viewAction.event)
+            is CustomerSheetViewAction.OnCardScanEvent -> onCardScanEvent(viewAction.event)
             is CustomerSheetViewAction.OnBackPressed -> onBackPressed()
             is CustomerSheetViewAction.OnEditPressed -> onEditPressed()
             is CustomerSheetViewAction.OnModifyItem -> onModifyItem(viewAction.paymentMethod)

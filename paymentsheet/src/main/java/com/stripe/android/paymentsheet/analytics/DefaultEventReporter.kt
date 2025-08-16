@@ -35,7 +35,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
-@Suppress("LargeClass")
+@Suppress("LargeClass", "TooManyFunctions")
 @OptIn(ExperimentalAnalyticEventCallbackApi::class)
 internal class DefaultEventReporter @Inject internal constructor(
     context: Context,

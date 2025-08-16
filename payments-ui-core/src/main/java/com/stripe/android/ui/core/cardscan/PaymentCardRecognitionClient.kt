@@ -34,7 +34,7 @@ internal class DefaultPaymentCardRecognitionClient : PaymentCardRecognitionClien
                 .addOnFailureListener { e ->
                     onFailure(e)
                 }
-        } catch (e: Exception) {
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             onFailure(e)
         }
     }

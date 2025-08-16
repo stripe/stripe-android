@@ -132,11 +132,21 @@ internal class PaymentMethodScreenTest {
                 LocalCardNumberCompletedEventReporter provides { },
                 LocalCardBrandDisallowedReporter provides { },
                 LocalCardScanEventsReporter provides object : CardScanEventsReporter {
-                    override fun onCardScanStarted(implementation: String) {}
-                    override fun onCardScanSucceeded(implementation: String) {}
-                    override fun onCardScanFailed(implementation: String, error: Throwable?) {}
-                    override fun onCardScanCancelled(implementation: String) {}
-                    override fun onCardScanApiCheck(implementation: String, available: Boolean, reason: String?) {}
+                    override fun onCardScanStarted(implementation: String) {
+                        // No-op implementation for testing purposes
+                    }
+                    override fun onCardScanSucceeded(implementation: String) {
+                        // No-op implementation for testing purposes
+                    }
+                    override fun onCardScanFailed(implementation: String, error: Throwable?) {
+                        // No-op implementation for testing purposes
+                    }
+                    override fun onCardScanCancelled(implementation: String) {
+                        // No-op implementation for testing purposes
+                    }
+                    override fun onCardScanApiCheck(implementation: String, available: Boolean, reason: String?) {
+                        // No-op implementation for testing purposes
+                    }
                 },
             ) {
                 DefaultLinkTheme {

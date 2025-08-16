@@ -376,7 +376,7 @@ private class DefaultCardBrandDisallowedReporter(
 
 private class DefaultCardScanEventReporter(
     private val viewActionHandler: (event: CustomerSheetViewAction) -> Unit
-) : CardScanEventsReporter{
+) : CardScanEventsReporter {
     override fun onCardScanStarted(implementation: String) {
         viewActionHandler.invoke(
             CustomerSheetViewAction.OnCardScanEvent(
