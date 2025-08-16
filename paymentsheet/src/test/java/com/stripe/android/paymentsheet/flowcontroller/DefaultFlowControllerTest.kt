@@ -36,6 +36,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilt
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -304,6 +305,7 @@ internal class DefaultFlowControllerTest {
                     extraParams = selection.paymentMethodExtraParams,
                     shouldSave = selection.customerRequestedSave == PaymentSelection
                         .CustomerRequestedSave.RequestReuse,
+                    passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
                 )
             )
 
@@ -1186,6 +1188,7 @@ internal class DefaultFlowControllerTest {
                 optionsParams = expectedPaymentMethodOptions,
                 extraParams = null,
                 shouldSave = false,
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
         )
         assertThat(arguments.intent).isEqualTo(intent)
@@ -1283,6 +1286,7 @@ internal class DefaultFlowControllerTest {
                 extraParams = GENERIC_PAYMENT_SELECTION.paymentMethodExtraParams,
                 shouldSave = GENERIC_PAYMENT_SELECTION.customerRequestedSave ==
                     PaymentSelection.CustomerRequestedSave.RequestReuse,
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
         )
 
@@ -1999,6 +2003,7 @@ internal class DefaultFlowControllerTest {
             BacsConfirmationOption(
                 createParams = selection.paymentMethodCreateParams,
                 optionsParams = selection.paymentMethodOptionsParams,
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
         )
         assertThat(arguments.appearance).isEqualTo(appearance)
@@ -2332,6 +2337,7 @@ internal class DefaultFlowControllerTest {
                 optionsParams = null,
                 extraParams = null,
                 shouldSave = true,
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
         )
         assertThat(arguments.shippingDetails).isNull()
@@ -2373,6 +2379,7 @@ internal class DefaultFlowControllerTest {
                 createParams = createParams,
                 optionsParams = null,
                 extraParams = null,
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
         )
 

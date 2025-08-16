@@ -1247,6 +1247,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     ),
                     extraParams = null,
                     shouldSave = false,
+                    passiveCaptchaParams = null,
                 ),
                 intent = PaymentIntentFactory.create(),
                 initializationMode = InitializationMode.DeferredIntent(
@@ -1317,6 +1318,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     optionsParams = PaymentMethodOptionsParams.Card(),
                     extraParams = null,
                     shouldSave = false,
+                    passiveCaptchaParams = null
                 ),
                 intent = PaymentIntentFactory.create(),
                 initializationMode = InitializationMode.DeferredIntent(

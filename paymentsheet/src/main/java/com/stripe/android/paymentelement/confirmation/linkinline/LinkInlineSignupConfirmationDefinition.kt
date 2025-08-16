@@ -188,6 +188,7 @@ internal class LinkInlineSignupConfirmationDefinition(
             optionsParams = optionsParams,
             extraParams = extraParams,
             shouldSave = saveOption.shouldSave(),
+            passiveCaptchaParams = null
         )
     }
 
@@ -197,6 +198,7 @@ internal class LinkInlineSignupConfirmationDefinition(
             optionsParams = optionsParams,
             extraParams = extraParams,
             shouldSave = saveOption.shouldSave(),
+            passiveCaptchaParams = null
         )
     }
 
