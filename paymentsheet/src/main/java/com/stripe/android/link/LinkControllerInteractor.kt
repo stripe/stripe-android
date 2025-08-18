@@ -143,6 +143,7 @@ internal class LinkControllerInteractor @Inject constructor(
                 LinkLaunchMode.PaymentMethodSelection(
                     selectedPayment = state.selectedPaymentMethod?.details,
                     sharePaymentDetailsImmediatelyAfterCreation = false,
+                    shouldShowSecondaryCta = false,
                     hint = hint,
                 )
             }

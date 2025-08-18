@@ -35,6 +35,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -1013,6 +1014,21 @@ class WalletViewModelTest {
         // Verify auto-selection was NOT attempted when flag is disabled
         assertThat(viewModel.uiState.value.hasAttemptedAutoSelection).isFalse()
         assertThat(viewModel.uiState.value.isAutoSelecting).isFalse()
+    }
+
+    @Test
+    fun `secondaryButtonLabel is present based on shouldShowSecondaryCta`() = runTest(dispatcher) {
+        val launchMode = LinkLaunchMode.PaymentMethodSelection(
+            selectedPayment = null,
+            shouldShowSecondaryCta = true
+        )
+        listOf(
+            launchMode to resolvableString(R.string.stripe_wallet_continue_another_way),
+            launchMode.copy(shouldShowSecondaryCta = false) to null,
+        ).forEach { (mode, expected) ->
+            assertThat(createViewModel(linkLaunchMode = mode).uiState.value.secondaryButtonLabel)
+                .isEqualTo(expected)
+        }
     }
 
     private fun createViewModel(
