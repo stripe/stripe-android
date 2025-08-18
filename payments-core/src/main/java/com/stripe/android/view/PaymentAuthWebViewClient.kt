@@ -160,6 +160,11 @@ class PaymentAuthWebViewClient(
         }
     }
 
+    // pre-defined return URLs
+    private fun isPredefinedReturnUrl(uri: Uri): Boolean {
+        return "stripejs://use_stripe_sdk/return_url" == uri.toString() ||
+            uri.toString().startsWith(DefaultReturnUrl.PREFIX)
+    }
 
     /**
      * Invoked when authentication flow has completed, whether succeeded or failed.
@@ -171,7 +176,7 @@ class PaymentAuthWebViewClient(
         activityFinisher(error)
     }
 
-    companion object {
+    internal companion object {
         internal const val PARAM_PAYMENT_CLIENT_SECRET = "payment_intent_client_secret"
         internal const val PARAM_SETUP_CLIENT_SECRET = "setup_intent_client_secret"
 
@@ -201,12 +206,5 @@ class PaymentAuthWebViewClient(
         ): Boolean {
             return AUTHENTICATE_URLS.any(url::startsWith)
         }
-
-        // pre-defined return URLs
-        fun isPredefinedReturnUrl(uri: Uri): Boolean {
-            return "stripejs://use_stripe_sdk/return_url" == uri.toString() ||
-                uri.toString().startsWith(DefaultReturnUrl.PREFIX)
-        }
-
     }
 }

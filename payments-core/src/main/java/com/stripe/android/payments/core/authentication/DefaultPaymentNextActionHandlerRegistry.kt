@@ -34,7 +34,6 @@ private typealias NextActionHandler = @JvmSuppressWildcards PaymentNextActionHan
 internal class DefaultPaymentNextActionHandlerRegistry @Inject internal constructor(
     private val noOpIntentNextActionHandler: NoOpIntentNextActionHandler,
     private val sourceNextActionHandler: SourceNextActionHandler,
-    private val webIntentNextActionHandler: WebIntentNextActionHandler?,
     @IntentAuthenticatorMap private val paymentNextActionHandlers: Map<NextActionHandlerKey, NextActionHandler>,
     @Named(INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS) private val includePaymentSheetNextActionHandlers: Boolean,
     applicationContext: Context,
@@ -93,7 +92,7 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
 
     override fun onNewActivityResultCaller(
         activityResultCaller: ActivityResultCaller,
-        activityResultCallback: ActivityResultCallback<PaymentFlowResult.Unvalidated>,
+        activityResultCallback: ActivityResultCallback<PaymentFlowResult.Unvalidated>
     ) {
         allNextActionHandlers.forEach {
             it.onNewActivityResultCaller(activityResultCaller, activityResultCallback)

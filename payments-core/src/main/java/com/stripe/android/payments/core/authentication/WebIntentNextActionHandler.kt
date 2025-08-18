@@ -1,6 +1,5 @@
 package com.stripe.android.payments.core.authentication
 
-import androidx.annotation.RestrictTo
 import com.stripe.android.PaymentBrowserAuthStarter
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentBrowserAuthContract
@@ -27,7 +26,7 @@ import kotlin.coroutines.CoroutineContext
  */
 @Singleton
 @JvmSuppressWildcards
-internal class WebIntentNextActionHandler @Inject internal constructor(
+internal class WebIntentNextActionHandler @Inject constructor(
     private val paymentBrowserAuthStarterFactory: (AuthActivityStarterHost) -> PaymentBrowserAuthStarter,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
