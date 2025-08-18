@@ -103,9 +103,9 @@ internal class OnrampActivity : ComponentActivity() {
                         onStartVerification = {
                             onrampPresenter.promptForIdentityVerification()
                         },
-	                    onCollectPayment = {
-	                        onrampPresenter.collectPaymentMethod()
-	                    }
+                        onCollectPayment = {
+                            onrampPresenter.collectPaymentMethod()
+                        }
 						
                     )
                 }
