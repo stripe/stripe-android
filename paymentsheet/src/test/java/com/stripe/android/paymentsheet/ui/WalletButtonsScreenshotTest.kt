@@ -16,8 +16,7 @@ class WalletButtonsScreenshotTest {
         val walletButtonsContent = createWalletButtonsContent(
             walletButtons = listOf(
                 WalletButtonsInteractor.WalletButton.Link(
-                    state = LinkButtonState.Email("email@email.com"),
-                    theme = PaymentSheet.ButtonThemes.LinkButtonTheme.DEFAULT,
+                    state = LinkButtonState.Email("email@email.com")
                 )
             ),
             buttonsEnabled = true,
@@ -33,8 +32,7 @@ class WalletButtonsScreenshotTest {
         val walletButtonsContent = createWalletButtonsContent(
             walletButtons = listOf(
                 WalletButtonsInteractor.WalletButton.Link(
-                    state = LinkButtonState.Email("email@email.com"),
-                    theme = PaymentSheet.ButtonThemes.LinkButtonTheme.DEFAULT,
+                    state = LinkButtonState.Email("email@email.com")
                 ),
             ),
             buttonsEnabled = false,

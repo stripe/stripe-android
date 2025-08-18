@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.link.ui.wallet.toDefaultPaymentUI
 import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.ButtonThemes.LinkButtonTheme
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.Locale
@@ -36,6 +37,33 @@ private enum class LinkButtonAppearance(private val appearance: PaymentSheet.App
     }
 }
 
+private enum class LinkButtonThemes(val buttonThemes: PaymentSheet.ButtonThemes) : PaparazziConfigOption {
+
+    DefaultTheme(
+        buttonThemes = PaymentSheet.ButtonThemes(
+            link = LinkButtonTheme.DEFAULT
+        )
+    ),
+
+    WhiteTheme(
+        buttonThemes = PaymentSheet.ButtonThemes(
+            link = LinkButtonTheme.WHITE
+        )
+    );
+
+    override fun initialize() {
+        currentTheme = buttonThemes.link
+    }
+
+    override fun reset() {
+        currentTheme = LinkButtonTheme.DEFAULT
+    }
+
+    companion object {
+        var currentTheme: LinkButtonTheme = LinkButtonTheme.DEFAULT
+    }
+}
+
 internal class LinkButtonScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
@@ -60,6 +88,16 @@ internal class LinkButtonScreenshotTest {
     val surfacePaparazziRule = PaparazziRule(
         SystemAppearance.entries,
         LinkButtonAppearance.entries,
+        FontSize.entries,
+        boxModifier = Modifier
+            .padding(0.dp)
+            .fillMaxWidth(),
+    )
+
+    @get:Rule
+    val themesPaparazziRule = PaparazziRule(
+        SystemAppearance.entries,
+        LinkButtonThemes.entries,
         FontSize.entries,
         boxModifier = Modifier
             .padding(0.dp)

@@ -10,7 +10,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 
 internal class LinkButtonPreviewParameterProvider : PreviewParameterProvider<LinkButtonPreviewData> {
     override val values = sequenceOf(
-        // DEFAULT theme variations
         LinkButtonPreviewData(
             state = LinkButtonState.Default,
             theme = PaymentSheet.ButtonThemes.LinkButtonTheme.DEFAULT,
@@ -53,7 +52,6 @@ internal class LinkButtonPreviewParameterProvider : PreviewParameterProvider<Lin
             enabled = true,
             name = "Visa - Default Theme"
         ),
-        // WHITE theme variations
         LinkButtonPreviewData(
             state = LinkButtonState.Default,
             theme = PaymentSheet.ButtonThemes.LinkButtonTheme.WHITE,

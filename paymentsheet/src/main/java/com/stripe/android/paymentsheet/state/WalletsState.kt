@@ -7,6 +7,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher.Billi
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.ButtonThemes.LinkButtonTheme
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 
@@ -21,7 +22,7 @@ internal data class WalletsState(
 
     data class Link(
         val state: LinkButtonState,
-        val theme: PaymentSheet.ButtonThemes.LinkButtonTheme,
+        val theme: LinkButtonTheme = LinkButtonTheme.DEFAULT,
     )
 
     data class GooglePay(

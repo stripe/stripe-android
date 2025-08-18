@@ -2,6 +2,7 @@
 
 package com.stripe.android.link.ui
 
+import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -24,6 +25,7 @@ import androidx.compose.material.ButtonColors
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Divider
+import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -78,6 +80,14 @@ private val LinkButtonTheme.dividerColor: Color
     get() = when (this) {
         LinkButtonTheme.WHITE -> EceLinkWhiteDivider
         LinkButtonTheme.DEFAULT -> LinkTheme.colors.separatorOnPrimaryButton
+    }
+
+private val LinkButtonTheme.logoRes: Int
+    @Composable
+    @DrawableRes
+    get() = when (this) {
+        LinkButtonTheme.WHITE -> R.drawable.stripe_link_logo
+        LinkButtonTheme.DEFAULT -> com.stripe.android.uicore.R.drawable.stripe_link_logo_bw
     }
 
 @Composable
@@ -204,7 +214,7 @@ private fun PaymentDetailsButtonContent(
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
-        LinkIconAndDivider(dividerColor = theme.dividerColor)
+        LinkIconAndDivider(theme)
 
         PaymentDetailsDisplay(paymentUI = paymentUI)
 
@@ -262,7 +272,7 @@ private fun SignedInButtonContent(
             this.contentDescription = payWithLinkText
         }
     ) {
-        LinkIconAndDivider(dividerColor = theme.dividerColor)
+        LinkIconAndDivider(theme)
         Text(
             text = annotatedEmail,
             color = color,
@@ -293,7 +303,7 @@ private fun RowScope.SignedOutButtonContent(theme: LinkButtonTheme) {
         text = iconizedText,
         textAlign = TextAlign.Center,
         inlineContent = InlineContentTemplateBuilder().apply {
-            add(id = LINK_ICON_ID, width = 2.6.em, height = 0.9.em) { LinkButtonIcon() }
+            add(id = LINK_ICON_ID, width = 2.6.em, height = 0.9.em) { LinkButtonIcon(theme.logoRes) }
         }.build(),
         modifier = Modifier
             .padding(start = 6.dp)
@@ -311,7 +321,9 @@ private fun RowScope.SignedOutButtonContent(theme: LinkButtonTheme) {
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun LinkIconAndDivider(dividerColor: Color) {
+private fun LinkIconAndDivider(
+    theme: LinkButtonTheme
+) {
     val annotatedLinkAndDivider = remember {
         buildAnnotatedString {
             appendInlineContent(
@@ -340,8 +352,8 @@ private fun LinkIconAndDivider(dividerColor: Color) {
         overflow = TextOverflow.Ellipsis,
         maxLines = 1,
         inlineContent = InlineContentTemplateBuilder().apply {
-            add(id = LINK_ICON_ID, width = 3.em, height = 1.1.em) { LinkButtonIcon() }
-            add(id = LINK_DIVIDER_ID, width = 0.1.em, height = 1.3.em) { LinkDivider(dividerColor) }
+            add(id = LINK_ICON_ID, width = 3.em, height = 1.1.em) { LinkButtonIcon(theme.logoRes) }
+            add(id = LINK_DIVIDER_ID, width = 0.1.em, height = 1.3.em) { LinkDivider(theme.dividerColor) }
             addSpacer(id = LINK_DIVIDER_SPACER_ID, width = 0.5.em)
         }.build(),
         modifier = Modifier.semantics { this.invisibleToUser() },
@@ -359,10 +371,15 @@ private fun LinkDivider(color: Color) {
 }
 
 @Composable
-private fun LinkButtonIcon() {
-    LinkIcon(
+private fun LinkButtonIcon(
+    @DrawableRes logoRes: Int
+) {
+    Icon(
         modifier = Modifier
             .aspectRatio(LINK_ICON_ASPECT_RATIO)
-            .alpha(LocalContentAlpha.current)
+            .alpha(LocalContentAlpha.current),
+        painter = painterResource(logoRes),
+        contentDescription = stringResource(com.stripe.android.R.string.stripe_link),
+        tint = Color.Unspecified
     )
 }

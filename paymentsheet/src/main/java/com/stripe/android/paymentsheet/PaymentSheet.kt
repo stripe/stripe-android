@@ -3273,9 +3273,6 @@ class PaymentSheet internal constructor(
          * Theme configuration for Link button
          */
         val link: LinkButtonTheme = LinkButtonTheme.DEFAULT,
-        // Future wallet themes can be added here:
-        // val googlePay: GooglePayButtonTheme = GooglePayButtonTheme.DEFAULT,
-        // val shopPay: ShopPayButtonTheme = ShopPayButtonTheme.DEFAULT,
     ) : Parcelable {
 
         /**
