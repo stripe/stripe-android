@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.runtime.Composable
@@ -11,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import kotlinx.parcelize.Parcelize
 
 interface IdentityVerificationSheet {
@@ -81,7 +83,14 @@ interface IdentityVerificationSheet {
             configuration: Configuration,
             identityVerificationCallback: IdentityVerificationCallback
         ): IdentityVerificationSheet =
-            StripeIdentityVerificationSheet(from, configuration, identityVerificationCallback)
+            StripeIdentityVerificationSheet(
+                lifecycleOwner = from,
+                activityResultRegistryOwner = from,
+                identityVerificationSheetContract = IdentityVerificationSheetContract(),
+                identityVerificationCallback = identityVerificationCallback,
+                context = from,
+                configuration = configuration
+            )
 
         /**
          * Creates a [IdentityVerificationSheet] instance with [Fragment].
@@ -95,7 +104,14 @@ interface IdentityVerificationSheet {
             configuration: Configuration,
             identityVerificationCallback: IdentityVerificationCallback
         ): IdentityVerificationSheet =
-            StripeIdentityVerificationSheet(from, configuration, identityVerificationCallback)
+            StripeIdentityVerificationSheet(
+                lifecycleOwner = from,
+                activityResultRegistryOwner = from.requireActivity(),
+                identityVerificationSheetContract = IdentityVerificationSheetContract(),
+                identityVerificationCallback = identityVerificationCallback,
+                context = from.requireContext(),
+                configuration = configuration
+            )
 
         /**
          * Creates a [IdentityVerificationSheet] instance in a [Composable]. Which would be
@@ -113,15 +129,18 @@ interface IdentityVerificationSheet {
             identityVerificationCallback: IdentityVerificationCallback
         ): IdentityVerificationSheet {
             val context = LocalContext.current
-            val activityResultLauncher = rememberLauncherForActivityResult(
-                IdentityVerificationSheetContract(),
-                identityVerificationCallback::onVerificationFlowResult
-            )
+            val lifecycleOwner = LocalLifecycleOwner.current
+            val activityResultRegistryOwner = LocalActivityResultRegistryOwner.current
+                ?: error("ActivityResultRegistryOwner is not available in this Compose context")
+
             return remember(configuration) {
                 StripeIdentityVerificationSheet(
-                    activityResultLauncher,
-                    context,
-                    configuration
+                    lifecycleOwner = lifecycleOwner,
+                    activityResultRegistryOwner = activityResultRegistryOwner,
+                    identityVerificationSheetContract = IdentityVerificationSheetContract(),
+                    identityVerificationCallback = identityVerificationCallback,
+                    context = context,
+                    configuration = configuration
                 )
             }
         }

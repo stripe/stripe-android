@@ -44,13 +44,15 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         .appendPath("stripe_ic_business")
         .build()
 
-    private val sheet = IdentityVerificationSheet.create(
-        from = activity,
-        configuration = IdentityVerificationSheet.Configuration(
-            brandLogo = linkController.state(activity).value.merchantLogoUrl?.toUri() ?: fallbackMerchantLogoUri,
-        ),
-        identityVerificationCallback = ::handleIdentityVerificationResult,
-    )
+    private val sheet by lazy {
+        IdentityVerificationSheet.create(
+            from = activity,
+            configuration = IdentityVerificationSheet.Configuration(
+                brandLogo = linkController.state(activity).value.merchantLogoUrl?.toUri() ?: fallbackMerchantLogoUri,
+            ),
+            identityVerificationCallback = ::handleIdentityVerificationResult,
+        )
+    }
 
     private val currentLinkAccount: LinkController.LinkAccount?
         get() = interactor.state.value.linkControllerState?.internalLinkAccount
