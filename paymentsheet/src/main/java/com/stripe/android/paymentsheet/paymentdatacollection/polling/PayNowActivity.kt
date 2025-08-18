@@ -70,6 +70,10 @@ internal class PayNowActivity : AppCompatActivity() {
                 }
 
                 LaunchedEffect(uiState.pollingState) {
+                    val pollingState = uiState.pollingState
+                    if (pollingState == PollingState.Failed) {
+                        _shouldShowWebView.value = false
+                    }
                     val result = uiState.pollingState.toFlowResult(
                         clientSecret = args.clientSecret,
                         stripeAccountId = args.stripeAccountId,
