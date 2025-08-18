@@ -1,14 +1,18 @@
 package com.stripe.android.link.repositories
 
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
+import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.IncentiveEligibilitySession
+import com.stripe.android.model.LinkAccountSession
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
@@ -22,9 +26,14 @@ internal interface LinkRepository {
 
     /**
      * Check if the email already has a link account.
+     *
+     * @param customerId Optional customer ID to associate with the lookup. When provided, enables
+     *                   retrieval of displayable payment details.
      */
     suspend fun lookupConsumer(
         email: String,
+        sessionId: String,
+        customerId: String?
     ): Result<ConsumerSessionLookup>
 
     /**
@@ -33,15 +42,23 @@ internal interface LinkRepository {
      * Link global holdback to look up consumers in the event Link is disabled.
      */
     suspend fun lookupConsumerWithoutBackendLoggingForExposure(
-        email: String
+        email: String,
+        sessionId: String,
     ): Result<ConsumerSessionLookup>
 
+    /**
+     * Performs a consumer lookup with mobile attestation verification.
+     *
+     * @param customerId Optional customer ID to associate with the lookup. When provided, enables
+     *                   retrieval of displayable payment details.
+     */
     suspend fun mobileLookupConsumer(
         email: String,
         emailSource: EmailSource,
         verificationToken: String,
         appId: String,
-        sessionId: String
+        sessionId: String,
+        customerId: String?
     ): Result<ConsumerSessionLookup>
 
     /**
@@ -49,8 +66,8 @@ internal interface LinkRepository {
      */
     suspend fun consumerSignUp(
         email: String,
-        phone: String,
-        country: String,
+        phone: String?,
+        country: String?,
         name: String?,
         consentAction: ConsumerSignUpConsentAction
     ): Result<ConsumerSessionSignup>
@@ -77,22 +94,32 @@ internal interface LinkRepository {
         stripeIntent: StripeIntent,
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?,
-        active: Boolean,
     ): Result<LinkPaymentDetails.New>
+
+    suspend fun createBankAccountPaymentDetails(
+        bankAccountId: String,
+        userEmail: String,
+        consumerSessionClientSecret: String,
+    ): Result<ConsumerPaymentDetails.PaymentDetails>
 
     suspend fun shareCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         id: String,
-        last4: String,
         consumerSessionClientSecret: String,
-        allowRedisplay: PaymentMethod.AllowRedisplay?,
-    ): Result<LinkPaymentDetails>
+    ): Result<LinkPaymentDetails.Saved>
 
     suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
         expectedPaymentMethodType: String,
+        billingPhone: String?,
+        cvc: String?,
     ): Result<SharePaymentDetails>
+
+    suspend fun createPaymentMethod(
+        consumerSessionClientSecret: String,
+        paymentMethod: LinkPaymentMethod
+    ): Result<PaymentMethod>
 
     suspend fun logOut(
         consumerSessionClientSecret: String,
@@ -126,6 +153,14 @@ internal interface LinkRepository {
     ): Result<ConsumerPaymentDetails>
 
     /**
+     * Fetch all shipping addresses for the signed in consumer.
+     */
+    suspend fun listShippingAddresses(
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
+    ): Result<ConsumerShippingAddresses>
+
+    /**
      * Delete the payment method from the consumer account.
      */
     suspend fun deletePaymentDetails(
@@ -142,4 +177,11 @@ internal interface LinkRepository {
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?
     ): Result<ConsumerPaymentDetails>
+
+    suspend fun createLinkAccountSession(
+        consumerSessionClientSecret: String,
+        stripeIntent: StripeIntent,
+        linkMode: LinkMode?,
+        consumerPublishableKey: String?
+    ): Result<LinkAccountSession>
 }

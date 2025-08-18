@@ -30,6 +30,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.R
@@ -43,6 +44,8 @@ import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElementUI
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
+import com.stripe.android.uicore.IconStyle
+import com.stripe.android.uicore.LocalIconStyle
 import com.stripe.android.uicore.elements.AddressController
 import com.stripe.android.uicore.elements.AddressElementUI
 import com.stripe.android.uicore.elements.H6Text
@@ -77,7 +80,7 @@ internal fun USBankAccountForm(
     enabled: Boolean
 ) {
     val viewModel = viewModel<USBankAccountFormViewModel>(
-        factory = USBankAccountFormViewModel.Factory {
+        factory = USBankAccountFormViewModel.Factory(usBankAccountFormArgs.autocompleteAddressInteractorFactory) {
             USBankAccountFormViewModel.Args(
                 instantDebits = usBankAccountFormArgs.instantDebits,
                 incentive = usBankAccountFormArgs.incentive,
@@ -95,12 +98,14 @@ internal fun USBankAccountForm(
                 setAsDefaultPaymentMethodEnabled = usBankAccountFormArgs.setAsDefaultPaymentMethodEnabled,
                 financialConnectionsAvailability = usBankAccountFormArgs.financialConnectionsAvailability,
                 setAsDefaultMatchesSaveForFutureUse = usBankAccountFormArgs.setAsDefaultMatchesSaveForFutureUse,
+                termsDisplay = usBankAccountFormArgs.termsDisplay,
             )
         },
     )
 
     val state by viewModel.currentScreenState.collectAsState()
     val lastTextFieldIdentifier by viewModel.lastTextFieldIdentifier.collectAsState()
+    val addressController by viewModel.addressElement.addressController.collectAsState()
     val isEnabled = !state.isProcessing && enabled
 
     USBankAccountEmitters(
@@ -118,7 +123,7 @@ internal fun USBankAccountForm(
         nameController = viewModel.nameController,
         emailController = viewModel.emailController,
         phoneController = viewModel.phoneController,
-        addressController = viewModel.addressElement.controller,
+        addressController = addressController,
         lastTextFieldIdentifier = lastTextFieldIdentifier,
         sameAsShippingElement = viewModel.sameAsShippingElement,
         saveForFutureUseElement = viewModel.saveForFutureUseElement,
@@ -363,7 +368,7 @@ private fun AddressSection(
     ) {
         Column(modifier) {
             Section(
-                title = PaymentsUiCoreR.string.stripe_billing_details,
+                title = resolvableString(PaymentsUiCoreR.string.stripe_billing_details),
                 error = sectionErrorString,
             ) {
                 AddressElementUI(
@@ -451,7 +456,17 @@ private fun BankAccountDetails(
     promoBadgeState: PromoBadgeState?,
     onIconButtonClick: () -> Unit,
 ) {
-    val bankIcon = remember(bankName) { TransformToBankIcon(bankName) }
+    val iconStyle = LocalIconStyle.current
+    val bankIcon = remember(bankName, iconStyle) {
+        TransformToBankIcon(
+            bankName = bankName,
+            fallbackIcon = if (iconStyle == IconStyle.Outlined) {
+                PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_bank_outlined
+            } else {
+                PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_bank
+            }
+        )
+    }
 
     SectionCard(modifier = Modifier.fillMaxWidth()) {
         Row(

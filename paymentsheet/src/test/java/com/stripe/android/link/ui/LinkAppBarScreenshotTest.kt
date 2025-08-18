@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.screenshottesting.FontSize
@@ -34,8 +35,6 @@ internal class LinkAppBarScreenshotTest(
                 LinkAppBar(
                     state = testCase.state,
                     onBackPressed = {},
-                    showBottomSheetContent = {},
-                    onLogoutClicked = {}
                 )
             }
         }
@@ -47,27 +46,30 @@ internal class LinkAppBarScreenshotTest(
         fun data(): List<TestCase> {
             return listOf(
                 TestCase(
-                    name = "LinkAppBarWithHeaderWithOverflowMenuWithEmail",
+                    name = "LinkAppBarWithLogoAndCloseButton",
                     state = LinkAppBarState(
-                        navigationIcon = R.drawable.stripe_link_close,
+                        canNavigateBack = false,
                         showHeader = true,
-                        showOverflowMenu = true,
+                        title = null,
+                        isElevated = false,
                     )
                 ),
                 TestCase(
-                    name = "LinkAppBarWithHeaderNoOverflowMenuWithEmail",
+                    name = "LinkAppBarWithBackButtonAndTitle",
                     state = LinkAppBarState(
-                        navigationIcon = R.drawable.stripe_link_close,
-                        showHeader = true,
-                        showOverflowMenu = false,
-                    )
-                ),
-                TestCase(
-                    name = "LinkAppBarNoHeaderWithOverflowMenuWithEmail",
-                    state = LinkAppBarState(
-                        navigationIcon = R.drawable.stripe_link_close,
+                        canNavigateBack = true,
                         showHeader = false,
-                        showOverflowMenu = true,
+                        title = R.string.stripe_add_payment_method.resolvableString,
+                        isElevated = false,
+                    )
+                ),
+                TestCase(
+                    name = "LinkAppBarWithBackButtonAndLongTitle",
+                    state = LinkAppBarState(
+                        canNavigateBack = true,
+                        showHeader = false,
+                        title = "Ein richtig langer Titel auf Deutsch, einer sehr verbosen Sprache".resolvableString,
+                        isElevated = false,
                     )
                 ),
             )

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.model.Address
@@ -14,6 +15,7 @@ import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
@@ -28,6 +30,7 @@ import com.stripe.android.testing.FakePaymentLauncher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
+@OptIn(SharedPaymentTokenSessionPreview::class)
 internal class IntentConfirmationFlowTest {
     @Test
     fun `On payment intent, action should be to confirm intent`() = runTest {
@@ -113,6 +116,38 @@ internal class IntentConfirmationFlowTest {
         assertThat(completeAction.confirmationOption).isEqualTo(CONFIRMATION_OPTION)
         assertThat(completeAction.deferredIntentConfirmationType)
             .isEqualTo(DeferredIntentConfirmationType.None)
+        assertThat(completeAction.completedFullPaymentFlow).isTrue()
+    }
+
+    @Test
+    fun `On deferred intent, action should be complete in uncomplete flow if preparing payment method`() = runTest {
+        val intentConfirmationDefinition = createIntentConfirmationDefinition(
+            preparePaymentMethodHandler = { _, _ ->
+                // No-op
+            }
+        )
+
+        val action = intentConfirmationDefinition.action(
+            confirmationOption = CONFIRMATION_OPTION,
+            confirmationParameters = DEFERRED_CONFIRMATION_PARAMETERS.copy(
+                initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                    intentConfiguration = PaymentSheet.IntentConfiguration(
+                        sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Setup(
+                            currency = "USD",
+                        ),
+                        sellerDetails = null,
+                    )
+                )
+            ),
+        )
+
+        val completeAction = action.asComplete()
+
+        assertThat(completeAction.intent).isEqualTo(SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD)
+        assertThat(completeAction.confirmationOption).isEqualTo(CONFIRMATION_OPTION)
+        assertThat(completeAction.deferredIntentConfirmationType)
+            .isEqualTo(DeferredIntentConfirmationType.None)
+        assertThat(completeAction.completedFullPaymentFlow).isFalse()
     }
 
     @Test
@@ -242,6 +277,7 @@ internal class IntentConfirmationFlowTest {
         createPaymentMethodResult: Result<PaymentMethod> = Result.success(CARD_PAYMENT_METHOD),
         intentResult: Result<StripeIntent> =
             Result.success(SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD),
+        preparePaymentMethodHandler: PreparePaymentMethodHandler? = null,
         createIntentCallback: CreateIntentCallback? = null,
     ): IntentConfirmationDefinition {
         return IntentConfirmationDefinition(
@@ -261,6 +297,7 @@ internal class IntentConfirmationFlowTest {
                 intentCreationCallbackProvider = {
                     createIntentCallback
                 },
+                preparePaymentMethodHandlerProvider = { preparePaymentMethodHandler }
             ),
             paymentLauncherFactory = {
                 FakePaymentLauncher()

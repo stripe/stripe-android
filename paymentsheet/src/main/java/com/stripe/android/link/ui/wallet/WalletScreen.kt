@@ -1,37 +1,41 @@
 package com.stripe.android.link.ui.wallet
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.AlertDialog
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -46,14 +50,24 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataContract
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.LinkTheme
+import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.ErrorText
+import com.stripe.android.link.ui.LinkAppBarMenu
+import com.stripe.android.link.ui.LinkDivider
+import com.stripe.android.link.ui.LinkLoadingScreen
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.SecondaryButton
+import com.stripe.android.link.utils.LinkScreenTransition
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.payments.financialconnections.getIntentBuilder
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
@@ -67,6 +81,7 @@ import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.text.Html
 import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.launch
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
 import com.stripe.android.uicore.R as StripeUiCoreR
 
@@ -74,9 +89,31 @@ import com.stripe.android.uicore.R as StripeUiCoreR
 internal fun WalletScreen(
     viewModel: WalletViewModel,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
-    hideBottomSheetContent: () -> Unit
+    hideBottomSheetContent: suspend () -> Unit,
+    onLogoutClicked: () -> Unit,
 ) {
     val state by viewModel.uiState.collectAsState()
+
+    val financialConnectionsSheetLauncher =
+        rememberFinancialConnectionsSheetInternal(
+            state.addBankAccountOption?.financialConnectionsAvailability,
+            viewModel::onFinancialConnectionsResult
+        )
+
+    val financialConnectionsSheetConfig =
+        (state.addBankAccountState as? AddBankAccountState.Processing)?.configToPresent
+    LaunchedEffect(financialConnectionsSheetConfig) {
+        if (financialConnectionsSheetConfig != null) {
+            if (financialConnectionsSheetLauncher != null) {
+                financialConnectionsSheetLauncher.present(financialConnectionsSheetConfig)
+                viewModel.onPresentFinancialConnections(true)
+            } else {
+                // Should never happen.
+                viewModel.onPresentFinancialConnections(false)
+            }
+        }
+    }
+
     WalletBody(
         state = state,
         expiryDateController = viewModel.expiryDateController,
@@ -87,10 +124,11 @@ internal fun WalletScreen(
         onPayAnotherWayClicked = viewModel::onPayAnotherWayClicked,
         onRemoveClicked = viewModel::onRemoveClicked,
         onUpdateClicked = viewModel::onUpdateClicked,
+        onLogoutClicked = onLogoutClicked,
         onSetDefaultClicked = viewModel::onSetDefaultClicked,
         showBottomSheetContent = showBottomSheetContent,
         hideBottomSheetContent = hideBottomSheetContent,
-        onAddNewPaymentMethodClicked = viewModel::onAddNewPaymentMethodClicked,
+        onAddPaymentMethodOptionClicked = viewModel::onAddPaymentMethodOptionClicked,
         onDismissAlert = viewModel::onDismissAlert
     )
 }
@@ -102,60 +140,84 @@ internal fun WalletBody(
     cvcController: CvcController,
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onExpandedChanged: (Boolean) -> Unit,
-    onAddNewPaymentMethodClicked: () -> Unit,
+    onAddPaymentMethodOptionClicked: (AddPaymentMethodOption) -> Unit,
     onPrimaryButtonClick: () -> Unit,
     onPayAnotherWayClicked: () -> Unit,
     onDismissAlert: () -> Unit,
     onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onUpdateClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onLogoutClicked: () -> Unit,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
-    hideBottomSheetContent: () -> Unit
+    hideBottomSheetContent: suspend () -> Unit,
 ) {
-    if (state.paymentDetailsList.isEmpty()) {
-        Loader()
-        return
-    }
+    val coroutineScope = rememberCoroutineScope()
+    AnimatedContent(
+        targetState = state.shouldShowLoadingState,
+        transitionSpec = { LinkScreenTransition },
+    ) { isLoading ->
+        if (isLoading) {
+            LinkLoadingScreen(Modifier.testTag(WALLET_LOADER_TAG))
+        } else {
+            if (state.alertMessage != null) {
+                AlertMessage(
+                    alertMessage = state.alertMessage,
+                    onDismissAlert = onDismissAlert
+                )
+            }
 
-    if (state.alertMessage != null) {
-        AlertMessage(
-            alertMessage = state.alertMessage,
-            onDismissAlert = onDismissAlert
-        )
-    }
+            val focusManager = LocalFocusManager.current
 
-    val focusManager = LocalFocusManager.current
+            LaunchedEffect(state.isProcessing) {
+                if (state.isProcessing) {
+                    focusManager.clearFocus()
+                }
+            }
 
-    LaunchedEffect(state.isProcessing) {
-        if (state.isProcessing) {
-            focusManager.clearFocus()
+            ScrollableTopLevelColumn {
+                PaymentDetailsSection(
+                    modifier = Modifier,
+                    state = state,
+                    isExpanded = state.isExpanded,
+                    expiryDateController = expiryDateController,
+                    cvcController = cvcController,
+                    onItemSelected = onItemSelected,
+                    onExpandedChanged = onExpandedChanged,
+                    showBottomSheetContent = showBottomSheetContent,
+                    onRemoveClicked = onRemoveClicked,
+                    onUpdateClicked = onUpdateClicked,
+                    onLogoutClicked = onLogoutClicked,
+                    onSetDefaultClicked = onSetDefaultClicked,
+                    onAddNewPaymentMethodClicked = {
+                        if (state.addPaymentMethodOptions.size == 1) {
+                            onAddPaymentMethodOptionClicked(state.addPaymentMethodOptions[0])
+                        } else {
+                            showBottomSheetContent {
+                                AddPaymentMethodMenu(
+                                    modifier = Modifier.testTag(WALLET_SCREEN_ADD_PAYMENT_METHOD_MENU),
+                                    options = state.addPaymentMethodOptions,
+                                    onOptionClick = { option ->
+                                        onAddPaymentMethodOptionClicked(option)
+                                        coroutineScope.launch {
+                                            hideBottomSheetContent()
+                                        }
+                                    },
+                                )
+                            }
+                        }
+                    },
+                    hideBottomSheetContent = hideBottomSheetContent
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                ActionSection(
+                    state = state,
+                    onPrimaryButtonClick = onPrimaryButtonClick,
+                    onPayAnotherWayClicked = onPayAnotherWayClicked
+                )
+            }
         }
-    }
-
-    ScrollableTopLevelColumn {
-        PaymentDetailsSection(
-            modifier = Modifier,
-            state = state,
-            isExpanded = state.isExpanded,
-            expiryDateController = expiryDateController,
-            cvcController = cvcController,
-            onItemSelected = onItemSelected,
-            onExpandedChanged = onExpandedChanged,
-            showBottomSheetContent = showBottomSheetContent,
-            onRemoveClicked = onRemoveClicked,
-            onUpdateClicked = onUpdateClicked,
-            onSetDefaultClicked = onSetDefaultClicked,
-            onAddNewPaymentMethodClicked = onAddNewPaymentMethodClicked,
-            hideBottomSheetContent = hideBottomSheetContent
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        ActionSection(
-            state = state,
-            onPrimaryButtonClick = onPrimaryButtonClick,
-            onPayAnotherWayClicked = onPayAnotherWayClicked
-        )
     }
 }
 
@@ -172,12 +234,21 @@ private fun PaymentDetailsSection(
     onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onUpdateClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onLogoutClicked: () -> Unit,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
-    hideBottomSheetContent: () -> Unit
+    hideBottomSheetContent: suspend () -> Unit,
 ) {
     Column(
         modifier = modifier
     ) {
+        if (state.paymentSelectionHint != null) {
+            Text(
+                modifier = Modifier.padding(bottom = 16.dp),
+                text = state.paymentSelectionHint,
+                style = LinkTheme.typography.body,
+                color = LinkTheme.colors.textPrimary,
+            )
+        }
         PaymentMethodSection(
             state = state,
             isExpanded = isExpanded,
@@ -188,7 +259,8 @@ private fun PaymentDetailsSection(
             onSetDefaultClicked = onSetDefaultClicked,
             onUpdateClicked = onUpdateClicked,
             onAddNewPaymentMethodClicked = onAddNewPaymentMethodClicked,
-            hideBottomSheetContent = hideBottomSheetContent
+            hideBottomSheetContent = hideBottomSheetContent,
+            onLogoutClicked = onLogoutClicked,
         )
 
         AnimatedVisibility(visible = state.mandate != null) {
@@ -202,13 +274,14 @@ private fun PaymentDetailsSection(
         state.selectedCard?.let { selectedCard ->
             if (selectedCard.requiresCardDetailsRecollection) {
                 Spacer(modifier = Modifier.height(16.dp))
-
-                CardDetailsRecollectionForm(
-                    paymentDetails = selectedCard,
-                    expiryDateController = expiryDateController,
-                    cvcController = cvcController,
-                    isCardExpired = selectedCard.isExpired
-                )
+                StripeThemeForLink {
+                    CardDetailsRecollectionForm(
+                        paymentDetails = selectedCard,
+                        expiryDateController = expiryDateController,
+                        cvcController = cvcController,
+                        isCardExpired = selectedCard.isExpired
+                    )
+                }
             }
         }
     }
@@ -268,9 +341,12 @@ private fun PaymentMethodSection(
     onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onUpdateClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onLogoutClicked: () -> Unit,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
-    hideBottomSheetContent: () -> Unit
+    hideBottomSheetContent: suspend () -> Unit
 ) {
+    val coroutineScope = rememberCoroutineScope()
+
     val emailLabel = stringResource(StripeUiCoreR.string.stripe_email)
     val paymentLabel = stringResource(R.string.stripe_wallet_collapsed_payment)
 
@@ -282,6 +358,11 @@ private fun PaymentMethodSection(
         selectedItem = state.selectedItem,
         emailLabel = emailLabel,
         labelMaxWidth = labelMaxWidthDp,
+        onAccountMenuClicked = {
+            showBottomSheetContent {
+                LinkAppBarMenu(onLogoutClicked)
+            }
+        },
         expandedContent = {
             ExpandedPaymentDetails(
                 uiState = state,
@@ -292,19 +373,22 @@ private fun PaymentMethodSection(
                             modifier = Modifier.testTag(WALLET_SCREEN_MENU_SHEET_TAG),
                             paymentDetails = it,
                             onSetDefaultClick = {
-                                hideBottomSheetContent()
-                                onSetDefaultClicked(it)
+                                coroutineScope.launch {
+                                    hideBottomSheetContent()
+                                    onSetDefaultClicked(it)
+                                }
                             },
                             onRemoveClick = {
-                                hideBottomSheetContent()
-                                onRemoveClicked(it)
-                            },
-                            onCancelClick = {
-                                hideBottomSheetContent()
+                                coroutineScope.launch {
+                                    hideBottomSheetContent()
+                                    onRemoveClicked(it)
+                                }
                             },
                             onUpdateClick = {
-                                hideBottomSheetContent()
-                                onUpdateClicked(it)
+                                coroutineScope.launch {
+                                    hideBottomSheetContent()
+                                    onUpdateClicked(it)
+                                }
                             }
                         )
                     }
@@ -353,39 +437,45 @@ private fun PaymentMethodPicker(
     expanded: Boolean,
     selectedItem: ConsumerPaymentDetails.PaymentDetails?,
     modifier: Modifier = Modifier,
+    onAccountMenuClicked: () -> Unit,
     collapsedContent: @Composable ((ConsumerPaymentDetails.PaymentDetails) -> Unit),
     expandedContent: @Composable (() -> Unit),
 ) {
     Column(
         modifier = modifier
-            .animateContentSize()
             .fillMaxWidth()
-            .border(
-                width = 1.dp,
-                color = LinkTheme.colors.componentBorder,
-                shape = LinkTheme.shapes.large
-            )
-            .clip(LinkTheme.shapes.large)
+            .clip(LinkTheme.shapes.default)
             .background(
-                color = LinkTheme.colors.componentBackground,
-                shape = LinkTheme.shapes.large
+                color = LinkTheme.colors.surfaceSecondary,
+                shape = LinkTheme.shapes.default
             )
     ) {
         EmailDetails(
             email = email,
             label = emailLabel,
-            labelMaxWidth = labelMaxWidth
+            labelMaxWidth = labelMaxWidth,
+            onMenuClicked = onAccountMenuClicked,
         )
 
-        Divider(
-            modifier = Modifier.fillMaxWidth(),
-            color = LinkTheme.colors.componentBorder,
-        )
+        LinkDivider()
 
-        if (expanded || selectedItem == null) {
-            expandedContent()
-        } else {
-            collapsedContent(selectedItem)
+        AnimatedContent(
+            targetState = expanded || selectedItem == null,
+            transitionSpec = {
+                if (targetState) {
+                    // Expanding
+                    (fadeIn() + expandVertically(expandFrom = Alignment.Top)) togetherWith fadeOut()
+                } else {
+                    // Collapsing
+                    fadeIn() togetherWith (fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top))
+                }
+            }
+        ) { showExpanded ->
+            if (showExpanded) {
+                expandedContent()
+            } else {
+                collapsedContent(selectedItem!!)
+            }
         }
     }
 }
@@ -417,7 +507,7 @@ private fun CollapsedPaymentDetails(
             modifier = Modifier
                 .testTag(COLLAPSED_WALLET_HEADER_TAG)
                 .width(labelMaxWidth),
-            color = LinkTheme.colors.disabledText,
+            color = LinkTheme.colors.textTertiary,
         )
 
         PaymentDetails(
@@ -431,7 +521,7 @@ private fun CollapsedPaymentDetails(
             modifier = Modifier
                 .padding(end = 22.dp)
                 .testTag(COLLAPSED_WALLET_CHEVRON_ICON_TAG),
-            tint = LinkTheme.colors.disabledText
+            tint = LinkTheme.colors.iconTertiary
         )
     }
 }
@@ -440,15 +530,18 @@ private fun CollapsedPaymentDetails(
 private fun EmailDetails(
     email: String,
     label: String,
-    labelMaxWidth: Dp
+    labelMaxWidth: Dp,
+    onMenuClicked: () -> Unit,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .defaultMinSize(minHeight = 64.dp)
             .padding(
-                vertical = 16.dp,
-                horizontal = HorizontalPadding,
+                top = 16.dp,
+                start = 20.dp,
+                end = 14.dp,
+                bottom = 16.dp,
             ),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -456,7 +549,7 @@ private fun EmailDetails(
         Text(
             modifier = Modifier.width(labelMaxWidth),
             text = label,
-            color = LinkTheme.colors.disabledText,
+            color = LinkTheme.colors.textTertiary,
         )
 
         Text(
@@ -466,6 +559,16 @@ private fun EmailDetails(
             maxLines = 1,
             style = LinkTheme.typography.bodyEmphasized,
             modifier = Modifier.weight(1f),
+        )
+
+        Icon(
+            imageVector = Icons.Default.MoreVert,
+            contentDescription = stringResource(R.string.stripe_show_menu),
+            tint = LinkTheme.colors.iconSecondary,
+            modifier = Modifier
+                .clip(CircleShape)
+                .clickable(onClick = onMenuClicked)
+                .padding(4.dp),
         )
     }
 }
@@ -478,7 +581,9 @@ private fun ExpandedPaymentDetails(
     onAddNewPaymentMethodClick: () -> Unit,
     onCollapse: () -> Unit
 ) {
-    val isInteractionEnabled = !uiState.primaryButtonState.isBlocking
+    val isInteractionEnabled =
+        !uiState.primaryButtonState.isBlocking &&
+            uiState.addBankAccountState == AddBankAccountState.Idle
 
     Column(modifier = Modifier.fillMaxWidth()) {
         ExpandedRowHeader(
@@ -502,8 +607,7 @@ private fun ExpandedPaymentDetails(
             )
 
             if (index != uiState.paymentDetailsList.lastIndex || uiState.canAddNewPaymentMethod) {
-                Divider(
-                    color = LinkTheme.colors.componentBorder,
+                LinkDivider(
                     modifier = Modifier.padding(horizontal = 20.dp),
                 )
             }
@@ -538,14 +642,13 @@ private fun ExpandedRowHeader(
     ) {
         Text(
             text = stringResource(R.string.stripe_wallet_expanded_title),
-            color = LinkTheme.colors.textPrimary,
-            style = LinkTheme.typography.bodyEmphasized,
+            color = LinkTheme.colors.textTertiary
         )
         Icon(
             painter = painterResource(id = R.drawable.stripe_link_chevron),
             contentDescription = stringResource(R.string.stripe_wallet_expand_accessibility),
             modifier = Modifier.rotate(CHEVRON_ICON_ROTATION),
-            tint = LinkTheme.colors.textPrimary,
+            tint = LinkTheme.colors.iconTertiary,
         )
     }
 }
@@ -563,16 +666,10 @@ private fun AddPaymentMethodRow(
             .clickable(enabled = isEnabled, onClick = onAddNewPaymentMethodClick),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            painter = painterResource(R.drawable.stripe_link_add_green),
-            contentDescription = null,
-            modifier = Modifier.padding(start = HorizontalPadding, end = 12.dp),
-            tint = Color.Unspecified
-        )
         Text(
             text = stringResource(R.string.stripe_add_payment_method),
-            modifier = Modifier.padding(end = HorizontalPadding),
-            color = LinkTheme.colors.actionLabel,
+            modifier = Modifier.padding(horizontal = HorizontalPadding),
+            color = LinkTheme.colors.textBrand,
             style = LinkTheme.typography.bodyEmphasized,
         )
     }
@@ -582,7 +679,7 @@ private fun AddPaymentMethodRow(
 private fun LinkMandate(text: String) {
     Html(
         html = text.replaceHyperlinks(),
-        color = LinkTheme.colors.textSecondary,
+        color = LinkTheme.colors.textTertiary,
         style = LinkTheme.typography.caption.copy(
             textAlign = TextAlign.Center,
         ),
@@ -590,7 +687,7 @@ private fun LinkMandate(text: String) {
             .fillMaxWidth()
             .padding(top = 12.dp),
         urlSpanStyle = SpanStyle(
-            color = LinkTheme.colors.primary,
+            color = LinkTheme.colors.textBrand,
         )
     )
 }
@@ -658,18 +755,6 @@ internal fun CardDetailsRecollectionForm(
 }
 
 @Composable
-private fun Loader() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .testTag(WALLET_LOADER_TAG),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator()
-    }
-}
-
-@Composable
 private fun AlertMessage(
     alertMessage: ResolvableString,
     onDismissAlert: () -> Unit
@@ -685,7 +770,7 @@ private fun AlertMessage(
                 color = LinkTheme.colors.textPrimary,
             )
         },
-        backgroundColor = LinkTheme.colors.background,
+        backgroundColor = LinkTheme.colors.surfacePrimary,
         onDismissRequest = onDismissAlert,
         confirmButton = {
             TextButton(
@@ -695,11 +780,33 @@ private fun AlertMessage(
             ) {
                 Text(
                     text = android.R.string.ok.resolvableString.resolve(context),
-                    color = LinkTheme.colors.actionLabel
+                    color = LinkTheme.colors.textBrand
                 )
             }
         }
     )
+}
+
+// We can't use FC's `rememberFinancialConnectionsSheet` because it doesn't support FC Lite.
+@Composable
+private fun rememberFinancialConnectionsSheetInternal(
+    financialConnectionsAvailability: FinancialConnectionsAvailability?,
+    callback: (FinancialConnectionsSheetResult) -> Unit
+): FinancialConnectionsSheetForDataLauncher? {
+    financialConnectionsAvailability ?: return null
+
+    val context = LocalContext.current
+    val contract = remember(context, financialConnectionsAvailability) {
+        FinancialConnectionsSheetForDataContract(
+            intentBuilder = financialConnectionsAvailability.getIntentBuilder(context)
+        )
+    }
+    val activityResultLauncher = rememberLauncherForActivityResult(contract, callback)
+    return remember(activityResultLauncher) {
+        FinancialConnectionsSheetForDataLauncher(
+            activityResultLauncher
+        )
+    }
 }
 
 private fun String.replaceHyperlinks() = this.replace(
@@ -715,6 +822,7 @@ internal const val COLLAPSED_WALLET_PAYMENT_DETAILS_TAG = "collapsed_wallet_paym
 internal const val COLLAPSED_WALLET_ROW = "collapsed_wallet_row_tag"
 internal const val WALLET_SCREEN_EXPANDED_ROW_HEADER = "wallet_screen_expanded_row_header"
 internal const val WALLET_ADD_PAYMENT_METHOD_ROW = "wallet_add_payment_method_row"
+internal const val WALLET_SCREEN_ADD_PAYMENT_METHOD_MENU = "wallet_screen_add_payment_method_sheet"
 internal const val WALLET_SCREEN_PAYMENT_METHODS_LIST = "wallet_screen_payment_methods_list"
 internal const val WALLET_SCREEN_PAY_BUTTON = "wallet_screen_pay_button"
 internal const val WALLET_SCREEN_PAY_ANOTHER_WAY_BUTTON = "wallet_screen_pay_another_way_button"

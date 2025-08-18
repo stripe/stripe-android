@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_download_complete">ダウンロードが完了しました</string>
+  <string name="stripe_downloading_file">ファイルをダウンロード中です</string>
+  <string name="stripe_failed_to_open_url">URL を開けませんでした: %s</string>
+  <string name="stripe_not_yet_built">まだ構築されていません…</string>
+  <string name="stripe_unable_to_download_file">ファイルをダウンロードできません</string>
+</resources>

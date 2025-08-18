@@ -12,9 +12,10 @@ internal sealed class LoggableExperiment(
     open val group: String,
     open val dimensions: Map<String, String>
 ) {
-    data class LinkGlobalHoldback(
+    data class LinkHoldback(
         override val arbId: String,
         override val group: String,
+        override val experiment: ExperimentAssignment,
         val isReturningLinkUser: Boolean,
         val useLinkNative: Boolean,
         val emailRecognitionSource: EmailRecognitionSource?,
@@ -25,7 +26,7 @@ internal sealed class LoggableExperiment(
     ) : LoggableExperiment(
         arbId = arbId,
         group = group,
-        experiment = ExperimentAssignment.LINK_GLOBAL_HOLD_BACK,
+        experiment = experiment,
         dimensions = mapOf(
             "integration_type" to "mpe_android",
             "is_returning_link_user" to isReturningLinkUser.toString(),

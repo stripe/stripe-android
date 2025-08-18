@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation
 
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -18,6 +19,7 @@ internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.
         val createParams: PaymentMethodCreateParams,
         val optionsParams: PaymentMethodOptionsParams?,
         val extraParams: PaymentMethodExtraParams?,
-        val shouldSave: Boolean
+        val shouldSave: Boolean,
+        val passiveCaptchaParams: PassiveCaptchaParams? = null,
     ) : PaymentMethodConfirmationOption
 }

@@ -50,7 +50,13 @@ internal class RealLinkConfigurationCoordinator @Inject internal constructor(
     private val componentFlow = MutableStateFlow<LinkComponent?>(null)
 
     override val emailFlow: StateFlow<String?> = componentFlow
-        .flatMapLatestAsStateFlow { it?.linkAccountManager?.linkAccount ?: stateFlowOf(null) }
+        .flatMapLatestAsStateFlow { component ->
+            if (component?.linkAccountManager?.linkAccountInfo != null) {
+                component.linkAccountManager.linkAccountInfo.mapAsStateFlow { it.account }
+            } else {
+                stateFlowOf(null)
+            }
+        }
         .mapAsStateFlow { it?.email }
 
     /**
@@ -97,10 +103,17 @@ internal class RealLinkConfigurationCoordinator @Inject internal constructor(
     override suspend fun attachNewCardToAccount(
         configuration: LinkConfiguration,
         paymentMethodCreateParams: PaymentMethodCreateParams
-    ): Result<LinkPaymentDetails> =
-        getLinkPaymentLauncherComponent(configuration)
-            .linkAccountManager
-            .createCardPaymentDetails(paymentMethodCreateParams)
+    ): Result<LinkPaymentDetails> {
+        val accountManager = getLinkPaymentLauncherComponent(configuration).linkAccountManager
+        val linkPaymentDetailsResult = accountManager.createCardPaymentDetails(paymentMethodCreateParams)
+        return linkPaymentDetailsResult.mapCatching { linkPaymentDetails ->
+            if (configuration.passthroughModeEnabled) {
+                accountManager.shareCardPaymentDetails(linkPaymentDetails).getOrThrow()
+            } else {
+                linkPaymentDetails
+            }
+        }
+    }
 
     override suspend fun logOut(
         configuration: LinkConfiguration,

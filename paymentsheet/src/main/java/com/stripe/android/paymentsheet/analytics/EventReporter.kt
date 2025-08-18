@@ -3,9 +3,11 @@ package com.stripe.android.paymentsheet.analytics
 import androidx.annotation.Keep
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -48,6 +50,8 @@ internal interface EventReporter {
         requireCvcRecollection: Boolean,
         hasDefaultPaymentMethod: Boolean?,
         setAsDefaultEnabled: Boolean?,
+        paymentMethodOptionsSetupFutureUsage: Boolean,
+        setupFutureUsage: StripeIntent.Usage?
     )
 
     /**
@@ -120,18 +124,20 @@ internal interface EventReporter {
 
     fun onDisallowedCardBrandEntered(brand: CardBrand)
 
+    fun onAnalyticsEvent(event: AnalyticsEvent)
+
     /**
      * The customer has pressed the confirm button.
      */
     fun onPressConfirmButton(
-        paymentSelection: PaymentSelection?,
+        paymentSelection: PaymentSelection,
     )
 
     /**
      * Payment or setup have succeeded.
      */
     fun onPaymentSuccess(
-        paymentSelection: PaymentSelection?,
+        paymentSelection: PaymentSelection,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
     )
 
@@ -139,7 +145,7 @@ internal interface EventReporter {
      * Payment or setup have failed.
      */
     fun onPaymentFailure(
-        paymentSelection: PaymentSelection?,
+        paymentSelection: PaymentSelection,
         error: PaymentSheetConfirmationError,
     )
 
@@ -229,6 +235,21 @@ internal interface EventReporter {
     fun onUsBankAccountFormEvent(
         event: USBankAccountFormViewModel.AnalyticsEvent
     )
+
+    /**
+     * Shop Pay webView loading has been attempted.
+     */
+    fun onShopPayWebViewLoadAttempt()
+
+    /**
+     * Shop Pay webView payment confirmation has succeeded.
+     */
+    fun onShopPayWebViewConfirmSuccess()
+
+    /**
+     * Shop Pay webView has been cancelled by the user.
+     */
+    fun onShopPayWebViewCancelled(didReceiveECEClick: Boolean)
 
     enum class Mode(val code: String) {
         Complete("complete"),

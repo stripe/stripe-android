@@ -26,6 +26,7 @@ import kotlinx.coroutines.test.setMain
 import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.fakes.RoboWebSettings
 import java.security.PublicKey
 import java.util.UUID
 import kotlin.test.AfterTest
@@ -59,11 +60,13 @@ class DefaultAuthenticationRequestParametersFactoryTest {
     @BeforeTest
     fun before() {
         Dispatchers.setMain(testDispatcher)
+        RoboWebSettings.setDefaultUserAgentOverride("user")
     }
 
     @AfterTest
     fun cleanup() {
         Dispatchers.resetMain()
+        RoboWebSettings.setDefaultUserAgentOverride(null)
     }
 
     @Test

@@ -2,9 +2,6 @@ package com.stripe.android.model
 
 import android.net.Uri
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.utils.FeatureFlags
-import com.stripe.android.testing.FeatureFlagTestRule
-import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -12,12 +9,6 @@ import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentIntentTest {
-
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage,
-        isEnabled = false
-    )
 
     @Test
     fun parseIdFromClientSecret_parsesCorrectly() {
@@ -225,8 +216,54 @@ class PaymentIntentTest {
 
     @Test
     fun clientSecret_withValidKeys_succeeds() {
-        assertThat(PaymentIntent.ClientSecret("pi_a1b2c3_secret_x7y8z9").value)
-            .isEqualTo("pi_a1b2c3_secret_x7y8z9")
+        val clientSecret = PaymentIntent.ClientSecret("pi_a1b2c3_secret_x7y8z9")
+
+        assertThat(clientSecret.value).isEqualTo("pi_a1b2c3_secret_x7y8z9")
+        assertThat(clientSecret.paymentIntentId).isEqualTo("pi_a1b2c3")
+    }
+
+    @Test
+    fun clientSecret_withValidScopedKeys_succeeds() {
+        val clientSecret = PaymentIntent.ClientSecret("pi_a1b2c3_scoped_secret_x7y8z9")
+
+        assertThat(clientSecret.value).isEqualTo("pi_a1b2c3_scoped_secret_x7y8z9")
+        assertThat(clientSecret.paymentIntentId).isEqualTo("pi_a1b2c3")
+    }
+
+    @Test
+    fun isRedacted_isTrue_ifClientSecretRedacted() {
+        val intent = PaymentIntent(
+            id = "pi_12345",
+            paymentMethodTypes = emptyList(),
+            amount = null,
+            currency = null,
+            countryCode = null,
+            confirmationMethod = PaymentIntent.ConfirmationMethod.Automatic,
+            isLiveMode = false,
+            created = 0L,
+            unactivatedPaymentMethods = emptyList(),
+            clientSecret = PaymentIntent.VALUE_REDACTED_CLIENT_SECRET,
+        )
+
+        assertThat(intent.isRedacted).isTrue()
+    }
+
+    @Test
+    fun isRedacted_isFalse_ifClientSecretNull() {
+        val intent = PaymentIntent(
+            id = "pi_12345",
+            paymentMethodTypes = emptyList(),
+            amount = null,
+            currency = null,
+            countryCode = null,
+            confirmationMethod = PaymentIntent.ConfirmationMethod.Automatic,
+            isLiveMode = false,
+            created = 0L,
+            unactivatedPaymentMethods = emptyList(),
+            clientSecret = "pi_123_secret_123",
+        )
+
+        assertThat(intent.isRedacted).isFalse()
     }
 
     @Test
@@ -286,7 +323,6 @@ class PaymentIntentTest {
 
     @Test
     fun `Determines SFU correctly if setup_future_usage is none in payment method options`() {
-        featureFlagTestRule.setEnabled(true)
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
             setupFutureUsage = StripeIntent.Usage.OffSession,
             paymentMethodOptionsJsonString = """
@@ -304,7 +340,6 @@ class PaymentIntentTest {
 
     @Test
     fun `Determines SFU correctly if setup_future_usage exists in PMO with feature enabled`() {
-        featureFlagTestRule.setEnabled(true)
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
             paymentMethodOptionsJsonString = """
                 {
@@ -321,7 +356,6 @@ class PaymentIntentTest {
 
     @Test
     fun `Determines SFU correctly if setup_future_usage does not exists in PMO with PMO SFU feature enabled`() {
-        featureFlagTestRule.setEnabled(true)
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
             paymentMethodOptionsJsonString = """
                 {

@@ -1,11 +1,11 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
-import com.stripe.android.financialconnections.R as FinancialConnectionsR
+import com.stripe.android.paymentsheet.R
 
 internal object TransformToBankIcon {
     operator fun invoke(
         bankName: String?,
-        fallbackIcon: Int = FinancialConnectionsR.drawable.stripe_ic_bank,
+        fallbackIcon: Int = R.drawable.stripe_ic_fc_bank,
     ): Int {
         if (bankName == null) {
             return fallbackIcon
@@ -20,7 +20,7 @@ internal object TransformToBankIcon {
             Regex("PNC\\s?BANK|PNC Bank", RegexOption.IGNORE_CASE) to "pnc",
             Regex("SUNTRUST|SunTrust Bank", RegexOption.IGNORE_CASE) to "suntrust",
             Regex("Silicon Valley Bank", RegexOption.IGNORE_CASE) to "svb",
-            Regex("Stripe|TestInstitution", RegexOption.IGNORE_CASE) to "stripe",
+            Regex("Stripe|TestInstitution|Test Institution", RegexOption.IGNORE_CASE) to "stripe",
             Regex("TD Bank", RegexOption.IGNORE_CASE) to "td",
             Regex("USAA FEDERAL SAVINGS BANK|USAA Bank", RegexOption.IGNORE_CASE) to "usaa",
             Regex("U\\.?S\\. BANK|US Bank", RegexOption.IGNORE_CASE) to "usbank",
@@ -31,6 +31,6 @@ internal object TransformToBankIcon {
             .filter { it.key.findAll(bankName).any() }
             .firstNotNullOfOrNull {
                 transformBankIconCodeToBankIcon(it.value, fallbackIcon)
-            } ?: FinancialConnectionsR.drawable.stripe_ic_bank
+            } ?: R.drawable.stripe_ic_fc_bank
     }
 }

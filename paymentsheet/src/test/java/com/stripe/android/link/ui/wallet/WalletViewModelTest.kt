@@ -1,41 +1,57 @@
 package com.stripe.android.link.ui.wallet
 
+import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.PaymentConfirmed
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH
+import com.stripe.android.link.TestFactory.CONSUMER_SHIPPING_ADDRESSES
 import com.stripe.android.link.account.FakeLinkAccountManager
+import com.stripe.android.link.confirmation.DefaultCompleteLinkFlow
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.navigation.NavigationManager
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import kotlin.Result
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
@@ -45,12 +61,6 @@ class WalletViewModelTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
-
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage,
-        isEnabled = false
-    )
 
     @Test
     fun `viewmodel should load payment methods on init`() = runTest(dispatcher) {
@@ -73,13 +83,17 @@ class WalletViewModelTest {
                 cardBrandFilter = TestFactory.LINK_CONFIGURATION.cardBrandFilter,
                 isProcessing = false,
                 hasCompleted = false,
+                userSetIsExpanded = false,
                 primaryButtonLabel = TestFactory.LINK_WALLET_PRIMARY_BUTTON_LABEL,
                 secondaryButtonLabel = TestFactory.LINK_WALLET_SECONDARY_BUTTON_LABEL,
                 expiryDateInput = FormFieldEntry(""),
                 cvcInput = FormFieldEntry(""),
-                canAddNewPaymentMethod = true,
+                addPaymentMethodOptions = listOf(AddPaymentMethodOption.Card),
                 isSettingUp = false,
                 merchantName = "merchantName",
+                collectMissingBillingDetailsForExistingPaymentMethods = true,
+                signupToggleEnabled = false,
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
             )
         )
         assertThat(state.selectedItem).isEqualTo(TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull())
@@ -89,7 +103,7 @@ class WalletViewModelTest {
     fun `viewmodel should dismiss with failure on load payment method failure`() = runTest(dispatcher) {
         val error = Throwable("oops")
         val linkAccountManager = WalletLinkAccountManager()
-        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
         linkAccountManager.listPaymentDetailsResult = Result.failure(error)
 
         var linkActivityResult: LinkActivityResult? = null
@@ -134,13 +148,159 @@ class WalletViewModelTest {
     }
 
     @Test
-    fun `viewmodel should open payment method screen when onAddNewPaymentMethodClicked`() = runTest(dispatcher) {
+    fun `viewmodel should open payment method screen when add card option clicked`() = runTest(dispatcher) {
         val navigationManager = TestNavigationManager()
         val vm = createViewModel(navigationManager = navigationManager)
 
-        vm.onAddNewPaymentMethodClicked()
+        vm.onAddPaymentMethodOptionClicked(AddPaymentMethodOption.Card)
 
         navigationManager.assertNavigatedTo(LinkScreen.PaymentMethod.route)
+    }
+
+    @Test
+    fun `viewmodel should handle state updates through the add bank payment method happy path`() = runTest(dispatcher) {
+        val linkAccount = TestFactory.LINK_ACCOUNT_WITH_PK
+        val newBankAccountId = "pm_9872893"
+        testAddBankAccount(
+            linkAccount = linkAccount,
+        ) { vm, linkAccountManager ->
+            val newBankAccountDetails = CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT.copy(id = newBankAccountId)
+            linkAccountManager.createBankAccountPaymentDetailsResult = Result.success(newBankAccountDetails)
+
+            awaitItem().run {
+                assertThat(userSetIsExpanded).isTrue()
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Idle)
+            }
+
+            vm.onAddPaymentMethodOptionClicked(AddPaymentMethodOption.Bank(FinancialConnectionsAvailability.Full))
+            awaitItem().run {
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Processing())
+            }
+            awaitItem().run {
+                val expectedConfig = FinancialConnectionsSheetConfiguration(
+                    financialConnectionsSessionClientSecret = TestFactory.LINK_ACCOUNT_SESSION.clientSecret,
+                    publishableKey = linkAccount.consumerPublishableKey!!,
+                )
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Processing(expectedConfig))
+            }
+
+            vm.onPresentFinancialConnections(true)
+            awaitItem().run {
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Processing())
+            }
+
+            vm.onFinancialConnectionsResult(
+                FinancialConnectionsSheetResult.Completed(mockFinancialConnectionsSession())
+            )
+            awaitItem().run {
+                assertThat(selectedItemId).isEqualTo(newBankAccountId)
+                assertThat(userSetIsExpanded).isFalse()
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Idle)
+            }
+        }
+    }
+
+    @Test
+    fun `viewmodel should handle link account session request error when adding bank account`() = runTest(dispatcher) {
+        testAddBankAccount { vm, linkAccountManager ->
+            awaitItem().run {
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Idle)
+            }
+
+            val error = Throwable("oops")
+            linkAccountManager.createLinkAccountSessionResult = Result.failure(error)
+            vm.onAddPaymentMethodOptionClicked(AddPaymentMethodOption.Bank(FinancialConnectionsAvailability.Full))
+            awaitItem().run {
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Processing())
+            }
+            awaitItem().run {
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Idle)
+                assertThat(alertMessage).isEqualTo(error.stripeErrorMessage())
+            }
+        }
+    }
+
+    @Test
+    fun `viewmodel should handle onFinancialConnectionsResult with Canceled`() = runTest(dispatcher) {
+        testAddBankAccount { vm, _ ->
+            skipItems(1)
+            vm.onPresentFinancialConnections(true)
+            awaitItem().run {
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Processing())
+            }
+
+            vm.onFinancialConnectionsResult(FinancialConnectionsSheetResult.Canceled)
+            awaitItem().run {
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Idle)
+            }
+        }
+    }
+
+    @Test
+    fun `viewmodel should handle onFinancialConnectionsResult with Failed`() = runTest(dispatcher) {
+        testAddBankAccount { vm, _ ->
+            skipItems(1)
+            vm.onPresentFinancialConnections(true)
+            awaitItem().run {
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Processing())
+            }
+
+            val error = Throwable("oops")
+            vm.onFinancialConnectionsResult(FinancialConnectionsSheetResult.Failed(error))
+            awaitItem().run {
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Idle)
+                assertThat(alertMessage).isEqualTo(error.stripeErrorMessage())
+            }
+        }
+    }
+
+    @Test
+    fun `viewmodel should init with correct Add Payment Method options`() = runTest(dispatcher) {
+        val account = TestFactory.LINK_ACCOUNT_WITH_PK
+        val stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+            linkFundingSources = listOf(
+                ConsumerPaymentDetails.Card.TYPE,
+                ConsumerPaymentDetails.BankAccount.TYPE,
+            )
+        )
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(stripeIntent = stripeIntent)
+
+        assertThat(
+            createViewModel(
+                linkAccount = account,
+                configuration = configuration,
+            ).uiState.value.addPaymentMethodOptions
+        ).containsExactly(
+            AddPaymentMethodOption.Card,
+            AddPaymentMethodOption.Bank(FinancialConnectionsAvailability.Full),
+        )
+
+        assertThat(
+            createViewModel(
+                linkAccount = TestFactory.LINK_ACCOUNT,
+                configuration = configuration,
+            ).uiState.value.addPaymentMethodOptions
+        ).containsExactly(
+            AddPaymentMethodOption.Card,
+        )
+
+        assertThat(
+            createViewModel(
+                linkAccount = account,
+                configuration = configuration.copy(financialConnectionsAvailability = null),
+            ).uiState.value.addPaymentMethodOptions
+        ).containsExactly(
+            AddPaymentMethodOption.Card,
+        )
+
+        assertThat(
+            createViewModel(
+                linkAccount = account,
+                configuration = configuration.copy(stripeIntent = stripeIntent.copy(linkFundingSources = emptyList()))
+            ).uiState.value.addPaymentMethodOptions
+        ).containsExactly(
+            AddPaymentMethodOption.Card, // Card is available by default.
+        )
     }
 
     @Test
@@ -151,7 +311,10 @@ class WalletViewModelTest {
         vm.onUpdateClicked(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD)
 
         navigationManager.assertNavigatedTo(
-            route = LinkScreen.UpdateCard(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.id)
+            route = LinkScreen.UpdateCard(
+                paymentDetailsId = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.id,
+                billingDetailsUpdateFlow = null
+            )
         )
     }
 
@@ -328,7 +491,8 @@ class WalletViewModelTest {
     fun `performPaymentConfirmation dismisses with Completed result on success`() = runTest(dispatcher) {
         val validCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(expiryYear = 2099)
         val linkAccountManager = WalletLinkAccountManager()
-        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
+        val account = TestFactory.LINK_ACCOUNT
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(account))
         linkAccountManager.listPaymentDetailsResult = Result.success(
             value = ConsumerPaymentDetails(paymentDetails = listOf(validCard))
         )
@@ -358,7 +522,12 @@ class WalletViewModelTest {
         )
 
         assertThat(result)
-            .isEqualTo(LinkActivityResult.Completed(LinkAccountUpdate.Value(null)))
+            .isEqualTo(
+                LinkActivityResult.Completed(
+                    linkAccountUpdate = LinkAccountUpdate.Value(null, PaymentConfirmed),
+                    selectedPayment = null
+                )
+            )
     }
 
     @Test
@@ -424,10 +593,11 @@ class WalletViewModelTest {
         val card2 = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "card2", isDefault = true)
         val linkAccountManager = object : WalletLinkAccountManager() {
             override suspend fun updatePaymentDetails(
-                updateParams: ConsumerPaymentDetailsUpdateParams
+                updateParams: ConsumerPaymentDetailsUpdateParams,
+                billingPhone: String?
             ): Result<ConsumerPaymentDetails> {
                 delay(CARD_PROCESSING_DELAY)
-                return super.updatePaymentDetails(updateParams)
+                return super.updatePaymentDetails(updateParams, billingPhone)
             }
         }
         linkAccountManager.listPaymentDetailsResult = Result.success(
@@ -536,8 +706,35 @@ class WalletViewModelTest {
     }
 
     @Test
+    fun `onRemoveClicked shows inline indicator correctly`() = runTest(dispatcher) {
+        val error = RuntimeException("Deletion failed")
+        val card = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "card1")
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(card))
+        )
+        linkAccountManager.deletePaymentDetailsResult = Result.failure(error)
+
+        val logger = FakeLogger()
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            logger = logger
+        )
+
+        val paymentMethodsBeingUpdated = viewModel.uiState.map { it.cardBeingUpdated }.distinctUntilChanged()
+
+        paymentMethodsBeingUpdated.test {
+            assertThat(awaitItem()).isNull()
+
+            viewModel.onRemoveClicked(card)
+            assertThat(awaitItem()).isEqualTo(card.id)
+
+            assertThat(awaitItem()).isNull()
+        }
+    }
+
+    @Test
     fun `state respects card PMO SFU off session in passthrough mode`() = runTest(dispatcher) {
-        featureFlagTestRule.setEnabled(true)
         val configuration = TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
                 paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
@@ -557,7 +754,6 @@ class WalletViewModelTest {
 
     @Test
     fun `state respects card PMO SFU on session in passthrough mode`() = runTest(dispatcher) {
-        featureFlagTestRule.setEnabled(true)
         val configuration = TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
                 paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
@@ -577,7 +773,6 @@ class WalletViewModelTest {
 
     @Test
     fun `state does not respect card PMO SFU in payment method mode`() = runTest(dispatcher) {
-        featureFlagTestRule.setEnabled(true)
         val configuration = TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
                 paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
@@ -597,7 +792,6 @@ class WalletViewModelTest {
 
     @Test
     fun `state does not respect link PMO SFU in passthrough mode`() = runTest(dispatcher) {
-        featureFlagTestRule.setEnabled(true)
         val configuration = TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
                 paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
@@ -617,7 +811,6 @@ class WalletViewModelTest {
 
     @Test
     fun `state respects link PMO SFU off session in payment method mode`() = runTest(dispatcher) {
-        featureFlagTestRule.setEnabled(true)
         val configuration = TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
                 paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
@@ -637,7 +830,6 @@ class WalletViewModelTest {
 
     @Test
     fun `state respects link PMO SFU on session in payment method mode`() = runTest(dispatcher) {
-        featureFlagTestRule.setEnabled(true)
         val configuration = TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
                 paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
@@ -655,7 +847,176 @@ class WalletViewModelTest {
         assertThat(viewModel.uiState.value.isSettingUp).isTrue()
     }
 
+    @Test
+    fun `Loads default shipping address in payment method selection mode`() = runTest(dispatcher) {
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
+        linkAccountManager.listShippingAddressesResult = Result.success(CONSUMER_SHIPPING_ADDRESSES)
+
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            passthroughModeEnabled = false,
+        )
+
+        var linkActivityResult: LinkActivityResult? = null
+        fun dismissWithResult(result: LinkActivityResult) {
+            linkActivityResult = result
+        }
+
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            configuration = configuration,
+            linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(
+                selectedPayment = null,
+            ),
+            dismissWithResult = ::dismissWithResult,
+        )
+
+        viewModel.onPrimaryButtonClicked()
+
+        val completedResult = linkActivityResult as? LinkActivityResult.Completed
+        assertThat(completedResult?.shippingAddress).isEqualTo(CONSUMER_SHIPPING_ADDRESSES.addresses.first())
+    }
+
+    @Test
+    fun `Does not load default shipping address if not payment method selection mode`() = runTest(dispatcher) {
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
+        linkAccountManager.listShippingAddressesResult = Result.success(CONSUMER_SHIPPING_ADDRESSES)
+
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            passthroughModeEnabled = false,
+        )
+
+        var linkActivityResult: LinkActivityResult? = null
+        fun dismissWithResult(result: LinkActivityResult) {
+            linkActivityResult = result
+        }
+
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            configuration = configuration,
+            linkLaunchMode = LinkLaunchMode.Full,
+            dismissWithResult = ::dismissWithResult,
+        )
+
+        viewModel.onPrimaryButtonClicked()
+
+        val completedResult = linkActivityResult as? LinkActivityResult.Completed
+        assertThat(completedResult?.shippingAddress).isNull()
+    }
+
+    @Test
+    fun `Failure while loading default shipping address still allows completion`() = runTest(dispatcher) {
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
+        linkAccountManager.listShippingAddressesResult = Result.failure(APIConnectionException())
+
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            passthroughModeEnabled = false,
+        )
+
+        var linkActivityResult: LinkActivityResult? = null
+        fun dismissWithResult(result: LinkActivityResult) {
+            linkActivityResult = result
+        }
+
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            configuration = configuration,
+            linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(
+                selectedPayment = null,
+            ),
+            dismissWithResult = ::dismissWithResult,
+        )
+
+        viewModel.onPrimaryButtonClicked()
+
+        val completedResult = linkActivityResult as? LinkActivityResult.Completed
+        assertThat(completedResult?.shippingAddress).isNull()
+    }
+
+    @Test
+    fun `paymentSelectionHint is present based on enablePaymentSelectionHint`() = runTest(dispatcher) {
+        val hint = "Select your payment method"
+        listOf(
+            false to null,
+            true to hint,
+        ).forEach { (enableHint, expectedHint) ->
+            val configuration = TestFactory.LINK_CONFIGURATION.copy(
+                flags = mapOf("link_mobile_enable_payment_selection_hint" to enableHint)
+            )
+
+            val viewModel = createViewModel(
+                configuration = configuration,
+                linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(
+                    selectedPayment = null,
+                    hint = hint
+                )
+            )
+
+            assertThat(viewModel.uiState.value.paymentSelectionHint)
+                .isEqualTo(expectedHint)
+        }
+    }
+
+    @Test
+    fun `marks auto-selection attempted when skipWalletInFlowController is enabled`() = runTest(dispatcher) {
+        val defaultCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(isDefault = true)
+
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(defaultCard))
+        )
+
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            skipWalletInFlowController = true
+        )
+
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            configuration = configuration,
+            linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment = null)
+        )
+
+        // Wait for async operations to complete
+        advanceUntilIdle()
+
+        // Verify auto-selection was attempted
+        assertThat(viewModel.uiState.value.hasAttemptedAutoSelection).isTrue()
+    }
+
+    @Test
+    fun `does not auto-select when skipWalletInFlowController is disabled`() = runTest(dispatcher) {
+        val defaultCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(isDefault = true)
+
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(defaultCard))
+        )
+
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            skipWalletInFlowController = false // Disabled
+        )
+
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            configuration = configuration,
+            linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment = null)
+        )
+
+        // Wait for async operations to complete
+        advanceUntilIdle()
+
+        // Verify auto-selection was NOT attempted when flag is disabled
+        assertThat(viewModel.uiState.value.hasAttemptedAutoSelection).isFalse()
+        assertThat(viewModel.uiState.value.isAutoSelecting).isFalse()
+    }
+
     private fun createViewModel(
+        linkAccount: LinkAccount = TestFactory.LINK_ACCOUNT,
         linkAccountManager: WalletLinkAccountManager = WalletLinkAccountManager(),
         navigationManager: NavigationManager = TestNavigationManager(),
         logger: Logger = FakeLogger(),
@@ -663,19 +1024,53 @@ class WalletViewModelTest {
         dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
         navigateAndClearStack: (route: LinkScreen) -> Unit = {},
         dismissWithResult: (LinkActivityResult) -> Unit = {},
-        configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION
+        configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
+        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full
     ): WalletViewModel {
         return WalletViewModel(
             configuration = configuration,
-            linkAccount = TestFactory.LINK_ACCOUNT,
+            linkAccount = linkAccount,
             linkAccountManager = linkAccountManager,
-            linkConfirmationHandler = linkConfirmationHandler,
             logger = logger,
             navigateAndClearStack = navigateAndClearStack,
             dismissWithResult = dismissWithResult,
             navigationManager = navigationManager,
             dismissalCoordinator = dismissalCoordinator,
+            completeLinkFlow = DefaultCompleteLinkFlow(
+                linkConfirmationHandler = linkConfirmationHandler,
+                linkAccountManager = linkAccountManager,
+                dismissalCoordinator = dismissalCoordinator,
+                linkLaunchMode = linkLaunchMode
+            ),
+            linkLaunchMode = linkLaunchMode
         )
+    }
+
+    private suspend fun testAddBankAccount(
+        linkAccount: LinkAccount = TestFactory.LINK_ACCOUNT_WITH_PK,
+        validate: suspend TurbineTestContext<WalletUiState>.(WalletViewModel, WalletLinkAccountManager) -> Unit,
+    ) {
+        val linkAccountManager = WalletLinkAccountManager()
+        val vm = createViewModel(
+            linkAccount = linkAccount,
+            linkAccountManager = linkAccountManager,
+        )
+        vm.onExpandedChanged(true)
+
+        vm.uiState.test { validate(vm, linkAccountManager) }
+    }
+
+    private fun mockFinancialConnectionsSession(): FinancialConnectionsSession {
+        val financialConnectionsSession = mock<FinancialConnectionsSession>()
+        whenever(financialConnectionsSession.id).thenReturn("123")
+        whenever(financialConnectionsSession.accounts).thenReturn(
+            FinancialConnectionsAccountList(
+                data = listOf(TestFactory.FINANCIAL_CONNECTIONS_CHECKING_ACCOUNT),
+                hasMore = false,
+                url = "url",
+            )
+        )
+        return financialConnectionsSession
     }
 
     companion object {
@@ -695,10 +1090,11 @@ private open class WalletLinkAccountManager : FakeLinkAccountManager() {
     }
 
     override suspend fun updatePaymentDetails(
-        updateParams: ConsumerPaymentDetailsUpdateParams
+        updateParams: ConsumerPaymentDetailsUpdateParams,
+        phone: String?
     ): Result<ConsumerPaymentDetails> {
         updatePaymentDetailsCalls.add(updateParams)
-        return super.updatePaymentDetails(updateParams)
+        return super.updatePaymentDetails(updateParams, phone)
     }
 
     override suspend fun deletePaymentDetails(paymentDetailsId: String): Result<Unit> {

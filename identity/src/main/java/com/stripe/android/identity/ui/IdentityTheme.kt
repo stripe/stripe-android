@@ -14,9 +14,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.TextStyle
 import com.google.accompanist.themeadapter.material.createMdcTheme
 import com.stripe.android.uicore.LocalColors
+import com.stripe.android.uicore.LocalSectionStyle
 import com.stripe.android.uicore.LocalShapes
+import com.stripe.android.uicore.LocalTextFieldInsets
 import com.stripe.android.uicore.LocalTypography
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.StripeTypography
@@ -75,7 +78,9 @@ internal fun AdoptForStripeTheme(
     val stripeTypography: StripeTypography = StripeThemeDefaults.typography.copy(
         body1FontFamily = hostingAppTypography.body1.fontFamily,
         body2FontFamily = hostingAppTypography.body2.fontFamily,
-        h4FontFamily = hostingAppTypography.h4.fontFamily,
+        h4 = TextStyle(
+            fontFamily = hostingAppTypography.h4.fontFamily,
+        ),
         h5FontFamily = hostingAppTypography.h5.fontFamily,
         h6FontFamily = hostingAppTypography.h6.fontFamily,
         subtitle1FontFamily = hostingAppTypography.subtitle1.fontFamily,
@@ -94,6 +99,8 @@ internal fun AdoptForStripeTheme(
         LocalShapes provides StripeThemeDefaults.shapes,
         LocalTypography provides stripeTypography,
         LocalInspectionMode provides inspectionMode,
+        LocalSectionStyle provides StripeThemeDefaults.sectionStyle,
+        LocalTextFieldInsets provides StripeThemeDefaults.textFieldInsets,
     ) {
         MaterialTheme(
             colors = hostingAppColors,

@@ -910,6 +910,40 @@ internal object PaymentIntentFixtures {
         )
     }
 
+    val REDACTED_PAYMENT_INTENT_JSON by lazy {
+        JSONObject(
+            """
+        {
+            "id" : "pi_1234",
+            "object" : "payment_intent",
+            "created" : 1750900060,
+            "last_payment_error" : null,
+            "livemode" : false,
+            "next_action" : {
+                "type" : "use_stripe_sdk",
+                "use_stripe_sdk" : {
+                "directory_server_encryption" : {
+                "algorithm" : "RSA",
+                    "certificate" : "-----BEGIN CERTIFICATE-----CERTIFICATE-----END CERTIFICATE-----",
+                    "directory_server_id" : "ID1",
+                    "root_certificate_authorities" : [ "-----BEGIN CERTIFICATE-----CERTIFICATE-----END CERTIFICATE-----" ]
+                },
+                "directory_server_name" : "visa",
+                "merchant" : "acct_1",
+                "one_click_authn" : null,
+                "server_transaction_id" : "transaction_123",
+                "three_d_secure_2_source" : "payatt_123",
+                "three_ds_method_url" : "",
+                "three_ds_optimizations" : "kf",
+                "type" : "stripe_3ds2_fingerprint"
+            }
+        },
+        "status" : "requires_action"
+    }
+            """.trimIndent()
+        )
+    }
+
     val PI_WITH_SHIPPING_JSON by lazy {
         JSONObject(
             """
@@ -1413,6 +1447,69 @@ internal object PaymentIntentFixtures {
                     "redirect_to_url": {
                         "return_url": "stripesdk://payment_return_url/some_package_name",
                         "url": "pm-redirects.stripe.com/wechat_payment"
+                    },
+                    "type": "redirect_to_url"
+                },
+                "on_behalf_of": null,
+                "payment_method": {
+                    "id": "pm_1234567890",
+                    "type": "wechat_pay"
+                },
+                "payment_method_types": [
+                    "card"
+                ],
+                "receipt_email": null,
+                "review": null,
+                "shipping": null,
+                "source": null,
+                "statement_descriptor": null,
+                "status": "requires_action",
+                "transfer_data": null,
+                "transfer_group": null
+            }
+            """.trimIndent()
+        )
+    }
+
+    val KLARNA_REQUIRES_ACTION by lazy {
+        requireNotNull(PARSER.parse(KLARNA_REQUIRES_ACTION_JSON))
+    }
+
+    private val KLARNA_REQUIRES_ACTION_JSON by lazy {
+        JSONObject(
+            """
+            {
+                "id": "pi_1EZlvVCRMbs6FrXfKpq2xMmy",
+                "object": "payment_intent",
+                "amount": 1000,
+                "amount_capturable": 0,
+                "amount_received": 0,
+                "application": null,
+                "application_fee_amount": null,
+                "canceled_at": null,
+                "cancellation_reason": null,
+                "capture_method": "automatic",
+                "charges": {
+                    "object": "list",
+                    "data": [],
+                    "has_more": false,
+                    "total_count": 0,
+                    "url": "/v1/charges?payment_intent=pi_1EZlvVCRMbs6FrXfKpq2xMmy"
+                },
+                "client_secret": "pi_1EZlvVCRMbs6FrXfKpq2xMmy_secret_cmhLfbSA54n4",
+                "confirmation_method": "automatic",
+                "created": 1557783797,
+                "currency": "usd",
+                "customer": null,
+                "description": null,
+                "invoice": null,
+                "last_payment_error": null,
+                "livemode": false,
+                "metadata": {},
+                "next_action": {
+                    "redirect_to_url": {
+                        "return_url": "stripesdk://payment_return_url/some_package_name",
+                        "url": "https://pm-redirects.stripe.com/authorize/acct_1234/sa_nonce_SmAXX?useWebAuthSession=true&followRedirectsInSDK=true"
                     },
                     "type": "redirect_to_url"
                 },

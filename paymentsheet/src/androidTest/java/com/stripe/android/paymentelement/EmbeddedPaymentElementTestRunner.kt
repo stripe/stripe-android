@@ -1,17 +1,18 @@
-@file:OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-
 package com.stripe.android.paymentelement
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.CreateIntentCallback
@@ -23,15 +24,17 @@ import java.util.concurrent.TimeUnit
 
 internal class EmbeddedPaymentElementTestRunnerContext(
     val embeddedPaymentElement: EmbeddedPaymentElement,
+    val rowSelectionCalls: ReceiveTurbine<RowSelectionCall>,
     private val countDownLatch: CountDownLatch,
 ) {
     suspend fun configure(
+        intentConfiguration: PaymentSheet.IntentConfiguration = PaymentSheet.IntentConfiguration(
+            mode = PaymentSheet.IntentConfiguration.Mode.Payment(amount = 5000, currency = "USD")
+        ),
         configurationMutator: EmbeddedPaymentElement.Configuration.Builder.() -> EmbeddedPaymentElement.Configuration.Builder = { this },
     ) {
         embeddedPaymentElement.configure(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Payment(amount = 5000, currency = "USD")
-            ),
+            intentConfiguration = intentConfiguration,
             configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
                 .configurationMutator()
                 .build()
@@ -58,25 +61,70 @@ internal fun runEmbeddedPaymentElementTest(
     resultCallback: EmbeddedPaymentElement.ResultCallback,
     builder: EmbeddedPaymentElement.Builder.() -> Unit = {},
     successTimeoutSeconds: Long = 5L,
+    showWalletButtons: Boolean = false,
+    rowSelectionCalls: ReceiveTurbine<RowSelectionCall> = Turbine(),
+    block: suspend (EmbeddedPaymentElementTestRunnerContext) -> Unit,
+) {
+    runEmbeddedPaymentElementTest(
+        networkRule = networkRule,
+        builderInstance = EmbeddedPaymentElement.Builder(
+            createIntentCallback = createIntentCallback,
+            resultCallback = resultCallback,
+        ),
+        builder = builder,
+        successTimeoutSeconds = successTimeoutSeconds,
+        showWalletButtons = showWalletButtons,
+        rowSelectionCalls = rowSelectionCalls,
+        block = block,
+    )
+}
+
+@OptIn(WalletButtonsPreview::class, SharedPaymentTokenSessionPreview::class)
+internal fun runEmbeddedPaymentElementTest(
+    networkRule: NetworkRule,
+    builderInstance: EmbeddedPaymentElement.Builder,
+    builder: EmbeddedPaymentElement.Builder.() -> Unit = {},
+    successTimeoutSeconds: Long = 5L,
+    showWalletButtons: Boolean = false,
+    rowSelectionCalls: ReceiveTurbine<RowSelectionCall> = Turbine(),
     block: suspend (EmbeddedPaymentElementTestRunnerContext) -> Unit,
 ) {
     val countDownLatch = CountDownLatch(1)
 
     val factory: (ComponentActivity) -> EmbeddedPaymentElement = {
         lateinit var embeddedPaymentElement: EmbeddedPaymentElement
-        val embeddedPaymentElementBuilder = EmbeddedPaymentElement.Builder(
-            createIntentCallback = createIntentCallback,
-            resultCallback = { result ->
-                resultCallback.onResult(result)
-                countDownLatch.countDown()
-            },
-        ).apply {
+        val embeddedPaymentElementBuilderInstance = when (builderInstance.deferredHandler) {
+            is EmbeddedPaymentElement.Builder.DeferredHandler.Intent -> {
+                EmbeddedPaymentElement.Builder(
+                    resultCallback = { result ->
+                        builderInstance.resultCallback.onResult(result)
+                        countDownLatch.countDown()
+                    },
+                    createIntentCallback = builderInstance.deferredHandler.createIntentCallback,
+                )
+            }
+            is EmbeddedPaymentElement.Builder.DeferredHandler.SharedPaymentToken -> {
+                EmbeddedPaymentElement.Builder(
+                    resultCallback = { result ->
+                        builderInstance.resultCallback.onResult(result)
+                        countDownLatch.countDown()
+                    },
+                    preparePaymentMethodHandler = builderInstance.deferredHandler.preparePaymentMethodHandler,
+                )
+            }
+        }
+
+        val embeddedPaymentElementBuilder = embeddedPaymentElementBuilderInstance.apply {
             builder()
         }
         it.setContent {
             embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedPaymentElementBuilder)
             val scrollState = rememberScrollState()
-            Box(modifier = Modifier.verticalScroll(scrollState)) {
+            Column(modifier = Modifier.verticalScroll(scrollState)) {
+                if (showWalletButtons) {
+                    embeddedPaymentElement.WalletButtons()
+                }
+
                 embeddedPaymentElement.Content()
             }
         }
@@ -88,6 +136,7 @@ internal fun runEmbeddedPaymentElementTest(
         countDownLatch = countDownLatch,
         countDownLatchTimeoutSeconds = successTimeoutSeconds,
         makeEmbeddedPaymentElement = factory,
+        rowSelectionCalls = rowSelectionCalls,
         block = block,
     )
 }
@@ -97,6 +146,7 @@ private fun runEmbeddedPaymentElementTestInternal(
     countDownLatch: CountDownLatch,
     countDownLatchTimeoutSeconds: Long,
     makeEmbeddedPaymentElement: (ComponentActivity) -> EmbeddedPaymentElement,
+    rowSelectionCalls: ReceiveTurbine<RowSelectionCall>,
     block: suspend (EmbeddedPaymentElementTestRunnerContext) -> Unit,
 ) {
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
@@ -115,14 +165,21 @@ private fun runEmbeddedPaymentElementTestInternal(
 
         val testContext = EmbeddedPaymentElementTestRunnerContext(
             embeddedPaymentElement = embeddedPaymentElement,
+            rowSelectionCalls = rowSelectionCalls,
             countDownLatch = countDownLatch,
         )
         runTest {
             block(testContext)
         }
 
+        testContext.rowSelectionCalls.ensureAllEventsConsumed()
         val didCompleteSuccessfully = countDownLatch.await(countDownLatchTimeoutSeconds, TimeUnit.SECONDS)
         networkRule.validate()
         assertThat(didCompleteSuccessfully).isTrue()
     }
 }
+
+data class RowSelectionCall(
+    val paymentMethodType: String?,
+    val paymentOptionLabel: String?,
+)

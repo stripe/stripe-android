@@ -1,7 +1,7 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.StringRes
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.R as CoreR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -11,11 +11,10 @@ class AdministrativeAreaConfig(
     private val shortAdministrativeAreaNames = country.administrativeAreas.map { it.first }
     private val fullAdministrativeAreaNames = country.administrativeAreas.map { it.second }
 
-    override val tinyMode: Boolean = false
+    override val mode = DropdownConfig.Mode.Full(selectsFirstOptionAsDefault = false)
     override val debugLabel = "administrativeArea"
 
-    @StringRes
-    override val label = country.label
+    override val label = resolvableString(country.label)
 
     override val rawItems = shortAdministrativeAreaNames
 

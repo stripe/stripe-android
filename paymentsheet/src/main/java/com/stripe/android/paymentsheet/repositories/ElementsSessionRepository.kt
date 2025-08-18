@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.di.APPLICATION_ID
 import com.stripe.android.common.di.MOBILE_SESSION_ID
 import com.stripe.android.core.injection.IOContext
@@ -128,7 +129,8 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
     mobileSessionId: String,
     appId: String
 ): ElementsSessionParams {
-    val customerSessionClientSecret = customer?.toElementSessionParam()
+    val customerSessionClientSecret = customer?.customerSessionClientSecret
+    val legacyCustomerEphemeralKey = customer?.legacyCustomerEphemeralKey
     val customPaymentMethodIds = customPaymentMethods.toElementSessionParam()
 
     return when (this) {
@@ -136,6 +138,7 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = clientSecret,
                 customerSessionClientSecret = customerSessionClientSecret,
+                legacyCustomerEphemeralKey = legacyCustomerEphemeralKey,
                 customPaymentMethods = customPaymentMethodIds,
                 externalPaymentMethods = externalPaymentMethods,
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
@@ -148,6 +151,7 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
             ElementsSessionParams.SetupIntentType(
                 clientSecret = clientSecret,
                 customerSessionClientSecret = customerSessionClientSecret,
+                legacyCustomerEphemeralKey = legacyCustomerEphemeralKey,
                 externalPaymentMethods = externalPaymentMethods,
                 customPaymentMethods = customPaymentMethodIds,
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
@@ -162,8 +166,10 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 customPaymentMethods = customPaymentMethodIds,
                 externalPaymentMethods = externalPaymentMethods,
                 customerSessionClientSecret = customerSessionClientSecret,
+                legacyCustomerEphemeralKey = legacyCustomerEphemeralKey,
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
                 mobileSessionId = mobileSessionId,
+                sellerDetails = intentConfiguration.toSellerDetails(),
                 appId = appId
             )
         }
@@ -176,12 +182,30 @@ private fun List<PaymentSheet.CustomPaymentMethod>.toElementSessionParam(): List
     }
 }
 
-private fun PaymentSheet.CustomerConfiguration.toElementSessionParam(): String? {
-    return when (accessType) {
+@OptIn(SharedPaymentTokenSessionPreview::class)
+private fun PaymentSheet.IntentConfiguration.toSellerDetails(): ElementsSessionParams.SellerDetails? {
+    return when (intentBehavior) {
+        is PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken -> intentBehavior.sellerDetails?.run {
+            ElementsSessionParams.SellerDetails(
+                externalId = externalId,
+                networkId = networkId,
+            )
+        }
+        is PaymentSheet.IntentConfiguration.IntentBehavior.Default -> null
+    }
+}
+
+private val PaymentSheet.CustomerConfiguration.customerSessionClientSecret: String?
+    get() = when (accessType) {
         is PaymentSheet.CustomerAccessType.CustomerSession -> accessType.customerSessionClientSecret
         is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> null
     }
-}
+
+private val PaymentSheet.CustomerConfiguration.legacyCustomerEphemeralKey: String?
+    get() = when (accessType) {
+        is PaymentSheet.CustomerAccessType.CustomerSession -> null
+        is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> accessType.ephemeralKeySecret
+    }
 
 private fun ElementsSessionParams.DeferredIntentType.toStripeIntent(options: ApiRequest.Options): StripeIntent {
     val deferredIntentParams = this.deferredIntentParams

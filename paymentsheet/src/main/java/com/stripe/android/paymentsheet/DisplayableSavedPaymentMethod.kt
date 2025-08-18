@@ -14,6 +14,20 @@ internal data class DisplayableSavedPaymentMethod private constructor(
     val isCbcEligible: Boolean = false,
     val shouldShowDefaultBadge: Boolean = false
 ) {
+    val isCard: Boolean
+        get() = when (savedPaymentMethod) {
+            is SavedPaymentMethod.Card -> {
+                // If this is a Link payment method, it's Link card brand
+                !paymentMethod.isLinkPaymentMethod
+            }
+            is SavedPaymentMethod.Link -> {
+                savedPaymentMethod.paymentDetails is LinkPaymentDetails.Card
+            }
+            is SavedPaymentMethod.SepaDebit,
+            is SavedPaymentMethod.USBankAccount,
+            SavedPaymentMethod.Unexpected -> false
+        }
+
     fun canChangeCbc(): Boolean {
         return when (savedPaymentMethod) {
             is SavedPaymentMethod.Card -> {
@@ -58,11 +72,23 @@ internal data class DisplayableSavedPaymentMethod private constructor(
             R.string.stripe_bank_account_ending_in,
             savedPaymentMethod.usBankAccount.last4
         )
-        is SavedPaymentMethod.Link -> resolvableString(
-            com.stripe.android.R.string.stripe_card_ending_in,
-            brandDisplayName(),
-            savedPaymentMethod.paymentDetails.last4
-        )
+        is SavedPaymentMethod.Link -> {
+            when (savedPaymentMethod.paymentDetails) {
+                is LinkPaymentDetails.BankAccount -> {
+                    resolvableString(
+                        R.string.stripe_bank_account_ending_in,
+                        savedPaymentMethod.paymentDetails.last4
+                    )
+                }
+                is LinkPaymentDetails.Card -> {
+                    resolvableString(
+                        com.stripe.android.R.string.stripe_card_ending_in,
+                        brandDisplayName(),
+                        savedPaymentMethod.paymentDetails.last4
+                    )
+                }
+            }
+        }
         is SavedPaymentMethod.Unexpected -> resolvableString("")
     }
 
@@ -86,7 +112,8 @@ internal data class DisplayableSavedPaymentMethod private constructor(
                 return brand.displayName
             }
             is SavedPaymentMethod.Link -> {
-                return savedPaymentMethod.paymentDetails.brand.displayName
+                val cardDetails = savedPaymentMethod.paymentDetails as? LinkPaymentDetails.Card
+                return cardDetails?.brand?.displayName
             }
             is SavedPaymentMethod.USBankAccount,
             is SavedPaymentMethod.SepaDebit,
@@ -107,7 +134,10 @@ internal data class DisplayableSavedPaymentMethod private constructor(
         ): DisplayableSavedPaymentMethod {
             val savedPaymentMethod = when (paymentMethod.type) {
                 PaymentMethod.Type.Card -> {
-                    paymentMethod.card?.let { card ->
+                    paymentMethod.linkPaymentDetails?.let {
+                        // This is Link card brand
+                        SavedPaymentMethod.Link(it)
+                    } ?: paymentMethod.card?.let { card ->
                         SavedPaymentMethod.Card(
                             card = card,
                             billingDetails = paymentMethod.billingDetails

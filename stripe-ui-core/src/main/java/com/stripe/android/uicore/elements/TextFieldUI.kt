@@ -18,6 +18,7 @@ import androidx.compose.foundation.progressSemantics
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
@@ -65,11 +66,14 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.Logger
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.BuildConfig
 import com.stripe.android.uicore.LocalInstrumentationTest
+import com.stripe.android.uicore.LocalTextFieldInsets
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.compat.CompatTextField
 import com.stripe.android.uicore.moveFocusSafely
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.autofill
 import com.stripe.android.uicore.utils.collectAsState
@@ -113,7 +117,7 @@ fun TextFieldSection(
 
     Section(
         modifier = modifier,
-        title = sectionTitle,
+        title = sectionTitle?.let { resolvableString(it) },
         error = sectionErrorString,
         isSelected = isSelected,
         content = content,
@@ -231,9 +235,7 @@ fun TextField(
                 if (!shouldAnnounceFieldValue) this.editableText = AnnotatedString("")
             },
         enabled = enabled && textFieldController.enabled,
-        label = label?.let {
-            stringResource(it)
-        },
+        label = label.resolve(),
         showOptionalLabel = textFieldController.showOptionalLabel,
         shouldAnnounceLabel = shouldAnnounceLabel,
         placeholder = placeHolder,
@@ -263,7 +265,7 @@ internal fun TextFieldUi(
     value: TextFieldValue,
     enabled: Boolean,
     loading: Boolean,
-    label: String?,
+    label: String,
     placeholder: String?,
     trailingIcon: TextFieldIcon?,
     showOptionalLabel: Boolean,
@@ -279,6 +281,7 @@ internal fun TextFieldUi(
     onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit = {}
 ) {
     val colors = TextFieldColors(shouldShowError)
+    val textFieldInsets = LocalTextFieldInsets.current
 
     val layoutDirectionToUse = layoutDirection ?: LocalLayoutDirection.current
 
@@ -288,20 +291,18 @@ internal fun TextFieldUi(
             onValueChange = onValueChange,
             modifier = modifier.fillMaxWidth(),
             enabled = enabled,
-            label = label?.let {
-                {
-                    FormLabel(
-                        text = if (showOptionalLabel) {
-                            stringResource(
-                                R.string.stripe_form_label_optional,
-                                it
-                            )
-                        } else {
-                            it
-                        },
-                        modifier = if (shouldAnnounceLabel) Modifier else Modifier.clearAndSetSemantics {}
-                    )
-                }
+            label = {
+                FormLabel(
+                    text = if (showOptionalLabel) {
+                        stringResource(
+                            R.string.stripe_form_label_optional,
+                            label,
+                        )
+                    } else {
+                        label
+                    },
+                    modifier = if (shouldAnnounceLabel) Modifier else Modifier.clearAndSetSemantics {}
+                )
             },
             placeholder = placeholder?.let {
                 {
@@ -319,7 +320,8 @@ internal fun TextFieldUi(
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
             singleLine = true,
-            colors = colors
+            colors = colors,
+            contentPadding = textFieldInsets.asPaddingValues(),
         )
     }
 }
@@ -388,17 +390,21 @@ fun AnimatedIcons(
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun TextFieldColors(
-    shouldShowError: Boolean = false
+    shouldShowError: Boolean = false,
+    textColor: Color = MaterialTheme.stripeColors.onComponent,
+    disabledTextColor: Color = textColor.copy(ContentAlpha.disabled),
+    backgroundColor: Color = MaterialTheme.stripeColors.component,
 ) = TextFieldDefaults.textFieldColors(
     textColor = if (shouldShowError) {
         MaterialTheme.colors.error
     } else {
-        MaterialTheme.stripeColors.onComponent
+        textColor
     },
+    disabledTextColor = disabledTextColor,
     unfocusedLabelColor = MaterialTheme.stripeColors.placeholderText,
     focusedLabelColor = MaterialTheme.stripeColors.placeholderText,
     placeholderColor = MaterialTheme.stripeColors.placeholderText,
-    backgroundColor = MaterialTheme.stripeColors.component,
+    backgroundColor = backgroundColor,
     focusedIndicatorColor = Color.Transparent,
     disabledIndicatorColor = Color.Transparent,
     unfocusedIndicatorColor = Color.Transparent,

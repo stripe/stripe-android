@@ -21,6 +21,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsEvent
@@ -79,11 +80,13 @@ class PaymentLauncherViewModelTest {
 
     private val confirmPaymentIntentParams = ConfirmPaymentIntentParams(
         clientSecret = CLIENT_SECRET,
-        paymentMethodId = PM_ID
+        paymentMethodId = PM_ID,
+        paymentMethodCode = "card",
     )
     private val confirmSetupIntentParams = ConfirmSetupIntentParams(
         clientSecret = CLIENT_SECRET,
-        paymentMethodId = PM_ID
+        paymentMethodId = PM_ID,
+        paymentMethodCode = "card",
     )
     private val paymentIntent = mock<PaymentIntent>()
     private val piAuthenticator = mock<PaymentNextActionHandler<PaymentIntent>>()
@@ -454,6 +457,36 @@ class PaymentLauncherViewModelTest {
 
             assertThat(viewModel.internalPaymentResult.value)
                 .isEqualTo(InternalPaymentResult.Canceled)
+        }
+
+    @Test
+    fun `verify redacted intent is properly handled when handling next action`() =
+        runTest {
+            val redactedIntent = PaymentIntent.fromJson(PaymentIntentFixtures.REDACTED_PAYMENT_INTENT_JSON)!!
+
+            whenever(
+                stripeApiRepository.retrieveStripeIntent(
+                    eq(CLIENT_SECRET),
+                    eq(apiRequestOptions),
+                    any()
+                )
+            ).thenReturn(Result.success(redactedIntent))
+
+            val unredactedIntent = redactedIntent.withUnredactedClientSecret(CLIENT_SECRET)
+
+            whenever(nextActionHandlerRegistry.getNextActionHandler<StripeIntent>(eq(unredactedIntent)))
+                .thenReturn(stripeIntentAuthenticator)
+
+            val viewModel = createViewModel(isPaymentIntent = true)
+
+            viewModel.handleNextActionForStripeIntent(CLIENT_SECRET, authHost)
+
+            verify(savedStateHandle)[PaymentLauncherViewModel.KEY_HAS_STARTED] = true
+            verify(stripeIntentAuthenticator).performNextAction(
+                eq(authHost),
+                eq(unredactedIntent),
+                eq(apiRequestOptions)
+            )
         }
 
     @Test

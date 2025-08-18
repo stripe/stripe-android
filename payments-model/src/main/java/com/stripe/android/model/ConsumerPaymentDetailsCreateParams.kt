@@ -18,13 +18,12 @@ sealed interface ConsumerPaymentDetailsCreateParams : StripeParamsModel, Parcela
     data class Card(
         private val cardPaymentMethodCreateParamsMap: Map<String, @RawValue Any>,
         private val email: String,
-        private val active: Boolean,
     ) : ConsumerPaymentDetailsCreateParams {
 
         override fun toParamMap(): Map<String, Any> {
             val params = mutableMapOf<String, Any>(
                 "type" to "card",
-                "active" to active,
+                "active" to true,
                 LINK_PARAM_BILLING_EMAIL_ADDRESS to email,
             )
 
@@ -112,13 +111,16 @@ fun getConsumerPaymentDetailsAddressFromPaymentMethodCreateParams(
 ): Pair<String, Any>? {
     val billingDetails = cardPaymentMethodCreateParams["billing_details"] as? Map<*, *>
     val address = billingDetails?.get("address") as? Map<*, *>
+    // The param naming for consumers API is different so we need to map them.
     return address?.let {
-        // card["billing_details"]["address"] becomes card["billing_address"]
         "billing_address" to mapOf(
-            // card["billing_details"]["address"]["country"]
-            // becomes card["billing_address"]["country_code"]
             "country_code" to it["country"],
-            "postal_code" to it["postal_code"]
-        )
+            "postal_code" to it["postal_code"],
+            "line_1" to it["line1"],
+            "line_2" to it["line2"],
+            "locality" to it["city"],
+            "administrative_area" to it["state"],
+            "name" to billingDetails["name"]
+        ).filterValues { it != null && it.toString().isNotEmpty() }
     }
 }

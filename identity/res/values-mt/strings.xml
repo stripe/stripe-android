@@ -7,7 +7,7 @@
   <!-- Instructional text when user needs to align the edge with camera -->
   <string name="stripe_align_document">Żomm id-dokument tal-identità ċatt</string>
   <!-- Opens the app's settings in the Settings app -->
-  <string name="stripe_app_settings">Settings tal-App</string>
+  <string name="stripe_app_settings">Għażliet tal-App</string>
   <!-- Description of back of driver's license image -->
   <string name="stripe_back_of_dl">In-naħa ta\' wara tal-liċenzja tas-sewqan</string>
   <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
@@ -117,7 +117,7 @@
   <!-- display name for Government issued photo ID -->
   <string name="stripe_government_id">Dokument tal-identità bir-ritratt maħruġ mill-gvern</string>
   <!-- Text displayed when requesting camera permissions -->
-  <string name="stripe_grant_camera_permission_text">Neħtieġu l-permess biex bużaw il-kamera tiegħek. Jekk jogħġbok agħti aċċess għall-kamera mis-settings tal-apps.</string>
+  <string name="stripe_grant_camera_permission_text">Neħtieġu l-permess biex nużaw il-kamera tiegħek. Jekk jogħġbok agħti aċċess għall-kamera mill-għażliet tal-apps.</string>
   <!-- Instructional text when camera is focusing on a document while scanning it -->
   <string name="stripe_hold_still">Tiċċaqlaqx, qed niskennjaw</string>
   <!-- display name for ID -->
@@ -165,7 +165,7 @@
   <!-- Instructional text for scanning front of a driver's license -->
   <string name="stripe_position_dl_front">Qiegħed il-liċenzja tas-sewqan tiegħek f\'nofs il-gwarniċ</string>
   <!-- Instructional text for scanning back of a identity card -->
-  <string name="stripe_position_id_back">Aqleb il-kard tal-identità tiegħek għan-naħa l-oħra</string>
+  <string name="stripe_position_id_back">Dawwar il-karta tal-identità tiegħek</string>
   <!-- Instructional text for scanning front of a identity card -->
   <string name="stripe_position_id_front">Qiegħed il-karta tal-identità tiegħek f\'nofs il-gwarniċ</string>
   <!-- Instructional text for scanning a passport -->

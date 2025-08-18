@@ -12,6 +12,7 @@ internal data class SignUpScreenState(
     val merchantName: String,
     val signUpEnabled: Boolean,
     val requiresNameCollection: Boolean,
+    val canEditEmail: Boolean,
     val signUpState: SignUpState = InputtingPrimaryField,
     val isSubmitting: Boolean = false,
     val errorMessage: ResolvableString? = null,
@@ -33,6 +34,7 @@ internal data class SignUpScreenState(
                 signUpEnabled = signupEnabled,
                 merchantName = configuration.merchantName,
                 requiresNameCollection = configuration.requiresNameCollection,
+                canEditEmail = configuration.allowUserEmailEdits,
                 signUpState = signUpState,
             )
         }

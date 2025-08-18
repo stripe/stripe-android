@@ -6,10 +6,10 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Button
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.ExternalPaymentMethodResult
@@ -73,7 +73,10 @@ class FawryActivity : AppCompatActivity() {
 
     @Composable
     fun BillingDetails(billingDetails: PaymentMethod.BillingDetails) {
-        Text("Billing details: $billingDetails", color = Color.White)
+        Text(
+            text = "Billing details: $billingDetails",
+            color = MaterialTheme.colors.onSurface
+        )
     }
 
     companion object {

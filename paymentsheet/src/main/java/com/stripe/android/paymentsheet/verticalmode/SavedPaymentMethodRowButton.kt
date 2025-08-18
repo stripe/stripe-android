@@ -16,12 +16,12 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.ui.PaymentMethodIconFromResource
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
+import com.stripe.android.paymentsheet.ui.getSublabel
 import com.stripe.android.paymentsheet.ui.readNumbersAsIndividualDigits
 import com.stripe.android.paymentsheet.utils.testMetadata
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
@@ -29,15 +29,13 @@ import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
 import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.strings.resolve
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 internal fun SavedPaymentMethodRowButton(
     displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     isEnabled: Boolean,
     isSelected: Boolean,
     modifier: Modifier = Modifier,
-    rowStyle: Embedded.RowStyle = Embedded.RowStyle.FloatingButton.default,
-    canShowLinkIcon: Boolean = false,
+    appearance: Embedded = Embedded(Embedded.RowStyle.FloatingButton.default),
     onClick: () -> Unit = {},
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
 ) {
@@ -46,7 +44,7 @@ internal fun SavedPaymentMethodRowButton(
         .resolve()
         .readNumbersAsIndividualDigits()
     val paymentMethodTitle =
-        displayableSavedPaymentMethod.paymentMethod.getLabel()
+        displayableSavedPaymentMethod.paymentMethod.getLabel(canShowSublabel = true)
             ?: displayableSavedPaymentMethod.displayName
 
     val paymentMethodId = displayableSavedPaymentMethod.paymentMethod.id
@@ -66,9 +64,8 @@ internal fun SavedPaymentMethodRowButton(
             )
         },
         title = paymentMethodTitle.resolve(),
-        subtitle = null,
+        subtitle = displayableSavedPaymentMethod.paymentMethod.getSublabel()?.resolve(),
         promoText = null,
-        showLinkIcon = displayableSavedPaymentMethod.paymentMethod.isLinkPaymentMethod && canShowLinkIcon,
         onClick = onClick,
         modifier = modifier
             .testTag(
@@ -76,12 +73,11 @@ internal fun SavedPaymentMethodRowButton(
             ),
         contentDescription = contentDescription,
         trailingContent = trailingContent,
-        style = rowStyle,
+        appearance = appearance,
         shouldShowDefaultBadge = displayableSavedPaymentMethod.shouldShowDefaultBadge
     )
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Preview
 @Composable
@@ -119,7 +115,6 @@ internal fun PreviewCardSavedPaymentMethodRowButton() {
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Preview
 @Composable

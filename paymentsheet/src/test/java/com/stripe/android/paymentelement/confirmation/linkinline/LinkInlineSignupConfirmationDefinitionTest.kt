@@ -37,6 +37,7 @@ import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNew
 import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.paymentelement.confirmation.asSaved
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -219,18 +220,10 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
     fun `'action' should return 'Launch' after successful sign-in & attach`() = test(
         attachNewCardToAccountResult = Result.success(
             LinkPaymentDetails.Saved(
-                paymentDetails = ConsumerPaymentDetails.Card(
-                    id = "pm_1",
+                paymentDetails = ConsumerPaymentDetails.Passthrough(
+                    id = "csmrpd_123",
                     last4 = "4242",
-                    isDefault = false,
-                    expiryYear = 2030,
-                    expiryMonth = 4,
-                    brand = CardBrand.Visa,
-                    cvcCheck = CvcCheck.Pass,
-                    networks = emptyList(),
-                    funding = "CREDIT",
-                    nickname = null,
-                    billingAddress = null,
+                    paymentMethodId = "pm_1",
                 ),
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             )
@@ -393,66 +386,84 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         expectedSetupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
         expectedShouldSave: Boolean,
     ) {
-        val expectedCreateParams = PaymentMethodCreateParams.createCard(
-            CardParams(
-                number = "4242424242424242",
-                expMonth = 7,
-                expYear = 2045,
-            )
-        )
-
-        val confirmationOption = createLinkInlineSignupConfirmationOption(
-            saveOption = saveOption,
-        )
-
-        actionTest(
-            attachNewCardToAccountResult = Result.success(
-                LinkPaymentDetails.New(
-                    paymentDetails = ConsumerPaymentDetails.Card(
-                        id = "pm_1",
-                        last4 = "4242",
-                        isDefault = false,
-                        expiryYear = 2030,
-                        expiryMonth = 4,
-                        brand = CardBrand.Visa,
-                        cvcCheck = CvcCheck.Pass,
-                        networks = emptyList(),
-                        funding = "CREDIT",
-                        nickname = null,
-                        billingAddress = null,
-                    ),
-                    paymentMethodCreateParams = expectedCreateParams,
-                    originalParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+        for (passthroughMode in listOf(true, false)) {
+            val expectedCreateParams = if (passthroughMode) {
+                PaymentMethodCreateParams.createCard(
+                    CardParams(
+                        number = "4242424242424242",
+                        expMonth = 7,
+                        expYear = 2045,
+                    )
                 )
-            ),
-            accountStatus = AccountStatus.Verified,
-            signInResult = Result.success(true),
-            confirmationOption = confirmationOption,
-        ) { launchAction ->
-            val attachNewCardToAccountCall = coordinatorScenario.attachNewCardToAccountCalls.awaitItem()
+            } else {
+                PaymentMethodCreateParams.createLink(
+                    paymentDetailsId = "csmr_pid_1234",
+                    consumerSessionClientSecret = "secret",
+                    extraParams = null,
+                    allowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS,
+                )
+            }
 
-            assertThat(attachNewCardToAccountCall.configuration).isEqualTo(confirmationOption.linkConfiguration)
-            assertThat(attachNewCardToAccountCall.paymentMethodCreateParams)
-                .isEqualTo(confirmationOption.createParams)
-
-            val nextConfirmationOption = launchAction.launcherArguments.nextConfirmationOption
-
-            assertThat(nextConfirmationOption).isInstanceOf<PaymentMethodConfirmationOption.New>()
-
-            val newConfirmationOption = nextConfirmationOption.asNew()
-
-            assertThat(newConfirmationOption.createParams).isEqualTo(expectedCreateParams)
-            assertThat(newConfirmationOption.optionsParams).isEqualTo(
+            val expectedOptionsParams = if (passthroughMode) {
                 PaymentMethodOptionsParams.Card(
                     setupFutureUsage = expectedSetupForFutureUsage,
                 )
+            } else {
+                PaymentMethodOptionsParams.Link(
+                    setupFutureUsage = expectedSetupForFutureUsage,
+                )
+            }
+
+            val confirmationOption = createLinkInlineSignupConfirmationOption(
+                saveOption = saveOption,
+                passthroughMode = passthroughMode,
             )
-            assertThat(newConfirmationOption.shouldSave).isEqualTo(expectedShouldSave)
 
-            assertThat(launchAction.receivesResultInProcess).isTrue()
-            assertThat(launchAction.deferredIntentConfirmationType).isNull()
+            actionTest(
+                attachNewCardToAccountResult = Result.success(
+                    LinkPaymentDetails.New(
+                        paymentDetails = ConsumerPaymentDetails.Card(
+                            id = "pm_1",
+                            last4 = "4242",
+                            isDefault = false,
+                            expiryYear = 2030,
+                            expiryMonth = 4,
+                            brand = CardBrand.Visa,
+                            cvcCheck = CvcCheck.Pass,
+                            networks = emptyList(),
+                            funding = "CREDIT",
+                            nickname = null,
+                            billingAddress = null,
+                        ),
+                        paymentMethodCreateParams = expectedCreateParams,
+                        originalParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    )
+                ),
+                accountStatus = AccountStatus.Verified,
+                signInResult = Result.success(true),
+                confirmationOption = confirmationOption,
+            ) { launchAction ->
+                val attachNewCardToAccountCall = coordinatorScenario.attachNewCardToAccountCalls.awaitItem()
 
-            assertThat(storeScenario.markAsUsedCalls.awaitItem()).isNotNull()
+                assertThat(attachNewCardToAccountCall.configuration).isEqualTo(confirmationOption.linkConfiguration)
+                assertThat(attachNewCardToAccountCall.paymentMethodCreateParams)
+                    .isEqualTo(confirmationOption.createParams)
+
+                val nextConfirmationOption = launchAction.launcherArguments.nextConfirmationOption
+
+                assertThat(nextConfirmationOption).isInstanceOf<PaymentMethodConfirmationOption.New>()
+
+                val newConfirmationOption = nextConfirmationOption.asNew()
+
+                assertThat(newConfirmationOption.createParams).isEqualTo(expectedCreateParams)
+                assertThat(newConfirmationOption.optionsParams).isEqualTo(expectedOptionsParams)
+                assertThat(newConfirmationOption.shouldSave).isEqualTo(expectedShouldSave)
+
+                assertThat(launchAction.receivesResultInProcess).isTrue()
+                assertThat(launchAction.deferredIntentConfirmationType).isNull()
+
+                assertThat(storeScenario.markAsUsedCalls.awaitItem()).isNotNull()
+            }
         }
     }
 
@@ -467,18 +478,10 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         actionTest(
             attachNewCardToAccountResult = Result.success(
                 LinkPaymentDetails.Saved(
-                    paymentDetails = ConsumerPaymentDetails.Card(
-                        id = "pm_1",
+                    paymentDetails = ConsumerPaymentDetails.Passthrough(
+                        id = "csmrpd_123",
                         last4 = "4242",
-                        isDefault = false,
-                        expiryYear = 2030,
-                        expiryMonth = 4,
-                        brand = CardBrand.Visa,
-                        cvcCheck = CvcCheck.Pass,
-                        networks = emptyList(),
-                        funding = "CREDIT",
-                        nickname = null,
-                        billingAddress = null,
+                        paymentMethodId = "pm_1",
                     ),
                     paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 )
@@ -658,7 +661,8 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
             country = "CA",
             name = "John Doe",
             consentAction = SignUpConsentAction.Checkbox,
-        )
+        ),
+        passthroughMode: Boolean = false,
     ): LinkInlineSignupConfirmationOption {
         return LinkInlineSignupConfirmationOption(
             createParams = createParams,
@@ -676,10 +680,11 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                     billingCountryCode = "CA"
                 ),
                 shippingDetails = null,
-                passthroughModeEnabled = false,
+                passthroughModeEnabled = passthroughMode,
                 flags = mapOf(),
                 cardBrandChoice = null,
                 cardBrandFilter = DefaultCardBrandFilter,
+                financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
                 useAttestationEndpointsForLink = false,
                 suppress2faModal = false,
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
@@ -687,6 +692,18 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 ),
                 elementsSessionId = "session_1234",
                 linkMode = LinkMode.LinkPaymentMethod,
+                allowDefaultOptIn = false,
+                disableRuxInFlowController = false,
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+                defaultBillingDetails = null,
+                collectMissingBillingDetailsForExistingPaymentMethods = true,
+                allowUserEmailEdits = true,
+                enableDisplayableDefaultValuesInEce = false,
+                skipWalletInFlowController = false,
+                linkAppearance = null,
+                linkSignUpOptInFeatureEnabled = false,
+                linkSignUpOptInInitialValue = false,
+                customerId = null
             ),
             userInput = userInput,
         )

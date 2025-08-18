@@ -9,6 +9,8 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.CustomEmailType
 import com.stripe.android.model.EmailSource
+import com.stripe.android.model.LinkAccountSession
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.SignUpParams
 import com.stripe.android.model.UpdateAvailableIncentives
@@ -56,14 +58,17 @@ internal open class FakeConsumersApiService : ConsumersApiService {
     override suspend fun lookupConsumerSession(
         email: String,
         requestSurface: String,
+        sessionId: String,
         doNotLogConsumerFunnelEvent: Boolean,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        customerId: String?
     ): ConsumerSessionLookup {
         lookupCalls.add(
             LookupCall(
                 email = email,
                 requestOptions = requestOptions,
-                requestSurface = requestSurface
+                requestSurface = requestSurface,
+                sessionId = sessionId,
             )
         )
         return lookupConsumerSessionResult
@@ -76,7 +81,8 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         verificationToken: String,
         appId: String,
         requestOptions: ApiRequest.Options,
-        sessionId: String
+        sessionId: String,
+        customerId: String?
     ): ConsumerSessionLookup {
         mobileLookupCalls.add(
             MobileLookupCall(
@@ -154,9 +160,20 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         TODO("Not yet implemented")
     }
 
+    override suspend fun createLinkAccountSession(
+        consumerSessionClientSecret: String,
+        intentToken: String?,
+        linkMode: LinkMode?,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options
+    ): Result<LinkAccountSession> {
+        TODO("Not yet implemented")
+    }
+
     data class LookupCall(
         val email: String,
         val requestSurface: String,
+        val sessionId: String,
         val requestOptions: ApiRequest.Options
     )
 

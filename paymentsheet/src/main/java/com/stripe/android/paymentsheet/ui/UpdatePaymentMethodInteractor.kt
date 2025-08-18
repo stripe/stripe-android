@@ -6,10 +6,13 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SavedPaymentMethod
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -36,6 +39,7 @@ internal interface UpdatePaymentMethodInteractor {
     val shouldShowSaveButton: Boolean
     val canUpdateFullPaymentMethodDetails: Boolean
     val addressCollectionMode: AddressCollectionMode
+    val allowedBillingCountries: Set<String>
     val editCardDetailsInteractor: EditCardDetailsInteractor
 
     val state: StateFlow<State>
@@ -68,7 +72,17 @@ internal interface UpdatePaymentMethodInteractor {
                 is SavedPaymentMethod.SepaDebit -> R.string.stripe_paymentsheet_manage_sepa_debit
                 is SavedPaymentMethod.USBankAccount -> R.string.stripe_paymentsheet_manage_bank_account
                 is SavedPaymentMethod.Card -> R.string.stripe_paymentsheet_manage_card
-                is SavedPaymentMethod.Link -> R.string.stripe_paymentsheet_manage_card
+                is SavedPaymentMethod.Link -> {
+                    when (displayableSavedPaymentMethod.paymentMethod.linkPaymentDetails) {
+                        is LinkPaymentDetails.BankAccount -> {
+                            R.string.stripe_paymentsheet_manage_international_bank_account
+                        }
+                        is LinkPaymentDetails.Card -> {
+                            R.string.stripe_paymentsheet_manage_card
+                        }
+                        null -> null
+                    }
+                }
                 SavedPaymentMethod.Unexpected -> null
             }
             )?.resolvableString
@@ -93,9 +107,10 @@ internal class DefaultUpdatePaymentMethodInteractor(
     override val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     override val cardBrandFilter: CardBrandFilter,
     override val addressCollectionMode: AddressCollectionMode,
+    override val allowedBillingCountries: Set<String>,
     override val canUpdateFullPaymentMethodDetails: Boolean,
     val isDefaultPaymentMethod: Boolean,
-    shouldShowSetAsDefaultCheckbox: Boolean,
+    override val shouldShowSetAsDefaultCheckbox: Boolean,
     private val removeExecutor: PaymentMethodRemoveOperation,
     private val updatePaymentMethodExecutor: UpdateCardPaymentMethodOperation,
     private val setDefaultPaymentMethodExecutor: PaymentMethodSetAsDefaultOperation,
@@ -110,12 +125,6 @@ internal class DefaultUpdatePaymentMethodInteractor(
     private val initialSetAsDefaultCheckedValue = isDefaultPaymentMethod
     private val setAsDefaultCheckboxChecked = MutableStateFlow(initialSetAsDefaultCheckedValue)
     private val cardUpdateParams = MutableStateFlow<CardUpdateParams?>(null)
-
-    // We don't yet support setting SEPA payment methods as defaults, so we hide the checkbox for now.
-    override val shouldShowSetAsDefaultCheckbox = (
-        shouldShowSetAsDefaultCheckbox &&
-            displayableSavedPaymentMethod.savedPaymentMethod !is SavedPaymentMethod.SepaDebit
-        )
 
     override val hasValidBrandChoices = hasValidBrandChoices()
     override val isExpiredCard = paymentMethodIsExpiredCard()
@@ -143,7 +152,9 @@ internal class DefaultUpdatePaymentMethodInteractor(
                 createEditCardDetailsInteractorForCard(paymentMethod)
             }
             is SavedPaymentMethod.Link -> {
-                createEditCardDetailsInteractorForLink(paymentMethod)
+                val linkPaymentDetails = paymentMethod.paymentDetails as? LinkPaymentDetails.Card
+                    ?: throw IllegalArgumentException("Link payment method is not a card")
+                createEditCardDetailsInteractorForLink(linkPaymentDetails)
             }
             else -> {
                 throw IllegalArgumentException(
@@ -158,35 +169,56 @@ internal class DefaultUpdatePaymentMethodInteractor(
     ): EditCardDetailsInteractor {
         val isModifiable = displayableSavedPaymentMethod.isModifiable(canUpdateFullPaymentMethodDetails)
         val payload = EditCardPayload.create(savedPaymentMethodCard.card, savedPaymentMethodCard.billingDetails)
+        val cardEditConfiguration = CardEditConfiguration(
+            cardBrandFilter = cardBrandFilter,
+            isCbcModifiable = isModifiable && displayableSavedPaymentMethod.canChangeCbc(),
+            areExpiryDateAndAddressModificationSupported = isModifiable && canUpdateFullPaymentMethodDetails,
+        )
         return editCardDetailsInteractorFactory.create(
             payload = payload,
+            cardEditConfiguration = cardEditConfiguration,
             onCardUpdateParamsChanged = { cardUpdateParams ->
                 onCardUpdateParamsChanged(cardUpdateParams)
             },
             coroutineScope = coroutineScope,
-            isCbcModifiable = isModifiable && displayableSavedPaymentMethod.canChangeCbc(),
-            cardBrandFilter = cardBrandFilter,
             onBrandChoiceChanged = onBrandChoiceSelected,
-            areExpiryDateAndAddressModificationSupported = isModifiable && canUpdateFullPaymentMethodDetails,
-            addressCollectionMode = addressCollectionMode,
+            // name, email, and phone are purposefully omitted (not collected) here.
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                address = addressCollectionMode,
+                email = CollectionMode.Never,
+                phone = CollectionMode.Never,
+                name = CollectionMode.Never,
+                allowedCountries = allowedBillingCountries,
+            ),
+            requiresModification = true
         )
     }
 
     private fun createEditCardDetailsInteractorForLink(
-        savedPaymentMethodCard: SavedPaymentMethod.Link,
+        savedPaymentMethodCard: LinkPaymentDetails.Card,
     ): EditCardDetailsInteractor {
-        val payload = EditCardPayload.create(savedPaymentMethodCard.paymentDetails)
+        val payload = EditCardPayload.create(savedPaymentMethodCard)
+        val cardEditConfiguration = CardEditConfiguration(
+            cardBrandFilter = cardBrandFilter,
+            isCbcModifiable = false,
+            areExpiryDateAndAddressModificationSupported = false,
+        )
         return editCardDetailsInteractorFactory.create(
             payload = payload,
+            cardEditConfiguration = cardEditConfiguration,
             onCardUpdateParamsChanged = { cardUpdateParams ->
                 onCardUpdateParamsChanged(cardUpdateParams)
             },
             coroutineScope = coroutineScope,
-            isCbcModifiable = false,
-            cardBrandFilter = cardBrandFilter,
             onBrandChoiceChanged = onBrandChoiceSelected,
-            areExpiryDateAndAddressModificationSupported = false,
-            addressCollectionMode = AddressCollectionMode.Never,
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                address = AddressCollectionMode.Never,
+                email = CollectionMode.Never,
+                phone = CollectionMode.Never,
+                name = CollectionMode.Never,
+                allowedCountries = allowedBillingCountries,
+            ),
+            requiresModification = true
         )
     }
 

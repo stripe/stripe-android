@@ -20,9 +20,11 @@ import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.attestation.FakeLinkAttestationCheck
+import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.utils.TestNavigationManager
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
+import com.stripe.android.paymentsheet.addresselement.TestAutocompleteLauncher
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.Dispatchers
@@ -73,7 +75,7 @@ internal class LinkActivityTest {
     @Test
     fun `verification dialog is displayed when link screen state is VerificationDialog`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
-        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
         linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
 
         setupActivityController(
@@ -92,7 +94,7 @@ internal class LinkActivityTest {
     @Test
     fun `full screen content is displayed when link screen state is FullScreen`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
-        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
         linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
 
         setupActivityController(
@@ -118,17 +120,18 @@ internal class LinkActivityTest {
         use2faDialog: Boolean = true,
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager()
     ): LinkActivity {
+        val linkExpressMode = if (use2faDialog) LinkExpressMode.ENABLED else LinkExpressMode.DISABLED
         val intent = LinkActivity.createIntent(
             context = context,
             args = TestFactory.NATIVE_LINK_ARGS.copy(
-                startWithVerificationDialog = use2faDialog
+                linkExpressMode = linkExpressMode,
             )
         )
 
         val activityController = Robolectric.buildActivity(LinkActivity::class.java, intent)
 
         activityController.get().viewModelFactory = linkViewModelFactory(
-            use2faDialog = use2faDialog,
+            linkExpressMode = linkExpressMode,
             linkAccountManager = linkAccountManager
         )
 
@@ -138,7 +141,7 @@ internal class LinkActivityTest {
     }
 
     private fun linkViewModelFactory(
-        use2faDialog: Boolean = true,
+        linkExpressMode: LinkExpressMode = LinkExpressMode.ENABLED,
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager()
     ): ViewModelProvider.Factory = viewModelFactory {
         initializer {
@@ -151,8 +154,11 @@ internal class LinkActivityTest {
                 linkAttestationCheck = FakeLinkAttestationCheck(),
                 savedStateHandle = SavedStateHandle(),
                 linkConfiguration = TestFactory.LINK_CONFIGURATION,
-                startWithVerificationDialog = use2faDialog,
-                navigationManager = TestNavigationManager()
+                linkExpressMode = linkExpressMode,
+                navigationManager = TestNavigationManager(),
+                linkLaunchMode = LinkLaunchMode.Full,
+                linkConfirmationHandlerFactory = { FakeLinkConfirmationHandler() },
+                autocompleteLauncher = TestAutocompleteLauncher.noOp(),
             )
         }
     }

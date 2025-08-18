@@ -28,7 +28,7 @@ import kotlin.test.fail
 internal suspend fun assertIntentConfirmed(
     activity: LpmNetworkTestActivity,
     params: LpmAssertionParams
-) {
+): Intent {
     intendingPaymentConfirmationToBeLaunched(params.intent)
 
     val option = PaymentMethodConfirmationOption.New(
@@ -73,6 +73,8 @@ internal suspend fun assertIntentConfirmed(
     val arguments = recordedIntent.assertPaymentLauncherArgs()
 
     assertConfirmed(activity, arguments.confirmStripeIntentParams)
+
+    return recordedIntent
 }
 
 private fun intendingPaymentConfirmationToBeLaunched(

@@ -56,8 +56,6 @@
   <string name="stripe_address_name_required">Inserisci il tuo nome</string>
   <!-- Error text indicating that phone number is required, used for all addresses -->
   <string name="stripe_address_phone_number_required">Inserisci il tuo numero di telefono</string>
-  <!-- Error message for when postal code in form is invalid -->
-  <string name="stripe_address_postal_code_invalid">Il codice postale non è valido.</string>
   <!-- Error text indicating postcode is invalid, used for UK addresses -->
   <string name="stripe_address_postcode_invalid">Il codice postale non è valido</string>
   <!-- Error text indicating that province is required, used for Canada addresses -->
@@ -121,8 +119,8 @@
   <!-- Accessibility title used during Talkback to indicate to users that a transaction is being confirmed -->
   <string name="stripe_confirming_transaction_status">Conferma della transazione</string>
   <!-- Accessibility action for deleting a payment method -->
-  <string name="stripe_delete_payment_method">Elimina modalità di pagamento</string>
-  <string name="stripe_delete_payment_method_prompt_title">Eliminare la modalità di pagamento?</string>
+  <string name="stripe_delete_payment_method">Elimina metodo di pagamento</string>
+  <string name="stripe_delete_payment_method_prompt_title">Eliminare il metodo di pagamento?</string>
   <!-- Error message for card entry form when a user enters a card with a brand that is not accepted. -->
   <string name="stripe_disallowed_card_brand">La carta %s non è accettata</string>
   <!-- Done button title -->
@@ -137,13 +135,13 @@
   <!-- Generic error message shown when payment cannot be processed. -->
   <string name="stripe_failure_connection_error">Stiamo riscontrando problemi di connessione con il nostro fornitore di servizi di pagamento. Controlla la connessione a Internet e riprova.</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
-  <string name="stripe_failure_reason_authentication">Impossibile autenticare la modalità di pagamento. Scegline un\'altra e riprova.</string>
+  <string name="stripe_failure_reason_authentication">Impossibile autenticare il metodo di pagamento. Scegline un altro e riprova.</string>
   <!-- Error when 3DS2 authentication timed out. -->
-  <string name="stripe_failure_reason_timed_out">Timeout durante l\'autenticazione della modalità di pagamento. Riprova.</string>
+  <string name="stripe_failure_reason_timed_out">Timeout durante l\'autenticazione del metodo di pagamento. Riprova.</string>
   <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
   <string name="stripe_fpx_bank_offline">%s - Offline</string>
   <!-- Error message when a payment method gets declined. -->
-  <string name="stripe_generic_decline">La tua modalità di pagamento è stata rifiutata.</string>
+  <string name="stripe_generic_decline">Il tuo metodo di pagamento è stato rifiutato.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">Si è verificato un errore interno.</string>
   <!-- An error message displayed when the customer's iban is invalid. -->
@@ -177,7 +175,7 @@
   <!-- Label for Bank Account selection or detail entry form -->
   <string name="stripe_title_bank_account">Conto bancario</string>
   <!-- Title for Payment Method screen -->
-  <string name="stripe_title_payment_method">Modalità di pagamento</string>
+  <string name="stripe_title_payment_method">Metodo di pagamento</string>
   <!-- Screen title telling users they should select a shipping address -->
   <string name="stripe_title_select_shipping_method">Scegli metodo spedizione</string>
   <!-- Title of screen to update a card -->

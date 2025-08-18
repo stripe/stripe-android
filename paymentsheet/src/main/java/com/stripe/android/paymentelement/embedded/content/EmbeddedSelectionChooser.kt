@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-
 package com.stripe.android.paymentelement.embedded.content
 
 import androidx.lifecycle.SavedStateHandle
@@ -8,8 +6,9 @@ import com.stripe.android.common.model.containsVolatileDifferences
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
+import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -17,6 +16,7 @@ import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
+import javax.inject.Provider
 
 internal fun interface EmbeddedSelectionChooser {
     fun choose(
@@ -25,6 +25,7 @@ internal fun interface EmbeddedSelectionChooser {
         previousSelection: PaymentSelection?,
         newSelection: PaymentSelection?,
         newConfiguration: CommonConfiguration,
+        formSheetAction: EmbeddedPaymentElement.FormSheetAction,
     ): PaymentSelection?
 }
 
@@ -33,6 +34,7 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
     private val formHelperFactory: EmbeddedFormHelperFactory,
     private val eventReporter: EventReporter,
     @ViewModelScope private val coroutineScope: CoroutineScope,
+    private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
 ) : EmbeddedSelectionChooser {
     private var previousConfiguration: CommonConfiguration?
         get() = savedStateHandle[PREVIOUS_CONFIGURATION_KEY]
@@ -48,19 +50,65 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
         previousSelection: PaymentSelection?,
         newSelection: PaymentSelection?,
         newConfiguration: CommonConfiguration,
+        formSheetAction: EmbeddedPaymentElement.FormSheetAction,
     ): PaymentSelection? {
-        val result = previousSelection?.takeIf { selection ->
-            canUseSelection(
+        val result = newSelection?.takeIf {
+            shouldUseNewSelectionAsDefaultPaymentMethod(
                 paymentMethodMetadata = paymentMethodMetadata,
                 paymentMethods = paymentMethods,
-                previousSelection = selection,
-            ) && previousConfiguration?.containsVolatileDifferences(newConfiguration) != true
+                newSelection = it,
+            )
+        } ?: previousSelection?.takeIf {
+            shouldUsePreviousSelection(
+                paymentMethodMetadata = paymentMethodMetadata,
+                paymentMethods = paymentMethods,
+                previousSelection = it,
+                newConfiguration = newConfiguration
+            )
         } ?: newSelection
+
+        if (
+            internalRowSelectionCallback.get() != null &&
+            formSheetAction == EmbeddedPaymentElement.FormSheetAction.Confirm
+        ) {
+            return null
+        }
 
         previousConfiguration = newConfiguration
         previousPaymentMethodMetadata = paymentMethodMetadata
 
         return result
+    }
+
+    /**
+     * In the case that there is a defaultPaymentMethod and setAsDefault is enabled, newSelection.paymentMethod
+     * will be the defaultPaymentMethod. See [DefaultPaymentElementLoader.retrieveInitialPaymentSelection]
+     */
+    private fun shouldUseNewSelectionAsDefaultPaymentMethod(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        paymentMethods: List<PaymentMethod>?,
+        newSelection: PaymentSelection,
+    ): Boolean {
+        return paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true &&
+            newSelection is PaymentSelection.Saved &&
+            canUseSelection(
+                paymentMethodMetadata = paymentMethodMetadata,
+                paymentMethods = paymentMethods,
+                previousSelection = newSelection,
+            )
+    }
+
+    private fun shouldUsePreviousSelection(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        paymentMethods: List<PaymentMethod>?,
+        previousSelection: PaymentSelection,
+        newConfiguration: CommonConfiguration,
+    ): Boolean {
+        return canUseSelection(
+            paymentMethodMetadata = paymentMethodMetadata,
+            paymentMethods = paymentMethods,
+            previousSelection = previousSelection,
+        ) && previousConfiguration?.containsVolatileDifferences(newConfiguration) != true
     }
 
     private fun canUseSelection(
@@ -96,6 +144,7 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
             is PaymentSelection.CustomPaymentMethod -> {
                 paymentMethodMetadata.isCustomPaymentMethod(previousSelection.id)
             }
+            is PaymentSelection.ShopPay -> false
         }
     }
 

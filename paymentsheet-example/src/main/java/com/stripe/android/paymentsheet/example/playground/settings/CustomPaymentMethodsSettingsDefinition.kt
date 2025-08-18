@@ -2,11 +2,10 @@ package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class, ExperimentalCustomPaymentMethodsApi::class)
+@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal object CustomPaymentMethodsSettingDefinition :
     PlaygroundSettingDefinition<CustomPaymentMethodPlaygroundType>,
     PlaygroundSettingDefinition.Saveable<CustomPaymentMethodPlaygroundType> by EnumSaveable(
@@ -16,6 +15,10 @@ internal object CustomPaymentMethodsSettingDefinition :
     ),
     PlaygroundSettingDefinition.Displayable<CustomPaymentMethodPlaygroundType> {
     override val displayName: String = "Custom payment methods"
+
+    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+        return configurationData.integrationType.isPaymentFlow()
+    }
 
     override fun createOptions(
         configurationData: PlaygroundConfigurationData

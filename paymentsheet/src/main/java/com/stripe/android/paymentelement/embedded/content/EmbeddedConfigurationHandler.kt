@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-
 package com.stripe.android.paymentelement.embedded.content
 
 import android.os.Parcelable
@@ -7,8 +5,9 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.coroutines.CoalescingOrchestrator
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
@@ -18,6 +17,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
+import javax.inject.Named
+import javax.inject.Provider
 
 internal interface EmbeddedConfigurationHandler {
     suspend fun configure(
@@ -30,7 +31,9 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
     private val paymentElementLoader: PaymentElementLoader,
     private val savedStateHandle: SavedStateHandle,
     private val sheetStateHolder: SheetStateHolder,
-    private val eventReporter: EventReporter
+    private val eventReporter: EventReporter,
+    private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
+    @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean
 ) : EmbeddedConfigurationHandler {
 
     private var cache: ConfigurationCache?
@@ -54,13 +57,16 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
             appearance = configuration.appearance,
             isDeferred = true,
             primaryButtonColor = null,
-            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.Embedded(configuration),
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.Embedded(
+                configuration = configuration,
+                isRowSelectionImmediateAction = internalRowSelectionCallback.get() != null
+            ),
         )
 
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration)
         try {
             initializationMode.validate()
-            targetConfiguration.validate()
+            targetConfiguration.validate(isLiveModeProvider())
         } catch (e: IllegalArgumentException) {
             return Result.failure(e)
         }
@@ -100,8 +106,10 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
                     paymentElementLoader.load(
                         initializationMode = initializationMode,
                         configuration = targetConfiguration,
-                        isReloadingAfterProcessDeath = false,
-                        initializedViaCompose = true,
+                        metadata = PaymentElementLoader.Metadata(
+                            isReloadingAfterProcessDeath = false,
+                            initializedViaCompose = true,
+                        ),
                     ).onSuccess { state ->
                         cache = ConfigurationCache(
                             arguments = Arguments(

@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark
 import com.stripe.android.screenshottesting.FontSize
@@ -20,7 +20,6 @@ import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
 import org.junit.Test
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
 
     @get:Rule
@@ -78,27 +77,31 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
 
     @Test
     fun testStyleAppearance() {
-        val style = FlatWithCheckmark(
-            separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
-            startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-            endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-            topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
-            bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
-            checkmarkInsetDp = 20f,
-            additionalVerticalInsetsDp = 40f,
-            horizontalInsetsDp = 40f,
-            colorsLight = FlatWithCheckmark.Colors(
-                separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-                checkmarkColor = StripeThemeDefaults.colorsLight.materialColors.error.toArgb()
-            ),
-            colorsDark = FlatWithCheckmark.Colors(
-                separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
-                checkmarkColor = StripeThemeDefaults.colorsDark.materialColors.error.toArgb()
+        val style = FlatWithCheckmark.Builder()
+            .separatorThicknessDp(StripeThemeDefaults.flat.separatorThickness)
+            .startSeparatorInsetDp(StripeThemeDefaults.flat.separatorInsets)
+            .endSeparatorInsetDp(StripeThemeDefaults.flat.separatorInsets)
+            .topSeparatorEnabled(StripeThemeDefaults.flat.topSeparatorEnabled)
+            .bottomSeparatorEnabled(StripeThemeDefaults.flat.bottomSeparatorEnabled)
+            .checkmarkInsetDp(20f)
+            .additionalVerticalInsetsDp(40f)
+            .horizontalInsetsDp(40f)
+            .colorsLight(
+                FlatWithCheckmark.Colors(
+                    separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+                    checkmarkColor = StripeThemeDefaults.colorsLight.materialColors.error.toArgb()
+                )
             )
-        )
+            .colorsDark(
+                FlatWithCheckmark.Colors(
+                    separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
+                    checkmarkColor = StripeThemeDefaults.colorsDark.materialColors.error.toArgb()
+                )
+            )
+            .build()
 
         testPaymentMethodRowButton_Checkmark(
-            rowStyle = style,
+            appearance = PaymentSheet.Appearance.Embedded(style),
             trailingContent = {
                 Text("View more")
             },
@@ -129,10 +132,43 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
         )
     }
 
+    @OptIn(AppearanceAPIAdditionsPreview::class)
     @Test
-    fun testLinkPaymentMethod() {
+    fun testIconMargins() {
         testPaymentMethodRowButton_Checkmark(
-            showLinkIcon = true,
+            appearance = PaymentSheet.Appearance.Embedded.Builder()
+                .rowStyle(FlatWithCheckmark.default)
+                .paymentMethodIconMargins(
+                    PaymentSheet.Insets(10f, 10f, 10f, 10f)
+                )
+                .build()
+        )
+    }
+
+    @OptIn(AppearanceAPIAdditionsPreview::class)
+    @Test
+    fun testFonts() {
+        testPaymentMethodRowButton_Checkmark(
+            subtitle = "this is a subtitle",
+            appearance = PaymentSheet.Appearance.Embedded.Builder()
+                .rowStyle(FlatWithCheckmark.default)
+                .titleFont(
+                    PaymentSheet.Typography.Font(
+                        fontFamily = com.stripe.android.paymentsheet.R.font.cursive,
+                        fontSizeSp = 20f,
+                        fontWeight = 500,
+                        letterSpacingSp = 10f
+                    )
+                )
+                .subtitleFont(
+                    PaymentSheet.Typography.Font(
+                        fontFamily = com.stripe.android.paymentsheet.R.font.cursive,
+                        fontSizeSp = 12f,
+                        fontWeight = 200,
+                        letterSpacingSp = 5f
+                    )
+                )
+                .build()
         )
     }
 
@@ -142,13 +178,12 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
         iconContent: @Composable RowScope.() -> Unit = {
             DefaultPaymentMethodRowIcon()
         },
-        rowStyle: PaymentSheet.Appearance.Embedded.RowStyle = FlatWithCheckmark.default,
+        appearance: PaymentSheet.Appearance.Embedded = PaymentSheet.Appearance.Embedded(FlatWithCheckmark.default),
         trailingContent: @Composable RowScope.() -> Unit = {},
         title: String = "**** 4242",
         subtitle: String? = null,
         promoText: String? = null,
         shouldShowDefaultBadge: Boolean = false,
-        showLinkIcon: Boolean = false,
     ) {
         testPaymentMethodRowButton(
             isEnabled = isEnabled,
@@ -159,8 +194,7 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
             promoText = promoText,
             trailingContent = trailingContent,
             shouldShowDefaultBadge = shouldShowDefaultBadge,
-            showLinkIcon = showLinkIcon,
-            rowStyle = rowStyle,
+            appearance = appearance,
             paparazziRule = paparazziRule,
         )
     }

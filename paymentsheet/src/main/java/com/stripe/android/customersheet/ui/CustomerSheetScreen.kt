@@ -12,12 +12,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.PrimaryButton
+import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.customersheet.CustomerSheetViewAction
 import com.stripe.android.customersheet.CustomerSheetViewModel
@@ -35,10 +35,14 @@ import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
+import com.stripe.android.ui.core.elements.events.AnalyticsEventReporter
 import com.stripe.android.ui.core.elements.events.CardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.CardNumberCompletedEventReporter
+import com.stripe.android.ui.core.elements.events.LocalAnalyticsEventReporter
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.R as PaymentsCoreR
@@ -121,7 +125,7 @@ internal fun SelectPaymentMethod(
     paymentMethodNameProvider: (PaymentMethodCode?) -> ResolvableString,
     modifier: Modifier = Modifier,
 ) {
-    val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+    val horizontalPadding = StripeTheme.getOuterFormInsets()
 
     Column(
         modifier = modifier
@@ -132,7 +136,7 @@ internal fun SelectPaymentMethod(
             ),
             modifier = Modifier
                 .padding(bottom = 20.dp)
-                .padding(horizontal = horizontalPadding)
+                .padding(horizontalPadding)
         )
 
         val paymentOptionsState = PaymentOptionsStateFactory.create(
@@ -161,7 +165,7 @@ internal fun SelectPaymentMethod(
                 error = error,
                 modifier = Modifier
                     .padding(vertical = 2.dp)
-                    .padding(horizontal = horizontalPadding),
+                    .padding(horizontalPadding),
             )
         }
 
@@ -176,7 +180,7 @@ internal fun SelectPaymentMethod(
                 modifier = Modifier
                     .testTag(CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG)
                     .padding(top = 20.dp)
-                    .padding(horizontal = horizontalPadding),
+                    .padding(horizontalPadding),
             )
         }
 
@@ -185,7 +189,7 @@ internal fun SelectPaymentMethod(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp)
-                .padding(horizontal = horizontalPadding),
+                .padding(horizontalPadding),
         )
     }
 }
@@ -197,7 +201,7 @@ internal fun AddPaymentMethod(
     viewActionHandler: (CustomerSheetViewAction) -> Unit,
     displayForm: Boolean,
 ) {
-    val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+    val horizontalPadding = StripeTheme.getOuterFormInsets()
 
     if (viewState.displayDismissConfirmationModal) {
         SimpleDialogElementUI(
@@ -220,7 +224,7 @@ internal fun AddPaymentMethod(
         text = stringResource(id = R.string.stripe_paymentsheet_save_a_new_payment_method),
         modifier = Modifier
             .padding(bottom = 4.dp)
-            .padding(horizontal = horizontalPadding)
+            .padding(horizontalPadding)
     )
 
     val eventReporter = remember(viewActionHandler) {
@@ -231,11 +235,15 @@ internal fun AddPaymentMethod(
         DefaultCardBrandDisallowedReporter(viewActionHandler)
     }
 
+    val analyticsEventReporter = remember(viewActionHandler) {
+        DefaultAnalyticsEventReporter(viewActionHandler)
+    }
+
     if (displayForm) {
         CompositionLocalProvider(
             LocalCardNumberCompletedEventReporter provides eventReporter,
-            LocalCardBrandDisallowedReporter provides disallowedReporter
-
+            LocalCardBrandDisallowedReporter provides disallowedReporter,
+            LocalAnalyticsEventReporter provides analyticsEventReporter,
         ) {
             PaymentElement(
                 enabled = viewState.enabled,
@@ -261,7 +269,7 @@ internal fun AddPaymentMethod(
     viewState.errorMessage?.let { error ->
         ErrorMessage(
             error = error.resolve(),
-            modifier = Modifier.padding(horizontal = horizontalPadding)
+            modifier = Modifier.padding(horizontalPadding)
         )
     }
 
@@ -275,7 +283,7 @@ internal fun AddPaymentMethod(
                         8.dp
                     } ?: 0.dp
                 )
-                .padding(horizontal = horizontalPadding),
+                .padding(horizontalPadding),
         )
     }
 
@@ -290,7 +298,7 @@ internal fun AddPaymentMethod(
         modifier = Modifier
             .testTag(CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG)
             .padding(top = 10.dp)
-            .padding(horizontal = horizontalPadding),
+            .padding(horizontalPadding),
     )
 
     if (!viewState.showMandateAbovePrimaryButton) {
@@ -299,7 +307,7 @@ internal fun AddPaymentMethod(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp)
-                .padding(horizontal = horizontalPadding),
+                .padding(horizontalPadding)
         )
     }
 }
@@ -309,7 +317,7 @@ private fun UpdatePaymentMethod(
     viewState: CustomerSheetViewState.UpdatePaymentMethod,
     modifier: Modifier = Modifier,
 ) {
-    val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+    val horizontalPadding = StripeTheme.getOuterFormInsets()
 
     Column(modifier) {
         viewState.updatePaymentMethodInteractor.screenTitle?.let {
@@ -317,7 +325,7 @@ private fun UpdatePaymentMethod(
                 text = it.resolve(),
                 modifier = Modifier
                     .padding(bottom = 20.dp)
-                    .padding(horizontal = horizontalPadding)
+                    .padding(horizontalPadding)
             )
         }
 
@@ -333,6 +341,14 @@ const val CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG = "CustomerSheetConfirmButton"
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG = "CustomerSheetSaveButton"
+
+private class DefaultAnalyticsEventReporter(
+    private val viewActionHandler: (event: CustomerSheetViewAction) -> Unit
+) : AnalyticsEventReporter {
+    override fun onAnalyticsEvent(event: AnalyticsEvent) {
+        viewActionHandler.invoke(CustomerSheetViewAction.OnAnalyticsEvent(event))
+    }
+}
 
 private class DefaultCardNumberCompletedEventReporter(
     private val viewActionHandler: (CustomerSheetViewAction) -> Unit

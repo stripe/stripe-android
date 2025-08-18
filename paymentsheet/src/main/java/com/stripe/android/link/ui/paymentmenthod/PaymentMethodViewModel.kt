@@ -7,14 +7,16 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
-import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.confirmation.LinkConfirmationHandler
-import com.stripe.android.link.confirmation.Result
+import com.stripe.android.link.confirmation.CompleteLinkFlow
+import com.stripe.android.link.confirmation.CompleteLinkFlow.Result
+import com.stripe.android.link.confirmation.DefaultCompleteLinkFlow
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.PrimaryButtonState
@@ -24,7 +26,11 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.FormHelper
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
+import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -35,18 +41,19 @@ internal class PaymentMethodViewModel @Inject constructor(
     private val configuration: LinkConfiguration,
     private val linkAccount: LinkAccount,
     private val linkAccountManager: LinkAccountManager,
-    private val linkConfirmationHandler: LinkConfirmationHandler,
+    private val completeLinkFlow: CompleteLinkFlow,
     private val logger: Logger,
     private val formHelper: FormHelper,
     private val dismissalCoordinator: LinkDismissalCoordinator,
-    private val dismissWithResult: (LinkActivityResult) -> Unit
+    private val linkLaunchMode: LinkLaunchMode,
+    private val dismissWithResult: (LinkActivityResult) -> Unit,
 ) : ViewModel() {
     private val _state = MutableStateFlow(
         PaymentMethodState(
             formElements = formHelper.formElementsForCode(PaymentMethod.Type.Card.code),
             formArguments = formHelper.createFormArguments(PaymentMethod.Type.Card.code),
             primaryButtonState = PrimaryButtonState.Disabled,
-            primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent)
+            primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent, linkLaunchMode)
         )
     )
 
@@ -85,12 +92,25 @@ internal class PaymentMethodViewModel @Inject constructor(
 
             dismissalCoordinator.withDismissalDisabled {
                 linkAccountManager.createCardPaymentDetails(paymentMethodCreateParams)
+                    .mapCatching { linkPaymentDetails ->
+                        val shouldShare = configuration.passthroughModeEnabled &&
+                            (linkLaunchMode as? LinkLaunchMode.PaymentMethodSelection)
+                                ?.sharePaymentDetailsImmediatelyAfterCreation != false
+                        if (shouldShare) {
+                            linkAccountManager.shareCardPaymentDetails(linkPaymentDetails).getOrThrow()
+                        } else {
+                            linkPaymentDetails
+                        }
+                    }
                     .fold(
                         onSuccess = { linkPaymentDetails ->
-                            val cardMap = paymentMethodCreateParams.toParamMap()["card"] as? Map<*, *>?
-                            performConfirmation(
+                            val params = paymentMethodCreateParams.toParamMap()
+                            val cardMap = params["card"] as? Map<*, *>?
+                            val billingDetailsMap = params["billing_details"] as? Map<*, *>?
+                            attemptCompletion(
                                 paymentDetails = linkPaymentDetails,
-                                cvc = cardMap?.get("cvc") as? String?
+                                cvc = cardMap?.get("cvc") as? String?,
+                                billingPhone = billingDetailsMap?.get("phone") as? String?
                             )
                             updateButtonState(PrimaryButtonState.Enabled)
                         },
@@ -111,27 +131,23 @@ internal class PaymentMethodViewModel @Inject constructor(
         }
     }
 
-    private suspend fun performConfirmation(
+    private suspend fun attemptCompletion(
         paymentDetails: LinkPaymentDetails,
-        cvc: String?
+        cvc: String?,
+        billingPhone: String?
     ) {
-        val result = linkConfirmationHandler.confirm(
-            paymentDetails = paymentDetails,
-            linkAccount = linkAccount,
-            cvc = cvc
+        val result = completeLinkFlow(
+            selectedPaymentDetails = LinkPaymentMethod.LinkPaymentDetails(
+                linkPaymentDetails = paymentDetails,
+                collectedCvc = cvc,
+                billingPhone = billingPhone
+            ),
+            linkAccount = linkAccount
         )
         when (result) {
-            Result.Canceled -> Unit
-            is Result.Failed -> {
-                _state.update { it.copy(errorMessage = result.message) }
-            }
-            Result.Succeeded -> {
-                dismissWithResult(
-                    LinkActivityResult.Completed(
-                        linkAccountUpdate = LinkAccountUpdate.Value(null)
-                    )
-                )
-            }
+            is Result.Canceled -> Unit
+            is Result.Failed -> _state.update { it.copy(errorMessage = result.error) }
+            is Result.Completed -> dismissWithResult(result.linkActivityResult)
         }
     }
 
@@ -161,24 +177,61 @@ internal class PaymentMethodViewModel @Inject constructor(
                         configuration = parentComponent.configuration,
                         linkAccount = linkAccount,
                         linkAccountManager = parentComponent.linkAccountManager,
-                        linkConfirmationHandler = parentComponent.linkConfirmationHandlerFactory.create(
-                            confirmationHandler = parentComponent.viewModel.confirmationHandler
+                        completeLinkFlow = DefaultCompleteLinkFlow(
+                            linkConfirmationHandler = parentComponent.linkConfirmationHandlerFactory.create(
+                                confirmationHandler = parentComponent.viewModel.confirmationHandler
+                            ),
+                            linkAccountManager = parentComponent.linkAccountManager,
+                            dismissalCoordinator = parentComponent.dismissalCoordinator,
+                            linkLaunchMode = parentComponent.linkLaunchMode
                         ),
                         formHelper = DefaultFormHelper.create(
                             coroutineScope = parentComponent.viewModel.viewModelScope,
                             cardAccountRangeRepositoryFactory = parentComponent.cardAccountRangeRepositoryFactory,
                             paymentMethodMetadata = PaymentMethodMetadata.createForNativeLink(
-                                configuration = parentComponent.configuration,
+                                configuration = parentComponent.configuration.withLinkRequiredSettings(),
+                                linkAccount = linkAccount,
                             ),
                             eventReporter = parentComponent.eventReporter,
-                            savedStateHandle = parentComponent.viewModel.savedStateHandle
+                            savedStateHandle = parentComponent.viewModel.savedStateHandle,
+                            autocompleteAddressInteractorFactory =
+                            PaymentElementAutocompleteAddressInteractor.Factory(
+                                launcher = parentComponent.autocompleteLauncher,
+                                autocompleteConfig = AutocompleteAddressInteractor.Config(
+                                    googlePlacesApiKey = parentComponent.configuration.googlePlacesApiKey,
+                                    autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
+                                )
+                            ),
+                            isLinkUI = true,
                         ),
                         logger = parentComponent.logger,
                         dismissalCoordinator = parentComponent.dismissalCoordinator,
+                        linkLaunchMode = parentComponent.linkLaunchMode,
                         dismissWithResult = dismissWithResult
                     )
                 }
             }
         }
+
+        private fun LinkConfiguration.withLinkRequiredSettings() = copy(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = billingDetailsCollectionConfiguration.name,
+                email = billingDetailsCollectionConfiguration.email,
+                phone = billingDetailsCollectionConfiguration.phone,
+                // Should always collect ZIP/postal code at minimum
+                address = if (
+                    billingDetailsCollectionConfiguration.address == PaymentSheet
+                        .BillingDetailsCollectionConfiguration
+                        .AddressCollectionMode
+                        .Never
+                ) {
+                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
+                } else {
+                    billingDetailsCollectionConfiguration.address
+                },
+                attachDefaultsToPaymentMethod = billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod,
+                allowedCountries = billingDetailsCollectionConfiguration.allowedBillingCountries,
+            )
+        )
     }
 }

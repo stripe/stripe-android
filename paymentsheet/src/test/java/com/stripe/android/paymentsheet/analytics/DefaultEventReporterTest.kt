@@ -5,8 +5,9 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
-import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkGlobalHoldback.EmailRecognitionSource
+import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkHoldback.EmailRecognitionSource
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequest
@@ -16,10 +17,13 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.StripeIntent
+import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
@@ -187,6 +191,36 @@ class DefaultEventReporterTest {
             argWhere { req ->
                 req.params["set_as_default_enabled"] == true &&
                     req.params["has_default_payment_method"] == null
+            }
+        )
+    }
+
+    @Test
+    fun `on completed loading operation, should fire analytics with pmo sfu map`() {
+        val eventReporter = createEventReporter(EventReporter.Mode.Complete)
+
+        eventReporter.simulateSuccessfulSetup(
+            paymentMethodOptionsSetupFutureUsage = true
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["payment_method_options_setup_future_usage"] == true
+            }
+        )
+    }
+
+    @Test
+    fun `on completed loading operation, should fire analytics with setup future usage value`() {
+        val eventReporter = createEventReporter(EventReporter.Mode.Complete)
+
+        eventReporter.simulateSuccessfulSetup(
+            setupFutureUsage = StripeIntent.Usage.OffSession
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["setup_future_usage"] == "off_session"
             }
         )
     }
@@ -633,13 +667,14 @@ class DefaultEventReporterTest {
                 simulateSuccessfulSetup()
             }
 
-            val experiment = LoggableExperiment.LinkGlobalHoldback(
+            val experiment = LoggableExperiment.LinkHoldback(
+                experiment = LINK_GLOBAL_HOLD_BACK,
                 arbId = "random_arb_id",
                 isReturningLinkUser = false,
                 group = "holdback",
                 useLinkNative = true,
                 emailRecognitionSource = EmailRecognitionSource.EMAIL,
-                providedDefaultValues = LoggableExperiment.LinkGlobalHoldback.ProvidedDefaultValues(
+                providedDefaultValues = LoggableExperiment.LinkHoldback.ProvidedDefaultValues(
                     email = true,
                     name = false,
                     phone = true,
@@ -996,6 +1031,22 @@ class DefaultEventReporterTest {
             )
         }
 
+    @Test
+    fun `Sends general analytics event on call`() =
+        runTest(testDispatcher) {
+            val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+                simulateInit()
+            }
+
+            completeEventReporter.onAnalyticsEvent(PaymentAnalyticsEvent.FileCreate)
+
+            val argumentCaptor = argumentCaptor<AnalyticsRequest>()
+            verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
+
+            val event = argumentCaptor.firstValue.params["event"]
+            assertThat(event).isEqualTo(PaymentAnalyticsEvent.FileCreate.eventName)
+        }
+
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
     @Test
     fun `Throwable in analytic event callback should not be propagated`() = runTest(testDispatcher) {
@@ -1026,6 +1077,136 @@ class DefaultEventReporterTest {
         analyticEventCallbackRule.setCallback(null)
 
         completeEventReporter.onShowNewPaymentOptions()
+    }
+
+    @Test
+    fun `onShopPayWebViewLoadAttempt should fire analytics request with expected event`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onShopPayWebViewLoadAttempt()
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_shoppay_webview_load_attempt"
+            }
+        )
+    }
+
+    @Test
+    fun `onShopPayWebViewConfirmSuccess should fire analytics request with expected event`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onShopPayWebViewConfirmSuccess()
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_shoppay_webview_confirm_success"
+            }
+        )
+    }
+
+    @Test
+    fun `onShopPayWebViewCancelled should fire analytics request with expected event and params`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onShopPayWebViewCancelled(didReceiveECEClick = true)
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_shoppay_webview_cancelled" &&
+                    req.params["did_receive_ece_click"] == true
+            }
+        )
+    }
+
+    @Test
+    fun `onShopPayWebViewCancelled should fire analytics request with false ECE click param`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onShopPayWebViewCancelled(didReceiveECEClick = false)
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_shoppay_webview_cancelled" &&
+                    req.params["did_receive_ece_click"] == false
+            }
+        )
+    }
+
+    @Test
+    fun `is_spt is false for all requests after load succeeded event`() = isSptTest(
+        intentConfiguration = PaymentSheet.IntentConfiguration(
+            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                amount = 5000L,
+                currency = "CAD",
+            ),
+        ),
+        expectedIsSptValue = false,
+    )
+
+    @OptIn(SharedPaymentTokenSessionPreview::class)
+    @Test
+    fun `is_spt is true for all requests after load succeeded event`() = isSptTest(
+        intentConfiguration = PaymentSheet.IntentConfiguration(
+            sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                amount = 5000L,
+                currency = "CAD",
+            ),
+            sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                businessName = "My business, Inc.",
+                networkId = "network_id",
+                externalId = "external_id",
+            ),
+        ),
+        expectedIsSptValue = true,
+    )
+
+    private fun isSptTest(
+        intentConfiguration: PaymentSheet.IntentConfiguration,
+        expectedIsSptValue: Boolean,
+    ) {
+        analyticEventCallbackRule.setCallback(null)
+
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateSuccessfulSetup(
+                initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                    intentConfiguration = intentConfiguration,
+                )
+            )
+        }
+
+        completeEventReporter.onShowNewPaymentOptions()
+        completeEventReporter.onCardNumberCompleted()
+        completeEventReporter.onPaymentMethodFormCompleted(code = "card")
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_complete_sheet_newpm_show" &&
+                    req.params["is_spt"] == expectedIsSptValue
+            }
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_card_number_completed" &&
+                    req.params["is_spt"] == expectedIsSptValue
+            }
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_form_completed" &&
+                    req.params["is_spt"] == expectedIsSptValue
+            }
+        )
     }
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
@@ -1105,6 +1286,8 @@ class DefaultEventReporterTest {
         setAsDefaultEnabled: Boolean? = null,
         financialConnectionsAvailability: FinancialConnectionsAvailability = FinancialConnectionsAvailability.Full,
         linkDisplay: PaymentSheet.LinkConfiguration.Display = PaymentSheet.LinkConfiguration.Display.Automatic,
+        paymentMethodOptionsSetupFutureUsage: Boolean = false,
+        setupFutureUsage: StripeIntent.Usage? = null
     ) {
         simulateInit()
         onLoadStarted(initializedViaCompose = false)
@@ -1121,6 +1304,8 @@ class DefaultEventReporterTest {
             setAsDefaultEnabled = setAsDefaultEnabled,
             financialConnectionsAvailability = financialConnectionsAvailability,
             linkDisplay = linkDisplay,
+            paymentMethodOptionsSetupFutureUsage = paymentMethodOptionsSetupFutureUsage,
+            setupFutureUsage = setupFutureUsage
         )
     }
 

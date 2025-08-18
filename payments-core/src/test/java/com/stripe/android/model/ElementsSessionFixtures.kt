@@ -453,6 +453,8 @@ internal object ElementsSessionFixtures {
         paymentMethodSyncDefaultFeature: String = "disabled",
         enableLinkSpm: Boolean = false,
         paymentMethodsWithLinkDetails: String = "",
+        passMobilePaymentElement: Boolean = true,
+        passCustomerSheet: Boolean = true,
     ): JSONObject {
         return JSONObject(
             """
@@ -534,24 +536,40 @@ internal object ElementsSessionFixtures {
                       "enabled": false,
                       "features": null
                     },
-                    "mobile_payment_element": {
-                      "enabled": true,
-                      "features": {
-                        "payment_method_remove": ${paymentMethodRemoveFeature ?: "enabled"},
-                        "payment_method_save": "disabled",
-                        "payment_method_remove_last": ${paymentMethodRemoveLastFeature ?: "enabled"},
-                        "payment_method_save_allow_redisplay_override": ${allowRedisplay?.let { "\"$it\""} ?: "null"},
-                        "payment_method_set_as_default": $paymentMethodSetAsDefaultFeature,
-                      }
-                    },
-                    "customer_sheet": {
-                      "enabled": true,
-                      "features": {
-                        "payment_method_remove": ${paymentMethodRemoveFeature ?: "enabled"},
-                        "payment_method_remove_last": ${paymentMethodRemoveLastFeature ?: "enabled"},
-                        "payment_method_sync_default": $paymentMethodSyncDefaultFeature,
-                      }
-                    },
+                    "mobile_payment_element": ${
+                if (passMobilePaymentElement) {
+                    """
+                            {
+                              "enabled": true,
+                              "features": {
+                                "payment_method_remove": ${paymentMethodRemoveFeature ?: "enabled"},
+                                "payment_method_save": "disabled",
+                                "payment_method_remove_last": ${paymentMethodRemoveLastFeature ?: "enabled"},
+                                "payment_method_save_allow_redisplay_override": ${allowRedisplay?.let { "\"$it\""} ?: "null"},
+                                "payment_method_set_as_default": $paymentMethodSetAsDefaultFeature,
+                              }
+                            }
+                    """.trimIndent()
+                } else {
+                    "null"
+                }
+            },
+                    "customer_sheet": ${
+                if (passCustomerSheet) {
+                    """
+                                {
+                                  "enabled": true,
+                                  "features": {
+                                    "payment_method_remove": ${paymentMethodRemoveFeature ?: "enabled"},
+                                    "payment_method_remove_last": ${paymentMethodRemoveLastFeature ?: "enabled"},
+                                    "payment_method_sync_default": $paymentMethodSyncDefaultFeature,
+                                  }
+                                }
+                    """.trimIndent()
+                } else {
+                    "null"
+                }
+            },
                     "pricing_table": {
                       "enabled": false
                     }
@@ -2307,4 +2325,106 @@ internal object ElementsSessionFixtures {
         }
       }
     """.trimIndent()
+
+    val PASSIVE_CAPTCHA_JSON_WITH_RQ_DATA = JSONObject(
+        """
+        {
+          "site_key": "test_site_key",
+          "rqdata": "test_rq_data"
+        }
+        """.trimIndent()
+    )
+
+    val PASSIVE_CAPTCHA_JSON_WITHOUT_RQ_DATA = JSONObject(
+        """
+        {
+          "site_key": "test_site_key"
+        }
+        """.trimIndent()
+    )
+
+    val PASSIVE_CAPTCHA_JSON_WITH_BLANK_RQ_DATA = JSONObject(
+        """
+        {
+          "site_key": "test_site_key",
+          "rqdata": ""
+        }
+        """.trimIndent()
+    )
+
+    val PASSIVE_CAPTCHA_JSON_MISSING_SITE_KEY = JSONObject(
+        """
+        {
+          "rqdata": "test_rq_data"
+        }
+        """.trimIndent()
+    )
+
+    val EXPANDED_PAYMENT_INTENT_JSON_WITH_PASSIVE_CAPTCHA = JSONObject(
+        """
+        {
+          "business_name": "Mybusiness",
+          "link_settings": {
+            "link_bank_enabled": false,
+            "link_bank_onboarding_enabled": false
+          },
+          "merchant_country": "US",
+          "payment_method_preference": {
+            "object": "payment_method_preference",
+            "country_code": "US",
+            "ordered_payment_method_types": [
+              "card"
+            ],
+            "payment_intent": {
+              "id": "pi_123",
+              "object": "payment_intent",
+              "amount": 1000,
+              "currency": "usd",
+              "status": "requires_payment_method",
+              "payment_method_types": ["card"]
+            },
+            "type": "payment_intent"
+          },
+          "passive_captcha": {
+            "site_key": "test_site_key",
+            "rqdata": "test_rq_data"
+          },
+          "flags": {
+            "elements_enable_passive_captcha": true
+          }
+        }
+        """.trimIndent()
+    )
+
+    val EXPANDED_PAYMENT_INTENT_JSON_WITHOUT_PASSIVE_CAPTCHA = JSONObject(
+        """
+        {
+          "business_name": "Mybusiness",
+          "link_settings": {
+            "link_bank_enabled": false,
+            "link_bank_onboarding_enabled": false
+          },
+          "merchant_country": "US",
+          "payment_method_preference": {
+            "object": "payment_method_preference",
+            "country_code": "US",
+            "ordered_payment_method_types": [
+              "card"
+            ],
+            "payment_intent": {
+              "id": "pi_123",
+              "object": "payment_intent",
+              "amount": 1000,
+              "currency": "usd",
+              "status": "requires_payment_method",
+              "payment_method_types": ["card"]
+            },
+            "type": "payment_intent"
+          },
+          "flags": {
+            "elements_enable_passive_captcha": true
+          }
+        }
+        """.trimIndent()
+    )
 }

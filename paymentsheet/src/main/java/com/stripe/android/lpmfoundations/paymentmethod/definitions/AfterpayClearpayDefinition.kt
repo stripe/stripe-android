@@ -46,6 +46,7 @@ private object AfterpayClearpayUiDefinitionFactory : UiDefinitionFactory.Require
         } else {
             UiCoreR.drawable.stripe_ic_paymentsheet_pm_afterpay_clearpay
         },
+        iconResourceNight = null,
         subtitle = if (AfterpayClearpayHeaderElement.isClearpay(metadata.stripeIntent.currency)) {
             R.string.stripe_clearpay_subtitle.resolvableString
         } else if (AfterpayClearpayHeaderElement.isCashappAfterpay(metadata.stripeIntent.currency)) {

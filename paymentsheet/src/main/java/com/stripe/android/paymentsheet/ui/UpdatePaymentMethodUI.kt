@@ -16,7 +16,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -27,13 +26,16 @@ import com.stripe.android.common.ui.PrimaryButton
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.SavedPaymentMethod
 import com.stripe.android.paymentsheet.utils.testMetadata
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.CheckboxElementUI
 import com.stripe.android.uicore.getBorderStroke
+import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
@@ -43,16 +45,14 @@ import com.stripe.android.paymentsheet.R as PaymentSheetR
 @Composable
 internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, modifier: Modifier) {
     val context = LocalContext.current
-    val horizontalPadding = dimensionResource(
-        id = PaymentSheetR.dimen.stripe_paymentsheet_outer_spacing_horizontal
-    )
+    val horizontalPadding = StripeTheme.getOuterFormInsets()
     val state by interactor.state.collectAsState()
     val shouldShowCardBrandDropdown = interactor.isModifiablePaymentMethod &&
         interactor.displayableSavedPaymentMethod.canChangeCbc()
 
     Column(
         modifier = modifier
-            .padding(horizontal = horizontalPadding)
+            .padding(horizontalPadding)
             .testTag(UPDATE_PM_SCREEN_TEST_TAG),
     ) {
         when (val savedPaymentMethod = interactor.displayableSavedPaymentMethod.savedPaymentMethod) {
@@ -62,19 +62,32 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
                 )
             }
             is SavedPaymentMethod.Link -> {
-                CardDetailsEditUI(
-                    editCardDetailsInteractor = interactor.editCardDetailsInteractor,
-                )
+                when (savedPaymentMethod.paymentDetails) {
+                    is LinkPaymentDetails.BankAccount -> {
+                        BankAccountUI(
+                            name = null,
+                            email = null,
+                            bankName = savedPaymentMethod.paymentDetails.bankName,
+                            last4 = savedPaymentMethod.paymentDetails.last4,
+                        )
+                    }
+                    is LinkPaymentDetails.Card -> {
+                        CardDetailsEditUI(
+                            editCardDetailsInteractor = interactor.editCardDetailsInteractor,
+                        )
+                    }
+                }
             }
             is SavedPaymentMethod.SepaDebit -> SepaDebitUI(
                 name = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.name,
                 email = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.email,
                 sepaDebit = savedPaymentMethod.sepaDebit,
             )
-            is SavedPaymentMethod.USBankAccount -> USBankAccountUI(
+            is SavedPaymentMethod.USBankAccount -> BankAccountUI(
                 name = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.name,
                 email = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.email,
-                usBankAccount = savedPaymentMethod.usBankAccount,
+                bankName = savedPaymentMethod.usBankAccount.bankName,
+                last4 = savedPaymentMethod.usBankAccount.last4,
             )
             SavedPaymentMethod.Unexpected -> {}
         }
@@ -121,7 +134,7 @@ private fun DetailsCannotBeChangedText(
     )?.let {
         Text(
             text = it.resolve(context),
-            style = MaterialTheme.typography.caption,
+            style = MaterialTheme.typography.subtitle2,
             color = MaterialTheme.stripeColors.subtitle,
             fontWeight = FontWeight.Normal,
             modifier = Modifier
@@ -172,18 +185,19 @@ private fun UpdatePaymentMethodButtons(
 }
 
 @Composable
-private fun USBankAccountUI(
+private fun BankAccountUI(
     name: String?,
     email: String?,
-    usBankAccount: PaymentMethod.USBankAccount,
+    bankName: String?,
+    last4: String?,
 ) {
     BankAccountUI(
         name = name,
         email = email,
         bankAccountFieldText = resolvableString(
             PaymentSheetR.string.stripe_paymentsheet_bank_account_info,
-            usBankAccount.bankName,
-            usBankAccount.last4,
+            bankName,
+            last4,
         ).resolve(),
         bankAccountFieldLabel = stringResource(R.string.stripe_title_bank_account),
         modifier = Modifier.testTag(UPDATE_PM_US_BANK_ACCOUNT_TEST_TAG),
@@ -219,15 +233,19 @@ private fun BankAccountUI(
     Column(
         modifier = modifier,
     ) {
-        BankAccountTextField(
-            value = name ?: "",
-            label = stringResource(id = com.stripe.android.core.R.string.stripe_address_label_full_name),
-        )
-        BankAccountTextField(
-            value = email ?: "",
-            label = stringResource(com.stripe.android.uicore.R.string.stripe_email),
-            modifier = Modifier.padding(vertical = 8.dp),
-        )
+        if (name != null) {
+            BankAccountTextField(
+                value = name,
+                label = stringResource(id = com.stripe.android.core.R.string.stripe_address_label_full_name),
+            )
+        }
+        if (email != null) {
+            BankAccountTextField(
+                value = email,
+                label = stringResource(com.stripe.android.uicore.R.string.stripe_email),
+                modifier = Modifier.padding(vertical = 8.dp),
+            )
+        }
         BankAccountTextField(
             value = bankAccountFieldText,
             label = bankAccountFieldLabel,
@@ -316,6 +334,7 @@ private fun PreviewUpdatePaymentMethodUI() {
             canUpdateFullPaymentMethodDetails = true,
             displayableSavedPaymentMethod = exampleCard,
             addressCollectionMode = AddressCollectionMode.Automatic,
+            allowedBillingCountries = emptySet(),
             removeExecutor = { null },
             updatePaymentMethodExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
             setDefaultPaymentMethodExecutor = { _ -> Result.success(Unit) },
@@ -340,8 +359,16 @@ private fun DisplayableSavedPaymentMethod.getDetailsCannotBeChangedText(
                 } else {
                     PaymentSheetR.string.stripe_paymentsheet_card_details_cannot_be_changed
                 }
-            is SavedPaymentMethod.Link ->
-                PaymentSheetR.string.stripe_paymentsheet_card_details_cannot_be_changed
+            is SavedPaymentMethod.Link -> {
+                when (savedPaymentMethod.paymentDetails) {
+                    is LinkPaymentDetails.BankAccount -> {
+                        PaymentSheetR.string.stripe_paymentsheet_bank_account_details_cannot_be_changed
+                    }
+                    is LinkPaymentDetails.Card -> {
+                        PaymentSheetR.string.stripe_paymentsheet_card_details_cannot_be_changed
+                    }
+                }
+            }
             is SavedPaymentMethod.USBankAccount ->
                 PaymentSheetR.string.stripe_paymentsheet_bank_account_details_cannot_be_changed
             is SavedPaymentMethod.SepaDebit ->

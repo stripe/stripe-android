@@ -13,6 +13,7 @@ import com.stripe.android.model.ElementsSessionFixtures.createPaymentIntentWithC
 import com.stripe.android.model.ElementsSessionFixtures.createWithCustomPaymentMethods
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.LinkConsumerIncentive
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
@@ -28,12 +29,6 @@ class ElementsSessionJsonParserTest {
     @get:Rule
     val incentivesFeatureFlagRule = FeatureFlagTestRule(
         featureFlag = FeatureFlags.instantDebitsIncentives,
-        isEnabled = false,
-    )
-
-    @get:Rule
-    val linkInSpmFeatureFlagRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.linkPMsInSPM,
         isEnabled = false,
     )
 
@@ -603,6 +598,30 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
+    fun `ElementsSession has ordered payment method types and wallets when in response`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            isLiveMode = false,
+        )
+
+        val intent = JSONObject(ElementsSessionFixtures.PI_WITH_CARD_AFTERPAY_AU_BECS)
+        val session = parser.parse(intent)
+
+        assertThat(session?.orderedPaymentMethodTypesAndWallets).containsExactly(
+            "card",
+            "apple_pay",
+            "google_pay",
+            "afterpay_clearpay",
+            "au_becs_debit",
+        )
+    }
+
+    @Test
     fun `ElementsSession has custom payment methods when they are included in response`() {
         val parser = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
@@ -739,6 +758,144 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
+    fun `ElementsSession has expected CS information in the response if 'mobile_payment_element' is null`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                customerSessionClientSecret = "customer_session_client_secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            isLiveMode = false,
+        )
+
+        val intent = createPaymentIntentWithCustomerSession(
+            passMobilePaymentElement = false,
+        )
+        val elementsSession = parser.parse(intent)
+
+        assertThat(elementsSession?.customer).isEqualTo(
+            ElementsSession.Customer(
+                session = ElementsSession.Customer.Session(
+                    id = "cuss_123",
+                    apiKey = "ek_test_1234",
+                    apiKeyExpiry = 1713890664,
+                    customerId = "cus_1",
+                    liveMode = false,
+                    components = ElementsSession.Customer.Components(
+                        mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
+                        customerSheet = ElementsSession.Customer.Components.CustomerSheet.Enabled(
+                            isPaymentMethodRemoveEnabled = true,
+                            canRemoveLastPaymentMethod = true,
+                            isPaymentMethodSyncDefaultEnabled = false,
+                        ),
+                    )
+                ),
+                defaultPaymentMethod = "pm_123",
+                paymentMethods = listOf(
+                    PaymentMethod(
+                        id = "pm_123",
+                        customerId = "cus_1",
+                        type = PaymentMethod.Type.Card,
+                        code = "card",
+                        created = 1550757934255,
+                        liveMode = false,
+                        billingDetails = null,
+                        card = PaymentMethod.Card(
+                            brand = CardBrand.Visa,
+                            last4 = "4242",
+                            expiryMonth = 8,
+                            expiryYear = 2032,
+                            country = "US",
+                            funding = "credit",
+                            fingerprint = "fingerprint123",
+                            checks = PaymentMethod.Card.Checks(
+                                addressLine1Check = "unchecked",
+                                cvcCheck = "unchecked",
+                                addressPostalCodeCheck = null,
+                            ),
+                            threeDSecureUsage = PaymentMethod.Card.ThreeDSecureUsage(
+                                isSupported = true
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `ElementsSession has expected customer session information in the response if 'customer_sheet' is null`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                customerSessionClientSecret = "customer_session_client_secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            isLiveMode = false,
+        )
+
+        val intent = createPaymentIntentWithCustomerSession(
+            passCustomerSheet = false,
+        )
+        val elementsSession = parser.parse(intent)
+
+        assertThat(elementsSession?.customer).isEqualTo(
+            ElementsSession.Customer(
+                session = ElementsSession.Customer.Session(
+                    id = "cuss_123",
+                    apiKey = "ek_test_1234",
+                    apiKeyExpiry = 1713890664,
+                    customerId = "cus_1",
+                    liveMode = false,
+                    components = ElementsSession.Customer.Components(
+                        mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+                            isPaymentMethodSaveEnabled = false,
+                            isPaymentMethodRemoveEnabled = true,
+                            canRemoveLastPaymentMethod = true,
+                            allowRedisplayOverride = PaymentMethod.AllowRedisplay.LIMITED,
+                            isPaymentMethodSetAsDefaultEnabled = false,
+                        ),
+                        customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
+                    )
+                ),
+                defaultPaymentMethod = "pm_123",
+                paymentMethods = listOf(
+                    PaymentMethod(
+                        id = "pm_123",
+                        customerId = "cus_1",
+                        type = PaymentMethod.Type.Card,
+                        code = "card",
+                        created = 1550757934255,
+                        liveMode = false,
+                        billingDetails = null,
+                        card = PaymentMethod.Card(
+                            brand = CardBrand.Visa,
+                            last4 = "4242",
+                            expiryMonth = 8,
+                            expiryYear = 2032,
+                            country = "US",
+                            funding = "credit",
+                            fingerprint = "fingerprint123",
+                            checks = PaymentMethod.Card.Checks(
+                                addressLine1Check = "unchecked",
+                                cvcCheck = "unchecked",
+                                addressPostalCodeCheck = null,
+                            ),
+                            threeDSecureUsage = PaymentMethod.Card.ThreeDSecureUsage(
+                                isSupported = true
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
     fun `ElementsSession has 'unspecified' allow redisplay override`() {
         allowRedisplayTest(
             rawAllowRedisplayValue = "unspecified",
@@ -774,6 +931,14 @@ class ElementsSessionJsonParserTest {
     fun `when 'payment_method_remove' is 'enabled', 'canRemovePaymentMethods' should be true`() {
         permissionsTest(
             paymentMethodRemoveFeatureValue = "enabled",
+            canRemovePaymentMethods = true,
+        )
+    }
+
+    @Test
+    fun `when 'payment_method_remove' is 'partial', 'canRemovePaymentMethods' should be true`() {
+        permissionsTest(
+            paymentMethodRemoveFeatureValue = "partial",
             canRemovePaymentMethods = true,
         )
     }
@@ -1144,9 +1309,8 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
-    fun `Parses payment_methods_with_link_details if feature is enabled locally and for merchant`() {
+    fun `Parses payment_methods_with_link_details if feature is enabled for merchant`() {
         testPaymentMethodsAndLinkDetails(
-            featureEnabled = true,
             merchantEnabled = true,
             expectedPaymentMethods = 2,
             expectLinkPaymentDetails = true,
@@ -1154,33 +1318,19 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
-    fun `Does not parse payment_methods_with_link_details if feature is enabled locally but disabled for merchant`() {
+    fun `Does not parse payment_methods_with_link_details if feature is disabled for merchant`() {
         testPaymentMethodsAndLinkDetails(
-            featureEnabled = true,
             merchantEnabled = false,
             expectedPaymentMethods = 1,
             expectLinkPaymentDetails = false,
         )
     }
 
-    @Test
-    fun `Does not parse payment_methods_with_link_details if feature is enabled for merchant but disabled locally`() {
-        testPaymentMethodsAndLinkDetails(
-            featureEnabled = false,
-            merchantEnabled = true,
-            expectedPaymentMethods = 1,
-            expectLinkPaymentDetails = false,
-        )
-    }
-
     private fun testPaymentMethodsAndLinkDetails(
-        featureEnabled: Boolean,
         merchantEnabled: Boolean,
         expectedPaymentMethods: Int,
         expectLinkPaymentDetails: Boolean,
     ) {
-        linkInSpmFeatureFlagRule.setEnabled(featureEnabled)
-
         val parser = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
@@ -1273,6 +1423,45 @@ class ElementsSessionJsonParserTest {
 
         assertThat(enabledCustomerSheetComponent?.isPaymentMethodRemoveEnabled).isEqualTo(canRemovePaymentMethods)
         assertThat(enabledCustomerSheetComponent?.canRemoveLastPaymentMethod).isEqualTo(canRemoveLastPaymentMethod)
+    }
+
+    @Test
+    fun `Parses passive captcha when present in response`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            isLiveMode = false,
+        )
+
+        val session = parser.parse(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON_WITH_PASSIVE_CAPTCHA)
+
+        assertThat(session?.passiveCaptchaParams).isEqualTo(
+            PassiveCaptchaParams(
+                siteKey = "test_site_key",
+                rqData = "test_rq_data"
+            )
+        )
+    }
+
+    @Test
+    fun `Returns null passive captcha when passive_captcha field is missing`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            isLiveMode = false,
+        )
+
+        val session = parser.parse(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON_WITHOUT_PASSIVE_CAPTCHA)
+
+        assertThat(session?.passiveCaptchaParams).isNull()
     }
 
     companion object {

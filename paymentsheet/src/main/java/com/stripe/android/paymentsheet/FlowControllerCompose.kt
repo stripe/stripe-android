@@ -2,11 +2,14 @@ package com.stripe.android.paymentsheet
 
 import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.stripe.android.common.ui.UpdateCallbacks
+import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.utils.rememberActivity
@@ -21,6 +24,14 @@ import java.util.UUID
  * @param paymentResultCallback Called when a [PaymentSheetResult] is available.
  */
 @Composable
+@Deprecated(
+    message = "This will be removed in a future release. Use FlowController.Builder instead.",
+    replaceWith = ReplaceWith(
+        "remember(paymentOptionCallback, paymentResultCallback) { " +
+            "PaymentSheet.FlowController.Builder(paymentResultCallback, paymentOptionCallback) " +
+            "}.build()"
+    )
+)
 fun rememberPaymentSheetFlowController(
     paymentOptionCallback: PaymentOptionCallback,
     paymentResultCallback: PaymentSheetResultCallback,
@@ -31,7 +42,7 @@ fun rememberPaymentSheetFlowController(
     }
 
     return internalRememberPaymentSheetFlowController(
-        paymentOptionCallback = paymentOptionCallback,
+        paymentOptionResultCallback = rememberUpdatedPaymentOptionCallback(paymentOptionCallback),
         paymentResultCallback = paymentResultCallback,
         callbacks = callbacks,
     )
@@ -49,6 +60,15 @@ fun rememberPaymentSheetFlowController(
  * @param paymentResultCallback Called when a [PaymentSheetResult] is available.
  */
 @Composable
+@Deprecated(
+    message = "This will be removed in a future release. Use FlowController.Builder instead.",
+    replaceWith = ReplaceWith(
+        "remember(createIntentCallback, paymentOptionCallback, paymentResultCallback) { " +
+            "PaymentSheet.FlowController.Builder(paymentResultCallback, paymentOptionCallback)" +
+            ".createIntentCallback(createIntentCallback) " +
+            "}.build()"
+    )
+)
 fun rememberPaymentSheetFlowController(
     createIntentCallback: CreateIntentCallback,
     paymentOptionCallback: PaymentOptionCallback,
@@ -61,7 +81,7 @@ fun rememberPaymentSheetFlowController(
     }
 
     return internalRememberPaymentSheetFlowController(
-        paymentOptionCallback = paymentOptionCallback,
+        paymentOptionResultCallback = rememberUpdatedPaymentOptionCallback(paymentOptionCallback),
         paymentResultCallback = paymentResultCallback,
         callbacks = callbacks,
     )
@@ -82,6 +102,21 @@ fun rememberPaymentSheetFlowController(
  * @param paymentResultCallback Called when a [PaymentSheetResult] is available.
  */
 @Composable
+@Deprecated(
+    message = "This will be removed in a future release. Use FlowController.Builder instead.",
+    replaceWith = ReplaceWith(
+        "remember(" +
+            "createIntentCallback, " +
+            "externalPaymentMethodConfirmHandler, " +
+            "paymentOptionCallback, " +
+            "paymentResultCallback" +
+            ") { " +
+            "PaymentSheet.FlowController.Builder(paymentResultCallback, paymentOptionCallback)" +
+            ".createIntentCallback(createIntentCallback)" +
+            ".externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler) " +
+            "}.build()"
+    )
+)
 fun rememberPaymentSheetFlowController(
     createIntentCallback: CreateIntentCallback? = null,
     externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
@@ -96,68 +131,16 @@ fun rememberPaymentSheetFlowController(
     }
 
     return internalRememberPaymentSheetFlowController(
-        paymentOptionCallback = paymentOptionCallback,
+        paymentOptionResultCallback = rememberUpdatedPaymentOptionCallback(paymentOptionCallback),
         paymentResultCallback = paymentResultCallback,
         callbacks = callbacks,
     )
 }
 
-/**
- * Creates a [PaymentSheet.FlowController] that is remembered across compositions.
- *
- * @param builder which contains required [PaymentOptionCallback] and [PaymentSheetResultCallback] as well as
- * other optional callbacks.
- */
-@Composable
-internal fun rememberPaymentSheetFlowController(
-    builder: PaymentSheet.FlowController.Builder
-): PaymentSheet.FlowController {
-    return internalRememberPaymentSheetFlowController(
-        paymentOptionCallback = builder.paymentOptionCallback,
-        paymentResultCallback = builder.resultCallback
-    )
-}
-
-@Composable
-private fun internalRememberPaymentSheetFlowController(
-    paymentOptionCallback: PaymentOptionCallback,
-    paymentResultCallback: PaymentSheetResultCallback,
-): PaymentSheet.FlowController {
-    val viewModelStoreOwner = requireNotNull(LocalViewModelStoreOwner.current) {
-        "PaymentSheet.FlowController must be created with access to a ViewModelStoreOwner"
-    }
-
-    val activityResultRegistryOwner = requireNotNull(LocalActivityResultRegistryOwner.current) {
-        "PaymentSheet.FlowController must be created with access to a ActivityResultRegistryOwner"
-    }
-
-    val lifecycleOwner = LocalLifecycleOwner.current
-
-    val activity = rememberActivity {
-        "PaymentSheet.FlowController must be created in the context of an Activity"
-    }
-
-    val paymentElementCallbackIdentifier = rememberSaveable {
-        UUID.randomUUID().toString()
-    }
-
-    return remember(paymentOptionCallback, paymentResultCallback) {
-        FlowControllerFactory(
-            viewModelStoreOwner = viewModelStoreOwner,
-            lifecycleOwner = lifecycleOwner,
-            activityResultRegistryOwner = activityResultRegistryOwner,
-            statusBarColor = { activity.window?.statusBarColor },
-            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
-            paymentOptionCallback = paymentOptionCallback,
-            paymentResultCallback = paymentResultCallback,
-        ).create()
-    }
-}
-
 @Composable
 internal fun internalRememberPaymentSheetFlowController(
     callbacks: PaymentElementCallbacks,
-    paymentOptionCallback: PaymentOptionCallback,
+    paymentOptionResultCallback: PaymentOptionResultCallback,
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet.FlowController {
     val paymentElementCallbackIdentifier = rememberSaveable {
@@ -180,16 +163,29 @@ internal fun internalRememberPaymentSheetFlowController(
         "PaymentSheet.FlowController must be created in the context of an Activity"
     }
 
-    return remember(paymentOptionCallback, paymentResultCallback) {
+    return remember(paymentOptionResultCallback, paymentResultCallback) {
         FlowControllerFactory(
             viewModelStoreOwner = viewModelStoreOwner,
             lifecycleOwner = lifecycleOwner,
             activityResultRegistryOwner = activityResultRegistryOwner,
-            statusBarColor = { activity.window?.statusBarColor },
-            paymentOptionCallback = paymentOptionCallback,
+            statusBarColor = { StatusBarCompat.color(activity) },
+            paymentOptionResultCallback = paymentOptionResultCallback,
             paymentResultCallback = paymentResultCallback,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             initializedViaCompose = true,
         ).create()
+    }
+}
+
+@Composable
+private fun rememberUpdatedPaymentOptionCallback(
+    paymentOptionCallback: PaymentOptionCallback
+): PaymentOptionResultCallback {
+    val updatedPaymentOptionCallback by rememberUpdatedState(paymentOptionCallback)
+
+    return remember {
+        PaymentOptionResultCallback { result ->
+            updatedPaymentOptionCallback.onPaymentOption(result.paymentOption)
+        }
     }
 }

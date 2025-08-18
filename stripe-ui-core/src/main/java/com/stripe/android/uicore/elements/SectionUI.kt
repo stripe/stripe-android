@@ -1,7 +1,6 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -10,13 +9,17 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.uicore.LocalSectionStyle
+import com.stripe.android.uicore.SectionStyle
 import com.stripe.android.uicore.getBorderStroke
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 
 /**
@@ -26,7 +29,7 @@ import com.stripe.android.uicore.stripeColors
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Section(
-    @StringRes title: Int?,
+    title: ResolvableString?,
     error: String?,
     modifier: Modifier = Modifier,
     isSelected: Boolean = false,
@@ -49,12 +52,12 @@ fun Section(
  * This is the layout for the section title
  */
 @Composable
-internal fun SectionTitle(@StringRes titleText: Int?) {
+internal fun SectionTitle(titleText: ResolvableString?) {
     titleText?.let {
         H6Text(
-            text = stringResource(titleText),
+            text = it.resolve(),
             modifier = Modifier
-                .padding(bottom = 4.dp)
+                .padding(bottom = 8.dp)
                 .semantics(mergeDescendants = true) { // Need to prevent form as focusable accessibility
                     heading()
                 }
@@ -75,15 +78,28 @@ fun SectionCard(
     border: BorderStroke = MaterialTheme.getBorderStroke(isSelected),
     content: @Composable () -> Unit
 ) {
+    val sectionStyle = LocalSectionStyle.current
+
     Card(
-        border = border,
         // TODO(skyler-stripe): this will change when we add shadow configurations.
         elevation = if (isSelected) 1.5.dp else 0.dp,
+        border = when (sectionStyle) {
+            SectionStyle.Borderless -> null
+            SectionStyle.Bordered -> border
+        },
         backgroundColor = backgroundColor,
-        shape = shape,
-        modifier = modifier
+        modifier = modifier,
+        shape = shape
     ) {
-        Column {
+        Column(
+            modifier = when (sectionStyle) {
+                SectionStyle.Borderless -> Modifier
+                SectionStyle.Bordered ->
+                    Modifier
+                        .padding(border.width)
+                        .clip(shape)
+            }
+        ) {
             content()
         }
     }

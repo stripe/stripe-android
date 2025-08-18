@@ -7,14 +7,22 @@ import androidx.compose.ui.test.isSelected
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectEmailSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectNameSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectPhoneSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
+import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PAYMENT_METHOD_SELECTOR_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.test.core.FieldPopulator
@@ -339,6 +347,82 @@ internal class TestCard : BasePlaygroundTest() {
                 populateCardDetails()
                 selectCardBrand("Cartes Bancaires")
             }
+        )
+    }
+
+    /**
+     * Tests that save checkbox SFU (which is still present when customer session is enabled) does not override
+     * PMO SFU.
+     */
+    @Test
+    fun testCardWithPmoSfuAndCustomerSession() {
+        testDriver.confirmNewOrGuestComplete(
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition] = "card:off_session"
+                settings[CustomerSessionSettingsDefinition] = true
+                settings[CustomerSettingsDefinition] = CustomerType.NEW
+            },
+            populateCustomLpmFields = {
+                populateCardDetails()
+            },
+        )
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun testCardWithPmoSfu() {
+        val state = testDriver.confirmNewOrGuestComplete(
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition] = "card:off_session"
+                settings[CustomerSettingsDefinition] = CustomerType.NEW
+            }.copy(saveForFutureUseCheckboxVisible = false),
+            populateCustomLpmFields = {
+                populateCardDetails()
+            },
+        )
+
+        // Verify card was save and re-displays
+        testDriver.confirmCompleteWithDefaultSavedPaymentMethod(
+            customerId = state?.asPaymentState()?.customerConfig?.id,
+            testParameters = testParameters,
+            beforeBuyAction = { selectors ->
+                selectors.composeTestRule.waitUntilExactlyOneExists(
+                    matcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
+                        .and(isSelected())
+                        .and(hasText("4242", substring = true)),
+                    timeoutMillis = 5000L
+                )
+            },
+        )
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun testCardWithPmoSfuDeferred() {
+        val state = testDriver.confirmNewOrGuestComplete(
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition] = "card:off_session"
+                settings[CustomerSettingsDefinition] = CustomerType.NEW
+                settings[InitializationTypeSettingsDefinition] = InitializationType.DeferredClientSideConfirmation
+                settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT
+            }.copy(saveForFutureUseCheckboxVisible = false),
+            populateCustomLpmFields = {
+                populateCardDetails()
+            },
+        )
+
+        // Verify card was save and re-displays
+        testDriver.confirmCompleteWithDefaultSavedPaymentMethod(
+            customerId = state?.asPaymentState()?.customerConfig?.id,
+            testParameters = testParameters,
+            beforeBuyAction = { selectors ->
+                selectors.composeTestRule.waitUntilExactlyOneExists(
+                    matcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
+                        .and(isSelected())
+                        .and(hasText("4242", substring = true)),
+                    timeoutMillis = 5000L
+                )
+            },
         )
     }
 }

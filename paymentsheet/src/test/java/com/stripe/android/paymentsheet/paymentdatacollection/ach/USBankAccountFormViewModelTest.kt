@@ -7,11 +7,12 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.Address
@@ -29,15 +30,17 @@ import com.stripe.android.payments.financialconnections.FinancialConnectionsAvai
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
+import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
+import com.stripe.android.uicore.elements.AutocompleteAddressElement
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.utils.BankFormScreenStateFactory
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -56,12 +59,6 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class USBankAccountFormViewModelTest {
-
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage,
-        isEnabled = false
-    )
 
     private val defaultArgs = USBankAccountFormViewModel.Args(
         instantDebits = false,
@@ -90,7 +87,8 @@ class USBankAccountFormViewModelTest {
         linkMode = null,
         setAsDefaultPaymentMethodEnabled = false,
         setAsDefaultMatchesSaveForFutureUse = false,
-        financialConnectionsAvailability = FinancialConnectionsAvailability.Full
+        financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+        termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
     )
 
     private val mockCollectBankAccountLauncher = mock<CollectBankAccountLauncher>()
@@ -230,7 +228,6 @@ class USBankAccountFormViewModelTest {
 
     @Test
     fun `when hasIntentToSetup, paymentMethodOptionsParams does not send SFU`() = runTest {
-        featureFlagTestRule.setEnabled(true)
         val viewModel = createViewModel(
             defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(
@@ -1140,6 +1137,21 @@ class USBankAccountFormViewModelTest {
     }
 
     @Test
+    fun `Produces null mandate text when termsDisplay=NEVER`() = runTest {
+        val viewModel = createViewModel(args = defaultArgs.copy(termsDisplay = PaymentSheet.TermsDisplay.NEVER))
+
+        viewModel.currentScreenState.test {
+            assertThat(awaitItem().linkedBankAccount).isNull()
+
+            val unverifiedAccount = mockManuallyEnteredBankAccount(usesMicrodeposits = false)
+            viewModel.handleCollectBankAccountResult(unverifiedAccount)
+
+            val mandateCollectionViewState = awaitItem()
+            assertThat(mandateCollectionViewState.linkedBankAccount?.mandateText).isNull()
+        }
+    }
+
+    @Test
     fun `allowRedisplay returns Unspecified when save behavior is Legacy, not setting up, and no checkbox`() =
         testAllowRedisplay(
             showCheckbox = false,
@@ -1387,7 +1399,6 @@ class USBankAccountFormViewModelTest {
 
     @Test
     fun `PaymentMethodOptionsParams does not contain SFU for RequestNoReuse if hasIntentToSetup`() = runTest {
-        featureFlagTestRule.setEnabled(true)
         val viewModel = createViewModel(
             args = defaultArgs.copy(
                 showCheckbox = true,
@@ -1573,6 +1584,69 @@ class USBankAccountFormViewModelTest {
         }
     }
 
+    @Test
+    fun `Contains all supported billing countries when allowed countries is empty`() {
+        val viewModel = createViewModel(
+            args = defaultArgs.run {
+                copy(
+                    formArgs = formArgs.copy(
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            name = CollectionMode.Automatic,
+                            phone = CollectionMode.Automatic,
+                            email = CollectionMode.Automatic,
+                            address = AddressCollectionMode.Full,
+                            allowedCountries = emptySet()
+                        )
+                    )
+                )
+            }
+        )
+
+        assertThat(viewModel.addressElement.countryElement.controller.displayItems)
+            .hasSize(CountryUtils.supportedBillingCountries.size)
+    }
+
+    @Test
+    fun `Contains only countries provided through billing configuration`() {
+        val viewModel = createViewModel(
+            args = defaultArgs.run {
+                copy(
+                    formArgs = formArgs.copy(
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            name = CollectionMode.Automatic,
+                            phone = CollectionMode.Automatic,
+                            email = CollectionMode.Automatic,
+                            address = AddressCollectionMode.Full,
+                            allowedCountries = setOf("US", "CA")
+                        )
+                    )
+                )
+            }
+        )
+
+        assertThat(viewModel.addressElement.countryElement.controller.displayItems).containsExactly(
+            "\uD83C\uDDFA\uD83C\uDDF8 United States",
+            "\uD83C\uDDE8\uD83C\uDDE6 Canada"
+        )
+    }
+
+    @Test
+    fun `If autocomplete address interactor factory provided, should use autocomplete element`() = runTest {
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(showCheckbox = true),
+            autocompleteAddressInteractorFactory = {
+                TestAutocompleteAddressInteractor.noOp(
+                    autocompleteConfig = AutocompleteAddressInteractor.Config(
+                        googlePlacesApiKey = "gi_123",
+                        autocompleteCountries = setOf("US")
+                    )
+                )
+            }
+        )
+
+        assertThat(viewModel.addressElement).isInstanceOf<AutocompleteAddressElement>()
+    }
+
     private fun testElementsSessionContextGeneration(
         viewModelArgs: USBankAccountFormViewModel.Args,
     ): ElementsSessionContext? {
@@ -1723,7 +1797,8 @@ class USBankAccountFormViewModelTest {
     }
 
     private fun createViewModel(
-        args: USBankAccountFormViewModel.Args = defaultArgs
+        args: USBankAccountFormViewModel.Args = defaultArgs,
+        autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
     ): USBankAccountFormViewModel {
         val paymentConfiguration = PaymentConfiguration(
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
@@ -1734,6 +1809,7 @@ class USBankAccountFormViewModelTest {
             application = ApplicationProvider.getApplicationContext(),
             lazyPaymentConfig = { paymentConfiguration },
             savedStateHandle = savedStateHandle,
+            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         )
     }
 

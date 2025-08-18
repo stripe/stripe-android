@@ -28,6 +28,9 @@ internal object ConfigurationDefaults {
     val paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.Automatic
     val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = PaymentSheet.CardBrandAcceptance.All
     val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> = emptyList()
+    val walletButtons: PaymentSheet.WalletButtonsConfiguration = PaymentSheet.WalletButtonsConfiguration()
+    val shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = null
+    val googlePlacesApiKey: String? = null
 
     const val embeddedViewDisplaysMandateText: Boolean = true
 }

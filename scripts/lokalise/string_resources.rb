@@ -7,6 +7,7 @@ class StringResources
     def fetch
         project_root = File.dirname(Dir.pwd)
         modules = [
+            'connect',
             'identity',
             'paymentsheet',
             'payments-core',

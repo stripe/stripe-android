@@ -2,6 +2,7 @@ package com.stripe.android.uicore.elements
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.core.strings.resolvableString
 import org.junit.Test
 import java.util.Locale
 import com.stripe.android.core.R as CoreR
@@ -17,7 +18,7 @@ class CountryConfigTest {
     @Test
     fun `Verify the label`() {
         assertThat(CountryConfig(locale = Locale.US).label)
-            .isEqualTo(CoreR.string.stripe_address_label_country_or_region)
+            .isEqualTo(resolvableString(CoreR.string.stripe_address_label_country_or_region))
     }
 
     @Test
@@ -36,7 +37,7 @@ class CountryConfigTest {
             CountryConfig(
                 onlyShowCountryCodes = setOf("AT"),
                 locale = Locale.US,
-                tinyMode = false
+                mode = DropdownConfig.Mode.Full(),
             ).getSelectedItemLabel(0)
         ).isEqualTo("Austria")
     }
@@ -47,7 +48,7 @@ class CountryConfigTest {
             CountryConfig(
                 onlyShowCountryCodes = setOf("AT"),
                 locale = Locale.US,
-                tinyMode = true,
+                mode = DropdownConfig.Mode.Condensed,
                 collapsedLabelMapper = { country ->
                     CountryConfig.countryCodeToEmoji(country.code.value)
                 },

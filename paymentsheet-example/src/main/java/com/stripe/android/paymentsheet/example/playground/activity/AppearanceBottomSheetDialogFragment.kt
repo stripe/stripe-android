@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.example.playground.activity
 
-import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -58,43 +57,38 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.fragment.app.setFragmentResult
 import com.godaddy.android.colorpicker.ClassicColorPicker
 import com.godaddy.android.colorpicker.HsvColor
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.example.R
-import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment.Companion.EMBEDDED_KEY
-import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedAppearance
-import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedRow
+import kotlin.math.roundToInt
 
 private val BASE_FONT_SIZE = 20.sp
 private val BASE_PADDING = 8.dp
 private val SECTION_LABEL_COLOR = Color(159, 159, 169)
+private const val DEFAULT_PRIMARY_BUTTON_HEIGHT = 48f
 
 internal class AppearanceBottomSheetDialogFragment : BottomSheetDialogFragment() {
-
-    private var embeddedAppearance by mutableStateOf(EmbeddedAppearance())
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        embeddedAppearance = arguments.getEmbeddedAppearance()
-
         return ComposeView(requireContext()).apply {
             setContent {
                 AppearancePicker(
                     currentAppearance = AppearanceStore.state,
                     updateAppearance = { AppearanceStore.state = it },
-                    embeddedAppearance = embeddedAppearance,
-                    updateEmbedded = { embeddedAppearance = it },
                     resetAppearance = ::resetAppearance
                 )
             }
@@ -103,33 +97,19 @@ internal class AppearanceBottomSheetDialogFragment : BottomSheetDialogFragment()
 
     private fun resetAppearance() {
         AppearanceStore.reset()
-        embeddedAppearance = EmbeddedAppearance()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        val result = Bundle().apply {
-            putParcelable(EMBEDDED_KEY, embeddedAppearance)
-        }
-        setFragmentResult(REQUEST_KEY, result)
     }
 
     companion object {
         fun newInstance(): AppearanceBottomSheetDialogFragment {
             return AppearanceBottomSheetDialogFragment()
         }
-
-        const val REQUEST_KEY = "REQUEST_KEY"
-        const val EMBEDDED_KEY = "EMBEDDED_APPEARANCE"
     }
 }
 
 @Composable
 private fun AppearancePicker(
-    currentAppearance: PaymentSheet.Appearance,
-    updateAppearance: (PaymentSheet.Appearance) -> Unit,
-    embeddedAppearance: EmbeddedAppearance,
-    updateEmbedded: (EmbeddedAppearance) -> Unit,
+    currentAppearance: AppearanceStore.State,
+    updateAppearance: (AppearanceStore.State) -> Unit,
     resetAppearance: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
@@ -137,18 +117,7 @@ private fun AppearancePicker(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Appearance") },
-                actions = {
-                    TextButton(onClick = {
-                        resetAppearance()
-                    }) {
-                        Text(text = stringResource(R.string.reset))
-                    }
-                },
-                backgroundColor = MaterialTheme.colors.surface,
-                contentColor = MaterialTheme.colors.onSurface,
-            )
+            AppearanceTopAppBar(resetAppearance)
         },
         modifier = Modifier
             .systemBarsPadding()
@@ -161,6 +130,12 @@ private fun AppearancePicker(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
+            CustomizationCard("Icons") {
+                Icons(
+                    currentAppearance = currentAppearance,
+                    updateAppearance = updateAppearance,
+                )
+            }
             CustomizationCard("Colors") {
                 Colors(
                     currentAppearance = currentAppearance,
@@ -169,6 +144,34 @@ private fun AppearancePicker(
             }
             CustomizationCard("Shapes") {
                 Shapes(
+                    currentAppearance = currentAppearance,
+                    updateAppearance = updateAppearance,
+                )
+            }
+            CustomizationCard("Form Insets") {
+                Insets(
+                    currentInsets = currentAppearance.formInsetValues,
+                    defaultCustomInsets = AppearanceStore.State.Insets.defaultFormInsets,
+                    updateInsets = {
+                        updateAppearance(
+                            currentAppearance.copy(formInsetValues = it)
+                        )
+                    },
+                )
+            }
+            CustomizationCard("Text Field Insets") {
+                Insets(
+                    currentInsets = currentAppearance.textFieldInsets,
+                    defaultCustomInsets = AppearanceStore.State.Insets.defaultTextInsets,
+                    updateInsets = {
+                        updateAppearance(
+                            currentAppearance.copy(textFieldInsets = it)
+                        )
+                    },
+                )
+            }
+            CustomizationCard("Section Spacing") {
+                SectionSpacing(
                     currentAppearance = currentAppearance,
                     updateAppearance = updateAppearance,
                 )
@@ -185,16 +188,38 @@ private fun AppearancePicker(
                     updateAppearance = updateAppearance,
                 )
             }
+            CustomizationCard("Vertical Mode") {
+                VerticalMode(
+                    currentAppearance = currentAppearance,
+                    updateAppearance = updateAppearance,
+                )
+            }
             CustomizationCard("Embedded") {
                 EmbeddedPicker(
-                    embeddedAppearance = embeddedAppearance,
-                    updateEmbedded = updateEmbedded
+                    currentAppearance = currentAppearance,
+                    updateAppearance = updateAppearance,
                 )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
+}
+
+@Composable
+private fun AppearanceTopAppBar(resetAppearance: () -> Unit) {
+    TopAppBar(
+        title = { Text("Appearance") },
+        actions = {
+            TextButton(onClick = {
+                resetAppearance()
+            }) {
+                Text(text = stringResource(R.string.reset))
+            }
+        },
+        backgroundColor = MaterialTheme.colors.surface,
+        contentColor = MaterialTheme.colors.onSurface,
+    )
 }
 
 @Composable
@@ -223,9 +248,25 @@ private fun CustomizationCard(
 }
 
 @Composable
+private fun Icons(
+    currentAppearance: AppearanceStore.State,
+    updateAppearance: (AppearanceStore.State) -> Unit,
+) {
+    IconStyleDropDown(
+        style = currentAppearance.iconStyle,
+    ) {
+        updateAppearance(
+            currentAppearance.copy(
+                iconStyle = it
+            )
+        )
+    }
+}
+
+@Composable
 private fun Colors(
-    currentAppearance: PaymentSheet.Appearance,
-    updateAppearance: (PaymentSheet.Appearance) -> Unit,
+    currentAppearance: AppearanceStore.State,
+    updateAppearance: (AppearanceStore.State) -> Unit,
 ) {
     ColorItem(
         label = "primary",
@@ -404,16 +445,19 @@ private fun Colors(
     )
 }
 
+@OptIn(AppearanceAPIAdditionsPreview::class)
 @Composable
 private fun Shapes(
-    currentAppearance: PaymentSheet.Appearance,
-    updateAppearance: (PaymentSheet.Appearance) -> Unit,
+    currentAppearance: AppearanceStore.State,
+    updateAppearance: (AppearanceStore.State) -> Unit,
 ) {
     IncrementDecrementItem("cornerRadiusDp", currentAppearance.shapes.cornerRadiusDp) {
         updateAppearance(
             currentAppearance.copy(
-                shapes = currentAppearance.shapes.copy(
-                    cornerRadiusDp = it
+                shapes = AppearanceStore.State.Shapes(
+                    cornerRadiusDp = it,
+                    borderStrokeWidthDp = currentAppearance.shapes.borderStrokeWidthDp,
+                    bottomSheetCornerRadiusDp = currentAppearance.shapes.bottomSheetCornerRadiusDp
                 )
             )
         )
@@ -422,8 +466,22 @@ private fun Shapes(
     IncrementDecrementItem("borderStrokeWidthDp", currentAppearance.shapes.borderStrokeWidthDp) {
         updateAppearance(
             currentAppearance.copy(
-                shapes = currentAppearance.shapes.copy(
-                    borderStrokeWidthDp = it
+                shapes = AppearanceStore.State.Shapes(
+                    cornerRadiusDp = currentAppearance.shapes.cornerRadiusDp,
+                    borderStrokeWidthDp = it,
+                    bottomSheetCornerRadiusDp = currentAppearance.shapes.bottomSheetCornerRadiusDp
+                )
+            )
+        )
+    }
+    Divider()
+    IncrementDecrementItem("bottomSheetCornerRadiusDp", currentAppearance.shapes.bottomSheetCornerRadiusDp) {
+        updateAppearance(
+            currentAppearance.copy(
+                shapes = AppearanceStore.State.Shapes(
+                    cornerRadiusDp = currentAppearance.shapes.cornerRadiusDp,
+                    borderStrokeWidthDp = currentAppearance.shapes.borderStrokeWidthDp,
+                    bottomSheetCornerRadiusDp = it,
                 )
             )
         )
@@ -431,15 +489,101 @@ private fun Shapes(
 }
 
 @Composable
+private fun Insets(
+    currentInsets: AppearanceStore.State.Insets,
+    defaultCustomInsets: AppearanceStore.State.Insets.Custom,
+    updateInsets: (AppearanceStore.State.Insets) -> Unit,
+) {
+    AppearanceToggle("Custom", currentInsets is AppearanceStore.State.Insets.Custom) {
+        updateInsets(
+            if (it) {
+                defaultCustomInsets
+            } else {
+                AppearanceStore.State.Insets.Default
+            }
+        )
+    }
+
+    if (currentInsets is AppearanceStore.State.Insets.Custom) {
+        Divider()
+        IncrementDecrementItem("start", currentInsets.start) {
+            updateInsets(
+                currentInsets.copy(
+                    start = it
+                )
+            )
+        }
+        Divider()
+        IncrementDecrementItem("top", currentInsets.top) {
+            updateInsets(
+                currentInsets.copy(
+                    top = it
+                )
+            )
+        }
+        Divider()
+        IncrementDecrementItem("end", currentInsets.end) {
+            updateInsets(
+                currentInsets.copy(
+                    end = it
+                )
+            )
+        }
+        Divider()
+        IncrementDecrementItem("bottom", currentInsets.bottom) {
+            updateInsets(
+                currentInsets.copy(
+                    bottom = it
+                )
+            )
+        }
+    }
+}
+
+@Composable
+private fun SectionSpacing(
+    currentAppearance: AppearanceStore.State,
+    updateAppearance: (AppearanceStore.State) -> Unit,
+) {
+    val sectionSpacing = currentAppearance.sectionSpacing
+
+    AppearanceToggle("Custom", sectionSpacing is AppearanceStore.State.SectionSpacing.Custom) {
+        updateAppearance(
+            currentAppearance.copy(
+                sectionSpacing = if (it) {
+                    AppearanceStore.State.SectionSpacing.Custom()
+                } else {
+                    AppearanceStore.State.SectionSpacing.Default
+                }
+            )
+        )
+    }
+
+    if (sectionSpacing is AppearanceStore.State.SectionSpacing.Custom) {
+        Divider()
+        IncrementDecrementItem("value", sectionSpacing.spacingDp) {
+            updateAppearance(
+                currentAppearance.copy(
+                    sectionSpacing = sectionSpacing.copy(it)
+                )
+            )
+        }
+    }
+}
+
+@OptIn(AppearanceAPIAdditionsPreview::class)
+@Composable
 private fun Typography(
-    currentAppearance: PaymentSheet.Appearance,
-    updateAppearance: (PaymentSheet.Appearance) -> Unit,
+    currentAppearance: AppearanceStore.State,
+    updateAppearance: (AppearanceStore.State) -> Unit,
 ) {
     FontScaleSlider(currentAppearance.typography.sizeScaleFactor) {
         updateAppearance(
             currentAppearance.copy(
-                typography = currentAppearance.typography.copy(
-                    sizeScaleFactor = it
+                typography = AppearanceStore.State.Typography(
+                    sizeScaleFactor = it,
+                    fontResId = currentAppearance.typography.fontResId,
+                    custom = currentAppearance.typography.custom,
                 )
             )
         )
@@ -448,18 +592,135 @@ private fun Typography(
     FontDropDown(currentAppearance.typography.fontResId) {
         updateAppearance(
             currentAppearance.copy(
-                typography = currentAppearance.typography.copy(
-                    fontResId = it
+                typography = AppearanceStore.State.Typography(
+                    sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
+                    fontResId = it,
+                    custom = currentAppearance.typography.custom,
                 )
             )
         )
+    }
+    Divider()
+
+    val h1 = currentAppearance.typography.custom.h1
+
+    AppearanceToggle("customH1", h1 != null) {
+        updateAppearance(
+            currentAppearance.copy(
+                typography = AppearanceStore.State.Typography(
+                    sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
+                    fontResId = currentAppearance.typography.fontResId,
+                    custom = AppearanceStore.State.Typography.Custom(
+                        h1 = if (it) {
+                            AppearanceStore.State.Typography.Font(
+                                fontSizeSp = 20f,
+                                fontWeight = 400,
+                                letterSpacingSp = 0.13f
+                            )
+                        } else {
+                            null
+                        }
+                    )
+                )
+            )
+        )
+    }
+
+    h1?.run {
+        Divider()
+        FontDropDown(fontFamily) {
+            updateAppearance(
+                currentAppearance.copy(
+                    typography = AppearanceStore.State.Typography(
+                        sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
+                        fontResId = currentAppearance.typography.fontResId,
+                        custom = AppearanceStore.State.Typography.Custom(
+                            h1 = AppearanceStore.State.Typography.Font(
+                                fontFamily = it,
+                                fontWeight = fontWeight,
+                                fontSizeSp = fontSizeSp,
+                                letterSpacingSp = letterSpacingSp,
+                            )
+                        )
+                    )
+                )
+            )
+        }
+        Divider()
+        IncrementDecrementItem(
+            label = "fontSizeSp",
+            value = fontSizeSp ?: AppearanceStore.State.defaultCustomH1LetterSpacingSp,
+        ) {
+            updateAppearance(
+                currentAppearance.copy(
+                    typography = AppearanceStore.State.Typography(
+                        sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
+                        fontResId = currentAppearance.typography.fontResId,
+                        custom = AppearanceStore.State.Typography.Custom(
+                            h1 = AppearanceStore.State.Typography.Font(
+                                fontFamily = fontFamily,
+                                fontWeight = fontWeight,
+                                fontSizeSp = it,
+                                letterSpacingSp = letterSpacingSp,
+                            )
+                        )
+                    )
+                )
+            )
+        }
+        Divider()
+        IncrementDecrementItem(
+            label = "fontWeight",
+            value = fontWeight?.toFloat() ?: AppearanceStore.State.defaultCustomH1FontSizeDp,
+            incrementDecrementAmount = 100f
+        ) {
+            updateAppearance(
+                currentAppearance.copy(
+                    typography = AppearanceStore.State.Typography(
+                        sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
+                        fontResId = currentAppearance.typography.fontResId,
+                        custom = AppearanceStore.State.Typography.Custom(
+                            h1 = AppearanceStore.State.Typography.Font(
+                                fontFamily = fontFamily,
+                                fontWeight = it.roundToInt(),
+                                fontSizeSp = fontSizeSp,
+                                letterSpacingSp = letterSpacingSp,
+                            )
+                        )
+                    )
+                )
+            )
+        }
+        Divider()
+        IncrementDecrementItem(
+            label = "letterSpacingSp",
+            value = letterSpacingSp ?: AppearanceStore.State.defaultCustomH1LetterSpacingSp,
+            incrementDecrementAmount = 0.01f
+        ) {
+            updateAppearance(
+                currentAppearance.copy(
+                    typography = AppearanceStore.State.Typography(
+                        sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
+                        fontResId = currentAppearance.typography.fontResId,
+                        custom = AppearanceStore.State.Typography.Custom(
+                            h1 = AppearanceStore.State.Typography.Font(
+                                fontFamily = fontFamily,
+                                fontWeight = fontWeight,
+                                fontSizeSp = fontSizeSp,
+                                letterSpacingSp = it,
+                            )
+                        )
+                    )
+                )
+            )
+        }
     }
 }
 
 @Composable
 private fun PrimaryButton(
-    currentAppearance: PaymentSheet.Appearance,
-    updateAppearance: (PaymentSheet.Appearance) -> Unit,
+    currentAppearance: AppearanceStore.State,
+    updateAppearance: (AppearanceStore.State) -> Unit,
 ) {
     val currentButton = currentAppearance.primaryButton
 
@@ -598,6 +859,21 @@ private fun PrimaryButton(
         )
     }
 
+    Divider()
+
+    val currentButtonHeight = currentButton.shape.heightDp ?: DEFAULT_PRIMARY_BUTTON_HEIGHT
+    IncrementDecrementItem("buttonHeightDp", currentButtonHeight) {
+        updateAppearance(
+            currentAppearance.copy(
+                primaryButton = currentButton.copy(
+                    shape = currentButton.shape.copy(
+                        heightDp = it
+                    )
+                )
+            )
+        )
+    }
+
     val currentFontSize = currentButton.typography.fontSizeSp
         ?: (currentAppearance.typography.sizeScaleFactor * 16)
     Divider()
@@ -630,10 +906,33 @@ private fun PrimaryButton(
 }
 
 @Composable
-private fun EmbeddedPicker(
-    embeddedAppearance: EmbeddedAppearance,
-    updateEmbedded: (EmbeddedAppearance) -> Unit
+private fun VerticalMode(
+    currentAppearance: AppearanceStore.State,
+    updateAppearance: (AppearanceStore.State) -> Unit,
 ) {
+    IncrementDecrementItem("verticalModeRowPaddingDp", currentAppearance.verticalModeRowPadding) {
+        updateAppearance(
+            currentAppearance.copy(
+                verticalModeRowPadding = it
+            )
+        )
+    }
+}
+
+@Composable
+private fun EmbeddedPicker(
+    currentAppearance: AppearanceStore.State,
+    updateAppearance: (AppearanceStore.State) -> Unit
+) {
+    val embeddedAppearance = currentAppearance.embedded
+    val updateEmbedded: (AppearanceStore.State.Embedded) -> Unit = { updatedEmbedded ->
+        updateAppearance(
+            currentAppearance.copy(
+                embedded = updatedEmbedded
+            )
+        )
+    }
+
     RowStyleDropDown(embeddedAppearance.embeddedRowStyle) { style ->
         updateEmbedded(
             embeddedAppearance.copy(
@@ -683,6 +982,18 @@ private fun EmbeddedPicker(
         onColorPicked = {
             embeddedAppearance.copy(
                 checkmarkColor = it.toArgb()
+            )
+        },
+        updateAppearance = updateEmbedded,
+    )
+    Divider()
+
+    ColorItem(
+        label = "disclosureColor",
+        currentColor = Color(embeddedAppearance.disclosureColor),
+        onColorPicked = {
+            embeddedAppearance.copy(
+                disclosureColor = it.toArgb()
             )
         },
         updateAppearance = updateEmbedded,
@@ -769,6 +1080,56 @@ private fun EmbeddedPicker(
         )
     }
     Divider()
+
+    IncrementDecrementItem(
+        "verticalIconMargin",
+        embeddedAppearance.verticalPaymentMethodIconMargin ?: 0f
+    ) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                verticalPaymentMethodIconMargin = it
+            )
+        )
+    }
+    Divider()
+
+    IncrementDecrementItem(
+        "horizontalIconMargin",
+        embeddedAppearance.horizontalPaymentMethodIconMargin ?: 0f
+    ) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                horizontalPaymentMethodIconMargin = it
+            )
+        )
+    }
+    Divider()
+
+    EmbeddedFontDropDown(embeddedAppearance.titleFont, "titleFont") {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                titleFont = it
+            )
+        )
+    }
+    Divider()
+
+    EmbeddedFontDropDown(embeddedAppearance.subtitleFont, "subtitleFont") {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                subtitleFont = it
+            )
+        )
+    }
+    Divider()
+
+    IconDropDown(embeddedAppearance.disclosureIconRes) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                disclosureIconRes = it
+            )
+        )
+    }
 }
 
 @Composable
@@ -861,7 +1222,12 @@ private fun ColorIcon(innerColor: Color) {
 }
 
 @Composable
-private fun IncrementDecrementItem(label: String, value: Float, onValueChange: (Float) -> Unit) {
+private fun IncrementDecrementItem(
+    label: String,
+    value: Float,
+    incrementDecrementAmount: Float = 1f,
+    onValueChange: (Float) -> Unit,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -878,7 +1244,7 @@ private fun IncrementDecrementItem(label: String, value: Float, onValueChange: (
                     .height(32.dp)
                     .width(50.dp)
                     .clickable {
-                        val newValue = value - 1
+                        val newValue = value - incrementDecrementAmount
                         onValueChange(if (newValue < 0) 0.0f else newValue)
                     }
             ) {
@@ -894,7 +1260,7 @@ private fun IncrementDecrementItem(label: String, value: Float, onValueChange: (
                     .height(32.dp)
                     .width(50.dp)
                     .clickable {
-                        onValueChange(value + 1)
+                        onValueChange(value + incrementDecrementAmount)
                     }
             ) {
                 Icon(
@@ -943,7 +1309,50 @@ private fun FontScaleSlider(sliderPosition: Float, onValueChange: (Float) -> Uni
 }
 
 @Composable
-private fun RowStyleDropDown(style: EmbeddedRow, rowStyleSelectedCallback: (EmbeddedRow) -> Unit) {
+private fun IconStyleDropDown(
+    style: AppearanceStore.State.IconStyle,
+    onIconStyleSelected: (AppearanceStore.State.IconStyle) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(all = BASE_PADDING)
+            .wrapContentSize(Alignment.TopStart)
+    ) {
+        Text(
+            text = "IconStyle: $style",
+            fontSize = BASE_FONT_SIZE,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = { expanded = true })
+        )
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            AppearanceStore.State.IconStyle.entries.forEach {
+                DropdownMenuItem(
+                    onClick = {
+                        expanded = false
+                        onIconStyleSelected(it)
+                    }
+                ) {
+                    Text(it.name)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RowStyleDropDown(
+    style: AppearanceStore.State.Embedded.Row,
+    rowStyleSelectedCallback: (AppearanceStore.State.Embedded.Row) -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
 
     Row(
@@ -965,7 +1374,7 @@ private fun RowStyleDropDown(style: EmbeddedRow, rowStyleSelectedCallback: (Embe
             onDismissRequest = { expanded = false },
             modifier = Modifier.fillMaxWidth()
         ) {
-            EmbeddedRow.entries.forEach {
+            AppearanceStore.State.Embedded.Row.entries.forEach {
                 DropdownMenuItem(
                     onClick = {
                         expanded = false
@@ -1021,6 +1430,71 @@ private fun FontDropDown(fontResId: Int?, fontSelectedCallback: (Int?) -> Unit) 
 }
 
 @Composable
+private fun EmbeddedFontDropDown(
+    currentFont: AppearanceStore.State.Typography.Font?,
+    displayText: String,
+    fontSelectedCallback: (AppearanceStore.State.Typography.Font?) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val items = mapOf(
+        AppearanceStore.State.Typography.Font(
+            fontSizeSp = 12f,
+            fontWeight = 200,
+            letterSpacingSp = 8f,
+        ) to "Small",
+        AppearanceStore.State.Typography.Font(
+            fontSizeSp = 16f,
+            fontWeight = 400,
+            letterSpacingSp = 8f,
+        ) to "Medium",
+        AppearanceStore.State.Typography.Font(
+            fontSizeSp = 24f,
+            fontWeight = 700,
+            letterSpacingSp = 8f,
+        ) to "Large",
+        null to "Default"
+    )
+
+    items[currentFont]?.let {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxSize().padding(all = BASE_PADDING).wrapContentSize(Alignment.TopStart)
+        ) {
+            Text(
+                text = "$displayText: $it",
+                fontSize = BASE_FONT_SIZE,
+                modifier = Modifier.fillMaxWidth().clickable(onClick = { expanded = true })
+            )
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items.forEach { font ->
+                    val style = TextStyle(
+                        fontSize = font.key?.fontSizeSp?.sp ?: TextUnit.Unspecified,
+                        fontWeight = font.key?.fontWeight?.let { FontWeight(it) },
+                        fontFamily = font.key?.fontFamily?.let { FontFamily(Font(it)) },
+                        letterSpacing = font.key?.letterSpacingSp?.sp ?: TextUnit.Unspecified,
+                    )
+                    DropdownMenuItem(
+                        onClick = {
+                            expanded = false
+                            fontSelectedCallback(font.key)
+                        },
+                    ) {
+                        Text(
+                            text = font.value,
+                            style = style
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun FontDropDownMenuItem(label: String, fontResId: Int?, onClick: () -> Unit) {
     DropdownMenuItem(
         onClick = onClick,
@@ -1032,20 +1506,62 @@ private fun FontDropDownMenuItem(label: String, fontResId: Int?, onClick: () -> 
     }
 }
 
+@Composable
+private fun IconDropDown(iconResId: Int?, iconSelectedCallback: (Int) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    val items = mapOf(
+        com.stripe.android.R.drawable.stripe_ic_arrow_down to "Down",
+        com.stripe.android.R.drawable.stripe_ic_add_black_32dp to "Add",
+        com.stripe.android.paymentsheet.R.drawable.stripe_ic_chevron_right to "Default"
+    )
+
+    items[iconResId].let {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(all = BASE_PADDING)
+                .wrapContentSize(Alignment.TopStart)
+        ) {
+            Text(
+                text = "Icon Resource: $it",
+                fontSize = BASE_FONT_SIZE,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = { expanded = true })
+            )
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items.forEach { icon ->
+                    DropdownMenuItem(
+                        onClick = {
+                            expanded = false
+                            iconSelectedCallback(icon.key)
+                        }
+                    ) {
+                        Text(
+                            text = icon.value
+                        )
+                        icon.key?.let { iconResId ->
+                            Icon(
+                                painter = painterResource(iconResId),
+                                contentDescription = null
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 private fun getFontFromResource(fontResId: Int?): FontFamily {
     return fontResId?.let {
         FontFamily(Font(it))
     } ?: run {
         FontFamily.Default
     }
-}
-
-internal fun Bundle?.getEmbeddedAppearance(): EmbeddedAppearance {
-    val appearance = if (SDK_INT >= 33) {
-        this?.getParcelable(EMBEDDED_KEY, EmbeddedAppearance::class.java)
-    } else {
-        @Suppress("DEPRECATION")
-        this?.getParcelable(EMBEDDED_KEY)
-    }
-    return appearance ?: EmbeddedAppearance()
 }

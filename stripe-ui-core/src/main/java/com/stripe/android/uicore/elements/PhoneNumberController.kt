@@ -3,8 +3,8 @@ package com.stripe.android.uicore.elements
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.text.input.ImeAction
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -23,7 +23,9 @@ class PhoneNumberController private constructor(
     override val showOptionalLabel: Boolean = false,
     private val acceptAnyInput: Boolean = false,
 ) : InputController, SectionFieldComposable {
-    override val label = stateFlowOf(CoreR.string.stripe_address_label_phone_number)
+    override val label = stateFlowOf(
+        resolvableString(CoreR.string.stripe_address_label_phone_number)
+    )
 
     private val _fieldValue = MutableStateFlow(initialPhoneNumber)
 
@@ -36,7 +38,7 @@ class PhoneNumberController private constructor(
 
     private val countryConfig = CountryConfig(
         overrideCountryCodes,
-        tinyMode = true,
+        mode = DropdownConfig.Mode.Condensed,
         expandedLabelMapper = { country ->
             listOfNotNull(
                 CountryConfig.countryCodeToEmoji(country.code.value),
@@ -58,13 +60,13 @@ class PhoneNumberController private constructor(
 
     private val phoneNumberFormatter = countryDropdownController.selectedIndex.mapAsStateFlow {
         PhoneNumberFormatter.forCountry(
-            countryConfig.countries[it].code.value
+            countryConfig.countries[it ?: 0].code.value
         )
     }
 
     private val phoneNumberMinimumLength = countryDropdownController.selectedIndex.mapAsStateFlow {
         PhoneNumberFormatter.lengthForCountry(
-            countryConfig.countries[it].code.value
+            countryConfig.countries[it ?: 0].code.value
         )
     }
 
@@ -103,6 +105,12 @@ class PhoneNumberController private constructor(
         phoneNumberFormatter.value.toE164Format(phoneNumber)
 
     fun getLocalNumber() = _fieldValue.value.removePrefix(phoneNumberFormatter.value.prefix)
+
+    fun formatLocalNumber(): String {
+        val localNumber = getLocalNumber()
+        val regionFormatter = phoneNumberFormatter.value as? PhoneNumberFormatter.WithRegion
+        return regionFormatter?.formatNumberNational(localNumber) ?: localNumber
+    }
 
     fun onValueChange(displayFormatted: String) {
         _fieldValue.value = phoneNumberFormatter.value.userInputFilter(displayFormatted)
@@ -175,13 +183,12 @@ class PhoneNumberController private constructor(
         field: SectionFieldElement,
         modifier: Modifier,
         hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?,
-        nextFocusDirection: FocusDirection,
-        previousFocusDirection: FocusDirection
+        lastTextFieldIdentifier: IdentifierSpec?
     ) {
         PhoneNumberElementUI(
             enabled,
             this,
+            modifier = modifier,
             imeAction = if (lastTextFieldIdentifier != field.identifier) {
                 ImeAction.Next
             } else {

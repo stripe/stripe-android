@@ -4,7 +4,6 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,14 +35,13 @@ class AddressController(
         modifier: Modifier,
         hiddenIdentifiers: Set<IdentifierSpec>,
         lastTextFieldIdentifier: IdentifierSpec?,
-        nextFocusDirection: FocusDirection,
-        previousFocusDirection: FocusDirection
     ) {
         AddressElementUI(
             enabled,
             this,
             hiddenIdentifiers,
-            lastTextFieldIdentifier
+            lastTextFieldIdentifier,
+            modifier,
         )
     }
 }

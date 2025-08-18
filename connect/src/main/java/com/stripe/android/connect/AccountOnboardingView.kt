@@ -10,7 +10,6 @@ import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMess
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
-@PrivateBetaConnectSDK
 internal class AccountOnboardingView internal constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -70,7 +69,6 @@ internal class AccountOnboardingView internal constructor(
     }
 }
 
-@PrivateBetaConnectSDK
 @Parcelize
 @Poko
 class AccountOnboardingProps(
@@ -101,6 +99,7 @@ class AccountOnboardingProps(
      * Customizes collecting `currently_due` or `eventually_due` requirements and controls whether to include
      * [future requirements](https://docs.stripe.com/api/accounts/object#account_object-future_requirements).
      * Specifying `eventually_due` collects both `eventually_due` and `currently_due` requirements.
+     * Additionally, `requirements` can be used to collect only some requirements or exclude them.
      */
     val collectionOptions: CollectionOptions? = null,
 ) : Parcelable {
@@ -110,6 +109,7 @@ class AccountOnboardingProps(
     class CollectionOptions(
         val fields: FieldOption? = null,
         val futureRequirements: FutureRequirementOption? = null,
+        internal val requirements: RequirementsOption? = null,
     ) : Parcelable
 
     enum class FieldOption(internal val value: String) {
@@ -121,9 +121,27 @@ class AccountOnboardingProps(
         OMIT("omit"),
         INCLUDE("include"),
     }
+
+    @Parcelize
+    sealed class RequirementsOption : Parcelable {
+        @Poko
+        @Parcelize
+        internal class Only(val only: List<String>) : RequirementsOption()
+
+        @Poko
+        @Parcelize
+        internal class Exclude(val exclude: List<String>) : RequirementsOption()
+
+        companion object {
+            @JvmStatic
+            fun only(only: List<String>): RequirementsOption = Only(only)
+
+            @JvmStatic
+            fun exclude(exclude: List<String>): RequirementsOption = Exclude(exclude)
+        }
+    }
 }
 
-@PrivateBetaConnectSDK
 interface AccountOnboardingListener : StripeEmbeddedComponentListener {
     /**
      * The connected account has exited the onboarding process.
@@ -131,7 +149,6 @@ interface AccountOnboardingListener : StripeEmbeddedComponentListener {
     fun onExit() {}
 }
 
-@OptIn(PrivateBetaConnectSDK::class)
 internal object AccountOnboardingListenerDelegate : ComponentListenerDelegate<AccountOnboardingListener>() {
     override fun delegate(listener: AccountOnboardingListener, message: SetterFunctionCalledMessage) {
         when (message.value) {

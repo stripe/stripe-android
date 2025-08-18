@@ -17,7 +17,7 @@ interface TextFieldConfig {
     val debugLabel: String
 
     /** This is the label to describe the field */
-    val label: Int?
+    val label: ResolvableString
 
     /** This is the type of keyboard to use for this field */
     val keyboard: KeyboardType
@@ -44,6 +44,8 @@ interface TextFieldConfig {
 
     val overrideContentDescriptionProvider: ((fieldValue: String) -> ResolvableString)?
         get() = null
+
+    val optional: Boolean
 
     /** This will determine the state of the field based on the text */
     fun determineState(input: String): TextFieldState

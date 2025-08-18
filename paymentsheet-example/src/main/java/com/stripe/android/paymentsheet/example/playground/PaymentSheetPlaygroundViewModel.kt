@@ -23,7 +23,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
@@ -38,14 +38,14 @@ import com.stripe.android.paymentsheet.example.playground.model.CreateSetupInten
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyResponse
 import com.stripe.android.paymentsheet.example.playground.network.PlaygroundRequester
+import com.stripe.android.paymentsheet.example.playground.network.SharedPaymentTokenPlaygroundRequester
 import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CustomEndpointDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
-import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedAppearance
-import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedAppearanceSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
+import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettingDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.ShippingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
@@ -58,14 +58,14 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import java.io.IOException
 
-@OptIn(ExperimentalCustomerSessionApi::class, ExperimentalEmbeddedPaymentElementApi::class)
+@OptIn(ExperimentalCustomerSessionApi::class)
 internal class PaymentSheetPlaygroundViewModel(
     application: Application,
     private val savedStateHandle: SavedStateHandle,
     launchUri: Uri?,
 ) : AndroidViewModel(application) {
 
-    private val settings by lazy {
+    val settings by lazy {
         Settings(application)
     }
 
@@ -98,8 +98,12 @@ internal class PaymentSheetPlaygroundViewModel(
         flowControllerState.value = null
         customerSheetState.value = null
 
-        if (playgroundSettings.configurationData.value.integrationType.isPaymentFlow()) {
+        if (
+            playgroundSettings.configurationData.value.integrationType.isPaymentFlow()
+        ) {
             prepareCheckout(playgroundSettings)
+        } else if (playgroundSettings.configurationData.value.integrationType.isSptFlow()) {
+            prepareSharedPaymentToken(playgroundSettings)
         } else {
             prepareCustomer(playgroundSettings)
         }
@@ -128,6 +132,31 @@ internal class PaymentSheetPlaygroundViewModel(
                 onFailure = { exception ->
                     status.value = StatusMessage(
                         "Preparing checkout failed:\n${exception.message}"
+                    )
+                },
+            )
+        }
+    }
+
+    private fun prepareSharedPaymentToken(
+        playgroundSettings: PlaygroundSettings,
+    ) {
+        viewModelScope.launch {
+            // Snapshot before making the network request to not rely on UI staying in sync.
+            val playgroundSettingsSnapshot = playgroundSettings.snapshot()
+
+            withContext(Dispatchers.IO) {
+                playgroundSettingsSnapshot.saveToSharedPreferences(getApplication())
+            }
+
+            SharedPaymentTokenPlaygroundRequester(playgroundSettingsSnapshot, getApplication()).session().fold(
+                onSuccess = { state ->
+                    playgroundSettingsFlow.value = state.snapshot.playgroundSettings()
+                    setPlaygroundState(state)
+                },
+                onFailure = { exception ->
+                    status.value = StatusMessage(
+                        "Preparing SPT session failed:\n${exception.message}"
                     )
                 },
             )
@@ -348,10 +377,12 @@ internal class PaymentSheetPlaygroundViewModel(
         }
     }
 
+    @OptIn(ShippingDetailsInPaymentOptionPreview::class)
     fun onPaymentOptionSelected(paymentOption: PaymentOption?) {
         flowControllerState.update { existingState ->
             existingState?.copy(
-                selectedPaymentOption = paymentOption
+                selectedPaymentOption = paymentOption,
+                addressDetails = paymentOption?.shippingDetails,
             )
         }
     }
@@ -396,7 +427,7 @@ internal class PaymentSheetPlaygroundViewModel(
         status.value = StatusMessage(statusMessage)
     }
 
-    fun onEmbeddedResult(success: Boolean) {
+    fun onResult(success: Boolean) {
         if (success) {
             setPlaygroundState(null)
             status.value = StatusMessage(SUCCESS_RESULT)
@@ -599,6 +630,7 @@ internal class PaymentSheetPlaygroundViewModel(
                     when (state) {
                         is PlaygroundState.Customer -> state.copy(snapshot = updatedSnapshot)
                         is PlaygroundState.Payment -> state.copy(snapshot = updatedSnapshot)
+                        is PlaygroundState.SharedPaymentToken -> state.copy(snapshot = updatedSnapshot)
                     }
                 }
             )
@@ -615,21 +647,27 @@ internal class PaymentSheetPlaygroundViewModel(
                     when (state) {
                         is PlaygroundState.Customer -> state.copy(snapshot = updatedSnapshot)
                         is PlaygroundState.Payment -> state.copy(snapshot = updatedSnapshot)
+                        // Does not support custom URLs
+                        is PlaygroundState.SharedPaymentToken -> state
                     }
                 }
             )
         }
     }
 
-    fun updateEmbeddedAppearance(appearanceSetting: EmbeddedAppearanceSettingsDefinition, value: EmbeddedAppearance) {
+    fun <T> updateSetting(
+        setting: PlaygroundSettingDefinition<T>,
+        value: T
+    ) {
         playgroundSettingsFlow.value?.let { settings ->
-            settings[appearanceSetting] = value
+            settings[setting] = value
             setPlaygroundState(
                 state.value?.let { state ->
                     val updatedSnapshot = settings.snapshot()
                     when (state) {
                         is PlaygroundState.Customer -> state.copy(snapshot = updatedSnapshot)
                         is PlaygroundState.Payment -> state.copy(snapshot = updatedSnapshot)
+                        is PlaygroundState.SharedPaymentToken -> state.copy(snapshot = updatedSnapshot)
                     }
                 }
             )

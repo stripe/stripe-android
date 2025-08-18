@@ -1,19 +1,21 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.input.VisualTransformation
+import com.stripe.android.uicore.LocalTextFieldInsets
 import com.stripe.android.uicore.elements.TextFieldColors
+import com.stripe.android.uicore.elements.compat.CompatTextField
 import com.stripe.android.uicore.stripeColors
 
 @Composable
@@ -30,11 +32,14 @@ internal fun CommonTextField(
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     shape: Shape =
         MaterialTheme.shapes.small.copy(bottomEnd = ZeroCornerSize, bottomStart = ZeroCornerSize),
-    colors: TextFieldColors = TextFieldColors(
+    colors: TextFieldColors = commonTextFieldColors(
         shouldShowError = shouldShowError,
+        enabled = enabled
     ),
 ) {
-    TextField(
+    val textFieldInsets = LocalTextFieldInsets.current
+
+    CompatTextField(
         modifier = modifier.fillMaxWidth(),
         value = value,
         enabled = enabled,
@@ -50,6 +55,8 @@ internal fun CommonTextField(
         keyboardActions = keyboardActions,
         visualTransformation = visualTransformation,
         onValueChange = onValueChange,
+        errorMessage = null,
+        contentPadding = textFieldInsets.asPaddingValues()
     )
 }
 
@@ -59,7 +66,30 @@ private fun Label(
 ) {
     Text(
         text = text,
-        color = MaterialTheme.stripeColors.placeholderText.copy(alpha = ContentAlpha.disabled),
         style = MaterialTheme.typography.subtitle1
+    )
+}
+
+@Composable
+private fun disabledBackgroundColor(): Color {
+    return if (isSystemInDarkTheme()) {
+        Color.White.copy(alpha = 0.04f)
+    } else {
+        Color.Black.copy(alpha = 0.04f)
+    }
+}
+
+@Composable
+internal fun commonTextFieldColors(
+    shouldShowError: Boolean,
+    enabled: Boolean
+): TextFieldColors {
+    return TextFieldColors(
+        shouldShowError = shouldShowError,
+        backgroundColor = if (enabled) {
+            MaterialTheme.stripeColors.component
+        } else {
+            disabledBackgroundColor()
+        }
     )
 }

@@ -11,11 +11,16 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
+import androidx.test.espresso.Espresso
+import com.google.android.gms.wallet.IsReadyToPayRequest
+import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
+import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -23,6 +28,8 @@ import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentelement.WalletButtonsPage
+import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.ActivityLaunchObserver
@@ -38,6 +45,7 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_MANAGE_SCREEN_SAVED
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_VIEW_MORE
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -53,10 +61,16 @@ internal class FlowControllerTest {
     private val networkRule = testRules.networkRule
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
+    private val walletButtonsPage = WalletButtonsPage(testRules.compose)
 
     private val defaultConfiguration = PaymentSheet.Configuration.Builder("Example, Inc.")
         .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
         .build()
+
+    @After
+    fun teardown() {
+        GooglePayRepository.resetFactory()
+    }
 
     @Test
     fun testSuccessfulCardPayment(
@@ -95,6 +109,8 @@ internal class FlowControllerTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @Test
@@ -137,6 +153,8 @@ internal class FlowControllerTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @Test
@@ -174,8 +192,7 @@ internal class FlowControllerTest {
             page.fillOutCardDetails()
 
             page.clickPrimaryButton()
-            assertThat(testContext.configureCallbackTurbine.awaitItem()?.label).endsWith("4242")
-            composeTestRule.waitForIdle()
+            testContext.consumePaymentOptionEventForFlowController("card", "4242")
 
             testContext.flowController.presentPaymentOptions()
 
@@ -220,14 +237,66 @@ internal class FlowControllerTest {
             page.assertLpmSelected("cashapp")
 
             page.clickPrimaryButton()
-            assertThat(testContext.configureCallbackTurbine.awaitItem()?.label).endsWith("Cash App Pay")
-            composeTestRule.waitForIdle()
+            testContext.consumePaymentOptionEventForFlowController("cashapp", "Cash App Pay")
 
             testContext.flowController.presentPaymentOptions()
 
             page.assertLpmSelected("cashapp")
             page.clickPrimaryButton()
-            assertThat(testContext.configureCallbackTurbine.awaitItem()?.label).endsWith("Cash App Pay")
+            testContext.consumePaymentOptionEventForFlowController("cashapp", "Cash App Pay")
+
+            testContext.markTestSucceeded()
+        }
+    }
+
+    @Test
+    fun testCorrectMandatesDisplayedAfterNavigation(
+        @TestParameter integrationType: IntegrationType,
+    ) {
+        runFlowControllerTest(
+            networkRule = networkRule,
+            integrationType = integrationType,
+            callConfirmOnPaymentOptionCallback = false,
+            resultCallback = ::assertCompleted,
+        ) { testContext ->
+            networkRule.enqueue(
+                method("GET"),
+                path("/v1/elements/sessions"),
+            ) { response ->
+                response.testBodyFromFile("elements-sessions-deferred_payment_intent.json")
+            }
+
+            testContext.configureFlowController {
+                configureWithIntentConfiguration(
+                    intentConfiguration = PaymentSheet.IntentConfiguration(
+                        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                            amount = 5099,
+                            currency = "usd",
+                            setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+                        )
+                    ),
+                    configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
+                        .build(),
+                    callback = { success, error ->
+                        assertThat(success).isTrue()
+                        assertThat(error).isNull()
+                        presentPaymentOptions()
+                    }
+                )
+            }
+
+            page.clickOnLpm("cashapp", forVerticalMode = true)
+            page.assertLpmSelected("cashapp")
+            page.assertHasMandate("By continuing, you authorize Example, Inc. to debit your Cash App account for this payment and future payments in accordance with Example, Inc.'s terms, until this authorization is revoked. You can change this anytime in your Cash App Settings.")
+
+            page.clickOnLpm("card", forVerticalMode = true)
+            page.waitForCardForm()
+            page.assertHasMandate("By providing your card information, you allow Example, Inc. to charge your card for future payments in accordance with their terms.")
+
+            Espresso.pressBack()
+
+            page.assertLpmSelected("cashapp")
+            page.assertHasMandate("By continuing, you authorize Example, Inc. to debit your Cash App account for this payment and future payments in accordance with Example, Inc.'s terms, until this authorization is revoked. You can change this anytime in your Cash App Settings.")
 
             testContext.markTestSucceeded()
         }
@@ -277,6 +346,8 @@ internal class FlowControllerTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @Test
@@ -317,6 +388,8 @@ internal class FlowControllerTest {
             }
 
             page.clickPrimaryButton()
+
+            testContext.consumePaymentOptionEventForFlowController("card", "4242")
         }
     }
 
@@ -338,6 +411,7 @@ internal class FlowControllerTest {
             scenario.onActivity {
                 PaymentConfiguration.init(it, "pk_test_123")
 
+                @Suppress("Deprecation")
                 val unsynchronizedController = PaymentSheet.FlowController.create(
                     activity = it,
                     paymentOptionCallback = { paymentOption ->
@@ -404,6 +478,7 @@ internal class FlowControllerTest {
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
             PaymentConfiguration.init(it, "pk_test_123")
+            @Suppress("Deprecation")
             flowController = PaymentSheet.FlowController.create(
                 activity = it,
                 paymentOptionCallback = {
@@ -524,6 +599,8 @@ internal class FlowControllerTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @Test
@@ -584,6 +661,8 @@ internal class FlowControllerTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @Test
@@ -644,6 +723,8 @@ internal class FlowControllerTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @OptIn(DelicatePaymentSheetApi::class)
@@ -698,6 +779,8 @@ internal class FlowControllerTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @Test
@@ -766,6 +849,8 @@ internal class FlowControllerTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @Test
@@ -816,7 +901,9 @@ internal class FlowControllerTest {
                 .and(hasText("4242", substring = true))
         ).performClick()
 
-        assertThat(testContext.configureCallbackTurbine.awaitItem()?.label).endsWith("4242")
+        val paymentOption = testContext.configureCallbackTurbine.awaitItem()
+        assertThat(paymentOption?.label).endsWith("4242")
+        assertThat(paymentOption?.paymentMethodType).isEqualTo("card")
 
         page.fillCvcRecollection("123")
 
@@ -896,7 +983,7 @@ internal class FlowControllerTest {
 
         testContext.configureCallbackTurbine.expectNoEvents()
         page.clickPrimaryButton()
-        assertThat(testContext.configureCallbackTurbine.awaitItem()?.label).endsWith("4242")
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
         testContext.markTestSucceeded()
     }
 
@@ -970,6 +1057,213 @@ internal class FlowControllerTest {
         composeTestRule.onNodeWithTag(TEST_TAG_LIST).performScrollToIndex(4)
         composeTestRule.onNodeWithTag(TEST_TAG_LIST + "affirm").assertIsDisplayed()
 
+        testContext.markTestSucceeded()
+    }
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
+    fun testWalletButtonsShown() = runFlowControllerTest(
+        networkRule = networkRule,
+        showWalletButtons = true,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        val isConfigured = CountDownLatch(1)
+
+        GooglePayRepository.googlePayAvailabilityClientFactory = object : GooglePayAvailabilityClient.Factory {
+            override fun create(paymentsClient: PaymentsClient): GooglePayAvailabilityClient {
+                return object : GooglePayAvailabilityClient {
+                    override suspend fun isReady(request: IsReadyToPayRequest): Boolean {
+                        return true
+                    }
+                }
+            }
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_pm_with_link_and_cs.json")
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/customers/cus_1"),
+        ) { response ->
+            response.testBodyFromFile("customer-get-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
+        }
+
+        testContext.flowController.configureWithPaymentIntent(
+            paymentIntentClientSecret = "pi_123_secret_123",
+            configuration = PaymentSheet.Configuration.Builder(
+                merchantDisplayName = "Example, Inc."
+            )
+                .customer(
+                    PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                        id = "cus_1",
+                        clientSecret = "cuss_123",
+                    )
+                )
+                .googlePay(
+                    PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                        countryCode = "US",
+                    )
+                )
+                .build(),
+            callback = { _, _ ->
+                isConfigured.countDown()
+            },
+        )
+
+        isConfigured.await(5, TimeUnit.SECONDS)
+
+        walletButtonsPage.assertLinkIsDisplayed()
+        walletButtonsPage.assertGooglePayIsDisplayed()
+
+        testContext.markTestSucceeded()
+    }
+
+    @OptIn(ExperimentalCustomerSessionApi::class, WalletButtonsPreview::class)
+    @Test
+    fun testWalletsShownInExpectedScreensWhenFilteringWalletButtons() = runFlowControllerTest(
+        networkRule = networkRule,
+        showWalletButtons = true,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        val isConfigured = CountDownLatch(1)
+
+        GooglePayRepository.googlePayAvailabilityClientFactory = object : GooglePayAvailabilityClient.Factory {
+            override fun create(paymentsClient: PaymentsClient): GooglePayAvailabilityClient {
+                return object : GooglePayAvailabilityClient {
+                    override suspend fun isReady(request: IsReadyToPayRequest): Boolean {
+                        return true
+                    }
+                }
+            }
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_pm_with_link_and_cs.json")
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/customers/cus_1"),
+        ) { response ->
+            response.testBodyFromFile("customer-get-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
+        }
+
+        val activityLaunchObserver = ActivityLaunchObserver(PaymentOptionsActivity::class.java)
+
+        testContext.scenario.onActivity {
+            activityLaunchObserver.prepareForLaunch(it)
+            testContext.flowController.configureWithPaymentIntent(
+                paymentIntentClientSecret = "pi_123_secret_123",
+                configuration = PaymentSheet.Configuration.Builder(
+                    merchantDisplayName = "Example, Inc."
+                )
+                    .customer(
+                        PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                            id = "cus_1",
+                            clientSecret = "cuss_123",
+                        )
+                    )
+                    .googlePay(
+                        PaymentSheet.GooglePayConfiguration(
+                            environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                            countryCode = "US",
+                        )
+                    )
+                    .walletButtons(
+                        PaymentSheet.WalletButtonsConfiguration(
+                            willDisplayExternally = true,
+                            walletsToShow = listOf("link"),
+                        )
+                    )
+                    .build(),
+                callback = { _, _ ->
+                    isConfigured.countDown()
+                },
+            )
+        }
+
+        isConfigured.await(5, TimeUnit.SECONDS)
+
+        walletButtonsPage.assertGooglePayIsNotDisplayed()
+        walletButtonsPage.assertLinkIsDisplayed()
+
+        testContext.flowController.presentPaymentOptions()
+        activityLaunchObserver.awaitLaunch()
+
+        composeTestRule.waitForIdle()
+        page.assertGooglePayIsDisplayed()
+
+        testContext.markTestSucceeded()
+    }
+
+    @Test
+    fun testFlowControllerConfigurationBuilderWithTermsDisplayNever(
+        @TestParameter integrationType: IntegrationType,
+    ) = runFlowControllerTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        testContext.configureFlowController {
+            configureWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 5000,
+                        currency = "USD",
+                        setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+                    )
+                ),
+                configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
+                    .termsDisplay(
+                        mapOf(
+                            com.stripe.android.model.PaymentMethod.Type.Card to PaymentSheet.TermsDisplay.NEVER
+                        )
+                    )
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                    .build(),
+                callback = { success, error ->
+                    assertThat(success).isTrue()
+                    assertThat(error).isNull()
+                    presentPaymentOptions()
+                }
+            )
+        }
+
+        page.assertMandateIsMissing()
         testContext.markTestSucceeded()
     }
 }

@@ -129,8 +129,11 @@ internal class LinkInlineSignupViewTest {
         enabled: Boolean = true,
         expanded: Boolean = true,
         requiresNameCollection: Boolean = false,
+        allowsDefaultOptIn: Boolean = false,
+        didAskToChangeSignupDetails: Boolean = false,
         errorMessage: String? = null,
-        toggleExpanded: () -> Unit = {}
+        toggleExpanded: () -> Unit = {},
+        changeSignupDetails: () -> Unit = {},
     ) {
         val sectionController = SectionController(
             label = null,
@@ -152,8 +155,12 @@ internal class LinkInlineSignupViewTest {
                     enabled,
                     expanded,
                     requiresNameCollection,
+                    allowsDefaultOptIn,
+                    linkSignUpOptInFeatureEnabled = false,
+                    didAskToChangeSignupDetails,
                     errorMessage,
                     toggleExpanded,
+                    changeSignupDetails,
                 )
             }
         }

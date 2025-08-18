@@ -1,5 +1,15 @@
 # Migration Guide
 
+## Migrating from versions < 21.18.0
+- Changes to `PaymentSheet`:
+  * The constructors have been deprecated and will be removed in a future release. Use `PaymentSheet.Builder` instead.
+- Changes to `PaymentSheet.FlowController`:
+  * `FlowController.create()` has been deprecated and will be removed in a future release. Use `FlowController.Builder` instead.
+- Changes to `rememberPaymentSheet`:
+  * The functions have been deprecated and will be removed in a future release. Use `PaymentSheet.Builder` with `remember` instead.
+- Changes to `rememberPaymentSheetFlowController`:
+  * The functions have been deprecated and will be removed in a future release. Use `FlowController.Builder` with `remember` instead.
+
 ## Migrating from versions < 21.0.0
 - Basic Integration has been removed. [Please use Mobile Payment Element instead](https://docs.stripe.com/payments/mobile/migrating-to-mobile-payment-element-from-basic-integration).
 - Card image verification has been removed. [Please use card OCR instead](https://github.com/stripe/stripe-android/tree/master/stripecardscan#credit-card-ocr).

@@ -15,6 +15,7 @@ data class ElementsSession(
     val paymentMethodSpecs: String?,
     val externalPaymentMethodData: String?,
     val stripeIntent: StripeIntent,
+    val orderedPaymentMethodTypesAndWallets: List<String>,
     val flags: Map<Flag, Boolean>,
     val experimentsData: ExperimentsData?,
     val customer: Customer?,
@@ -24,6 +25,7 @@ data class ElementsSession(
     val sessionsError: Throwable? = null,
     val customPaymentMethods: List<CustomPaymentMethod>,
     val elementsSessionId: String,
+    private val passiveCaptcha: PassiveCaptchaParams?
 ) : StripeModel {
 
     val linkPassthroughModeEnabled: Boolean
@@ -48,8 +50,29 @@ data class ElementsSession(
     val suppressLink2faModal: Boolean
         get() = linkSettings?.suppress2faModal ?: false
 
+    val disableRuxInFlowController: Boolean
+        get() = linkSettings?.disableLinkRuxInFlowController ?: false
+
     val enableLinkInSpm: Boolean
         get() = flags[Flag.ELEMENTS_ENABLE_LINK_SPM] == true
+
+    val allowLinkDefaultOptIn: Boolean
+        get() = linkSettings?.linkFlags?.get("link_mobile_disable_default_opt_in") != true
+
+    val linkEnableDisplayableDefaultValuesInEce: Boolean
+        get() = linkSettings?.linkEnableDisplayableDefaultValuesInEce ?: false
+
+    val linkMobileSkipWalletInFlowController: Boolean
+        get() = linkSettings?.linkMobileSkipWalletInFlowController ?: false
+
+    val passiveCaptchaParams: PassiveCaptchaParams?
+        get() = passiveCaptcha.takeIf { flags[Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA] == true }
+
+    val linkSignUpOptInFeatureEnabled: Boolean
+        get() = linkSettings?.linkSignUpOptInFeatureEnabled ?: false
+
+    val linkSignUpOptInInitialValue: Boolean
+        get() = linkSettings?.linkSignUpOptInInitialValue ?: false
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
@@ -61,7 +84,12 @@ data class ElementsSession(
         val disableLinkSignup: Boolean,
         val linkConsumerIncentive: LinkConsumerIncentive?,
         val useAttestationEndpoints: Boolean,
-        val suppress2faModal: Boolean
+        val suppress2faModal: Boolean,
+        val disableLinkRuxInFlowController: Boolean,
+        val linkEnableDisplayableDefaultValuesInEce: Boolean,
+        val linkMobileSkipWalletInFlowController: Boolean,
+        val linkSignUpOptInFeatureEnabled: Boolean,
+        val linkSignUpOptInInitialValue: Boolean
     ) : StripeModel
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -163,8 +191,10 @@ data class ElementsSession(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class Flag(val flagValue: String) {
         ELEMENTS_DISABLE_FC_LITE("elements_disable_fc_lite"),
+        ELEMENTS_PREFER_FC_LITE("elements_prefer_fc_lite"),
         ELEMENTS_DISABLE_LINK_GLOBAL_HOLDBACK_LOOKUP("elements_disable_link_global_holdback_lookup"),
         ELEMENTS_ENABLE_LINK_SPM("elements_enable_link_spm"),
+        ELEMENTS_ENABLE_PASSIVE_CAPTCHA("elements_enable_passive_captcha")
     }
 
     /**
@@ -173,6 +203,7 @@ data class ElementsSession(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class ExperimentAssignment(val experimentValue: String) {
         LINK_GLOBAL_HOLD_BACK("link_global_holdback"),
+        LINK_AB_TEST("link_ab_test"),
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -188,6 +219,7 @@ data class ElementsSession(
                 externalPaymentMethodData = null,
                 flags = emptyMap(),
                 stripeIntent = stripeIntent,
+                orderedPaymentMethodTypesAndWallets = stripeIntent.paymentMethodTypes,
                 experimentsData = null,
                 customer = null,
                 customPaymentMethods = listOf(),
@@ -196,6 +228,7 @@ data class ElementsSession(
                 isGooglePayEnabled = true,
                 sessionsError = sessionsError,
                 elementsSessionId = elementsSessionId,
+                passiveCaptcha = null
             )
         }
     }

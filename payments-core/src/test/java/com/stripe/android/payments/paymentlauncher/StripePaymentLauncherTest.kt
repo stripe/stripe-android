@@ -1,7 +1,9 @@
 package com.stripe.android.payments.paymentlauncher
 
 import android.graphics.Color
+import android.util.Base64
 import androidx.activity.result.ActivityResultLauncher
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -76,9 +78,26 @@ class StripePaymentLauncherTest {
         )
     }
 
+    @OptIn(SharedPaymentTokenSessionPreview::class)
+    @Test
+    fun `verify handle next action for hashed payment creates correct params`() {
+        paymentLauncher.handleNextActionForHashedPaymentIntent(
+            hashedValue = Base64.encodeToString(HASHED_VALUE.toByteArray(), 0)
+        )
+
+        verify(mockHostActivityLauncher).launch(
+            argWhere { arg ->
+                arg is PaymentLauncherContract.Args.HashedPaymentIntentNextActionArgs &&
+                    arg.paymentIntentClientSecret == CLIENT_SECRET &&
+                    arg.publishableKey == PUBLISHABLE_KEY
+            }
+        )
+    }
+
     companion object {
         const val PUBLISHABLE_KEY = "publishableKey"
         const val STRIPE_ACCOUNT_ID = "stripeAccountId"
         const val CLIENT_SECRET = "clientSecret"
+        const val HASHED_VALUE = "$PUBLISHABLE_KEY:$CLIENT_SECRET"
     }
 }

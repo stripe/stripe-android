@@ -1,10 +1,12 @@
 package com.stripe.android.customersheet.analytics
 
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetIntegration
+import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.model.CardBrand
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -22,6 +24,18 @@ internal class DefaultCustomerSheetEventReporter @Inject constructor(
     ) {
         fireEvent(
             CustomerSheetEvent.Init(configuration, integrationType)
+        )
+    }
+
+    override fun onLoadSucceeded(customerSheetSession: CustomerSheetSession) {
+        fireEvent(
+            CustomerSheetEvent.LoadSucceeded(customerSheetSession)
+        )
+    }
+
+    override fun onLoadFailed(error: Throwable) {
+        fireEvent(
+            CustomerSheetEvent.LoadFailed(error)
         )
     }
 
@@ -213,6 +227,17 @@ internal class DefaultCustomerSheetEventReporter @Inject constructor(
                 cardBrand = brand,
             )
         )
+    }
+
+    override fun onAnalyticsEvent(event: AnalyticsEvent) {
+        CoroutineScope(workContext).launch {
+            analyticsRequestExecutor.executeAsync(
+                analyticsRequestFactory.createRequest(
+                    event = event,
+                    additionalParams = emptyMap(),
+                )
+            )
+        }
     }
 
     private fun fireEvent(event: CustomerSheetEvent) {

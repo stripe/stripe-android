@@ -3,7 +3,6 @@ package com.stripe.android.model
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.StripeModel
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.PaymentIntent.CaptureMethod
 import com.stripe.android.model.PaymentIntent.ConfirmationMethod
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
@@ -213,6 +212,9 @@ constructor(
     override val lastErrorMessage: String?
         get() = lastPaymentError?.message
 
+    internal val isRedacted: Boolean
+        get() = clientSecret == VALUE_REDACTED_CLIENT_SECRET
+
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     val requireCvcRecollection: Boolean
         get() = paymentMethodOptionsJsonString?.let { json ->
@@ -229,12 +231,41 @@ constructor(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun isSetupFutureUsageSet(code: PaymentMethodCode): Boolean {
-        return if (FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage.isEnabled) {
-            (isTopLevelSetupFutureUsageSet() || isLpmLevelSetupFutureUsageSet(code)) &&
-                !isPaymentMethodOptionsSetupFutureUsageNone(code)
-        } else {
-            isTopLevelSetupFutureUsageSet() || isLpmLevelSetupFutureUsageSet(code)
+        return (isTopLevelSetupFutureUsageSet() || isLpmLevelSetupFutureUsageSet(code)) &&
+            !isPaymentMethodOptionsSetupFutureUsageNone(code)
+    }
+
+    internal fun withUnredactedClientSecret(clientSecret: String): PaymentIntent {
+        if (!isRedacted) {
+            return this
         }
+
+        return PaymentIntent(
+            id = id,
+            paymentMethodTypes = paymentMethodTypes,
+            amount = amount,
+            canceledAt = canceledAt,
+            cancellationReason = cancellationReason,
+            captureMethod = captureMethod,
+            clientSecret = clientSecret,
+            confirmationMethod = confirmationMethod,
+            countryCode = countryCode,
+            created = created,
+            currency = currency,
+            description = description,
+            isLiveMode = isLiveMode,
+            paymentMethod = paymentMethod,
+            paymentMethodId = paymentMethodId,
+            receiptEmail = receiptEmail,
+            status = status,
+            setupFutureUsage = setupFutureUsage,
+            lastPaymentError = lastPaymentError,
+            shipping = shipping,
+            unactivatedPaymentMethods = unactivatedPaymentMethods,
+            linkFundingSources = linkFundingSources,
+            nextActionData = nextActionData,
+            paymentMethodOptionsJsonString = paymentMethodOptionsJsonString
+        )
     }
 
     /**
@@ -381,7 +412,7 @@ constructor(
 
     internal data class ClientSecret(internal val value: String) {
         internal val paymentIntentId: String =
-            value.split("_secret".toRegex())
+            value.split("_(scoped_)?secret".toRegex())
                 .dropLastWhile { it.isEmpty() }.toTypedArray()[0]
 
         init {
@@ -391,7 +422,7 @@ constructor(
         }
 
         internal companion object {
-            private val PATTERN = Pattern.compile("^pi_[^_]+_secret_[^_]+$")
+            private val PATTERN = Pattern.compile("^pi_[^_]+_(scoped_)?secret_[^_]+$")
 
             fun isMatch(value: String) = PATTERN.matcher(value).matches()
         }
@@ -479,5 +510,7 @@ constructor(
         internal const val NONE = "none"
         internal const val OFF_SESSION = "off_session"
         internal const val ON_SESSION = "on_session"
+
+        internal const val VALUE_REDACTED_CLIENT_SECRET = "redacted_client_secret"
     }
 }

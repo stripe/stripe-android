@@ -22,9 +22,13 @@ constructor(
     val signupMode: LinkSignupMode?,
     val fields: List<LinkSignupField>,
     val prefillEligibleFields: Set<LinkSignupField>,
+    val allowsDefaultOptIn: Boolean,
+    val linkSignUpOptInFeatureEnabled: Boolean,
+    val didAskToChangeSignupDetails: Boolean = false,
     internal val isExpanded: Boolean = false,
     internal val apiFailed: Boolean = false,
     internal val signUpState: SignUpState = SignUpState.InputtingPrimaryField,
+    internal val userHasInteracted: Boolean = false,
 ) {
 
     val isShowingPhoneFirst: Boolean
@@ -37,10 +41,20 @@ constructor(
      * Whether the view is active and the payment should be processed through Link.
      */
     val useLink: Boolean
-        get() = when (signupMode) {
-            LinkSignupMode.AlongsideSaveForFutureUse -> userInput != null && !apiFailed
-            LinkSignupMode.InsteadOfSaveForFutureUse -> isExpanded && !apiFailed
-            null -> false
+        get() {
+            if (apiFailed) {
+                return false
+            }
+
+            return when (signupMode) {
+                LinkSignupMode.AlongsideSaveForFutureUse -> userInput != null
+                LinkSignupMode.InsteadOfSaveForFutureUse -> when {
+                    linkSignUpOptInFeatureEnabled -> userInput != null && isExpanded
+                    allowsDefaultOptIn -> userInput != null
+                    else -> isExpanded
+                }
+                null -> false
+            }
         }
 
     companion object {
@@ -48,6 +62,8 @@ constructor(
         fun create(
             signupMode: LinkSignupMode,
             config: LinkConfiguration,
+            initialEmail: String? = null,
+            initialPhone: String? = null,
             isExpanded: Boolean = false,
         ): InlineSignupViewState {
             val isAlternativeFlow = signupMode == LinkSignupMode.AlongsideSaveForFutureUse
@@ -83,15 +99,42 @@ constructor(
                 }
             }
 
+            val allowsDefaultOptIn = allowsDefaultOptIn(config, signupMode)
+            val missingDataForDefaultOptIn = initialEmail.isNullOrBlank() || initialPhone.isNullOrBlank()
+
+            val signupState = if (allowsDefaultOptIn && missingDataForDefaultOptIn) {
+                SignUpState.InputtingRemainingFields
+            } else {
+                SignUpState.InputtingPrimaryField
+            }
+
             return InlineSignupViewState(
                 userInput = null,
                 merchantName = config.merchantName,
                 signupMode = signupMode,
                 fields = fields,
                 prefillEligibleFields = prefillEligibleFields,
-                isExpanded = isExpanded,
+                isExpanded = isExpanded || allowsDefaultOptIn,
+                allowsDefaultOptIn = allowsDefaultOptIn(config, signupMode),
+                linkSignUpOptInFeatureEnabled = linkSignupOptInFeatureEnabled(config, signupMode),
+                signUpState = signupState,
             )
         }
+
+        private fun allowsDefaultOptIn(
+            config: LinkConfiguration,
+            signupMode: LinkSignupMode
+        ): Boolean = config.allowDefaultOptIn &&
+            config.stripeIntent.countryCode == "US" &&
+            signupMode == LinkSignupMode.InsteadOfSaveForFutureUse
+
+        private fun linkSignupOptInFeatureEnabled(
+            config: LinkConfiguration,
+            signupMode: LinkSignupMode
+        ): Boolean = config.linkSignUpOptInFeatureEnabled &&
+            // We only allow the opt-in feature if the user has provided an email address.
+            config.customerInfo.email.isNullOrBlank().not() &&
+            signupMode == LinkSignupMode.InsteadOfSaveForFutureUse
     }
 }
 

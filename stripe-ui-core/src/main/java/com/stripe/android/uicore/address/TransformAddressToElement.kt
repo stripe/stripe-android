@@ -270,10 +270,10 @@ private fun FieldType.toElement(
                 label = label,
                 capitalization = capitalization,
                 keyboardType = keyboardType,
-                countryCode = countryCode
+                countryCode = countryCode,
+                optional = showOptionalLabel,
             ),
             overrideContentDescriptionProvider = getOverrideContentDescription(),
-            showOptionalLabel = showOptionalLabel
         )
     )
     return when (this) {
@@ -306,17 +306,20 @@ private fun FieldType.toConfig(
     label: Int,
     capitalization: KeyboardCapitalization,
     keyboardType: KeyboardType,
-    countryCode: String
+    countryCode: String,
+    optional: Boolean,
 ): TextFieldConfig {
     return when (this) {
         FieldType.PostalCode -> PostalCodeConfig(
-            label = label,
-            country = countryCode
+            label = resolvableString(label),
+            country = countryCode,
+            optional = optional,
         )
         else -> SimpleTextFieldConfig(
-            label = label,
+            label = resolvableString(label),
             capitalization = capitalization,
-            keyboard = keyboardType
+            keyboard = keyboardType,
+            optional = optional,
         )
     }
 }

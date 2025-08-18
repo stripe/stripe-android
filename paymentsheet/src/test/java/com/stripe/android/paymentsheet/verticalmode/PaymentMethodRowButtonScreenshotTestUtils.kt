@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ui.PaymentMethodIconFromResource
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
@@ -28,18 +27,16 @@ internal fun DefaultPaymentMethodRowIcon(
     )
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal fun testPaymentMethodRowButton(
     isEnabled: Boolean,
     isSelected: Boolean,
     iconContent: @Composable RowScope.() -> Unit,
-    rowStyle: PaymentSheet.Appearance.Embedded.RowStyle,
+    appearance: PaymentSheet.Appearance.Embedded,
     trailingContent: @Composable RowScope.() -> Unit,
     title: String,
     subtitle: String?,
     promoText: String?,
     shouldShowDefaultBadge: Boolean,
-    showLinkIcon: Boolean,
     paparazziRule: PaparazziRule,
 ) {
     paparazziRule.snapshot {
@@ -50,11 +47,10 @@ internal fun testPaymentMethodRowButton(
             title = title,
             subtitle = subtitle,
             promoText = promoText,
-            showLinkIcon = showLinkIcon,
             onClick = {},
             trailingContent = trailingContent,
             shouldShowDefaultBadge = shouldShowDefaultBadge,
-            style = rowStyle
+            appearance = appearance
         )
     }
 }

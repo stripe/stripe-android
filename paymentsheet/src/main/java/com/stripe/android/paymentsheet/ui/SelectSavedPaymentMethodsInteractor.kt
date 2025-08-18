@@ -192,7 +192,8 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
         val paymentSelection = when (selection) {
             is PaymentSelection.Saved,
             is PaymentSelection.Link,
-            is PaymentSelection.GooglePay -> selection
+            is PaymentSelection.GooglePay,
+            is PaymentSelection.ShopPay -> selection
             is PaymentSelection.New,
             is PaymentSelection.ExternalPaymentMethod,
             is PaymentSelection.CustomPaymentMethod,

@@ -41,9 +41,13 @@ class InlineSignupViewModelTest {
             val linkAccountManager = object : FakeLinkAccountManager() {
                 var counter = 0
 
-                override suspend fun lookupConsumer(email: String, startSession: Boolean): Result<LinkAccount?> {
+                override suspend fun lookupConsumer(
+                    email: String,
+                    startSession: Boolean,
+                    customerId: String?
+                ): Result<LinkAccount?> {
                     counter += 1
-                    return super.lookupConsumer(email, startSession)
+                    return super.lookupConsumer(email, startSession, customerId)
                 }
             }
             val viewModel = InlineSignupViewModel(
@@ -480,6 +484,39 @@ class InlineSignupViewModelTest {
             }
         }
 
+    @Test
+    fun `When signup opt-in feature enabled and toggle is checked, creates user input from billing email`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(
+                countryCode = CountryCode.US,
+                prefilledEmail = CUSTOMER_EMAIL,
+                prefilledPhone = "+16282464111",
+                linkSignUpOptInFeatureEnabled = true,
+                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+            )
+
+            linkAccountManager.lookupConsumerResult = Result.success(null)
+
+            viewModel.toggleExpanded()
+
+            // Advance past lookup debounce delay
+            advanceTimeBy(LOOKUP_DEBOUNCE_MS + 100)
+
+            val viewState = viewModel.viewState.value
+
+            assertThat(viewState.isExpanded).isTrue()
+            assertThat(viewState.linkSignUpOptInFeatureEnabled).isTrue()
+            assertThat(viewState.userInput).isEqualTo(
+                UserInput.SignUp(
+                    email = CUSTOMER_EMAIL,
+                    phone = "+16282464111",
+                    country = CountryCode.US.value,
+                    name = null,
+                    consentAction = SignUpConsentAction.SignUpOptInMobileChecked
+                )
+            )
+        }
+
     private fun createViewModel(
         countryCode: CountryCode = CountryCode.US,
         prefilledEmail: String? = null,
@@ -487,6 +524,7 @@ class InlineSignupViewModelTest {
         prefilledPhone: String? = null,
         signupMode: LinkSignupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
         initialUserInput: UserInput? = null,
+        linkSignUpOptInFeatureEnabled: Boolean = false,
     ) = InlineSignupViewModel(
         config = TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = stripeIntent(countryCode),
@@ -496,7 +534,8 @@ class InlineSignupViewModelTest {
                 name = prefilledName,
                 phone = prefilledPhone,
                 billingCountryCode = null
-            )
+            ),
+            linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
         ),
         signupMode = signupMode,
         linkAccountManager = linkAccountManager,

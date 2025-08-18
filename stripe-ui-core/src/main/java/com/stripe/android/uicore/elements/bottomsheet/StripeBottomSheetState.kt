@@ -3,7 +3,6 @@ package com.stripe.android.uicore.elements.bottomsheet
 import android.os.Build
 import androidx.annotation.RestrictTo
 import androidx.compose.animation.core.tween
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
@@ -14,7 +13,6 @@ import com.stripe.android.uicore.BuildConfig
 import kotlinx.coroutines.flow.first
 import kotlin.coroutines.cancellation.CancellationException
 
-@OptIn(ExperimentalMaterialApi::class)
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 @Composable
 fun rememberStripeBottomSheetState(
@@ -38,7 +36,6 @@ fun rememberStripeBottomSheetState(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 class StripeBottomSheetState internal constructor(
     val modalBottomSheetState: ModalBottomSheetState,

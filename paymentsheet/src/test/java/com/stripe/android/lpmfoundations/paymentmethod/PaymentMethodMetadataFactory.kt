@@ -2,9 +2,10 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
-import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
+import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -25,6 +26,7 @@ internal object PaymentMethodMetadataFactory {
         allowsDelayedPaymentMethods: Boolean = true,
         allowsPaymentMethodsRequiringShippingAddress: Boolean = false,
         allowsLinkInSavedPaymentMethods: Boolean = false,
+        availableWallets: List<WalletType> = listOf(WalletType.GooglePay),
         paymentMethodOrder: List<String> = emptyList(),
         shippingDetails: AddressDetails? = null,
         cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
@@ -35,7 +37,6 @@ internal object PaymentMethodMetadataFactory {
         isGooglePayReady: Boolean = false,
         paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         linkConfiguration: PaymentSheet.LinkConfiguration = PaymentSheet.LinkConfiguration(),
-        linkInlineConfiguration: LinkInlineConfiguration? = null,
         linkMode: LinkMode? = LinkMode.LinkPaymentMethod,
         linkState: LinkState? = null,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
@@ -46,6 +47,8 @@ internal object PaymentMethodMetadataFactory {
         financialConnectionsAvailability: FinancialConnectionsAvailability? = FinancialConnectionsAvailability.Lite,
         customerMetadataPermissions: CustomerMetadata.Permissions =
             PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS,
+        shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = SHOP_PAY_CONFIGURATION,
+        termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay> = emptyMap(),
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -53,6 +56,7 @@ internal object PaymentMethodMetadataFactory {
             allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
             allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
             allowsLinkInSavedPaymentMethods = allowsLinkInSavedPaymentMethods,
+            availableWallets = availableWallets,
             paymentMethodOrder = paymentMethodOrder,
             cbcEligibility = cbcEligibility,
             merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
@@ -69,13 +73,14 @@ internal object PaymentMethodMetadataFactory {
             displayableCustomPaymentMethods = displayableCustomPaymentMethods,
             isGooglePayReady = isGooglePayReady,
             linkConfiguration = linkConfiguration,
-            linkInlineConfiguration = linkInlineConfiguration,
             linkMode = linkMode,
             linkState = linkState,
             cardBrandFilter = cardBrandFilter,
             paymentMethodIncentive = paymentMethodIncentive,
             elementsSessionId = elementsSessionId,
-            financialConnectionsAvailability = financialConnectionsAvailability
+            financialConnectionsAvailability = financialConnectionsAvailability,
+            shopPayConfiguration = shopPayConfiguration,
+            termsDisplay = termsDisplay,
         )
     }
 

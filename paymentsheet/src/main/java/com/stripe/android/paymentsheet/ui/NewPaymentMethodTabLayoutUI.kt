@@ -4,10 +4,8 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -22,11 +20,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
 
 private object PaymentMethodsUISpacing {
-    val carouselOuterPadding = 20.dp
     val carouselInnerPadding = 12.dp
 }
 
@@ -67,24 +66,19 @@ internal fun NewPaymentMethodTabLayoutUI(
 
         LazyRow(
             state = state,
-            contentPadding = PaddingValues(horizontal = PaymentMethodsUISpacing.carouselOuterPadding),
+            contentPadding = StripeTheme.getOuterFormInsets(),
             horizontalArrangement = Arrangement.spacedBy(PaymentMethodsUISpacing.carouselInnerPadding),
             userScrollEnabled = isEnabled,
             modifier = Modifier.testTag(TEST_TAG_LIST)
         ) {
             itemsIndexed(items = paymentMethods) { index, item ->
-                val iconUrl = if (isSystemInDarkTheme() && item.darkThemeIconUrl != null) {
-                    item.darkThemeIconUrl
-                } else {
-                    item.lightThemeIconUrl
-                }
                 NewPaymentMethodTab(
                     modifier = Modifier.testTag(
                         TEST_TAG_LIST + item.code
                     ),
                     minViewWidth = viewWidth,
-                    iconRes = item.iconResource,
-                    iconUrl = iconUrl,
+                    iconRes = item.icon(),
+                    iconUrl = item.iconUrl(),
                     imageLoader = imageLoader,
                     title = item.displayName.resolve(),
                     isSelected = index == selectedIndex,
@@ -112,7 +106,7 @@ internal fun calculateViewWidth(
     maxWidth: Dp,
     numberOfPaymentMethods: Int
 ): Dp {
-    val targetWidth = maxWidth - (PaymentMethodsUISpacing.carouselOuterPadding * 2)
+    val targetWidth = maxWidth - (StripeTheme.formInsets.end + StripeTheme.formInsets.start).dp
     val minItemWidth = 90.dp
 
     val minimumCardsWidth = minItemWidth * numberOfPaymentMethods

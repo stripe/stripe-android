@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
@@ -16,17 +15,16 @@ internal object AppearanceSettingsDefinition : PlaygroundSettingDefinition<Unit>
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
     ) {
-        configurationBuilder.appearance(AppearanceStore.state)
+        configurationBuilder.appearance(AppearanceStore.state.toPaymentSheetAppearance())
     }
 
-    @ExperimentalEmbeddedPaymentElementApi
     override fun configure(
         value: Unit,
         configurationBuilder: EmbeddedPaymentElement.Configuration.Builder,
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.EmbeddedConfigurationData
     ) {
-        configurationBuilder.appearance(AppearanceStore.state)
+        configurationBuilder.appearance(AppearanceStore.state.toPaymentSheetAppearance())
     }
 
     override fun configure(
@@ -35,6 +33,15 @@ internal object AppearanceSettingsDefinition : PlaygroundSettingDefinition<Unit>
         playgroundState: PlaygroundState.Customer,
         configurationData: PlaygroundSettingDefinition.CustomerSheetConfigurationData,
     ) {
-        configurationBuilder.appearance(AppearanceStore.state)
+        configurationBuilder.appearance(AppearanceStore.state.toPaymentSheetAppearance())
+    }
+
+    override fun configure(
+        value: Unit,
+        configurationBuilder: PaymentSheet.Configuration.Builder,
+        playgroundState: PlaygroundState.SharedPaymentToken,
+        configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
+    ) {
+        configurationBuilder.appearance(AppearanceStore.state.toPaymentSheetAppearance())
     }
 }

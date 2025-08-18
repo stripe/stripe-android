@@ -1,23 +1,31 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
 import com.stripe.android.ConfirmStripeIntentParamsFactory
+import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.exception.GenericStripeException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.setupFutureUsage
+import com.stripe.android.model.updateSetupFutureUsageWithPmoSfu
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
+import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor.NextStep
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -26,7 +34,9 @@ import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DeferredIntentValidator
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.utils.hasIntentToSetup
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
@@ -65,7 +75,10 @@ internal interface IntentConfirmationInterceptor {
                 get() = DeferredIntentConfirmationType.Server
         }
 
-        data class Complete(val isForceSuccess: Boolean) : NextStep {
+        data class Complete(
+            val isForceSuccess: Boolean,
+            val completedFullPaymentFlow: Boolean = true,
+        ) : NextStep {
 
             override val deferredIntentConfirmationType: DeferredIntentConfirmationType
                 get() = if (isForceSuccess) {
@@ -138,10 +151,12 @@ internal class InvalidClientSecretException(
     """.trimIndent()
 }
 
+@OptIn(SharedPaymentTokenSessionPreview::class)
 internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     private val stripeRepository: StripeRepository,
     private val errorReporter: ErrorReporter,
     private val intentCreationCallbackProvider: Provider<CreateIntentCallback?>,
+    private val preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?>,
     @Named(ALLOWS_MANUAL_CONFIRMATION) private val allowsManualConfirmation: Boolean,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
@@ -168,11 +183,15 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                  * from the merchant through `CreateIntentCallback`. The intent passed through here is created from
                  * `PaymentSheet.Configuration` in order to populate `Payment Element` data.
                  */
-                handleDeferredIntent(
+                handleDeferred(
                     intentConfiguration = initializationMode.intentConfiguration,
                     shippingValues = shippingValues,
                     paymentMethodCreateParams = paymentMethodCreateParams,
-                    paymentMethodOptionsParams = paymentMethodOptionsParams,
+                    paymentMethodOptionsParams = updatePaymentMethodOptionsParams(
+                        code = paymentMethodCreateParams.typeCode,
+                        intentConfiguration = initializationMode.intentConfiguration,
+                        paymentMethodOptionsParams = paymentMethodOptionsParams
+                    ),
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     customerRequestedSave = customerRequestedSave,
                 )
@@ -211,14 +230,21 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     ): NextStep {
         return when (initializationMode) {
             is PaymentElementLoader.InitializationMode.DeferredIntent -> {
-                val offSession = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
-                handleDeferredIntent(
+                val updatedPaymentMethodOptionsParams = updatePaymentMethodOptionsParams(
+                    code = paymentMethod.type?.code,
+                    intentConfiguration = initializationMode.intentConfiguration,
+                    paymentMethodOptionsParams = paymentMethodOptionsParams
+                )
+                handleDeferred(
                     intentConfiguration = initializationMode.intentConfiguration,
                     paymentMethod = paymentMethod,
-                    paymentMethodOptionsParams = paymentMethodOptionsParams,
+                    paymentMethodOptionsParams = updatedPaymentMethodOptionsParams,
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     shippingValues = shippingValues,
-                    shouldSavePaymentMethod = paymentMethodOptionsParams?.setupFutureUsage() == offSession,
+                    shouldSavePaymentMethod = shouldSavePaymentMethod(
+                        paymentMethodOptionsParams = updatedPaymentMethodOptionsParams,
+                        intentConfiguration = initializationMode.intentConfiguration
+                    ),
                 )
             }
 
@@ -231,6 +257,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     isDeferred = false,
+                    intentConfigSetupFutureUsage = null
                 )
             }
 
@@ -243,12 +270,13 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     isDeferred = false,
+                    intentConfigSetupFutureUsage = null
                 )
             }
         }
     }
 
-    private suspend fun handleDeferredIntent(
+    private suspend fun handleDeferred(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
@@ -270,22 +298,49 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
 
         return createPaymentMethod(params).fold(
             onSuccess = { paymentMethod ->
-                handleDeferredIntent(
+                handleDeferred(
                     intentConfiguration = intentConfiguration,
                     paymentMethod = paymentMethod,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     shippingValues = shippingValues,
-                    shouldSavePaymentMethod = customerRequestedSave,
+                    shouldSavePaymentMethod = customerRequestedSave || shouldSavePaymentMethod(
+                        paymentMethodOptionsParams = paymentMethodOptionsParams,
+                        intentConfiguration = intentConfiguration
+                    ),
                 )
             },
             onFailure = { error ->
                 NextStep.Fail(
                     cause = error,
-                    message = resolvableString(GENERIC_STRIPE_MESSAGE),
+                    message = error.stripeErrorMessage(),
                 )
             }
         )
+    }
+
+    private suspend fun handleDeferred(
+        intentConfiguration: PaymentSheet.IntentConfiguration,
+        paymentMethod: PaymentMethod,
+        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+        paymentMethodExtraParams: PaymentMethodExtraParams?,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        shouldSavePaymentMethod: Boolean,
+    ): NextStep {
+        return when (intentConfiguration.intentBehavior) {
+            is PaymentSheet.IntentConfiguration.IntentBehavior.Default -> handleDeferredIntent(
+                intentConfiguration = intentConfiguration,
+                paymentMethod = paymentMethod,
+                paymentMethodOptionsParams = paymentMethodOptionsParams,
+                paymentMethodExtraParams = paymentMethodExtraParams,
+                shippingValues = shippingValues,
+                shouldSavePaymentMethod = shouldSavePaymentMethod,
+            )
+            is PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken -> handlePreparePaymentMethod(
+                paymentMethod = paymentMethod,
+                shippingValues = shippingValues,
+            )
+        }
     }
 
     private suspend fun handleDeferredIntent(
@@ -327,6 +382,63 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         }
     }
 
+    private suspend fun handlePreparePaymentMethod(
+        paymentMethod: PaymentMethod,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?,
+    ): NextStep {
+        runCatching {
+            stripeRepository.createSavedPaymentMethodRadarSession(
+                paymentMethodId = paymentMethod.id
+                    ?: throw GenericStripeException(
+                        cause = IllegalStateException(
+                            "No payment method ID was found for provided 'PaymentMethod' object!"
+                        ),
+                        analyticsValue = "noPaymentMethodId"
+                    ),
+                requestOptions = requestOptions,
+            ).getOrThrow()
+        }.onFailure {
+            errorReporter.report(
+                ErrorReporter.ExpectedErrorEvent.SAVED_PAYMENT_METHOD_RADAR_SESSION_FAILURE,
+                stripeException = StripeException.create(it),
+            )
+        }
+
+        return when (val handler = waitForPreparePaymentMethodHandler()) {
+            is PreparePaymentMethodHandler -> {
+                try {
+                    handler.onPreparePaymentMethod(
+                        paymentMethod = paymentMethod,
+                        shippingAddress = shippingValues?.toAddressDetails(),
+                    )
+
+                    NextStep.Complete(isForceSuccess = true, completedFullPaymentFlow = false)
+                } catch (exception: Exception) {
+                    NextStep.Fail(
+                        cause = exception,
+                        message = exception.errorMessage,
+                    )
+                }
+            }
+
+            else -> {
+                val error = "${PreparePaymentMethodHandler::class.java.simpleName} must be implemented " +
+                    "when using IntentConfiguration with shared payment tokens!"
+
+                errorReporter.report(ErrorReporter.ExpectedErrorEvent.PREPARE_PAYMENT_METHOD_HANDLER_NULL)
+
+                NextStep.Fail(
+                    cause = IllegalStateException(error),
+                    message = if (requestOptions.apiKeyIsLiveMode) {
+                        PaymentsCoreR.string.stripe_internal_error.resolvableString
+                    } else {
+                        error.resolvableString
+                    }
+                )
+            }
+        }
+    }
+
     private suspend fun createPaymentMethod(
         params: PaymentMethodCreateParams,
     ): Result<PaymentMethod> {
@@ -338,11 +450,11 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
 
     private suspend fun waitForIntentCallback(): CreateIntentCallback? {
         return retrieveCallback() ?: run {
-            val callback = withTimeoutOrNull(INTENT_CALLBACK_FETCH_TIMEOUT.seconds) {
+            val callback = withTimeoutOrNull(PROVIDER_FETCH_TIMEOUT.seconds) {
                 var intentCallback: CreateIntentCallback? = null
 
                 while (intentCallback == null) {
-                    delay(INTENT_CALLBACK_FETCH_INTERVAL)
+                    delay(PROVIDER_FETCH_INTERVAL)
                     intentCallback = retrieveCallback()
                 }
 
@@ -357,8 +469,33 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         }
     }
 
+    private suspend fun waitForPreparePaymentMethodHandler(): PreparePaymentMethodHandler? {
+        return retrievePreparePaymentMethodHandler() ?: run {
+            val handler = withTimeoutOrNull(PROVIDER_FETCH_TIMEOUT.seconds) {
+                var handler: PreparePaymentMethodHandler? = null
+
+                while (handler == null) {
+                    delay(PROVIDER_FETCH_INTERVAL)
+                    handler = retrievePreparePaymentMethodHandler()
+                }
+
+                handler
+            }
+
+            if (handler != null) {
+                errorReporter.report(ErrorReporter.SuccessEvent.FOUND_PREPARE_PAYMENT_METHOD_HANDLER_WHILE_POLLING)
+            }
+
+            handler
+        }
+    }
+
     private fun retrieveCallback(): CreateIntentCallback? {
         return intentCreationCallbackProvider.get()
+    }
+
+    private fun retrievePreparePaymentMethodHandler(): PreparePaymentMethodHandler? {
+        return preparePaymentMethodHandlerProvider.get()
     }
 
     private suspend fun handleDeferredIntentCreationFromPaymentMethod(
@@ -392,10 +529,11 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             }
 
             is CreateIntentResult.Failure -> {
+                val exception = CreateIntentCallbackFailureException(result.cause)
                 NextStep.Fail(
-                    cause = CreateIntentCallbackFailureException(result.cause),
+                    cause = exception,
                     message = result.displayMessage?.resolvableString
-                        ?: resolvableString(GENERIC_STRIPE_MESSAGE),
+                        ?: exception.stripeErrorMessage(),
                 )
             }
         }
@@ -416,7 +554,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             } else if (intent.requiresAction()) {
                 createHandleNextActionStep(clientSecret, intent, paymentMethod)
             } else {
-                DeferredIntentValidator.validate(intent, intentConfiguration, allowsManualConfirmation)
+                DeferredIntentValidator.validate(intent, intentConfiguration, allowsManualConfirmation, paymentMethod)
                 createConfirmStep(
                     clientSecret,
                     intent,
@@ -425,12 +563,14 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     isDeferred = true,
+                    intentConfigSetupFutureUsage = intentConfiguration
+                        .mode.setupFutureUse?.toConfirmParamsSetupFutureUsage()
                 )
             }
         }.getOrElse { error ->
             NextStep.Fail(
                 cause = error,
-                message = resolvableString(GENERIC_STRIPE_MESSAGE),
+                message = error.stripeErrorMessage(),
             )
         }
     }
@@ -466,6 +606,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams?,
         isDeferred: Boolean,
+        intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?
     ): NextStep {
         val factory = ConfirmStripeIntentParamsFactory.createFactory(
             clientSecret = clientSecret,
@@ -481,6 +622,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             paymentMethod = paymentMethod,
             optionsParams = paymentMethodOptionsParams,
             extraParams = paymentMethodExtraParams,
+            intentConfigSetupFutureUsage = intentConfigSetupFutureUsage
         )
         return NextStep.Confirm(
             confirmParams = confirmParams,
@@ -541,6 +683,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         val setAsDefaultChecked = when (paymentMethodExtraParams) {
             is PaymentMethodExtraParams.Card -> paymentMethodExtraParams.setAsDefault == true
             is PaymentMethodExtraParams.USBankAccount -> paymentMethodExtraParams.setAsDefault == true
+            is PaymentMethodExtraParams.Link -> paymentMethodExtraParams.setAsDefault == true
+            is PaymentMethodExtraParams.SepaDebit -> paymentMethodExtraParams.setAsDefault == true
             is PaymentMethodExtraParams.BacsDebit, null -> false
         }
 
@@ -553,9 +697,76 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         }
     }
 
+    private fun ConfirmPaymentIntentParams.Shipping.toAddressDetails(): AddressDetails {
+        return AddressDetails(
+            name = getName(),
+            phoneNumber = getPhone(),
+            address = getAddress().run {
+                PaymentSheet.Address(
+                    line1 = line1,
+                    line2 = line2,
+                    city = city,
+                    country = country,
+                    postalCode = postalCode,
+                    state = state,
+                )
+            }
+        )
+    }
+
+    private fun PaymentSheet.IntentConfiguration.SetupFutureUse.toConfirmParamsSetupFutureUsage():
+        ConfirmPaymentIntentParams.SetupFutureUsage {
+        return when (this) {
+            PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession -> {
+                ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            }
+            PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession -> {
+                ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
+            }
+            PaymentSheet.IntentConfiguration.SetupFutureUse.None -> {
+                ConfirmPaymentIntentParams.SetupFutureUsage.None
+            }
+        }
+    }
+
+    /**
+     * [PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions] does not require setting PMO SFU on the
+     * intent. If PMO SFU value exists in the configuration, set it in the PaymentMethodOptionsParams.
+     */
+    @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
+    private fun updatePaymentMethodOptionsParams(
+        code: PaymentMethodCode?,
+        intentConfiguration: PaymentSheet.IntentConfiguration,
+        paymentMethodOptionsParams: PaymentMethodOptionsParams?
+    ): PaymentMethodOptionsParams? {
+        val paymentMethodType = PaymentMethod.Type.fromCode(code) ?: return paymentMethodOptionsParams
+        return (intentConfiguration.mode as? PaymentSheet.IntentConfiguration.Mode.Payment)
+            ?.paymentMethodOptions
+            ?.setupFutureUsageValues?.let { values ->
+                values[paymentMethodType]?.toConfirmParamsSetupFutureUsage()?.let { configPmoSfu ->
+                    if (paymentMethodOptionsParams != null) {
+                        paymentMethodOptionsParams.updateSetupFutureUsageWithPmoSfu(configPmoSfu)
+                    } else {
+                        PaymentMethodOptionsParams.SetupFutureUsage(
+                            paymentMethodType = paymentMethodType,
+                            setupFutureUsage = configPmoSfu
+                        )
+                    }
+                }
+            } ?: paymentMethodOptionsParams
+    }
+
+    private fun shouldSavePaymentMethod(
+        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+        intentConfiguration: PaymentSheet.IntentConfiguration
+    ): Boolean {
+        return paymentMethodOptionsParams?.setupFutureUsage()?.hasIntentToSetup() == true ||
+            (intentConfiguration.mode as? PaymentSheet.IntentConfiguration.Mode.Payment)
+                ?.setupFutureUse?.toConfirmParamsSetupFutureUsage()?.hasIntentToSetup() == true
+    }
+
     private companion object {
-        private const val INTENT_CALLBACK_FETCH_TIMEOUT = 2
-        private const val INTENT_CALLBACK_FETCH_INTERVAL = 5L
-        private val GENERIC_STRIPE_MESSAGE = R.string.stripe_something_went_wrong
+        private const val PROVIDER_FETCH_TIMEOUT = 2
+        private const val PROVIDER_FETCH_INTERVAL = 5L
     }
 }

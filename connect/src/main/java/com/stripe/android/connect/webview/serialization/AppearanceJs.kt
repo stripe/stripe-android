@@ -1,7 +1,6 @@
 package com.stripe.android.connect.webview.serialization
 
 import androidx.annotation.ColorInt
-import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.TextTransform
 import kotlinx.serialization.Serializable
@@ -12,7 +11,6 @@ internal data class AppearanceJs(
     val variables: AppearanceVariablesJs,
 )
 
-@OptIn(PrivateBetaConnectSDK::class)
 @Serializable
 internal data class AppearanceVariablesJs(
     /**
@@ -373,7 +371,6 @@ private fun Float?.toPx(): String? {
  * Unscaled floats are sent without conversion since browsers will appropriately
  * scale `px` values.
  */
-@OptIn(PrivateBetaConnectSDK::class)
 @Suppress("LongMethod")
 internal fun Appearance.toJs(): AppearanceJs {
     return AppearanceJs(

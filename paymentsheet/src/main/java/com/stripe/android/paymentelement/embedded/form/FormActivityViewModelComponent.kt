@@ -15,7 +15,6 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
@@ -48,7 +47,6 @@ import javax.inject.Singleton
     ]
 )
 @Singleton
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal interface FormActivityViewModelComponent {
     val viewModel: FormActivityViewModel
     val selectionHolder: EmbeddedSelectionHolder

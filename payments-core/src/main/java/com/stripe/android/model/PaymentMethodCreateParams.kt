@@ -37,8 +37,10 @@ constructor(
     private val link: Link? = null,
     private val cashAppPay: CashAppPay? = null,
     private val swish: Swish? = null,
+    private val shopPay: ShopPay? = null,
     val billingDetails: PaymentMethod.BillingDetails? = null,
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+    private val radarOptions: RadarOptions? = null,
     private val metadata: Map<String, String>? = null,
     private val productUsage: Set<String> = emptySet(),
 
@@ -70,8 +72,10 @@ constructor(
         link: Link? = null,
         cashAppPay: CashAppPay? = null,
         swish: Swish? = null,
+        shopPay: ShopPay? = null,
         billingDetails: PaymentMethod.BillingDetails? = null,
         allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        radarOptions: RadarOptions? = null,
         metadata: Map<String, String>? = null,
         productUsage: Set<String> = emptySet(),
         overrideParamMap: Map<String, @RawValue Any>? = null
@@ -91,8 +95,10 @@ constructor(
         link,
         cashAppPay,
         swish,
+        shopPay,
         billingDetails,
         allowRedisplay,
+        radarOptions,
         metadata,
         productUsage,
         overrideParamMap
@@ -267,6 +273,17 @@ constructor(
         metadata = metadata,
     )
 
+    private constructor(
+        shopPay: ShopPay,
+        billingDetails: PaymentMethod.BillingDetails?,
+        metadata: Map<String, String>?,
+    ) : this(
+        type = PaymentMethod.Type.ShopPay,
+        shopPay = shopPay,
+        billingDetails = billingDetails,
+        metadata = metadata,
+    )
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun requiresMandate(): Boolean {
         return requiresMandate
@@ -290,6 +307,10 @@ constructor(
             allowRedisplay?.let {
                 mapOf(PARAM_ALLOW_REDISPLAY to allowRedisplay.value)
             }.orEmpty()
+        ).plus(
+            radarOptions?.let {
+                mapOf(PARAM_RADAR_OPTIONS to it.toParamMap())
+            }.orEmpty()
         )
     }
 
@@ -307,6 +328,7 @@ constructor(
                 PaymentMethod.Type.Netbanking.code -> netbanking?.toParamMap()
                 PaymentMethod.Type.USBankAccount.code -> usBankAccount?.toParamMap()
                 PaymentMethod.Type.Link.code -> link?.toParamMap()
+                PaymentMethod.Type.ShopPay.code -> shopPay?.toParamMap()
                 else -> null
             }.takeUnless { it.isNullOrEmpty() }?.let {
                 mapOf(code to it)
@@ -692,11 +714,27 @@ constructor(
         }
     }
 
+    @Parcelize
+    data class ShopPay(
+        internal var externalSourceId: String
+    ) : StripeParamsModel, Parcelable {
+        override fun toParamMap(): Map<String, Any> {
+            return mapOf(
+                PARAM_EXTERNAL_SOURCE_ID to externalSourceId
+            )
+        }
+
+        private companion object {
+            private const val PARAM_EXTERNAL_SOURCE_ID = "external_source_id"
+        }
+    }
+
     companion object {
         private const val PARAM_TYPE = "type"
         private const val PARAM_BILLING_DETAILS = "billing_details"
         private const val PARAM_ALLOW_REDISPLAY = "allow_redisplay"
         private const val PARAM_METADATA = "metadata"
+        private const val PARAM_RADAR_OPTIONS = "radar_options"
 
         /**
          * @return params for creating a [PaymentMethod.Type.Card] payment method
@@ -1123,7 +1161,6 @@ constructor(
                 billingDetails = billingDetails,
                 metadata = metadata,
                 allowRedisplay = allowRedisplay,
-
             )
         }
 
@@ -1308,15 +1345,19 @@ constructor(
         fun createLink(
             paymentDetailsId: String,
             consumerSessionClientSecret: String,
-            extraParams: Map<String, @RawValue Any>? = null
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            extraParams: Map<String, @RawValue Any>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.Link,
                 link = Link(
-                    paymentDetailsId,
-                    consumerSessionClientSecret,
-                    extraParams
-                )
+                    paymentDetailsId = paymentDetailsId,
+                    consumerSessionClientSecret = consumerSessionClientSecret,
+                    extraParams = extraParams
+                ),
+                allowRedisplay = allowRedisplay,
+                billingDetails = billingDetails,
             )
         }
 
@@ -1332,6 +1373,18 @@ constructor(
                 overrideParamMap = emptyMap(),
                 allowRedisplay = allowRedisplay,
                 productUsage = productUsage,
+            )
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+        fun createShopPay(
+            externalSourceId: String,
+            billingDetails: PaymentMethod.BillingDetails? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.ShopPay,
+                shopPay = ShopPay(externalSourceId),
+                billingDetails = billingDetails,
             )
         }
 

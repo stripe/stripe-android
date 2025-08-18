@@ -40,7 +40,7 @@ class FinancialConnectionsWebviewExampleActivity : AppCompatActivity() {
             settings.loadWithOverviewMode = true
             webViewClient = buildWebviewClient()
             webChromeClient = buildWebChromeClient()
-            loadUrl(GLITCH_EXAMPLE_URL)
+            loadUrl(BACKEND_EXAMPLE_URL)
         }
     }
 
@@ -52,9 +52,9 @@ class FinancialConnectionsWebviewExampleActivity : AppCompatActivity() {
             Log.d("Webview", "url loading: ${webResourceRequest.url}")
             val url = webResourceRequest.url.toString()
             return when {
-                // Glitch-only: instance is idle it'll wake up and redirect when ready. This prevents
+                // If the instance is idle it'll wake up and redirect when ready. This prevents
                 // the redirect from opening in an external browser.
-                url.startsWith(GLITCH_EXAMPLE_URL) -> false
+                url.startsWith(BACKEND_EXAMPLE_URL) -> false
                 else -> {
                     CustomTabsIntent.Builder()
                         .build()
@@ -90,4 +90,4 @@ class FinancialConnectionsWebviewExampleActivity : AppCompatActivity() {
     }
 }
 
-private const val GLITCH_EXAMPLE_URL = "https://connections-webview-example.glitch.me/"
+private const val BACKEND_EXAMPLE_URL = "https://connections-webview-example.stripedemos.com"

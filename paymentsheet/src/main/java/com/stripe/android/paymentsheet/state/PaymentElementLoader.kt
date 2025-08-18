@@ -2,12 +2,15 @@ package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
 import com.stripe.android.DefaultCardBrandFilter
-import com.stripe.android.common.analytics.experiment.LogLinkGlobalHoldbackExposure
+import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.common.validation.isSupportedWithBillingConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.utils.FeatureFlag
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -15,6 +18,8 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.LinkAppearance
+import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
@@ -24,10 +29,11 @@ import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata.Permissi
 import com.stripe.android.lpmfoundations.paymentmethod.IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
-import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.toPaymentSheetSaveConsentBehavior
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
@@ -46,9 +52,11 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
+import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -63,9 +71,13 @@ internal interface PaymentElementLoader {
     suspend fun load(
         initializationMode: InitializationMode,
         configuration: CommonConfiguration,
-        isReloadingAfterProcessDeath: Boolean = false,
-        initializedViaCompose: Boolean,
+        metadata: Metadata,
     ): Result<State>
+
+    data class Metadata(
+        val isReloadingAfterProcessDeath: Boolean = false,
+        val initializedViaCompose: Boolean,
+    )
 
     sealed class InitializationMode : Parcelable {
         abstract fun validate()
@@ -96,7 +108,13 @@ internal interface PaymentElementLoader {
         ) : InitializationMode() {
 
             override fun validate() {
-                // Nothing to do here
+                (intentConfiguration.mode as? IntentConfiguration.Mode.Payment)?.let {
+                    if (it.amount <= 0) {
+                        throw IllegalArgumentException(
+                            "Payment IntentConfiguration requires a positive amount."
+                        )
+                    }
+                }
             }
         }
     }
@@ -135,22 +153,22 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     @IOContext private val workContext: CoroutineContext,
     private val retrieveCustomerEmail: RetrieveCustomerEmail,
     private val accountStatusProvider: LinkAccountStatusProvider,
-    private val logLinkGlobalHoldbackExposure: LogLinkGlobalHoldbackExposure,
+    private val logLinkHoldbackExperiment: LogLinkHoldbackExperiment,
     private val linkStore: LinkStore,
     private val linkGateFactory: LinkGate.Factory,
     private val externalPaymentMethodsRepository: ExternalPaymentMethodsRepository,
     private val userFacingLogger: UserFacingLogger,
-    private val cvcRecollectionHandler: CvcRecollectionHandler
+    private val cvcRecollectionHandler: CvcRecollectionHandler,
+    private val integrityRequestManager: IntegrityRequestManager,
 ) : PaymentElementLoader {
 
     @Suppress("LongMethod")
     override suspend fun load(
         initializationMode: PaymentElementLoader.InitializationMode,
         configuration: CommonConfiguration,
-        isReloadingAfterProcessDeath: Boolean,
-        initializedViaCompose: Boolean,
+        metadata: PaymentElementLoader.Metadata,
     ): Result<PaymentElementLoader.State> = workContext.runCatching(::reportFailedLoad) {
-        eventReporter.onLoadStarted(initializedViaCompose)
+        eventReporter.onLoadStarted(metadata.initializedViaCompose)
 
         val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
         val elementsSession = retrieveElementsSession(
@@ -160,6 +178,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             externalPaymentMethods = configuration.externalPaymentMethods,
             savedPaymentMethodSelectionId = savedPaymentMethodSelection?.id,
         ).getOrThrow()
+
+        // Preemptively prepare Integrity asynchronously if needed, as warm up can take
+        // a few seconds.
+        if (elementsSession.shouldWarmUpIntegrity()) {
+            launch { integrityRequestManager.prepare() }
+        }
 
         val customerInfo = createCustomerInfo(
             configuration = configuration,
@@ -181,11 +205,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 configuration = configuration,
                 elementsSession = elementsSession,
                 customer = customerInfo,
-                initializationMode = initializationMode
+                initializationMode = initializationMode,
+                linkAppearance = configuration.linkAppearance
             )
         }
 
-        val metadata = async {
+        val paymentMethodMetadata = async {
             createPaymentMethodMetadata(
                 configuration = configuration,
                 elementsSession = elementsSession,
@@ -197,8 +222,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         val customer = async {
             createCustomerState(
+                configuration = configuration,
                 customerInfo = customerInfo,
-                metadata = metadata.await(),
+                metadata = paymentMethodMetadata.await(),
                 savedSelection = savedSelection,
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
             )
@@ -207,18 +233,19 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val initialPaymentSelection = async {
             retrieveInitialPaymentSelection(
                 savedSelection = savedSelection,
-                metadata = metadata.await(),
+                metadata = paymentMethodMetadata.await(),
                 customer = customer.await(),
                 isGooglePayReady = isGooglePayReady,
+                isUsingWalletButtons = configuration.walletButtons?.willDisplayExternally ?: false
             )
         }
 
         val stripeIntent = elementsSession.stripeIntent
-        val paymentMethodMetadata = metadata.await()
+        val pmMetadata = paymentMethodMetadata.await()
 
         warnUnactivatedIfNeeded(stripeIntent)
 
-        if (!supportsIntent(paymentMethodMetadata)) {
+        if (!supportsIntent(pmMetadata)) {
             val requested = stripeIntent.paymentMethodTypes.joinToString(separator = ", ")
             throw PaymentSheetLoadingException.NoPaymentMethodTypesAvailable(requested)
         }
@@ -228,10 +255,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             customer = customer.await(),
             paymentSelection = initialPaymentSelection.await(),
             validationError = stripeIntent.validate(),
-            paymentMethodMetadata = paymentMethodMetadata,
+            paymentMethodMetadata = pmMetadata,
         )
 
-        logLinkGlobalHoldbackExposure(
+        logLinkExperimentExposures(
             elementsSession = elementsSession,
             state = state
         )
@@ -239,15 +266,41 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         reportSuccessfulLoad(
             elementsSession = elementsSession,
             state = state,
-            isReloadingAfterProcessDeath = isReloadingAfterProcessDeath,
+            isReloadingAfterProcessDeath = metadata.isReloadingAfterProcessDeath,
             isGooglePaySupported = isGooglePaySupported(),
             linkDisplay = configuration.link.display,
             initializationMode = initializationMode,
             customerInfo = customerInfo,
-            paymentMethodMetadata = paymentMethodMetadata
+            paymentMethodMetadata = pmMetadata,
         )
 
         return@runCatching state
+    }
+
+    private fun ElementsSession.shouldWarmUpIntegrity(): Boolean = when {
+        stripeIntent.isLiveMode -> useAttestationEndpointsForLink
+        else -> when (FeatureFlags.nativeLinkAttestationEnabled.value) {
+            FeatureFlag.Flag.Disabled -> false
+            FeatureFlag.Flag.Enabled -> true
+            FeatureFlag.Flag.NotSet -> useAttestationEndpointsForLink
+        }
+    }
+
+    private fun logLinkExperimentExposures(
+        elementsSession: ElementsSession,
+        state: PaymentElementLoader.State
+    ) {
+        logLinkHoldbackExperiment(
+            experimentAssignment = ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK,
+            elementsSession = elementsSession,
+            state = state
+        )
+
+        logLinkHoldbackExperiment(
+            elementsSession = elementsSession,
+            state = state,
+            experimentAssignment = ElementsSession.ExperimentAssignment.LINK_AB_TEST
+        )
     }
 
     private suspend fun retrieveElementsSession(
@@ -299,7 +352,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = isGooglePayReady,
-            linkInlineConfiguration = createLinkInlineConfiguration(linkState),
             linkState = linkState,
             customerMetadata = getCustomerMetadata(
                 configuration = configuration,
@@ -375,6 +427,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     }
 
     private suspend fun createCustomerState(
+        configuration: CommonConfiguration,
         customerInfo: CustomerInfo?,
         metadata: PaymentMethodMetadata,
         savedSelection: Deferred<SavedSelection>,
@@ -407,10 +460,15 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     .withDefaultPaymentMethodOrLastUsedPaymentMethodFirst(
                         savedSelection = savedSelection,
                         defaultPaymentMethodId = state.defaultPaymentMethodId,
-                        isPaymentMethodSetAsDefaultEnabled =
-                        metadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
-                            ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
-                    ).filter { cardBrandFilter.isAccepted(it) },
+                        isPaymentMethodSetAsDefaultEnabled = metadata.customerMetadata
+                            ?.isPaymentMethodSetAsDefaultEnabled
+                            ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
+                    ).filter { paymentMethod ->
+                        cardBrandFilter.isAccepted(paymentMethod) &&
+                            paymentMethod.isSupportedWithBillingConfig(
+                                configuration.billingDetailsCollectionConfiguration
+                            )
+                    },
             )
         }
     }
@@ -443,14 +501,16 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         elementsSession: ElementsSession,
         configuration: CommonConfiguration,
         customer: CustomerInfo?,
-        initializationMode: PaymentElementLoader.InitializationMode
+        initializationMode: PaymentElementLoader.InitializationMode,
+        linkAppearance: LinkAppearance?
     ): LinkState? {
         val linkConfig =
             createLinkConfiguration(
                 configuration = configuration,
                 customer = customer,
                 elementsSession = elementsSession,
-                initializationMode = initializationMode
+                initializationMode = initializationMode,
+                linkAppearance = linkAppearance
             ) ?: return null
         return loadLinkState(
             configuration = configuration,
@@ -468,16 +528,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     ): LinkState {
         val accountStatus = accountStatusProvider(linkConfiguration)
 
-        val loginState = when (accountStatus) {
-            AccountStatus.Verified ->
-                LinkState.LoginState.LoggedIn
-            AccountStatus.NeedsVerification,
-            AccountStatus.VerificationStarted ->
-                LinkState.LoginState.NeedsVerification
-            AccountStatus.SignedOut,
-            AccountStatus.Error ->
-                LinkState.LoginState.LoggedOut
-        }
+        val loginState = accountStatus.toLoginState()
 
         val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
             code = PaymentMethod.Type.Card.code,
@@ -486,13 +537,19 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             hasCustomerConfiguration = configuration.customer != null,
         )
         val hasUsedLink = linkStore.hasUsedLink()
+        val signupToggleEnabled = elementsSession.linkSignUpOptInFeatureEnabled
 
-        val linkSignupMode = if (hasUsedLink || linkSignUpDisabled) {
-            null
-        } else if (isSaveForFutureUseValueChangeable) {
-            LinkSignupMode.AlongsideSaveForFutureUse
-        } else {
-            LinkSignupMode.InsteadOfSaveForFutureUse
+        val linkSignupMode = when {
+            // If signup toggle enabled, we show a future usage + link combined toggle
+            signupToggleEnabled && !linkConfiguration.customerInfo.email.isNullOrBlank() -> {
+                LinkSignupMode.InsteadOfSaveForFutureUse
+            }
+            // If inline signup is disabled or user has used Link, we don't show inline signup
+            linkSignUpDisabled || hasUsedLink -> null
+            // If inline signup and save for future use, we show it alongside save for future use
+            isSaveForFutureUseValueChangeable -> LinkSignupMode.AlongsideSaveForFutureUse
+            // If inline signup and save for future usage is not displayed, only show link signup
+            else -> LinkSignupMode.InsteadOfSaveForFutureUse
         }
 
         return LinkState(
@@ -509,16 +566,15 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         )
     }
 
+    @Suppress("LongMethod")
     private suspend fun createLinkConfiguration(
         configuration: CommonConfiguration,
         customer: CustomerInfo?,
         elementsSession: ElementsSession,
-        initializationMode: PaymentElementLoader.InitializationMode
+        initializationMode: PaymentElementLoader.InitializationMode,
+        linkAppearance: LinkAppearance?,
     ): LinkConfiguration? {
-        if (!configuration.link.shouldDisplay ||
-            configuration.billingDetailsCollectionConfiguration.collectsAnything ||
-            !elementsSession.isLinkEnabled
-        ) {
+        if (!configuration.link.shouldDisplay || !elementsSession.isLinkEnabled) {
             return null
         }
 
@@ -569,12 +625,27 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             passthroughModeEnabled = elementsSession.linkPassthroughModeEnabled,
             cardBrandChoice = cardBrandChoice,
             cardBrandFilter = cardBrandFilter,
+            financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = elementsSession),
             flags = elementsSession.linkFlags,
             useAttestationEndpointsForLink = elementsSession.useAttestationEndpointsForLink,
             suppress2faModal = elementsSession.suppressLink2faModal,
+            disableRuxInFlowController = elementsSession.disableRuxInFlowController,
+            enableDisplayableDefaultValuesInEce = elementsSession.linkEnableDisplayableDefaultValuesInEce,
+            linkSignUpOptInFeatureEnabled = elementsSession.linkSignUpOptInFeatureEnabled,
+            linkSignUpOptInInitialValue = elementsSession.linkSignUpOptInInitialValue,
             elementsSessionId = elementsSession.elementsSessionId,
             initializationMode = initializationMode,
             linkMode = elementsSession.linkSettings?.linkMode,
+            billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
+            defaultBillingDetails = configuration.defaultBillingDetails,
+            allowDefaultOptIn = elementsSession.allowLinkDefaultOptIn,
+            googlePlacesApiKey = configuration.googlePlacesApiKey,
+            collectMissingBillingDetailsForExistingPaymentMethods =
+            configuration.link.collectMissingBillingDetailsForExistingPaymentMethods,
+            allowUserEmailEdits = configuration.link.allowUserEmailEdits,
+            skipWalletInFlowController = elementsSession.linkMobileSkipWalletInFlowController,
+            customerId = elementsSession.customer?.session?.customerId,
+            linkAppearance = linkAppearance
         )
 
         // CBF isn't currently supported in the web flow.
@@ -635,16 +706,21 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         metadata: PaymentMethodMetadata,
         customer: CustomerState?,
         isGooglePayReady: Boolean,
+        isUsingWalletButtons: Boolean,
     ): PaymentSelection? {
         val isDefaultPaymentMethodEnabled = metadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled ?: false
         val primaryPaymentSelection = if (isDefaultPaymentMethodEnabled) {
             customer?.paymentMethods?.firstOrNull {
-                it.id == customer.defaultPaymentMethodId
+                customer.defaultPaymentMethodId != null && it.id == customer.defaultPaymentMethodId
             }?.toPaymentSelection()
         } else {
             when (val selection = savedSelection.await()) {
-                is SavedSelection.GooglePay -> PaymentSelection.GooglePay
-                is SavedSelection.Link -> PaymentSelection.Link()
+                is SavedSelection.GooglePay -> PaymentSelection.GooglePay.takeIf {
+                    !isUsingWalletButtons && isGooglePayReady
+                }
+                is SavedSelection.Link -> PaymentSelection.Link().takeIf {
+                    !isUsingWalletButtons
+                }
                 is SavedSelection.PaymentMethod -> {
                     customer?.paymentMethods?.find { it.id == selection.id }?.toPaymentSelection()
                 }
@@ -654,7 +730,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         return primaryPaymentSelection
             ?: customer?.paymentMethods?.firstOrNull()?.toPaymentSelection()
-            ?: PaymentSelection.GooglePay.takeIf { isGooglePayReady }
+            ?: PaymentSelection.GooglePay.takeIf {
+                !isUsingWalletButtons && isGooglePayReady
+            }
     }
 
     private suspend fun retrieveSavedSelection(
@@ -704,17 +782,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             isGooglePayAvailable = isGooglePayReady,
             isLinkAvailable = isLinkAvailable,
         )
-    }
-
-    private fun createLinkInlineConfiguration(state: LinkState?): LinkInlineConfiguration? {
-        return state?.run {
-            signupMode?.let { linkSignupMode ->
-                LinkInlineConfiguration(
-                    linkConfiguration = configuration,
-                    signupMode = linkSignupMode,
-                )
-            }
-        }
     }
 
     private fun warnUnactivatedIfNeeded(stripeIntent: StripeIntent) {
@@ -783,7 +850,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     initializationMode
                 ),
                 hasDefaultPaymentMethod = hasDefaultPaymentMethod,
-                setAsDefaultEnabled = setAsDefaultEnabled
+                setAsDefaultEnabled = setAsDefaultEnabled,
+                setupFutureUsage = elementsSession.stripeIntent.setupFutureUsage(),
+                paymentMethodOptionsSetupFutureUsage = elementsSession.stripeIntent
+                    .paymentMethodOptionsSetupFutureUsageMap()
             )
         }
     }
@@ -884,4 +954,15 @@ private suspend fun List<PaymentMethod>.withDefaultPaymentMethodOrLastUsedPaymen
 
 private fun PaymentMethod.toPaymentSelection(): PaymentSelection.Saved {
     return PaymentSelection.Saved(this)
+}
+
+private fun StripeIntent.paymentMethodOptionsSetupFutureUsageMap(): Boolean {
+    return getPaymentMethodOptions().any { (_, value) ->
+        (value as? Map<*, *>)?.get("setup_future_usage") != null
+    }
+}
+
+private fun StripeIntent.setupFutureUsage(): StripeIntent.Usage? = when (this) {
+    is SetupIntent -> usage
+    is PaymentIntent -> setupFutureUsage
 }

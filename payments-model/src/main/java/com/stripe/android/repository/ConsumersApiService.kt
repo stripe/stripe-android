@@ -16,6 +16,8 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.CustomEmailType
 import com.stripe.android.model.EmailSource
+import com.stripe.android.model.LinkAccountSession
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.SignUpParams
 import com.stripe.android.model.UpdateAvailableIncentives
@@ -25,6 +27,7 @@ import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionLookupJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionSignupJsonParser
+import com.stripe.android.model.parsers.LinkAccountSessionJsonParser
 import com.stripe.android.model.parsers.SharePaymentDetailsJsonParser
 import com.stripe.android.model.parsers.UpdateAvailableIncentivesJsonParser
 import java.util.Locale
@@ -45,8 +48,10 @@ interface ConsumersApiService {
     suspend fun lookupConsumerSession(
         email: String,
         requestSurface: String,
+        sessionId: String,
         doNotLogConsumerFunnelEvent: Boolean,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        customerId: String?
     ): ConsumerSessionLookup
 
     suspend fun mobileLookupConsumerSession(
@@ -56,7 +61,8 @@ interface ConsumersApiService {
         verificationToken: String,
         appId: String,
         requestOptions: ApiRequest.Options,
-        sessionId: String
+        sessionId: String,
+        customerId: String?
     ): ConsumerSessionLookup
 
     suspend fun startConsumerVerification(
@@ -108,6 +114,14 @@ interface ConsumersApiService {
         requestSurface: String,
         requestOptions: ApiRequest.Options,
     ): Result<UpdateAvailableIncentives>
+
+    suspend fun createLinkAccountSession(
+        consumerSessionClientSecret: String,
+        intentToken: String?,
+        linkMode: LinkMode?,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options
+    ): Result<LinkAccountSession>
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -167,8 +181,10 @@ class ConsumersApiServiceImpl(
     override suspend fun lookupConsumerSession(
         email: String,
         requestSurface: String,
+        sessionId: String,
         doNotLogConsumerFunnelEvent: Boolean,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        customerId: String?
     ): ConsumerSessionLookup {
         val avoidConsumerLoggingParams: Map<String, Boolean> = if (doNotLogConsumerFunnelEvent) {
             mapOf("do_not_log_consumer_funnel_event" to true)
@@ -183,8 +199,10 @@ class ConsumersApiServiceImpl(
                 requestOptions,
                 mapOf(
                     "request_surface" to requestSurface,
-                    "email_address" to email.lowercase()
-                ) + avoidConsumerLoggingParams
+                    "session_id" to sessionId,
+                    "email_address" to email.lowercase(),
+                    "customer_id" to customerId
+                ).filterValues { it != null } + avoidConsumerLoggingParams
             ),
             responseJsonParser = ConsumerSessionLookupJsonParser()
         )
@@ -200,7 +218,8 @@ class ConsumersApiServiceImpl(
         verificationToken: String,
         appId: String,
         requestOptions: ApiRequest.Options,
-        sessionId: String
+        sessionId: String,
+        customerId: String?
     ): ConsumerSessionLookup {
         return executeRequestWithModelJsonParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
@@ -214,8 +233,9 @@ class ConsumersApiServiceImpl(
                     "android_verification_token" to verificationToken,
                     "session_id" to sessionId,
                     "email_source" to emailSource.backendValue,
-                    "app_id" to appId
-                )
+                    "app_id" to appId,
+                    "customer_id" to customerId
+                ).filterValues { it != null }
             ),
             responseJsonParser = ConsumerSessionLookupJsonParser()
         )
@@ -385,6 +405,32 @@ class ConsumersApiServiceImpl(
         )
     }
 
+    override suspend fun createLinkAccountSession(
+        consumerSessionClientSecret: String,
+        intentToken: String?,
+        linkMode: LinkMode?,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options
+    ): Result<LinkAccountSession> {
+        return executeRequestWithResultParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createPost(
+                url = createLinkAccountSession,
+                options = requestOptions,
+                params = mapOf(
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    ),
+                    "intent_token" to intentToken,
+                    "link_mode" to linkMode?.value,
+                    "request_surface" to requestSurface,
+                ),
+            ),
+            responseJsonParser = LinkAccountSessionJsonParser,
+        )
+    }
+
     internal companion object {
 
         /**
@@ -433,6 +479,11 @@ class ConsumersApiServiceImpl(
          * @return `https://api.stripe.com/v1/consumers/payment_details`
          */
         private val createPaymentDetails: String = getApiUrl("consumers/payment_details")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/link_account_sessions`
+         */
+        private val createLinkAccountSession: String = getApiUrl("consumers/link_account_sessions")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/payment_details/share`

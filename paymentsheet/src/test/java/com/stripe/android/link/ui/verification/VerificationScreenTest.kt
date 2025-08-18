@@ -1,6 +1,8 @@
 package com.stripe.android.link.ui.verification
 
 import androidx.activity.ComponentActivity
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
@@ -11,6 +13,8 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
@@ -20,6 +24,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
+import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -138,7 +143,6 @@ internal class VerificationScreenTest {
         onOtpTag().assertIsDisplayed()
         onEmailTag().assertIsDisplayed().assertIsEnabled()
         onErrorTag().assertDoesNotExist()
-        onLoaderTag().assertIsDisplayed()
         onResendCodeButtonTag()
             .assertIsDisplayed()
             .assertHasClickAction()
@@ -187,8 +191,17 @@ internal class VerificationScreenTest {
         )
         composeTestRule.setContent {
             DefaultLinkTheme {
+                val state by viewModel.viewState.collectAsState()
                 VerificationDialogBody(
-                    viewModel = viewModel
+                    modifier = Modifier,
+                    state = state,
+                    otpElement = viewModel.otpElement,
+                    onBack = viewModel::onBack,
+                    onChangeEmailClick = viewModel::onChangeEmailButtonClicked,
+                    onResendCodeClick = viewModel::resendCode,
+                    onFocusRequested = viewModel::onFocusRequested,
+                    didShowCodeSentNotification = viewModel::didShowCodeSentNotification,
+                    linkAppearance = null
                 )
             }
         }
@@ -196,7 +209,7 @@ internal class VerificationScreenTest {
         onTitleField().assertIsDisplayed()
         onSubtitleTag().assertIsDisplayed()
         onOtpTag().assertIsDisplayed()
-        onEmailTag().assertDoesNotExist()
+        onEmailTag().assertIsDisplayed()
         onErrorTag().assertDoesNotExist()
         onLoaderTag().assertDoesNotExist()
         onResendCodeButtonTag()
@@ -220,8 +233,17 @@ internal class VerificationScreenTest {
         )
         composeTestRule.setContent {
             DefaultLinkTheme {
+                val state by viewModel.viewState.collectAsState()
                 VerificationDialogBody(
-                    viewModel = viewModel
+                    modifier = Modifier,
+                    state = state,
+                    otpElement = viewModel.otpElement,
+                    onBack = viewModel::onBack,
+                    onChangeEmailClick = viewModel::onChangeEmailButtonClicked,
+                    onResendCodeClick = viewModel::resendCode,
+                    onFocusRequested = viewModel::onFocusRequested,
+                    didShowCodeSentNotification = viewModel::didShowCodeSentNotification,
+                    linkAppearance = null
                 )
             }
         }
@@ -237,7 +259,9 @@ internal class VerificationScreenTest {
         linkEventsReporter: LinkEventsReporter = VerificationLinkEventsReporter(),
         logger: Logger = FakeLogger(),
         isDialog: Boolean = false,
-        onDismissClicked: () -> Unit = {}
+        onDismissClicked: () -> Unit = {},
+        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.PaymentMethodSelection(null),
+        dismissWithResult: (LinkActivityResult) -> Unit = {}
     ): VerificationViewModel {
         return VerificationViewModel(
             linkAccountManager = linkAccountManager,
@@ -247,7 +271,9 @@ internal class VerificationScreenTest {
             onVerificationSucceeded = {},
             onChangeEmailRequested = {},
             linkAccount = TestFactory.LINK_ACCOUNT,
-            isDialog = isDialog
+            isDialog = isDialog,
+            linkLaunchMode = linkLaunchMode,
+            dismissWithResult = dismissWithResult
         )
     }
 

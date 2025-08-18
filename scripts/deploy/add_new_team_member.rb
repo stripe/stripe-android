@@ -14,7 +14,7 @@ end.parse!
 required_passwords = [
     "bindings/gnupg/privkey",
     "bindings/gnupg/passphrase",
-    "bindings/java-maven-api-token",
+    "bindings/sonatype-central-api-token",
     "nexus-sonatype-login",
 ]
 

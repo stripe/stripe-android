@@ -1,5 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
@@ -33,13 +34,17 @@ private object UpiUiDefinitionFactory : UiDefinitionFactory.Simple {
         paymentMethodDefinition = UpiDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_upi,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_upi,
+        iconResourceNight = null,
     )
 
     override fun createFormElements(
         metadata: PaymentMethodMetadata,
         arguments: UiDefinitionFactory.Arguments
     ): List<FormElement> {
-        val section = SectionElement.wrap(UpiElement(), label = R.string.stripe_paymentsheet_buy_using_upi_id)
+        val section = SectionElement.wrap(
+            UpiElement(),
+            label = resolvableString(R.string.stripe_paymentsheet_buy_using_upi_id)
+        )
         return FormElementsBuilder(arguments).element(section).build()
     }
 }

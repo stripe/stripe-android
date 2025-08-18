@@ -2,7 +2,6 @@ package com.stripe.android.common.analytics
 
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.model.CardBrand
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.uicore.StripeThemeDefaults
@@ -58,7 +57,6 @@ internal fun PaymentSheet.Appearance.toAnalyticsMap(isEmbedded: Boolean = false)
     return appearanceConfigMap
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal fun PaymentSheet.Appearance.Embedded.toAnalyticsMap(): Map<String, Any?> {
     return mapOf(
         FIELD_STYLE to (this.style != PaymentSheet.Appearance.Embedded.default.style),
@@ -66,12 +64,12 @@ internal fun PaymentSheet.Appearance.Embedded.toAnalyticsMap(): Map<String, Any?
     )
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal fun PaymentSheet.Appearance.Embedded.RowStyle.toAnalyticsValue(): String {
     return when (this) {
         is PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton -> "floating_button"
         is PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio -> "flat_with_radio"
         is PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark -> "flat_with_checkmark"
+        is PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure -> "flat_with_disclosure"
     }
 }
 

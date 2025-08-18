@@ -1,6 +1,5 @@
 package com.stripe.android.connect.appearance.fonts
 
-import com.stripe.android.connect.PrivateBetaConnectSDK
 import dev.drewhamilton.poko.Poko
 import kotlinx.serialization.Serializable
 
@@ -10,7 +9,6 @@ import kotlinx.serialization.Serializable
  * A custom font can be used in the EmbeddedComponent SDK by specifying the font family
  * String in the [Typography] object.
  */
-@PrivateBetaConnectSDK
 @Serializable
 @Poko
 class CustomFontSource(

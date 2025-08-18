@@ -1,7 +1,7 @@
 package com.stripe.android.link.ui.verification
 
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.ui.LinkScreenshotSurface
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.uicore.elements.OTPElement
@@ -21,13 +21,15 @@ internal class VerificationScreenshotTest(
     @Test
     fun testContent() {
         paparazziRule.snapshot {
-            DefaultLinkTheme {
+            LinkScreenshotSurface {
                 VerificationBody(
                     state = testCase.content.state,
                     otpElement = testCase.content.otpElement,
                     onBack = {},
                     onResendCodeClick = {},
-                    onChangeEmailClick = {}
+                    onChangeEmailClick = {},
+                    didShowCodeSentNotification = {},
+                    onFocusRequested = {},
                 )
             }
         }
@@ -51,7 +53,9 @@ internal class VerificationScreenshotTest(
                             errorMessage = null,
                             isSendingNewCode = false,
                             didSendNewCode = false,
-                            isDialog = false
+                            defaultPayment = null,
+                            isDialog = false,
+                            allowLogout = true,
                         )
                     )
                 ),
@@ -67,7 +71,9 @@ internal class VerificationScreenshotTest(
                             errorMessage = null,
                             isSendingNewCode = false,
                             didSendNewCode = false,
-                            isDialog = false
+                            defaultPayment = null,
+                            isDialog = false,
+                            allowLogout = true,
                         )
                     )
                 ),
@@ -83,7 +89,9 @@ internal class VerificationScreenshotTest(
                             errorMessage = null,
                             isSendingNewCode = false,
                             didSendNewCode = false,
-                            isDialog = false
+                            defaultPayment = null,
+                            isDialog = false,
+                            allowLogout = true,
                         )
                     )
                 ),
@@ -99,7 +107,9 @@ internal class VerificationScreenshotTest(
                             isProcessing = false,
                             errorMessage = null,
                             didSendNewCode = false,
-                            isDialog = false
+                            defaultPayment = null,
+                            isDialog = false,
+                            allowLogout = true,
                         )
                     )
                 ),
@@ -115,7 +125,9 @@ internal class VerificationScreenshotTest(
                             isProcessing = false,
                             errorMessage = "Something went wrong".resolvableString,
                             didSendNewCode = false,
-                            isDialog = false
+                            defaultPayment = null,
+                            isDialog = false,
+                            allowLogout = true,
                         )
                     )
                 ),
@@ -131,7 +143,9 @@ internal class VerificationScreenshotTest(
                             errorMessage = null,
                             isSendingNewCode = false,
                             didSendNewCode = false,
-                            isDialog = true
+                            defaultPayment = null,
+                            isDialog = true,
+                            allowLogout = false,
                         )
                     )
                 ),
@@ -147,7 +161,9 @@ internal class VerificationScreenshotTest(
                             errorMessage = null,
                             isSendingNewCode = false,
                             didSendNewCode = false,
-                            isDialog = true
+                            defaultPayment = null,
+                            isDialog = true,
+                            allowLogout = false,
                         )
                     )
                 ),
@@ -163,7 +179,9 @@ internal class VerificationScreenshotTest(
                             isProcessing = false,
                             errorMessage = "Something went wrong".resolvableString,
                             didSendNewCode = false,
-                            isDialog = true
+                            defaultPayment = null,
+                            isDialog = true,
+                            allowLogout = false,
                         )
                     )
                 ),

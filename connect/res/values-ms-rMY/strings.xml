@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_download_complete">Muat turun selesai</string>
+  <string name="stripe_downloading_file">Fail sedang dimuat turun</string>
+  <string name="stripe_failed_to_open_url">URL gagal dibuka: %s</string>
+  <string name="stripe_not_yet_built">Belum dibina lagi…</string>
+  <string name="stripe_unable_to_download_file">Fail tidak dapat dimuat turun</string>
+</resources>

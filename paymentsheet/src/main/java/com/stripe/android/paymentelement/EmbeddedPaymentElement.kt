@@ -2,8 +2,10 @@ package com.stripe.android.paymentelement
 
 import android.app.Activity
 import android.graphics.drawable.Drawable
+import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.painter.Painter
@@ -12,10 +14,13 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
+import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfigurationCoordinator
@@ -29,6 +34,7 @@ import com.stripe.android.paymentelement.embedded.content.PaymentOptionDisplayDa
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.TermsDisplay
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
@@ -39,7 +45,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
-@ExperimentalEmbeddedPaymentElementApi
 @EmbeddedPaymentElementScope
 class EmbeddedPaymentElement @Inject internal constructor(
     private val confirmationHelper: EmbeddedConfirmationHelper,
@@ -78,6 +83,17 @@ class EmbeddedPaymentElement @Inject internal constructor(
     }
 
     /**
+     * A composable function that displays a vertical list of wallet payment methods that can be used for express
+     * checkout.
+     */
+    @WalletButtonsPreview
+    @Composable
+    fun WalletButtons() {
+        val walletButtonsContent by contentHelper.walletButtonsContent.collectAsState()
+        walletButtonsContent?.Content()
+    }
+
+    /**
      * A composable function that displays payment methods.
      *
      * It can present a sheet to collect more details or display saved payment methods.
@@ -109,17 +125,40 @@ class EmbeddedPaymentElement @Inject internal constructor(
      *
      * Creation can be completed with [rememberEmbeddedPaymentElement].
      */
-    @ExperimentalEmbeddedPaymentElementApi
-    class Builder(
-        /**
-         * Called when the customer confirms the payment or setup.
-         */
-        internal val createIntentCallback: CreateIntentCallback,
-        /**
-         * Called with the result of the payment.
-         */
+    class Builder internal constructor(
+        internal val deferredHandler: DeferredHandler,
         internal val resultCallback: ResultCallback,
     ) {
+        constructor(
+            /**
+             * Called when the customer confirms the payment or setup.
+             */
+            createIntentCallback: CreateIntentCallback,
+            /**
+             * Called with the result of the payment.
+             */
+            resultCallback: ResultCallback,
+        ) : this(
+            deferredHandler = DeferredHandler.Intent(createIntentCallback),
+            resultCallback = resultCallback,
+        )
+
+        @SharedPaymentTokenSessionPreview
+        constructor(
+            /**
+             * Called when a user calls confirm and their payment method
+             * is being handed off to an external provider to handle payment/setup.
+             */
+            preparePaymentMethodHandler: PreparePaymentMethodHandler,
+            /**
+             * Called with the result of the payment.
+             */
+            resultCallback: ResultCallback,
+        ) : this(
+            deferredHandler = DeferredHandler.SharedPaymentToken(preparePaymentMethodHandler),
+            resultCallback = resultCallback,
+        )
+
         internal var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
             private set
 
@@ -130,6 +169,8 @@ class EmbeddedPaymentElement @Inject internal constructor(
         @OptIn(ExperimentalAnalyticEventCallbackApi::class)
         internal var analyticEventCallback: AnalyticEventCallback? = null
             private set
+
+        internal var rowSelectionBehavior: RowSelectionBehavior = RowSelectionBehavior.default()
 
         /**
          * Called when a user confirms payment for an external payment method.
@@ -153,12 +194,30 @@ class EmbeddedPaymentElement @Inject internal constructor(
         fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
             this.analyticEventCallback = callback
         }
+
+        /**
+         * Set the rowSelectionBehavior.
+         * Default: payment method rows are selectable.
+         * ImmediateAction: payment method rows are treated as buttons. Provide the custom logic you want to see when
+         * rows are clicked
+         */
+        fun rowSelectionBehavior(rowSelectionBehavior: RowSelectionBehavior) = apply {
+            this.rowSelectionBehavior = rowSelectionBehavior
+        }
+
+        @OptIn(SharedPaymentTokenSessionPreview::class)
+        internal sealed interface DeferredHandler {
+            class Intent(val createIntentCallback: CreateIntentCallback) : DeferredHandler
+
+            class SharedPaymentToken constructor(
+                val preparePaymentMethodHandler: PreparePaymentMethodHandler
+            ) : DeferredHandler
+        }
     }
 
     /** Configuration for [EmbeddedPaymentElement] **/
     @Parcelize
     @Poko
-    @ExperimentalEmbeddedPaymentElementApi
     class Configuration internal constructor(
         internal val merchantDisplayName: String,
         internal val customer: PaymentSheet.CustomerConfiguration?,
@@ -179,9 +238,9 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val embeddedViewDisplaysMandateText: Boolean,
         internal val link: PaymentSheet.LinkConfiguration,
         internal val formSheetAction: FormSheetAction,
+        internal val termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap(),
     ) : Parcelable {
         @Suppress("TooManyFunctions")
-        @ExperimentalEmbeddedPaymentElementApi
         class Builder(
             /**
              * Your customer-facing business name.
@@ -211,6 +270,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 ConfigurationDefaults.customPaymentMethods
             private var link: PaymentSheet.LinkConfiguration = ConfigurationDefaults.link
             private var formSheetAction: FormSheetAction = FormSheetAction.Continue
+            private var termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap()
 
             /**
              * If set, the customer can select a previously saved payment method.
@@ -409,6 +469,14 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 this.formSheetAction = formSheetAction
             }
 
+            /**
+             * A map for specifying when legal agreements are displayed for each payment method type.
+             * If the payment method is not specified in the list, the TermsDisplay value will default to automatic.
+             */
+            fun termsDisplay(termsDisplay: Map<PaymentMethod.Type, TermsDisplay>) = apply {
+                this.termsDisplay = termsDisplay
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -429,6 +497,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
                 link = link,
                 formSheetAction = formSheetAction,
+                termsDisplay = termsDisplay,
             )
         }
     }
@@ -438,7 +507,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
      * payment method details. The sheet has a button at the bottom. [FormSheetAction] enumerates the actions the button
      * can perform.
      */
-    @ExperimentalEmbeddedPaymentElementApi
     enum class FormSheetAction {
 
         /**
@@ -456,12 +524,10 @@ class EmbeddedPaymentElement @Inject internal constructor(
     /**
      * The result of a [configure] call.
      */
-    @ExperimentalEmbeddedPaymentElementApi
     sealed interface ConfigureResult {
         /**
          * The configure succeeded.
          */
-        @ExperimentalEmbeddedPaymentElementApi
         class Succeeded internal constructor() : ConfigureResult
 
         /**
@@ -470,14 +536,13 @@ class EmbeddedPaymentElement @Inject internal constructor(
          * Your integration should retry with exponential backoff.
          */
         @Poko
-        @ExperimentalEmbeddedPaymentElementApi
         class Failed internal constructor(val error: Throwable) : ConfigureResult
     }
 
     @Poko
-    @ExperimentalEmbeddedPaymentElementApi
     class PaymentOptionDisplayData internal constructor(
-        private val imageLoader: suspend () -> Drawable,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val imageLoader: suspend () -> Drawable,
 
         /**
          * A user facing string representing the payment method; e.g. "Google Pay" or "···· 4242" for a card.
@@ -494,7 +559,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
          * - If this is a Stripe payment method, see
          *      https://stripe.com/docs/api/payment_methods/object#payment_method_object-type for possible values.
          * - If this is an external payment method, see
-         *      https://stripe.com/docs/payments/external-payment-methods?platform=ios#available-external-payment-methods
+         *      https://docs.stripe.com/payments/mobile/external-payment-methods?platform=android
          *      for possible values.
          * - If this is Google Pay, the value is "google_pay".
          */
@@ -505,10 +570,18 @@ class EmbeddedPaymentElement @Inject internal constructor(
          * the customer near your "Buy" button to comply with regulations.
          */
         val mandateText: AnnotatedString?,
+        private val _shippingDetails: AddressDetails?,
     ) {
         private val iconDrawable: Drawable by lazy {
             DelegateDrawable(imageLoader)
         }
+
+        /**
+         * A shipping address that the user provided during checkout.
+         */
+        @ShippingDetailsInPaymentOptionPreview
+        val shippingDetails: AddressDetails?
+            get() = _shippingDetails
 
         /**
          * An image representing a payment method; e.g. the Google Pay logo or a VISA logo.
@@ -521,7 +594,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
     /**
      * The result of an attempt to confirm a [PaymentIntent] or [SetupIntent].
      */
-    @ExperimentalEmbeddedPaymentElementApi
     sealed interface Result {
         /**
          * The customer completed the payment or setup.
@@ -533,13 +605,11 @@ class EmbeddedPaymentElement @Inject internal constructor(
          *
          * See [Stripe's documentation](https://stripe.com/docs/payments/handling-payment-events).
          */
-        @ExperimentalEmbeddedPaymentElementApi
         class Completed internal constructor() : Result
 
         /**
          * The customer canceled the payment or setup attempt.
          */
-        @ExperimentalEmbeddedPaymentElementApi
         class Canceled internal constructor() : Result
 
         /**
@@ -548,31 +618,72 @@ class EmbeddedPaymentElement @Inject internal constructor(
          * @param error The error encountered by the customer.
          */
         @Poko
-        @ExperimentalEmbeddedPaymentElementApi
         class Failed internal constructor(val error: Throwable) : Result
     }
 
     /**
      * Callback that is invoked when a [Result] is available.
      */
-    @ExperimentalEmbeddedPaymentElementApi
     fun interface ResultCallback {
         fun onResult(result: Result)
     }
 
     /**
+     * Describes how you handle row selections in EmbeddedPaymentElement
+     */
+    abstract class RowSelectionBehavior internal constructor() {
+        private object Default : RowSelectionBehavior()
+
+        private class ImmediateAction(
+            val didSelectPaymentOption: (EmbeddedPaymentElement) -> Unit
+        ) : RowSelectionBehavior()
+
+        companion object {
+            /**
+             * When a payment option is selected, the customer taps a button to continue or confirm payment.
+             * This is the default recommended integration.
+             */
+            fun default(): RowSelectionBehavior {
+                return Default
+            }
+
+            /**
+             * When a payment option is selected, [didSelectPaymentOption] is triggered.
+             * You can implement this method to immediately perform an action e.g. go back to the checkout screen
+             * or confirm the payment.
+             *
+             * Note that certain payment options like Google Pay and saved payment methods are disabled in this mode if
+             * you set [EmbeddedPaymentElement.Configuration.formSheetAction] to [FormSheetAction.Confirm].
+             */
+            fun immediateAction(didSelectPaymentOption: (EmbeddedPaymentElement) -> Unit): RowSelectionBehavior {
+                return ImmediateAction(didSelectPaymentOption)
+            }
+
+            internal fun getInternalRowSelectionCallback(
+                rowSelectionBehavior: RowSelectionBehavior,
+                embeddedPaymentElement: EmbeddedPaymentElement
+            ): (() -> Unit)? {
+                return if (rowSelectionBehavior is ImmediateAction) {
+                    { rowSelectionBehavior.didSelectPaymentOption(embeddedPaymentElement) }
+                } else {
+                    null
+                }
+            }
+        }
+    }
+
+    /**
      * A [Parcelable] state used to reconfigure [EmbeddedPaymentElement] across activity boundaries.
      */
-    @ExperimentalEmbeddedPaymentElementApi
     @Poko
     @Parcelize
     class State internal constructor(
         internal val confirmationState: EmbeddedConfirmationStateHolder.State,
         internal val customer: CustomerState?,
+        internal val previousNewSelections: Bundle,
     ) : Parcelable
 
     internal companion object {
-        @ExperimentalEmbeddedPaymentElementApi
         fun create(
             activity: Activity,
             activityResultCaller: ActivityResultCaller,
@@ -585,7 +696,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 owner = viewModelStoreOwner,
                 factory = EmbeddedPaymentElementViewModel.Factory(
                     paymentElementCallbackIdentifier,
-                    activity.window?.statusBarColor,
+                    StatusBarCompat.color(activity),
                 )
             ).get(
                 key = "EmbeddedPaymentElementViewModel(instance = $paymentElementCallbackIdentifier)",

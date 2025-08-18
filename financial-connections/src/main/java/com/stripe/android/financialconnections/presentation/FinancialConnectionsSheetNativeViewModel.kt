@@ -44,6 +44,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetFlowType
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
@@ -340,7 +341,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     }
 
                     session.hasAValidAccount() -> {
-                        if (state.isLinkWithStripe) {
+                        if (state.flowType == FinancialConnectionsSheetFlowType.ForInstantDebits) {
                             handleInstantDebitsCompletion(session)
                         } else {
                             handleFinancialConnectionsCompletion(session)
@@ -517,6 +518,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 }
 
 internal data class FinancialConnectionsSheetNativeState(
+    val flowType: FinancialConnectionsSheetFlowType,
     val webAuthFlow: WebAuthFlowState,
     /**
      * Tracks whether this state was recreated from a process kill.
@@ -541,6 +543,7 @@ internal data class FinancialConnectionsSheetNativeState(
         args: FinancialConnectionsSheetNativeActivityArgs,
         savedState: Bundle?
     ) : this(
+        flowType = args.flowType,
         webAuthFlow = savedState?.getParcelable<WebAuthFlowState>(KEY_WEB_AUTH_FLOW)
             ?: WebAuthFlowState.Uninitialized,
         reducedBranding = args.initialSyncResponse.visual.reducedBranding,

@@ -6,7 +6,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -45,7 +44,6 @@ internal interface FormActivityStateHelper {
     )
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Singleton
 internal class DefaultFormActivityStateHelper @Inject constructor(
     private val paymentMethodMetadata: PaymentMethodMetadata,

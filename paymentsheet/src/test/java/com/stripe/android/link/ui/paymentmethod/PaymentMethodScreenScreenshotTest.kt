@@ -2,7 +2,7 @@ package com.stripe.android.link.ui.paymentmethod
 
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.ui.LinkScreenshotSurface
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodBody
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodState
@@ -66,12 +66,11 @@ internal class PaymentMethodScreenScreenshotTest {
     ) {
         paparazziRule.snapshot {
             ViewModelStoreOwnerContext {
-                DefaultLinkTheme {
+                LinkScreenshotSurface {
                     PaymentMethodBody(
                         state = state,
                         onFormFieldValuesChanged = {},
                         onPayClicked = {},
-                        onCancelClicked = {}
                     )
                 }
             }
@@ -86,7 +85,9 @@ internal class PaymentMethodScreenScreenshotTest {
         val uiDefinitionArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             linkConfigurationCoordinator = null,
+            linkInlineHandler = null,
             onLinkInlineSignupStateChanged = { throw AssertionError("Not expected") },
+            autocompleteAddressInteractorFactory = null,
         )
         val formElements = metadata.formElementsForCode(
             code = PaymentMethod.Type.Card.code,

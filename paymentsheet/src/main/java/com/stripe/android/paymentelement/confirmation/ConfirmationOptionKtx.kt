@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation
 
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
@@ -10,6 +11,8 @@ import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethod
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
+import com.stripe.android.paymentelement.confirmation.shoppay.ShopPayConfirmationOption
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal fun PaymentSelection.toConfirmationOption(
@@ -25,6 +28,7 @@ internal fun PaymentSelection.toConfirmationOption(
         is PaymentSelection.New -> toConfirmationOption()
         is PaymentSelection.GooglePay -> toConfirmationOption(configuration)
         is PaymentSelection.Link -> toConfirmationOption(linkConfiguration)
+        is PaymentSelection.ShopPay -> toConfirmationOption(configuration)
     }
 }
 
@@ -123,7 +127,13 @@ private fun PaymentSelection.Link.toConfirmationOption(
     return linkConfiguration?.let {
         LinkConfirmationOption(
             configuration = linkConfiguration,
-            useLinkExpress = useLinkExpress
+            linkExpressMode = linkExpressMode,
+            linkLaunchMode = when {
+                // If a payment is included in the confirmation option, launch confirmation right away
+                selectedPayment != null -> LinkLaunchMode.Confirmation(selectedPayment)
+                // If a payment is not included, launch the link flow regularly
+                else -> LinkLaunchMode.Full
+            },
         )
     }
 }
@@ -137,6 +147,22 @@ private fun PaymentSelection.CustomPaymentMethod.toConfirmationOption(
         CustomPaymentMethodConfirmationOption(
             customPaymentMethodType = type,
             billingDetails = billingDetails
+        )
+    }
+}
+
+private fun PaymentSelection.ShopPay.toConfirmationOption(
+    configuration: CommonConfiguration
+): ShopPayConfirmationOption? {
+    val customerSessionClientSecret = when (val accessType = configuration.customer?.accessType) {
+        is PaymentSheet.CustomerAccessType.CustomerSession -> accessType.customerSessionClientSecret
+        else -> return null
+    }
+    return configuration.shopPayConfiguration?.let { config ->
+        ShopPayConfirmationOption(
+            shopPayConfiguration = config,
+            customerSessionClientSecret = customerSessionClientSecret,
+            merchantDisplayName = configuration.merchantDisplayName
         )
     }
 }

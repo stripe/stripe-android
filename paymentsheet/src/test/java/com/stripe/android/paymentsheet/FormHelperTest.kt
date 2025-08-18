@@ -305,6 +305,8 @@ internal class FormHelperTest {
                 fields = emptyList(),
                 prefillEligibleFields = emptySet(),
                 userInput = userInput,
+                allowsDefaultOptIn = false,
+                linkSignUpOptInFeatureEnabled = false,
             ),
         ) {
             assertThat(expectMostRecentItem()).isEqualTo(
@@ -353,6 +355,8 @@ internal class FormHelperTest {
                     consentAction = SignUpConsentAction.Checkbox,
                 ),
                 isExpanded = false,
+                allowsDefaultOptIn = false,
+                linkSignUpOptInFeatureEnabled = false,
             )
         ) {
             assertThat(expectMostRecentItem()).isEqualTo(
@@ -405,6 +409,8 @@ internal class FormHelperTest {
                     name = "John Doe",
                     consentAction = SignUpConsentAction.Checkbox,
                 ),
+                allowsDefaultOptIn = false,
+                linkSignUpOptInFeatureEnabled = false,
             )
         ) {
             assertThat(expectMostRecentItem()).isEqualTo(
@@ -483,6 +489,8 @@ internal class FormHelperTest {
                     prefillEligibleFields = emptySet(),
                     userInput = null,
                     isExpanded = true,
+                    allowsDefaultOptIn = false,
+                    linkSignUpOptInFeatureEnabled = false,
                 )
             )
 
@@ -624,7 +632,8 @@ internal class FormHelperTest {
             selectionUpdater = selectionUpdater,
             setAsDefaultMatchesSaveForFutureUse = false,
             eventReporter = eventReporter,
-            savedStateHandle = SavedStateHandle()
+            savedStateHandle = SavedStateHandle(),
+            autocompleteAddressInteractorFactory = null,
         )
     }
 

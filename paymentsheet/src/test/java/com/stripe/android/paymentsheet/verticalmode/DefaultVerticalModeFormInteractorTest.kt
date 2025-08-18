@@ -1,11 +1,12 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
@@ -54,33 +55,28 @@ internal class DefaultVerticalModeFormInteractorTest {
 
     @Test
     fun `handleViewAction FieldInteraction calls reportFieldInteraction`() {
-        var fieldInteractionValue: String? = null
         runScenario(
             selectedPaymentMethodCode = "randomTestValue",
-            reportFieldInteraction = { fieldInteractionValue = it },
         ) {
             interactor.handleViewAction(ViewAction.FieldInteraction)
-            assertThat(fieldInteractionValue).isEqualTo("randomTestValue")
+            assertThat(reportFieldInteractionTurbine.awaitItem()).isEqualTo("randomTestValue")
         }
     }
 
     @Test
     fun `handleViewAction FormFieldValuesChanged calls onFormFieldValuesChanged`() {
-        var onFormFieldValuesChangedCalled = false
         val expectedFormValues = FormFieldValues(
             fieldValuePairs = emptyMap(),
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
         )
         runScenario(
             selectedPaymentMethodCode = "randomTestValue",
-            onFormFieldValuesChanged = { formValues, selectedPaymentMethodCode ->
-                assertThat(formValues).isEqualTo(expectedFormValues)
-                assertThat(selectedPaymentMethodCode).isEqualTo("randomTestValue")
-                onFormFieldValuesChangedCalled = true
-            },
         ) {
             interactor.handleViewAction(ViewAction.FormFieldValuesChanged(expectedFormValues))
-            assertThat(onFormFieldValuesChangedCalled).isTrue()
+            onFormFieldValuesChangedTurbine.awaitItem().run {
+                assertThat(first).isEqualTo(expectedFormValues)
+                assertThat(second).isEqualTo("randomTestValue")
+            }
         }
     }
 
@@ -145,7 +141,6 @@ internal class DefaultVerticalModeFormInteractorTest {
         }
     }
 
-    @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
     private fun testSetAsDefaultElements(
         hasSavedPaymentMethods: Boolean,
         block: (SaveForFutureUseElement?, SetAsDefaultPaymentMethodElement?) -> Unit
@@ -197,27 +192,28 @@ internal class DefaultVerticalModeFormInteractorTest {
         block(saveForFutureUseElement, setAsDefaultElement)
     }
 
-    private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
-
     private fun runScenario(
         selectedPaymentMethodCode: String,
-        onFormFieldValuesChanged: (formValues: FormFieldValues?, selectedPaymentMethodCode: String) -> Unit = { _, _ ->
-            notImplemented()
-        },
-        reportFieldInteraction: (String) -> Unit = { notImplemented() },
         testBlock: suspend TestParams.() -> Unit,
     ) {
         val formArguments = mock<FormArguments>()
         val usBankAccountArguments = mock<USBankAccountFormArguments>()
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
+        val onFormFieldValuesChangedTurbine = Turbine<Pair<FormFieldValues?, String>>()
+        val reportFieldInteractionTurbine = Turbine<String>()
+
         val interactor = DefaultVerticalModeFormInteractor(
             selectedPaymentMethodCode = selectedPaymentMethodCode,
             formArguments = formArguments,
             formElements = emptyList(),
-            onFormFieldValuesChanged = onFormFieldValuesChanged,
+            onFormFieldValuesChanged = { formValues: FormFieldValues?, selectedPaymentMethodCode: String ->
+                onFormFieldValuesChangedTurbine.add(Pair(formValues, selectedPaymentMethodCode))
+            },
             usBankAccountArguments = usBankAccountArguments,
-            reportFieldInteraction = reportFieldInteraction,
+            reportFieldInteraction = {
+                reportFieldInteractionTurbine.add(it)
+            },
             headerInformation = null,
             isLiveMode = true,
             processing = processing,
@@ -228,6 +224,8 @@ internal class DefaultVerticalModeFormInteractorTest {
         TestParams(
             interactor = interactor,
             processingSource = processing,
+            onFormFieldValuesChangedTurbine = onFormFieldValuesChangedTurbine,
+            reportFieldInteractionTurbine = reportFieldInteractionTurbine,
         ).apply {
             runTest {
                 testBlock()
@@ -235,10 +233,14 @@ internal class DefaultVerticalModeFormInteractorTest {
         }
 
         verifyNoMoreInteractions(formArguments, usBankAccountArguments)
+        onFormFieldValuesChangedTurbine.ensureAllEventsConsumed()
+        reportFieldInteractionTurbine.ensureAllEventsConsumed()
     }
 
     private class TestParams(
         val interactor: DefaultVerticalModeFormInteractor,
         val processingSource: MutableStateFlow<Boolean>,
+        val onFormFieldValuesChangedTurbine: ReceiveTurbine<Pair<FormFieldValues?, String>>,
+        val reportFieldInteractionTurbine: ReceiveTurbine<String>,
     )
 }

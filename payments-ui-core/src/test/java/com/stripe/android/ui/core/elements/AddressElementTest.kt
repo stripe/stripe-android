@@ -2,11 +2,12 @@ package com.stripe.android.ui.core.elements
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.uicore.elements.AddressElement
-import com.stripe.android.uicore.elements.AddressType
+import com.stripe.android.uicore.elements.AddressFieldConfiguration
+import com.stripe.android.uicore.elements.AddressInputMode
 import com.stripe.android.uicore.elements.CountryConfig
+import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.elements.PhoneNumberState
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
@@ -30,8 +31,11 @@ import com.stripe.android.uicore.R as UiCoreR
 // TODO(ccen) Rewrite the test with generic Element and move it to stripe-ui-core
 @RunWith(RobolectricTestRunner::class)
 class AddressElementTest {
-    private val countryDropdownFieldController = DropdownFieldController(
-        CountryConfig(setOf("US", "CA"))
+    private val countryElement = CountryElement(
+        IdentifierSpec.Country,
+        DropdownFieldController(
+            CountryConfig(setOf("US", "CA"))
+        )
     )
 
     @Test
@@ -40,25 +44,25 @@ class AddressElementTest {
             // ZZ does not have state and US does
             val addressElement = AddressElement(
                 IdentifierSpec.Generic("address"),
-                countryDropdownFieldController = countryDropdownFieldController,
+                countryElement = countryElement,
                 sameAsShippingElement = null,
                 shippingValuesMap = null
             )
 
             var postalCodeController = addressElement.fields.postalCodeController()
 
-            countryDropdownFieldController.onValueChange(0)
+            countryElement.controller.onValueChange(0)
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
             postalCodeController.onValueChange("9999")
             postalCodeController.onFocusChange(false)
 
-            assertThat(addressElement.controller.error.first())
+            assertThat(addressElement.addressController.value.error.first())
                 .isNotNull()
-            assertThat(addressElement.controller.error.first()?.errorMessage)
-                .isEqualTo(UiCoreR.string.stripe_address_zip_invalid)
+            assertThat(addressElement.addressController.value.error.first()?.errorMessage)
+                .isEqualTo(UiCoreR.string.stripe_address_zip_incomplete)
 
-            countryDropdownFieldController.onValueChange(1)
+            countryElement.controller.onValueChange(1)
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
             postalCodeController = addressElement.fields.postalCodeController()
@@ -67,8 +71,8 @@ class AddressElementTest {
             postalCodeController.onFocusChange(false)
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
-            assertThat(addressElement.controller.error.first()?.errorMessage)
-                .isEqualTo(UiCoreR.string.stripe_address_zip_postal_invalid)
+            assertThat(addressElement.addressController.value.error.first()?.errorMessage)
+                .isEqualTo(UiCoreR.string.stripe_address_postal_code_incomplete)
         }
     }
 
@@ -76,14 +80,14 @@ class AddressElementTest {
     fun `verify flow of form field values`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
+            countryElement = countryElement,
             sameAsShippingElement = null,
             shippingValuesMap = null
         )
         val formFieldValueFlow = addressElement.getFormFieldValueFlow()
         var postalCodeController = addressElement.fields.postalCodeController()
 
-        countryDropdownFieldController.onValueChange(0)
+        countryElement.controller.onValueChange(0)
 
         // Add values to the fields
         postalCodeController.onValueChange("999")
@@ -97,7 +101,7 @@ class AddressElementTest {
                 FormFieldEntry("999", false)
             )
 
-        countryDropdownFieldController.onValueChange(1)
+        countryElement.controller.onValueChange(1)
 
         // Add values to the fields
         postalCodeController = addressElement.fields.postalCodeController()
@@ -116,7 +120,7 @@ class AddressElementTest {
     fun `changing country updates the fields`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
+            countryElement = countryElement,
             sameAsShippingElement = null,
             shippingValuesMap = null
         )
@@ -128,24 +132,26 @@ class AddressElementTest {
                 .first()[0].second.value
         }
 
-        countryDropdownFieldController.onValueChange(0)
+        countryElement.controller.onValueChange(0)
 
         assertThat(country()).isEqualTo("US")
 
-        countryDropdownFieldController.onValueChange(1)
+        countryElement.controller.onValueChange(1)
 
         assertThat(country()).isEqualTo("CA")
     }
 
     @Test
-    fun `condensed shipping address element should have name and phone number fields when required`() = runTest {
+    fun `condensed address element should have name and phone number fields when required`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingCondensed(
+            countryElement = countryElement,
+            addressInputMode = AddressInputMode.AutocompleteCondensed(
                 googleApiKey = null,
                 autocompleteCountries = setOf(),
-                phoneNumberState = PhoneNumberState.REQUIRED
+                nameConfig = AddressFieldConfiguration.REQUIRED,
+                phoneNumberConfig = AddressFieldConfiguration.REQUIRED,
+                emailConfig = AddressFieldConfiguration.REQUIRED,
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
             shippingValuesMap = null
@@ -156,17 +162,20 @@ class AddressElementTest {
         }
         assertThat(identifierSpecs.contains(IdentifierSpec.Name)).isTrue()
         assertThat(identifierSpecs.contains(IdentifierSpec.Phone)).isTrue()
+        assertThat(identifierSpecs.contains(IdentifierSpec.Email)).isTrue()
     }
 
     @Test
-    fun `hidden phone number field is not shown`() = runTest {
+    fun `hidden name & phone number field is not shown`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingCondensed(
+            countryElement = countryElement,
+            addressInputMode = AddressInputMode.AutocompleteCondensed(
                 googleApiKey = null,
                 autocompleteCountries = setOf(),
-                phoneNumberState = PhoneNumberState.HIDDEN
+                nameConfig = AddressFieldConfiguration.HIDDEN,
+                phoneNumberConfig = AddressFieldConfiguration.HIDDEN,
+                emailConfig = AddressFieldConfiguration.HIDDEN,
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
             shippingValuesMap = null
@@ -175,18 +184,22 @@ class AddressElementTest {
         val identifierSpecs = addressElement.fields.first().map {
             it.identifier
         }
+        assertThat(identifierSpecs.contains(IdentifierSpec.Name)).isFalse()
         assertThat(identifierSpecs.contains(IdentifierSpec.Phone)).isFalse()
+        assertThat(identifierSpecs.contains(IdentifierSpec.Email)).isFalse()
     }
 
     @Test
-    fun `optional phone number field is shown`() = runTest {
+    fun `optional name & phone number field is shown`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingCondensed(
+            countryElement = countryElement,
+            addressInputMode = AddressInputMode.AutocompleteCondensed(
                 googleApiKey = null,
                 autocompleteCountries = setOf(),
-                phoneNumberState = PhoneNumberState.OPTIONAL
+                nameConfig = AddressFieldConfiguration.OPTIONAL,
+                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
+                emailConfig = AddressFieldConfiguration.OPTIONAL,
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
             shippingValuesMap = null
@@ -195,7 +208,9 @@ class AddressElementTest {
         val identifierSpecs = addressElement.fields.first().map {
             it.identifier
         }
+        assertThat(identifierSpecs.contains(IdentifierSpec.Name)).isTrue()
         assertThat(identifierSpecs.contains(IdentifierSpec.Phone)).isTrue()
+        assertThat(identifierSpecs.contains(IdentifierSpec.Email)).isTrue()
     }
 
     @Test
@@ -235,14 +250,16 @@ class AddressElementTest {
     }
 
     @Test
-    fun `expanded shipping address element should have name and phone number fields when required`() = runTest {
+    fun `expanded address element should have name and phone number fields when required`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingExpanded(
+            countryElement = countryElement,
+            addressInputMode = AddressInputMode.AutocompleteExpanded(
                 googleApiKey = null,
                 autocompleteCountries = null,
-                phoneNumberState = PhoneNumberState.REQUIRED,
+                nameConfig = AddressFieldConfiguration.REQUIRED,
+                phoneNumberConfig = AddressFieldConfiguration.REQUIRED,
+                emailConfig = AddressFieldConfiguration.REQUIRED,
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
             shippingValuesMap = null
@@ -253,17 +270,20 @@ class AddressElementTest {
         }
         assertThat(identifierSpecs.contains(IdentifierSpec.Name)).isTrue()
         assertThat(identifierSpecs.contains(IdentifierSpec.Phone)).isTrue()
+        assertThat(identifierSpecs.contains(IdentifierSpec.Email)).isTrue()
     }
 
     @Test
-    fun `expanded shipping address element should hide phone number when state is hidden`() = runTest {
+    fun `expanded shipping address element should hide name and phone number when state is hidden`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingExpanded(
+            countryElement = countryElement,
+            addressInputMode = AddressInputMode.AutocompleteExpanded(
                 googleApiKey = null,
                 autocompleteCountries = null,
-                phoneNumberState = PhoneNumberState.HIDDEN,
+                nameConfig = AddressFieldConfiguration.HIDDEN,
+                phoneNumberConfig = AddressFieldConfiguration.HIDDEN,
+                emailConfig = AddressFieldConfiguration.HIDDEN,
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
             shippingValuesMap = null
@@ -272,18 +292,22 @@ class AddressElementTest {
         val identifierSpecs = addressElement.fields.first().map {
             it.identifier
         }
+        assertThat(identifierSpecs.contains(IdentifierSpec.Name)).isFalse()
         assertThat(identifierSpecs.contains(IdentifierSpec.Phone)).isFalse()
+        assertThat(identifierSpecs.contains(IdentifierSpec.Email)).isFalse()
     }
 
     @Test
     fun `expanded shipping address element should show phone number when state is optional`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingExpanded(
+            countryElement = countryElement,
+            addressInputMode = AddressInputMode.AutocompleteExpanded(
                 googleApiKey = null,
                 autocompleteCountries = null,
-                phoneNumberState = PhoneNumberState.OPTIONAL,
+                nameConfig = AddressFieldConfiguration.HIDDEN,
+                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
+                emailConfig = AddressFieldConfiguration.HIDDEN,
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
             shippingValuesMap = null
@@ -296,11 +320,11 @@ class AddressElementTest {
     }
 
     @Test
-    fun `normal address element should not have name and phone number fields`() = runTest {
+    fun `normal address element should not have name, email, and phone number fields`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.Normal(),
+            countryElement = countryElement,
+            addressInputMode = AddressInputMode.NoAutocomplete(),
             sameAsShippingElement = null,
             shippingValuesMap = null
         )
@@ -310,14 +334,15 @@ class AddressElementTest {
         }
         assertThat(identifierSpecs.contains(IdentifierSpec.Name)).isFalse()
         assertThat(identifierSpecs.contains(IdentifierSpec.Phone)).isFalse()
+        assertThat(identifierSpecs.contains(IdentifierSpec.Email)).isFalse()
     }
 
     @Test
     fun `normal address element should not have one line address element`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.Normal(),
+            countryElement = countryElement,
+            addressInputMode = AddressInputMode.NoAutocomplete(),
             sameAsShippingElement = null,
             shippingValuesMap = null
         )
@@ -332,11 +357,13 @@ class AddressElementTest {
     fun `condensed shipping address element should have one line address element`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingCondensed(
-                "some key",
-                setOf("US", "CA"),
-                PhoneNumberState.OPTIONAL
+            countryElement = countryElement,
+            addressInputMode = AddressInputMode.AutocompleteCondensed(
+                googleApiKey = "some key",
+                autocompleteCountries = setOf("US", "CA"),
+                nameConfig = AddressFieldConfiguration.OPTIONAL,
+                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
+                emailConfig = AddressFieldConfiguration.OPTIONAL,
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
             shippingValuesMap = null
@@ -352,15 +379,17 @@ class AddressElementTest {
     fun `AddressElement should not have OneLineAddress when places is unavailable`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingCondensed(
-                "some key",
-                setOf("US", "CA"),
-                PhoneNumberState.OPTIONAL
+            countryElement = countryElement,
+            addressInputMode = AddressInputMode.AutocompleteCondensed(
+                googleApiKey = "some key",
+                autocompleteCountries = setOf("US", "CA"),
+                nameConfig = AddressFieldConfiguration.OPTIONAL,
+                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
+                emailConfig = AddressFieldConfiguration.OPTIONAL,
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
             shippingValuesMap = null,
-            isPlacesAvailable = { false },
+            isPlacesAvailable = false,
         )
         val identifierSpecs = addressElement.fields.first().map {
             it.identifier
@@ -375,15 +404,20 @@ class AddressElementTest {
         )
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingCondensed(
-                "some key",
-                setOf("US", "CA"),
-                PhoneNumberState.OPTIONAL
+            countryElement = CountryElement(
+                identifier = IdentifierSpec.Country,
+                controller = countryDropdownFieldController,
+            ),
+            addressInputMode = AddressInputMode.AutocompleteCondensed(
+                googleApiKey = "some key",
+                autocompleteCountries = setOf("US", "CA"),
+                nameConfig = AddressFieldConfiguration.OPTIONAL,
+                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
+                emailConfig = AddressFieldConfiguration.OPTIONAL,
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
             shippingValuesMap = null,
-            isPlacesAvailable = { false },
+            isPlacesAvailable = false,
         )
         countryDropdownFieldController.onValueChange(1)
 
@@ -399,15 +433,20 @@ class AddressElementTest {
         val onNavigationCounter = AtomicInteger(0)
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingExpanded(
-                "some key",
-                setOf("US", "CA"),
-                PhoneNumberState.OPTIONAL
+            countryElement = CountryElement(
+                identifier = IdentifierSpec.Country,
+                controller = countryDropdownFieldController,
+            ),
+            addressInputMode = AddressInputMode.AutocompleteExpanded(
+                googleApiKey = "some key",
+                autocompleteCountries = setOf("US", "CA"),
+                nameConfig = AddressFieldConfiguration.OPTIONAL,
+                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
+                emailConfig = AddressFieldConfiguration.OPTIONAL,
             ) { onNavigationCounter.getAndIncrement() },
             sameAsShippingElement = null,
             shippingValuesMap = null,
-            isPlacesAvailable = { true },
+            isPlacesAvailable = true,
         )
         countryDropdownFieldController.onValueChange(1)
 
@@ -421,34 +460,39 @@ class AddressElementTest {
     }
 
     @Test
-    fun `when google api key not supplied, condensed shipping address element is not one line address element`() = runTest {
-        val addressElement = AddressElement(
-            IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingCondensed(
-                null,
-                setOf(),
-                PhoneNumberState.OPTIONAL
-            ) { throw AssertionError("Not Expected") },
-            sameAsShippingElement = null,
-            shippingValuesMap = null
-        )
+    fun `when google api key not supplied, condensed shipping address element is not one line address element`() =
+        runTest {
+            val addressElement = AddressElement(
+                IdentifierSpec.Generic("address"),
+                countryElement = countryElement,
+                addressInputMode = AddressInputMode.AutocompleteCondensed(
+                    googleApiKey = null,
+                    autocompleteCountries = setOf(),
+                    nameConfig = AddressFieldConfiguration.OPTIONAL,
+                    phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
+                    emailConfig = AddressFieldConfiguration.OPTIONAL,
+                ) { throw AssertionError("Not Expected") },
+                sameAsShippingElement = null,
+                shippingValuesMap = null
+            )
 
-        val identifierSpecs = addressElement.fields.first().map {
-            it.identifier
+            val identifierSpecs = addressElement.fields.first().map {
+                it.identifier
+            }
+            assertThat(identifierSpecs.contains(IdentifierSpec.OneLineAddress)).isFalse()
         }
-        assertThat(identifierSpecs.contains(IdentifierSpec.OneLineAddress)).isFalse()
-    }
 
     @Test
     fun `expanded shipping address element should not have one line address element`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingExpanded(
+            countryElement = countryElement,
+            addressInputMode = AddressInputMode.AutocompleteExpanded(
                 googleApiKey = null,
                 autocompleteCountries = null,
-                phoneNumberState = PhoneNumberState.OPTIONAL,
+                nameConfig = AddressFieldConfiguration.OPTIONAL,
+                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
+                emailConfig = AddressFieldConfiguration.OPTIONAL,
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
             shippingValuesMap = null
@@ -471,8 +515,8 @@ class AddressElementTest {
             mapOf(
                 IdentifierSpec.Country to "CA"
             ),
-            countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.Normal(),
+            countryElement = countryElement,
+            addressInputMode = AddressInputMode.NoAutocomplete(),
             sameAsShippingElement = sameAsShippingElement,
             shippingValuesMap = mapOf(
                 IdentifierSpec.Country to "US"
@@ -486,7 +530,7 @@ class AddressElementTest {
                 .first()[0].second.value
         }
 
-        countryDropdownFieldController.onValueChange(1)
+        countryElement.controller.onValueChange(1)
 
         assertThat(country()).isEqualTo("CA")
 
@@ -502,9 +546,9 @@ class AddressElementTest {
             mapOf(
                 IdentifierSpec.Country to "CA"
             ),
-            countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.Normal(
-                phoneNumberState = PhoneNumberState.REQUIRED
+            countryElement = countryElement,
+            addressInputMode = AddressInputMode.NoAutocomplete(
+                phoneNumberConfig = AddressFieldConfiguration.REQUIRED
             ),
             sameAsShippingElement = null,
             shippingValuesMap = null,
@@ -526,11 +570,13 @@ class AddressElementTest {
         return AddressElement(
             IdentifierSpec.Generic("address"),
             rawValuesMap = initialValues,
-            countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingCondensed(
+            countryElement = countryElement,
+            addressInputMode = AddressInputMode.AutocompleteCondensed(
                 googleApiKey = null,
                 autocompleteCountries = setOf(),
-                phoneNumberState = PhoneNumberState.OPTIONAL
+                nameConfig = AddressFieldConfiguration.OPTIONAL,
+                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
+                emailConfig = AddressFieldConfiguration.OPTIONAL,
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
             shippingValuesMap = null,

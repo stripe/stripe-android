@@ -23,7 +23,6 @@ buildscript {
         classpath buildLibs.kotlinGradlePlugin
         classpath buildLibs.kotlinSerializationPlugin
         classpath buildLibs.paparazzi
-        classpath buildLibs.shot
     }
 }
 
@@ -69,6 +68,7 @@ nexusPublishing {
 
     repositories {
         sonatype {
+            nexusUrl = uri("https://ossrh-staging-api.central.sonatype.com/service/local/")
             username = project.findProperty('NEXUS_USERNAME') ?: ""
             password = project.findProperty('NEXUS_PASSWORD') ?: ""
         }
@@ -107,6 +107,7 @@ apiValidation {
             "3ds2playground",
             "dokka-stripe",
             "stripe-test-e2e",
+            "stripe-crypto-onramp-example",
     ]
     nonPublicMarkers.add("androidx.annotation.RestrictTo")
     nonPublicMarkers.add("dagger.internal.DaggerGenerated")

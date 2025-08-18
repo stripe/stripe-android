@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -70,6 +71,206 @@ internal class VerticalModeFormUIScreenshotTest {
     }
 
     @Test
+    fun fullCardFormWithAddressBillingDetails() {
+        val metadata = PaymentMethodMetadataFactory.create()
+        val initialScreen = VerticalModeForm(
+            FakeVerticalModeFormInteractor.create(
+                paymentMethodCode = "card",
+                metadata = metadata.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    )
+                ),
+            )
+        )
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = true)
+
+        paparazziRule.snapshot {
+            ViewModelStoreOwnerContext {
+                PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+            }
+        }
+    }
+
+    @Test
+    fun fullCardFormWithFullBillingDetails() {
+        val metadata = PaymentMethodMetadataFactory.create()
+        val initialScreen = VerticalModeForm(
+            FakeVerticalModeFormInteractor.create(
+                paymentMethodCode = "card",
+                metadata = metadata.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    )
+                ),
+            )
+        )
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = true)
+
+        paparazziRule.snapshot {
+            ViewModelStoreOwnerContext {
+                PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+            }
+        }
+    }
+
+    @Test
+    fun fullCardFormWithZipAndContactInfo() {
+        val metadata = PaymentMethodMetadataFactory.create()
+        val initialScreen = VerticalModeForm(
+            FakeVerticalModeFormInteractor.create(
+                paymentMethodCode = "card",
+                metadata = metadata.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+                    )
+                ),
+            )
+        )
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = true)
+
+        paparazziRule.snapshot {
+            ViewModelStoreOwnerContext {
+                PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+            }
+        }
+    }
+
+    @Test
+    fun fullCardFormWithAddressAndEmail() {
+        val metadata = PaymentMethodMetadataFactory.create()
+        val initialScreen = VerticalModeForm(
+            FakeVerticalModeFormInteractor.create(
+                paymentMethodCode = "card",
+                metadata = metadata.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    )
+                ),
+            )
+        )
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = true)
+
+        paparazziRule.snapshot {
+            ViewModelStoreOwnerContext {
+                PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+            }
+        }
+    }
+
+    @Test
+    fun fullCardFormWithAddressAndPhone() {
+        val metadata = PaymentMethodMetadataFactory.create()
+        val initialScreen = VerticalModeForm(
+            FakeVerticalModeFormInteractor.create(
+                paymentMethodCode = "card",
+                metadata = metadata.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    )
+                ),
+            )
+        )
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = true)
+
+        paparazziRule.snapshot {
+            ViewModelStoreOwnerContext {
+                PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+            }
+        }
+    }
+
+    @Test
+    fun fullCardFormWithEmail() {
+        val metadata = PaymentMethodMetadataFactory.create()
+        val initialScreen = VerticalModeForm(
+            FakeVerticalModeFormInteractor.create(
+                paymentMethodCode = "card",
+                metadata = metadata.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                    )
+                ),
+            )
+        )
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = true)
+
+        paparazziRule.snapshot {
+            ViewModelStoreOwnerContext {
+                PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+            }
+        }
+    }
+
+    @Test
+    fun fullCardFormWithPhone() {
+        val metadata = PaymentMethodMetadataFactory.create()
+        val initialScreen = VerticalModeForm(
+            FakeVerticalModeFormInteractor.create(
+                paymentMethodCode = "card",
+                metadata = metadata.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                    )
+                ),
+            )
+        )
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = true)
+
+        paparazziRule.snapshot {
+            ViewModelStoreOwnerContext {
+                PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+            }
+        }
+    }
+
+    @Test
+    fun fullCardFormWithPhoneAndEmail() {
+        val metadata = PaymentMethodMetadataFactory.create()
+        val initialScreen = VerticalModeForm(
+            FakeVerticalModeFormInteractor.create(
+                paymentMethodCode = "card",
+                metadata = metadata.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                    )
+                ),
+            )
+        )
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = true)
+
+        paparazziRule.snapshot {
+            ViewModelStoreOwnerContext {
+                PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+            }
+        }
+    }
+
+    @Test
     fun fullCardFormWithError() {
         val metadata = PaymentMethodMetadataFactory.create()
         val initialScreen = VerticalModeForm(
@@ -101,7 +302,7 @@ internal class VerticalModeFormUIScreenshotTest {
         val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
         viewModel.walletsStateSource.value = WalletsState(
             link = WalletsState.Link(
-                email = null,
+                state = LinkButtonState.Default,
             ),
             googlePay = null,
             buttonsEnabled = true,

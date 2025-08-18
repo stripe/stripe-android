@@ -148,6 +148,12 @@ constructor(
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val linkPaymentDetails: LinkPaymentDetails? = null,
 
     /**
+     * Indicates whether this payment method was created in Link passthrough mode.
+     * A payment method is in passthrough mode if it was created through Link but doesn't have link details.
+     */
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val isLinkPassthroughMode: Boolean = false,
+
+    /**
      * Indicates whether this payment method can be shown again to its customer in a checkout flow. Stripe products
      * such as Checkout and Elements use this field to determine whether a payment method can be shown as a saved
      * payment method in a checkout flow. The field defaults to "unspecified".
@@ -159,7 +165,7 @@ constructor(
 
     val isLinkPaymentMethod: Boolean
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        get() = type == Type.Link && linkPaymentDetails != null
+        get() = linkPaymentDetails != null
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
     fun hasExpectedDetails(): Boolean =
@@ -376,6 +382,7 @@ constructor(
             requiresMandate = true,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
+            afterRedirectAction = AfterRedirectAction.Refresh(),
         ),
         Affirm(
             "affirm",
@@ -525,6 +532,14 @@ constructor(
             // after redirecting following a successful payment.
             // This allows time for the intent to transition to its terminal state.
             afterRedirectAction = AfterRedirectAction.Poll(),
+        ),
+        ShopPay(
+            code = "shop_pay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
         );
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet

@@ -40,7 +40,7 @@ internal class LinkPaymentLauncherTest {
 
         setupActivityResultRegistryMock(activityResultRegistry, activityResultLauncher)
 
-        linkPaymentLauncher.register(activityResultRegistry) {}
+        linkPaymentLauncher.register(activityResultRegistry = activityResultRegistry) {}
 
         verifyActivityResultRegistryRegister(activityResultRegistry, linkActivityContract)
     }
@@ -89,8 +89,9 @@ internal class LinkPaymentLauncherTest {
 
             linkPaymentLauncher.present(
                 configuration = TestFactory.LINK_CONFIGURATION,
-                linkAccount = TestFactory.LINK_ACCOUNT,
-                useLinkExpress = true
+                linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+                linkExpressMode = LinkExpressMode.ENABLED,
+                launchMode = LinkLaunchMode.Full
             )
 
             val launchCall = awaitLaunchCall()
@@ -99,8 +100,9 @@ internal class LinkPaymentLauncherTest {
                 .isEqualTo(
                     LinkActivityContract.Args(
                         configuration = TestFactory.LINK_CONFIGURATION,
-                        startWithVerificationDialog = true,
-                        linkAccount = TestFactory.LINK_ACCOUNT,
+                        linkExpressMode = LinkExpressMode.ENABLED,
+                        linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+                        launchMode = LinkLaunchMode.Full,
                     )
                 )
 
@@ -120,12 +122,13 @@ internal class LinkPaymentLauncherTest {
 
             linkPaymentLauncher.present(
                 configuration = TestFactory.LINK_CONFIGURATION,
-                linkAccount = TestFactory.LINK_ACCOUNT,
-                useLinkExpress = false
+                linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+                linkExpressMode = LinkExpressMode.DISABLED,
+                launchMode = LinkLaunchMode.Full
             )
 
             val launchCall = awaitLaunchCall() as? LinkActivityContract.Args
-            assertThat(launchCall?.startWithVerificationDialog).isFalse()
+            assertThat(launchCall?.linkExpressMode).isEqualTo(LinkExpressMode.DISABLED)
             awaitNextRegisteredLauncher()
         }
     }
@@ -134,7 +137,8 @@ internal class LinkPaymentLauncherTest {
     fun `ActivityResultRegistry callback should handle Completed result correctly`() {
         testActivityResultCallbackWithActivityResultRegistry(
             linkActivityResult = LinkActivityResult.Completed(
-                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
+                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+                selectedPayment = null,
             ),
             expectedMarkAsUsedCalls = 1,
         )
@@ -173,7 +177,8 @@ internal class LinkPaymentLauncherTest {
     fun `ActivityResultCaller callback should handle Completed result correctly`() {
         testActivityResultCallbackWithResultCaller(
             linkActivityResult = LinkActivityResult.Completed(
-                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
+                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+                selectedPayment = null
             ),
             expectedMarkAsUsedCalls = 1,
         )
@@ -222,12 +227,13 @@ internal class LinkPaymentLauncherTest {
             )
 
             var callbackParam: LinkActivityResult? = null
-            linkPaymentLauncher.register(activityResultRegistry) { callbackParam = it }
+            linkPaymentLauncher.register(activityResultRegistry = activityResultRegistry) { callbackParam = it }
 
             linkPaymentLauncher.present(
                 configuration = TestFactory.LINK_CONFIGURATION,
-                linkAccount = TestFactory.LINK_ACCOUNT,
-                useLinkExpress = true
+                linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+                linkExpressMode = LinkExpressMode.ENABLED,
+                launchMode = LinkLaunchMode.Full
             )
 
             verifyActivityResultCallback(
@@ -257,8 +263,9 @@ internal class LinkPaymentLauncherTest {
 
                 linkPaymentLauncher.present(
                     configuration = TestFactory.LINK_CONFIGURATION,
-                    linkAccount = TestFactory.LINK_ACCOUNT,
-                    useLinkExpress = true
+                    linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+                    linkExpressMode = LinkExpressMode.ENABLED,
+                    launchMode = LinkLaunchMode.Full
                 )
 
                 val registerCall = awaitRegisterCall()
@@ -314,7 +321,7 @@ internal class LinkPaymentLauncherTest {
         linkActivityContract: LinkActivityContract
     ) {
         verify(activityResultRegistry).register(
-            eq("LinkPaymentLauncher"),
+            eq("PaymentElementCallbackIdentifier_LinkPaymentLauncher"),
             eq(linkActivityContract),
             any()
         )
@@ -332,7 +339,8 @@ internal class LinkPaymentLauncherTest {
                 }
             },
             linkActivityContract = linkActivityContract,
-            linkStore = linkStore
+            linkStore = linkStore,
+            paymentElementCallbackIdentifier = "PaymentElementCallbackIdentifier"
         )
     }
 }

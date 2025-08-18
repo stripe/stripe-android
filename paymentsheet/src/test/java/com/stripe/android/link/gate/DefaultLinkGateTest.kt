@@ -257,10 +257,50 @@ internal class DefaultLinkGateTest {
         assertThat(gate.suppress2faModal).isFalse()
     }
 
+    @Test
+    fun `showRuxInFlowController - returns true when useNativeLink is true and disableRuxInFlowController is false`() {
+        nativeLinkFeatureFlagTestRule.setEnabled(true)
+        val gate = gate(
+            isLiveMode = false,
+            disableRuxInFlowController = false
+        )
+
+        assertThat(gate.showRuxInFlowController).isTrue()
+    }
+
+    @Test
+    fun `showRuxInFlowController - returns false when useNativeLink is true but disableRuxInFlowController is true`() {
+        nativeLinkFeatureFlagTestRule.setEnabled(true)
+        val gate = gate(
+            isLiveMode = false,
+            disableRuxInFlowController = true
+        )
+
+        assertThat(gate.showRuxInFlowController).isFalse()
+    }
+
+    @Test
+    fun `showRuxInFlowController - false when useNativeLink is false regardless of disableRuxInFlowController`() {
+        nativeLinkFeatureFlagTestRule.setEnabled(false)
+
+        val gateWithRuxEnabled = gate(
+            isLiveMode = false,
+            disableRuxInFlowController = false
+        )
+        assertThat(gateWithRuxEnabled.showRuxInFlowController).isFalse()
+
+        val gateWithRuxDisabled = gate(
+            isLiveMode = false,
+            disableRuxInFlowController = true
+        )
+        assertThat(gateWithRuxDisabled.showRuxInFlowController).isFalse()
+    }
+
     private fun gate(
         isLiveMode: Boolean = true,
         useAttestationEndpoints: Boolean = true,
-        suppress2faModal: Boolean = false
+        suppress2faModal: Boolean = false,
+        disableRuxInFlowController: Boolean = false
     ): DefaultLinkGate {
         val newIntent = when (val intent = TestFactory.LINK_CONFIGURATION.stripeIntent) {
             is PaymentIntent -> {
@@ -269,13 +309,13 @@ internal class DefaultLinkGateTest {
             is SetupIntent -> {
                 intent.copy(isLiveMode = isLiveMode)
             }
-            else -> intent
         }
         return DefaultLinkGate(
             configuration = TestFactory.LINK_CONFIGURATION.copy(
                 useAttestationEndpointsForLink = useAttestationEndpoints,
                 suppress2faModal = suppress2faModal,
-                stripeIntent = newIntent
+                stripeIntent = newIntent,
+                disableRuxInFlowController = disableRuxInFlowController
             )
         )
     }

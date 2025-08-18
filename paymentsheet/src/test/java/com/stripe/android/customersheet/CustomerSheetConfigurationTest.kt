@@ -14,9 +14,9 @@ class CustomerSheetConfigurationTest {
     fun `Builder returns a configuration`() {
         val googlePayEnabled = true
         val merchantDisplayName = "Test"
-        val appearance = PaymentSheet.Appearance().copy(
-            typography = PaymentSheet.Typography.default
-        )
+        val appearance = PaymentSheet.Appearance.Builder()
+            .typography(PaymentSheet.Typography.default)
+            .build()
         val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
             name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
         )

@@ -6,6 +6,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.testing.PaymentMethodFactory
@@ -24,6 +25,7 @@ internal class FakeUpdatePaymentMethodInteractor(
     override val shouldShowSetAsDefaultCheckbox: Boolean = false,
     override val shouldShowSaveButton: Boolean = false,
     override val addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Automatic,
+    override val allowedBillingCountries: Set<String> = setOf("US", "CA"),
     val viewActionRecorder: ViewActionRecorder<UpdatePaymentMethodInteractor.ViewAction>? = ViewActionRecorder(),
     initialState: UpdatePaymentMethodInteractor.State = UpdatePaymentMethodInteractor.State(
         error = null,
@@ -45,17 +47,21 @@ internal class FakeUpdatePaymentMethodInteractor(
             displayableSavedPaymentMethod.isModifiable(canUpdateFullPaymentMethodDetails)
         editCardDetailsInteractorFactory.create(
             coroutineScope = TestScope(),
-            isCbcModifiable = isModifiable && displayableSavedPaymentMethod.canChangeCbc(),
-            cardBrandFilter = cardBrandFilter,
+            cardEditConfiguration = CardEditConfiguration(
+                cardBrandFilter = cardBrandFilter,
+                isCbcModifiable = isModifiable && displayableSavedPaymentMethod.canChangeCbc(),
+                areExpiryDateAndAddressModificationSupported = isModifiable && canUpdateFullPaymentMethodDetails
+            ),
+            requiresModification = true,
             payload = EditCardPayload.create(
                 card = displayableSavedPaymentMethod.paymentMethod.card!!,
                 billingDetails = PaymentMethodFixtures.BILLING_DETAILS,
             ),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                address = addressCollectionMode
+            ),
             onBrandChoiceChanged = {},
             onCardUpdateParamsChanged = {},
-            areExpiryDateAndAddressModificationSupported =
-            isModifiable && canUpdateFullPaymentMethodDetails,
-            addressCollectionMode = addressCollectionMode,
         )
     }
 

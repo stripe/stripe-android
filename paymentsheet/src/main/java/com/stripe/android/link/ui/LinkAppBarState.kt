@@ -1,30 +1,39 @@
 package com.stripe.android.link.ui
 
-import androidx.annotation.DrawableRes
+import androidx.navigation.NavBackStackEntry
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkScreen
+import com.stripe.android.link.LinkScreen.Companion.billingDetailsUpdateFlow
 import com.stripe.android.paymentsheet.R
 
 internal data class LinkAppBarState(
-    @DrawableRes val navigationIcon: Int,
     val showHeader: Boolean,
-    val showOverflowMenu: Boolean,
+    val canNavigateBack: Boolean,
+    val title: ResolvableString?,
+    val isElevated: Boolean,
 ) {
+
+    val canShowCloseIcon: Boolean
+        get() = !canNavigateBack
 
     internal companion object {
 
         fun initial(): LinkAppBarState {
             return LinkAppBarState(
-                navigationIcon = R.drawable.stripe_link_close,
                 showHeader = true,
-                showOverflowMenu = false,
+                canNavigateBack = false,
+                title = null,
+                isElevated = false,
             )
         }
 
         fun create(
-            route: String?,
+            currentEntry: NavBackStackEntry?,
             previousEntryRoute: String?,
             consumerIsSigningUp: Boolean,
         ): LinkAppBarState {
+            val route = currentEntry?.destination?.route
             val showHeaderRoutes = mutableSetOf(
                 LinkScreen.Loading.route,
                 LinkScreen.SignUp.route,
@@ -37,15 +46,36 @@ internal data class LinkAppBarState(
                 showHeaderRoutes.add(LinkScreen.PaymentMethod.route)
             }
 
+            val title = when (route) {
+                LinkScreen.PaymentMethod.route -> {
+                    if (consumerIsSigningUp) {
+                        // Don't show a title if there's no previous screen, which is the case
+                        // if we're in the signup flow
+                        null
+                    } else {
+                        R.string.stripe_add_payment_method.resolvableString
+                    }
+                }
+                LinkScreen.UpdateCard.route -> {
+                    updateCardTitle(currentEntry)
+                }
+                else -> null
+            }
+
             return LinkAppBarState(
                 showHeader = route in showHeaderRoutes,
-                showOverflowMenu = route == LinkScreen.Wallet.route,
-                navigationIcon = if (previousEntryRoute != null) {
-                    R.drawable.stripe_link_back
-                } else {
-                    R.drawable.stripe_link_close
-                },
+                canNavigateBack = previousEntryRoute != null,
+                title = title,
+                isElevated = false,
             )
+        }
+
+        private fun updateCardTitle(currentEntry: NavBackStackEntry): ResolvableString {
+            return if (currentEntry.billingDetailsUpdateFlow() != null) {
+                R.string.stripe_link_confirm_payment_title.resolvableString
+            } else {
+                R.string.stripe_link_update_card_title.resolvableString
+            }
         }
     }
 }

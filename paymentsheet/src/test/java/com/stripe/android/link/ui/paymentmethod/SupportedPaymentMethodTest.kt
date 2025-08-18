@@ -28,7 +28,6 @@ class SupportedPaymentMethodTest {
             ConsumerPaymentDetailsCreateParams.Card(
                 cardPaymentMethodCreateParamsMap = paymentMethodCreateParams,
                 email = "email@test.com",
-                active = false,
             ).toParamMap()
         ).isEqualTo(
             mapOf(
@@ -43,7 +42,7 @@ class SupportedPaymentMethodTest {
                     "country_code" to "US",
                     "postal_code" to "12345"
                 ),
-                "active" to false,
+                "active" to true,
             )
         )
     }

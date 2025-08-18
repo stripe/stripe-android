@@ -1,8 +1,10 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import android.os.Parcelable
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -10,19 +12,50 @@ import javax.inject.Singleton
  * Coordinates the navigation between screens.
  * TODO combine this with Link's navigator class.
  */
+internal interface AddressElementNavigator {
+    fun navigateTo(
+        target: AddressElementScreen
+    )
+
+    fun setResult(key: String, value: Any?)
+
+    fun <T : Any?> getResultFlow(key: String): Flow<T>?
+
+    fun dismiss(result: AddressLauncherResult = AddressLauncherResult.Canceled)
+
+    fun onBack()
+
+    sealed interface AutocompleteEvent : Parcelable {
+        val addressDetails: AddressDetails?
+
+        @Parcelize
+        data class OnBack(override val addressDetails: AddressDetails?) : AutocompleteEvent
+
+        @Parcelize
+        data class OnEnterManually(override val addressDetails: AddressDetails?) : AutocompleteEvent
+
+        companion object {
+            const val KEY = "AutocompleteEvent"
+        }
+    }
+}
+
 @Singleton
-internal class AddressElementNavigator @Inject constructor() {
+internal class NavHostAddressElementNavigator @Inject constructor() : AddressElementNavigator {
     var navigationController: NavHostController? = null
     var onDismiss: ((AddressLauncherResult) -> Unit)? = null
 
-    fun navigateTo(
+    override fun navigateTo(
         target: AddressElementScreen
-    ) = navigationController?.navigate(target.route)
+    ) {
+        navigationController?.navigate(target.route)
+    }
 
-    fun setResult(key: String, value: Any?) =
+    override fun setResult(key: String, value: Any?) {
         navigationController?.previousBackStackEntry?.savedStateHandle?.set(key, value)
+    }
 
-    fun <T : Any?> getResultFlow(key: String): Flow<T>? {
+    override fun <T : Any?> getResultFlow(key: String): Flow<T>? {
         val currentBackStackEntry = navigationController?.currentBackStackEntry ?: return null
         return currentBackStackEntry
             .savedStateHandle
@@ -30,19 +63,15 @@ internal class AddressElementNavigator @Inject constructor() {
             .filterNotNull()
     }
 
-    fun dismiss(result: AddressLauncherResult = AddressLauncherResult.Canceled) {
+    override fun dismiss(result: AddressLauncherResult) {
         onDismiss?.invoke(result)
     }
 
-    fun onBack() {
+    override fun onBack() {
         navigationController?.let { navController ->
             if (!navController.popBackStack()) {
                 dismiss()
             }
         }
-    }
-
-    companion object {
-        internal const val FORCE_EXPANDED_FORM_KEY = "force_expanded_form"
     }
 }

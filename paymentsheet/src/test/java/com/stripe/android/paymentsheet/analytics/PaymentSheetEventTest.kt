@@ -12,8 +12,8 @@ import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
 import com.stripe.android.model.PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -41,6 +41,7 @@ class PaymentSheetEventTest {
             primaryButtonColor = config.primaryButtonColorUsage(),
             configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
             isDeferred = false,
+            isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
             isStripeCardScanAvailable = true,
@@ -77,6 +78,7 @@ class PaymentSheetEventTest {
             primaryButtonColor = config.primaryButtonColorUsage(),
             configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
             isDeferred = false,
+            isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
             isStripeCardScanAvailable = true,
@@ -113,6 +115,7 @@ class PaymentSheetEventTest {
             primaryButtonColor = config.primaryButtonColorUsage(),
             configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
             isDeferred = false,
+            isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
             isStripeCardScanAvailable = true,
@@ -141,9 +144,9 @@ class PaymentSheetEventTest {
 
     @Test
     fun `Init event with vertical mode should return expected params`() {
-        val config = PaymentSheetFixtures.CONFIG_CUSTOMER.copy(
-            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical
-        )
+        val config = PaymentSheetFixtures.CONFIG_CUSTOMER.newBuilder()
+            .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+            .build()
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
             configuration = config.asCommonConfiguration(),
@@ -151,6 +154,7 @@ class PaymentSheetEventTest {
             primaryButtonColor = config.primaryButtonColorUsage(),
             configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
             isDeferred = false,
+            isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
             isStripeCardScanAvailable = true,
@@ -187,6 +191,7 @@ class PaymentSheetEventTest {
             primaryButtonColor = config.primaryButtonColorUsage(),
             configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
             isDeferred = false,
+            isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
             isStripeCardScanAvailable = true,
@@ -211,9 +216,9 @@ class PaymentSheetEventTest {
 
     @Test
     fun `Init event with preferred networks`() {
-        val config = PaymentSheetFixtures.CONFIG_MINIMUM.copy(
-            preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa)
-        )
+        val config = PaymentSheetFixtures.CONFIG_MINIMUM.newBuilder()
+            .preferredNetworks(listOf(CardBrand.CartesBancaires, CardBrand.Visa))
+            .build()
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
             configuration = config.asCommonConfiguration(),
@@ -221,6 +226,7 @@ class PaymentSheetEventTest {
             primaryButtonColor = config.primaryButtonColorUsage(),
             configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
             isDeferred = false,
+            isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
             isStripeCardScanAvailable = true,
@@ -248,12 +254,13 @@ class PaymentSheetEventTest {
     @Test
     fun `Init with legacy customer has expected keys`() {
         val event = createInitEvent(
-            configuration = PaymentSheetFixtures.CONFIG_MINIMUM.copy(
-                customer = PaymentSheet.CustomerConfiguration(
-                    id = "cus_1",
-                    ephemeralKeySecret = "ek_123"
-                )
-            )
+            configuration = PaymentSheetFixtures.CONFIG_MINIMUM.newBuilder()
+                .customer(
+                    PaymentSheet.CustomerConfiguration(
+                        id = "cus_1",
+                        ephemeralKeySecret = "ek_123"
+                    )
+                ).build()
         )
 
         val config = event.params["mpe_config"]?.asMap()
@@ -266,12 +273,13 @@ class PaymentSheetEventTest {
     @Test
     fun `Init with customer session enabled customer has expected keys`() {
         val event = createInitEvent(
-            configuration = PaymentSheetFixtures.CONFIG_MINIMUM.copy(
-                customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                    id = "cus_1",
-                    clientSecret = "ek_123",
-                )
-            )
+            configuration = PaymentSheetFixtures.CONFIG_MINIMUM.newBuilder()
+                .customer(
+                    PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                        id = "cus_1",
+                        clientSecret = "ek_123",
+                    )
+                ).build()
         )
 
         val config = event.params["mpe_config"]?.asMap()
@@ -280,7 +288,6 @@ class PaymentSheetEventTest {
         assertThat(config).containsEntry("customer_access_provider", "customer_session")
     }
 
-    @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
     @Test
     fun `Init event with embedded appearance should return expected params`() {
         val config = EmbeddedPaymentElement.Configuration.Builder("Example, Inc")
@@ -299,8 +306,12 @@ class PaymentSheetEventTest {
             configuration = config.asCommonConfiguration(),
             appearance = config.appearance,
             primaryButtonColor = null,
-            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.Embedded(config),
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.Embedded(
+                configuration = config,
+                isRowSelectionImmediateAction = false
+            ),
             isDeferred = true,
+            isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
             isStripeCardScanAvailable = true,
@@ -325,6 +336,7 @@ class PaymentSheetEventTest {
             primaryButtonColor = null,
         ) {
             put("form_sheet_action", "confirm")
+            put("row_selection_behavior", "default")
             put("embedded_view_displays_mandate_text", true)
         }
 
@@ -336,7 +348,6 @@ class PaymentSheetEventTest {
         }
     }
 
-    @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
     @Test
     fun `Init event with embedded should return expected params`() {
         val config = EmbeddedPaymentElement.Configuration.Builder("Example, Inc")
@@ -355,8 +366,12 @@ class PaymentSheetEventTest {
             configuration = config.asCommonConfiguration(),
             appearance = config.appearance,
             primaryButtonColor = null,
-            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.Embedded(config),
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.Embedded(
+                configuration = config,
+                isRowSelectionImmediateAction = false
+            ),
             isDeferred = true,
+            isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
             isStripeCardScanAvailable = true,
@@ -381,6 +396,7 @@ class PaymentSheetEventTest {
             primaryButtonColor = null,
         ) {
             put("form_sheet_action", "continue")
+            put("row_selection_behavior", "default")
             put("embedded_view_displays_mandate_text", false)
         }
 
@@ -388,6 +404,63 @@ class PaymentSheetEventTest {
             containsEntry("link_enabled", false)
             containsEntry("google_pay_enabled", false)
             containsEntry("is_decoupled", true)
+            containsEntry("mpe_config", expectedConfig)
+        }
+    }
+
+    @Test
+    fun `Init event with embedded immediateRowSelectionBehavior should return expected params`() {
+        val config = EmbeddedPaymentElement.Configuration.Builder("Example, Inc")
+            .appearance(
+                PaymentSheet.Appearance(
+                    embeddedAppearance = PaymentSheet.Appearance.Embedded(
+                        style = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.default
+                    )
+                )
+            )
+            .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
+            .embeddedViewDisplaysMandateText(false)
+            .build()
+        val event = PaymentSheetEvent.Init(
+            mode = EventReporter.Mode.Embedded,
+            configuration = config.asCommonConfiguration(),
+            appearance = config.appearance,
+            primaryButtonColor = null,
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.Embedded(
+                configuration = config,
+                isRowSelectionImmediateAction = true
+            ),
+            isDeferred = true,
+            isSpt = false,
+            linkEnabled = false,
+            googlePaySupported = false,
+            isStripeCardScanAvailable = true,
+            isAnalyticEventCallbackSet = false,
+        )
+
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_embedded_init"
+        )
+
+        val expectedConfig = buildInitMpeConfig(
+            appearanceMap = buildAppearanceMap(
+                usedParams = false,
+                embeddedConfig = mapOf(
+                    "style" to true,
+                    "row_style" to "flat_with_checkmark"
+                )
+            ),
+            paymentMethodLayout = null,
+            primaryButtonColor = null,
+        ) {
+            put("form_sheet_action", "continue")
+            put("row_selection_behavior", "immediate_action")
+            put("embedded_view_displays_mandate_text", false)
+        }
+
+        assertThat(event.params).run {
             containsEntry("mpe_config", expectedConfig)
         }
     }
@@ -404,6 +477,7 @@ class PaymentSheetEventTest {
             mapOf(
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "is_spt" to false,
                 "google_pay_enabled" to false,
                 "duration" to 5f,
                 "selected_lpm" to "none",
@@ -411,7 +485,9 @@ class PaymentSheetEventTest {
                 "ordered_lpms" to "card,klarna",
                 "require_cvc_recollection" to false,
                 "link_display" to "automatic",
-                "fc_sdk_availability" to "FULL"
+                "fc_sdk_availability" to "FULL",
+                "payment_method_options_setup_future_usage" to false,
+                "setup_future_usage" to null,
             )
         )
     }
@@ -558,6 +634,30 @@ class PaymentSheetEventTest {
     }
 
     @Test
+    fun `LoadSucceeded with paymentMethodOptionsSetupFutureUsage should return expected params`() {
+        val event = createLoadSucceededEvent(
+            paymentMethodOptionsSetupfutureUsage = true
+        )
+
+        assertThat(event.params).containsEntry(
+            "payment_method_options_setup_future_usage",
+            true
+        )
+    }
+
+    @Test
+    fun `LoadSucceeded with setup future usage should return expected params`() {
+        val event = createLoadSucceededEvent(
+            setupFutureUsage = StripeIntent.Usage.OffSession
+        )
+
+        assertThat(event.params).containsEntry(
+            "setup_future_usage",
+            "off_session"
+        )
+    }
+
+    @Test
     fun `New payment method event should return expected event`() {
         val newPMEvent = newCardPaymentMethod(
             result = PaymentSheetEvent.Payment.Result.Success,
@@ -574,6 +674,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
                 "selected_lpm" to "card",
@@ -630,6 +731,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
                 "selected_lpm" to "card",
@@ -655,6 +757,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
                 "selected_lpm" to "google_pay",
@@ -680,6 +783,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
                 "selected_lpm" to "link",
@@ -706,6 +810,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "selected_lpm" to "card",
                 "google_pay_enabled" to false,
@@ -738,6 +843,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
                 "selected_lpm" to "external_fawry",
@@ -769,6 +875,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
                 "selected_lpm" to "cpmt_1",
@@ -803,6 +910,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
                 "selected_lpm" to "external_fawry",
@@ -839,6 +947,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
                 "selected_lpm" to "cpmt_1",
@@ -866,6 +975,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
                 "selected_lpm" to "card",
@@ -929,6 +1039,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
                 "selected_lpm" to "card",
@@ -957,6 +1068,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
                 "selected_lpm" to "google_pay",
@@ -985,6 +1097,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
                 "selected_lpm" to "link",
@@ -1014,6 +1127,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "selected_lpm" to "card",
                 "google_pay_enabled" to false,
@@ -1029,6 +1143,7 @@ class PaymentSheetEventTest {
             code = "card",
             currency = "usd",
             isDeferred = false,
+            isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
         )
@@ -1044,6 +1159,7 @@ class PaymentSheetEventTest {
                 "selected_lpm" to "card",
                 "currency" to "usd",
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
             )
@@ -1057,6 +1173,7 @@ class PaymentSheetEventTest {
             paymentSelection = PaymentSelection.GooglePay,
             currency = "usd",
             isDeferred = false,
+            isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
         )
@@ -1071,6 +1188,7 @@ class PaymentSheetEventTest {
             mapOf(
                 "currency" to "usd",
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
             )
@@ -1082,6 +1200,7 @@ class PaymentSheetEventTest {
         val event = PaymentSheetEvent.ShowPaymentOptionForm(
             code = "card",
             isDeferred = false,
+            isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
         )
@@ -1096,6 +1215,7 @@ class PaymentSheetEventTest {
             mapOf(
                 "selected_lpm" to "card",
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
             )
@@ -1107,6 +1227,7 @@ class PaymentSheetEventTest {
         val event = PaymentSheetEvent.PaymentOptionFormInteraction(
             code = "card",
             isDeferred = false,
+            isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
         )
@@ -1121,6 +1242,7 @@ class PaymentSheetEventTest {
             mapOf(
                 "selected_lpm" to "card",
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
             )
@@ -1132,6 +1254,7 @@ class PaymentSheetEventTest {
         val event = PaymentSheetEvent.PaymentMethodFormCompleted(
             code = "card",
             isDeferred = false,
+            isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
         )
@@ -1146,6 +1269,7 @@ class PaymentSheetEventTest {
             mapOf(
                 "selected_lpm" to "card",
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
             )
@@ -1156,6 +1280,7 @@ class PaymentSheetEventTest {
     fun `CardNumberCompleted event should return expected toString()`() {
         val event = PaymentSheetEvent.CardNumberCompleted(
             isDeferred = false,
+            isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
         )
@@ -1169,6 +1294,7 @@ class PaymentSheetEventTest {
         ).isEqualTo(
             mapOf(
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
             )
@@ -1179,6 +1305,7 @@ class PaymentSheetEventTest {
     fun `ShowEditablePaymentOption event should return expected toString()`() {
         val event = PaymentSheetEvent.ShowEditablePaymentOption(
             isDeferred = false,
+            isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
         )
@@ -1192,6 +1319,7 @@ class PaymentSheetEventTest {
         ).isEqualTo(
             mapOf(
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
             )
@@ -1202,6 +1330,7 @@ class PaymentSheetEventTest {
     fun `HideEditablePaymentOption event should return expected toString()`() {
         val event = PaymentSheetEvent.HideEditablePaymentOption(
             isDeferred = false,
+            isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
         )
@@ -1215,6 +1344,7 @@ class PaymentSheetEventTest {
         ).isEqualTo(
             mapOf(
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
             )
@@ -1227,6 +1357,7 @@ class PaymentSheetEventTest {
             selectedBrand = CardBrand.CartesBancaires,
             source = PaymentSheetEvent.CardBrandSelected.Source.Add,
             isDeferred = false,
+            isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
         )
@@ -1242,6 +1373,7 @@ class PaymentSheetEventTest {
                 "cbc_event_source" to "add",
                 "selected_card_brand" to "cartes_bancaires",
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
             )
@@ -1254,6 +1386,7 @@ class PaymentSheetEventTest {
             selectedBrand = CardBrand.CartesBancaires,
             source = PaymentSheetEvent.CardBrandSelected.Source.Edit,
             isDeferred = false,
+            isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
         )
@@ -1269,6 +1402,7 @@ class PaymentSheetEventTest {
                 "cbc_event_source" to "edit",
                 "selected_card_brand" to "cartes_bancaires",
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
             )
@@ -1280,6 +1414,7 @@ class PaymentSheetEventTest {
         val event = PaymentSheetEvent.UpdatePaymentOptionSucceeded(
             selectedBrand = CardBrand.CartesBancaires,
             isDeferred = false,
+            isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
         )
@@ -1294,6 +1429,7 @@ class PaymentSheetEventTest {
             mapOf(
                 "selected_card_brand" to "cartes_bancaires",
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
             )
@@ -1310,6 +1446,7 @@ class PaymentSheetEventTest {
                 message = "No network available!"
             ),
             isDeferred = false,
+            isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
         )
@@ -1325,6 +1462,7 @@ class PaymentSheetEventTest {
                 "selected_card_brand" to "cartes_bancaires",
                 "error_message" to "No network available!",
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
                 "analytics_value" to "apiError",
@@ -1339,6 +1477,7 @@ class PaymentSheetEventTest {
     fun `SetAsDefaultPaymentMethodSucceeded event with setAsDefaultPaymentMethod should return expected toString()`() {
         val event = PaymentSheetEvent.SetAsDefaultPaymentMethodSucceeded(
             isDeferred = false,
+            isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
             paymentMethodType = PaymentMethod.Type.Card.code,
@@ -1353,6 +1492,7 @@ class PaymentSheetEventTest {
         ).isEqualTo(
             mapOf(
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
                 "payment_method_type" to "card",
@@ -1369,6 +1509,7 @@ class PaymentSheetEventTest {
                 message = "No network available!"
             ),
             isDeferred = false,
+            isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
             paymentMethodType = PaymentMethod.Type.Card.code,
@@ -1384,6 +1525,7 @@ class PaymentSheetEventTest {
             mapOf(
                 "error_message" to "No network available!",
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
                 "payment_method_type" to "card",
@@ -1407,6 +1549,7 @@ class PaymentSheetEventTest {
                 primaryButtonColor = config.primaryButtonColorUsage(),
                 configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
                 isDeferred = false,
+                isSpt = false,
                 linkEnabled = false,
                 googlePaySupported = false,
                 isStripeCardScanAvailable = true,
@@ -1416,6 +1559,7 @@ class PaymentSheetEventTest {
             mapOf(
                 "mpe_config" to expectedConfigMap,
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
             )
@@ -1453,6 +1597,7 @@ class PaymentSheetEventTest {
                 primaryButtonColor = config.primaryButtonColorUsage(),
                 configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
                 isDeferred = false,
+                isSpt = false,
                 linkEnabled = false,
                 googlePaySupported = false,
                 isStripeCardScanAvailable = true,
@@ -1462,6 +1607,7 @@ class PaymentSheetEventTest {
             mapOf(
                 "mpe_config" to expectedConfigMap,
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
             )
@@ -1479,6 +1625,7 @@ class PaymentSheetEventTest {
                 configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
                 primaryButtonColor = config.primaryButtonColorUsage(),
                 isDeferred = false,
+                isSpt = false,
                 linkEnabled = false,
                 googlePaySupported = false,
                 isStripeCardScanAvailable = true,
@@ -1498,6 +1645,7 @@ class PaymentSheetEventTest {
                 configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
                 primaryButtonColor = config.primaryButtonColorUsage(),
                 isDeferred = false,
+                isSpt = false,
                 linkEnabled = false,
                 googlePaySupported = false,
                 isStripeCardScanAvailable = false,
@@ -1517,6 +1665,7 @@ class PaymentSheetEventTest {
                 configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
                 primaryButtonColor = config.primaryButtonColorUsage(),
                 isDeferred = false,
+                isSpt = false,
                 linkEnabled = false,
                 googlePaySupported = false,
                 isStripeCardScanAvailable = true,
@@ -1536,6 +1685,7 @@ class PaymentSheetEventTest {
                 configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
                 primaryButtonColor = config.primaryButtonColorUsage(),
                 isDeferred = false,
+                isSpt = false,
                 linkEnabled = false,
                 googlePaySupported = false,
                 isStripeCardScanAvailable = false,
@@ -1551,6 +1701,7 @@ class PaymentSheetEventTest {
             currency = "USD",
             duration = 60.seconds,
             isDeferred = false,
+            isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
             linkContext = null,
@@ -1567,6 +1718,7 @@ class PaymentSheetEventTest {
             mapOf(
                 "selected_lpm" to "card",
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
                 "duration" to 60f,
@@ -1583,6 +1735,7 @@ class PaymentSheetEventTest {
             currency = null,
             duration = null,
             isDeferred = false,
+            isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
             linkContext = null,
@@ -1598,6 +1751,7 @@ class PaymentSheetEventTest {
         ).isEqualTo(
             mapOf(
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
                 "fc_sdk_availability" to "LITE"
@@ -1622,6 +1776,7 @@ class PaymentSheetEventTest {
         ).isEqualTo(
             mapOf(
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
             )
@@ -1642,8 +1797,103 @@ class PaymentSheetEventTest {
         ).isEqualTo(
             mapOf(
                 "is_decoupled" to false,
+                "is_spt" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
+            )
+        )
+    }
+
+    @Test
+    fun `ShopPayWebviewLoadAttempt event should return expected event name and params`() {
+        val event = PaymentSheetEvent.ShopPayWebviewLoadAttempt(
+            isDeferred = false,
+            isSpt = false,
+            linkEnabled = false,
+            googlePaySupported = false,
+        )
+
+        assertThat(event.eventName).isEqualTo("mc_shoppay_webview_load_attempt")
+        assertThat(event.params).isEqualTo(
+            mapOf(
+                "is_decoupled" to false,
+                "is_spt" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+            )
+        )
+    }
+
+    @Test
+    fun `ShopPayWebviewConfirmSuccess event should return expected event name and params`() {
+        val event = PaymentSheetEvent.ShopPayWebviewConfirmSuccess(
+            isDeferred = false,
+            isSpt = false,
+            linkEnabled = false,
+            googlePaySupported = false,
+        )
+
+        assertThat(event.eventName).isEqualTo("mc_shoppay_webview_confirm_success")
+        assertThat(event.params).isEqualTo(
+            mapOf(
+                "is_decoupled" to false,
+                "is_spt" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+            )
+        )
+    }
+
+    @Test
+    fun `ShopPayWebviewCancelled event with ECE click should return expected event name and params`() {
+        val event = PaymentSheetEvent.ShopPayWebviewCancelled(
+            isDeferred = false,
+            isSpt = false,
+            linkEnabled = false,
+            googlePaySupported = false,
+            didReceiveECEClick = true,
+        )
+
+        assertThat(event.eventName).isEqualTo("mc_shoppay_webview_cancelled")
+        assertThat(event.params).isEqualTo(
+            mapOf(
+                "is_decoupled" to false,
+                "is_spt" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+                "did_receive_ece_click" to true,
+            )
+        )
+    }
+
+    @Test
+    fun `ShopPayWebviewCancelled event without ECE click should return expected event name and params`() {
+        val event = PaymentSheetEvent.ShopPayWebviewCancelled(
+            isDeferred = false,
+            isSpt = false,
+            linkEnabled = false,
+            googlePaySupported = false,
+            didReceiveECEClick = false,
+        )
+
+        assertThat(event.params["did_receive_ece_click"]).isEqualTo(false)
+    }
+
+    @Test
+    fun `ShopPay events with different deferred and link states should return expected params`() {
+        val loadAttemptEvent = PaymentSheetEvent.ShopPayWebviewLoadAttempt(
+            isDeferred = true,
+            isSpt = false,
+            linkEnabled = true,
+            googlePaySupported = true,
+        )
+
+        assertThat(loadAttemptEvent.params).isEqualTo(
+            mapOf(
+                "is_decoupled" to true,
+                "is_spt" to false,
+                "link_enabled" to true,
+                "google_pay_enabled" to true,
             )
         )
     }
@@ -1671,6 +1921,7 @@ class PaymentSheetEventTest {
             result = result,
             currency = "usd",
             isDeferred = false,
+            isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
             deferredIntentConfirmationType = null,
@@ -1692,6 +1943,7 @@ class PaymentSheetEventTest {
             configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(configuration),
             googlePaySupported = true,
             isDeferred = false,
+            isSpt = false,
             linkEnabled = false,
             isStripeCardScanAvailable = true,
             isAnalyticEventCallbackSet = false,
@@ -1704,6 +1956,7 @@ class PaymentSheetEventTest {
 
     private fun createLoadSucceededEvent(
         isDeferred: Boolean = false,
+        isSpt: Boolean = false,
         linkEnabled: Boolean = false,
         linkMode: LinkMode? = null,
         googlePaySupported: Boolean = false,
@@ -1715,9 +1968,12 @@ class PaymentSheetEventTest {
         setAsDefaultEnabled: Boolean? = null,
         financialConnectionsAvailability: FinancialConnectionsAvailability = FinancialConnectionsAvailability.Full,
         linkDisplay: PaymentSheet.LinkConfiguration.Display = PaymentSheet.LinkConfiguration.Display.Automatic,
+        paymentMethodOptionsSetupfutureUsage: Boolean = false,
+        setupFutureUsage: StripeIntent.Usage? = null
     ): PaymentSheetEvent.LoadSucceeded {
         return PaymentSheetEvent.LoadSucceeded(
             isDeferred = isDeferred,
+            isSpt = isSpt,
             linkEnabled = linkEnabled,
             linkMode = linkMode,
             googlePaySupported = googlePaySupported,
@@ -1729,6 +1985,8 @@ class PaymentSheetEventTest {
             setAsDefaultEnabled = setAsDefaultEnabled,
             linkDisplay = linkDisplay,
             financialConnectionsAvailability = financialConnectionsAvailability,
+            paymentMethodOptionsSetupFutureUsage = paymentMethodOptionsSetupfutureUsage,
+            setupFutureUsage = setupFutureUsage
         )
     }
 

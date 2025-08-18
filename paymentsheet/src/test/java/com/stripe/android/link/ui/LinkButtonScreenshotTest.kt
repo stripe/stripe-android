@@ -1,10 +1,12 @@
 package com.stripe.android.link.ui
 
-import android.graphics.Color
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.stripe.android.link.ui.wallet.toDefaultPaymentUI
+import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.screenshottesting.FontSize
@@ -20,12 +22,8 @@ private enum class LinkButtonAppearance(private val appearance: PaymentSheet.App
 
     TestSurfaceBackgroundAppearance(
         appearance = PaymentSheet.Appearance(
-            colorsLight = PaymentSheet.Colors.defaultLight.copy(
-                surface = Color.RED,
-            ),
-            colorsDark = PaymentSheet.Colors.defaultDark.copy(
-                surface = Color.RED,
-            ),
+            colorsLight = PaymentSheet.Colors.configureDefaultLight(surface = Color.Red),
+            colorsDark = PaymentSheet.Colors.configureDefaultDark(surface = Color.Red),
         ),
     );
 
@@ -71,56 +69,81 @@ internal class LinkButtonScreenshotTest {
     @Test
     fun testNewUser() {
         paparazziRule.snapshot {
-            LinkButton(email = null, enabled = true, onClick = { })
+            LinkButton(state = LinkButtonState.Default, enabled = true, onClick = { })
         }
     }
 
     @Test
     fun testNewUserInDifferentLocales() {
         localesPaparazziRule.snapshot {
-            LinkButton(email = null, enabled = true, onClick = { })
+            LinkButton(state = LinkButtonState.Default, enabled = true, onClick = { })
         }
     }
 
     @Test
     fun testNewUserDisabled() {
         paparazziRule.snapshot {
-            LinkButton(email = null, enabled = false, onClick = { })
+            LinkButton(state = LinkButtonState.Default, enabled = false, onClick = { })
         }
     }
 
     @Test
     fun testExistingUser() {
         paparazziRule.snapshot {
-            LinkButton(email = "jaynewstrom@test.com", enabled = true, onClick = { })
+            LinkButton(state = LinkButtonState.Email("jaynewstrom@test.com"), enabled = true, onClick = { })
         }
     }
 
     @Test
     fun testExistingUserDisabled() {
         paparazziRule.snapshot {
-            LinkButton(email = "jaynewstrom@test.com", enabled = false, onClick = { })
+            LinkButton(state = LinkButtonState.Email("jaynewstrom@test.com"), enabled = false, onClick = { })
         }
     }
 
     @Test
     fun testExistingUserWithLongEmail() {
         paparazziRule.snapshot {
-            LinkButton(email = "jaynewstrom12345678987654321@test.com", enabled = true, onClick = { })
+            LinkButton(
+                state = LinkButtonState.Email(email = "jaynewstrom12345678987654321@test.com"),
+                enabled = true,
+                onClick = { }
+            )
         }
     }
 
     @Test
     fun testExistingUserWithLongEmailDisabled() {
         paparazziRule.snapshot {
-            LinkButton(email = "jaynewstrom12345678987654321@test.com", enabled = false, onClick = { })
+            LinkButton(
+                state = LinkButtonState.Email("jaynewstrom12345678987654321@test.com"),
+                enabled = false,
+                onClick = { }
+            )
         }
     }
 
     @Test
     fun testRoundedCornerSurfaceColor() {
         surfacePaparazziRule.snapshot {
-            LinkButton(email = null, enabled = true, onClick = { })
+            LinkButton(state = LinkButtonState.Default, enabled = true, onClick = { })
+        }
+    }
+
+    @Test
+    fun testPaymentMethodDisplayed() {
+        paparazziRule.snapshot {
+            LinkButton(
+                state = LinkButtonState.DefaultPayment(
+                    paymentUI = DisplayablePaymentDetails(
+                        defaultPaymentType = "CARD",
+                        defaultCardBrand = "visa",
+                        last4 = "4242"
+                    ).toDefaultPaymentUI(true)!!,
+                ),
+                enabled = true,
+                onClick = { }
+            )
         }
     }
 }

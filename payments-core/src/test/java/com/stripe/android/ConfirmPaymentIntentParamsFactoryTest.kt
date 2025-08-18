@@ -1,7 +1,6 @@
 package com.stripe.android
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -13,10 +12,8 @@ import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
-import org.junit.Rule
 import org.junit.Test
 
 class ConfirmPaymentIntentParamsFactoryTest {
@@ -25,12 +22,6 @@ class ConfirmPaymentIntentParamsFactoryTest {
         clientSecret = CLIENT_SECRET,
         intent = createPaymentIntent(),
         shipping = null,
-    )
-
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage,
-        isEnabled = false
     )
 
     @Test
@@ -129,7 +120,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
             ),
             extraParams = PaymentMethodExtraParams.Card(
                 setAsDefault = true
-            )
+            ),
+            intentConfigSetupFutureUsage = null
         )
         assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isTrue()
     }
@@ -143,7 +135,58 @@ class ConfirmPaymentIntentParamsFactoryTest {
             ),
             extraParams = PaymentMethodExtraParams.Card(
                 setAsDefault = false
+            ),
+            intentConfigSetupFutureUsage = null
+        )
+        assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isFalse()
+    }
+
+    @Test
+    fun `create() with new sepa debit when setAsDefaultPaymentMethod is true`() {
+        val paymentIntentParams = factory.create(
+            createParams = PaymentMethodCreateParamsFixtures.DEFAULT_SEPA_DEBIT,
+            optionsParams = null,
+            extraParams = PaymentMethodExtraParams.SepaDebit(
+                setAsDefault = true
             )
+        )
+        assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isTrue()
+    }
+
+    @Test
+    fun `create() with new sepa debit when setAsDefaultPaymentMethod is false`() {
+        val paymentIntentParams = factory.create(
+            createParams = PaymentMethodCreateParamsFixtures.DEFAULT_SEPA_DEBIT,
+            optionsParams = null,
+            extraParams = PaymentMethodExtraParams.SepaDebit(
+                setAsDefault = false
+            )
+        )
+        assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isFalse()
+    }
+
+    @Test
+    fun `create() with new sepa debit when setAsDefaultPaymentMethod is true and using paymentMethod`() {
+        val paymentIntentParams = factory.create(
+            paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
+            optionsParams = null,
+            extraParams = PaymentMethodExtraParams.SepaDebit(
+                setAsDefault = true
+            ),
+            intentConfigSetupFutureUsage = null
+        )
+        assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isTrue()
+    }
+
+    @Test
+    fun `create() with new sepa debit when setAsDefaultPaymentMethod is false and using paymentMethod`() {
+        val paymentIntentParams = factory.create(
+            paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
+            optionsParams = null,
+            extraParams = PaymentMethodExtraParams.SepaDebit(
+                setAsDefault = false
+            ),
+            intentConfigSetupFutureUsage = null
         )
         assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isFalse()
     }
@@ -168,7 +211,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
         val result = factoryWithConfig.create(
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = null,
-            extraParams = null
+            extraParams = null,
+            intentConfigSetupFutureUsage = null
         )
         assertThat(result.shipping).isEqualTo(shippingDetails)
     }
@@ -211,6 +255,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
             ),
             extraParams = null,
+            intentConfigSetupFutureUsage = null
         )
 
         assertThat(result.paymentMethodOptions).isEqualTo(
@@ -234,12 +279,61 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
             ),
             extraParams = null,
+            intentConfigSetupFutureUsage = null
         )
 
         assertThat(result.paymentMethodOptions).isEqualTo(
             PaymentMethodOptionsParams.Card(
                 setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
             )
+        )
+    }
+
+    @Test
+    fun `create() with PMO SFU should contain value in PMO`() {
+        val factoryWithConfig = ConfirmPaymentIntentParamsFactory(
+            clientSecret = CLIENT_SECRET,
+            intent = PaymentIntentFactory.create(
+                paymentMethodTypes = listOf("klarna")
+            ),
+            shipping = null,
+        )
+
+        val result = factoryWithConfig.create(
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            optionsParams = PaymentMethodOptionsParams.SetupFutureUsage(
+                paymentMethodType = PaymentMethod.Type.Klarna,
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.None
+            ),
+            extraParams = null,
+            intentConfigSetupFutureUsage = null
+        )
+
+        assertThat(result.paymentMethodOptions).isEqualTo(
+            PaymentMethodOptionsParams.SetupFutureUsage(
+                paymentMethodType = PaymentMethod.Type.Klarna,
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.None
+            )
+        )
+    }
+
+    @Test
+    fun `create() with top level SFU should contain value`() {
+        val factoryWithConfig = ConfirmPaymentIntentParamsFactory(
+            clientSecret = CLIENT_SECRET,
+            intent = createPaymentIntent(),
+            shipping = null,
+        )
+
+        val result = factoryWithConfig.create(
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            optionsParams = null,
+            extraParams = null,
+            intentConfigSetupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+        )
+
+        assertThat(result.setupFutureUsage).isEqualTo(
+            ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
         )
     }
 
@@ -276,7 +370,6 @@ class ConfirmPaymentIntentParamsFactoryTest {
 
     @Test
     fun `create() with 'OffSession' PMO SFU should contain any mandate data`() {
-        featureFlagTestRule.setEnabled(true)
         mandateDataTest(
             setupFutureUsage = null,
             expectedMandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT),
@@ -286,7 +379,6 @@ class ConfirmPaymentIntentParamsFactoryTest {
 
     @Test
     fun `create() with 'OnSession' PMO SFU should contain any mandate data`() {
-        featureFlagTestRule.setEnabled(true)
         mandateDataTest(
             setupFutureUsage = null,
             expectedMandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT),
@@ -296,7 +388,6 @@ class ConfirmPaymentIntentParamsFactoryTest {
 
     @Test
     fun `create() with top level 'OffSession' and 'None' PMO SFU should not contain any mandate data`() {
-        featureFlagTestRule.setEnabled(true)
         mandateDataTest(
             setupFutureUsage = StripeIntent.Usage.OffSession,
             expectedMandateDataParams = null,
@@ -304,11 +395,21 @@ class ConfirmPaymentIntentParamsFactoryTest {
         )
     }
 
+    @Test
+    fun `create() with intentConfig SFU 'OffSession' should contain mandate data`() {
+        mandateDataTest(
+            setupFutureUsage = StripeIntent.Usage.OffSession,
+            expectedMandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT),
+            intentConfigSetupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+        )
+    }
+
     private fun mandateDataTest(
         setupFutureUsage: StripeIntent.Usage?,
         expectedMandateDataParams: MandateDataParams?,
         paymentMethod: PaymentMethod = PaymentMethodFactory.cashAppPay(),
-        paymentMethodOptionsJsonString: String? = null
+        paymentMethodOptionsJsonString: String? = null,
+        intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null
     ) {
         val factoryWithConfig = ConfirmPaymentIntentParamsFactory(
             clientSecret = CLIENT_SECRET,
@@ -323,6 +424,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
             paymentMethod = paymentMethod,
             optionsParams = null,
             extraParams = null,
+            intentConfigSetupFutureUsage = intentConfigSetupFutureUsage
         )
 
         assertThat(result).isInstanceOf(ConfirmPaymentIntentParams::class.java)

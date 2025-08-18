@@ -35,7 +35,7 @@ import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
@@ -48,17 +48,20 @@ import com.stripe.android.paymentsheet.example.playground.network.PlaygroundRequ
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DropdownSetting
+import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedRowSelectionBehaviorSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedViewDisplaysMandateSettingDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
+import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsPlaygroundType
+import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
 import kotlinx.coroutines.launch
 
 @OptIn(
-    ExperimentalEmbeddedPaymentElementApi::class,
     ExperimentalCustomPaymentMethodsApi::class,
     ExperimentalAnalyticEventCallbackApi::class,
+    WalletButtonsPreview::class,
 )
 internal class EmbeddedPlaygroundActivity :
     AppCompatActivity(),
@@ -115,12 +118,15 @@ internal class EmbeddedPlaygroundActivity :
             .confirmCustomPaymentMethodCallback(this)
             .externalPaymentMethodConfirmHandler(this)
             .analyticEventCallback(this)
+            .rowSelectionBehavior(
+                playgroundSettings[EmbeddedRowSelectionBehaviorSettingsDefinition].value.rowSelectionBehavior
+            )
         val embeddedViewDisplaysMandateText =
             initialPlaygroundState.snapshot[EmbeddedViewDisplaysMandateSettingDefinition]
         setContent {
             embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedBuilder)
 
-            var loadingState by remember {
+            var loadingState: LoadingState by remember {
                 mutableStateOf(LoadingState.Loading)
             }
 
@@ -133,7 +139,9 @@ internal class EmbeddedPlaygroundActivity :
                     configuration = playgroundState.embeddedConfiguration(),
                 )
                 loadingState = when (result) {
-                    is EmbeddedPaymentElement.ConfigureResult.Failed -> LoadingState.Failed
+                    is EmbeddedPaymentElement.ConfigureResult.Failed -> {
+                        LoadingState.Failed(result.error.message ?: "Unknown error")
+                    }
                     is EmbeddedPaymentElement.ConfigureResult.Succeeded -> LoadingState.Complete
                 }
             }
@@ -151,6 +159,9 @@ internal class EmbeddedPlaygroundActivity :
             BottomSheetContent(
                 loadingState = loadingState,
                 configure = ::configure,
+                showWalletButtons =
+                playgroundState.snapshot[WalletButtonsSettingsDefinition] !=
+                    WalletButtonsPlaygroundType.Disabled,
                 embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
             )
         }
@@ -162,11 +173,16 @@ internal class EmbeddedPlaygroundActivity :
     private fun BottomSheetContent(
         loadingState: LoadingState,
         configure: () -> Unit,
+        showWalletButtons: Boolean,
         embeddedViewDisplaysMandateText: Boolean,
     ) {
         PlaygroundTheme(
             content = {
-                loadingState.Content(embeddedPaymentElement = embeddedPaymentElement, retry = configure)
+                loadingState.Content(
+                    embeddedPaymentElement = embeddedPaymentElement,
+                    showWalletButtons = showWalletButtons,
+                    retry = configure
+                )
             },
             bottomBarContent = {
                 val selectedPaymentOption by embeddedPaymentElement.paymentOption.collectAsState()
@@ -317,10 +333,14 @@ internal class EmbeddedPlaygroundActivity :
         return this
     }
 
-    private enum class LoadingState {
-        Loading {
+    private sealed class LoadingState {
+        data object Loading : LoadingState() {
             @Composable
-            override fun Content(embeddedPaymentElement: EmbeddedPaymentElement, retry: () -> Unit) {
+            override fun Content(
+                embeddedPaymentElement: EmbeddedPaymentElement,
+                showWalletButtons: Boolean,
+                retry: () -> Unit,
+            ) {
                 Box(modifier = Modifier.fillMaxWidth()) {
                     CircularProgressIndicator(
                         modifier = Modifier
@@ -330,24 +350,46 @@ internal class EmbeddedPlaygroundActivity :
                     )
                 }
             }
-        },
-        Complete {
+        }
+        data object Complete : LoadingState() {
+            @OptIn(WalletButtonsPreview::class)
             @Composable
-            override fun Content(embeddedPaymentElement: EmbeddedPaymentElement, retry: () -> Unit) {
-                embeddedPaymentElement.Content()
+            override fun Content(
+                embeddedPaymentElement: EmbeddedPaymentElement,
+                showWalletButtons: Boolean,
+                retry: () -> Unit,
+            ) {
+                if (showWalletButtons) {
+                    Box(modifier = Modifier.padding(bottom = 12.dp)) {
+                        embeddedPaymentElement.WalletButtons()
+                    }
+                }
+
+                Box(modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)) {
+                    embeddedPaymentElement.Content()
+                }
             }
-        },
-        Failed {
+        }
+        data class Failed(val message: String) : LoadingState() {
             @Composable
-            override fun Content(embeddedPaymentElement: EmbeddedPaymentElement, retry: () -> Unit) {
+            override fun Content(
+                embeddedPaymentElement: EmbeddedPaymentElement,
+                showWalletButtons: Boolean,
+                retry: () -> Unit,
+            ) {
+                Text(message)
                 Button(onClick = retry, Modifier.fillMaxWidth()) {
                     Text("Retry")
                 }
             }
-        };
+        }
 
         @Composable
-        abstract fun Content(embeddedPaymentElement: EmbeddedPaymentElement, retry: () -> Unit)
+        abstract fun Content(
+            embeddedPaymentElement: EmbeddedPaymentElement,
+            showWalletButtons: Boolean,
+            retry: () -> Unit
+        )
     }
 
     override fun onConfirmCustomPaymentMethod(

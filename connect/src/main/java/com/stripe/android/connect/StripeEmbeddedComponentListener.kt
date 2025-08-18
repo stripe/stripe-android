@@ -4,7 +4,6 @@ import com.stripe.android.connect.webview.serialization.SetOnLoadError
 import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
 
-@PrivateBetaConnectSDK
 interface StripeEmbeddedComponentListener {
     /**
      * The component executes this callback function before any UI is displayed to the user.
@@ -20,7 +19,6 @@ interface StripeEmbeddedComponentListener {
 /**
  * Handles generic component events and delegates others to a component event listener.
  */
-@OptIn(PrivateBetaConnectSDK::class)
 internal open class ComponentListenerDelegate<Listener : StripeEmbeddedComponentListener> {
     open fun delegate(listener: Listener, message: SetterFunctionCalledMessage) {
         // Override me.

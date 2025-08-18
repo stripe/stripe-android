@@ -16,7 +16,7 @@ import javax.inject.Inject
 internal class LinkConfirmationDefinition @Inject constructor(
     private val linkPaymentLauncher: LinkPaymentLauncher,
     private val linkStore: LinkStore,
-    private val linkAccountHolder: LinkAccountHolder
+    private val linkAccountHolder: LinkAccountHolder,
 ) : ConfirmationDefinition<LinkConfirmationOption, LinkPaymentLauncher, Unit, LinkActivityResult> {
     override val key: String = "Link"
 
@@ -56,8 +56,9 @@ internal class LinkConfirmationDefinition @Inject constructor(
     ) {
         launcher.present(
             configuration = confirmationOption.configuration,
-            linkAccount = linkAccountHolder.linkAccount.value,
-            useLinkExpress = confirmationOption.useLinkExpress
+            linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
+            launchMode = confirmationOption.linkLaunchMode,
+            linkExpressMode = confirmationOption.linkExpressMode,
         )
     }
 
@@ -112,7 +113,7 @@ internal class LinkConfirmationDefinition @Inject constructor(
     private fun LinkAccountUpdate.updateLinkAccount() {
         when (this) {
             is LinkAccountUpdate.Value -> {
-                linkAccountHolder.set(linkAccount)
+                linkAccountHolder.set(this)
             }
             LinkAccountUpdate.None -> Unit
         }

@@ -2,6 +2,97 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [FIXED][11332](https://github.com/stripe/stripe-android/pull/11332) Added additional spacing between the section title and section content for payment form screens.
+
+## 21.23.0 - 2025-08-12
+### PaymentSheet
+* [ADDED][11303](https://github.com/stripe/stripe-android/pull/11303) You no longer need to set the backend PaymentIntent setup_future_usage or payment_method_options setup_future_usage values to match the client's IntentConfiguration; the client will automatically configure this for you.
+* [CHANGED][11307](https://github.com/stripe/stripe-android/pull/11307) The value of `shouldSavePaymentMethod` passed to `CreateIntentCallback.onCreateIntent` is now `true` if `SetupFutureUse` is `OffSession` or `OnSession` in your `IntentConfiguration`.
+
+## 21.22.2 - 2025-08-11
+### PaymentSheet
+* [ADDED][11179](https://github.com/stripe/stripe-android/pull/11179) More specific error messaging for postal codes
+* [FIXED][11280](https://github.com/stripe/stripe-android/pull/11280) Flows initiated with PaymentSheet.IntentConfiguration now show specific API error messages instead of generic fallback messages
+
+## 21.22.1 - 2025-08-04
+
+## 21.22.0 - 2025-07-28
+### PaymentSheet
+* [FIXED][11184](https://github.com/stripe/stripe-android/pull/11184) PaymentSheet will now accurately show a success state when confirming Blik and UPI PaymentIntents using a Stripe Connect account ID.
+* [ADDED][11205](https://github.com/stripe/stripe-android/pull/11205) Added `subtitleFont` to `PaymentSheet.Appearance.Embedded` for customization of EmbeddedPaymentElement payment method row subtitles.
+
+## 21.21.0 - 2025-07-21
+### PaymentSheet
+* [CHANGED][11151](https://github.com/stripe/stripe-android/pull/11151) Remove intrinsic top and bottom padding from `EmbeddedPaymentElement.Content`.
+* [FIXED][11111](https://github.com/stripe/stripe-android/pull/11083) EmbeddedPaymentElement now errors when `configuration.rowSelectionBehavior` is `.immediateAction` and `configuration.embeddedViewDisplaysMandateText` is `true` to ensure integrations display legal mandate text to the customer.
+* [ADDED][11178](https://github.com/stripe/stripe-android/pull/11178) Added `disclosureIconRes` property to `PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure` to customize the chevron icon displayed in EmbeddedPaymentElement payment method rows.
+* [ADDED][11173](https://github.com/stripe/stripe-android/pull/11173) Added `titleFont` to `PaymentSheet.Appearance.Embedded` for customization of EmbeddedPaymentElement payment method row titles.
+* [ADDED][11166](https://github.com/stripe/stripe-android/pull/11166) Added `paymentMethodIconMargins` to `PaymentSheet.Appearance.Embedded` for customization of EmbeddedPaymentElement payment method row icon spacing.
+* [CHANGED][11175](https://github.com/stripe/stripe-android/pull/11175) Renamed `PaymentSheet.Appearance.Embedded.RowStyle.FlatWithChevron` to `PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure`.
+* [ADDED][11162](https://github.com/stripe/stripe-android/pull/11162) Added Builders for `PaymentSheet.Appearance.Embedded` and `PaymentSheet.Appearance.Embedded.RowStyle`.
+
+## 21.20.2 - 2025-07-09
+
+### PaymentSheet
+* [ADDED][11083](https://github.com/stripe/stripe-android/pull/11083) Updated translations.
+
+## 21.20.1 - 2025-07-07
+
+### PaymentSheet
+* [ADDED][10987](https://github.com/stripe/stripe-android/pull/10987) Added support for satispay with `setup_future_usage`.
+
+## 21.20.0 - 2025-06-30
+
+### PaymentSheet
+* [ADDED][11007](https://github.com/stripe/stripe-android/pull/11007) Added support for bacs with `setup_future_usage`.
+
+## 21.19.0 - 2025-06-23
+
+### PaymentSheet
+* [ADDED][10947](https://github.com/stripe/stripe-android/pull/10947) Added `FlatWithChevron` Embedded RowStyle to Appearance API
+* [CHANGED][10705](https://github.com/stripe/stripe-android/pull/10705) `EmbeddedPaymentElement` is now GA.
+
+## 21.18.0 - 2025-06-16
+
+### PaymentSheet
+* [ADDED][10935](https://github.com/stripe/stripe-android/pull/10935) Add `formInsetValues` method to `PaymentSheet.Appearance.Builder`.
+* [ADDED][10831](https://github.com/stripe/stripe-android/pull/10831) Added `RowSelectionBehavior` API to Embedded Payment Element
+* [DEPRECATED][10833](https://github.com/stripe/stripe-android/pull/10833) Deprecated PaymentSheet/FlowController constructors, create methods, and Compose remember functions in favor of new Builder pattern APIs.
+* [ADDED][10940](https://github.com/stripe/stripe-android/pull/10940) Add `paymentMethodType` to `PaymentOption` for use with `PaymentSheet.FlowController`.
+
+## 21.17.0 - 2025-06-09
+
+### PaymentSheet
+* [ADDED][10919](https://github.com/stripe/stripe-android/pull/10919) Add `formInsetValues` to `PaymentSheet.Appearance`.
+
+## 21.16.0 - 2025-06-02
+
+### PaymentSheet
+* [ADDED][10885](https://github.com/stripe/stripe-android/pull/10885) Add `heightDp` to `PrimaryButtonShape`.
+* [CHANGED][10896](https://github.com/stripe/stripe-android/pull/10896) Update manage payment methods screen remove button to use `PrimaryButtonShape` Appearance API values.
+
+### Connect
+* [CHANGED][10871](https://github.com/stripe/stripe-android/pull/10871) Removed `PrivateBetaConnectSDK` annotation and all usages. Connect SDK is now GA.
+
+## 21.15.1 - 2025-05-28
+
+### PaymentSheet
+* [FIXED][10870](https://github.com/stripe/stripe-android/pull/10870) Fixed an issue with `EmbeddedPaymentElement` where `View more` and `Edit` buttons would completely fill the parent's height if `height` modifier is used by the parent composable.
+
+## 21.15.0 - 2025-05-27
+
+### PaymentSheet
+* [BREAKING][10854](https://github.com/stripe/stripe-android/pull/10854) Applicable to `ExperimentalEmbeddedPaymentElementApi`, fixed misnaming of `EmbeddedRowStyle` constructor params.
+
+### Payments
+* [FIXED][10843](https://github.com/stripe/stripe-android/pull/10843) Fix 3DS2 Whitelisting Encoding Issue.
+
+## 21.14.0 - 2025-05-19
+
+### PaymentSheet
+* [ADDED][10827](https://github.com/stripe/stripe-android/pull/10827) PaymentMethodOptions SetupFutureUsage is now in public preview.
+
 ## 21.13.0 - 2025-05-06
 
 ### PaymentSheet

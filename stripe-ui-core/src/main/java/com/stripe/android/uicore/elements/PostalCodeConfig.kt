@@ -1,18 +1,19 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.R
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PostalCodeConfig(
-    @StringRes override val label: Int,
+    override val label: ResolvableString,
     override val trailingIcon: MutableStateFlow<TextFieldIcon?> = MutableStateFlow(null),
-    private val country: String
+    private val country: String,
+    override val optional: Boolean = false,
 ) : TextFieldConfig {
     private val format = CountryPostalFormat.forCountry(country)
 
@@ -40,11 +41,17 @@ class PostalCodeConfig(
         override fun shouldShowError(hasFocus: Boolean) = getError() != null && !hasFocus
 
         override fun isValid(): Boolean {
+            val canBeEmpty = optional && input.isEmpty()
+
             return when (format) {
-                is CountryPostalFormat.Other -> input.isNotBlank()
+                is CountryPostalFormat.Other -> canBeEmpty || input.isNotBlank()
                 else -> {
-                    input.length in format.minimumLength..format.maximumLength &&
-                        input.matches(format.regexPattern)
+                    canBeEmpty ||
+                        (
+                            input.length in format.minimumLength..format.maximumLength &&
+                                input.isNotBlank() &&
+                                input.matches(format.regexPattern)
+                            )
                 }
             }
         }
@@ -52,10 +59,27 @@ class PostalCodeConfig(
         override fun getError(): FieldError? {
             return when {
                 input.isNotBlank() && !isValid() && country == "US" -> {
-                    FieldError(R.string.stripe_address_zip_invalid)
+                    // Check if it's too short (incomplete) vs invalid format
+                    if (input.length < format.minimumLength) {
+                        FieldError(R.string.stripe_address_zip_incomplete)
+                    } else {
+                        FieldError(R.string.stripe_address_zip_invalid)
+                    }
                 }
                 input.isNotBlank() && !isValid() -> {
-                    FieldError(R.string.stripe_address_zip_postal_invalid)
+                    // Check if it's too short (incomplete) vs invalid format
+                    if (input.length < format.minimumLength) {
+                        FieldError(R.string.stripe_address_postal_code_incomplete)
+                    } else {
+                        FieldError(R.string.stripe_address_postal_code_invalid)
+                    }
+                }
+                input.isNotEmpty() && !isValid() -> {
+                    if (country == "US") {
+                        FieldError(R.string.stripe_address_zip_invalid)
+                    } else {
+                        FieldError(R.string.stripe_address_postal_code_invalid)
+                    }
                 }
                 else -> null
             }

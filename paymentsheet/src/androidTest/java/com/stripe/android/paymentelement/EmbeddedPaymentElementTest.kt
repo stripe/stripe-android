@@ -1,9 +1,11 @@
-@file:OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-
 package com.stripe.android.paymentelement
 
 import app.cash.turbine.test
+import com.google.android.gms.wallet.IsReadyToPayRequest
+import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
+import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.host
@@ -11,6 +13,7 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.CreateIntentResult
+import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
@@ -20,6 +23,7 @@ import com.stripe.paymentelementtestpages.EditPage
 import com.stripe.paymentelementtestpages.ManagePage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 
@@ -29,6 +33,7 @@ internal class EmbeddedPaymentElementTest {
     @get:Rule
     val testRules: TestRules = TestRules.create(networkRule = networkRule)
 
+    private val walletButtonsPage = WalletButtonsPage(testRules.compose)
     private val embeddedContentPage = EmbeddedContentPage(testRules.compose)
     private val managePage = ManagePage(testRules.compose)
     private val editPage = EditPage(testRules.compose)
@@ -36,6 +41,19 @@ internal class EmbeddedPaymentElementTest {
 
     private val card1 = CardPaymentMethodDetails("pm_12345", "4242")
     private val card2 = CardPaymentMethodDetails("pm_67890", "5544")
+
+    private val paymentWithSetupFutureUsageIntentConfiguration = PaymentSheet.IntentConfiguration(
+        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+            amount = 5000,
+            currency = "USD",
+            setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+        )
+    )
+
+    @After
+    fun teardown() {
+        GooglePayRepository.resetFactory()
+    }
 
     @Test
     fun testSuccessfulCardPayment_withFormSheetActionConfirm() = runEmbeddedPaymentElementTest(
@@ -227,13 +245,133 @@ internal class EmbeddedPaymentElementTest {
                 withContext(Dispatchers.Main) {
                     testContext.embeddedPaymentElement.state = state
                 }
-                assertThat(awaitItem()?.paymentMethodType).isEqualTo("Card")
+                assertThat(awaitItem()?.paymentMethodType).isEqualTo("card")
             }
 
             embeddedContentPage.clickViewMore()
 
             testContext.markTestSucceeded()
         }
+    }
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
+    fun testWalletButtonsShown() = runEmbeddedPaymentElementTest(
+        networkRule = networkRule,
+        showWalletButtons = true,
+        createIntentCallback = { _, shouldSavePaymentMethod ->
+            assertThat(shouldSavePaymentMethod).isFalse()
+            CreateIntentResult.Success("pi_example_secret_12345")
+        },
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        GooglePayRepository.googlePayAvailabilityClientFactory = object : GooglePayAvailabilityClient.Factory {
+            override fun create(paymentsClient: PaymentsClient): GooglePayAvailabilityClient {
+                return object : GooglePayAvailabilityClient {
+                    override suspend fun isReady(request: IsReadyToPayRequest): Boolean {
+                        return true
+                    }
+                }
+            }
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_pm_with_link_and_cs.json")
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/customers/cus_1"),
+        ) { response ->
+            response.testBodyFromFile("customer-get-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
+        }
+
+        testContext.configure {
+            customer(
+                PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    id = "cus_1",
+                    clientSecret = "cuss_123",
+                )
+            )
+
+            googlePay(
+                PaymentSheet.GooglePayConfiguration(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    countryCode = "US",
+                )
+            )
+        }
+
+        walletButtonsPage.assertLinkIsDisplayed()
+        walletButtonsPage.assertGooglePayIsDisplayed()
+
+        testContext.markTestSucceeded()
+    }
+
+    @Test
+    fun testEmbeddedPaymentElementDisplaysMandate() = runEmbeddedPaymentElementTest(
+        networkRule = networkRule,
+        createIntentCallback = { _, shouldSavePaymentMethod ->
+            assertThat(shouldSavePaymentMethod).isFalse()
+            CreateIntentResult.Success("pi_example_secret_12345")
+        },
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        testContext.configure(intentConfiguration = paymentWithSetupFutureUsageIntentConfiguration)
+
+        embeddedContentPage.clickOnLpm("card")
+        formPage.assertMandateIsShown()
+        testContext.markTestSucceeded()
+    }
+
+    @Test
+    fun testEmbeddedPaymentElementWithTermsDisplayNeverDoesNotDisplayMandate() = runEmbeddedPaymentElementTest(
+        networkRule = networkRule,
+        createIntentCallback = { _, shouldSavePaymentMethod ->
+            assertThat(shouldSavePaymentMethod).isFalse()
+            CreateIntentResult.Success("pi_example_secret_12345")
+        },
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        testContext.configure(intentConfiguration = paymentWithSetupFutureUsageIntentConfiguration) {
+            termsDisplay(
+                mapOf(
+                    PaymentMethod.Type.Card to PaymentSheet.TermsDisplay.NEVER
+                )
+            )
+        }
+
+        embeddedContentPage.clickOnLpm("card")
+        formPage.assertMandateIsMissing()
+        testContext.markTestSucceeded()
     }
 
     private fun enqueueDeferredIntentConfirmationRequests() {

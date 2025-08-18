@@ -49,3 +49,11 @@ def update_changelog()
 
     execute_or_fail("git add CHANGELOG.md")
 end
+
+def update_3ds2_version()
+    replace_in_file("3ds2sdk/src/main/kotlin/com/stripe/android/stripe3ds2/SdkVersion.kt",
+      /internal const val VERSION_NAME = "[.\d]+"/,
+      %Q{internal const val VERSION_NAME = "#{@version}"},
+    )
+    execute_or_fail("git add 3ds2sdk/src/main/kotlin/com/stripe/android/stripe3ds2/SdkVersion.kt")
+end

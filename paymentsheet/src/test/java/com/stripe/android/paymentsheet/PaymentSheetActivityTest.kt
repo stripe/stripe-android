@@ -85,9 +85,9 @@ import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
-import com.stripe.android.paymentsheet.utils.prefilledBuilder
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
@@ -134,6 +134,9 @@ internal class PaymentSheetActivityTest {
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<PaymentSheetActivity>()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -971,7 +974,7 @@ internal class PaymentSheetActivityTest {
     @Test
     fun `mandate text is shown above primary button when in vertical mode`() {
         val args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-            config = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY.config.prefilledBuilder()
+            config = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
                 .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
                 .build()
         )
@@ -1111,11 +1114,8 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity { activity ->
-            testDispatcher.scheduler.advanceTimeBy(50)
-            Espresso.onIdle()
-            assertThat(activity.buyButton.externalLabel?.resolve(context)).isEqualTo("Pay")
             testDispatcher.scheduler.advanceTimeBy(250)
-            Espresso.onIdle()
+            composeTestRule.waitForIdle()
             assertThat(activity.buyButton.externalLabel?.resolve(context)).isEqualTo("Pay CA\$99.99")
         }
     }
@@ -1276,7 +1276,8 @@ internal class PaymentSheetActivityTest {
                     ): CvcRecollectionInteractor {
                         return FakeCvcRecollectionInteractor()
                     }
-                }
+                },
+                isLiveModeProvider = { false }
             )
         }
     }
@@ -1292,7 +1293,7 @@ internal class PaymentSheetActivityTest {
             } doReturn mock()
         }
 
-        registerFromActivity(mockActivityResultCaller, TestLifecycleOwner())
+        registerForActivityResult(mockActivityResultCaller, TestLifecycleOwner())
 
         val googlePayListenerCaptor =
             argumentCaptor<ActivityResultCallback<GooglePayPaymentMethodLauncher.Result>>()

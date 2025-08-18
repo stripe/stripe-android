@@ -24,6 +24,7 @@ com.stripe.android.financialconnections.features.linkaccountpicker
 com.stripe.android.financialconnections.model
 module:financial-connections-core
 com.stripe.android.financialconnections
+com.stripe.android.financialconnections.launcher
 com.stripe.android.financialconnections.model
 module:identity
 com.stripe.android.identity
@@ -49,6 +50,8 @@ com.stripe.android.model
 module:paymentsheet
 com.stripe.android
 com.stripe.android.customersheet
+com.stripe.android.link.model
+com.stripe.android.link.ui.verification
 com.stripe.android.paymentelement
 com.stripe.android.paymentsheet
 com.stripe.android.paymentsheet.addresselement

@@ -54,6 +54,17 @@ constructor(
      * Indicates that this should be the default payment method going forward.
      */
     internal val setAsDefaultPaymentMethod: Boolean? = null,
+
+    internal val paymentMethodCode: PaymentMethodCode? = paymentMethodCreateParams?.code,
+
+    /**
+     * Payment-method-specific configuration for this SetupIntent.
+     *
+     * See [payment_method_options](
+     *   https://docs.stripe.com/api/setup_intents/confirm#confirm_setup_intent-payment_method_options
+     * ).
+     */
+    val paymentMethodOptions: PaymentMethodOptionsParams? = null
 ) : ConfirmStripeIntentParams {
 
     override fun shouldUseStripeSdk(): Boolean {
@@ -137,7 +148,8 @@ constructor(
                 clientSecret = clientSecret,
                 // infers default [MandateDataParams] based on the attached [paymentMethodType]
                 mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT)
-                    .takeIf { paymentMethodType.requiresMandate }
+                    .takeIf { paymentMethodType.requiresMandate },
+                paymentMethodCode = paymentMethodType.code,
             )
         }
 
@@ -227,7 +239,8 @@ constructor(
                 paymentMethodCreateParams = paymentMethodCreateParams,
                 mandateId = mandateId,
                 mandateData = mandateData,
-                setAsDefaultPaymentMethod = setAsDefaultPaymentMethod
+                setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
+                paymentMethodCode = paymentMethodCreateParams.code,
             )
         }
 
@@ -237,13 +250,33 @@ constructor(
             mandateData: MandateDataParams? = null,
             mandateId: String? = null,
             setAsDefaultPaymentMethod: Boolean?,
+            paymentMethodCode: PaymentMethodCode,
         ): ConfirmSetupIntentParams {
             return ConfirmSetupIntentParams(
                 paymentMethodId = paymentMethodId,
                 clientSecret = clientSecret,
                 mandateId = mandateId,
                 mandateData = mandateData,
-                setAsDefaultPaymentMethod = setAsDefaultPaymentMethod
+                setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
+                paymentMethodCode = paymentMethodCode,
+            )
+        }
+
+        internal fun createForDashboard(
+            clientSecret: String,
+            paymentMethodId: String,
+            paymentMethodOptions: PaymentMethodOptionsParams?,
+        ): ConfirmSetupIntentParams {
+            // Dashboard only supports a specific payment flow today.
+            return ConfirmSetupIntentParams(
+                clientSecret = clientSecret,
+                paymentMethodId = paymentMethodId,
+                paymentMethodOptions = PaymentMethodOptionsParams.Card(
+                    moto = true,
+                    setupFutureUsage = (paymentMethodOptions as? PaymentMethodOptionsParams.Card)?.setupFutureUsage
+                ),
+                useStripeSdk = true,
+                paymentMethodCode = PaymentMethod.Type.Card.code,
             )
         }
     }

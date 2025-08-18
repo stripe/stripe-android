@@ -14,6 +14,10 @@ internal object PaymentMethodOptionsSetupFutureUsageSettingsDefinition :
 
     override val displayName: String = "Payment Method Options SetupFutureUsage"
 
+    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+        return configurationData.integrationType.isPaymentFlow()
+    }
+
     override fun createOptions(
         configurationData: PlaygroundConfigurationData
     ) = PaymentMethodOptionsSetupFutureUsageType.entries.map {

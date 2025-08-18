@@ -35,8 +35,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
-        val validationResult = initializeArgs()
         super.onCreate(savedInstanceState)
+        val validationResult = initializeArgs()
 
         val validatedArgs = validationResult.getOrNull()
         if (validatedArgs == null) {
@@ -44,7 +44,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             return
         }
 
-        viewModel.registerFromActivity(
+        viewModel.registerForActivityResult(
             activityResultCaller = this,
             lifecycleOwner = this,
         )
@@ -88,7 +88,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         } else {
             try {
                 starterArgs.initializationMode.validate()
-                starterArgs.config.asCommonConfiguration().validate()
+                starterArgs.config.asCommonConfiguration().validate(viewModel.isLiveModeProvider())
                 starterArgs.config.appearance.parseAppearance()
                 Result.success(starterArgs)
             } catch (e: IllegalArgumentException) {

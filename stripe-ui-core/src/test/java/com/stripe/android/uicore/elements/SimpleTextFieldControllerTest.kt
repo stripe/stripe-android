@@ -6,6 +6,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Blank
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Invalid
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Valid.Full
@@ -49,7 +50,7 @@ internal class SimpleTextFieldControllerTest {
             assertThat(awaitItem()).isNull()
             controller.onValueChange("showWhenNoFocus")
             shadowOf(getMainLooper()).idle()
-            assertThat(awaitItem()).isEqualTo(ShowWhenNoFocus.getError())
+            assertThat(expectMostRecentItem()).isEqualTo(ShowWhenNoFocus.getError())
         }
     }
 
@@ -104,7 +105,7 @@ internal class SimpleTextFieldControllerTest {
 
     @Test
     fun `Verify is blank optional fields are considered complete`() = runTest {
-        val controller = createControllerWithState(showOptionalLabel = true)
+        val controller = createControllerWithState(isOptional = true)
         controller.onValueChange("invalid")
 
         controller.isComplete.test {
@@ -153,7 +154,7 @@ internal class SimpleTextFieldControllerTest {
             shadowOf(getMainLooper()).idle()
 
             assertThat(visibleErrors.awaitItem()).isEqualTo(false)
-            assertThat(errors.awaitItem()).isNull()
+            assertThat(errors.expectMostRecentItem()).isNull()
         }
     }
 
@@ -189,15 +190,9 @@ internal class SimpleTextFieldControllerTest {
     }
 
     @Test
-    fun `Verify null label`() {
-        val controller = createControllerWithState(nullLabel = true)
-        assertThat(controller.label.value).isNull()
-    }
-
-    @Test
-    fun `Verify non-null label`() {
-        val controller = createControllerWithState(nullLabel = false)
-        assertThat(controller.label.value).isEqualTo(CoreR.string.stripe_address_label_full_name)
+    fun `Verify label`() {
+        val controller = createControllerWithState()
+        assertThat(controller.label.value).isEqualTo(resolvableString(CoreR.string.stripe_address_label_full_name))
     }
 
     @Test
@@ -212,14 +207,45 @@ internal class SimpleTextFieldControllerTest {
         assertThat(controller.placeHolder.value).isNotNull()
     }
 
+    @Test
+    fun `Verify 'showOptionalLabel' is true when 'optional' is true in config`() {
+        val controller = createControllerWithState(isOptional = true)
+        assertThat(controller.showOptionalLabel).isTrue()
+    }
+
+    @Test
+    fun `Verify 'showOptionalLabel' is false when 'optional' is false in config`() {
+        val controller = createControllerWithState(isOptional = false)
+        assertThat(controller.showOptionalLabel).isFalse()
+    }
+
+    @Test
+    fun `Verify initial state is 'Limitless' when 'optional' is true in config`() = runTest {
+        val controller = createControllerWithState(isOptional = true)
+
+        controller.fieldState.test {
+            assertThat(awaitItem()).isEqualTo(Limitless)
+        }
+    }
+
+    @Test
+    fun `Verify initial state is 'Blank' when 'optional' is false in config`() = runTest {
+        val controller = createControllerWithState(isOptional = false)
+
+        controller.fieldState.test {
+            assertThat(awaitItem()).isEqualTo(Blank)
+        }
+    }
+
     private fun createControllerWithState(
-        showOptionalLabel: Boolean = false,
-        nullLabel: Boolean = false,
-        nullPlaceHolder: Boolean = true
+        isOptional: Boolean = false,
+        nullPlaceHolder: Boolean = true,
     ): SimpleTextFieldController {
         val config: TextFieldConfig = mock {
             on { determineState("full") } doReturn Full
             on { filter("full") } doReturn "full"
+
+            on { optional } doReturn isOptional
 
             on { determineState("limitless") } doReturn Limitless
             on { filter("limitless") } doReturn "limitless"
@@ -237,18 +263,14 @@ internal class SimpleTextFieldControllerTest {
             on { determineState("") } doReturn Blank
             on { filter("") } doReturn ""
 
-            if (nullLabel) {
-                on { label } doReturn null
-            } else {
-                on { label } doReturn CoreR.string.stripe_address_label_full_name
-            }
+            on { label } doReturn resolvableString(CoreR.string.stripe_address_label_full_name)
 
             if (!nullPlaceHolder) {
                 on { placeHolder } doReturn "PlaceHolder"
             }
         }
 
-        return SimpleTextFieldController(config, showOptionalLabel)
+        return SimpleTextFieldController(config)
     }
 
     companion object {

@@ -2,6 +2,7 @@ package com.stripe.android.payments.paymentlauncher
 
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
@@ -79,6 +80,20 @@ class StripePaymentLauncher @AssistedInject internal constructor(
                 productUsage = productUsage,
                 includePaymentSheetNextHandlers = includePaymentSheetNextHandlers,
                 setupIntentClientSecret = clientSecret,
+                statusBarColor = statusBarColor,
+            )
+        )
+    }
+
+    @SharedPaymentTokenSessionPreview
+    override fun handleNextActionForHashedPaymentIntent(hashedValue: String) {
+        hostActivityLauncher.launch(
+            PaymentLauncherContract.Args.HashedPaymentIntentNextActionArgs(
+                hashedValue = hashedValue,
+                stripeAccountId = stripeAccountIdProvider(),
+                enableLogging = enableLogging,
+                productUsage = productUsage,
+                includePaymentSheetNextHandlers = includePaymentSheetNextHandlers,
                 statusBarColor = statusBarColor,
             )
         )

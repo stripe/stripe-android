@@ -41,8 +41,9 @@ class WebLinkActivityContractTest {
         val contract = contract(stripeRepository)
         val args = LinkActivityContract.Args(
             configuration = TestFactory.LINK_CONFIGURATION,
-            startWithVerificationDialog = false,
-            linkAccount = TestFactory.LINK_ACCOUNT
+            linkExpressMode = LinkExpressMode.DISABLED,
+            linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+            launchMode = LinkLaunchMode.Full
         )
 
         val intent = contract.createIntent(ApplicationProvider.getApplicationContext(), args)

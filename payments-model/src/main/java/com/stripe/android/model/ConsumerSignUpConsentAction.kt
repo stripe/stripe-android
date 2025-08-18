@@ -10,6 +10,11 @@ enum class ConsumerSignUpConsentAction(val value: String) {
     CheckboxWithPrefilledEmailAndPhone("clicked_checkbox_nospm_mobile_v0_1"),
     Implied("implied_consent_withspm_mobile_v0"),
     ImpliedWithPrefilledEmail("implied_consent_withspm_mobile_v0_0"),
+    PrecheckedOptInBoxPrefilledAll("prechecked_opt_in_box_prefilled_all"),
+    PrecheckedOptInBoxPrefilledSome("prechecked_opt_in_box_prefilled_some"),
+    PrecheckedOptInBoxPrefilledNone("prechecked_opt_in_box_prefilled_none"),
+    SignUpOptInMobileChecked("sign_up_opt_in_mobile_checked"),
+    SignUpOptInMobilePrechecked("sign_up_opt_in_mobile_prechecked"),
 
     // Financial Connections
     EnteredPhoneNumberClickedSaveToLink("entered_phone_number_clicked_save_to_link"),

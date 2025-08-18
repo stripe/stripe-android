@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
@@ -43,13 +42,12 @@ const val TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT = "TEST_TAG_PAYMENT_METHOD_EMB
 
 internal const val EMBEDDED_MANDATE_TEXT_TEST_TAG = "EMBEDDED_MANDATE"
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
     interactor: PaymentMethodVerticalLayoutInteractor,
     embeddedViewDisplaysMandateText: Boolean,
     modifier: Modifier = Modifier,
-    rowStyle: Embedded.RowStyle
+    appearance: Embedded
 ) {
     val context = LocalContext.current
     val imageLoader = remember {
@@ -82,7 +80,7 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
         imageLoader = imageLoader,
         modifier = modifier
             .testTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT),
-        rowStyle = rowStyle
+        appearance = appearance
     )
 
     EmbeddedMandate(
@@ -91,7 +89,6 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
     )
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @VisibleForTesting
 @Composable
 internal fun PaymentMethodEmbeddedLayoutUI(
@@ -104,16 +101,16 @@ internal fun PaymentMethodEmbeddedLayoutUI(
     onManageOneSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
-    rowStyle: Embedded.RowStyle,
+    appearance: Embedded,
     modifier: Modifier = Modifier,
 ) {
-    val arrangement = if (rowStyle is Embedded.RowStyle.FloatingButton) {
-        Arrangement.spacedBy(rowStyle.spacingDp.dp)
+    val arrangement = if (appearance.style is RowStyle.FloatingButton) {
+        Arrangement.spacedBy(appearance.style.spacingDp.dp)
     } else {
         Arrangement.Top
     }
     Column(modifier = modifier, verticalArrangement = arrangement) {
-        if (rowStyle.topSeparatorEnabled()) OptionalEmbeddedDivider(rowStyle)
+        if (appearance.style.topSeparatorEnabled()) OptionalEmbeddedDivider(appearance.style)
 
         EmbeddedSavedPaymentMethodRowButton(
             paymentMethods = paymentMethods,
@@ -124,7 +121,7 @@ internal fun PaymentMethodEmbeddedLayoutUI(
             onViewMorePaymentMethods = onViewMorePaymentMethods,
             onManageOneSavedPaymentMethod = onManageOneSavedPaymentMethod,
             onSelectSavedPaymentMethod = onSelectSavedPaymentMethod,
-            rowStyle = rowStyle
+            appearance = appearance
         )
 
         EmbeddedNewPaymentMethodRowButtonsLayoutUi(
@@ -132,14 +129,13 @@ internal fun PaymentMethodEmbeddedLayoutUI(
             selection = selection,
             isEnabled = isEnabled,
             imageLoader = imageLoader,
-            rowStyle = rowStyle,
+            appearance = appearance,
         )
 
-        if (rowStyle.bottomSeparatorEnabled()) OptionalEmbeddedDivider(rowStyle)
+        if (appearance.style.bottomSeparatorEnabled()) OptionalEmbeddedDivider(appearance.style)
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 private fun OptionalEmbeddedDivider(rowStyle: Embedded.RowStyle) {
     if (rowStyle.hasSeparators()) {
@@ -166,67 +162,66 @@ private fun EmbeddedMandate(
         Mandate(
             mandateText = mandate?.resolve(),
             modifier = Modifier
-                .padding(bottom = 8.dp)
+                .padding(top = 8.dp)
                 .testTag(EMBEDDED_MANDATE_TEXT_TEST_TAG),
         )
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 private fun Embedded.RowStyle.bottomSeparatorEnabled(): Boolean {
     return when (this) {
         is Embedded.RowStyle.FloatingButton -> false
         is Embedded.RowStyle.FlatWithRadio -> bottomSeparatorEnabled
         is Embedded.RowStyle.FlatWithCheckmark -> bottomSeparatorEnabled
+        is Embedded.RowStyle.FlatWithDisclosure -> bottomSeparatorEnabled
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 private fun Embedded.RowStyle.topSeparatorEnabled(): Boolean {
     return when (this) {
         is Embedded.RowStyle.FloatingButton -> false
         is Embedded.RowStyle.FlatWithRadio -> topSeparatorEnabled
         is Embedded.RowStyle.FlatWithCheckmark -> topSeparatorEnabled
+        is Embedded.RowStyle.FlatWithDisclosure -> topSeparatorEnabled
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 private fun Embedded.RowStyle.separatorThickness(): Dp {
     return when (this) {
         is Embedded.RowStyle.FloatingButton -> 0.dp
         is Embedded.RowStyle.FlatWithRadio -> separatorThicknessDp.dp
         is Embedded.RowStyle.FlatWithCheckmark -> separatorThicknessDp.dp
+        is Embedded.RowStyle.FlatWithDisclosure -> separatorThicknessDp.dp
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 private fun Embedded.RowStyle.separatorColor(isDarkMode: Boolean): Int {
     return when (this) {
         is Embedded.RowStyle.FloatingButton -> 0
         is Embedded.RowStyle.FlatWithRadio -> getColors(isDarkMode).separatorColor
         is Embedded.RowStyle.FlatWithCheckmark -> getColors(isDarkMode).separatorColor
+        is Embedded.RowStyle.FlatWithDisclosure -> getColors(isDarkMode).separatorColor
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 private fun Embedded.RowStyle.startSeparatorInset(): Dp {
     return when (this) {
         is Embedded.RowStyle.FloatingButton -> 0.dp
         is Embedded.RowStyle.FlatWithRadio -> startSeparatorInsetDp.dp
         is Embedded.RowStyle.FlatWithCheckmark -> startSeparatorInsetDp.dp
+        is Embedded.RowStyle.FlatWithDisclosure -> startSeparatorInsetDp.dp
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 private fun Embedded.RowStyle.endSeparatorInset(): Dp {
     return when (this) {
         is Embedded.RowStyle.FloatingButton -> 0.dp
         is Embedded.RowStyle.FlatWithRadio -> endSeparatorInsetDp.dp
         is Embedded.RowStyle.FlatWithCheckmark -> endSeparatorInsetDp.dp
+        is Embedded.RowStyle.FlatWithDisclosure -> endSeparatorInsetDp.dp
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 internal fun EmbeddedSavedPaymentMethodRowButton(
     paymentMethods: List<DisplayablePaymentMethod>,
@@ -237,7 +232,7 @@ internal fun EmbeddedSavedPaymentMethodRowButton(
     onViewMorePaymentMethods: () -> Unit,
     onManageOneSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
-    rowStyle: Embedded.RowStyle,
+    appearance: Embedded,
 ) {
     if (displayedSavedPaymentMethod != null) {
         SavedPaymentMethodRowButton(
@@ -246,28 +241,27 @@ internal fun EmbeddedSavedPaymentMethodRowButton(
             isSelected = selection?.isSaved == true,
             trailingContent = {
                 SavedPaymentMethodTrailingContent(
-                    viewMoreShowChevron = rowStyle.viewMoreShowsChevron,
+                    viewMoreShowChevron = appearance.style.viewMoreShowsChevron,
                     savedPaymentMethodAction = savedPaymentMethodAction,
                     onViewMorePaymentMethods = onViewMorePaymentMethods,
                     onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
                 )
             },
             onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },
-            rowStyle = rowStyle
+            appearance = appearance
         )
 
-        if (paymentMethods.isNotEmpty()) OptionalEmbeddedDivider(rowStyle)
+        if (paymentMethods.isNotEmpty()) OptionalEmbeddedDivider(appearance.style)
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
     paymentMethods: List<DisplayablePaymentMethod>,
     selection: PaymentMethodVerticalLayoutInteractor.Selection?,
     isEnabled: Boolean,
     imageLoader: StripeImageLoader,
-    rowStyle: Embedded.RowStyle,
+    appearance: Embedded,
 ) {
     val selectedIndex = remember(selection, paymentMethods) {
         if (selection is PaymentMethodVerticalLayoutInteractor.Selection.New) {
@@ -290,11 +284,13 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
                 isSelected = true,
                 displayablePaymentMethod = displayablePaymentMethod,
                 imageLoader = imageLoader,
-                rowStyle = rowStyle,
+                appearance = appearance,
                 trailingContent = {
-                    EmbeddedNewPaymentMethodTrailingContent(
-                        showChevron = rowStyle !is Embedded.RowStyle.FlatWithCheckmark,
-                    )
+                    if (appearance.style !is RowStyle.FlatWithDisclosure) {
+                        EmbeddedNewPaymentMethodTrailingContent(
+                            showChevron = appearance.style !is RowStyle.FlatWithCheckmark,
+                        )
+                    }
                 }
             )
         } else {
@@ -303,20 +299,20 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
                 isSelected = isSelected,
                 displayablePaymentMethod = item,
                 imageLoader = imageLoader,
-                rowStyle = rowStyle,
+                appearance = appearance
             )
         }
 
-        if (index != paymentMethods.lastIndex) OptionalEmbeddedDivider(rowStyle)
+        if (index != paymentMethods.lastIndex) OptionalEmbeddedDivider(appearance.style)
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 private val RowStyle.viewMoreShowsChevron: Boolean
     get() = when (this) {
         is RowStyle.FloatingButton -> true
         is RowStyle.FlatWithRadio -> true
         is RowStyle.FlatWithCheckmark -> false
+        is RowStyle.FlatWithDisclosure -> false
     }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

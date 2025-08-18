@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -18,20 +19,19 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Link
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountForm
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.image.StripeImageLoader
 import java.util.UUID
 
@@ -54,9 +54,7 @@ internal fun PaymentElement(
         StripeImageLoader(context.applicationContext)
     }
 
-    val horizontalPadding = dimensionResource(
-        id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
-    )
+    val horizontalPadding = StripeTheme.getOuterFormInsets()
 
     val selectedIndex = remember(selectedItemCode, supportedPaymentMethods) {
         supportedPaymentMethods.map { it.code }.indexOf(selectedItemCode)
@@ -84,7 +82,7 @@ internal fun PaymentElement(
             formElements = formElements,
             formArguments = formArguments,
             usBankAccountFormArguments = usBankAccountFormArguments,
-            horizontalPadding = horizontalPadding,
+            horizontalPaddingValues = horizontalPadding,
             onFormFieldValuesChanged = onFormFieldValuesChanged,
             onInteractionEvent = onInteractionEvent,
         )
@@ -98,7 +96,7 @@ internal fun FormElement(
     formElements: List<FormElement>,
     formArguments: FormArguments,
     usBankAccountFormArguments: USBankAccountFormArguments,
-    horizontalPadding: Dp,
+    horizontalPaddingValues: PaddingValues,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
     onInteractionEvent: () -> Unit,
 ) {
@@ -139,7 +137,7 @@ internal fun FormElement(
                     }
                     previouslyCompletedUSBankAccountForm = true
                 },
-                modifier = Modifier.padding(horizontal = horizontalPadding),
+                modifier = Modifier.padding(horizontalPaddingValues),
                 enabled = enabled
             )
         } else {
@@ -149,7 +147,7 @@ internal fun FormElement(
                 enabled = enabled,
                 onFormFieldValuesChanged = onFormFieldValuesChanged,
                 formElements = formElements,
-                modifier = Modifier.padding(horizontal = horizontalPadding)
+                modifier = Modifier.padding(horizontalPaddingValues)
             )
         }
     }

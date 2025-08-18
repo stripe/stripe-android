@@ -137,6 +137,32 @@ class IntentConfirmationDefinitionTest {
     }
 
     @Test
+    fun `On 'IntentConfirmationInterceptor' complete with uncompleted flow, should return expected action`() =
+        runTest {
+            val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
+                enqueueCompleteStep(
+                    completedFullPaymentFlow = false
+                )
+            }
+
+            val definition = createIntentConfirmationDefinition(
+                intentConfirmationInterceptor = intentConfirmationInterceptor,
+            )
+
+            val action = definition.action(
+                confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
+                confirmationParameters = CONFIRMATION_PARAMETERS,
+            )
+
+            val completeAction = action.asComplete()
+
+            assertThat(completeAction.intent).isEqualTo(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+            assertThat(completeAction.confirmationOption).isEqualTo(SAVED_PAYMENT_CONFIRMATION_OPTION)
+            assertThat(completeAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Server)
+            assertThat(completeAction.completedFullPaymentFlow).isFalse()
+        }
+
+    @Test
     fun `On 'IntentConfirmationInterceptor' failure, should return 'Fail' confirmation action`() = runTest {
         val message = "Failed!"
         val cause = IllegalStateException("Failed with exception!")
@@ -330,6 +356,7 @@ class IntentConfirmationDefinitionTest {
 
         assertThat(succeededResult.intent).isEqualTo(PaymentIntentFixtures.PI_SUCCEEDED)
         assertThat(succeededResult.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
+        assertThat(succeededResult.completedFullPaymentFlow).isTrue()
     }
 
     @Test

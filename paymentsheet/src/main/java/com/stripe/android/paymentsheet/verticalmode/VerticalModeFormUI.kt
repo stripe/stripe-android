@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.annotation.RestrictTo
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -17,14 +16,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.stripe.android.lpmfoundations.FormHeaderInformation
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.FormElement
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.ui.PromoBadge
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
@@ -38,9 +37,7 @@ internal fun VerticalModeFormUI(
     showsWalletHeader: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val horizontalPadding = dimensionResource(
-        id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
-    )
+    val horizontalPadding = StripeTheme.getOuterFormInsets()
 
     var hasSentInteractionEvent by remember { mutableStateOf(false) }
     val state by interactor.state.collectAsState()
@@ -58,7 +55,7 @@ internal fun VerticalModeFormUI(
             formElements = state.formElements,
             formArguments = state.formArguments,
             usBankAccountFormArguments = state.usBankAccountFormArguments,
-            horizontalPadding = horizontalPadding,
+            horizontalPaddingValues = horizontalPadding,
             onFormFieldValuesChanged = { formValues ->
                 interactor.handleViewAction(
                     VerticalModeFormInteractor.ViewAction.FormFieldValuesChanged(formValues)
@@ -83,20 +80,17 @@ internal fun VerticalModeFormHeaderUI(
     val imageLoader = remember {
         StripeImageLoader(context)
     }
-    val iconUrl = if (isSystemInDarkTheme() && formHeaderInformation.darkThemeIconUrl != null) {
-        formHeaderInformation.darkThemeIconUrl
-    } else {
-        formHeaderInformation.lightThemeIconUrl
-    }
 
     Row(
-        modifier = Modifier.padding(horizontal = 20.dp).padding(bottom = 12.dp),
+        modifier = Modifier
+            .padding(bottom = 12.dp)
+            .padding(StripeTheme.getOuterFormInsets()),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (formHeaderInformation.shouldShowIcon) {
             PaymentMethodIcon(
-                iconRes = formHeaderInformation.iconResource,
-                iconUrl = iconUrl,
+                iconRes = formHeaderInformation.icon(),
+                iconUrl = formHeaderInformation.iconUrl(),
                 imageLoader = imageLoader,
                 iconRequiresTinting = formHeaderInformation.iconRequiresTinting,
                 modifier = Modifier

@@ -13,6 +13,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
@@ -281,6 +282,12 @@ interface StripeRepository {
     ): Result<RadarSessionWithHCaptcha>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun createSavedPaymentMethodRadarSession(
+        paymentMethodId: String,
+        requestOptions: ApiRequest.Options
+    ): Result<RadarSessionWithHCaptcha>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun attachHCaptchaToRadarSession(
         radarSessionToken: String,
         hcaptchaToken: String,
@@ -296,7 +303,7 @@ interface StripeRepository {
         id: String,
         extraParams: Map<String, *>?,
         requestOptions: ApiRequest.Options
-    ): Result<String>
+    ): Result<PaymentMethod>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun logOut(
@@ -412,6 +419,12 @@ interface StripeRepository {
     ): Result<ConsumerPaymentDetails>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun listShippingAddresses(
+        clientSecret: String,
+        requestOptions: ApiRequest.Options
+    ): Result<ConsumerShippingAddresses>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun deletePaymentDetails(
         clientSecret: String,
         paymentDetailsId: String,
@@ -427,4 +440,10 @@ interface StripeRepository {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun buildPaymentUserAgent(attribution: Set<String> = emptySet()): String
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val DEFAULT_REQUEST_SURFACE = RequestSurface.PaymentElement
+    }
 }

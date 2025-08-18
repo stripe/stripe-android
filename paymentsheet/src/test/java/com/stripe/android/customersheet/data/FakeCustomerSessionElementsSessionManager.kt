@@ -45,6 +45,7 @@ internal class FakeCustomerSessionElementsSessionManager(
                 linkSettings = null,
                 paymentMethodSpecs = null,
                 stripeIntent = intent,
+                orderedPaymentMethodTypesAndWallets = intent.paymentMethodTypes,
                 merchantCountry = null,
                 isGooglePayEnabled = true,
                 sessionsError = null,
@@ -54,7 +55,8 @@ internal class FakeCustomerSessionElementsSessionManager(
                 cardBrandChoice = null,
                 elementsSessionId = "session_1234",
                 flags = emptyMap(),
-                experimentsData = null
+                experimentsData = null,
+                passiveCaptcha = null
             ),
             customer = customer,
             ephemeralKey = CachedCustomerEphemeralKey(

@@ -2,8 +2,8 @@ package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
 import com.stripe.android.Stripe
-import com.stripe.android.common.analytics.experiment.DefaultLogLinkGlobalHoldbackExposure
-import com.stripe.android.common.analytics.experiment.LogLinkGlobalHoldbackExposure
+import com.stripe.android.common.analytics.experiment.DefaultLogLinkHoldbackExperiment
+import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
@@ -12,6 +12,7 @@ import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.repositories.LinkApiRepository
 import com.stripe.android.link.repositories.LinkRepository
+import com.stripe.android.networking.RequestSurface
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.repository.ConsumersApiServiceImpl
@@ -42,8 +43,8 @@ internal class LinkHoldbackExposureModule {
 
     @Provides
     fun providesLogLinkGlobalHoldbackExposure(
-        default: DefaultLogLinkGlobalHoldbackExposure
-    ): LogLinkGlobalHoldbackExposure {
+        default: DefaultLogLinkHoldbackExperiment
+    ): LogLinkHoldbackExperiment {
         return default
     }
 
@@ -53,6 +54,7 @@ internal class LinkHoldbackExposureModule {
         application: Application,
         @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
         @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?,
+        requestSurface: RequestSurface,
         stripeRepository: StripeRepository,
         @IOContext workContext: CoroutineContext,
         logger: Logger,
@@ -69,14 +71,15 @@ internal class LinkHoldbackExposureModule {
             )
         )
         return LinkApiRepository(
-            application,
-            publishableKeyProvider,
-            stripeAccountIdProvider,
-            stripeRepository,
-            consumersApiService,
-            workContext,
-            locale,
-            errorReporter,
+            application = application,
+            requestSurface = requestSurface,
+            publishableKeyProvider = publishableKeyProvider,
+            stripeAccountIdProvider = stripeAccountIdProvider,
+            stripeRepository = stripeRepository,
+            consumersApiService = consumersApiService,
+            workContext = workContext,
+            locale = locale,
+            errorReporter = errorReporter,
         )
     }
 }

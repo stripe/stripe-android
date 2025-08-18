@@ -5,9 +5,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -22,9 +22,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
@@ -81,7 +82,6 @@ internal fun PaymentMethodVerticalLayoutUI(
     )
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @VisibleForTesting
 @Composable
 internal fun PaymentMethodVerticalLayoutUI(
@@ -99,6 +99,13 @@ internal fun PaymentMethodVerticalLayoutUI(
     Column(modifier = modifier) {
         val textStyle = MaterialTheme.typography.subtitle1
         val textColor = MaterialTheme.stripeColors.onComponent
+
+        val rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default.run {
+            PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.Builder()
+                .spacingDp(spacingDp)
+                .additionalInsetsDp(StripeTheme.verticalModeRowPadding)
+                .build()
+        }
 
         if (displayedSavedPaymentMethod != null) {
             Text(
@@ -119,7 +126,8 @@ internal fun PaymentMethodVerticalLayoutUI(
                         onViewMorePaymentMethods = onViewMorePaymentMethods,
                         onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
                     )
-                }
+                },
+                appearance = PaymentSheet.Appearance.Embedded(rowStyle),
             )
             Spacer(Modifier.size(24.dp))
             Text(stringResource(id = R.string.stripe_paymentsheet_new_pm), style = textStyle, color = textColor)
@@ -129,7 +137,7 @@ internal fun PaymentMethodVerticalLayoutUI(
         val selectedIndex = remember(selection, paymentMethods) {
             if (selection is PaymentMethodVerticalLayoutInteractor.Selection.New) {
                 val code = selection.code
-                paymentMethods.indexOfFirst { it.code == code }
+                paymentMethods.indexOfFirst { it.syntheticCode == code }
             } else {
                 -1
             }
@@ -140,6 +148,7 @@ internal fun PaymentMethodVerticalLayoutUI(
             selectedIndex = selectedIndex,
             isEnabled = isEnabled,
             imageLoader = imageLoader,
+            rowStyle = rowStyle,
         )
     }
 }
@@ -176,7 +185,7 @@ private fun EditButton(onClick: () -> Unit) {
             .testTag(TEST_TAG_EDIT_SAVED_CARD)
             .clickable(onClick = onClick)
             .padding(vertical = 4.dp)
-            .fillMaxHeight()
+            .wrapContentHeight()
     )
 }
 
@@ -191,7 +200,7 @@ private fun ViewMoreButton(
             .testTag(TEST_TAG_VIEW_MORE)
             .clickable(onClick = onViewMorePaymentMethods)
             .padding(vertical = 4.dp)
-            .fillMaxHeight()
+            .wrapContentHeight()
     ) {
         Text(
             stringResource(id = R.string.stripe_view_more),

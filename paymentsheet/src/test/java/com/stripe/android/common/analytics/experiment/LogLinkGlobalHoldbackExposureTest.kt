@@ -2,7 +2,7 @@ package com.stripe.android.common.analytics.experiment
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkGlobalHoldback.EmailRecognitionSource
+import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkHoldback.EmailRecognitionSource
 import com.stripe.android.common.model.CommonConfigurationFactory
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CONSUMER_SESSION
@@ -41,7 +41,7 @@ class LogLinkGlobalHoldbackExposureTest {
     private lateinit var eventReporter: FakeEventReporter
     private lateinit var logger: FakeLogger
     private lateinit var linkRepository: FakeLinkRepository
-    private lateinit var logLinkGlobalHoldbackExposure: LogLinkGlobalHoldbackExposure
+    private lateinit var logLinkHoldbackExperiment: LogLinkHoldbackExperiment
     private lateinit var customerRepository: FakeCustomerRepository
     private lateinit var retrieveCustomerEmail: RetrieveCustomerEmail
     private lateinit var linkConfigurationCoordinator: FakeLinkConfigurationCoordinator
@@ -60,7 +60,7 @@ class LogLinkGlobalHoldbackExposureTest {
         retrieveCustomerEmail = DefaultRetrieveCustomerEmail(customerRepository)
         linkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
 
-        logLinkGlobalHoldbackExposure = DefaultLogLinkGlobalHoldbackExposure(
+        logLinkHoldbackExperiment = DefaultLogLinkHoldbackExperiment(
             linkDisabledApiRepository = linkRepository,
             eventReporter = eventReporter,
             logger = logger,
@@ -83,11 +83,15 @@ class LogLinkGlobalHoldbackExposureTest {
         )
         val state = createElementsState(PaymentMethodMetadataFactory.create())
 
-        logLinkGlobalHoldbackExposure(elementsSession, state)
+        logLinkHoldbackExperiment(
+            experimentAssignment = LINK_GLOBAL_HOLD_BACK,
+            elementsSession = elementsSession,
+            state = state
+        )
 
         val exposureCall = eventReporter.experimentExposureCalls.awaitItem()
 
-        assertTrue(exposureCall.experiment is LoggableExperiment.LinkGlobalHoldback)
+        assertTrue(exposureCall.experiment is LoggableExperiment.LinkHoldback)
         assertEquals(exposureCall.experiment.group, "holdback")
     }
 
@@ -103,11 +107,15 @@ class LogLinkGlobalHoldbackExposureTest {
         )
         val state = createElementsState(PaymentMethodMetadataFactory.create())
 
-        logLinkGlobalHoldbackExposure(elementsSession, state)
+        logLinkHoldbackExperiment(
+            experimentAssignment = LINK_GLOBAL_HOLD_BACK,
+            elementsSession = elementsSession,
+            state = state
+        )
 
         val exposureCall = eventReporter.experimentExposureCalls.awaitItem()
 
-        assertTrue(exposureCall.experiment is LoggableExperiment.LinkGlobalHoldback)
+        assertTrue(exposureCall.experiment is LoggableExperiment.LinkHoldback)
         assertEquals(exposureCall.experiment.group, "control")
     }
 
@@ -125,7 +133,11 @@ class LogLinkGlobalHoldbackExposureTest {
         )
         val state = createElementsState(PaymentMethodMetadataFactory.create())
 
-        logLinkGlobalHoldbackExposure(elementsSession, state)
+        logLinkHoldbackExperiment(
+            experimentAssignment = LINK_GLOBAL_HOLD_BACK,
+            elementsSession = elementsSession,
+            state = state
+        )
 
         eventReporter.experimentExposureCalls.expectNoEvents()
     }
@@ -135,7 +147,11 @@ class LogLinkGlobalHoldbackExposureTest {
         val elementsSession = createElementsSession()
         val state = createElementsState(PaymentMethodMetadataFactory.create())
 
-        logLinkGlobalHoldbackExposure(elementsSession, state)
+        logLinkHoldbackExperiment(
+            experimentAssignment = LINK_GLOBAL_HOLD_BACK,
+            elementsSession = elementsSession,
+            state = state
+        )
 
         val loggedError = logger.errorLogs.first()
         assertEquals(
@@ -174,14 +190,18 @@ class LogLinkGlobalHoldbackExposureTest {
             )
         )
 
-        logLinkGlobalHoldbackExposure(elementsSession, state)
+        logLinkHoldbackExperiment(
+            experimentAssignment = LINK_GLOBAL_HOLD_BACK,
+            elementsSession = elementsSession,
+            state = state
+        )
 
         val lookupCall = linkRepository.awaitLookupWithoutBackendLogging()
         assertEquals(lookupCall.email, TestFactory.LINK_CONFIGURATION.customerInfo.email!!)
 
         val exposureCall = eventReporter.experimentExposureCalls.awaitItem()
         val experiment = exposureCall.experiment
-        assertTrue(experiment is LoggableExperiment.LinkGlobalHoldback)
+        assertTrue(experiment is LoggableExperiment.LinkHoldback)
         assertThat(experiment.group).isEqualTo("holdback")
         assertThat(experiment.isReturningLinkUser).isTrue()
     }
@@ -211,7 +231,11 @@ class LogLinkGlobalHoldbackExposureTest {
             IllegalArgumentException("Test exception")
         )
 
-        logLinkGlobalHoldbackExposure(elementsSession, state)
+        logLinkHoldbackExperiment(
+            experimentAssignment = LINK_GLOBAL_HOLD_BACK,
+            elementsSession = elementsSession,
+            state = state
+        )
 
         eventReporter.experimentExposureCalls.expectNoEvents()
         assertThat(logger.errorLogs.last().first).isEqualTo("Failed to log Global holdback exposure")
@@ -248,13 +272,17 @@ class LogLinkGlobalHoldbackExposureTest {
             )
         )
 
-        logLinkGlobalHoldbackExposure(elementsSession, state)
+        logLinkHoldbackExperiment(
+            experimentAssignment = LINK_GLOBAL_HOLD_BACK,
+            elementsSession = elementsSession,
+            state = state
+        )
 
         val lookupCall = linkRepository.awaitLookupWithoutBackendLogging()
         assertEquals(lookupCall.email, TestFactory.LINK_CONFIGURATION.customerInfo.email!!)
 
         val exposureCall = eventReporter.experimentExposureCalls.awaitItem()
-        assertTrue(exposureCall.experiment is LoggableExperiment.LinkGlobalHoldback)
+        assertTrue(exposureCall.experiment is LoggableExperiment.LinkHoldback)
         assertThat(exposureCall.experiment.group).isEqualTo("holdback")
         assertThat(exposureCall.experiment.isReturningLinkUser).isFalse()
     }
@@ -279,10 +307,14 @@ class LogLinkGlobalHoldbackExposureTest {
             )
         )
 
-        logLinkGlobalHoldbackExposure(elementsSession, state)
+        logLinkHoldbackExperiment(
+            experimentAssignment = LINK_GLOBAL_HOLD_BACK,
+            elementsSession = elementsSession,
+            state = state
+        )
 
         val exposureCall = eventReporter.experimentExposureCalls.awaitItem()
-        assertTrue(exposureCall.experiment is LoggableExperiment.LinkGlobalHoldback)
+        assertTrue(exposureCall.experiment is LoggableExperiment.LinkHoldback)
         assertThat(exposureCall.experiment.useLinkNative).isTrue()
     }
 
@@ -308,10 +340,14 @@ class LogLinkGlobalHoldbackExposureTest {
             )
         )
 
-        logLinkGlobalHoldbackExposure(elementsSession, state)
+        logLinkHoldbackExperiment(
+            experimentAssignment = LINK_GLOBAL_HOLD_BACK,
+            elementsSession = elementsSession,
+            state = state
+        )
 
         val exposureCall = eventReporter.experimentExposureCalls.awaitItem()
-        assertTrue(exposureCall.experiment is LoggableExperiment.LinkGlobalHoldback)
+        assertTrue(exposureCall.experiment is LoggableExperiment.LinkHoldback)
         assertThat(exposureCall.experiment.emailRecognitionSource).isEqualTo(EmailRecognitionSource.EMAIL)
     }
 
@@ -337,10 +373,14 @@ class LogLinkGlobalHoldbackExposureTest {
 
         val state = createElementsState(PaymentMethodMetadataFactory.create())
 
-        logLinkGlobalHoldbackExposure(elementsSession, state)
+        logLinkHoldbackExperiment(
+            experimentAssignment = LINK_GLOBAL_HOLD_BACK,
+            elementsSession = elementsSession,
+            state = state
+        )
 
         val exposureCall = eventReporter.experimentExposureCalls.awaitItem()
-        assertTrue(exposureCall.experiment is LoggableExperiment.LinkGlobalHoldback)
+        assertTrue(exposureCall.experiment is LoggableExperiment.LinkHoldback)
         assertThat(exposureCall.experiment.spmEnabled).isTrue()
     }
 
@@ -355,12 +395,14 @@ class LogLinkGlobalHoldbackExposureTest {
             isGooglePayEnabled = false,
             customer = customer,
             linkSettings = null,
+            orderedPaymentMethodTypesAndWallets = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.paymentMethodTypes,
             customPaymentMethods = emptyList(),
             externalPaymentMethodData = null,
             paymentMethodSpecs = null,
             elementsSessionId = "session_1234",
             flags = emptyMap(),
-            experimentsData = experimentsData
+            experimentsData = experimentsData,
+            passiveCaptcha = null
         )
     }
 

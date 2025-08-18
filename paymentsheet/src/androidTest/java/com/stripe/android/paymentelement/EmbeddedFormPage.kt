@@ -13,17 +13,21 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import com.stripe.android.paymentelement.embedded.form.EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
+import com.stripe.android.ui.core.elements.MANDATE_TEST_TAG
 import kotlin.time.Duration.Companion.seconds
 
 internal class EmbeddedFormPage(
     private val composeTestRule: ComposeTestRule,
 ) {
-    val cardNumber: SemanticsNodeInteraction = nodeWithLabel("Card number")
+    val cardNumberText: SemanticsNodeInteraction = nodeWithLabel("Card number")
 
-    fun fillOutCardDetails(fillOutCardNumber: Boolean = true) {
+    fun fillOutCardDetails(
+        newCardNumber: String = "4242424242424242",
+        fillOutCardNumber: Boolean = true
+    ) {
         waitUntilVisible()
         if (fillOutCardNumber) {
-            replaceText(cardNumber, "4242424242424242")
+            replaceText(cardNumberText, newCardNumber)
         }
         fillExpirationDate("12/34")
         replaceText("CVC", "123")
@@ -52,7 +56,7 @@ internal class EmbeddedFormPage(
         composeTestRule.waitUntil {
             composeTestRule
                 .onAllNodes(hasTestTag(FORM_ELEMENT_TEST_TAG))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
     }
@@ -84,5 +88,19 @@ internal class EmbeddedFormPage(
         }
 
         composeTestRule.waitForIdle()
+    }
+
+    fun assertMandateIsShown() {
+        waitUntilVisible()
+
+        composeTestRule.onNodeWithTag(MANDATE_TEST_TAG)
+            .assertExists()
+    }
+
+    fun assertMandateIsMissing() {
+        waitUntilVisible()
+
+        composeTestRule.onNodeWithTag(MANDATE_TEST_TAG)
+            .assertDoesNotExist()
     }
 }

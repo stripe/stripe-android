@@ -37,6 +37,12 @@ internal class DefaultLinkGate @Inject constructor(
             return useNativeLink.not() || configuration.suppress2faModal
         }
 
+    override val useInlineOtpInWalletButtons: Boolean
+        get() = FeatureFlags.showInlineOtpInWalletButtons.isEnabled && useNativeLink
+
+    override val showRuxInFlowController: Boolean
+        get() = useNativeLink && configuration.disableRuxInFlowController == false
+
     class Factory @Inject constructor() : LinkGate.Factory {
         override fun create(configuration: LinkConfiguration): LinkGate {
             return DefaultLinkGate(configuration)

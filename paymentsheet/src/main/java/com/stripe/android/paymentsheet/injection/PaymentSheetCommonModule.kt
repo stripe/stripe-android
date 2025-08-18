@@ -20,7 +20,9 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.gate.DefaultLinkGate
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkAnalyticsComponent
+import com.stripe.android.link.injection.LinkCommonModule
 import com.stripe.android.link.injection.LinkComponent
+import com.stripe.android.link.injection.PaymentsIntegrityModule
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
@@ -63,6 +65,10 @@ import kotlin.coroutines.CoroutineContext
         LinkAnalyticsComponent::class,
         LinkComponent::class,
     ],
+    includes = [
+        LinkCommonModule::class,
+        PaymentsIntegrityModule::class,
+    ]
 )
 internal abstract class PaymentSheetCommonModule {
 

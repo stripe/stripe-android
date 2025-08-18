@@ -39,6 +39,8 @@ internal class FakeAddPaymentMethodInteractor(
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 linkConfigurationCoordinator = null,
                 onLinkInlineSignupStateChanged = { throw AssertionError("Not expected") },
+                autocompleteAddressInteractorFactory = null,
+                linkInlineHandler = null,
             )
 
             return AddPaymentMethodInteractor.State(

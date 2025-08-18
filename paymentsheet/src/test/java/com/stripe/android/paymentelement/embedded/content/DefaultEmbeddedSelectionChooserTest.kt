@@ -10,9 +10,9 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser.Companion.PREVIOUS_CONFIGURATION_KEY
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser.Companion.PREVIOUS_PAYMENT_METHOD_METADATA_KEY
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -28,7 +28,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class DefaultEmbeddedSelectionChooserTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
@@ -45,6 +44,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = null,
             newSelection = PaymentSelection.GooglePay,
             newConfiguration = defaultConfiguration,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
         )
         assertThat(selection).isEqualTo(PaymentSelection.GooglePay)
     }
@@ -65,6 +65,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = newSelection,
             newConfiguration = defaultConfiguration,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
         )
         assertThat(selection).isEqualTo(previousSelection)
     }
@@ -80,6 +81,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = PaymentSelection.GooglePay,
             newConfiguration = defaultConfiguration,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
         )
         assertThat(selection).isEqualTo(previousSelection)
     }
@@ -94,6 +96,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = null,
             newConfiguration = defaultConfiguration,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
         )
         assertThat(selection).isNull()
     }
@@ -112,6 +115,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = null,
             newConfiguration = defaultConfiguration,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
         )
         assertThat(selection).isNull()
     }
@@ -130,6 +134,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = PaymentSelection.GooglePay,
             newConfiguration = defaultConfiguration,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
         )
         assertThat(selection).isEqualTo(previousSelection)
     }
@@ -147,6 +152,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = null,
             newConfiguration = defaultConfiguration,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
         )
         assertThat(selection).isNull()
     }
@@ -165,6 +171,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = PaymentSelection.GooglePay,
             newConfiguration = defaultConfiguration,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
         )
         assertThat(selection).isEqualTo(previousSelection)
     }
@@ -182,6 +189,54 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = null,
             newConfiguration = defaultConfiguration,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
+        )
+        assertThat(selection).isNull()
+    }
+
+    @Test
+    fun `ShopPay selection returns null when used as previous selection`() = runScenario {
+        val selection = chooser.choose(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            paymentMethods = PaymentMethodFixtures.createCards(3),
+            previousSelection = PaymentSelection.ShopPay,
+            newSelection = null,
+            newConfiguration = defaultConfiguration,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
+        )
+        assertThat(selection).isNull()
+    }
+
+    @Test
+    fun `Uses new selection when previous selection is ShopPay`() = runScenario {
+        val paymentMethod = PaymentMethodFixtures.createCard()
+        val newSelection = PaymentSelection.Saved(paymentMethod)
+
+        val selection = chooser.choose(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            paymentMethods = PaymentMethodFixtures.createCards(3) + paymentMethod,
+            previousSelection = PaymentSelection.ShopPay,
+            newSelection = newSelection,
+            newConfiguration = defaultConfiguration,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
+        )
+        assertThat(selection).isEqualTo(newSelection)
+    }
+
+    @Test
+    fun `No payment selection when rowSelectionCallback not null and formSheetAction confirm`() = runScenario(
+        internalRowSelectionCallback = {}
+    ) {
+        val paymentMethod = PaymentMethodFixtures.createCard()
+        val previousSelection = PaymentSelection.Saved(paymentMethod)
+
+        val selection = chooser.choose(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(isGooglePayReady = true),
+            paymentMethods = PaymentMethodFixtures.createCards(3) + paymentMethod,
+            previousSelection = previousSelection,
+            newSelection = PaymentSelection.GooglePay,
+            newConfiguration = defaultConfiguration,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Confirm,
         )
         assertThat(selection).isNull()
     }
@@ -199,6 +254,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = newSelection,
             newConfiguration = defaultConfiguration,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
         )
         assertThat(selection).isEqualTo(previousSelection)
     }
@@ -220,6 +276,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = newSelection,
             newConfiguration = defaultConfiguration,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
         )
         assertThat(selection).isEqualTo(newSelection)
     }
@@ -242,6 +299,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = null,
             newConfiguration = defaultConfiguration,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
         )
         assertThat(selection).isNull()
     }
@@ -261,6 +319,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = null,
             newConfiguration = defaultConfiguration,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
         )
         assertThat(selection).isEqualTo(previousSelection)
     }
@@ -280,6 +339,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = null,
             newConfiguration = defaultConfiguration,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
         )
         assertThat(selection).isEqualTo(previousSelection)
     }
@@ -299,6 +359,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = null,
             newConfiguration = defaultConfiguration,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
         )
         assertThat(selection).isEqualTo(previousSelection)
     }
@@ -320,6 +381,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = null,
             newConfiguration = defaultConfiguration,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
         )
         assertThat(selection).isEqualTo(previousSelection)
     }
@@ -341,8 +403,57 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = null,
             newConfiguration = defaultConfiguration,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
         )
         assertThat(selection).isNull()
+    }
+
+    @Test
+    fun `Selects newSelection when setAsDefault enabled`() = runScenario {
+        val defaultPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val newSelection = PaymentSelection.Saved(defaultPaymentMethod)
+        val previousSelectionPaymentMethod = PaymentMethodFixtures.createCard()
+        val previousSelection = PaymentSelection.Saved(previousSelectionPaymentMethod)
+
+        val selection = chooser.choose(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                isPaymentMethodSetAsDefaultEnabled = true
+            ),
+            paymentMethods = listOf(
+                PaymentMethodFixtures.createCard(),
+                defaultPaymentMethod,
+                previousSelectionPaymentMethod
+            ),
+            previousSelection = previousSelection,
+            newSelection = newSelection,
+            newConfiguration = defaultConfiguration,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Confirm,
+        )
+        assertThat(selection).isEqualTo(newSelection)
+    }
+
+    @Test
+    fun `Does not select newSelection when setAsDefault disabled`() = runScenario {
+        val defaultPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val newSelection = PaymentSelection.Saved(defaultPaymentMethod)
+        val previousSelectionPaymentMethod = PaymentMethodFixtures.createCard()
+        val previousSelection = PaymentSelection.Saved(previousSelectionPaymentMethod)
+
+        val selection = chooser.choose(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                isPaymentMethodSetAsDefaultEnabled = false
+            ),
+            paymentMethods = listOf(
+                PaymentMethodFixtures.createCard(),
+                defaultPaymentMethod,
+                previousSelectionPaymentMethod
+            ),
+            previousSelection = previousSelection,
+            newSelection = newSelection,
+            newConfiguration = defaultConfiguration,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Confirm,
+        )
+        assertThat(selection).isEqualTo(previousSelection)
     }
 
     @Test
@@ -359,6 +470,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = newSelection,
             newConfiguration = defaultConfiguration,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
         )
         assertThat(selection).isEqualTo(previousSelection)
         assertThat(savedStateHandle.get<CommonConfiguration>(PREVIOUS_CONFIGURATION_KEY))
@@ -366,6 +478,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
     }
 
     private fun runScenario(
+        internalRowSelectionCallback: InternalRowSelectionCallback? = null,
         block: Scenario.() -> Unit,
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
@@ -381,6 +494,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
                 formHelperFactory = formHelperFactory,
                 coroutineScope = CoroutineScope(Dispatchers.Unconfined),
                 eventReporter = FakeEventReporter(),
+                internalRowSelectionCallback = { internalRowSelectionCallback }
             ),
             savedStateHandle = savedStateHandle,
         ).block()

@@ -16,6 +16,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.IS_LIVE_MODE
+import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
@@ -55,6 +56,7 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -271,6 +273,7 @@ internal class CustomerSheetViewModel(
             is CustomerSheetViewAction.OnAddCardPressed -> onAddCardPressed()
             is CustomerSheetViewAction.OnCardNumberInputCompleted -> onCardNumberInputCompleted()
             is CustomerSheetViewAction.OnDisallowedCardBrandEntered -> onDisallowedCardBrandEntered(viewAction.brand)
+            is CustomerSheetViewAction.OnAnalyticsEvent -> onAnalyticsEvent(viewAction.event)
             is CustomerSheetViewAction.OnBackPressed -> onBackPressed()
             is CustomerSheetViewAction.OnEditPressed -> onEditPressed()
             is CustomerSheetViewAction.OnModifyItem -> onModifyItem(viewAction.paymentMethod)
@@ -458,12 +461,14 @@ internal class CustomerSheetViewModel(
                          * `CustomerSheet` does not implement `Link` so we don't need a coordinator or callback.
                          */
                         linkConfigurationCoordinator = null,
+                        linkInlineHandler = null,
                         onLinkInlineSignupStateChanged = {
                             throw IllegalStateException(
                                 "`CustomerSheet` does not implement `Link` and should not " +
                                     "receive `InlineSignUpViewState` updates"
                             )
-                        }
+                        },
+                        autocompleteAddressInteractorFactory = null,
                     ),
                 ) ?: listOf(),
                 primaryButtonLabel = if (
@@ -560,6 +565,8 @@ internal class CustomerSheetViewModel(
                     canUpdateFullPaymentMethodDetails = customerState.canUpdateFullPaymentMethodDetails,
                     displayableSavedPaymentMethod = paymentMethod,
                     addressCollectionMode = configuration.billingDetailsCollectionConfiguration.address,
+                    allowedBillingCountries =
+                    configuration.billingDetailsCollectionConfiguration.allowedBillingCountries,
                     cardBrandFilter = PaymentSheetCardBrandFilter(customerState.configuration.cardBrandAcceptance),
                     removeExecutor = ::removeExecutor,
                     onBrandChoiceSelected = { brand ->
@@ -803,12 +810,14 @@ internal class CustomerSheetViewModel(
                  * `CustomerSheet` does not implement `Link` so we don't need a coordinator or callback.
                  */
                 linkConfigurationCoordinator = null,
+                linkInlineHandler = null,
                 onLinkInlineSignupStateChanged = {
                     throw IllegalStateException(
                         "`CustomerSheet` does not implement `Link` and should not " +
                             "receive `InlineSignUpViewState` updates"
                     )
-                }
+                },
+                autocompleteAddressInteractorFactory = null,
             )
         ) ?: emptyList()
 
@@ -867,6 +876,8 @@ internal class CustomerSheetViewModel(
             setAsDefaultPaymentMethodEnabled = false,
             financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),
             setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
+            autocompleteAddressInteractorFactory = null,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         )
     }
 
@@ -915,6 +926,10 @@ internal class CustomerSheetViewModel(
 
     private fun onCardNumberInputCompleted() {
         eventReporter.onCardNumberCompleted()
+    }
+
+    private fun onAnalyticsEvent(event: AnalyticsEvent) {
+        eventReporter.onAnalyticsEvent(event)
     }
 
     private fun onDisallowedCardBrandEntered(brand: CardBrand) {

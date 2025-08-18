@@ -1,10 +1,11 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.TextFieldConfig
 import com.stripe.android.uicore.elements.TextFieldIcon
@@ -23,8 +24,7 @@ class UpiConfig : TextFieldConfig {
         "[a-zA-Z0-9.\\-_]{2,256}@[a-zA-Z]{2,64}".toRegex()
     }
 
-    @StringRes
-    override val label: Int = R.string.stripe_upi_id_label
+    override val label: ResolvableString = resolvableString(R.string.stripe_upi_id_label)
 
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel: String = "upi_id"
@@ -32,6 +32,7 @@ class UpiConfig : TextFieldConfig {
     override val visualTransformation: VisualTransformation? = null
     override val trailingIcon: StateFlow<TextFieldIcon?> = MutableStateFlow(value = null)
     override val loading: StateFlow<Boolean> = MutableStateFlow(value = false)
+    override val optional: Boolean = false
 
     override fun determineState(input: String): TextFieldState {
         val isValid = upiPattern.matches(input) && input.length <= UPI_MAX_LENGTH

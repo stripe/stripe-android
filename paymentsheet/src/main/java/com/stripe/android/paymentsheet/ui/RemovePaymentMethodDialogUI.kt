@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
@@ -31,8 +32,25 @@ internal fun RemovePaymentMethodDialogUI(
 }
 
 private fun DisplayableSavedPaymentMethod.getRemoveDialogTitle() = when (paymentMethod.type) {
-    PaymentMethod.Type.Card,
-    PaymentMethod.Type.Link -> resolvableString(R.string.stripe_paymentsheet_remove_card_title)
+    PaymentMethod.Type.Card -> {
+        if (paymentMethod.isLinkPaymentMethod) {
+            // Link card brand
+            resolvableString(R.string.stripe_paymentsheet_remove_bank_account_question_title)
+        } else {
+            resolvableString(R.string.stripe_paymentsheet_remove_card_title)
+        }
+    }
+    PaymentMethod.Type.Link -> {
+        when (paymentMethod.linkPaymentDetails) {
+            is LinkPaymentDetails.BankAccount -> {
+                resolvableString(R.string.stripe_paymentsheet_remove_bank_account_question_title)
+            }
+            is LinkPaymentDetails.Card -> {
+                resolvableString(R.string.stripe_paymentsheet_remove_card_title)
+            }
+            null -> resolvableString("")
+        }
+    }
     PaymentMethod.Type.SepaDebit,
     PaymentMethod.Type.USBankAccount ->
         resolvableString(R.string.stripe_paymentsheet_remove_bank_account_question_title)
@@ -40,11 +58,21 @@ private fun DisplayableSavedPaymentMethod.getRemoveDialogTitle() = when (payment
 }
 
 private fun DisplayableSavedPaymentMethod.getRemoveDialogDescription() = when (paymentMethod.type) {
-    PaymentMethod.Type.Card -> resolvableString(
-        com.stripe.android.R.string.stripe_card_with_last_4,
-        this.brandDisplayName(),
-        paymentMethod.card?.last4
-    )
+    PaymentMethod.Type.Card -> {
+        if (paymentMethod.isLinkPaymentMethod) {
+            // Link card brand
+            resolvableString(
+                R.string.stripe_bank_account_with_last_4,
+                paymentMethod.linkPaymentDetails?.last4
+            )
+        } else {
+            resolvableString(
+                com.stripe.android.R.string.stripe_card_with_last_4,
+                this.brandDisplayName(),
+                paymentMethod.card?.last4
+            )
+        }
+    }
     PaymentMethod.Type.SepaDebit -> resolvableString(
         R.string.stripe_bank_account_with_last_4,
         paymentMethod.sepaDebit?.last4
@@ -53,10 +81,19 @@ private fun DisplayableSavedPaymentMethod.getRemoveDialogDescription() = when (p
         R.string.stripe_bank_account_with_last_4,
         paymentMethod.usBankAccount?.last4
     )
-    PaymentMethod.Type.Link -> resolvableString(
-        com.stripe.android.R.string.stripe_card_with_last_4,
-        this.brandDisplayName(),
-        paymentMethod.linkPaymentDetails?.last4
-    )
+    PaymentMethod.Type.Link -> {
+        when (val linkDetails = paymentMethod.linkPaymentDetails) {
+            is LinkPaymentDetails.BankAccount -> resolvableString(
+                R.string.stripe_bank_account_with_last_4,
+                linkDetails.last4
+            )
+            is LinkPaymentDetails.Card -> resolvableString(
+                com.stripe.android.R.string.stripe_card_with_last_4,
+                this.brandDisplayName(),
+                linkDetails.last4
+            )
+            null -> resolvableString("")
+        }
+    }
     else -> resolvableString("")
 }

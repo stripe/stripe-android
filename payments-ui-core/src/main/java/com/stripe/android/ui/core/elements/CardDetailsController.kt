@@ -2,11 +2,11 @@ package com.stripe.android.ui.core.elements
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -39,7 +39,7 @@ internal class CardDetailsController(
         SimpleTextElement(
             controller = SimpleTextFieldController(
                 textFieldConfig = SimpleTextFieldConfig(
-                    label = R.string.stripe_name_on_card,
+                    label = resolvableString(R.string.stripe_name_on_card),
                     capitalization = KeyboardCapitalization.Words,
                     keyboard = androidx.compose.ui.text.input.KeyboardType.Text
                 ),
@@ -127,15 +127,14 @@ internal class CardDetailsController(
         field: SectionFieldElement,
         modifier: Modifier,
         hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?,
-        nextFocusDirection: FocusDirection,
-        previousFocusDirection: FocusDirection
+        lastTextFieldIdentifier: IdentifierSpec?
     ) {
         CardDetailsElementUI(
             enabled,
             this,
             hiddenIdentifiers,
-            lastTextFieldIdentifier
+            lastTextFieldIdentifier,
+            modifier = modifier,
         )
     }
 }

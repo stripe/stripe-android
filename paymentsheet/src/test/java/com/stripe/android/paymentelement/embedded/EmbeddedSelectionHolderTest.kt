@@ -1,9 +1,11 @@
 package com.stripe.android.paymentelement.embedded
 
+import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import kotlinx.coroutines.test.runTest
@@ -29,6 +31,14 @@ internal class EmbeddedSelectionHolderTest {
     }
 
     @Test
+    fun `setting selection updates previousNewSelections`() = testScenario {
+        assertThat(selectionHolder.previousNewSelections.isEmpty).isTrue()
+        selectionHolder.set(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+        assertThat(selectionHolder.previousNewSelections.isEmpty).isFalse()
+        assertThat(selectionHolder.previousNewSelections.size()).isEqualTo(1)
+    }
+
+    @Test
     fun `initializing with selection in savedStateHandle sets initial value`() = testScenario(
         setup = {
             set(EmbeddedSelectionHolder.EMBEDDED_SELECTION_KEY, PaymentSelection.GooglePay)
@@ -39,6 +49,21 @@ internal class EmbeddedSelectionHolderTest {
         selectionHolder.set(null)
         assertThat(savedStateHandle.get<PaymentSelection?>(EmbeddedSelectionHolder.EMBEDDED_SELECTION_KEY))
             .isNull()
+    }
+
+    @Test
+    fun `initializing with previousNewSelections in savedStateHandle sets initial value`() = testScenario(
+        setup = {
+            set(
+                EmbeddedSelectionHolder.EMBEDDED_PREVIOUS_SELECTIONS_KEY,
+                Bundle().apply {
+                    putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+                }
+            )
+        },
+    ) {
+        assertThat(selectionHolder.getPreviousNewSelection("cashapp"))
+            .isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
     }
 
     @Test
@@ -70,6 +95,17 @@ internal class EmbeddedSelectionHolderTest {
         selectionHolder.setTemporary(null)
         assertThat(savedStateHandle.get<PaymentMethodCode?>(EmbeddedSelectionHolder.EMBEDDED_TEMPORARY_SELECTION_KEY))
             .isNull()
+    }
+
+    @Test
+    fun `setting previousNewSelections updates previousNewSelections`() = testScenario {
+        assertThat(selectionHolder.previousNewSelections.isEmpty).isTrue()
+        val previousNewSelections = Bundle().apply {
+            putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+        }
+        selectionHolder.setPreviousNewSelections(previousNewSelections)
+        assertThat(selectionHolder.previousNewSelections.isEmpty).isFalse()
+        assertThat(selectionHolder.previousNewSelections.size()).isEqualTo(1)
     }
 
     private class Scenario(

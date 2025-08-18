@@ -13,6 +13,7 @@ internal fun Any.toComponentPropsJsonObject(): JsonObject {
     return when (this) {
         EmptyProps -> JsonObject(emptyMap())
         is AccountOnboardingProps -> ConnectJson.encodeToJsonElement(toJs()).jsonObject
+        is PaymentsProps -> ConnectJson.encodeToJsonElement(toJs()).jsonObject
         else -> throw IllegalArgumentException("Unsupported props type: $this")
     }
 }
@@ -20,6 +21,5 @@ internal fun Any.toComponentPropsJsonObject(): JsonObject {
 /**
  * Empty props.
  */
-@PrivateBetaConnectSDK
 @Parcelize
 internal data object EmptyProps : Parcelable

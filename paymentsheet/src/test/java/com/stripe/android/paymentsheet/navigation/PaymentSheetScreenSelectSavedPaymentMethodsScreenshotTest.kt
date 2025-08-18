@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSaved
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.SelectSavedPaymentMethodsInteractor
+import com.stripe.android.paymentsheet.utils.OutlinedIconsAppearance
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.CoroutineTestRule
@@ -26,10 +27,21 @@ internal class PaymentSheetScreenSelectSavedPaymentMethodsScreenshotTest {
     )
 
     @get:Rule
+    val outlinedPaparazziRule = PaparazziRule(
+        listOf(OutlinedIconsAppearance),
+        boxModifier = Modifier
+            .padding(16.dp),
+    )
+
+    @get:Rule
     val coroutineRule = CoroutineTestRule()
 
     private val savedPaymentOptionItem = PaymentOptionsItem.SavedPaymentMethod(
         displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+    )
+
+    private val savedUsBankAccount = PaymentOptionsItem.SavedPaymentMethod(
+        displayableSavedPaymentMethod = PaymentMethodFixtures.displayableUsBankAccount(),
     )
 
     private val defaultSavedPaymentOptionItem = PaymentOptionsItem.SavedPaymentMethod(
@@ -99,26 +111,48 @@ internal class PaymentSheetScreenSelectSavedPaymentMethodsScreenshotTest {
         }
     }
 
+    @Test
+    fun displaysSelectSavedPaymentMethodsWithOutlinedIcons() {
+        val viewModel = getTestViewModel(
+            includeDefaultPaymentMethod = true,
+            isEditing = true,
+            isProcessing = false,
+            canEdit = true,
+            canRemove = true,
+            useUsBankAccount = true,
+        )
+
+        outlinedPaparazziRule.snapshot {
+            PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+        }
+    }
+
     private fun getTestViewModel(
         includeDefaultPaymentMethod: Boolean,
         isEditing: Boolean,
         isProcessing: Boolean,
         canEdit: Boolean,
         canRemove: Boolean,
+        useUsBankAccount: Boolean = false,
     ): FakeBaseSheetViewModel {
         val metadata = PaymentMethodMetadataFactory.create()
+        val option = if (useUsBankAccount) {
+            savedUsBankAccount
+        } else {
+            savedPaymentOptionItem
+        }
         val interactor = FakeSelectSavedPaymentMethodsInteractor(
             initialState = SelectSavedPaymentMethodsInteractor.State(
                 paymentOptionsItems = if (includeDefaultPaymentMethod) {
                     listOf(
                         PaymentOptionsItem.AddCard,
                         defaultSavedPaymentOptionItem,
-                        savedPaymentOptionItem,
+                        option,
                     )
                 } else {
                     listOf(
                         PaymentOptionsItem.AddCard,
-                        savedPaymentOptionItem,
+                        option,
                     )
                 },
                 selectedPaymentOptionsItem = savedPaymentOptionItem,

@@ -43,8 +43,7 @@ internal class RelayingPaymentElementLoader : PaymentElementLoader {
     override suspend fun load(
         initializationMode: PaymentElementLoader.InitializationMode,
         onfiguration: CommonConfiguration,
-        isReloadingAfterProcessDeath: Boolean,
-        initializedViaCompose: Boolean,
+        metadata: PaymentElementLoader.Metadata,
     ): Result<PaymentElementLoader.State> {
         return results.receive()
     }

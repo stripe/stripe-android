@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.PermissionException
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
@@ -112,9 +113,10 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
                 appVerificationEnabled = sync.manifest.appVerificationEnabled,
                 prefilledEmail = initialEmail,
                 emailController = SimpleTextFieldController(
-                    textFieldConfig = EmailConfig(label = R.string.stripe_networking_signup_email_label),
+                    textFieldConfig = EmailConfig(
+                        label = resolvableString(R.string.stripe_networking_signup_email_label)
+                    ),
                     initialValue = initialEmail,
-                    showOptionalLabel = false
                 ),
                 phoneController = PhoneNumberController.createPhoneNumberController(
                     initialValue = sync.manifest.accountholderPhoneNumber ?: prefillDetails?.phone ?: "",

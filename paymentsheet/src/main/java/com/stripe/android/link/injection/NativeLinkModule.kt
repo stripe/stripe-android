@@ -1,6 +1,5 @@
 package com.stripe.android.link.injection
 
-import android.app.Application
 import android.content.Context
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.SavedStateHandle
@@ -19,6 +18,7 @@ import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.account.DefaultLinkAccountManager
@@ -34,7 +34,6 @@ import com.stripe.android.link.confirmation.DefaultLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.gate.DefaultLinkGate
 import com.stripe.android.link.gate.LinkGate
-import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.LinkApiRepository
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -49,13 +48,16 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
+import com.stripe.android.paymentsheet.addresselement.AutocompleteActivityLauncher
+import com.stripe.android.paymentsheet.addresselement.AutocompleteAppearanceContext
+import com.stripe.android.paymentsheet.addresselement.AutocompleteLauncher
+import com.stripe.android.paymentsheet.addresselement.DefaultAutocompleteLauncher
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.repository.ConsumersApiServiceImpl
 import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.navigation.NavigationManagerImpl
-import com.stripe.attestation.IntegrityRequestManager
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -66,7 +68,8 @@ import kotlin.coroutines.CoroutineContext
 
 @Module(
     includes = [
-        StripeRepositoryModule::class
+        StripeRepositoryModule::class,
+        PaymentsIntegrityModule::class
     ]
 )
 internal interface NativeLinkModule {
@@ -124,17 +127,23 @@ internal interface NativeLinkModule {
     @NativeLinkScope
     fun bindsDismissalCoordinator(impl: RealLinkDismissalCoordinator): LinkDismissalCoordinator
 
+    @Binds
+    @NativeLinkScope
+    fun bindsAutocompleteActivityLauncher(impl: DefaultAutocompleteLauncher): AutocompleteActivityLauncher
+
+    @Binds
+    @NativeLinkScope
+    fun bindsAutocompleteLauncher(impl: DefaultAutocompleteLauncher): AutocompleteLauncher
+
     @SuppressWarnings("TooManyFunctions")
     companion object {
         @Provides
         @NativeLinkScope
         fun providesLinkAccountHolder(
             savedStateHandle: SavedStateHandle,
-            linkAccount: LinkAccount?
-        ): LinkAccountHolder {
-            return LinkAccountHolder(savedStateHandle).apply {
-                set(linkAccount)
-            }
+            linkAccountInfo: LinkAccountUpdate.Value,
+        ): LinkAccountHolder = LinkAccountHolder(savedStateHandle).apply {
+            set(linkAccountInfo)
         }
 
         @Provides
@@ -204,12 +213,6 @@ internal interface NativeLinkModule {
         @NativeLinkScope
         fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Custom
 
-        @Provides
-        @NativeLinkScope
-        fun provideIntegrityStandardRequestManager(
-            context: Application
-        ): IntegrityRequestManager = createIntegrityStandardRequestManager(context)
-
         @JvmSuppressWildcards
         @Provides
         @IntoSet
@@ -228,5 +231,11 @@ internal interface NativeLinkModule {
         ): AnalyticEventCallback? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.analyticEventCallback
         }
+
+        @Provides
+        @NativeLinkScope
+        fun provideAutocompleteLauncher() = DefaultAutocompleteLauncher(
+            appearanceContext = AutocompleteAppearanceContext.Link,
+        )
     }
 }

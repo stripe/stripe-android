@@ -3,14 +3,19 @@ package com.stripe.android.paymentsheet.model
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.core.model.CountryCode
+import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.Address
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountTextBuilder
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -20,12 +25,6 @@ class PaymentSelectionTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
 
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage,
-        isEnabled = false
-    )
-
     @Test
     fun `Doesn't display a mandate for Link`() {
         val link = PaymentSelection.Link()
@@ -34,6 +33,65 @@ class PaymentSelectionTest {
             isSetupFlow = false,
         )
         assertThat(result).isNull()
+    }
+
+    @Test
+    fun `Link billingDetails returns null when selectedPayment is null`() {
+        val link = PaymentSelection.Link(selectedPayment = null)
+
+        assertThat(link.billingDetails).isNull()
+    }
+
+    @Test
+    fun `Link billingDetails returns complete billing details when selectedPayment has full billing info`() {
+        val billingAddress = ConsumerPaymentDetails.BillingAddress(
+            name = "John Doe",
+            line1 = "123 Main St",
+            line2 = "Apt 4B",
+            administrativeArea = "CA",
+            locality = "San Francisco",
+            postalCode = "94111",
+            countryCode = CountryCode.US,
+        )
+
+        val paymentDetails = ConsumerPaymentDetails.Card(
+            id = "pm_123",
+            last4 = "4242",
+            isDefault = true,
+            nickname = "My Card",
+            billingAddress = billingAddress,
+            billingEmailAddress = "john@example.com",
+            expiryYear = 2025,
+            expiryMonth = 12,
+            brand = CardBrand.Visa,
+            networks = listOf("visa"),
+            cvcCheck = CvcCheck.Pass,
+            funding = "credit"
+        )
+
+        val selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
+            details = paymentDetails,
+            collectedCvc = null,
+            billingPhone = "+1-555-123-4567"
+        )
+
+        val link = PaymentSelection.Link(selectedPayment = selectedPayment)
+
+        assertThat(link.billingDetails).isEqualTo(
+            PaymentMethod.BillingDetails(
+                address = Address(
+                    city = "San Francisco",
+                    country = "US",
+                    line1 = "123 Main St",
+                    line2 = "Apt 4B",
+                    postalCode = "94111",
+                    state = "CA",
+                ),
+                email = "john@example.com",
+                phone = "+1-555-123-4567",
+                name = "John Doe",
+            )
+        )
     }
 
     @Test
@@ -158,7 +216,6 @@ class PaymentSelectionTest {
 
     @Test
     fun `mandateTextFromPaymentMethodMetadata returns correct mandate for USBankAccount with PMO SFU set`() {
-        featureFlagTestRule.setEnabled(true)
         val selection = PaymentSelection.Saved(
             PaymentMethodFactory.usBankAccount()
         )
@@ -186,8 +243,23 @@ class PaymentSelectionTest {
     }
 
     @Test
+    fun `mandateTextFromPaymentMethodMetadata returns mandate for Saved SepaDebit`() {
+        val selection = PaymentSelection.Saved(PaymentMethodFactory.sepaDebit())
+        val metadata = PaymentMethodMetadataFactory.create()
+        assertThat(selection.mandateTextFromPaymentMethodMetadata(metadata)).isNotNull()
+    }
+
+    @Test
+    fun `mandateTextFromPaymentMethodMetadata returns correct mandate for Saved SepaDebit with TermsDisplay=NEVER`() {
+        val selection = PaymentSelection.Saved(PaymentMethodFactory.sepaDebit())
+        val metadata = PaymentMethodMetadataFactory.create(
+            termsDisplay = mapOf(PaymentMethod.Type.SepaDebit to PaymentSheet.TermsDisplay.NEVER)
+        )
+        assertThat(selection.mandateTextFromPaymentMethodMetadata(metadata)).isNull()
+    }
+
+    @Test
     fun `getSetupFutureUseValue returns correct value when hasIntentToSetup is true`() {
-        featureFlagTestRule.setEnabled(true)
         val noRequestSfu = PaymentSelection.CustomerRequestedSave.NoRequest.getSetupFutureUseValue(
             hasIntentToSetup = true
         )
@@ -206,7 +278,6 @@ class PaymentSelectionTest {
 
     @Test
     fun `getSetupFutureUseValue returns correct value when hasIntentToSetup is false`() {
-        featureFlagTestRule.setEnabled(true)
         val noRequestSfu = PaymentSelection.CustomerRequestedSave.NoRequest.getSetupFutureUseValue(
             hasIntentToSetup = false
         )

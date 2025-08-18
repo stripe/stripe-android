@@ -7,13 +7,20 @@ import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
+import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.screenshottesting.LayoutDirection
+import com.stripe.android.screenshottesting.PaparazziConfigOption
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.utils.screenshots.PaymentSheetAppearance.DefaultAppearance
 import org.junit.Rule
 import org.junit.Test
 
@@ -24,6 +31,16 @@ class CardUiDefinitionFactoryTest {
     @get:Rule
     val rightToLeftPaparazziRule = PaparazziRule(
         listOf(LayoutDirection.RightToLeft)
+    )
+
+    @get:Rule
+    val customSpacingPaparazziRule = PaparazziRule(
+        listOf(CustomSpacingAppearance)
+    )
+
+    @get:Rule
+    val customTextFieldsPaparazziRule = PaparazziRule(
+        listOf(CustomTextInsetsAppearance)
     )
 
     private val metadata = PaymentMethodMetadataFactory.create(
@@ -175,6 +192,40 @@ class CardUiDefinitionFactoryTest {
     }
 
     @Test
+    fun testCardWithCustomSpacing() {
+        customSpacingPaparazziRule.snapshot {
+            val setupIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "link"),
+            )
+
+            CardDefinition.CreateFormUi(
+                metadata = metadata.copy(
+                    stripeIntent = setupIntent,
+                    paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
+                    customerMetadata = getDefaultCustomerMetadata(),
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun testCardWithCustomTextFieldInsets() {
+        customTextFieldsPaparazziRule.snapshot {
+            val setupIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "link"),
+            )
+
+            CardDefinition.CreateFormUi(
+                metadata = metadata.copy(
+                    stripeIntent = setupIntent,
+                    paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
+                    customerMetadata = getDefaultCustomerMetadata(),
+                ),
+            )
+        }
+    }
+
+    @Test
     fun testCardRightToLeft() {
         rightToLeftPaparazziRule.snapshot {
             CardDefinition.CreateFormUi(
@@ -213,6 +264,127 @@ class CardUiDefinitionFactoryTest {
                     ),
                 ),
             )
+        }
+    }
+
+    @Test
+    fun testCondensedAutocompleteForm() {
+        paparazziRule.snapshot {
+            CardDefinition.CreateFormUi(
+                paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
+                    code = "card",
+                    billingDetails = null,
+                    requiresMandate = false,
+                    overrideParamMap = mapOf(
+                        "type" to "card",
+                        "card" to mapOf(
+                            "number" to "4242424242424242",
+                            "exp_month" to "07",
+                            "exp_year" to "2050",
+                            "cvc" to "123",
+                        ),
+                        "billing_details" to emptyMap<IdentifierSpec, String?>(),
+                    ),
+                    productUsage = emptySet(),
+                ),
+                metadata = metadata.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    ),
+                ),
+                autocompleteAddressInteractorFactory = {
+                    TestAutocompleteAddressInteractor.noOp(
+                        autocompleteConfig = AutocompleteAddressInteractor.Config(
+                            googlePlacesApiKey = "123",
+                            autocompleteCountries = setOf("US"),
+                            isPlacesAvailable = true,
+                        )
+                    )
+                }
+            )
+        }
+    }
+
+    @Test
+    fun testExpandedAutocompleteForm() {
+        paparazziRule.snapshot {
+            CardDefinition.CreateFormUi(
+                paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
+                    code = "card",
+                    billingDetails = null,
+                    requiresMandate = false,
+                    overrideParamMap = mapOf(
+                        "type" to "card",
+                        "card" to mapOf(
+                            "number" to "4242424242424242",
+                            "exp_month" to "07",
+                            "exp_year" to "2050",
+                            "cvc" to "123",
+                        ),
+                        "billing_details" to mapOf(
+                            "address" to mapOf(
+                                "country" to "US",
+                                "line1" to "123 Apple Street",
+                                "state" to "CA",
+                                "city" to "South San Francisco",
+                                "postal_code" to "94080",
+                            )
+                        ),
+                    ),
+                    productUsage = emptySet(),
+                ),
+                metadata = metadata.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    ),
+                ),
+                autocompleteAddressInteractorFactory = {
+                    TestAutocompleteAddressInteractor.noOp(
+                        autocompleteConfig = AutocompleteAddressInteractor.Config(
+                            googlePlacesApiKey = "123",
+                            autocompleteCountries = setOf("US"),
+                            isPlacesAvailable = true,
+                        )
+                    )
+                }
+            )
+        }
+    }
+
+    @OptIn(AppearanceAPIAdditionsPreview::class)
+    private data object CustomSpacingAppearance : PaparazziConfigOption {
+        private val appearance = PaymentSheet.Appearance.Builder()
+            .sectionSpacing(PaymentSheet.Spacing(spacingDp = 50f))
+            .build()
+
+        override fun initialize() {
+            appearance.parseAppearance()
+        }
+
+        override fun reset() {
+            DefaultAppearance.appearance.parseAppearance()
+        }
+    }
+
+    @OptIn(AppearanceAPIAdditionsPreview::class)
+    private data object CustomTextInsetsAppearance : PaparazziConfigOption {
+        private val appearance = PaymentSheet.Appearance.Builder()
+            .textFieldInsets(
+                PaymentSheet.Insets(
+                    startDp = 24f,
+                    endDp = 20f,
+                    topDp = 28f,
+                    bottomDp = 20f,
+                )
+            )
+            .build()
+
+        override fun initialize() {
+            appearance.parseAppearance()
+        }
+
+        override fun reset() {
+            DefaultAppearance.appearance.parseAppearance()
         }
     }
 }

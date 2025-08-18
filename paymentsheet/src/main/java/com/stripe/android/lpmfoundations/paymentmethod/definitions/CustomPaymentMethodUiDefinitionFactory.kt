@@ -21,6 +21,7 @@ internal class CustomPaymentMethodUiDefinitionFactory(
             lightThemeIconUrl = displayableCustomPaymentMethod.logoUrl,
             darkThemeIconUrl = displayableCustomPaymentMethod.logoUrl,
             iconResource = 0,
+            iconResourceNight = 0,
             iconRequiresTinting = false,
         )
     }

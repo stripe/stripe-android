@@ -10,7 +10,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -26,7 +25,6 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
-@ExperimentalEmbeddedPaymentElementApi
 internal class DefaultEmbeddedConfigurationCoordinatorTest {
     private val defaultConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
 
@@ -219,7 +217,7 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
             confirmationStateHolder = confirmationStateHolder,
             configurationHandler = configurationHandler,
             selectionHolder = selectionHolder,
-            selectionChooser = { _, _, _, newSelection, _ ->
+            selectionChooser = { _, _, _, newSelection, _, _ ->
                 selectionChooser(newSelection)
             },
             stateHelper = stateHelper,

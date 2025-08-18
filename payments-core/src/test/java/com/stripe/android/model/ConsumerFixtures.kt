@@ -121,13 +121,13 @@ object ConsumerFixtures {
                   },
                   "billing_address": {
                     "administrative_area": null,
-                    "country_code": null,
+                    "country_code": "US",
                     "dependent_locality": null,
-                    "line_1": null,
+                    "line_1": "123 Fake St",
                     "line_2": null,
                     "locality": null,
                     "name": null,
-                    "postal_code": null,
+                    "postal_code": "94103",
                     "sorting_code": null
                   },
                   "billing_email_address": "",
@@ -268,7 +268,42 @@ object ConsumerFixtures {
         """
         {
             "object": "payment_method",
-            "payment_method": "pm_1NsnWALu5o3P18Zp36Q7YfWW"
+            "payment_method": {
+                "id": "pm_1NsnWALu5o3P18Zp36Q7YfWW",
+                "object": "payment_method",
+                "created": 1550757934255,
+                "customer": "cus_AQsHpvKfKwJDrF",
+                "livemode": true,
+                "type": "card",
+                "billing_details": {
+                    "address": {
+                        "city": "San Francisco",
+                        "country": "US",
+                        "line1": "1234 Main Street",
+                        "postal_code": "94111",
+                        "state": "CA"
+                    },
+                    "email": "jenny.rosen@example.com",
+                    "name": "Jenny Rosen",
+                    "phone": "123-456-7890"
+                },
+                "card": {
+                    "brand": "visa",
+                    "checks": {
+                        "address_line1_check": "unchecked",
+                        "cvc_check": "unchecked"
+                    },
+                    "country": "US",
+                    "exp_month": 8,
+                    "exp_year": 2022,
+                    "funding": "credit",
+                    "fingerprint": "fingerprint123",
+                    "last4": "4242",
+                    "three_d_secure_usage": {
+                        "supported": true
+                    }
+                }
+            }
         }
         """.trimIndent()
     )

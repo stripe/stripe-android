@@ -12,6 +12,7 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentsheet.PaymentSheet.Builder
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.PaymentSheetLayoutType
 import com.stripe.android.paymentsheet.utils.PaymentSheetLayoutTypeProvider
@@ -40,6 +41,13 @@ internal class PaymentSheetBillingConfigurationTest {
     @Test
     fun testPayloadWithDefaultsAndOverrides() {
         networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.setResponseCode(500)
+        }
+
+        networkRule.enqueue(
             method("GET"),
             path("/v1/elements/sessions"),
         ) { response ->
@@ -53,10 +61,10 @@ internal class PaymentSheetBillingConfigurationTest {
         lateinit var paymentSheet: PaymentSheet
         scenario.onActivity {
             PaymentConfiguration.init(it, "pk_test_123")
-            paymentSheet = PaymentSheet(it) { result ->
+            paymentSheet = Builder { result ->
                 assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
                 countDownLatch.countDown()
-            }
+            }.build(it)
         }
         scenario.moveToState(Lifecycle.State.RESUMED)
         scenario.onActivity {
@@ -130,10 +138,10 @@ internal class PaymentSheetBillingConfigurationTest {
         lateinit var paymentSheet: PaymentSheet
         scenario.onActivity {
             PaymentConfiguration.init(it, "pk_test_123")
-            paymentSheet = PaymentSheet(it) { result ->
+            paymentSheet = Builder { result ->
                 assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
                 countDownLatch.countDown()
-            }
+            }.build(it)
         }
         scenario.moveToState(Lifecycle.State.RESUMED)
         scenario.onActivity {
@@ -185,6 +193,13 @@ internal class PaymentSheetBillingConfigurationTest {
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.setResponseCode(500)
+        }
+
+        networkRule.enqueue(
             method("GET"),
             path("/v1/elements/sessions"),
         ) { response ->
@@ -218,6 +233,7 @@ internal class PaymentSheetBillingConfigurationTest {
             )
         }
 
+        page.assertIsOnFormPage()
         page.replaceText("123 Main Street", "123 Main Road")
         page.fillExpirationDate("12/34")
 
@@ -238,6 +254,13 @@ internal class PaymentSheetBillingConfigurationTest {
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.setResponseCode(500)
+        }
+
         networkRule.enqueue(
             method("GET"),
             path("/v1/elements/sessions"),
@@ -298,5 +321,6 @@ internal class PaymentSheetBillingConfigurationTest {
         }
 
         page.clickPrimaryButton()
+        testContext.consumePaymentOptionEventForFlowController("cashapp", "Cash App Pay")
     }
 }

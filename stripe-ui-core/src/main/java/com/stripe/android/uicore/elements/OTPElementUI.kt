@@ -104,8 +104,12 @@ fun OTPElementUI(
     otpInputPlaceholder: String = "●",
     colors: OTPElementColors = OTPElementColors(
         selectedBorder = MaterialTheme.colors.primary,
-        placeholder = MaterialTheme.stripeColors.placeholderText
+        unselectedBorder = MaterialTheme.stripeColors.componentBorder,
+        placeholder = MaterialTheme.stripeColors.placeholderText,
+        background = Color.Transparent,
+        selectedBackground = Color.Transparent
     ),
+    selectedStrokeWidth: Dp = 2.dp,
     focusRequester: FocusRequester = remember { FocusRequester() }
 ) {
     val focusManager = LocalFocusManager.current
@@ -130,11 +134,14 @@ fun OTPElementUI(
                 shape = boxShape,
                 backgroundColor = MaterialTheme.stripeColors.component,
                 border = BorderStroke(
-                    width = MaterialTheme.getBorderStrokeWidth(isSelected),
+                    width = MaterialTheme.getBorderStrokeWidth(
+                        isSelected = isSelected,
+                        selectedStrokeWidth = selectedStrokeWidth,
+                    ),
                     color = if (isSelected) {
                         colors.selectedBorder
                     } else {
-                        MaterialTheme.stripeColors.componentBorder
+                        colors.unselectedBorder
                     }
                 )
             ) {
@@ -142,10 +149,6 @@ fun OTPElementUI(
 
                 var textFieldModifier = Modifier
                     .height(56.dp)
-                    .autofill(
-                        types = listOf(AutofillType.SmsOtpCode),
-                        onFill = element.controller::onAutofillDigit,
-                    )
                     .onFocusChanged { focusState ->
                         if (focusState.isFocused) {
                             focusedElementIndex = index
@@ -170,7 +173,12 @@ fun OTPElementUI(
                     .semantics { testTagsAsResourceId = true }
 
                 if (index == 0) {
-                    textFieldModifier = textFieldModifier.focusRequester(focusRequester)
+                    textFieldModifier = textFieldModifier
+                        .focusRequester(focusRequester)
+                        .autofill(
+                            types = listOf(AutofillType.SmsOtpCode),
+                            onFill = element.controller::onAutofillDigit,
+                        )
                 }
 
                 OTPInputBox(
@@ -267,11 +275,11 @@ private fun OTPInputDecorationBox(
         interactionSource = remember { MutableInteractionSource() },
         colors = TextFieldDefaults.textFieldColors(
             textColor = MaterialTheme.stripeColors.onComponent,
-            backgroundColor = Color.Transparent,
+            backgroundColor = if (isSelected) colors.selectedBackground else colors.background,
             cursorColor = MaterialTheme.stripeColors.textCursor,
-            focusedIndicatorColor = Color.Transparent,
-            disabledIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
+            focusedIndicatorColor = colors.background,
+            disabledIndicatorColor = colors.background,
+            unfocusedIndicatorColor = colors.background,
             placeholderColor = colors.placeholder,
             disabledPlaceholderColor = colors.placeholder
         ),
@@ -295,5 +303,8 @@ internal object OTPElementUI {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class OTPElementColors(
     val selectedBorder: Color,
-    val placeholder: Color
+    val placeholder: Color,
+    val background: Color,
+    val selectedBackground: Color,
+    val unselectedBorder: Color
 )

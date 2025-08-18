@@ -6,6 +6,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
@@ -128,7 +129,7 @@ internal class LinkConfirmationDefinitionTest {
     @Test
     fun `'launch', when linkAccount is provided, should launch properly with provided parameters`() = test {
         val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
-        linkAccountHolder.set(TestFactory.LINK_ACCOUNT)
+        linkAccountHolder.set(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
 
         val definition = createLinkConfirmationDefinition(
             linkAccountHolder = linkAccountHolder
@@ -143,16 +144,16 @@ internal class LinkConfirmationDefinitionTest {
 
         val presentCall = launcherScenario.presentCalls.awaitItem()
 
-        assertThat(presentCall.useLinkExpress).isTrue()
+        assertThat(presentCall.linkExpressMode).isNotEqualTo(LinkExpressMode.DISABLED)
     }
 
     @Test
-    fun `'launch' should launch properly with provided parameters when useLinkExpress is false`() = test {
+    fun `'launch' should launch properly with provided parameters when linkExpressMode is disabled`() = test {
         val definition = createLinkConfirmationDefinition()
 
         definition.launch(
             confirmationOption = LINK_CONFIRMATION_OPTION.copy(
-                useLinkExpress = false
+                linkExpressMode = LinkExpressMode.DISABLED
             ),
             confirmationParameters = CONFIRMATION_PARAMETERS,
             launcher = launcherScenario.launcher,
@@ -163,7 +164,7 @@ internal class LinkConfirmationDefinitionTest {
 
         assertThat(presentCall.configuration).isEqualTo(LINK_CONFIRMATION_OPTION.configuration)
         assertThat(presentCall.linkAccount).isNull()
-        assertThat(presentCall.useLinkExpress).isFalse()
+        assertThat(presentCall.linkExpressMode).isEqualTo(LinkExpressMode.DISABLED)
     }
 
     @Test
@@ -248,7 +249,7 @@ internal class LinkConfirmationDefinitionTest {
         assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
 
         assertThat(storeScenario.markAsUsedCalls.awaitItem()).isNotNull()
-        verify(linkAccountHolder).set(null)
+        linkAccountHolder.set(LinkAccountUpdate.Value(null))
     }
 
     @Test
@@ -277,7 +278,7 @@ internal class LinkConfirmationDefinitionTest {
         assertThat(failedResult.action).isEqualTo(ConfirmationHandler.Result.Canceled.Action.InformCancellation)
 
         assertThat(storeScenario.markAsUsedCalls.awaitItem()).isNotNull()
-        verify(linkAccountHolder).set(TestFactory.LINK_ACCOUNT)
+        verify(linkAccountHolder).set(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
     }
 
     @Test
@@ -355,7 +356,7 @@ internal class LinkConfirmationDefinitionTest {
 
         private val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(
             configuration = TestFactory.LINK_CONFIGURATION,
-            useLinkExpress = true
+            linkExpressMode = LinkExpressMode.ENABLED,
         )
     }
 }

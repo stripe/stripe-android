@@ -8,6 +8,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
@@ -19,7 +20,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 internal class FlowControllerTestRunnerContext(
-    private val scenario: ActivityScenario<MainActivity>,
+    val scenario: ActivityScenario<MainActivity>,
     val flowController: PaymentSheet.FlowController,
     val configureCallbackTurbine: Turbine<PaymentOption?>,
     private val countDownLatch: CountDownLatch,
@@ -36,6 +37,12 @@ internal class FlowControllerTestRunnerContext(
         activityLaunchObserver.awaitLaunch()
     }
 
+    suspend fun consumePaymentOptionEventForFlowController(paymentMethodType: String, label: String) {
+        val paymentOption = configureCallbackTurbine.awaitItem()
+        assertThat(paymentOption?.label).endsWith(label)
+        assertThat(paymentOption?.paymentMethodType).isEqualTo(paymentMethodType)
+    }
+
     /**
      * Normally we know a test succeeds when it calls [PaymentSheetResultCallback], but some tests
      * succeed based on other criteria. In these cases, call this method to manually mark a test as
@@ -46,10 +53,12 @@ internal class FlowControllerTestRunnerContext(
     }
 }
 
+@OptIn(WalletButtonsPreview::class)
 internal fun runFlowControllerTest(
     networkRule: NetworkRule,
     integrationType: IntegrationType = IntegrationType.Compose,
     callConfirmOnPaymentOptionCallback: Boolean = true,
+    showWalletButtons: Boolean = false,
     builder: PaymentSheet.FlowController.Builder.() -> Unit = {},
     resultCallback: PaymentSheetResultCallback,
     block: suspend (FlowControllerTestRunnerContext) -> Unit,
@@ -81,6 +90,10 @@ internal fun runFlowControllerTest(
             when (integrationType) {
                 IntegrationType.Compose -> activity.setContent {
                     flowController = factory.make()
+
+                    if (showWalletButtons) {
+                        flowController?.WalletButtons()
+                    }
                 }
                 IntegrationType.Activity -> {
                     flowController = factory.make(activity)

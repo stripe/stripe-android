@@ -10,7 +10,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillType
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.LayoutDirection
@@ -25,8 +24,10 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
+import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.events.LocalAnalyticsEventReporter
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.elements.FieldError
@@ -45,6 +46,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.drop
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.R as PaymentsCoreR
@@ -78,15 +80,15 @@ internal class DefaultCardNumberController(
     workContext: CoroutineContext,
     staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     override val initialValue: String?,
-    override val showOptionalLabel: Boolean = false,
     private val cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
 ) : CardNumberController() {
     override val capitalization: KeyboardCapitalization = cardTextFieldConfig.capitalization
     override val keyboardType: KeyboardType = cardTextFieldConfig.keyboard
     override val debugLabel = cardTextFieldConfig.debugLabel
+    override val showOptionalLabel: Boolean = false
 
-    override val label: StateFlow<Int> = stateFlowOf(cardTextFieldConfig.label)
+    override val label: StateFlow<ResolvableString> = stateFlowOf(cardTextFieldConfig.label)
 
     private val _fieldValue = MutableStateFlow("")
     override val fieldValue: StateFlow<String> = _fieldValue.asStateFlow()
@@ -362,15 +364,17 @@ internal class DefaultCardNumberController(
         field: SectionFieldElement,
         modifier: Modifier,
         hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?,
-        nextFocusDirection: FocusDirection,
-        previousFocusDirection: FocusDirection
+        lastTextFieldIdentifier: IdentifierSpec?
     ) {
         val reporter = LocalCardNumberCompletedEventReporter.current
         val disallowedBrandReporter = LocalCardBrandDisallowedReporter.current
+        val analyticsEventReporter = LocalAnalyticsEventReporter.current
 
         // Remember the last state indicating whether it was a disallowed card brand error
         var lastLoggedCardBrand by rememberSaveable { mutableStateOf<CardBrand?>(null) }
+        var hasReportedIncompleteCardNumberRequiringMoreThan16Digits by rememberSaveable {
+            mutableStateOf(false)
+        }
 
         LaunchedEffect(Unit) {
             // Drop the set empty value & initial value
@@ -395,18 +399,38 @@ internal class DefaultCardNumberController(
             }
         }
 
+        LaunchedEffect(Unit) {
+            combine(
+                fieldState.drop(1),
+                fieldValue,
+                _hasFocus,
+            ) { state, fieldValue, hasFocus ->
+                state is TextFieldStateConstants.Error.Incomplete &&
+                    !hasFocus &&
+                    !hasReportedIncompleteCardNumberRequiringMoreThan16Digits &&
+                    fieldValue.length == CARD_NUMBER_16_DIGITS
+            }.collectLatest {
+                if (it) {
+                    analyticsEventReporter.onAnalyticsEvent(
+                        PaymentAnalyticsEvent.CardMetadataExpectedExtraDigitsButUserEntered16ThenSwitchedFields
+                    )
+
+                    hasReportedIncompleteCardNumberRequiringMoreThan16Digits = true
+                }
+            }
+        }
+
         super.ComposeUI(
             enabled,
             field,
             modifier,
             hiddenIdentifiers,
-            lastTextFieldIdentifier,
-            nextFocusDirection,
-            previousFocusDirection
+            lastTextFieldIdentifier
         )
     }
 
     private companion object {
         const val STATIC_ICON_COUNT = 3
+        const val CARD_NUMBER_16_DIGITS = 16
     }
 }

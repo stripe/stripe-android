@@ -2,15 +2,13 @@ package com.stripe.android.paymentelement.embedded.content
 
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import org.junit.Rule
 import kotlin.test.Test
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class EmbeddedContentScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
@@ -25,7 +23,8 @@ internal class EmbeddedContentScreenshotTest {
         val content = EmbeddedContent(
             interactor = interactor,
             embeddedViewDisplaysMandateText = true,
-            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default,
+            appearance = Embedded(Embedded.RowStyle.FloatingButton.default),
+            isImmediateAction = false,
         )
         paparazziRule.snapshot {
             content.Content()
@@ -42,7 +41,8 @@ internal class EmbeddedContentScreenshotTest {
         val content = EmbeddedContent(
             interactor = interactor,
             embeddedViewDisplaysMandateText = true,
-            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default
+            appearance = Embedded(Embedded.RowStyle.FloatingButton.default),
+            isImmediateAction = false,
         )
         paparazziRule.snapshot {
             content.Content()
@@ -59,7 +59,8 @@ internal class EmbeddedContentScreenshotTest {
         val content = EmbeddedContent(
             interactor = interactor,
             embeddedViewDisplaysMandateText = false,
-            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default
+            appearance = Embedded(Embedded.RowStyle.FloatingButton.default),
+            isImmediateAction = false,
         )
         paparazziRule.snapshot {
             content.Content()

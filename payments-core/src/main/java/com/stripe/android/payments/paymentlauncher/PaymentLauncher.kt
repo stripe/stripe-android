@@ -7,6 +7,7 @@ import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.fragment.app.Fragment
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -36,6 +37,12 @@ interface PaymentLauncher {
      * Fetches a [SetupIntent] and handles its next action.
      */
     fun handleNextActionForSetupIntent(clientSecret: String)
+
+    /**
+     * Fetches a [PaymentIntent] from a hashed value and handles its next action.
+     */
+    @SharedPaymentTokenSessionPreview
+    fun handleNextActionForHashedPaymentIntent(hashedValue: String)
 
     /**
      * Callback to notify when the intent is confirmed and next action handled.

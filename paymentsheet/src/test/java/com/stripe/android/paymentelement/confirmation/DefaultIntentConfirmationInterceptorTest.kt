@@ -1,11 +1,16 @@
 package com.stripe.android.paymentelement.confirmation
 
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -13,8 +18,11 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.model.RadarSessionWithHCaptcha
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
+import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.confirmation.intent.CreateIntentCallbackFailureException
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
@@ -25,11 +33,13 @@ import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -43,6 +53,7 @@ import org.robolectric.RobolectricTestRunner
 import java.util.Objects
 import com.stripe.android.R as PaymentsCoreR
 
+@OptIn(SharedPaymentTokenSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
 class DefaultIntentConfirmationInterceptorTest {
     @Test
@@ -54,6 +65,9 @@ class DefaultIntentConfirmationInterceptorTest {
             errorReporter = FakeErrorReporter(),
             allowsManualConfirmation = false,
             intentCreationCallbackProvider = {
+                null
+            },
+            preparePaymentMethodHandlerProvider = {
                 null
             },
         )
@@ -85,6 +99,9 @@ class DefaultIntentConfirmationInterceptorTest {
             errorReporter = FakeErrorReporter(),
             allowsManualConfirmation = false,
             intentCreationCallbackProvider = {
+                null
+            },
+            preparePaymentMethodHandlerProvider = {
                 null
             },
         )
@@ -136,7 +153,9 @@ class DefaultIntentConfirmationInterceptorTest {
         }
 
     @Test
-    fun `Fails if invoked without a confirm callback for existing payment method`() = testNoConfirmCallback(
+    fun `Fails if invoked without a confirm callback for existing payment method`() = testNoProvider(
+        event = ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL,
+        failureMessage = CREATE_INTENT_CALLBACK_MESSAGE,
         userMessage = CREATE_INTENT_CALLBACK_MESSAGE.resolvableString,
     ) { errorReporter ->
         val interceptor = DefaultIntentConfirmationInterceptor(
@@ -146,6 +165,9 @@ class DefaultIntentConfirmationInterceptorTest {
             errorReporter = errorReporter,
             allowsManualConfirmation = false,
             intentCreationCallbackProvider = {
+                null
+            },
+            preparePaymentMethodHandlerProvider = {
                 null
             },
         )
@@ -168,7 +190,9 @@ class DefaultIntentConfirmationInterceptorTest {
     }
 
     @Test
-    fun `Fails if invoked without a confirm callback for new payment method`() = testNoConfirmCallback(
+    fun `Fails if invoked without a confirm callback for new payment method`() = testNoProvider(
+        event = ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL,
+        failureMessage = CREATE_INTENT_CALLBACK_MESSAGE,
         userMessage = CREATE_INTENT_CALLBACK_MESSAGE.resolvableString,
     ) { errorReporter ->
         val interceptor = DefaultIntentConfirmationInterceptor(
@@ -187,10 +211,20 @@ class DefaultIntentConfirmationInterceptorTest {
             intentCreationCallbackProvider = {
                 null
             },
+            preparePaymentMethodHandlerProvider = {
+                null
+            },
         )
 
         interceptor.intercept(
-            initializationMode = InitializationMode.DeferredIntent(mock()),
+            initializationMode = InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1099L,
+                        currency = "usd",
+                    ),
+                ),
+            ),
             intent = PaymentIntentFactory.create(),
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             shippingValues = null,
@@ -199,8 +233,10 @@ class DefaultIntentConfirmationInterceptorTest {
     }
 
     @Test
-    fun `Message for live key when error without confirm callback is user friendly`() = testNoConfirmCallback(
-        userMessage = PaymentsCoreR.string.stripe_internal_error.resolvableString
+    fun `Message for live key when error without confirm callback is user friendly`() = testNoProvider(
+        event = ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL,
+        failureMessage = CREATE_INTENT_CALLBACK_MESSAGE,
+        userMessage = PaymentsCoreR.string.stripe_internal_error.resolvableString,
     ) { errorReporter ->
         val interceptor = DefaultIntentConfirmationInterceptor(
             stripeRepository = object : AbsFakeStripeRepository() {},
@@ -209,6 +245,9 @@ class DefaultIntentConfirmationInterceptorTest {
             errorReporter = errorReporter,
             allowsManualConfirmation = false,
             intentCreationCallbackProvider = {
+                null
+            },
+            preparePaymentMethodHandlerProvider = {
                 null
             },
         )
@@ -262,6 +301,9 @@ class DefaultIntentConfirmationInterceptorTest {
                 intentCreationCallbackProvider = {
                     callback
                 },
+                preparePaymentMethodHandlerProvider = {
+                    null
+                },
             )
 
             val interceptJob = async {
@@ -304,10 +346,14 @@ class DefaultIntentConfirmationInterceptorTest {
 
     @Test
     fun `Fails if creating payment method did not succeed`() = runTest {
-        val apiException = APIException(
+        val invalidRequestException = InvalidRequestException(
+            stripeError = StripeError(
+                type = "card_error",
+                message = "Your card is not supported.",
+                code = "card_declined",
+            ),
             requestId = "req_123",
-            statusCode = 500,
-            message = "Whoopsie",
+            statusCode = 400,
         )
 
         val interceptor = DefaultIntentConfirmationInterceptor(
@@ -316,7 +362,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     paymentMethodCreateParams: PaymentMethodCreateParams,
                     options: ApiRequest.Options
                 ): Result<PaymentMethod> {
-                    return Result.failure(apiException)
+                    return Result.failure(invalidRequestException)
                 }
             },
             publishableKeyProvider = { "pk" },
@@ -326,10 +372,20 @@ class DefaultIntentConfirmationInterceptorTest {
             intentCreationCallbackProvider = {
                 null
             },
+            preparePaymentMethodHandlerProvider = {
+                null
+            },
         )
 
         val nextStep = interceptor.intercept(
-            initializationMode = InitializationMode.DeferredIntent(mock()),
+            initializationMode = InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1099L,
+                        currency = "usd",
+                    ),
+                ),
+            ),
             intent = PaymentIntentFactory.create(),
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             shippingValues = null,
@@ -338,8 +394,8 @@ class DefaultIntentConfirmationInterceptorTest {
 
         assertThat(nextStep).isEqualTo(
             IntentConfirmationInterceptor.NextStep.Fail(
-                cause = apiException,
-                message = resolvableString(R.string.stripe_something_went_wrong),
+                cause = invalidRequestException,
+                message = "Your card is not supported.".resolvableString,
             )
         )
     }
@@ -371,10 +427,20 @@ class DefaultIntentConfirmationInterceptorTest {
             intentCreationCallbackProvider = {
                 succeedingCreateIntentCallback(paymentMethod)
             },
+            preparePaymentMethodHandlerProvider = {
+                null
+            },
         )
 
         val nextStep = interceptor.intercept(
-            initializationMode = InitializationMode.DeferredIntent(mock()),
+            initializationMode = InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1099L,
+                        currency = "usd",
+                    ),
+                ),
+            ),
             intent = PaymentIntentFactory.create(),
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             paymentMethodOptionsParams = null,
@@ -403,10 +469,20 @@ class DefaultIntentConfirmationInterceptorTest {
                     message = "that didn't work…"
                 )
             },
+            preparePaymentMethodHandlerProvider = {
+                null
+            },
         )
 
         val nextStep = interceptor.intercept(
-            initializationMode = InitializationMode.DeferredIntent(mock()),
+            initializationMode = InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1099L,
+                        currency = "usd",
+                    ),
+                ),
+            ),
             intent = PaymentIntentFactory.create(),
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             paymentMethodOptionsParams = null,
@@ -433,10 +509,20 @@ class DefaultIntentConfirmationInterceptorTest {
             intentCreationCallbackProvider = {
                 failingCreateIntentCallback()
             },
+            preparePaymentMethodHandlerProvider = {
+                null
+            },
         )
 
         val nextStep = interceptor.intercept(
-            initializationMode = InitializationMode.DeferredIntent(mock()),
+            initializationMode = InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1099L,
+                        currency = "usd",
+                    ),
+                ),
+            ),
             intent = PaymentIntentFactory.create(),
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             paymentMethodOptionsParams = null,
@@ -476,7 +562,10 @@ class DefaultIntentConfirmationInterceptorTest {
             allowsManualConfirmation = false,
             intentCreationCallbackProvider = {
                 succeedingCreateIntentCallback(paymentMethod)
-            }
+            },
+            preparePaymentMethodHandlerProvider = {
+                null
+            },
         )
 
         val nextStep = interceptor.intercept(
@@ -518,7 +607,10 @@ class DefaultIntentConfirmationInterceptorTest {
             allowsManualConfirmation = false,
             intentCreationCallbackProvider = {
                 succeedingCreateIntentCallback(paymentMethod)
-            }
+            },
+            preparePaymentMethodHandlerProvider = {
+                null
+            },
         )
 
         val nextStep = interceptor.intercept(
@@ -567,7 +659,10 @@ class DefaultIntentConfirmationInterceptorTest {
             allowsManualConfirmation = false,
             intentCreationCallbackProvider = {
                 succeedingCreateIntentCallback(paymentMethod)
-            }
+            },
+            preparePaymentMethodHandlerProvider = {
+                null
+            },
         )
 
         val nextStep = interceptor.intercept(
@@ -616,6 +711,9 @@ class DefaultIntentConfirmationInterceptorTest {
                     CreateIntentResult.Success("pi_123_secret_456")
                 }
             },
+            preparePaymentMethodHandlerProvider = {
+                null
+            },
         )
 
         val inputs = listOf(true, false)
@@ -643,6 +741,117 @@ class DefaultIntentConfirmationInterceptorTest {
         assertThat(observedValues).containsExactly(true, false).inOrder()
     }
 
+    @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
+    @Test
+    fun `Sets shouldSavePaymentMethod to true for CreateIntentCallback if top level SFU is set with PMO`() = runTest {
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        var observedValue = false
+
+        val interceptor = DefaultIntentConfirmationInterceptor(
+            stripeRepository = object : AbsFakeStripeRepository() {
+                override suspend fun retrieveStripeIntent(
+                    clientSecret: String,
+                    options: ApiRequest.Options,
+                    expandFields: List<String>
+                ): Result<StripeIntent> {
+                    return Result.success(PaymentIntentFactory.create())
+                }
+            },
+            publishableKeyProvider = { "pk" },
+            stripeAccountIdProvider = { null },
+            errorReporter = FakeErrorReporter(),
+            allowsManualConfirmation = false,
+            intentCreationCallbackProvider = {
+                CreateIntentCallback { _, shouldSavePaymentMethod ->
+                    observedValue = shouldSavePaymentMethod
+                    CreateIntentResult.Success("pi_123_secret_456")
+                }
+            },
+            preparePaymentMethodHandlerProvider = {
+                null
+            },
+        )
+
+        interceptor.intercept(
+            initializationMode = InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1099L,
+                        currency = "usd",
+                        setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
+                        paymentMethodOptions = PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
+                            setupFutureUsageValues = mapOf(
+                                PaymentMethod.Type.Affirm to PaymentSheet.IntentConfiguration.SetupFutureUse.None
+                            )
+                        )
+                    ),
+                ),
+            ),
+            intent = PaymentIntentFactory.create(),
+            paymentMethod = paymentMethod,
+            paymentMethodOptionsParams = null,
+            paymentMethodExtraParams = null,
+            shippingValues = null,
+        )
+
+        assertThat(observedValue).isTrue()
+    }
+
+    @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
+    @Test
+    fun `Sets shouldSavePaymentMethod to true for CreateIntentCallback if PMO SFU is set`() = runTest {
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        var observedValue = false
+
+        val interceptor = DefaultIntentConfirmationInterceptor(
+            stripeRepository = object : AbsFakeStripeRepository() {
+                override suspend fun retrieveStripeIntent(
+                    clientSecret: String,
+                    options: ApiRequest.Options,
+                    expandFields: List<String>
+                ): Result<StripeIntent> {
+                    return Result.success(PaymentIntentFactory.create())
+                }
+            },
+            publishableKeyProvider = { "pk" },
+            stripeAccountIdProvider = { null },
+            errorReporter = FakeErrorReporter(),
+            allowsManualConfirmation = false,
+            intentCreationCallbackProvider = {
+                CreateIntentCallback { _, shouldSavePaymentMethod ->
+                    observedValue = shouldSavePaymentMethod
+                    CreateIntentResult.Success("pi_123_secret_456")
+                }
+            },
+            preparePaymentMethodHandlerProvider = {
+                null
+            },
+        )
+
+        interceptor.intercept(
+            initializationMode = InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1099L,
+                        currency = "usd",
+                        paymentMethodOptions = PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
+                            setupFutureUsageValues = mapOf(
+                                PaymentMethod.Type.Card to PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+                            )
+                        )
+                    ),
+                ),
+            ),
+            intent = PaymentIntentFactory.create(),
+            paymentMethod = paymentMethod,
+            paymentMethodOptionsParams = null,
+            paymentMethodExtraParams = null,
+            shippingValues = null,
+        )
+
+        assertThat(observedValue).isTrue()
+    }
+
     @Test
     fun `Returns success as next step if merchant is forcing success`() = runTest {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -658,6 +867,9 @@ class DefaultIntentConfirmationInterceptorTest {
                 CreateIntentCallback { _, _ ->
                     CreateIntentResult.Success(IntentConfirmationInterceptor.COMPLETE_WITHOUT_CONFIRMING_INTENT)
                 }
+            },
+            preparePaymentMethodHandlerProvider = {
+                null
             },
         )
 
@@ -703,6 +915,9 @@ class DefaultIntentConfirmationInterceptorTest {
                         CreateIntentResult.Success(clientSecret = "pi_123")
                     }
                 },
+                preparePaymentMethodHandlerProvider = {
+                    null
+                },
             )
 
             val nextStep = interceptor.intercept(
@@ -729,7 +944,413 @@ class DefaultIntentConfirmationInterceptorTest {
             )
         }
 
-    private fun testNoConfirmCallback(
+    @Test
+    fun `If initialized with shared payment token, should fail if 'preparePaymentMethodHandler' in null`() =
+        testNoProvider(
+            event = ErrorReporter.ExpectedErrorEvent.PREPARE_PAYMENT_METHOD_HANDLER_NULL,
+            failureMessage = PREPARE_PAYMENT_METHOD_HANDLER_MESSAGE,
+            userMessage = PaymentsCoreR.string.stripe_internal_error.resolvableString,
+        ) { errorReporter ->
+            val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+
+            val interceptor = DefaultIntentConfirmationInterceptor(
+                stripeRepository = stripeRepositoryReturning(
+                    onCreatePaymentMethodId = "pm_1234",
+                    onRetrievePaymentMethodId = "pm_5678"
+                ),
+                publishableKeyProvider = { "pk" },
+                stripeAccountIdProvider = { null },
+                errorReporter = errorReporter,
+                allowsManualConfirmation = false,
+                intentCreationCallbackProvider = {
+                    null
+                },
+                preparePaymentMethodHandlerProvider = {
+                    null
+                },
+            )
+
+            interceptor.intercept(
+                initializationMode = InitializationMode.DeferredIntent(
+                    intentConfiguration = PaymentSheet.IntentConfiguration(
+                        sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                            amount = 1099L,
+                            currency = "usd",
+                        ),
+                        sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                            businessName = "My business, Inc.",
+                            networkId = "network_id",
+                            externalId = "external_id"
+                        )
+                    ),
+                ),
+                intent = PaymentIntentFactory.create(),
+                paymentMethod = paymentMethod,
+                paymentMethodOptionsParams = null,
+                paymentMethodExtraParams = null,
+                shippingValues = null,
+            )
+        }
+
+    @Test
+    fun `If initialized with shared payment token, should call 'onPreparePaymentMethod' with saved PM`() =
+        runTest {
+            val completablePaymentMethod = CompletableDeferred<PaymentMethod>()
+            val completableShippingAddress = CompletableDeferred<AddressDetails?>()
+            val createSavedPaymentMethodRadarSessionCalls = Turbine<CreateSavedPaymentMethodRadarSessionCall>()
+
+            val providedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            val providedShippingAddress = SHIPPING_ADDRESS
+
+            val interceptor = DefaultIntentConfirmationInterceptor(
+                stripeRepository = stripeRepositoryReturning(
+                    onCreatePaymentMethodId = "pm_1234",
+                    onRetrievePaymentMethodId = "pm_5678",
+                    createSavedPaymentMethodRadarSessionCalls = createSavedPaymentMethodRadarSessionCalls,
+                ),
+                publishableKeyProvider = { "pk" },
+                stripeAccountIdProvider = { null },
+                errorReporter = FakeErrorReporter(),
+                allowsManualConfirmation = false,
+                intentCreationCallbackProvider = { null },
+                preparePaymentMethodHandlerProvider = {
+                    PreparePaymentMethodHandler { paymentMethod, shippingAddress ->
+                        completablePaymentMethod.complete(paymentMethod)
+                        completableShippingAddress.complete(shippingAddress)
+                    }
+                },
+            )
+
+            val nextStep = interceptor.intercept(
+                initializationMode = InitializationMode.DeferredIntent(
+                    intentConfiguration = PaymentSheet.IntentConfiguration(
+                        sharedPaymentTokenSessionWithMode =
+                        PaymentSheet.IntentConfiguration.Mode.Payment(amount = 1099L, currency = "usd"),
+                        sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                            businessName = "My business, Inc.",
+                            networkId = "network_id",
+                            externalId = "external_id"
+                        )
+                    ),
+                ),
+                intent = PaymentIntentFactory.create(),
+                paymentMethod = providedPaymentMethod,
+                paymentMethodOptionsParams = null,
+                paymentMethodExtraParams = null,
+                shippingValues = providedShippingAddress,
+            )
+
+            assertThat(nextStep).isEqualTo(
+                IntentConfirmationInterceptor.NextStep.Complete(
+                    isForceSuccess = true,
+                    completedFullPaymentFlow = false,
+                )
+            )
+
+            val paymentMethod = completablePaymentMethod.await()
+
+            assertThat(paymentMethod).isEqualTo(providedPaymentMethod)
+
+            val shippingAddress = completableShippingAddress.await()
+
+            verifyShipping(providedShippingAddress, shippingAddress)
+
+            val createRadarSessionCall = createSavedPaymentMethodRadarSessionCalls.awaitItem()
+
+            assertThat(createRadarSessionCall.paymentMethodId).isEqualTo("pm_123456789")
+            assertThat(createRadarSessionCall.requestOptions.apiKey).isEqualTo("pk")
+            assertThat(createRadarSessionCall.requestOptions.stripeAccount).isNull()
+
+            createSavedPaymentMethodRadarSessionCalls.ensureAllEventsConsumed()
+        }
+
+    @Test
+    fun `If initialized with shared payment token, should call 'onPreparePaymentMethod' with new PM`() =
+        runTest {
+            val completablePaymentMethod = CompletableDeferred<PaymentMethod>()
+            val completableShippingAddress = CompletableDeferred<AddressDetails?>()
+            val createSavedPaymentMethodRadarSessionCalls = Turbine<CreateSavedPaymentMethodRadarSessionCall>()
+
+            val interceptor = DefaultIntentConfirmationInterceptor(
+                stripeRepository = stripeRepositoryReturning(
+                    onCreatePaymentMethodId = "pm_1234",
+                    onRetrievePaymentMethodId = "pm_5678",
+                    createSavedPaymentMethodRadarSessionCalls = createSavedPaymentMethodRadarSessionCalls,
+                ),
+                publishableKeyProvider = { "pk" },
+                stripeAccountIdProvider = { null },
+                errorReporter = FakeErrorReporter(),
+                allowsManualConfirmation = false,
+                intentCreationCallbackProvider = {
+                    null
+                },
+                preparePaymentMethodHandlerProvider = {
+                    PreparePaymentMethodHandler { paymentMethod, shippingAddress ->
+                        completablePaymentMethod.complete(paymentMethod)
+                        completableShippingAddress.complete(shippingAddress)
+                    }
+                },
+            )
+
+            val nextStep = interceptor.intercept(
+                initializationMode = InitializationMode.DeferredIntent(
+                    intentConfiguration = PaymentSheet.IntentConfiguration(
+                        sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                            amount = 1099L,
+                            currency = "usd",
+                        ),
+                        sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                            businessName = "My business, Inc.",
+                            networkId = "network_id",
+                            externalId = "external_id"
+                        )
+                    ),
+                ),
+                intent = PaymentIntentFactory.create(),
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                paymentMethodOptionsParams = null,
+                paymentMethodExtraParams = null,
+                shippingValues = null,
+                customerRequestedSave = false,
+            )
+
+            assertThat(nextStep).isEqualTo(
+                IntentConfirmationInterceptor.NextStep.Complete(
+                    isForceSuccess = true,
+                    completedFullPaymentFlow = false,
+                )
+            )
+
+            val paymentMethod = completablePaymentMethod.await()
+
+            assertThat(paymentMethod.id).isEqualTo("pm_1234")
+
+            val shippingAddress = completableShippingAddress.await()
+
+            assertThat(shippingAddress).isNull()
+
+            createSavedPaymentMethodRadarSessionCalls.verify()
+        }
+
+    @Test
+    fun `If failed to make radar session, should still continue with preparing payment method`() =
+        runTest {
+            val completablePaymentMethod = CompletableDeferred<PaymentMethod>()
+            val completableShippingAddress = CompletableDeferred<AddressDetails?>()
+            val createSavedPaymentMethodRadarSessionCalls = Turbine<CreateSavedPaymentMethodRadarSessionCall>()
+
+            val error = IllegalStateException("Failed to make radar session!")
+            val eventReporter = FakeErrorReporter()
+
+            val interceptor = DefaultIntentConfirmationInterceptor(
+                stripeRepository = stripeRepositoryReturning(
+                    onCreatePaymentMethodId = "pm_1234",
+                    onRetrievePaymentMethodId = "pm_5678",
+                    createSavedPaymentMethodRadarSessionResult = Result.failure(error),
+                    createSavedPaymentMethodRadarSessionCalls = createSavedPaymentMethodRadarSessionCalls,
+                ),
+                publishableKeyProvider = { "pk" },
+                stripeAccountIdProvider = { null },
+                errorReporter = eventReporter,
+                allowsManualConfirmation = false,
+                intentCreationCallbackProvider = { null },
+                preparePaymentMethodHandlerProvider = {
+                    PreparePaymentMethodHandler { paymentMethod, shippingAddress ->
+                        completablePaymentMethod.complete(paymentMethod)
+                        completableShippingAddress.complete(shippingAddress)
+                    }
+                },
+            )
+
+            val nextStep = interceptor.intercept(
+                initializationMode = InitializationMode.DeferredIntent(
+                    intentConfiguration = PaymentSheet.IntentConfiguration(
+                        sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                            amount = 1099L,
+                            currency = "usd",
+                        ),
+                        sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                            businessName = "My business, Inc.",
+                            networkId = "network_id",
+                            externalId = "external_id"
+                        )
+                    ),
+                ),
+                intent = PaymentIntentFactory.create(),
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                paymentMethodOptionsParams = null,
+                paymentMethodExtraParams = null,
+                shippingValues = null,
+                customerRequestedSave = false,
+            )
+
+            assertThat(nextStep).isEqualTo(
+                IntentConfirmationInterceptor.NextStep.Complete(
+                    isForceSuccess = true,
+                    completedFullPaymentFlow = false,
+                )
+            )
+
+            val paymentMethod = completablePaymentMethod.await()
+
+            assertThat(paymentMethod.id).isEqualTo("pm_1234")
+
+            val shippingAddress = completableShippingAddress.await()
+
+            assertThat(shippingAddress).isNull()
+
+            createSavedPaymentMethodRadarSessionCalls.verify()
+
+            eventReporter.verifyCreateSavedPaymentMethodRadarSessionCall(error)
+        }
+
+    @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
+    @Test
+    fun `Returns confirm params with top level 'setup_future_usage' set to 'off_session' when set on configuration`() =
+        runTest {
+            val interceptor = DefaultIntentConfirmationInterceptor(
+                stripeRepository = object : AbsFakeStripeRepository() {
+                    override suspend fun retrieveStripeIntent(
+                        clientSecret: String,
+                        options: ApiRequest.Options,
+                        expandFields: List<String>
+                    ): Result<StripeIntent> {
+                        return Result.success(PaymentIntentFactory.create())
+                    }
+
+                    override suspend fun createPaymentMethod(
+                        paymentMethodCreateParams: PaymentMethodCreateParams,
+                        options: ApiRequest.Options
+                    ): Result<PaymentMethod> {
+                        return Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                    }
+                },
+                publishableKeyProvider = { "pk" },
+                stripeAccountIdProvider = { null },
+                errorReporter = FakeErrorReporter(),
+                allowsManualConfirmation = false,
+                intentCreationCallbackProvider = {
+                    CreateIntentCallback { _, _ ->
+                        CreateIntentResult.Success("pi_123_secret_456")
+                    }
+                },
+                preparePaymentMethodHandlerProvider = {
+                    null
+                },
+            )
+
+            val nextStep = interceptor.intercept(
+                confirmationOption = PaymentMethodConfirmationOption.New(
+                    createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    optionsParams = PaymentMethodOptionsParams.Card(
+                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                    ),
+                    extraParams = null,
+                    shouldSave = false,
+                ),
+                intent = PaymentIntentFactory.create(),
+                initializationMode = InitializationMode.DeferredIntent(
+                    PaymentSheet.IntentConfiguration(
+                        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                            currency = "usd",
+                            amount = 5000,
+                            setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
+                            paymentMethodOptions = PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
+                                setupFutureUsageValues = mapOf(
+                                    PaymentMethod.Type.Affirm to PaymentSheet.IntentConfiguration.SetupFutureUse.None
+                                )
+                            )
+                        ),
+                    )
+                ),
+                shippingDetails = null,
+            )
+
+            val confirmNextStep = nextStep as? IntentConfirmationInterceptor.NextStep.Confirm
+            val confirmParams = confirmNextStep?.confirmParams as? ConfirmPaymentIntentParams
+
+            assertThat(
+                confirmParams?.setupFutureUsage
+            ).isEqualTo(
+                ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            )
+        }
+
+    @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
+    @Test
+    fun `Returns confirm params with pmo 'setup_future_usage' set to 'off_session' when set on configuration`() =
+        runTest {
+            val interceptor = DefaultIntentConfirmationInterceptor(
+                stripeRepository = object : AbsFakeStripeRepository() {
+                    override suspend fun retrieveStripeIntent(
+                        clientSecret: String,
+                        options: ApiRequest.Options,
+                        expandFields: List<String>
+                    ): Result<StripeIntent> {
+                        return Result.success(PaymentIntentFactory.create())
+                    }
+
+                    override suspend fun createPaymentMethod(
+                        paymentMethodCreateParams: PaymentMethodCreateParams,
+                        options: ApiRequest.Options
+                    ): Result<PaymentMethod> {
+                        return Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                    }
+                },
+                publishableKeyProvider = { "pk" },
+                stripeAccountIdProvider = { null },
+                errorReporter = FakeErrorReporter(),
+                allowsManualConfirmation = false,
+                intentCreationCallbackProvider = {
+                    CreateIntentCallback { _, _ ->
+                        CreateIntentResult.Success("pi_123_secret_456")
+                    }
+                },
+                preparePaymentMethodHandlerProvider = {
+                    null
+                },
+            )
+
+            val nextStep = interceptor.intercept(
+                confirmationOption = PaymentMethodConfirmationOption.New(
+                    createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    optionsParams = PaymentMethodOptionsParams.Card(),
+                    extraParams = null,
+                    shouldSave = false,
+                ),
+                intent = PaymentIntentFactory.create(),
+                initializationMode = InitializationMode.DeferredIntent(
+                    PaymentSheet.IntentConfiguration(
+                        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                            currency = "usd",
+                            amount = 5000,
+                            paymentMethodOptions = PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
+                                setupFutureUsageValues = mapOf(
+                                    PaymentMethod.Type.Card to
+                                        PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+                                )
+                            )
+                        ),
+                    )
+                ),
+                shippingDetails = null,
+            )
+
+            val confirmNextStep = nextStep as? IntentConfirmationInterceptor.NextStep.Confirm
+            val confirmParams = confirmNextStep?.confirmParams as? ConfirmPaymentIntentParams
+
+            assertThat(
+                confirmParams?.paymentMethodOptions
+            ).isEqualTo(
+                PaymentMethodOptionsParams.Card(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                )
+            )
+        }
+
+    private fun testNoProvider(
+        event: ErrorReporter.ErrorEvent,
+        failureMessage: String,
         userMessage: ResolvableString,
         interceptCall: suspend (errorReporter: ErrorReporter) -> IntentConfirmationInterceptor.NextStep
     ) {
@@ -762,12 +1383,10 @@ class DefaultIntentConfirmationInterceptorTest {
             val failedStep = nextStep.asFail()
 
             assertThat(failedStep.cause).isInstanceOf<IllegalStateException>()
-            assertThat(failedStep.cause.message).isEqualTo(CREATE_INTENT_CALLBACK_MESSAGE)
+            assertThat(failedStep.cause.message).isEqualTo(failureMessage)
             assertThat(failedStep.message).isEqualTo(userMessage)
 
-            assertThat(errorReporter.getLoggedErrors()).containsExactly(
-                ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL.eventName,
-            )
+            assertThat(errorReporter.awaitCall().errorEvent).isEqualTo(event)
         }
     }
 
@@ -801,12 +1420,23 @@ class DefaultIntentConfirmationInterceptorTest {
             intentCreationCallbackProvider = {
                 null
             },
+            preparePaymentMethodHandlerProvider = {
+                null
+            },
         )
     }
 
     private fun stripeRepositoryReturning(
         onCreatePaymentMethodId: String,
         onRetrievePaymentMethodId: String,
+        createSavedPaymentMethodRadarSessionCalls: Turbine<CreateSavedPaymentMethodRadarSessionCall> = Turbine(),
+        createSavedPaymentMethodRadarSessionResult: Result<RadarSessionWithHCaptcha> = Result.success(
+            RadarSessionWithHCaptcha(
+                id = "rse_123",
+                passiveCaptchaSiteKey = "1234",
+                passiveCaptchaRqdata = "123456789",
+            )
+        ),
     ): StripeRepository {
         return object : AbsFakeStripeRepository() {
             override suspend fun createPaymentMethod(
@@ -831,7 +1461,54 @@ class DefaultIntentConfirmationInterceptorTest {
                     )
                 )
             }
+
+            override suspend fun createSavedPaymentMethodRadarSession(
+                paymentMethodId: String,
+                requestOptions: ApiRequest.Options
+            ): Result<RadarSessionWithHCaptcha> {
+                createSavedPaymentMethodRadarSessionCalls.add(
+                    CreateSavedPaymentMethodRadarSessionCall(paymentMethodId, requestOptions)
+                )
+
+                return createSavedPaymentMethodRadarSessionResult
+            }
         }
+    }
+
+    private fun verifyShipping(
+        expectedShippingAddress: ConfirmPaymentIntentParams.Shipping,
+        actualShippingAddress: AddressDetails?
+    ) {
+        assertThat(actualShippingAddress?.name).isEqualTo(expectedShippingAddress.getName())
+        assertThat(actualShippingAddress?.phoneNumber).isEqualTo(expectedShippingAddress.getPhone())
+        assertThat(actualShippingAddress?.address?.line1).isEqualTo(expectedShippingAddress.getAddress().line1)
+        assertThat(actualShippingAddress?.address?.line2).isEqualTo(expectedShippingAddress.getAddress().line2)
+        assertThat(actualShippingAddress?.address?.city).isEqualTo(expectedShippingAddress.getAddress().city)
+        assertThat(actualShippingAddress?.address?.state).isEqualTo(expectedShippingAddress.getAddress().state)
+        assertThat(actualShippingAddress?.address?.country)
+            .isEqualTo(expectedShippingAddress.getAddress().country)
+    }
+
+    private suspend fun Turbine<CreateSavedPaymentMethodRadarSessionCall>.verify() {
+        val createRadarSessionCall = awaitItem()
+
+        assertThat(createRadarSessionCall.paymentMethodId).isEqualTo("pm_1234")
+        assertThat(createRadarSessionCall.requestOptions.apiKey).isEqualTo("pk")
+        assertThat(createRadarSessionCall.requestOptions.stripeAccount).isNull()
+
+        ensureAllEventsConsumed()
+    }
+
+    private suspend fun FakeErrorReporter.verifyCreateSavedPaymentMethodRadarSessionCall(
+        error: Exception,
+    ) {
+        val failedRadarEvent = awaitCall()
+
+        assertThat(failedRadarEvent.errorEvent)
+            .isEqualTo(ErrorReporter.ExpectedErrorEvent.SAVED_PAYMENT_METHOD_RADAR_SESSION_FAILURE)
+        assertThat(failedRadarEvent.stripeException?.cause).isEqualTo(error)
+
+        ensureAllEventsConsumed()
     }
 
     private fun IntentConfirmationInterceptor.NextStep.asFail(): IntentConfirmationInterceptor.NextStep.Fail {
@@ -849,8 +1526,30 @@ class DefaultIntentConfirmationInterceptorTest {
         }
     }
 
+    private data class CreateSavedPaymentMethodRadarSessionCall(
+        val paymentMethodId: String,
+        val requestOptions: ApiRequest.Options
+    )
+
     private companion object {
         const val CREATE_INTENT_CALLBACK_MESSAGE =
             "CreateIntentCallback must be implemented when using IntentConfiguration with PaymentSheet"
+
+        const val PREPARE_PAYMENT_METHOD_HANDLER_MESSAGE =
+            "PreparePaymentMethodHandler must be implemented when using IntentConfiguration with " +
+                "shared payment tokens!"
+
+        val SHIPPING_ADDRESS = ConfirmPaymentIntentParams.Shipping(
+            address = Address(
+                city = "South San Francisc",
+                line1 = "123 Apple Street",
+                line2 = "Unit #2",
+                state = "CA",
+                postalCode = "99999",
+                country = "US"
+            ),
+            phone = "11234567890",
+            name = "John Doe"
+        )
     }
 }

@@ -26,6 +26,9 @@
   <string name="stripe_confirm_close_form_title">Chcete zatvoriť tento formulár?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Uložte svoje údaje pre bezpečnú platbu jedným kliknutím pomocou služby Link</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_header_default_opt_in">Uložiť moje údaje pre rýchlejšiu platbu so službou Link</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">Kreditná karta %1$s</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -34,12 +37,20 @@
   <string name="stripe_link_card_type_prepaid">Predplatená platba %1$s</string>
   <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
   <string name="stripe_link_card_type_unknown">Karta %1$s</string>
+  <!-- Title for the update card screen in Link native when the user is confirming their payment details -->
+  <string name="stripe_link_confirm_payment_title">Potvrdiť platobné údaje</string>
+  <!-- Title for a button that indicates a user can log in or sign up. -->
+  <string name="stripe_link_log_in_or_sign_up">Prihlásiť sa alebo zaregistrovať</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Súhlasiť a pokračovať</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">Rýchla, bezpečná platba jedným kliknutím</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">Rýchla, bezpečná platba</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Uložte si svoje platobné údaje pomocou služby Link a bezpečne plaťte jedným kliknutím na stránkach podporovaných službou Link.</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">Plaťte rýchlejšie všade tam, kde je akceptovaná služba Link.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Pokračovaním súhlasíte s <terms>podmienkami</terms> a <privacy>zásadami ochrany osobných údajov</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -50,6 +61,8 @@
   <string name="stripe_link_update_card_title">Aktualizovať kartu</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
   <string name="stripe_link_verification_message">Zadajte kód zaslaný na telefónne číslo %s a používajte svoje uložené údaje.</string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message_short">Zadajte kód zaslaný na %s.</string>
   <!-- Menu option to update card on the wallet screen on Link native -->
   <string name="stripe_link_wallet_menu_action_update_card">Aktualizovať kartu</string>
   <!-- Title of the logout action. -->
@@ -72,6 +85,8 @@
   <string name="stripe_paymentsheet_address_element_primary_button">Uložiť adresu</string>
   <!-- Title for shipping address entry section -->
   <string name="stripe_paymentsheet_address_element_shipping_address">Dodacia adresa</string>
+  <!-- Label for a checkbox when pressed used the provided billing address details as shipping address -->
+  <string name="stripe_paymentsheet_address_element_use_billing_as_shipping">Použiť fakturačnú adresu na doručenie</string>
   <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
   <string name="stripe_paymentsheet_bacs_email_mandate">Do troch pracovných dní sa na adresu %s pošle e-mail s potvrdením o nastavení tohto príkazu na odúčtovanie.</string>
   <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
@@ -94,6 +109,12 @@
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Informácie o karte nie je možné meniť.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Poskytnutím informácií o karte povolíte spoločnosti %s účtovať na vašej karte budúce platby v súlade s ich podmienkami.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Pokračovaním súhlasíte s uložením svojich údajov pre budúce nákupy v spoločnosti %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Pokračovaním súhlasíte s uložením svojich údajov pre budúce nákupy v spoločnosti %s a <link>službe Link</link>Súhlasíte aj s <terms>podmienkami</terms> a <privacy>zásadami ochrany osobných údajov</privacy> služby Link.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Pokračovaním súhlasíte s uložením svojich údajov pre budúce nákupy v spoločnosti %s a <link>službe Link</link> (pozrite si <terms>podmienky</terms> a <privacy>zásady ochrany osobných údajov</privacy>).]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Karta nebola aktualizovaná. Skúste to znova.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -111,6 +132,8 @@
   <string name="stripe_paymentsheet_manage_card">Spravovať kartu</string>
   <!-- Title shown above a view containing the customer's cards that they can delete or update -->
   <string name="stripe_paymentsheet_manage_cards">Spravovať karty</string>
+  <!-- Title shown above a view containing the customer's bank account that they can delete -->
+  <string name="stripe_paymentsheet_manage_international_bank_account">Spravovať bankový účet</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Spravovať spôsoby platby</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -185,6 +208,8 @@
   <string name="stripe_pm_set_as_default">Nastaviť ako predvolený spôsob platby</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">Odstrániť bankový účet končiaci na %s</string>
+  <!-- Accessibility description for a button that launches Shop Pay. -->
+  <string name="stripe_shop_pay_button_description">Tlačidlo Platba v obchode</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">Zobraziť ponuku</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
@@ -199,6 +224,8 @@
   <string name="stripe_sign_up_terms_alternative"><![CDATA[Poskytnutím svojho e-mailu súhlasíte s vytvorením účtu Link a s uložením svojich platobných informácií do služby Link podľa <terms>podmienok služby Link</terms> a <privacy>zásad ochrany osobných údajov</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Poskytnutím svojho telefónneho čísla súhlasíte s vytvorením účtu Link a s uložením svojich platobných informácií do služby Link podľa <terms>podmienok služby Link</terms> a <privacy>zásad ochrany osobných údajov</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[Poskytnutím telefónneho čísla a e-mailu súhlasíte s vytvorením účtu Link, ktoré podlieha <terms>podmienkam</terms> a <privacy>zásadám ochrany osobných údajov</privacy> služby Link.]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">Váš účet bol deaktivovaný</string>
   <!-- Generic failure message -->
@@ -217,6 +244,8 @@
   <string name="stripe_upi_polling_payment_failed_title">Platba zlyhala</string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="stripe_verification_change_email">Zmeniť e-mail</string>
+  <!-- Title for a button that allows the user to use a different email in the signup flow. -->
+  <string name="stripe_verification_change_email_new">Nie ste to vy?</string>
   <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
   <string name="stripe_verification_code_sent">Kód odoslaný</string>
   <!-- Two factor authentication screen heading -->
@@ -239,6 +268,8 @@
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Pokračovaním súhlasíte s autorizáciou platieb podľa týchto <terms>podmienok</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Platba</string>
+  <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
+  <string name="stripe_wallet_continue_another_way">Pokračovať iným spôsobom</string>
   <!-- Label for identifying the default payment method. -->
   <string name="stripe_wallet_default">Predvolené</string>
   <string name="stripe_wallet_expand_accessibility">Zmeniť výber</string>

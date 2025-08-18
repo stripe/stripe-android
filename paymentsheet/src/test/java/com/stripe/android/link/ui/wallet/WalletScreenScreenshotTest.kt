@@ -8,12 +8,14 @@ import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH
-import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.ui.LinkScreenshotSurface
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.screenshottesting.Orientation
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
@@ -24,7 +26,10 @@ import org.junit.Test
 
 internal class WalletScreenScreenshotTest {
     @get:Rule
-    val paparazziRule = PaparazziRule(Orientation.entries)
+    val paparazziRule = PaparazziRule(
+        Orientation.entries,
+        SystemAppearance.entries
+    )
 
     @Test
     fun testEmptyState() {
@@ -65,6 +70,16 @@ internal class WalletScreenScreenshotTest {
             state = walletUiState(
                 userSetIsExpanded = true,
                 cardBrandFilter = RejectCardBrands(CardBrand.Visa)
+            ),
+        )
+    }
+
+    @Test
+    fun testCollapsedStateWithExpiredCardCollection() {
+        snapshot(
+            state = walletUiState(
+                userSetIsExpanded = false,
+
             ),
         )
     }
@@ -163,7 +178,7 @@ internal class WalletScreenScreenshotTest {
     fun testCannotAddCreditCard() {
         snapshot(
             state = walletUiState(
-                canAddNewPaymentMethod = false,
+                addPaymentMethodOptions = emptyList(),
                 userSetIsExpanded = true,
             ),
         )
@@ -179,31 +194,35 @@ internal class WalletScreenScreenshotTest {
         expiryDateInput: FormFieldEntry = FormFieldEntry(null),
         cvcInput: FormFieldEntry = FormFieldEntry(null),
         alertMessage: ResolvableString? = null,
-        canAddNewPaymentMethod: Boolean = true,
+        addPaymentMethodOptions: List<AddPaymentMethodOption> = listOf(AddPaymentMethodOption.Card),
         userSetIsExpanded: Boolean = false,
+        signupToggleEnabled: Boolean = false,
     ): WalletUiState {
         return WalletUiState(
             paymentDetailsList = paymentDetailsList,
             email = "email@email.com",
-            selectedItemId = selectedItem?.id,
             cardBrandFilter = cardBrandFilter,
-            hasCompleted = hasCompleted,
+            selectedItemId = selectedItem?.id,
             isProcessing = isProcessing,
+            isSettingUp = false,
+            merchantName = "Example Inc.",
             primaryButtonLabel = primaryButtonLabel,
             secondaryButtonLabel = secondaryButtonLabel,
+            hasCompleted = hasCompleted,
+            addPaymentMethodOptions = addPaymentMethodOptions,
+            userSetIsExpanded = userSetIsExpanded,
             expiryDateInput = expiryDateInput,
             cvcInput = cvcInput,
             alertMessage = alertMessage,
-            canAddNewPaymentMethod = canAddNewPaymentMethod,
-            userSetIsExpanded = userSetIsExpanded,
-            isSettingUp = false,
-            merchantName = "Example Inc.",
+            collectMissingBillingDetailsForExistingPaymentMethods = true,
+            signupToggleEnabled = signupToggleEnabled,
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
         )
     }
 
     private fun snapshot(state: WalletUiState) {
         paparazziRule.snapshot {
-            DefaultLinkTheme {
+            LinkScreenshotSurface {
                 WalletBody(
                     state = state,
                     onItemSelected = {},
@@ -215,8 +234,9 @@ internal class WalletScreenScreenshotTest {
                     onSetDefaultClicked = {},
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {},
-                    onAddNewPaymentMethodClicked = {},
+                    onAddPaymentMethodOptionClicked = {},
                     onDismissAlert = {},
+                    onLogoutClicked = {},
                     expiryDateController = SimpleTextFieldController(DateConfig()),
                     cvcController = CvcController(
                         cardBrandFlow = stateFlowOf(CardBrand.Unknown)

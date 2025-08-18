@@ -13,7 +13,8 @@
     <ID>ForEachOnRange:OTPElementUI.kt$0 until inputLength</ID>
     <ID>FunctionParameterNaming:IdentifierSpec.kt$IdentifierSpec.Companion$_value: String</ID>
     <ID>LongMethod:Html.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun annotatedStringResource( text: String, imageGetter: Map&lt;String, EmbeddableImage> = emptyMap(), urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline) ): AnnotatedString</ID>
-    <ID>LongMethod:OTPElementUI.kt$@OptIn(ExperimentalComposeUiApi::class) @Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun OTPElementUI( enabled: Boolean, element: OTPElement, modifier: Modifier = Modifier, boxShape: Shape = MaterialTheme.shapes.medium, boxTextStyle: TextStyle = OTPElementUI.defaultTextStyle(), boxSpacing: Dp = 8.dp, middleSpacing: Dp = 20.dp, otpInputPlaceholder: String = "●", colors: OTPElementColors = OTPElementColors( selectedBorder = MaterialTheme.colors.primary, placeholder = MaterialTheme.stripeColors.placeholderText ), focusRequester: FocusRequester = remember { FocusRequester() } )</ID>
+    <ID>LongMethod:OTPElementUI.kt$@OptIn(ExperimentalComposeUiApi::class) @Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun OTPElementUI( enabled: Boolean, element: OTPElement, modifier: Modifier = Modifier, boxShape: Shape = MaterialTheme.shapes.medium, boxTextStyle: TextStyle = OTPElementUI.defaultTextStyle(), boxSpacing: Dp = 8.dp, middleSpacing: Dp = 20.dp, otpInputPlaceholder: String = "●", colors: OTPElementColors = OTPElementColors( selectedBorder = MaterialTheme.colors.primary, unselectedBorder = MaterialTheme.stripeColors.componentBorder, placeholder = MaterialTheme.stripeColors.placeholderText, background = Color.Transparent, selectedBackground = Color.Transparent ), selectedStrokeWidth: Dp = 2.dp, focusRequester: FocusRequester = remember { FocusRequester() } )</ID>
+    <ID>LongMethod:StripeTheme.kt$@Composable @ReadOnlyComposable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun StripeTypography.toComposeTypography(): Typography</ID>
     <ID>MagicNumber:AnimationConstants.kt$34</ID>
     <ID>MagicNumber:DateConfig.kt$DateConfig$4</ID>
     <ID>MagicNumber:DateConfig.kt$DateConfig.Companion$100</ID>
@@ -21,7 +22,6 @@
     <ID>MagicNumber:DateConfig.kt$DateConfig.Companion$50</ID>
     <ID>MagicNumber:DrawablePainter.kt$DrawablePainter$255</ID>
     <ID>MagicNumber:DropdownFieldUI.kt$.8f</ID>
-    <ID>MagicNumber:DropdownFieldUI.kt$.9f</ID>
     <ID>MagicNumber:ExpiryDateVisualTransformation.kt$ExpiryDateVisualTransformation$12</ID>
     <ID>MagicNumber:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$3</ID>
     <ID>MagicNumber:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$5</ID>

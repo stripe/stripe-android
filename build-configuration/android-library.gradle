@@ -20,7 +20,9 @@ configurations {
     javadocDeps
 }
 
-if (System.getenv("JITPACK")) {
+def jitpackEnabled = System.getenv("JITPACK")
+
+if (jitpackEnabled != null && jitpackEnabled.toBoolean()) {
     group='com.github.stripe.stripe-android'
 }
 

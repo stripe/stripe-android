@@ -24,7 +24,7 @@ internal sealed class LinkPaymentDetails(
      */
     @Parcelize
     class Saved(
-        override val paymentDetails: ConsumerPaymentDetails.PaymentDetails,
+        override val paymentDetails: ConsumerPaymentDetails.Passthrough,
         override val paymentMethodCreateParams: PaymentMethodCreateParams
     ) : LinkPaymentDetails(paymentDetails, paymentMethodCreateParams)
 

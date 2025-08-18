@@ -40,12 +40,16 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.uicore.LocalTextFieldInsets
 import com.stripe.android.uicore.R
+import com.stripe.android.uicore.elements.compat.CompatTextField
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
-import com.stripe.android.uicore.utils.mapAsStateFlow
 
 @Preview
 @Composable
@@ -53,14 +57,14 @@ private fun DropDownPreview() {
     Column {
         DropDown(
             controller = DropdownFieldController(
-                CountryConfig(tinyMode = true)
+                CountryConfig(mode = DropdownConfig.Mode.Condensed)
             ),
             enabled = true
         )
         Spacer(modifier = Modifier.height(16.dp))
         DropDown(
             controller = DropdownFieldController(
-                CountryConfig(tinyMode = false)
+                CountryConfig(mode = DropdownConfig.Mode.Full())
             ),
             enabled = true
         )
@@ -97,9 +101,11 @@ fun DropDown(
     val shouldEnable = enabled && !shouldDisableDropdownWithSingleItem
 
     var expanded by remember { mutableStateOf(false) }
-    val selectedItemLabel by controller.selectedIndex.mapAsStateFlow {
+    val selectedItemIndex by controller.selectedIndex.collectAsState()
+    val selectedItemLabel = remember(selectedItemIndex) {
         controller.getSelectedItemLabel(selectedIndex)
-    }.collectAsState()
+    }
+
     val currentTextColor = if (shouldEnable) {
         MaterialTheme.stripeColors.onComponent
     } else {
@@ -147,7 +153,7 @@ fun DropDown(
                     selectedItemLabel = selectedItemLabel,
                     currentTextColor = currentTextColor,
                     shouldDisableDropdownWithSingleItem = shouldDisableDropdownWithSingleItem,
-                    showChevron = showChevron
+                    showChevron = showChevron,
                 )
             }
         }
@@ -165,7 +171,7 @@ fun DropDown(
         ) {
             var height = 0
             items.forEachIndexed { index, displayValue ->
-                var hasUpdatedHeight: Boolean = index >= selectedIndex - 1
+                var hasUpdatedHeight: Boolean = index >= (selectedIndex ?: -1) - 1
                 if (index == selectedIndex) {
                     LaunchedEffect(expanded) {
                         scrollState.scrollTo(height)
@@ -193,38 +199,24 @@ fun DropDown(
 
 @Composable
 private fun LargeDropdownLabel(
-    label: Int?,
-    selectedItemLabel: String,
+    label: ResolvableString,
+    selectedItemLabel: String?,
     currentTextColor: Color,
     shouldDisableDropdownWithSingleItem: Boolean,
-    showChevron: Boolean
+    showChevron: Boolean,
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier.padding(
-                start = 16.dp,
-                top = 4.dp,
-                bottom = 8.dp
-            )
-        ) {
-            label?.let {
-                FormLabel(stringResource(it))
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(.9f),
-                verticalAlignment = Alignment.Bottom
-            ) {
-                Text(
-                    selectedItemLabel,
-                    color = currentTextColor
-                )
-            }
-        }
-        if (!shouldDisableDropdownWithSingleItem && showChevron) {
-            Column(modifier = Modifier.align(Alignment.CenterVertically)) {
+    val textFieldInsets = LocalTextFieldInsets.current
+
+    CompatTextField(
+        value = TextFieldValue(selectedItemLabel ?: ""),
+        enabled = false,
+        onValueChange = {},
+        errorMessage = null,
+        label = {
+            FormLabel(label.resolve())
+        },
+        trailingIcon = if (!shouldDisableDropdownWithSingleItem && showChevron) {
+            {
                 Icon(
                     painter = painterResource(id = R.drawable.stripe_ic_chevron_down),
                     contentDescription = null,
@@ -232,8 +224,16 @@ private fun LargeDropdownLabel(
                     tint = currentTextColor
                 )
             }
-        }
-    }
+        } else {
+            null
+        },
+        contentPadding = textFieldInsets.asPaddingValues(),
+        colors = TextFieldColors(
+            textColor = currentTextColor,
+            disabledTextColor = currentTextColor,
+        ),
+        modifier = Modifier.fillMaxWidth(),
+    )
 }
 
 @Composable

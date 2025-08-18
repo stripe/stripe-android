@@ -22,14 +22,34 @@ data class PlaygroundConfigurationData(
         Embedded,
 
         @SerialName("CustomerSheet")
-        CustomerSheet;
+        CustomerSheet,
+
+        @SerialName("FlowControllerWithSpt")
+        FlowControllerWithSpt,
+
+        @SerialName("LinkController")
+        LinkController;
 
         fun isPaymentFlow(): Boolean {
-            return this in setOf(PaymentSheet, FlowController, Embedded)
+            return this in paymentFlows()
+        }
+
+        fun isSptFlow(): Boolean {
+            return this in sptFlows()
         }
 
         fun isCustomerFlow(): Boolean {
             return this == CustomerSheet
+        }
+
+        companion object {
+            fun paymentFlows(): Set<IntegrationType> {
+                return setOf(PaymentSheet, FlowController, Embedded, LinkController)
+            }
+
+            fun sptFlows(): Set<IntegrationType> {
+                return setOf(FlowControllerWithSpt)
+            }
         }
     }
 }

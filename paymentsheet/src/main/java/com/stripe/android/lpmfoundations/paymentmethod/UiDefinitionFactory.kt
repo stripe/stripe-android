@@ -14,12 +14,14 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.setupFutureUsage
+import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.ui.core.elements.SharedDataSpec
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 
@@ -38,6 +40,9 @@ internal sealed interface UiDefinitionFactory {
         val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
         val cardBrandFilter: CardBrandFilter,
         val setAsDefaultMatchesSaveForFutureUse: Boolean,
+        val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
+        val linkInlineHandler: LinkInlineHandler?,
+        val isLinkUI: Boolean = false,
     ) {
         interface Factory {
             fun create(
@@ -48,6 +53,7 @@ internal sealed interface UiDefinitionFactory {
             class Default(
                 private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
                 private val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
+                private val linkInlineHandler: LinkInlineHandler?,
                 private val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
                 private val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
                 private val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
@@ -55,6 +61,8 @@ internal sealed interface UiDefinitionFactory {
                 private val initialLinkUserInput: UserInput? = null,
                 private val setAsDefaultMatchesSaveForFutureUse: Boolean =
                     FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
+                private val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
+                private val isLinkUI: Boolean = false,
             ) : Factory {
                 override fun create(
                     metadata: PaymentMethodMetadata,
@@ -77,7 +85,10 @@ internal sealed interface UiDefinitionFactory {
                         onLinkInlineSignupStateChanged = onLinkInlineSignupStateChanged,
                         cardBrandFilter = metadata.cardBrandFilter,
                         initialLinkUserInput = initialLinkUserInput,
-                        setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse
+                        setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
+                        autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+                        linkInlineHandler = linkInlineHandler,
+                        isLinkUI = isLinkUI,
                     )
                 }
 
@@ -108,10 +119,24 @@ internal sealed interface UiDefinitionFactory {
             metadata: PaymentMethodMetadata,
             sharedDataSpec: SharedDataSpec,
             transformSpecToElements: TransformSpecToElements,
+            arguments: Arguments,
+        ): List<FormElement> {
+            return createFormElements(
+                metadata = metadata,
+                sharedDataSpec = sharedDataSpec,
+                transformSpecToElements = transformSpecToElements,
+            )
+        }
+
+        fun createFormElements(
+            metadata: PaymentMethodMetadata,
+            sharedDataSpec: SharedDataSpec,
+            transformSpecToElements: TransformSpecToElements,
         ): List<FormElement> {
             return transformSpecToElements.transform(
                 metadata = metadata,
                 specs = sharedDataSpec.fields,
+                termsDisplay = metadata.termsDisplayForCode(sharedDataSpec.type),
             )
         }
     }
@@ -208,6 +233,7 @@ internal sealed interface UiDefinitionFactory {
                     metadata = metadata,
                     sharedDataSpec = sharedDataSpec,
                     transformSpecToElements = TransformSpecToElements(arguments),
+                    arguments = arguments,
                 )
             } else {
                 null

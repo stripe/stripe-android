@@ -25,6 +25,11 @@ internal class DelegateDrawable(
 ) : Drawable() {
     @Volatile
     private var delegate: Drawable = ShapeDrawable()
+        .apply {
+            // Non-zero dimensions to avoid crashing before `delegate` has been initialized.
+            intrinsicHeight = 1
+            intrinsicWidth = 1
+        }
 
     init {
         @OptIn(DelicateCoroutinesApi::class)

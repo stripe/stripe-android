@@ -26,6 +26,9 @@
   <string name="stripe_confirm_close_form_title">แน่ใจไหมว่าต้องการปิดแบบฟอร์มนี้</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">บันทึกข้อมูลของคุณไว้เพื่อการชำระเงินที่ปลอดภัยในคลิกเดียวด้วย Link</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_header_default_opt_in">บันทึกข้อมูลของฉันเพื่อให้ชำระเงินด้วย Link ได้รวดเร็วขึ้น</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">บัตรเครดิต %1$s</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -34,12 +37,20 @@
   <string name="stripe_link_card_type_prepaid">บัตรเติมเงิน %1$s</string>
   <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
   <string name="stripe_link_card_type_unknown">บัตร %1$s</string>
+  <!-- Title for the update card screen in Link native when the user is confirming their payment details -->
+  <string name="stripe_link_confirm_payment_title">ยืนยันรายละเอียดการชำระเงิน</string>
+  <!-- Title for a button that indicates a user can log in or sign up. -->
+  <string name="stripe_link_log_in_or_sign_up">เข้าสู่ระบบหรือลงทะเบียน</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">ยอมรับและดำเนินการต่อ</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">การชำระเงินที่รวดเร็วและปลอดภัยในคลิกเดียว</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">การชำระเงินที่รวดเร็วและปลอดภัย</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">บันทึกข้อมูลการชำระเงินของคุณด้วย Link แล้วชำระเงินอย่างปลอดภัยในคลิกเดียวบนเว็บไซต์ที่ Link รองรับ</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">ชำระเงินได้รวดเร็วขึ้นในทุกที่ที่รองรับ Link</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[การดำเนินการต่อหมายความว่าคุณยอมรับ<terms>ข้อกำหนด</terms>และ<privacy>นโยบายความเป็นส่วนตัว</privacy>]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -50,6 +61,8 @@
   <string name="stripe_link_update_card_title">อัปเดตบัตร</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
   <string name="stripe_link_verification_message">ป้อนรหัสยืนยันที่ส่งไปยัง %s เพื่อใช้ข้อมูลที่บันทึกไว้</string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message_short">ป้อนรหัสที่เราส่งให้ที่ %s</string>
   <!-- Menu option to update card on the wallet screen on Link native -->
   <string name="stripe_link_wallet_menu_action_update_card">อัปเดตบัตร</string>
   <!-- Title of the logout action. -->
@@ -72,6 +85,8 @@
   <string name="stripe_paymentsheet_address_element_primary_button">บันทึกที่อยู่</string>
   <!-- Title for shipping address entry section -->
   <string name="stripe_paymentsheet_address_element_shipping_address">ที่อยู่สำหรับจัดส่ง</string>
+  <!-- Label for a checkbox when pressed used the provided billing address details as shipping address -->
+  <string name="stripe_paymentsheet_address_element_use_billing_as_shipping">ใช้ที่อยู่เรียกเก็บเงินสำหรับการจัดส่ง</string>
   <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
   <string name="stripe_paymentsheet_bacs_email_mandate">ระบบจะส่งอีเมลถึง %s ภายใน 3 วันทำการเพื่อยืนยันการตั้งค่าขั้นตอนการหักเงินนี้</string>
   <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
@@ -94,6 +109,14 @@
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">เปลี่ยนแปลงรายละเอียดบัตรไม่ได้</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">การให้ข้อมูลบัตร หมายความว่าคุณอนุญาตให้ %s เรียกเก็บเงินจากบัตรสำหรับการชำระเงินในอนาคตตามเงื่อนไขของผู้ค้ารายดังกล่าว</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">เมื่อดำเนินการต่อ จะถือว่าคุณตกลงที่จะบันทึกข้อมูลไว้สําหรับการซื้อด้วย %s ในอนาคต</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[เมื่อดำเนินการต่อ จะถือว่าคุณตกลงที่จะบันทึกข้อมูลไว้สำหรับการซื้อด้วย %s ในอนาคต และ <link>Link</link>คุณยังยอมรับ<terms>ข้อกำหนด</terms>และ<privacy>ความเป็นส่วนตัว</privacy>ของ Link ด้วย]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[เมื่อดำเนินการต่อ แสดงว่ายินยอมที่จะบันทึกข้อมูลไว้สำหรับการซื้อด้วย %s ในอนาคต และ <link>Link</link> (ดู<terms>ข้อกำหนด</terms>และ<privacy>ความเป็นส่วนตัว</privacy>)]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[เมื่อดำเนินการต่อ แสดงว่าคุณยินยอมที่จะบันทึกข้อมูลไว้สำหรับการซื้อด้วย %s ในอนาคต และ <link>Link</link> ตาม<terms>ข้อกำหนด</terms>และ<privacy>ความเป็นส่วนตัว</privacy>ของ Link]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">บัตรไม่ได้อัปเดต โปรดลองอีกครั้ง</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -111,6 +134,8 @@
   <string name="stripe_paymentsheet_manage_card">จัดการบัตร</string>
   <!-- Title shown above a view containing the customer's cards that they can delete or update -->
   <string name="stripe_paymentsheet_manage_cards">จัดการบัตร</string>
+  <!-- Title shown above a view containing the customer's bank account that they can delete -->
+  <string name="stripe_paymentsheet_manage_international_bank_account">จัดการบัญชีธนาคาร</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">จัดการวิธีการชำระเงิน</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -185,6 +210,8 @@
   <string name="stripe_pm_set_as_default">ตั้งเป็นวิธีการชำระเงินเริ่มต้น</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">ลบบัญชีธนาคารที่ลงท้ายด้วย %s</string>
+  <!-- Accessibility description for a button that launches Shop Pay. -->
+  <string name="stripe_shop_pay_button_description">ปุ่ม Shop Pay</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">แสดงเมนู</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
@@ -199,6 +226,8 @@
   <string name="stripe_sign_up_terms_alternative"><![CDATA[การให้อีเมลหมายความว่าคุณยินยอมที่จะสร้างบัญชี Link และบันทึกข้อมูลการชำระเงินไปยัง Link ตาม<terms>ข้อกำหนดของ Link</terms> และ<privacy>นโยบายความเป็นส่วนตัว</privacy>]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[การให้หมายเลขโทรศัพท์หมายความว่าคุณยินยอมที่จะสร้างบัญชี Link และบันทึกข้อมูลการชำระเงินไปยัง Link ตาม<terms>ข้อกำหนด</terms> และ<privacy>เงื่อนไข</privacy>ของ Link]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[การให้หมายเลขโทรศัพท์และอีเมลหมายความว่าคุณยินยอมที่จะสร้างบัญชี Link ที่อยู่ภายใต้<terms>ข้อกำหนด</terms>และ<privacy>นโยบายความเป็นส่วนตัว</privacy>ของ Link]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">บัญชีของคุณถูกปิดใช้งานแล้ว</string>
   <!-- Generic failure message -->
@@ -217,6 +246,8 @@
   <string name="stripe_upi_polling_payment_failed_title">ชำระเงินไม่สำเร็จ</string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="stripe_verification_change_email">เปลี่ยนอีเมล</string>
+  <!-- Title for a button that allows the user to use a different email in the signup flow. -->
+  <string name="stripe_verification_change_email_new">หากไม่ใช่คุณ</string>
   <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
   <string name="stripe_verification_code_sent">ส่งรหัสแล้ว</string>
   <!-- Two factor authentication screen heading -->
@@ -239,6 +270,8 @@
   <string name="stripe_wallet_bank_account_terms"><![CDATA[การดำเนินการต่อหมายความว่าคุณตกลงที่จะอนุมัติการชำระเงินซึ่งดำเนินการตาม<terms>ข้อกำหนด</terms>เหล่านี้]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">การชำระเงิน</string>
+  <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
+  <string name="stripe_wallet_continue_another_way">ดำเนินการต่อด้วยวิธีอื่น</string>
   <!-- Label for identifying the default payment method. -->
   <string name="stripe_wallet_default">ค่าเริ่มต้น</string>
   <string name="stripe_wallet_expand_accessibility">เปลี่ยนการเลือก</string>

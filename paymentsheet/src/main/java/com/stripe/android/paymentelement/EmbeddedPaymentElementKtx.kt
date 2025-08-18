@@ -8,6 +8,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.common.ui.UpdateCallbacks
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
@@ -19,7 +20,6 @@ import java.util.UUID
  *
  * This *must* be called unconditionally as part of the initialization path.
  */
-@ExperimentalEmbeddedPaymentElementApi
 @Composable
 fun rememberEmbeddedPaymentElement(
     builder: EmbeddedPaymentElement.Builder
@@ -32,18 +32,6 @@ fun rememberEmbeddedPaymentElement(
         UUID.randomUUID().toString()
     }
 
-    val callbacks = remember(builder) {
-        @OptIn(ExperimentalCustomPaymentMethodsApi::class, ExperimentalAnalyticEventCallbackApi::class)
-        PaymentElementCallbacks.Builder()
-            .createIntentCallback(builder.createIntentCallback)
-            .confirmCustomPaymentMethodCallback(builder.confirmCustomPaymentMethodCallback)
-            .externalPaymentMethodConfirmHandler(builder.externalPaymentMethodConfirmHandler)
-            .analyticEventCallback(builder.analyticEventCallback)
-            .build()
-    }
-
-    UpdateCallbacks(paymentElementCallbackIdentifier, callbacks)
-
     val lifecycleOwner = LocalLifecycleOwner.current
     val activityResultRegistryOwner = requireNotNull(LocalActivityResultRegistryOwner.current) {
         "EmbeddedPaymentElement must have an ActivityResultRegistryOwner."
@@ -55,7 +43,7 @@ fun rememberEmbeddedPaymentElement(
         "EmbeddedPaymentElement must be created in the context of an Activity."
     }
 
-    return remember {
+    val embeddedPaymentElement = remember {
         EmbeddedPaymentElement.create(
             activity = activity,
             activityResultCaller = PaymentElementActivityResultCaller(
@@ -68,4 +56,32 @@ fun rememberEmbeddedPaymentElement(
             resultCallback = onResult,
         )
     }
+
+    val callbacks = remember(builder) {
+        @OptIn(
+            ExperimentalCustomPaymentMethodsApi::class,
+            ExperimentalAnalyticEventCallbackApi::class,
+            SharedPaymentTokenSessionPreview::class
+        )
+        PaymentElementCallbacks.Builder()
+            .apply {
+                when (val deferredHandler = builder.deferredHandler) {
+                    is EmbeddedPaymentElement.Builder.DeferredHandler.Intent -> {
+                        createIntentCallback(deferredHandler.createIntentCallback)
+                    }
+                    is EmbeddedPaymentElement.Builder.DeferredHandler.SharedPaymentToken -> {
+                        preparePaymentMethodHandler(deferredHandler.preparePaymentMethodHandler)
+                    }
+                }
+            }
+            .confirmCustomPaymentMethodCallback(builder.confirmCustomPaymentMethodCallback)
+            .externalPaymentMethodConfirmHandler(builder.externalPaymentMethodConfirmHandler)
+            .analyticEventCallback(builder.analyticEventCallback)
+            .rowSelectionImmediateActionCallback(builder.rowSelectionBehavior, embeddedPaymentElement)
+            .build()
+    }
+
+    UpdateCallbacks(paymentElementCallbackIdentifier, callbacks)
+
+    return embeddedPaymentElement
 }

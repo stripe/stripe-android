@@ -1,6 +1,8 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.FieldError
 import com.stripe.android.uicore.elements.InputController
@@ -13,10 +15,11 @@ import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class SaveForFutureUseController(
+    merchantName: String?,
     saveForFutureUseInitialValue: Boolean
 ) : InputController {
-    override val label: StateFlow<Int> = MutableStateFlow(
-        R.string.stripe_save_payment_details_to_merchant_name
+    override val label: StateFlow<ResolvableString> = MutableStateFlow(
+        resolvableString(R.string.stripe_save_payment_details_to_merchant_name, merchantName)
     )
     private val _saveForFutureUse = MutableStateFlow(saveForFutureUseInitialValue)
     val saveForFutureUse: StateFlow<Boolean> = _saveForFutureUse

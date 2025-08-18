@@ -6,41 +6,44 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import org.junit.Test
-import java.lang.IllegalArgumentException
 import kotlin.test.assertFailsWith
 
 class PaymentSheetConfigurationKtxTest {
     @Test
     fun `'validate' should fail when ephemeral key secret is blank`() {
-        val configWithBlankEphemeralKeySecret = configuration.copy(
-            customer = PaymentSheet.CustomerConfiguration(
-                id = "cus_1",
-                ephemeralKeySecret = "   "
-            ),
-        ).asCommonConfiguration()
+        val configWithBlankEphemeralKeySecret = configuration.newBuilder()
+            .customer(
+                PaymentSheet.CustomerConfiguration(
+                    id = "cus_1",
+                    ephemeralKeySecret = "   "
+                )
+            )
+            .build()
+            .asCommonConfiguration()
 
         assertFailsWith(
             IllegalArgumentException::class,
             message = "When a CustomerConfiguration is passed to PaymentSheet, " +
                 "the ephemeralKeySecret cannot be an empty string."
         ) {
-            configWithBlankEphemeralKeySecret.validate()
+            configWithBlankEphemeralKeySecret.validate(isLiveMode = false)
         }
     }
 
     private fun getConfig(eKey: String): CommonConfiguration {
-        return configuration.copy(
-            customer = PaymentSheet.CustomerConfiguration(
-                id = "cus_1",
-                ephemeralKeySecret = eKey
-            ),
-        ).asCommonConfiguration()
+        return configuration.newBuilder()
+            .customer(
+                PaymentSheet.CustomerConfiguration(
+                    id = "cus_1",
+                    ephemeralKeySecret = eKey
+                ),
+            ).build().asCommonConfiguration()
     }
 
     @Test
     fun `'validate' should succeed when ephemeral key secret is of correct format`() {
-        getConfig("ek_askljdlkasfhgasdfjls").validate()
-        getConfig("ek_test_iiuwfhdaiuhasdvkcjn32n").validate()
+        getConfig("ek_askljdlkasfhgasdfjls").validate(isLiveMode = false)
+        getConfig("ek_test_iiuwfhdaiuhasdvkcjn32n").validate(isLiveMode = false)
     }
 
     @Test
@@ -50,7 +53,7 @@ class PaymentSheetConfigurationKtxTest {
                 IllegalArgumentException::class,
                 message = "`ephemeralKeySecret` format does not match expected client secret formatting"
             ) {
-                getConfig(ephemeralKeySecret).validate()
+                getConfig(ephemeralKeySecret).validate(isLiveMode = false)
             }
         }
 
@@ -65,58 +68,130 @@ class PaymentSheetConfigurationKtxTest {
     @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
     fun `'validate' should fail when customer client secret key is secret is blank`() {
-        val configWithBlankCustomerSessionClientSecret = configuration.copy(
-            customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                id = "cus_1",
-                clientSecret = "   "
-            ),
-        ).asCommonConfiguration()
+        val configWithBlankCustomerSessionClientSecret = configuration.newBuilder()
+            .customer(
+                PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    id = "cus_1",
+                    clientSecret = "   "
+                ),
+            ).build().asCommonConfiguration()
 
         assertFailsWith(
             IllegalArgumentException::class,
             message = "When a CustomerConfiguration is passed to PaymentSheet, " +
                 "the customerSessionClientSecret cannot be an empty string."
         ) {
-            configWithBlankCustomerSessionClientSecret.validate()
+            configWithBlankCustomerSessionClientSecret.validate(isLiveMode = false)
         }
     }
 
     @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
     fun `'validate' should fail when provided argument has an ephemeral key secret format`() {
-        val configWithEphemeralKeySecretAsCustomerSessionClientSecret = configuration.copy(
-            customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                id = "cus_1",
-                clientSecret = "ek_12345"
-            ),
-        ).asCommonConfiguration()
+        val configWithEphemeralKeySecretAsCustomerSessionClientSecret = configuration.newBuilder()
+            .customer(
+                PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    id = "cus_1",
+                    clientSecret = "ek_12345"
+                ),
+            ).build().asCommonConfiguration()
 
         assertFailsWith(
             IllegalArgumentException::class,
             message = "Argument looks like an Ephemeral Key secret, but expecting a CustomerSession client " +
                 "secret. See CustomerSession API: https://docs.stripe.com/api/customer_sessions/create"
         ) {
-            configWithEphemeralKeySecretAsCustomerSessionClientSecret.validate()
+            configWithEphemeralKeySecretAsCustomerSessionClientSecret.validate(isLiveMode = false)
         }
     }
 
     @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
     fun `'validate' should fail when provided argument is not a recognized customer session client secret format`() {
-        val configWithInvalidCustomerSessionClientSecret = configuration.copy(
-            customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                id = "cus_1",
-                clientSecret = "total_12345"
-            ),
-        ).asCommonConfiguration()
+        val configWithInvalidCustomerSessionClientSecret = configuration.newBuilder()
+            .customer(
+                PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    id = "cus_1",
+                    clientSecret = "total_12345"
+                ),
+            ).build().asCommonConfiguration()
 
         assertFailsWith(
             IllegalArgumentException::class,
             message = "Argument does not look like a CustomerSession client secret. " +
                 "See CustomerSession API: https://docs.stripe.com/api/customer_sessions/create"
         ) {
-            configWithInvalidCustomerSessionClientSecret.validate()
+            configWithInvalidCustomerSessionClientSecret.validate(isLiveMode = false)
         }
+    }
+
+    @Test
+    fun `'validate' should succeed when external payment methods have correct prefix`() {
+        val configWithValidExternalPaymentMethods = configuration.newBuilder()
+            .externalPaymentMethods(listOf("external_paypal", "external_fawry"))
+            .build()
+            .asCommonConfiguration()
+
+        // Should not throw
+        configWithValidExternalPaymentMethods.validate(isLiveMode = false)
+    }
+
+    @Test
+    fun `'validate' should fail when external payment method does not have external_ prefix`() {
+        val configWithInvalidExternalPaymentMethod = configuration.newBuilder()
+            .externalPaymentMethods(listOf("paypal", "external_fawry"))
+            .build()
+            .asCommonConfiguration()
+
+        assertFailsWith(
+            IllegalArgumentException::class,
+            message = "External payment method 'paypal' does not start with 'external_'. " +
+                "All external payment methods must use the 'external_' prefix. " +
+                "See https://docs.stripe.com/payments/external-payment-methods?platform=android#available-external-" +
+                "payment-methods"
+        ) {
+            configWithInvalidExternalPaymentMethod.validate(isLiveMode = false)
+        }
+    }
+
+    @Test
+    fun `'validate' should succeed when external payment methods list is empty`() {
+        val configWithEmptyExternalPaymentMethods = configuration.newBuilder()
+            .externalPaymentMethods(emptyList())
+            .build()
+            .asCommonConfiguration()
+
+        // Should not throw
+        configWithEmptyExternalPaymentMethods.validate(isLiveMode = false)
+    }
+
+    @Test
+    fun `'validate' should fail when multiple external payment methods have incorrect prefix`() {
+        val configWithMultipleInvalidExternalPaymentMethods = configuration.newBuilder()
+            .externalPaymentMethods(listOf("paypal", "venmo", "external_fawry"))
+            .build()
+            .asCommonConfiguration()
+
+        assertFailsWith(
+            IllegalArgumentException::class,
+            message = "External payment method 'paypal' does not start with 'external_'. " +
+                "All external payment methods must use the 'external_' prefix. " +
+                "See https://docs.stripe.com/payments/external-payment-methods?platform=android#available-external" +
+                "-payment-methods"
+        ) {
+            configWithMultipleInvalidExternalPaymentMethods.validate(isLiveMode = false)
+        }
+    }
+
+    @Test
+    fun `'validate' should succeed when in live mode with invalid external payment methods`() {
+        val configWithInvalidExternalPaymentMethods = configuration.newBuilder()
+            .externalPaymentMethods(listOf("paypal", "venmo"))
+            .build()
+            .asCommonConfiguration()
+
+        // Should not throw when in live mode
+        configWithInvalidExternalPaymentMethods.validate(isLiveMode = true)
     }
 
     private companion object {

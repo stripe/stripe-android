@@ -4,12 +4,15 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.PaymentConfirmed
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkDismissalCoordinator
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.confirmation.DefaultCompleteLinkFlow
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.ui.PrimaryButtonState
@@ -60,7 +63,10 @@ class PaymentMethodViewModelTest {
                 formArguments = TestFactory.CARD_FORM_ARGS,
                 formElements = TestFactory.CARD_FORM_ELEMENTS,
                 primaryButtonState = PrimaryButtonState.Disabled,
-                primaryButtonLabel = completePaymentButtonLabel(TestFactory.LINK_CONFIGURATION.stripeIntent)
+                primaryButtonLabel = completePaymentButtonLabel(
+                    TestFactory.LINK_CONFIGURATION.stripeIntent,
+                    LinkLaunchMode.Full
+                )
             )
         )
     }
@@ -72,9 +78,7 @@ class PaymentMethodViewModelTest {
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest
         )
 
-        val vm = createViewModel(
-            formHelper = formHelper,
-        )
+        val vm = createViewModel(formHelper = formHelper)
 
         vm.formValuesChanged(formValues)
 
@@ -99,12 +103,12 @@ class PaymentMethodViewModelTest {
     fun `onPayClicked confirms payment successfully`() = runTest {
         val linkConfirmationHandler = FakeLinkConfirmationHandler()
         val linkAccountManager = FakeLinkAccountManager()
-        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
 
         var result: LinkActivityResult? = null
         val viewModel = createViewModel(
-            linkConfirmationHandler = linkConfirmationHandler,
             linkAccountManager = linkAccountManager,
+            linkConfirmationHandler = linkConfirmationHandler,
             dismissWithResult = { result = it }
         )
 
@@ -119,13 +123,14 @@ class PaymentMethodViewModelTest {
 
         assertThat(linkConfirmationHandler.confirmWithLinkPaymentDetailsCall).hasSize(1)
         val call = linkConfirmationHandler.confirmWithLinkPaymentDetailsCall.first()
-        assertThat(call.paymentDetails)
-            .isEqualTo(TestFactory.LINK_NEW_PAYMENT_DETAILS)
+        val paymentDetails = TestFactory.LINK_NEW_PAYMENT_DETAILS
+        assertThat(call.paymentDetails).isEqualTo(paymentDetails)
         assertThat(call.cvc).isEqualTo("111")
         assertThat(result)
             .isEqualTo(
                 LinkActivityResult.Completed(
-                    linkAccountUpdate = LinkAccountUpdate.Value(null)
+                    linkAccountUpdate = LinkAccountUpdate.Value(null, PaymentConfirmed),
+                    selectedPayment = null,
                 )
             )
         assertThat(viewModel.state.value.primaryButtonState).isEqualTo(PrimaryButtonState.Enabled)
@@ -142,10 +147,10 @@ class PaymentMethodViewModelTest {
         linkAccountManager.createCardPaymentDetailsResult = Result.failure(error)
 
         val viewModel = createViewModel(
-            linkConfirmationHandler = linkConfirmationHandler,
             linkAccountManager = linkAccountManager,
             logger = logger,
-            dismissWithResult = { result = it }
+            dismissWithResult = { result = it },
+            linkConfirmationHandler = linkConfirmationHandler
         )
 
         viewModel.formValuesChanged(
@@ -171,7 +176,9 @@ class PaymentMethodViewModelTest {
         linkConfirmationHandler.confirmWithLinkPaymentDetailsResult =
             LinkConfirmationResult.Failed("Payment failed".resolvableString)
 
-        val viewModel = createViewModel(linkConfirmationHandler = linkConfirmationHandler)
+        val viewModel = createViewModel(
+            linkConfirmationHandler = linkConfirmationHandler
+        )
 
         viewModel.formValuesChanged(
             formValues = FormFieldValues(userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest)
@@ -189,7 +196,9 @@ class PaymentMethodViewModelTest {
         val linkConfirmationHandler = FakeLinkConfirmationHandler()
         linkConfirmationHandler.confirmWithLinkPaymentDetailsResult = LinkConfirmationResult.Canceled
 
-        val viewModel = createViewModel(linkConfirmationHandler = linkConfirmationHandler)
+        val viewModel = createViewModel(
+            linkConfirmationHandler = linkConfirmationHandler
+        )
 
         viewModel.formValuesChanged(
             formValues = FormFieldValues(userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest)
@@ -208,8 +217,8 @@ class PaymentMethodViewModelTest {
         val logger = FakeLogger()
 
         val viewModel = createViewModel(
-            linkConfirmationHandler = linkConfirmationHandler,
-            logger = logger
+            logger = logger,
+            linkConfirmationHandler = linkConfirmationHandler
         )
 
         viewModel.onPayClicked()
@@ -222,21 +231,27 @@ class PaymentMethodViewModelTest {
 
     private fun createViewModel(
         formHelper: PaymentMethodFormHelper = PaymentMethodFormHelper(),
-        linkConfirmationHandler: LinkConfirmationHandler = FakeLinkConfirmationHandler(),
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
+        linkConfirmationHandler: LinkConfirmationHandler = FakeLinkConfirmationHandler(),
         logger: Logger = FakeLogger(),
         dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
-        dismissWithResult: (LinkActivityResult) -> Unit = {}
+        dismissWithResult: (LinkActivityResult) -> Unit = {},
     ): PaymentMethodViewModel {
         return PaymentMethodViewModel(
             configuration = TestFactory.LINK_CONFIGURATION,
             linkAccount = TestFactory.LINK_ACCOUNT,
-            linkConfirmationHandler = linkConfirmationHandler,
             dismissWithResult = dismissWithResult,
             formHelper = formHelper,
             logger = logger,
             dismissalCoordinator = dismissalCoordinator,
-            linkAccountManager = linkAccountManager
+            linkAccountManager = linkAccountManager,
+            linkLaunchMode = LinkLaunchMode.Full,
+            completeLinkFlow = DefaultCompleteLinkFlow(
+                linkConfirmationHandler = linkConfirmationHandler,
+                linkAccountManager = linkAccountManager,
+                dismissalCoordinator = dismissalCoordinator,
+                linkLaunchMode = LinkLaunchMode.Full
+            ),
         )
     }
 }

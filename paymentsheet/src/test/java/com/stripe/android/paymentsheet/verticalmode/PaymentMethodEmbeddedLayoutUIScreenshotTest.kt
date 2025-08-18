@@ -1,15 +1,18 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import android.graphics.Color
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -20,7 +23,6 @@ import org.junit.Test
 import org.mockito.kotlin.mock
 import kotlin.reflect.KClass
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(PaymentSheetAppearance.entries)
@@ -41,7 +43,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     fun testFloatingButton() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
-                rowStyle = getRowStyle(FloatingButton::class)
+                appearance = getEmbeddedAppearance(FloatingButton::class)
             )
         }
     }
@@ -50,7 +52,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     fun testFlatWithRadio() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
-                rowStyle = getRowStyle(FlatWithRadio::class)
+                appearance = getEmbeddedAppearance(FlatWithRadio::class)
             )
         }
     }
@@ -59,7 +61,16 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     fun testFlatWithCheckmark() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
-                rowStyle = getRowStyle(FlatWithCheckmark::class)
+                appearance = getEmbeddedAppearance(FlatWithCheckmark::class)
+            )
+        }
+    }
+
+    @Test
+    fun testFlatWithDisclosure() {
+        paparazziRule.snapshot {
+            TestPaymentMethodLayoutUi(
+                appearance = getEmbeddedAppearance(FlatWithDisclosure::class)
             )
         }
     }
@@ -68,7 +79,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     fun testSeparatorColorAndInsets() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
-                rowStyle = getRowStyle(
+                appearance = getEmbeddedAppearance(
                     type = FlatWithCheckmark::class,
                     separatorThicknessDp = 5f,
                     separatorColor = Color.CYAN,
@@ -83,7 +94,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     fun testBottomSeparatorOnly() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
-                rowStyle = getRowStyle(
+                appearance = getEmbeddedAppearance(
                     type = FlatWithCheckmark::class,
                     topSeparatorEnabled = false,
                     bottomSeparatorEnabled = true
@@ -96,7 +107,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     fun testTopSeparatorOnly() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
-                rowStyle = getRowStyle(
+                appearance = getEmbeddedAppearance(
                     type = FlatWithCheckmark::class,
                     topSeparatorEnabled = true,
                     bottomSeparatorEnabled = false
@@ -109,7 +120,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     fun testSavedPaymentMethodOnly() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
-                rowStyle = getRowStyle(
+                appearance = getEmbeddedAppearance(
                     type = FlatWithCheckmark::class,
                     topSeparatorEnabled = true,
                     bottomSeparatorEnabled = true,
@@ -124,7 +135,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     fun testNewPaymentMethodsOnly() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
-                rowStyle = getRowStyle(
+                appearance = getEmbeddedAppearance(
                     type = FlatWithCheckmark::class,
                     topSeparatorEnabled = true,
                     bottomSeparatorEnabled = true,
@@ -150,6 +161,20 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     }
 
     @Test
+    fun testNewPaymentMethodsWithSelectionAndDisclosure() {
+        paparazziRule.snapshot {
+            TestPaymentMethodLayoutUiWithNewSelection(
+                rowStyle = FlatWithDisclosure.default,
+                selection = PaymentMethodVerticalLayoutInteractor.Selection.New(
+                    code = "card",
+                    changeDetails = "Visa **** 4242",
+                    canBeChanged = true
+                )
+            )
+        }
+    }
+
+    @Test
     fun testNewPaymentMethodsWithSelectionWithoutChangeDetails() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUiWithNewSelection(
@@ -163,9 +188,27 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         }
     }
 
+    @Test
+    fun testWithSavedPaymentMethodsSetHeightAndCanManageAll() {
+        paparazziRule.snapshot {
+            TestPaymentMethodLayoutUiWithSetHeight(
+                action = PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+            )
+        }
+    }
+
+    @Test
+    fun testWithSavedPaymentMethodsSetHeightAndCanManageOnlyOne() {
+        paparazziRule.snapshot {
+            TestPaymentMethodLayoutUiWithSetHeight(
+                action = PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE,
+            )
+        }
+    }
+
     @Composable
     private fun TestPaymentMethodLayoutUi(
-        rowStyle: Embedded.RowStyle,
+        appearance: Embedded,
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod? = savedPaymentMethod,
         newPaymentMethods: List<DisplayablePaymentMethod> = paymentMethods
     ) {
@@ -181,7 +224,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             onSelectSavedPaymentMethod = {},
             onManageOneSavedPaymentMethod = {},
             imageLoader = mock(),
-            rowStyle = rowStyle,
+            appearance = appearance,
             modifier = Modifier.verticalScroll(scrollState),
         )
     }
@@ -204,14 +247,35 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             onSelectSavedPaymentMethod = {},
             onManageOneSavedPaymentMethod = {},
             imageLoader = mock(),
-            rowStyle = rowStyle,
+            appearance = Embedded(rowStyle),
             modifier = Modifier.verticalScroll(scrollState),
         )
     }
 
-    @Suppress("CyclomaticComplexMethod")
-    @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-    private fun <T : Embedded.RowStyle> getRowStyle(
+    @Composable
+    private fun TestPaymentMethodLayoutUiWithSetHeight(
+        action: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
+    ) {
+        Box(
+            modifier = Modifier.requiredHeight(450.dp)
+        ) {
+            PaymentMethodEmbeddedLayoutUI(
+                paymentMethods = emptyList(),
+                displayedSavedPaymentMethod = savedPaymentMethod,
+                savedPaymentMethodAction = action,
+                selection = null,
+                isEnabled = true,
+                onViewMorePaymentMethods = {},
+                onSelectSavedPaymentMethod = {},
+                onManageOneSavedPaymentMethod = {},
+                imageLoader = mock(),
+                appearance = getEmbeddedAppearance(FloatingButton::class),
+            )
+        }
+    }
+
+    @Suppress("CyclomaticComplexMethod", "LongMethod")
+    private fun <T : Embedded.RowStyle> getEmbeddedAppearance(
         type: KClass<T>,
         separatorThicknessDp: Float? = null,
         separatorColor: Int? = null,
@@ -224,47 +288,77 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         additionalVerticalInsetsDp: Float? = null,
         horizontalInsetsDp: Float? = null,
         checkmarkColor: Int? = null,
+        disclosureColor: Int? = null,
         checkmarkInsetDp: Float? = null,
         spacingDp: Float? = null
-    ): Embedded.RowStyle {
-        return when (type) {
-            FlatWithRadio::class -> FlatWithRadio(
-                separatorThicknessDp = separatorThicknessDp ?: FlatWithRadio.default.separatorThicknessDp,
-                startSeparatorInsetDp = startSeparatorInset ?: FlatWithRadio.default.startSeparatorInsetDp,
-                endSeparatorInsetDp = endSeparatorInset ?: FlatWithRadio.default.endSeparatorInsetDp,
-                topSeparatorEnabled = topSeparatorEnabled ?: FlatWithRadio.default.topSeparatorEnabled,
-                bottomSeparatorEnabled = bottomSeparatorEnabled ?: FlatWithRadio.default.bottomSeparatorEnabled,
-                additionalVerticalInsetsDp = additionalVerticalInsetsDp
-                    ?: FlatWithRadio.default.additionalVerticalInsetsDp,
-                horizontalInsetsDp = horizontalInsetsDp ?: FlatWithRadio.default.horizontalInsetsDp,
-                colorsLight = FlatWithRadio.Colors(
-                    separatorColor = separatorColor ?: FlatWithRadio.default.colorsLight.separatorColor,
-                    selectedColor = selectedColor ?: FlatWithRadio.default.colorsLight.selectedColor,
-                    unselectedColor = unselectedColor ?: FlatWithRadio.default.colorsLight.unselectedColor
-                ),
-                colorsDark = FlatWithRadio.default.colorsDark
-            )
-            FlatWithCheckmark::class -> FlatWithCheckmark(
-                separatorThicknessDp = separatorThicknessDp ?: FlatWithCheckmark.default.separatorThicknessDp,
-                startSeparatorInsetDp = startSeparatorInset ?: FlatWithCheckmark.default.startSeparatorInsetDp,
-                endSeparatorInsetDp = endSeparatorInset ?: FlatWithCheckmark.default.endSeparatorInsetDp,
-                topSeparatorEnabled = topSeparatorEnabled ?: FlatWithCheckmark.default.topSeparatorEnabled,
-                bottomSeparatorEnabled = bottomSeparatorEnabled
-                    ?: FlatWithCheckmark.default.bottomSeparatorEnabled,
-                checkmarkInsetDp = checkmarkInsetDp ?: FlatWithCheckmark.default.checkmarkInsetDp,
-                additionalVerticalInsetsDp = additionalVerticalInsetsDp
-                    ?: FlatWithCheckmark.default.additionalVerticalInsetsDp,
-                horizontalInsetsDp = horizontalInsetsDp ?: FlatWithCheckmark.default.horizontalInsetsDp,
-                colorsLight = FlatWithCheckmark.Colors(
-                    separatorColor = separatorColor ?: FlatWithCheckmark.default.colorsLight.separatorColor,
-                    checkmarkColor = checkmarkColor ?: FlatWithCheckmark.default.colorsLight.checkmarkColor
-                ),
-                colorsDark = FlatWithCheckmark.default.colorsDark
-            )
-            else -> FloatingButton(
-                spacingDp = spacingDp ?: FloatingButton.default.spacingDp,
-                additionalInsetsDp = additionalVerticalInsetsDp ?: FloatingButton.default.additionalInsetsDp
-            )
+    ): Embedded {
+        val row = when (type) {
+            FlatWithRadio::class -> FlatWithRadio.Builder()
+                .separatorThicknessDp(separatorThicknessDp ?: FlatWithRadio.default.separatorThicknessDp)
+                .startSeparatorInsetDp(startSeparatorInset ?: FlatWithRadio.default.startSeparatorInsetDp)
+                .endSeparatorInsetDp(endSeparatorInset ?: FlatWithRadio.default.endSeparatorInsetDp)
+                .topSeparatorEnabled(topSeparatorEnabled ?: FlatWithRadio.default.topSeparatorEnabled)
+                .bottomSeparatorEnabled(bottomSeparatorEnabled ?: FlatWithRadio.default.bottomSeparatorEnabled)
+                .additionalVerticalInsetsDp(
+                    additionalVerticalInsetsDp ?: FlatWithRadio.default.additionalVerticalInsetsDp
+                )
+                .horizontalInsetsDp(horizontalInsetsDp ?: FlatWithRadio.default.horizontalInsetsDp)
+                .colorsLight(
+                    FlatWithRadio.Colors(
+                        separatorColor = separatorColor ?: FlatWithRadio.default.colorsLight.separatorColor,
+                        selectedColor = selectedColor ?: FlatWithRadio.default.colorsLight.selectedColor,
+                        unselectedColor = unselectedColor ?: FlatWithRadio.default.colorsLight.unselectedColor
+                    )
+                )
+                .colorsDark(FlatWithRadio.default.colorsDark)
+                .build()
+            FlatWithCheckmark::class -> FlatWithCheckmark.Builder()
+                .separatorThicknessDp(separatorThicknessDp ?: FlatWithCheckmark.default.separatorThicknessDp)
+                .startSeparatorInsetDp(startSeparatorInset ?: FlatWithCheckmark.default.startSeparatorInsetDp)
+                .endSeparatorInsetDp(endSeparatorInset ?: FlatWithCheckmark.default.endSeparatorInsetDp)
+                .topSeparatorEnabled(topSeparatorEnabled ?: FlatWithCheckmark.default.topSeparatorEnabled)
+                .bottomSeparatorEnabled(
+                    bottomSeparatorEnabled ?: FlatWithCheckmark.default.bottomSeparatorEnabled
+                )
+                .checkmarkInsetDp(checkmarkInsetDp ?: FlatWithCheckmark.default.checkmarkInsetDp)
+                .additionalVerticalInsetsDp(
+                    additionalVerticalInsetsDp ?: FlatWithCheckmark.default.additionalVerticalInsetsDp
+                )
+                .horizontalInsetsDp(horizontalInsetsDp ?: FlatWithCheckmark.default.horizontalInsetsDp)
+                .colorsLight(
+                    FlatWithCheckmark.Colors(
+                        separatorColor = separatorColor ?: FlatWithCheckmark.default.colorsLight.separatorColor,
+                        checkmarkColor = checkmarkColor ?: FlatWithCheckmark.default.colorsLight.checkmarkColor
+                    )
+                )
+                .colorsDark(FlatWithCheckmark.default.colorsDark)
+                .build()
+            FlatWithDisclosure::class -> FlatWithDisclosure.Builder()
+                .separatorThicknessDp(separatorThicknessDp ?: FlatWithDisclosure.default.separatorThicknessDp)
+                .startSeparatorInsetDp(startSeparatorInset ?: FlatWithDisclosure.default.startSeparatorInsetDp)
+                .endSeparatorInsetDp(endSeparatorInset ?: FlatWithDisclosure.default.endSeparatorInsetDp)
+                .topSeparatorEnabled(topSeparatorEnabled ?: FlatWithDisclosure.default.topSeparatorEnabled)
+                .bottomSeparatorEnabled(
+                    bottomSeparatorEnabled ?: FlatWithDisclosure.default.bottomSeparatorEnabled
+                )
+                .additionalVerticalInsetsDp(
+                    additionalVerticalInsetsDp ?: FlatWithDisclosure.default.additionalVerticalInsetsDp
+                )
+                .horizontalInsetsDp(horizontalInsetsDp ?: FlatWithDisclosure.default.horizontalInsetsDp)
+                .colorsLight(
+                    FlatWithDisclosure.Colors(
+                        separatorColor = separatorColor ?: FlatWithDisclosure.default.colorsLight.separatorColor,
+                        disclosureColor = disclosureColor ?: FlatWithDisclosure.default.colorsLight.disclosureColor
+                    )
+                )
+                .colorsDark(FlatWithDisclosure.default.colorsDark)
+                .build()
+            else -> FloatingButton.Builder()
+                .spacingDp(spacingDp ?: FloatingButton.default.spacingDp)
+                .additionalInsetsDp(additionalVerticalInsetsDp ?: FloatingButton.default.additionalInsetsDp)
+                .build()
         }
+
+        return Embedded(row)
     }
 }

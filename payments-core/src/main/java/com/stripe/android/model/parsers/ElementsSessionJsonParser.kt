@@ -41,6 +41,9 @@ internal class ElementsSessionJsonParser(
         val orderedPaymentMethodTypes =
             paymentMethodPreference.optJSONArray(FIELD_ORDERED_PAYMENT_METHOD_TYPES)
 
+        val orderedPaymentMethodTypesAndWallets =
+            jsonArrayToList(json.optJSONArray(FIELD_ORDERED_PAYMENT_METHOD_TYPESAND_WALLETS))
+
         val flags = json.optJSONObject(FIELD_FLAGS)?.let { flags -> parseSessionFlags(json = flags) } ?: emptyMap()
 
         val elementsSessionId = json.optString(FIELD_ELEMENTS_SESSION_ID)
@@ -78,6 +81,10 @@ internal class ElementsSessionJsonParser(
 
         val merchantCountry = json.optString(FIELD_MERCHANT_COUNTRY)
 
+        val passiveCaptcha = json.optJSONObject(FIELD_PASSIVE_CAPTCHA)?.let {
+            PassiveCaptchaJsonParser().parse(it)
+        }
+
         return if (stripeIntent != null) {
             ElementsSession(
                 linkSettings = parseLinkSettings(linkSettings, linkFundingSources),
@@ -91,7 +98,9 @@ internal class ElementsSessionJsonParser(
                 customPaymentMethods = customPaymentMethods,
                 flags = flags,
                 experimentsData = experimentsData,
-                elementsSessionId = elementsSessionId.takeIf { it.isNotBlank() } ?: UUID.randomUUID().toString()
+                orderedPaymentMethodTypesAndWallets = orderedPaymentMethodTypesAndWallets,
+                elementsSessionId = elementsSessionId.takeIf { it.isNotBlank() } ?: UUID.randomUUID().toString(),
+                passiveCaptcha = passiveCaptcha
             )
         } else {
             null
@@ -164,7 +173,17 @@ internal class ElementsSessionJsonParser(
         val disableLinkSignup = json?.optBoolean(FIELD_DISABLE_LINK_SIGNUP) == true
         val linkPassthroughModeEnabled = json?.optBoolean(FIELD_LINK_PASSTHROUGH_MODE_ENABLED) == true
         val useLinkAttestationEndpoints = json?.optBoolean(FIELD_USE_LINK_ATTESTATION_ENDPOINTS) == true
+        val disableLinkRuxInFlowController = json?.optBoolean(FIELD_LINK_MOBILE_DISABLE_RUX_IN_FLOW_CONTROLLER) == true
         val suppressLink2faModal = json?.optBoolean(FIELD_LINK_SUPPRESS_2FA_MODAL) == true
+        val linkEnableDisplayableDefaultValuesInEce = json?.optBoolean(
+            FIELD_LINK_ENABLE_DISPLAYABLE_DEFAULT_VALUES_IN_ECE
+        ) == true
+        val linkMobileSkipWalletInFlowController = json?.optBoolean(
+            FIELD_LINK_MOBILE_SKIP_WALLET_IN_FLOW_CONTROLLER
+        ) == true
+
+        val linkSignUpOptInFeatureEnabled = json?.optBoolean(FIELD_LINK_SIGN_UP_OPT_IN_FEATURE_ENABLED) == true
+        val linkSignUpOptInInitialValue = json?.optBoolean(FIELD_LINK_SIGN_UP_OPT_IN_INITIAL_VALUE) == true
 
         val linkMode = json?.optString(FIELD_LINK_MODE)?.let { mode ->
             LinkMode.entries.firstOrNull { it.value == mode }
@@ -189,7 +208,12 @@ internal class ElementsSessionJsonParser(
             disableLinkSignup = disableLinkSignup,
             linkConsumerIncentive = linkConsumerIncentive,
             useAttestationEndpoints = useLinkAttestationEndpoints,
-            suppress2faModal = suppressLink2faModal
+            suppress2faModal = suppressLink2faModal,
+            disableLinkRuxInFlowController = disableLinkRuxInFlowController,
+            linkEnableDisplayableDefaultValuesInEce = linkEnableDisplayableDefaultValuesInEce,
+            linkMobileSkipWalletInFlowController = linkMobileSkipWalletInFlowController,
+            linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
+            linkSignUpOptInInitialValue = linkSignUpOptInInitialValue
         )
     }
 
@@ -213,7 +237,7 @@ internal class ElementsSessionJsonParser(
             return null
         }
 
-        val paymentMethods = if (enableLinkInSpm && FeatureFlags.linkPMsInSPM.isEnabled) {
+        val paymentMethods = if (enableLinkInSpm) {
             parsePaymentMethodsWithLinkDetails(json)
         } else {
             parsePaymentMethods(json)
@@ -279,7 +303,6 @@ internal class ElementsSessionJsonParser(
         }
 
         val paymentElementComponent = parsePaymentElementComponent(json.optJSONObject(FIELD_MOBILE_PAYMENT_ELEMENT))
-            ?: return null
         val customerSheetComponent = parseCustomerSheetComponent(json.optJSONObject(FIELD_CUSTOMER_SHEET))
             ?: return null
 
@@ -291,15 +314,16 @@ internal class ElementsSessionJsonParser(
 
     private fun parsePaymentElementComponent(
         json: JSONObject?
-    ): ElementsSession.Customer.Components.MobilePaymentElement? {
+    ): ElementsSession.Customer.Components.MobilePaymentElement {
         if (json == null) {
-            return null
+            return ElementsSession.Customer.Components.MobilePaymentElement.Disabled
         }
 
         val paymentSheetEnabled = json.optBoolean(FIELD_ENABLED)
 
         return if (paymentSheetEnabled) {
-            val paymentSheetFeatures = json.optJSONObject(FIELD_FEATURES) ?: return null
+            val paymentSheetFeatures = json.optJSONObject(FIELD_FEATURES)
+                ?: return ElementsSession.Customer.Components.MobilePaymentElement.Disabled
 
             val paymentMethodSaveFeature = paymentSheetFeatures.optString(FIELD_PAYMENT_METHOD_SAVE)
             val paymentMethodRemoveFeature = paymentSheetFeatures.optString(FIELD_PAYMENT_METHOD_REMOVE)
@@ -314,7 +338,8 @@ internal class ElementsSessionJsonParser(
 
             ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                 isPaymentMethodSaveEnabled = paymentMethodSaveFeature == VALUE_ENABLED,
-                isPaymentMethodRemoveEnabled = paymentMethodRemoveFeature == VALUE_ENABLED,
+                isPaymentMethodRemoveEnabled = paymentMethodRemoveFeature == VALUE_ENABLED ||
+                    paymentMethodRemoveFeature == VALUE_PARTIAL,
                 canRemoveLastPaymentMethod = paymentMethodRemoveLastFeature == VALUE_ENABLED,
                 isPaymentMethodSetAsDefaultEnabled = paymentMethodSetAsDefaultFeature == VALUE_ENABLED,
                 allowRedisplayOverride = allowRedisplayOverride,
@@ -326,20 +351,22 @@ internal class ElementsSessionJsonParser(
 
     private fun parseCustomerSheetComponent(json: JSONObject?): ElementsSession.Customer.Components.CustomerSheet? {
         if (json == null) {
-            return null
+            return ElementsSession.Customer.Components.CustomerSheet.Disabled
         }
 
         val customerSheetEnabled = json.optBoolean(FIELD_ENABLED)
 
         return if (customerSheetEnabled) {
-            val customerSheetFeatures = json.optJSONObject(FIELD_FEATURES) ?: return null
+            val customerSheetFeatures = json.optJSONObject(FIELD_FEATURES)
+                ?: return ElementsSession.Customer.Components.CustomerSheet.Disabled
 
             val paymentMethodRemoveFeature = customerSheetFeatures.optString(FIELD_PAYMENT_METHOD_REMOVE)
             val paymentMethodRemoveLastFeature = customerSheetFeatures.optString(FIELD_PAYMENT_METHOD_REMOVE_LAST)
             val paymentMethodSyncDefaultFeature = customerSheetFeatures.optString(FIELD_PAYMENT_METHOD_SYNC_DEFAULT)
 
             ElementsSession.Customer.Components.CustomerSheet.Enabled(
-                isPaymentMethodRemoveEnabled = paymentMethodRemoveFeature == VALUE_ENABLED,
+                isPaymentMethodRemoveEnabled = paymentMethodRemoveFeature == VALUE_ENABLED ||
+                    paymentMethodRemoveFeature == VALUE_PARTIAL,
                 canRemoveLastPaymentMethod = paymentMethodRemoveLastFeature == VALUE_ENABLED,
                 isPaymentMethodSyncDefaultEnabled = paymentMethodSyncDefaultFeature == VALUE_ENABLED,
             )
@@ -427,6 +454,7 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_COUNTRY_CODE = "country_code"
         private const val FIELD_PAYMENT_METHOD_TYPES = "payment_method_types"
         private const val FIELD_ORDERED_PAYMENT_METHOD_TYPES = "ordered_payment_method_types"
+        private const val FIELD_ORDERED_PAYMENT_METHOD_TYPESAND_WALLETS = "ordered_payment_method_types_and_wallets"
         private const val FIELD_LINK_SETTINGS = "link_settings"
         private const val FIELD_LINK_FUNDING_SOURCES = "link_funding_sources"
         private const val FIELD_FLAGS = "flags"
@@ -434,7 +462,15 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_LINK_MODE = "link_mode"
         private const val FIELD_DISABLE_LINK_SIGNUP = "link_mobile_disable_signup"
         private const val FIELD_USE_LINK_ATTESTATION_ENDPOINTS = "link_mobile_use_attestation_endpoints"
+        private const val FIELD_LINK_MOBILE_DISABLE_RUX_IN_FLOW_CONTROLLER =
+            "link_mobile_disable_rux_in_flow_controller"
         private const val FIELD_LINK_SUPPRESS_2FA_MODAL = "link_mobile_suppress_2fa_modal"
+        private const val FIELD_LINK_ENABLE_DISPLAYABLE_DEFAULT_VALUES_IN_ECE =
+            "link_enable_displayable_default_values_in_ece"
+        private const val FIELD_LINK_MOBILE_SKIP_WALLET_IN_FLOW_CONTROLLER =
+            "link_mobile_skip_wallet_in_flow_controller"
+        private const val FIELD_LINK_SIGN_UP_OPT_IN_FEATURE_ENABLED = "link_sign_up_opt_in_feature_enabled"
+        private const val FIELD_LINK_SIGN_UP_OPT_IN_INITIAL_VALUE = "link_sign_up_opt_in_initial_value"
         private const val FIELD_MERCHANT_COUNTRY = "merchant_country"
         private const val FIELD_PAYMENT_METHOD_PREFERENCE = "payment_method_preference"
         private const val FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES = "unactivated_payment_method_types"
@@ -467,9 +503,11 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_PAYMENT_METHOD_SET_AS_DEFAULT = "payment_method_set_as_default"
         private const val FIELD_PAYMENT_METHOD_SYNC_DEFAULT = "payment_method_sync_default"
         private const val VALUE_ENABLED = FIELD_ENABLED
+        private const val VALUE_PARTIAL = "partial"
         const val FIELD_GOOGLE_PAY_PREFERENCE = "google_pay_preference"
         private const val FIELD_EXPERIMENTS_DATA = "experiments_data"
         private const val FIELD_EXPERIMENTS_ASSIGNMENTS = "experiment_assignments"
+        private const val FIELD_PASSIVE_CAPTCHA = "passive_captcha"
         private const val ARB_ID = "arb_id"
 
         private val CUSTOM_PAYMENT_METHOD_JSON_PARSER = CustomPaymentMethodJsonParser()

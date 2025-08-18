@@ -3,13 +3,14 @@ package com.stripe.android.paymentelement.embedded.content
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
+import com.stripe.android.paymentsheet.ui.WalletButtonsContent
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class FakeEmbeddedContentHelper(
-    override val embeddedContent: MutableStateFlow<EmbeddedContent?> = MutableStateFlow(null)
+    override val embeddedContent: MutableStateFlow<EmbeddedContent?> = MutableStateFlow(null),
+    override val walletButtonsContent: StateFlow<WalletButtonsContent?> = MutableStateFlow(null),
 ) : EmbeddedContentHelper {
     private val _dataLoadedTurbine = Turbine<DefaultEmbeddedContentHelper.State>()
     val dataLoadedTurbine: ReceiveTurbine<DefaultEmbeddedContentHelper.State> = _dataLoadedTurbine
@@ -20,13 +21,13 @@ internal class FakeEmbeddedContentHelper(
 
     override fun dataLoaded(
         paymentMethodMetadata: PaymentMethodMetadata,
-        rowStyle: Embedded.RowStyle,
+        appearance: Embedded,
         embeddedViewDisplaysMandateText: Boolean,
     ) {
         _dataLoadedTurbine.add(
             DefaultEmbeddedContentHelper.State(
                 paymentMethodMetadata = paymentMethodMetadata,
-                rowStyle = rowStyle,
+                appearance = appearance,
                 embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
             )
         )

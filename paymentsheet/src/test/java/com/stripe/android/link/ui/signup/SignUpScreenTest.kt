@@ -16,6 +16,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAuth
@@ -127,6 +128,7 @@ internal class SignUpScreenTest {
                 }
             }
 
+            linkAuth.lookupResult = LinkAuthResult.NoLinkAccountFound
             linkAuth.signupResult = LinkAuthResult.Error(error)
             viewModel.onSignUpClick()
 
@@ -243,7 +245,7 @@ internal class SignUpScreenTest {
         linkAuth: LinkAuth = FakeLinkAuth(),
         dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
         customerInfo: LinkConfiguration.CustomerInfo = TestFactory.LINK_CUSTOMER_INFO,
-        moveToWeb: () -> Unit = {}
+        moveToWeb: (Throwable) -> Unit = {}
     ): SignUpViewModel {
         return SignUpViewModel(
             configuration = TestFactory.LINK_CONFIGURATION.copy(
@@ -255,7 +257,9 @@ internal class SignUpScreenTest {
             savedStateHandle = SavedStateHandle(),
             navigateAndClearStack = {},
             dismissalCoordinator = dismissalCoordinator,
-            moveToWeb = moveToWeb
+            moveToWeb = moveToWeb,
+            linkLaunchMode = LinkLaunchMode.Full,
+            dismissWithResult = {}
         )
     }
 

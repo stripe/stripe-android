@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillType
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
@@ -15,7 +14,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.LayoutDirection
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Blank
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -38,7 +36,7 @@ interface TextFieldController : InputController, SectionFieldComposable, Section
     val capitalization: KeyboardCapitalization
     val keyboardType: KeyboardType
     val layoutDirection: LayoutDirection?
-    override val label: StateFlow<Int?>
+    override val label: StateFlow<ResolvableString>
     val visualTransformation: StateFlow<VisualTransformation>
     override val showOptionalLabel: Boolean
     val fieldState: StateFlow<TextFieldState>
@@ -63,8 +61,6 @@ interface TextFieldController : InputController, SectionFieldComposable, Section
         modifier: Modifier,
         hiddenIdentifiers: Set<IdentifierSpec>,
         lastTextFieldIdentifier: IdentifierSpec?,
-        nextFocusDirection: FocusDirection,
-        previousFocusDirection: FocusDirection,
     ) {
         TextField(
             textFieldController = this,
@@ -75,8 +71,6 @@ interface TextFieldController : InputController, SectionFieldComposable, Section
                 ImeAction.Next
             },
             modifier = modifier,
-            nextFocusDirection = nextFocusDirection,
-            previousFocusDirection = previousFocusDirection
         )
     }
 }
@@ -126,7 +120,6 @@ sealed class TextFieldIcon {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 class SimpleTextFieldController(
     val textFieldConfig: TextFieldConfig,
-    override val showOptionalLabel: Boolean = false,
     override val initialValue: String? = null,
     private val overrideContentDescriptionProvider: ((fieldValue: String) -> ResolvableString)? = null,
 ) : TextFieldController {
@@ -136,6 +129,7 @@ class SimpleTextFieldController(
     override val visualTransformation = stateFlowOf(
         value = textFieldConfig.visualTransformation ?: VisualTransformation.None
     )
+    override val showOptionalLabel: Boolean = textFieldConfig.optional
 
     override val label = MutableStateFlow(textFieldConfig.label)
     override val debugLabel = textFieldConfig.debugLabel
@@ -162,7 +156,13 @@ class SimpleTextFieldController(
         overrideContentDescriptionProvider?.invoke(it) ?: it.resolvableString
     }
 
-    private val _fieldState = MutableStateFlow<TextFieldState>(Blank)
+    private val _fieldState = MutableStateFlow(
+        if (textFieldConfig.optional) {
+            TextFieldStateConstants.Valid.Limitless
+        } else {
+            TextFieldStateConstants.Error.Blank
+        }
+    )
     override val fieldState: StateFlow<TextFieldState> = _fieldState.asStateFlow()
 
     override val loading: StateFlow<Boolean> = textFieldConfig.loading
@@ -177,12 +177,15 @@ class SimpleTextFieldController(
     /**
      * An error must be emitted if it is visible or not visible.
      **/
-    override val error: StateFlow<FieldError?> = visibleError.mapAsStateFlow { visibleError ->
-        _fieldState.value.getError()?.takeIf { visibleError }
+    override val error: StateFlow<FieldError?> = combineAsStateFlow(
+        visibleError,
+        _fieldState
+    ) { visibleError, fieldState ->
+        fieldState.getError()?.takeIf { visibleError }
     }
 
     override val isComplete: StateFlow<Boolean> = _fieldState.mapAsStateFlow {
-        it.isValid() || (!it.isValid() && showOptionalLabel && it.isBlank())
+        it.isValid() || (!it.isValid() && textFieldConfig.optional && it.isBlank())
     }
 
     override val formFieldValue: StateFlow<FormFieldEntry> =
@@ -229,8 +232,6 @@ class SimpleTextFieldController(
         modifier: Modifier,
         hiddenIdentifiers: Set<IdentifierSpec>,
         lastTextFieldIdentifier: IdentifierSpec?,
-        nextFocusDirection: FocusDirection,
-        previousFocusDirection: FocusDirection,
     ) {
         TextField(
             textFieldController = this,
@@ -241,8 +242,6 @@ class SimpleTextFieldController(
                 ImeAction.Next
             },
             modifier = modifier,
-            nextFocusDirection = nextFocusDirection,
-            previousFocusDirection = previousFocusDirection,
             shouldAnnounceLabel = textFieldConfig.shouldAnnounceLabel,
             shouldAnnounceFieldValue = textFieldConfig.shouldAnnounceFieldValue
         )

@@ -26,6 +26,9 @@
   <string name="stripe_confirm_close_form_title">Ar norite uždaryti šią formą?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Išsaugokite savo informaciją saugiam atsiskaitymui vienu spustelėjimu su \"Link\"</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_header_default_opt_in">Išsaugoti mano informaciją greitesniam atsiskaitymui su „Link“</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">„%1$s“ kredito</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -34,12 +37,20 @@
   <string name="stripe_link_card_type_prepaid">„%1$s“ išankstinio mokėjimo</string>
   <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
   <string name="stripe_link_card_type_unknown">„%1$s“ kortelė</string>
+  <!-- Title for the update card screen in Link native when the user is confirming their payment details -->
+  <string name="stripe_link_confirm_payment_title">Patvirtinkite mokėjimo informaciją</string>
+  <!-- Title for a button that indicates a user can log in or sign up. -->
+  <string name="stripe_link_log_in_or_sign_up">Prisijungti arba prisiregistruoti</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Sutikti ir tęsti</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">Greitas ir saugus atsiskaitymas vienu spustelėjimu</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">Greitas ir saugus pirkimo užbaigimas</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Išsaugokite savo mokėjimų informaciją naudodami \"Link\" ir saugiai atsiskaitykite vienu spustelėjimu \"Link\" palaikomose svetainėse.</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">Mokėkite greičiau visur, kur priimama „Link“.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Tęsdami sutinkate su <terms>sąlygomis</terms> ir <privacy>privatumo politika</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -50,6 +61,8 @@
   <string name="stripe_link_update_card_title">Atnaujinti kortelę</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
   <string name="stripe_link_verification_message">Norėdami naudoti savo išsaugotą informaciją, įveskite %s gautą kodą.</string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message_short">Įveskite kodą, išsiųstą %s.</string>
   <!-- Menu option to update card on the wallet screen on Link native -->
   <string name="stripe_link_wallet_menu_action_update_card">Atnaujinti kortelę</string>
   <!-- Title of the logout action. -->
@@ -72,6 +85,8 @@
   <string name="stripe_paymentsheet_address_element_primary_button">išsaugoti adresą</string>
   <!-- Title for shipping address entry section -->
   <string name="stripe_paymentsheet_address_element_shipping_address">Siuntimo adresas</string>
+  <!-- Label for a checkbox when pressed used the provided billing address details as shipping address -->
+  <string name="stripe_paymentsheet_address_element_use_billing_as_shipping">Atsiskaitymo adresą naudoti siuntimui</string>
   <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
   <string name="stripe_paymentsheet_bacs_email_mandate">Per tris darbo dienas %s bus išsiųstas el. laiškas, patvirtinantis šio debeto nurodymo nustatymą.</string>
   <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
@@ -94,6 +109,12 @@
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Kortelės duomenų keisti negalima.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Pateikdami kortelės duomenis sutinkate, kad \"%s\" nuskaičiuotų nuo jūsų kortelės būsimus mokėjimus pagal jų sąlygas.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Tęsdami sutinkate išsaugoti savo informaciją būsimiems pirkiniams naudojant %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Tęsdami sutinkate išsaugoti savo informaciją būsimiems pirkimams naudojant %s ir <link>Nuoroda</link>. Taip pat sutinkate su „Link“ <terms>Sąlygomis</terms> ir <privacy>Privatumo politika</privacy>.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Tęsdami sutinkate išsaugoti savo informaciją būsimiems pirkimams naudojant %s ir <link>„Link“</link> (žr. <terms>Sąlygos</terms> ir <privacy>Privatumo politika</privacy>).]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Kortelė neatnaujinta. Bandykite dar kartą.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -111,6 +132,8 @@
   <string name="stripe_paymentsheet_manage_card">Tvarkyti kortelę</string>
   <!-- Title shown above a view containing the customer's cards that they can delete or update -->
   <string name="stripe_paymentsheet_manage_cards">Tvarkyti korteles</string>
+  <!-- Title shown above a view containing the customer's bank account that they can delete -->
+  <string name="stripe_paymentsheet_manage_international_bank_account">Tvarkyti banko sąskaitą</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Valdyti mokėjimo būdus</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -185,6 +208,8 @@
   <string name="stripe_pm_set_as_default">Nustatyti kaip numatytąjį mokėjimo būdą</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">Pašalinti banko sąskaitą, kurios paskutiniai skaičiai %s</string>
+  <!-- Accessibility description for a button that launches Shop Pay. -->
+  <string name="stripe_shop_pay_button_description">„Shop Pay“ mygtukas</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">Rodyti meniu</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
@@ -199,6 +224,8 @@
   <string name="stripe_sign_up_terms_alternative"><![CDATA[Pateikdami savo el. pašto adresą sutinkate susikurti \"Link\" paskyrą bei įrašyti savo mokėjimo informaciją į \"Link\" pagal <terms>\"Link\" sąlygas</terms> ir <privacy>privatumo politiką</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Pateikdami savo telefono numerį sutinkate susikurti \"Link\" paskyrą bei įrašyti savo mokėjimo informaciją į \"Link\" pagal <terms>\"Link\" sąlygas</terms> ir <privacy>privatumo politiką</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[Pateikdami telefono numerį ir el. pašto adresą sutinkate susikurti „Link“ paskyrą pagal „Link“ <terms>sąlygas</terms> ir <privacy>privatumo politiką</privacy>.]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">Jūsų paskyra išjungta</string>
   <!-- Generic failure message -->
@@ -217,6 +244,8 @@
   <string name="stripe_upi_polling_payment_failed_title">Sumokėti nepavyko</string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="stripe_verification_change_email">Pakeiskite el. paštą</string>
+  <!-- Title for a button that allows the user to use a different email in the signup flow. -->
+  <string name="stripe_verification_change_email_new">Ne jūs?</string>
   <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
   <string name="stripe_verification_code_sent">Kodas išsiųstas</string>
   <!-- Two factor authentication screen heading -->
@@ -239,6 +268,8 @@
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Tęsdami sutinkate autorizuoti mokėjimus pagal šias <terms>sąlygas</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Mokėjimas</string>
+  <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
+  <string name="stripe_wallet_continue_another_way">Tęsti kitu būdu</string>
   <!-- Label for identifying the default payment method. -->
   <string name="stripe_wallet_default">Numatytasis</string>
   <string name="stripe_wallet_expand_accessibility">Keisti pasirinkimą</string>

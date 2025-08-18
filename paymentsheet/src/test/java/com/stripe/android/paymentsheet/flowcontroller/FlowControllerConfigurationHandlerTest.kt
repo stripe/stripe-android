@@ -15,6 +15,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -25,6 +26,7 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.SessionTestRule
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.PaymentElementCallbackTestRule
 import com.stripe.android.utils.RelayingPaymentElementLoader
@@ -84,12 +86,27 @@ class FlowControllerConfigurationHandlerTest {
         val configurationHandler = createConfigurationHandler()
 
         val beforeSessionId = AnalyticsRequestFactory.sessionId
+
+        val configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+            .appearance(
+                PaymentSheet.Appearance.Builder()
+                    .primaryButton(
+                        PaymentSheet.PrimaryButton(
+                            shape = PaymentSheet.PrimaryButtonShape(
+                                heightDp = 80f
+                            )
+                        )
+                    )
+                    .build()
+            )
+            .build()
+
         configurationHandler.configure(
             scope = this,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            configuration = configuration,
             initializedViaCompose = false,
         ) { _, exception ->
             configureErrors.add(exception)
@@ -100,13 +117,13 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(configurationHandler.isConfigured).isTrue()
         assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link())
         assertThat(viewModel.state).isNotNull()
+        assertThat(StripeTheme.primaryButtonStyle.shape.height).isEqualTo(80f)
 
-        val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         verify(eventReporter).onInit(
-            commonConfiguration = config.asCommonConfiguration(),
-            appearance = config.appearance,
-            primaryButtonColor = config.primaryButtonColorUsage(),
-            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
+            commonConfiguration = configuration.asCommonConfiguration(),
+            appearance = configuration.appearance,
+            primaryButtonColor = configuration.primaryButtonColorUsage(),
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(configuration),
             isDeferred = false,
         )
         // Configure should regenerate the analytics sessionId.
@@ -270,9 +287,9 @@ class FlowControllerConfigurationHandlerTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
-                merchantDisplayName = "",
-            ),
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                .merchantDisplayName("")
+                .build(),
             initializedViaCompose = false,
         ) { _, error ->
             configureErrors.add(error)
@@ -292,11 +309,13 @@ class FlowControllerConfigurationHandlerTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
-                customer = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.customer?.copy(
-                    id = " "
-                )
-            ),
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                .customer(
+                    PaymentSheet.CustomerConfiguration(
+                        id = " ",
+                        ephemeralKeySecret = PaymentSheetFixtures.DEFAULT_EPHEMERAL_KEY,
+                    )
+                ).build(),
             initializedViaCompose = false,
         ) { _, error ->
             configureErrors.add(error)
@@ -316,11 +335,14 @@ class FlowControllerConfigurationHandlerTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
-                customer = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.customer?.copy(
-                    ephemeralKeySecret = " "
-                )
-            ),
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                .customer(
+                    PaymentSheet.CustomerConfiguration(
+                        id = "customer_id",
+                        ephemeralKeySecret = " ",
+                        accessType = LegacyCustomerEphemeralKey(PaymentSheetFixtures.DEFAULT_EPHEMERAL_KEY),
+                    )
+                ).build(),
             initializedViaCompose = false,
         ) { _, error ->
             configureErrors.add(error)
@@ -585,7 +607,8 @@ class FlowControllerConfigurationHandlerTest {
             uiContext = testDispatcher,
             eventReporter = eventReporter,
             viewModel = viewModel,
-            paymentSelectionUpdater = { _, _, newState, _ -> newState.paymentSelection },
+            paymentSelectionUpdater = { _, _, newState, _, _ -> newState.paymentSelection },
+            isLiveModeProvider = { false },
         )
     }
 }

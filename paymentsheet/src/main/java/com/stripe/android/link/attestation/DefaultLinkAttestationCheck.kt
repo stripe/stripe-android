@@ -29,13 +29,14 @@ internal class DefaultLinkAttestationCheck @Inject constructor(
             val result = integrityRequestManager.prepare()
             result.fold(
                 onSuccess = {
-                    val email = linkAccountManager.linkAccount.value?.email
+                    val email = linkAccountManager.linkAccountInfo.value.account?.email
                         ?: linkConfiguration.customerInfo.email
                     if (email == null) return@fold LinkAttestationCheck.Result.Successful
                     val lookupResult = linkAuth.lookUp(
                         email = email,
                         emailSource = EmailSource.CUSTOMER_OBJECT,
-                        startSession = false
+                        startSession = false,
+                        customerId = linkConfiguration.customerIdForEceDefaultValues
                     )
                     handleLookupResult(lookupResult)
                 },

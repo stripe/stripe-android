@@ -14,7 +14,6 @@ import com.stripe.android.paymentelement.CustomPaymentMethodResult
 import com.stripe.android.paymentelement.CustomPaymentMethodResultHandler
 import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.assertCompleted
 import com.stripe.android.paymentelement.runEmbeddedPaymentElementTest
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
@@ -94,6 +93,8 @@ internal class CustomPaymentMethodsTest {
             )
 
             page.clickPrimaryButton()
+
+            context.consumePaymentOptionEventForFlowController("cpmt_123", "TestPay")
         }
     }
 
@@ -171,6 +172,8 @@ internal class CustomPaymentMethodsTest {
             page.fillOutBillingCollectionDetails()
 
             page.clickPrimaryButton()
+
+            context.consumePaymentOptionEventForFlowController("cpmt_123", "TestPay")
         }
     }
 
@@ -237,10 +240,11 @@ internal class CustomPaymentMethodsTest {
             )
 
             page.clickPrimaryButton()
+
+            context.consumePaymentOptionEventForFlowController("cpmt_123", "TestPay")
         }
     }
 
-    @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
     @Test
     fun testSuccessfulWithEmbedded() {
         val customPaymentMethod = PaymentSheet.CustomPaymentMethod(

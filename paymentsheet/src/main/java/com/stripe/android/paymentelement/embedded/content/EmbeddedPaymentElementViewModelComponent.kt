@@ -4,23 +4,29 @@ import android.app.Application
 import android.content.Context
 import android.content.res.Resources
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.common.di.MobileSessionIdModule
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.injection.PaymentsIntegrityModule
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
+import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
+import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -45,12 +51,11 @@ import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.plus
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
-@ExperimentalEmbeddedPaymentElementApi
 @Singleton
 @Component(
     modules = [
@@ -62,6 +67,7 @@ import kotlin.coroutines.CoroutineContext
         MobileSessionIdModule::class,
         CardScanModule::class,
         EmbeddedLinkExtrasModule::class,
+        PaymentsIntegrityModule::class,
         LinkHoldbackExposureModule::class,
     ],
 )
@@ -82,7 +88,6 @@ internal interface EmbeddedPaymentElementViewModelComponent {
     }
 }
 
-@ExperimentalEmbeddedPaymentElementApi
 @Module(
     subcomponents = [
         EmbeddedPaymentElementSubcomponent::class,
@@ -115,6 +120,9 @@ internal interface EmbeddedPaymentElementViewModelModule {
     ): EmbeddedConfigurationHandler
 
     @Binds
+    fun bindsLinkHelper(helper: DefaultEmbeddedLinkHelper): EmbeddedLinkHelper
+
+    @Binds
     fun bindsWalletsHelper(helper: DefaultEmbeddedWalletsHelper): EmbeddedWalletsHelper
 
     @Binds
@@ -142,11 +150,23 @@ internal interface EmbeddedPaymentElementViewModelModule {
     @Binds
     fun bindsEmbeddedContentHelper(helper: DefaultEmbeddedContentHelper): EmbeddedContentHelper
 
+    @Binds
+    fun bindsEmbeddedRowSelectionImmediateActionHandler(
+        handler: DefaultEmbeddedRowSelectionImmediateActionHandler
+    ): EmbeddedRowSelectionImmediateActionHandler
+
+    @Suppress("TooManyFunctions")
     companion object {
         @Provides
         fun providesContext(application: Application): Context {
             return application
         }
+
+        @Provides
+        @Named(IS_LIVE_MODE)
+        fun providesIsLiveMode(
+            paymentConfiguration: Provider<PaymentConfiguration>
+        ): () -> Boolean = { paymentConfiguration.get().publishableKey.startsWith("pk_live") }
 
         @Provides
         @Singleton
@@ -207,6 +227,13 @@ internal interface EmbeddedPaymentElementViewModelModule {
             confirmationStateHolder: EmbeddedConfirmationStateHolder,
         ): () -> EmbeddedConfirmationStateHolder.State? {
             return { confirmationStateHolder.state }
+        }
+
+        @Provides
+        fun providesInternalRowSelectionCallback(
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+        ): InternalRowSelectionCallback? {
+            return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.rowSelectionCallback
         }
     }
 }

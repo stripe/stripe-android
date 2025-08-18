@@ -2,9 +2,15 @@ package com.stripe.android.ui.core.elements
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
+import com.stripe.android.uicore.elements.AddressController
+import com.stripe.android.uicore.elements.AutocompleteAddressController
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.utils.isInstanceOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,6 +26,7 @@ internal class CardBillingAddressElementTest {
         rawValuesMap = emptyMap(),
         emptySet(),
         dropdownFieldController,
+        null,
         null,
         null
     )
@@ -56,6 +63,95 @@ internal class CardBillingAddressElementTest {
         }
     }
 
+    @Test
+    fun `Verify that AutocompleteAddressElement is used when billing details collection is Full`() =
+        autocompleteTest(
+            configuration = BillingDetailsCollectionConfiguration(
+                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            )
+        ) { cardBillingAddressElement ->
+            assertThat(cardBillingAddressElement.sectionFieldErrorController())
+                .isInstanceOf<AutocompleteAddressController>()
+        }
+
+    @Test
+    fun `Verify that AddressElement is used when billing details collection is Never`() = autocompleteTest(
+        configuration = BillingDetailsCollectionConfiguration(
+            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+        )
+    ) { cardBillingAddressElement ->
+        assertThat(cardBillingAddressElement.sectionFieldErrorController()).isInstanceOf<AddressController>()
+    }
+
+    @Test
+    fun `Verify that AddressElement is used when billing details collection is Automatic`() = autocompleteTest(
+        configuration = BillingDetailsCollectionConfiguration(
+            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+        )
+    ) { cardBillingAddressElement ->
+        assertThat(cardBillingAddressElement.sectionFieldErrorController()).isInstanceOf<AddressController>()
+    }
+
+    @Test
+    fun `Verify that email is used when email collection is required for non-autocomplete case`() =
+        nonAutocompleteEmailAndPhoneTest(
+            collectsEmail = true,
+            collectsPhone = false,
+        ) { hasEmail, hasPhone ->
+            assertThat(hasEmail).isTrue()
+            assertThat(hasPhone).isFalse()
+        }
+
+    @Test
+    fun `Verify that phone is used when phone collection is required for non-autocomplete case`() =
+        nonAutocompleteEmailAndPhoneTest(
+            collectsEmail = false,
+            collectsPhone = true,
+        ) { hasEmail, hasPhone ->
+            assertThat(hasEmail).isFalse()
+            assertThat(hasPhone).isTrue()
+        }
+
+    @Test
+    fun `Verify that email & phone is used when collection is required for non-autocomplete case`() =
+        nonAutocompleteEmailAndPhoneTest(
+            collectsEmail = true,
+            collectsPhone = true,
+        ) { hasEmail, hasPhone ->
+            assertThat(hasEmail).isTrue()
+            assertThat(hasPhone).isTrue()
+        }
+
+    @Test
+    fun `Verify that email is used when email collection is required for autocomplete case`() =
+        autocompleteEmailAndPhoneTest(
+            collectsEmail = true,
+            collectsPhone = false,
+        ) { hasEmail, hasPhone ->
+            assertThat(hasEmail).isTrue()
+            assertThat(hasPhone).isFalse()
+        }
+
+    @Test
+    fun `Verify that phone is used when phone collection is required for autocomplete case`() =
+        autocompleteEmailAndPhoneTest(
+            collectsEmail = false,
+            collectsPhone = true,
+        ) { hasEmail, hasPhone ->
+            assertThat(hasEmail).isFalse()
+            assertThat(hasPhone).isTrue()
+        }
+
+    @Test
+    fun `Verify that email & phone is used when collection is required for autocomplete case`() =
+        autocompleteEmailAndPhoneTest(
+            collectsEmail = true,
+            collectsPhone = true,
+        ) { hasEmail, hasPhone ->
+            assertThat(hasEmail).isTrue()
+            assertThat(hasPhone).isTrue()
+        }
+
     fun verifyPostalShown(hiddenIdentifiers: Set<IdentifierSpec>) {
         Truth.assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.PostalCode)
         Truth.assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.Country)
@@ -72,5 +168,99 @@ internal class CardBillingAddressElementTest {
         Truth.assertThat(hiddenIdentifiers).contains(IdentifierSpec.Line2)
         Truth.assertThat(hiddenIdentifiers).contains(IdentifierSpec.State)
         Truth.assertThat(hiddenIdentifiers).contains(IdentifierSpec.City)
+    }
+
+    private fun nonAutocompleteEmailAndPhoneTest(
+        collectsEmail: Boolean,
+        collectsPhone: Boolean,
+        block: (hasEmail: Boolean, hasPhone: Boolean) -> Unit,
+    ) = autocompleteTest(
+        configuration = BillingDetailsCollectionConfiguration(
+            collectEmail = collectsEmail,
+            collectPhone = collectsPhone,
+            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+        )
+    ) { cardBillingAddressElement ->
+        val sectionController = cardBillingAddressElement.sectionFieldErrorController()
+
+        assertThat(sectionController).isInstanceOf<AddressController>()
+
+        val addressController = sectionController as AddressController
+
+        val addressFields = addressController.fieldsFlowable.value
+
+        val hasEmail = addressFields.any { field ->
+            field.identifier == IdentifierSpec.Email
+        }
+
+        val hasPhone = addressFields.any { field ->
+            field.identifier == IdentifierSpec.Phone
+        }
+
+        block(hasEmail, hasPhone)
+    }
+
+    private fun autocompleteEmailAndPhoneTest(
+        collectsEmail: Boolean,
+        collectsPhone: Boolean,
+        block: (hasEmail: Boolean, hasPhone: Boolean) -> Unit,
+    ) = autocompleteTest(
+        configuration = BillingDetailsCollectionConfiguration(
+            collectEmail = collectsEmail,
+            collectPhone = collectsPhone,
+            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+        )
+    ) { cardBillingAddressElement ->
+        val sectionController = cardBillingAddressElement.sectionFieldErrorController()
+
+        assertThat(sectionController).isInstanceOf<AutocompleteAddressController>()
+
+        val autocompleteController = sectionController as AutocompleteAddressController
+
+        val addressFields = autocompleteController.addressController.value.fieldsFlowable.value
+
+        val hasEmail = addressFields.any { field ->
+            field.identifier == IdentifierSpec.Email
+        }
+
+        val hasPhone = addressFields.any { field ->
+            field.identifier == IdentifierSpec.Phone
+        }
+
+        block(hasEmail, hasPhone)
+    }
+
+    private fun autocompleteTest(
+        configuration: BillingDetailsCollectionConfiguration,
+        block: (CardBillingAddressElement) -> Unit,
+    ) = runTest {
+        block(
+            CardBillingAddressElement(
+                identifier = IdentifierSpec.Generic("billing_element"),
+                rawValuesMap = emptyMap(),
+                countryCodes = emptySet(),
+                countryDropdownFieldController = dropdownFieldController,
+                autocompleteAddressInteractorFactory = {
+                    object : AutocompleteAddressInteractor {
+                        override val autocompleteConfig: AutocompleteAddressInteractor.Config =
+                            AutocompleteAddressInteractor.Config(
+                                googlePlacesApiKey = null,
+                                autocompleteCountries = emptySet()
+                            )
+
+                        override fun register(onEvent: (AutocompleteAddressInteractor.Event) -> Unit) {
+                            // No-op
+                        }
+
+                        override fun onAutocomplete(country: String) {
+                            error("Should not be called!")
+                        }
+                    }
+                },
+                sameAsShippingElement = null,
+                shippingValuesMap = null,
+                collectionConfiguration = configuration,
+            )
+        )
     }
 }

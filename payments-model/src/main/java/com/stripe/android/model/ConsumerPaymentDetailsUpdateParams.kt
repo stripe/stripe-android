@@ -16,11 +16,14 @@ data class ConsumerPaymentDetailsUpdateParams(
     override fun toParamMap(): Map<String, Any> {
         val params: MutableMap<String, Any> = mutableMapOf()
 
-        isDefault?.let { params["is_default"] = it }
+        // When updating a payment that is not the default and you send isDefault=false to the server,
+        // you get "Can't unset payment details when it's not the default", so send nil instead of false
+        if (isDefault == true) params["is_default"] = true
 
         cardPaymentMethodCreateParamsMap?.let { map ->
             params.addCardParams(map)
             params.addAddressParams(map)
+            params.addEmailParam(map)
         }
 
         return params
@@ -37,8 +40,14 @@ data class ConsumerPaymentDetailsUpdateParams(
     }
 
     private fun MutableMap<String, Any>.addAddressParams(map: Map<String, @RawValue Any>) {
-        ConsumerPaymentDetails.Card.getAddressFromMap(map)?.let {
+        getConsumerPaymentDetailsAddressFromPaymentMethodCreateParams(map)?.let {
             this[it.first] = it.second
         }
+    }
+
+    private fun MutableMap<String, Any>.addEmailParam(map: Map<String, @RawValue Any>) {
+        val billingDetails = map["billing_details"] as? Map<*, *>
+        val emailAddress = billingDetails?.get("email") as? String
+        emailAddress?.let { this["billing_email_address"] = it }
     }
 }

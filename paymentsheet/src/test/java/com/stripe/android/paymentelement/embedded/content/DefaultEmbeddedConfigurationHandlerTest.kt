@@ -11,7 +11,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedConfigurationHandler.ConfigurationCache
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
@@ -27,7 +26,6 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 
-@ExperimentalEmbeddedPaymentElementApi
 internal class DefaultEmbeddedConfigurationHandlerTest {
     @Test
     fun validationFailureReturnsFailureResult() = runScenario {
@@ -301,13 +299,22 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
         assertThat(second.await()).isEqualTo(expectedResult.getOrThrow())
     }
 
-    private fun runScenario(block: suspend Scenario.() -> Unit) {
+    private fun runScenario(
+        block: suspend Scenario.() -> Unit
+    ) {
         runTest {
             val loader = FakePaymentElementLoader()
             val savedStateHandle = SavedStateHandle()
             val sheetStateHolder = SheetStateHolder(savedStateHandle)
             val eventReporter = FakeEventReporter()
-            val handler = DefaultEmbeddedConfigurationHandler(loader, savedStateHandle, sheetStateHolder, eventReporter)
+            val handler = DefaultEmbeddedConfigurationHandler(
+                loader,
+                savedStateHandle,
+                sheetStateHolder,
+                eventReporter,
+                internalRowSelectionCallback = { null },
+                isLiveModeProvider = { false }
+            )
             Scenario(
                 loader = loader,
                 savedStateHandle = savedStateHandle,
@@ -368,8 +375,7 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
         override suspend fun load(
             initializationMode: PaymentElementLoader.InitializationMode,
             configuration: CommonConfiguration,
-            isReloadingAfterProcessDeath: Boolean,
-            initializedViaCompose: Boolean,
+            metadata: PaymentElementLoader.Metadata,
         ): Result<PaymentElementLoader.State> {
             loadCalledTurbine.add(initializationMode)
             return resultTurbine.awaitItem()

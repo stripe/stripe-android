@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.menu
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,14 +26,15 @@ import com.stripe.android.link.theme.MinimumTouchTargetSize
  * @param onItemPress Called when an item in the list is pressed
  */
 @Composable
-internal fun LinkMenu(
+internal fun <T : LinkMenuItem> LinkMenu(
     modifier: Modifier = Modifier,
-    items: List<LinkMenuItem>,
-    onItemPress: (LinkMenuItem) -> Unit
+    items: List<T>,
+    onItemPress: (T) -> Unit
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .background(LinkTheme.colors.surfaceSecondary)
             .padding(vertical = 10.dp)
             .navigationBarsPadding()
     ) {
@@ -65,7 +67,7 @@ private fun LinkBottomSheetRow(
             text = item.text.resolve(context),
             style = LinkTheme.typography.body,
             color = if (item.isDestructive) {
-                LinkTheme.colors.errorText
+                LinkTheme.colors.textCritical
             } else {
                 LinkTheme.colors.textPrimary
             },

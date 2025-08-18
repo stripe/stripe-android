@@ -164,6 +164,7 @@ class CustomPaymentMethodConfirmationDefinitionTest {
         val succeededResult = result.asSucceeded()
         assertThat(succeededResult.intent).isEqualTo(CONFIRMATION_PARAMETERS.intent)
         assertThat(succeededResult.deferredIntentConfirmationType).isNull()
+        assertThat(succeededResult.completedFullPaymentFlow).isTrue()
     }
 
     @Test
@@ -243,9 +244,9 @@ class CustomPaymentMethodConfirmationDefinitionTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123",
             ),
-            appearance = PaymentSheet.Appearance().copy(
-                colorsDark = PaymentSheet.Colors.defaultLight,
-            ),
+            appearance = PaymentSheet.Appearance.Builder()
+                .colorsDark(PaymentSheet.Colors.defaultLight)
+                .build(),
             shippingDetails = null,
         )
 

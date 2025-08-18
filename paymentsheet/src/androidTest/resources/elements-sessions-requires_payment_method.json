@@ -41,6 +41,7 @@
     "link_financial_incentives_experiment_enabled": false,
     "link_funding_sources": ["CARD"],
     "link_local_storage_login_enabled": false,
+    "link_mobile_disable_default_opt_in": true,
     "link_m2_default_integration_enabled": true,
     "link_only_for_payment_method_types_enabled": false,
     "link_passthrough_mode_enabled": false,

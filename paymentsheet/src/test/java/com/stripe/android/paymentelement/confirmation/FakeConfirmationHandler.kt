@@ -43,4 +43,39 @@ internal class FakeConfirmationHandler(
         val activityResultCaller: ActivityResultCaller,
         val lifecycleOwner: LifecycleOwner,
     )
+
+    class Scenario(
+        val handler: ConfirmationHandler,
+        val confirmationState: MutableStateFlow<ConfirmationHandler.State>,
+        val registerTurbine: Turbine<RegisterCall>,
+        val startTurbine: Turbine<ConfirmationHandler.Args>,
+        val awaitResultTurbine: Turbine<ConfirmationHandler.Result?>,
+    )
+
+    companion object {
+        suspend fun test(
+            hasReloadedFromProcessDeath: Boolean = false,
+            initialState: ConfirmationHandler.State,
+            block: suspend Scenario.() -> Unit,
+        ) {
+            val state = MutableStateFlow(initialState)
+
+            val handler = FakeConfirmationHandler(
+                hasReloadedFromProcessDeath = hasReloadedFromProcessDeath,
+                state = state,
+            )
+
+            block(
+                Scenario(
+                    handler = handler,
+                    confirmationState = state,
+                    registerTurbine = handler.registerTurbine,
+                    startTurbine = handler.startTurbine,
+                    awaitResultTurbine = handler.awaitResultTurbine,
+                )
+            )
+
+            handler.validate()
+        }
+    }
 }

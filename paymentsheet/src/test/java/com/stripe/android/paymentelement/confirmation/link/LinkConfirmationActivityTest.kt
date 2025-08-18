@@ -17,8 +17,12 @@ import androidx.test.espresso.intent.rule.IntentsRule
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkExpressMode
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.NativeLinkArgs
 import com.stripe.android.link.TestFactory
+import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
@@ -131,6 +135,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
 
             assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT.copy(paymentMethod = paymentMethod))
             assertThat(successResult.deferredIntentConfirmationType).isNull()
+            assertThat(successResult.completedFullPaymentFlow).isTrue()
         }
     }
 
@@ -199,11 +204,13 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                         "native_link_args",
                         NativeLinkArgs(
                             configuration = TestFactory.LINK_CONFIGURATION,
+                            requestSurface = RequestSurface.PaymentElement,
                             publishableKey = PUBLISHABLE_KEY,
                             stripeAccountId = null,
-                            startWithVerificationDialog = true,
-                            linkAccount = null,
-                            paymentElementCallbackIdentifier = "ConfirmationTestIdentifier"
+                            linkExpressMode = LinkExpressMode.ENABLED,
+                            linkAccountInfo = LinkAccountUpdate.Value(null),
+                            paymentElementCallbackIdentifier = "ConfirmationTestIdentifier",
+                            launchMode = LinkLaunchMode.Full,
                         )
                     )
                 )
@@ -237,7 +244,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
 
         val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(
             configuration = TestFactory.LINK_CONFIGURATION,
-            useLinkExpress = true
+            linkExpressMode = LinkExpressMode.ENABLED,
         )
 
         val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(

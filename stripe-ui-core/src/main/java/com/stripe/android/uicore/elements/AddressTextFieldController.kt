@@ -5,7 +5,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillType
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
@@ -37,7 +36,7 @@ class AddressTextFieldController(
     override val visualTransformation = stateFlowOf(
         value = config.visualTransformation ?: VisualTransformation.None,
     )
-    override val showOptionalLabel: Boolean = false
+    override val showOptionalLabel: Boolean = config.optional
 
     override val label = MutableStateFlow(config.label)
     override val debugLabel = config.debugLabel
@@ -55,7 +54,13 @@ class AddressTextFieldController(
 
     override val contentDescription: StateFlow<ResolvableString> = _fieldValue.mapAsStateFlow { it.resolvableString }
 
-    private val _fieldState = MutableStateFlow<TextFieldState>(TextFieldStateConstants.Error.Blank)
+    private val _fieldState = MutableStateFlow(
+        if (config.optional) {
+            TextFieldStateConstants.Valid.Limitless
+        } else {
+            TextFieldStateConstants.Error.Blank
+        }
+    )
     override val fieldState: StateFlow<TextFieldState> = _fieldState.asStateFlow()
 
     override val loading: StateFlow<Boolean> = config.loading
@@ -75,7 +80,7 @@ class AddressTextFieldController(
     }
 
     override val isComplete: StateFlow<Boolean> = _fieldState.mapAsStateFlow {
-        it.isValid() || (!it.isValid() && showOptionalLabel && it.isBlank())
+        it.isValid() || (!it.isValid() && config.optional && it.isBlank())
     }
 
     /**
@@ -114,11 +119,9 @@ class AddressTextFieldController(
         field: SectionFieldElement,
         modifier: Modifier,
         hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?,
-        nextFocusDirection: FocusDirection,
-        previousFocusDirection: FocusDirection
+        lastTextFieldIdentifier: IdentifierSpec?
     ) {
-        AddressTextFieldUI(this)
+        AddressTextFieldUI(this, modifier)
     }
 
     fun launchAutocompleteScreen() {

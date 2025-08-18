@@ -49,7 +49,11 @@ internal class DefaultLinkAnalyticsHelperTest {
             }
         }
         val analyticsHelper = DefaultLinkAnalyticsHelper(eventReporter)
-        analyticsHelper.onLinkResult(LinkActivityResult.Completed(LinkAccountUpdate.None))
+        analyticsHelper.onLinkResult(
+            LinkActivityResult.Completed(
+                linkAccountUpdate = LinkAccountUpdate.None
+            )
+        )
         assertThat(eventReporter.calledCount).isEqualTo(1)
     }
 

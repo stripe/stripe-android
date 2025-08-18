@@ -73,6 +73,8 @@
   <string name="stripe_pay_button_amount">Plati %s</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">Banka</string>
+  <!-- Label shown in the payment type picker describing a card payment -->
+  <string name="stripe_payment_method_debit_or_credit_card">Debitna ili kreditna kartica</string>
   <!-- Label of a button displayed below a card entry form that saves the card details -->
   <string name="stripe_paymentsheet_add_card">Dodaj karticu</string>
   <!-- Title shown above a view allowing the customer to save a card. -->
@@ -97,6 +99,8 @@
   <string name="stripe_paypal_mandate">Potvrđivanjem vašeg plaćanja putem usluge PayPal, dopuštate poduzeću %s da tereti vaš račun PayPal za buduća plaćanja u skladu s njegovim uvjetima.</string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">Potvrđivanjem vašeg plaćanja putem usluge RevolutPay, dopuštate %s da tereti vaš račun RevolutPay za buduća plaćanja u skladu s njegovim uvjetima.</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_satispay_mandate">Nastavkom ovlašćujete %1$s da automatski tereti vaš saldo Satispay na ponavljajućoj osnovi u skladu s vašim planom kupnje ili pretplate.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Spremi za buduća plaćanja %s</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->

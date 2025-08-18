@@ -16,6 +16,7 @@ import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Colors
 import androidx.compose.material.LocalTextStyle
@@ -40,10 +41,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isUnspecified
 import androidx.compose.ui.unit.sp
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.ColorUtils
 import java.lang.Float.max
+import androidx.compose.ui.unit.max as maxDp
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class StripeColors(
@@ -61,6 +64,7 @@ data class StripeColors(
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class StripeShapes(
     val cornerRadius: Float,
+    val bottomSheetCornerRadius: Float,
     val borderStrokeWidth: Float,
 ) {
 
@@ -84,9 +88,9 @@ data class StripeTypography(
     @FontRes
     val fontFamily: Int?,
     // individual front overrides, only valid when fontFamily is null.
+    val h4: TextStyle? = null,
     val body1FontFamily: FontFamily? = null,
     val body2FontFamily: FontFamily? = null,
-    val h4FontFamily: FontFamily? = null,
     val h5FontFamily: FontFamily? = null,
     val h6FontFamily: FontFamily? = null,
     val subtitle1FontFamily: FontFamily? = null,
@@ -113,7 +117,8 @@ data class PrimaryButtonColors(
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class PrimaryButtonShape(
     val cornerRadius: Float,
-    val borderStrokeWidth: Float
+    val borderStrokeWidth: Float,
+    val height: Float
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -155,6 +160,35 @@ data class EmbeddedRadioColors(
 data class EmbeddedFloatingStyle(
     val spacing: Float
 )
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class EmbeddedDisclosureColors(
+    val separatorColor: Color,
+    val disclosureColor: Color
+)
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class FormInsets(
+    val start: Float,
+    val top: Float,
+    val end: Float,
+    val bottom: Float,
+) {
+    fun asPaddingValues(): PaddingValues {
+        return PaddingValues(
+            start = start.dp,
+            end = end.dp,
+            top = top.dp,
+            bottom = bottom.dp,
+        )
+    }
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+enum class SectionStyle {
+    Bordered,
+    Borderless
+}
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR = Color(0xFF24B47E)
@@ -202,6 +236,7 @@ object StripeThemeDefaults {
 
     val shapes = StripeShapes(
         cornerRadius = 6.0f,
+        bottomSheetCornerRadius = 6.0f,
         borderStrokeWidth = 1.0f,
     )
 
@@ -236,7 +271,8 @@ object StripeThemeDefaults {
         ),
         shape = PrimaryButtonShape(
             cornerRadius = shapes.cornerRadius,
-            borderStrokeWidth = 0.0f
+            borderStrokeWidth = 0.0f,
+            height = 48f,
         ),
         typography = PrimaryButtonTypography(
             fontFamily = typography.fontFamily,
@@ -273,6 +309,16 @@ object StripeThemeDefaults {
         separatorColor = EMBEDDED_SEPARATOR_COLOR_DARK
     )
 
+    val disclosureColorsLight = EmbeddedDisclosureColors(
+        separatorColor = colorsLight.componentBorder,
+        disclosureColor = Color.DarkGray
+    )
+
+    val disclosureColorsDark = EmbeddedDisclosureColors(
+        separatorColor = EMBEDDED_SEPARATOR_COLOR_DARK,
+        disclosureColor = Color.LightGray
+    )
+
     val embeddedCommon = EmbeddedInsets(
         additionalVerticalInsetsDp = 0.0f,
         horizontalInsetsDp = 0.0f,
@@ -282,6 +328,34 @@ object StripeThemeDefaults {
     val floating = EmbeddedFloatingStyle(
         spacing = 12.0f
     )
+
+    val formInsets = FormInsets(
+        start = 20f,
+        top = 0f,
+        end = 20f,
+        bottom = 40f
+    )
+
+    val sectionSpacing: Float? = null
+
+    val textFieldInsets = FormInsets(
+        start = 16f,
+        top = 20f,
+        end = 12f,
+        bottom = 10f
+    )
+
+    val sectionStyle = SectionStyle.Bordered
+
+    val iconStyle: IconStyle = IconStyle.Filled
+
+    val verticalModeRowPadding = embeddedCommon.additionalVerticalInsetsDp
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+enum class IconStyle {
+    Filled,
+    Outlined
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -313,9 +387,10 @@ fun StripeTypography.toComposeTypography(): Typography {
     // h4 is our largest headline. It is used for the most important labels in our UI
     // ex: "Select your payment method" in Payment Sheet.
     val h4 = defaultTextStyle.copy(
-        fontFamily = globalFontFamily ?: h4FontFamily ?: FontFamily.Default,
-        fontSize = (xLargeFontSize * fontSizeMultiplier),
-        fontWeight = FontWeight(fontWeightBold)
+        fontFamily = h4?.fontFamily ?: globalFontFamily ?: FontFamily.Default,
+        fontSize = h4?.fontSize.elseIfNullOrUnspecified(unit = xLargeFontSize * fontSizeMultiplier),
+        fontWeight = h4?.fontWeight ?: FontWeight(fontWeightBold),
+        letterSpacing = h4?.letterSpacing.elseIfNullOrUnspecified(defaultTextStyle.letterSpacing)
     )
 
     // h5 is our medium headline label.
@@ -394,7 +469,19 @@ val LocalShapes = staticCompositionLocalOf { StripeTheme.shapesMutable }
 val LocalTypography = staticCompositionLocalOf { StripeTheme.typographyMutable }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val LocalSectionSpacing = staticCompositionLocalOf { StripeTheme.customSectionSpacing }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val LocalIconStyle = staticCompositionLocalOf { StripeTheme.iconStyle }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val LocalInstrumentationTest = staticCompositionLocalOf { false }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val LocalSectionStyle = staticCompositionLocalOf { StripeTheme.sectionStyle }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val LocalTextFieldInsets = staticCompositionLocalOf { StripeTheme.textFieldInsets }
 
 /**
  * Base Theme for Stripe Composables.
@@ -407,6 +494,10 @@ fun StripeTheme(
     colors: StripeColors = StripeTheme.getColors(isSystemInDarkTheme()),
     shapes: StripeShapes = StripeTheme.shapesMutable,
     typography: StripeTypography = StripeTheme.typographyMutable,
+    sectionSpacing: Float? = StripeTheme.customSectionSpacing,
+    sectionStyle: SectionStyle = StripeTheme.sectionStyle,
+    textFieldInsets: FormInsets = StripeTheme.textFieldInsets,
+    iconStyle: IconStyle = StripeTheme.iconStyle,
     content: @Composable () -> Unit
 ) {
     val isRobolectricTest = runCatching {
@@ -429,6 +520,10 @@ fun StripeTheme(
         LocalColors provides colors,
         LocalShapes provides shapes,
         LocalTypography provides typography,
+        LocalSectionSpacing provides sectionSpacing,
+        LocalSectionStyle provides sectionStyle,
+        LocalTextFieldInsets provides textFieldInsets,
+        LocalIconStyle provides iconStyle,
         LocalInspectionMode provides inspectionMode,
         LocalInstrumentationTest provides isInstrumentationTest,
     ) {
@@ -495,8 +590,10 @@ val MaterialTheme.stripeTypography: StripeTypography
 @Composable
 @ReadOnlyComposable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun MaterialTheme.getBorderStrokeWidth(isSelected: Boolean) =
-    if (isSelected) max(stripeShapes.borderStrokeWidth, 2f).dp else stripeShapes.borderStrokeWidth.dp
+fun MaterialTheme.getBorderStrokeWidth(
+    isSelected: Boolean,
+    selectedStrokeWidth: Dp = 2.dp
+) = if (isSelected) maxDp(stripeShapes.borderStrokeWidth.dp, selectedStrokeWidth) else stripeShapes.borderStrokeWidth.dp
 
 @Composable
 @ReadOnlyComposable
@@ -521,6 +618,18 @@ object StripeTheme {
     var typographyMutable = StripeThemeDefaults.typography
 
     var primaryButtonStyle = StripeThemeDefaults.primaryButtonStyle
+
+    var formInsets = StripeThemeDefaults.formInsets
+
+    var customSectionSpacing: Float? = StripeThemeDefaults.sectionSpacing
+
+    var textFieldInsets = StripeThemeDefaults.textFieldInsets
+
+    var sectionStyle = StripeThemeDefaults.sectionStyle
+
+    var iconStyle: IconStyle = StripeThemeDefaults.iconStyle
+
+    var verticalModeRowPadding: Float = StripeThemeDefaults.verticalModeRowPadding
 
     fun getColors(isDark: Boolean): StripeColors {
         return if (isDark) colorsDarkMutable else colorsLightMutable
@@ -668,6 +777,12 @@ fun Color.darken(amount: Float): Color {
     }
 }
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun StripeTheme.getOuterFormInsets(): PaddingValues = PaddingValues(
+    start = formInsets.start.dp,
+    end = formInsets.end.dp
+)
+
 private fun TextStyle.toCompat(): TextStyle {
     return copy(
         lineHeight = TextStyle.Default.lineHeight,
@@ -675,6 +790,16 @@ private fun TextStyle.toCompat(): TextStyle {
         platformStyle = PlatformTextStyle(includeFontPadding = true),
     )
 }
+
+private fun TextUnit?.elseIfNullOrUnspecified(
+    unit: TextUnit
+): TextUnit = this?.run {
+    if (isUnspecified) {
+        unit
+    } else {
+        this
+    }
+} ?: unit
 
 private fun Color.modifyBrightness(transform: (Float) -> Float): Color {
     val hsl = FloatArray(3)

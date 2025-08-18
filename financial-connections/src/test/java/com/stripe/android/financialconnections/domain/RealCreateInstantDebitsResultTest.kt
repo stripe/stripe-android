@@ -251,6 +251,8 @@ class RealCreateInstantDebitsResultTest {
                     bankIconCode = null,
                     isDefault = false,
                     nickname = null,
+                    billingAddress = null,
+                    billingEmailAddress = null,
                 )
             )
         )

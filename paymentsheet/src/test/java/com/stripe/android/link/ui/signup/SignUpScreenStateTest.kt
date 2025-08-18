@@ -4,6 +4,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.model.LinkMode
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import org.junit.Test
@@ -87,11 +89,24 @@ class SignUpScreenStateTest {
             flags = emptyMap(),
             cardBrandChoice = null,
             cardBrandFilter = DefaultCardBrandFilter,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             useAttestationEndpointsForLink = true,
             suppress2faModal = false,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("pi_123_secret_456"),
             elementsSessionId = "elements_session_id_123",
             linkMode = LinkMode.Passthrough,
+            allowDefaultOptIn = false,
+            disableRuxInFlowController = false,
+            defaultBillingDetails = null,
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+            collectMissingBillingDetailsForExistingPaymentMethods = true,
+            allowUserEmailEdits = true,
+            enableDisplayableDefaultValuesInEce = false,
+            linkAppearance = null,
+            linkSignUpOptInFeatureEnabled = false,
+            linkSignUpOptInInitialValue = false,
+            skipWalletInFlowController = false,
+            customerId = null
         )
     }
 

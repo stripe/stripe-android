@@ -161,6 +161,7 @@ class ConfirmationMediatorTest {
             confirmationOption = TestConfirmationDefinition.Option,
             intent = INTENT,
             deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+            completedFullPaymentFlow = true,
         ),
     ) {
         val mediator = ConfirmationMediator(
@@ -185,6 +186,41 @@ class ConfirmationMediatorTest {
         assertThat(completeAction.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
         assertThat(completeAction.intent).isEqualTo(INTENT)
         assertThat(completeAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
+        assertThat(completeAction.completedFullPaymentFlow).isTrue()
+    }
+
+    @Test
+    fun `On complete confirmation action with uncompleted flow, should return expected action`() = test(
+        action = ConfirmationDefinition.Action.Complete(
+            confirmationOption = TestConfirmationDefinition.Option,
+            intent = INTENT,
+            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+            completedFullPaymentFlow = false,
+        ),
+    ) {
+        val mediator = ConfirmationMediator(
+            savedStateHandle = SavedStateHandle(),
+            definition = definition
+        )
+
+        val action = mediator.action(
+            option = TestConfirmationDefinition.Option,
+            parameters = CONFIRMATION_PARAMETERS,
+        )
+
+        assertThat(optionCalls.awaitItem().option).isEqualTo(TestConfirmationDefinition.Option)
+
+        val actionCall = actionCalls.awaitItem()
+
+        assertThat(actionCall.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
+        assertThat(actionCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+
+        val completeAction = action.asComplete()
+
+        assertThat(completeAction.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
+        assertThat(completeAction.intent).isEqualTo(INTENT)
+        assertThat(completeAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
+        assertThat(completeAction.completedFullPaymentFlow).isFalse()
     }
 
     @Test
