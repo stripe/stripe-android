@@ -914,6 +914,7 @@
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.10.1 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0 (*)
+|    +--- com.google.android.gms:play-services-wallet:19.4.0 (*)
 |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.1.10 (*)
 +--- project :stripe-ui-core (*)
 +--- androidx.annotation:annotation:1.9.1 (*)
