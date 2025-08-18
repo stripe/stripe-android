@@ -87,12 +87,14 @@ class LinkControllerPaymentMethodPreviewScreenshotTest {
                     style = MaterialTheme.typography.h6,
                     color = contentColor,
                 )
-                Text(
-                    modifier = Modifier.padding(top = 2.dp),
-                    text = preview.sublabel,
-                    style = MaterialTheme.typography.body2,
-                    color = contentColor.copy(alpha = 0.6f),
-                )
+                preview.sublabel?.let { sublabel ->
+                    Text(
+                        modifier = Modifier.padding(top = 2.dp),
+                        text = sublabel,
+                        style = MaterialTheme.typography.body2,
+                        color = contentColor.copy(alpha = 0.6f),
+                    )
+                }
             }
         }
     }
