@@ -297,11 +297,11 @@ class CardDefinitionTest {
 
         assertThat(formElements).hasSize(3)
 
-        testStaticMandateElement(metadata, formElements[2])
+        testCombinedLinkMandateElement(formElements[2])
     }
 
     @Test
-    fun `createFormElements returns no mandate if linkSignUpOptInFeatureEnabled but no email passed in`() {
+    fun `createFormElements returns mandate when linkSignUpOptInFeatureEnabled even with no email`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             linkState = LinkState(
@@ -324,8 +324,8 @@ class CardDefinitionTest {
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
         )
 
-        assertThat(formElements).hasSize(2)
-        assertThat(formElements.filterIsInstance<CombinedLinkMandateElement>()).isEmpty()
+        assertThat(formElements).hasSize(3)
+        testCombinedLinkMandateElement(formElements[2])
     }
 
     @Test
@@ -531,13 +531,12 @@ class CardDefinitionTest {
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
         )
 
-        // Should only include card_details and billing section, no mandate
+        // Should include card_details, billing section, link_form, and combined mandate (Link enabled)
         assertThat(formElements).hasSize(4)
         assertThat(formElements[0].identifier.v1).isEqualTo("card_details")
         assertThat(formElements[1].identifier.v1).isEqualTo("credit_billing_section")
         assertThat(formElements[2].identifier.v1).isEqualTo("link_form")
-        assertThat(formElements[3].identifier.v1).isEqualTo("card_mandate")
-        assertThat(formElements[3]).isInstanceOf<CombinedLinkMandateElement>()
+        testCombinedLinkMandateElement(formElements[3])
     }
 
     @Test

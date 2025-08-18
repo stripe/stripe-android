@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.inline.InlineSignupViewState
@@ -137,14 +138,8 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                 null
             }
 
-            val shouldShowCombinedMandate = shouldShowCombinedMandate(
-                isLinkUI = arguments.isLinkUI,
-                linkSignupOptInEnabled = linkSignupOptInEnabled,
-                signupMode = signupMode
-            )
-
             val mandateAllowed = metadata.mandateAllowed(CardDefinition.type)
-            if (shouldShowCombinedMandate) {
+            if (linkSignupOptInEnabled) {
                 add(
                     CombinedLinkMandateElement(
                         identifier = IdentifierSpec.Generic("card_mandate"),
@@ -171,15 +166,6 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                 )
             }
         }
-    }
-
-    private fun shouldShowCombinedMandate(
-        isLinkUI: Boolean,
-        linkSignupOptInEnabled: Boolean,
-        signupMode: LinkSignupMode?
-    ): Boolean = when (isLinkUI) {
-        true -> linkSignupOptInEnabled
-        false -> linkSignupOptInEnabled && signupMode != null
     }
 
     private fun MutableList<FormElement>.addCardBillingElements(
@@ -305,6 +291,7 @@ internal class CombinedLinkMandateElement(
                     formatArgs = arrayOf(merchantName)
                 ).replaceHyperlinks()
             },
+            textAlign = if (isLinkUI) TextAlign.Center else TextAlign.Start,
             modifier = Modifier.padding(top = topPadding)
         )
     }
