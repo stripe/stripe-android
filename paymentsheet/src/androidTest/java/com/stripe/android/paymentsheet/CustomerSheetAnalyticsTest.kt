@@ -52,6 +52,7 @@ internal class CustomerSheetAnalyticsTest {
 
         validateAnalyticsRequest(eventName = "cs_load_succeeded")
         validateAnalyticsRequest(eventName = "cs_init_with_customer_adapter")
+        validateAnalyticsRequest(eventName = "cs_cardscan_api_check")
 
         // These are all fired twice, once for cards & once for US bank account
         validateAnalyticsRequest(eventName = "stripe_android.retrieve_payment_methods")
