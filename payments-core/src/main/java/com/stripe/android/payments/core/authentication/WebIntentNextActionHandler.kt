@@ -27,8 +27,7 @@ import kotlin.coroutines.CoroutineContext
  */
 @Singleton
 @JvmSuppressWildcards
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class WebIntentNextActionHandler @Inject internal constructor(
+internal class WebIntentNextActionHandler @Inject internal constructor(
     private val paymentBrowserAuthStarterFactory: (AuthActivityStarterHost) -> PaymentBrowserAuthStarter,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
