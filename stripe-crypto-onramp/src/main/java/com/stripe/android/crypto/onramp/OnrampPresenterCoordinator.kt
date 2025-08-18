@@ -37,22 +37,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         authenticationCallback = ::handleAuthenticationResult
     )
 
-    private val fallbackMerchantLogoUri: Uri = Uri.Builder()
-        .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
-        .authority(activity.packageName)
-        .appendPath("drawable")
-        .appendPath("stripe_ic_business")
-        .build()
-
-    private val sheet by lazy {
-        IdentityVerificationSheet.create(
-            from = activity,
-            configuration = IdentityVerificationSheet.Configuration(
-                brandLogo = linkController.state(activity).value.merchantLogoUrl?.toUri() ?: fallbackMerchantLogoUri,
-            ),
-            identityVerificationCallback = ::handleIdentityVerificationResult,
-        )
-    }
+    private var sheet: IdentityVerificationSheet = createSheet()
 
     private val currentLinkAccount: LinkController.LinkAccount?
         get() = interactor.state.value.linkControllerState?.internalLinkAccount
@@ -62,6 +47,8 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         lifecycleOwner.lifecycleScope.launch {
             linkController.state(activity).collect { state ->
                 interactor.onLinkControllerState(state)
+
+                sheet = createSheet()
             }
         }
     }
@@ -115,5 +102,22 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 interactor.handleIdentityVerificationResult(result)
             )
         }
+    }
+
+    private fun createSheet(): IdentityVerificationSheet {
+        val fallbackMerchantLogoUri: Uri = Uri.Builder()
+            .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+            .authority(activity.packageName)
+            .appendPath("drawable")
+            .appendPath("stripe_ic_business")
+            .build()
+
+        val logoUri = linkController.state(activity).value.merchantLogoUrl?.toUri() ?: fallbackMerchantLogoUri
+
+        return IdentityVerificationSheet.create(
+            from = activity,
+            configuration = IdentityVerificationSheet.Configuration(brandLogo = logoUri),
+            identityVerificationCallback = ::handleIdentityVerificationResult,
+        )
     }
 }
