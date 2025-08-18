@@ -2,12 +2,14 @@ package com.stripe.android.link.ui.wallet
 
 import androidx.compose.runtime.Immutable
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.common.validation.isSupportedWithBillingConfig
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.Card
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.forms.FormFieldEntry
 
@@ -35,6 +37,8 @@ internal data class WalletUiState(
     val paymentSelectionHint: String? = null,
     val isAutoSelecting: Boolean = false,
     val hasAttemptedAutoSelection: Boolean = false,
+    val signupToggleEnabled: Boolean,
+    val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
 ) {
 
     val selectedItem: ConsumerPaymentDetails.PaymentDetails?
@@ -48,7 +52,11 @@ internal data class WalletUiState(
         get() = selectedItem as? Card
 
     val mandate: ResolvableString?
-        get() = selectedItem?.makeMandateText(isSettingUp, merchantName)
+        get() = selectedItem?.makeMandateText(
+            isSettingUp = isSettingUp,
+            merchantName = merchantName,
+            signupToggleEnabled = signupToggleEnabled
+        )
 
     val shouldShowLoadingState: Boolean
         get() = paymentDetailsList.isEmpty() || isAutoSelecting
@@ -93,7 +101,9 @@ internal data class WalletUiState(
         get() = addPaymentMethodOptions.isNotEmpty()
 
     fun isItemAvailable(item: ConsumerPaymentDetails.PaymentDetails): Boolean {
-        return item !is Card || cardBrandFilter.isAccepted(item.brand)
+        return (
+            item !is Card || cardBrandFilter.isAccepted(item.brand)
+            ) && item.isSupportedWithBillingConfig(billingDetailsCollectionConfiguration)
     }
 
     fun updateWithResponse(
@@ -110,18 +120,23 @@ internal data class WalletUiState(
 private fun ConsumerPaymentDetails.PaymentDetails.makeMandateText(
     isSettingUp: Boolean,
     merchantName: String,
+    signupToggleEnabled: Boolean
 ): ResolvableString? {
     return when (this) {
         is ConsumerPaymentDetails.BankAccount -> {
             resolvableString(R.string.stripe_wallet_bank_account_terms)
         }
         is Card,
-        is ConsumerPaymentDetails.Passthrough -> {
-            if (isSettingUp) {
-                resolvableString(R.string.stripe_paymentsheet_card_mandate, merchantName)
-            } else {
-                null
-            }
+        is ConsumerPaymentDetails.Passthrough -> when {
+            signupToggleEnabled -> resolvableString(
+                id = R.string.stripe_paymentsheet_card_mandate_signup_toggle_off,
+                merchantName
+            )
+            isSettingUp -> resolvableString(
+                id = R.string.stripe_paymentsheet_card_mandate,
+                merchantName
+            )
+            else -> null
         }
     }
 }

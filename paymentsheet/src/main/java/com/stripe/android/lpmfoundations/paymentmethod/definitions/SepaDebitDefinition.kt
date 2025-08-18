@@ -19,8 +19,6 @@ internal object SepaDebitDefinition : PaymentMethodDefinition {
 
     override val supportedAsSavedPaymentMethod: Boolean = true
 
-    override val supportsTermDisplayConfiguration: Boolean = true
-
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf(

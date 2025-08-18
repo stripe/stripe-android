@@ -39,6 +39,7 @@ internal interface UpdatePaymentMethodInteractor {
     val shouldShowSaveButton: Boolean
     val canUpdateFullPaymentMethodDetails: Boolean
     val addressCollectionMode: AddressCollectionMode
+    val allowedBillingCountries: Set<String>
     val editCardDetailsInteractor: EditCardDetailsInteractor
 
     val state: StateFlow<State>
@@ -106,6 +107,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     override val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     override val cardBrandFilter: CardBrandFilter,
     override val addressCollectionMode: AddressCollectionMode,
+    override val allowedBillingCountries: Set<String>,
     override val canUpdateFullPaymentMethodDetails: Boolean,
     val isDefaultPaymentMethod: Boolean,
     override val shouldShowSetAsDefaultCheckbox: Boolean,
@@ -185,7 +187,8 @@ internal class DefaultUpdatePaymentMethodInteractor(
                 address = addressCollectionMode,
                 email = CollectionMode.Never,
                 phone = CollectionMode.Never,
-                name = CollectionMode.Never
+                name = CollectionMode.Never,
+                allowedCountries = allowedBillingCountries,
             ),
             requiresModification = true
         )
@@ -212,7 +215,8 @@ internal class DefaultUpdatePaymentMethodInteractor(
                 address = AddressCollectionMode.Never,
                 email = CollectionMode.Never,
                 phone = CollectionMode.Never,
-                name = CollectionMode.Never
+                name = CollectionMode.Never,
+                allowedCountries = allowedBillingCountries,
             ),
             requiresModification = true
         )

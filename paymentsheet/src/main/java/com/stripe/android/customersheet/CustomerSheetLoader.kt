@@ -2,6 +2,7 @@ package com.stripe.android.customersheet
 
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.coroutines.awaitWithTimeout
+import com.stripe.android.common.validation.isSupportedWithBillingConfig
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.IS_LIVE_MODE
@@ -81,7 +82,8 @@ internal class DefaultCustomerSheetLoader(
             )
 
             val filteredPaymentMethods = customerSheetSession.paymentMethods.filter { paymentMethod ->
-                PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance).isAccepted(paymentMethod)
+                PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance).isAccepted(paymentMethod) &&
+                    paymentMethod.isSupportedWithBillingConfig(configuration.billingDetailsCollectionConfiguration)
             }.filterToSupportedPaymentMethods(isPaymentMethodSyncDefaultEnabled)
 
             customerSheetSession = customerSheetSession.copy(

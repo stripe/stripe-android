@@ -552,7 +552,7 @@ class LinkController @Inject internal constructor(
     constructor(
         private val imageLoader: suspend () -> Drawable,
         val label: String,
-        val sublabel: String,
+        val sublabel: String?,
     ) {
         /**
          * An image representing a payment method; e.g. the VISA logo.

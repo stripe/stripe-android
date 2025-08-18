@@ -147,6 +147,18 @@ internal class UpdateCardScreenshotTest(
                         name = CollectionMode.Never
                     )
                 ),
+                TestCase(
+                    name = "Bank account with contact info",
+                    state = state(),
+                    payment = bankAccount(),
+                    cardEditConfiguration = null,
+                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                        address = AddressCollectionMode.Full,
+                        email = CollectionMode.Always,
+                        phone = CollectionMode.Always,
+                        name = CollectionMode.Always,
+                    )
+                ),
             )
         }
 

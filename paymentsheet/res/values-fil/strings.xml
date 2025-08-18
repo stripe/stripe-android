@@ -113,6 +113,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Sa pagpapatuloy, sumasang-ayon kang i-save ang iyong impormasyon para sa mga pagbili sa hinaharap sa %s.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Sa pagpapatuloy, sumasang-ayon kang i-save ang iyong impormasyon para sa mga pagbili sa hinaharap sa %s at <link>Link</link>. Sumasang-ayon ka rin sa <terms>Mga Tuntunin</terms> at <privacy>Privacy</privacy> ng Link.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Sa pagpapatuloy, sumasang-ayon kang i-save ang iyong impormasyon para sa mga pagbili sa hinaharap sa %s at <link>Link</link> (tingnan ang <terms>Mga Tuntunin</terms> at <privacy>Privacy</privacy>).]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Sa pagpapatuloy, sumasang-ayon kang i-save ang iyong impormasyon para sa mga pagbili sa hinaharap gamit ang %s at <link>Link</link> Ayon sa Link <terms>mga tuntunin</terms> at <privacy>privacy</privacy>.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Hindi na-update ang kard. Pakisubukan muli.</string>
   <!-- Title shown above a carousel containing available payment methods -->

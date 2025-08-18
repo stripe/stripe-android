@@ -12,6 +12,7 @@ import com.stripe.android.link.ui.LinkScreenshotSurface
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.screenshottesting.Orientation
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -195,6 +196,7 @@ internal class WalletScreenScreenshotTest {
         alertMessage: ResolvableString? = null,
         addPaymentMethodOptions: List<AddPaymentMethodOption> = listOf(AddPaymentMethodOption.Card),
         userSetIsExpanded: Boolean = false,
+        signupToggleEnabled: Boolean = false,
     ): WalletUiState {
         return WalletUiState(
             paymentDetailsList = paymentDetailsList,
@@ -212,7 +214,9 @@ internal class WalletScreenScreenshotTest {
             expiryDateInput = expiryDateInput,
             cvcInput = cvcInput,
             alertMessage = alertMessage,
-            collectMissingBillingDetailsForExistingPaymentMethods = true
+            collectMissingBillingDetailsForExistingPaymentMethods = true,
+            signupToggleEnabled = signupToggleEnabled,
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
         )
     }
 

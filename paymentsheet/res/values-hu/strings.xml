@@ -113,6 +113,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">A folytatással Ön beleegyezik abba, hogy adatait elmenti a jövőbeni vásárlásokhoz itt: %s.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[A folytatással Ön beleegyezik abba, hogy adatait elmenti a jövőbeni vásárlásokhoz itt: %s és <link>Link</link>. Ön elfogadja a Link <terms>feltételeit</terms> és <privacy>adatvédelmi szabályzatát</privacy>.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[A folytatással Ön beleegyezik abba, hogy adatait elmenti a jövőbeni vásárlásokhoz itt: %s és <link>a Linknél</link> (lásd a <terms>feltételeket</terms> és az <privacy>adatvédelmi szabályzatot).]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[A folytatással Ön beleegyezik abba, hogy adatait elmenti a jövőbeni vásárlásokhoz itt: %s és <link>a Linknél</link> a Link <terms>feltételei</terms> és <privacy>adatvédelmi szabályzata</privacy> szerint.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">A kártya frissítése nem sikerült, próbálja újra.</string>
   <!-- Title shown above a carousel containing available payment methods -->

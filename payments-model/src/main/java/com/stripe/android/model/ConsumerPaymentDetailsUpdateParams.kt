@@ -16,7 +16,9 @@ data class ConsumerPaymentDetailsUpdateParams(
     override fun toParamMap(): Map<String, Any> {
         val params: MutableMap<String, Any> = mutableMapOf()
 
-        isDefault?.let { params["is_default"] = it }
+        // When updating a payment that is not the default and you send isDefault=false to the server,
+        // you get "Can't unset payment details when it's not the default", so send nil instead of false
+        if (isDefault == true) params["is_default"] = true
 
         cardPaymentMethodCreateParamsMap?.let { map ->
             params.addCardParams(map)

@@ -117,7 +117,6 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
                         label = resolvableString(R.string.stripe_networking_signup_email_label)
                     ),
                     initialValue = initialEmail,
-                    showOptionalLabel = false
                 ),
                 phoneController = PhoneNumberController.createPhoneNumberController(
                     initialValue = sync.manifest.accountholderPhoneNumber ?: prefillDetails?.phone ?: "",

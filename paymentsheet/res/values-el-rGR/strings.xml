@@ -113,6 +113,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Συνεχίζοντας, συμφωνείτε να αποθηκεύσετε τις πληροφορίες σας για μελλοντικές αγορές με το %s.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Συνεχίζοντας, συμφωνείτε να αποθηκεύσετε τις πληροφορίες σας για μελλοντικές αγορές με το %s και <link>Link</link>. Συμφωνείτε επίσης με τους <terms>Όρους</terms> και το <privacy>Απόρρητο</privacy> του Link.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Συνεχίζοντας, συμφωνείτε να αποθηκεύσετε τις πληροφορίες σας για μελλοντικές αγορές με το %s και <link>Link</link> (βλέπε <terms>Όρους</terms> και <privacy>Απόρρητο</privacy>).]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Συνεχίζοντας, συμφωνείτε να αποθηκεύσετε τις πληροφορίες σας για μελλοντικές αγορές με το %s και <link>Link</link> σύμφωνα με τους <terms>όρους</terms> και το <privacy>απόρρητο</privacy> του Link.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Η κάρτα δεν ενημερώθηκε. Δοκιμάστε ξανά.</string>
   <!-- Title shown above a carousel containing available payment methods -->

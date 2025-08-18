@@ -1,5 +1,6 @@
 package com.stripe.android.connect.example.ui.componentpicker
 
+import android.content.Intent
 import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
@@ -41,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.stripe.android.connect.AccountOnboardingListener
+import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeComponentController
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.core.Success
@@ -52,10 +54,13 @@ import com.stripe.android.connect.example.ui.common.ConnectExampleScaffold
 import com.stripe.android.connect.example.ui.common.CustomizeAppearanceIconButton
 import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentLoaderViewModel
 import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentManagerLoader
+import com.stripe.android.connect.example.ui.features.payments.PaymentsExampleActivity
+import com.stripe.android.connect.example.ui.features.payouts.PayoutsExampleActivity
 import com.stripe.android.connect.example.ui.settings.SettingsViewModel
 import kotlinx.coroutines.launch
 
 @Suppress("LongMethod")
+@OptIn(PrivateBetaConnectSDK::class)
 @Composable
 fun ComponentPickerContent(
     viewModel: EmbeddedComponentLoaderViewModel,
@@ -142,6 +147,12 @@ fun ComponentPickerContent(
                             MenuItem.AccountOnboarding -> {
                                 onboardingController.show()
                             }
+                            MenuItem.Payouts -> {
+                                context.startActivity(Intent(context, PayoutsExampleActivity::class.java))
+                            }
+                            MenuItem.Payments -> {
+                                context.startActivity(Intent(context, PaymentsExampleActivity::class.java))
+                            }
                         }
                     },
                 )
@@ -152,7 +163,7 @@ fun ComponentPickerContent(
 
 @Composable
 private fun ComponentPickerList(onMenuItemClick: (MenuItem) -> Unit) {
-    val items = remember { listOf(MenuItem.AccountOnboarding) }
+    val items = remember { listOf(MenuItem.AccountOnboarding, MenuItem.Payouts, MenuItem.Payments) }
     LazyColumn {
         items(items) { menuItem ->
             MenuRowItem(menuItem, onMenuItemClick)
@@ -217,6 +228,16 @@ private enum class MenuItem(
     AccountOnboarding(
         title = R.string.account_onboarding,
         subtitle = R.string.account_onboarding_menu_subtitle,
+        isBeta = false,
+    ),
+    Payouts(
+        title = R.string.payouts,
+        subtitle = R.string.payouts_menu_subtitle,
+        isBeta = true,
+    ),
+    Payments(
+        title = R.string.payments,
+        subtitle = R.string.payments_menu_subtitle,
         isBeta = true,
     ),
 }

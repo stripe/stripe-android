@@ -370,12 +370,14 @@ private fun PaymentMethodButton(
                             text = preview.label,
                             style = MaterialTheme.typography.h6,
                         )
-                        Text(
-                            modifier = Modifier.padding(top = 2.dp),
-                            text = preview.sublabel,
-                            style = MaterialTheme.typography.body2,
-                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
-                        )
+                        preview.sublabel?.let { sublabel ->
+                            Text(
+                                modifier = Modifier.padding(top = 2.dp),
+                                text = sublabel,
+                                style = MaterialTheme.typography.body2,
+                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                            )
+                        }
                     }
                 } else {
                     Icon(

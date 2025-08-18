@@ -424,7 +424,11 @@ internal data class PaymentMethodMetadata(
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(null),
                 linkConfiguration = PaymentSheet.LinkConfiguration(),
                 linkMode = null,
-                linkState = null,
+                linkState = LinkState(
+                    configuration = configuration,
+                    signupMode = null,
+                    loginState = LinkState.LoginState.LoggedIn
+                ),
                 paymentMethodIncentive = null,
                 isGooglePayReady = false,
                 displayableCustomPaymentMethods = emptyList(),

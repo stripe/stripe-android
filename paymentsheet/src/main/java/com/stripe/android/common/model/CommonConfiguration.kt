@@ -5,7 +5,6 @@ import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.model.LinkAppearance
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodRegistry
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -45,8 +44,6 @@ internal data class CommonConfiguration(
         customer?.accessType?.let { customerAccessType ->
             customerAccessTypeValidate(customerAccessType)
         }
-
-        validateTermsDisplay()
     }
 
     // These exception messages are not localized as they are not intended to be displayed to a user.
@@ -145,17 +142,6 @@ internal data class CommonConfiguration(
             throw IllegalArgumentException(
                 "`ephemeralKeySecret` format does not match expected client secret formatting"
             )
-        }
-    }
-
-    private fun validateTermsDisplay() {
-        termsDisplay.forEach { (key, _) ->
-            val paymentMethodDefinition = requireNotNull(PaymentMethodRegistry.definitionsByCode[key.code]) {
-                "Unsupported payment method $key"
-            }
-            if (!paymentMethodDefinition.supportsTermDisplayConfiguration) {
-                throw IllegalArgumentException("$key does not support terms display configuration.")
-            }
         }
     }
 }

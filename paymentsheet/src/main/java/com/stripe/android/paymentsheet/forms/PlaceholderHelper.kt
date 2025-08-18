@@ -5,6 +5,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.ui.core.elements.AddressSpec
+import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextSpec
 import com.stripe.android.ui.core.elements.CashAppPayMandateTextSpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.FormItemSpec
@@ -68,6 +69,10 @@ internal object PlaceholderHelper {
                 )
 
                 is SepaMandateTextSpec -> it.takeUnless {
+                    termsDisplay == PaymentSheet.TermsDisplay.NEVER
+                }
+
+                is AuBecsDebitMandateTextSpec -> it.takeUnless {
                     termsDisplay == PaymentSheet.TermsDisplay.NEVER
                 }
 
@@ -153,7 +158,9 @@ internal object PlaceholderHelper {
                     )
         }
 
-        PlaceholderField.BillingAddress -> AddressSpec().takeIf {
+        PlaceholderField.BillingAddress -> AddressSpec(
+            allowedCountryCodes = configuration.allowedBillingCountries,
+        ).takeIf {
             configuration.address == AddressCollectionMode.Full ||
                 (
                     placeholderOverrideList.contains(it.apiPath) &&
@@ -162,7 +169,7 @@ internal object PlaceholderHelper {
         }
 
         PlaceholderField.BillingAddressWithoutCountry ->
-            AddressSpec(hideCountry = true).takeIf {
+            AddressSpec(allowedCountryCodes = configuration.allowedBillingCountries, hideCountry = true).takeIf {
                 configuration.address == AddressCollectionMode.Full ||
                     (
                         placeholderOverrideList.contains(it.apiPath) &&

@@ -55,9 +55,9 @@ private object KonbiniUiDefinitionFactory : UiDefinitionFactory.Simple {
                     label = resolvableString(R.string.stripe_konbini_confirmation_number_label),
                     capitalization = KeyboardCapitalization.None,
                     keyboard = KeyboardType.Phone,
+                    optional = true,
                 ),
                 initialValue = arguments.initialValues[IdentifierSpec.KonbiniConfirmationNumber],
-                showOptionalLabel = true,
             ),
         )
         return FormElementsBuilder(arguments)
