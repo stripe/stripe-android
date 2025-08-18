@@ -3,6 +3,7 @@
 package com.stripe.android.ui.core.cardscan
 
 import androidx.annotation.RestrictTo
+import androidx.compose.runtime.compositionLocalOf
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface CardScanEventsReporter {
@@ -30,6 +31,11 @@ interface CardScanEventsReporter {
      * Card scan API availability check.
      */
     fun onCardScanApiCheck(implementation: String, available: Boolean, reason: String? = null)
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val LocalCardScanEventsReporter = compositionLocalOf<CardScanEventsReporter> {
+    error("CardScanEventsReporter not provided")
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

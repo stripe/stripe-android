@@ -34,6 +34,7 @@ import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodUI
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.ui.core.cardscan.CardScanEventsReporter
+import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
@@ -250,6 +251,7 @@ internal fun AddPaymentMethod(
             LocalCardNumberCompletedEventReporter provides eventReporter,
             LocalCardBrandDisallowedReporter provides disallowedReporter,
             LocalAnalyticsEventReporter provides analyticsEventReporter,
+            LocalCardScanEventsReporter provides cardScanEventReporter,
         ) {
             PaymentElement(
                 enabled = viewState.enabled,

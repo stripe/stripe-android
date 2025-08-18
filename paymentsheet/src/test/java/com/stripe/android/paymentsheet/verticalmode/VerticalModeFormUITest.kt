@@ -23,6 +23,8 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.cardscan.CardScanEventsReporter
+import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
@@ -125,7 +127,14 @@ internal class VerticalModeFormUITest {
         composeRule.setContent {
             CompositionLocalProvider(
                 LocalCardNumberCompletedEventReporter provides { },
-                LocalCardBrandDisallowedReporter provides { }
+                LocalCardBrandDisallowedReporter provides { },
+                LocalCardScanEventsReporter provides object : CardScanEventsReporter {
+                    override fun onCardScanStarted(implementation: String) {}
+                    override fun onCardScanSucceeded(implementation: String) {}
+                    override fun onCardScanFailed(implementation: String, error: Throwable?) {}
+                    override fun onCardScanCancelled(implementation: String) {}
+                    override fun onCardScanApiCheck(implementation: String, available: Boolean, reason: String?) {}
+                },
             ) {
                 VerticalModeFormUI(interactor, showsWalletHeader = false)
             }

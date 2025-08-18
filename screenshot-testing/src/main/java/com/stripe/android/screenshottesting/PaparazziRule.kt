@@ -11,6 +11,8 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import com.android.ide.common.rendering.api.SessionParams
+import com.stripe.android.ui.core.cardscan.CardScanEventsReporter
+import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
 import com.stripe.android.uicore.StripeTheme
 import org.junit.rules.TestRule
 import org.junit.runner.Description
@@ -67,7 +69,34 @@ class PaparazziRule(
                             }
 
                             paparazzi.snapshot {
-                                CompositionLocalProvider(LocalInspectionMode provides true) {
+                                CompositionLocalProvider(
+                                    LocalInspectionMode provides true,
+                                    LocalCardScanEventsReporter provides object : CardScanEventsReporter {
+                                        override fun onCardScanStarted(implementation: String) {
+                                            // No-op implementation for testing purposes
+                                        }
+
+                                        override fun onCardScanSucceeded(implementation: String) {
+                                            // No-op implementation for testing purposes
+                                        }
+
+                                        override fun onCardScanFailed(implementation: String, error: Throwable?) {
+                                            // No-op implementation for testing purposes
+                                        }
+
+                                        override fun onCardScanCancelled(implementation: String) {
+                                            // No-op implementation for testing purposes
+                                        }
+
+                                        override fun onCardScanApiCheck(
+                                            implementation: String,
+                                            available: Boolean,
+                                            reason: String?
+                                        ) {
+                                            // No-op implementation for testing purposes
+                                        }
+                                    },
+                                ) {
                                     @Composable
                                     fun boxContent() {
                                         Box(
