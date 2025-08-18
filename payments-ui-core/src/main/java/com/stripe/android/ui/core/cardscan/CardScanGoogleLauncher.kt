@@ -7,6 +7,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import com.google.android.gms.wallet.PaymentCardRecognitionResult
@@ -24,7 +25,8 @@ internal class CardScanGoogleLauncher(
     private val _isAvailable = MutableStateFlow(false)
     val isAvailable: StateFlow<Boolean> = _isAvailable.asStateFlow()
 
-    private lateinit var activityLauncher: ActivityResultLauncher<IntentSenderRequest>
+    @VisibleForTesting
+    lateinit var activityLauncher: ActivityResultLauncher<IntentSenderRequest>
 
     init {
         paymentCardRecognitionClient.fetchIntent(

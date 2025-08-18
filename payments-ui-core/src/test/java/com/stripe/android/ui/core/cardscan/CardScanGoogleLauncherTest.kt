@@ -3,6 +3,10 @@ package com.stripe.android.ui.core.cardscan
 import android.app.Activity
 import android.content.Intent
 import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContract
+import androidx.core.app.ActivityOptionsCompat
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
@@ -14,44 +18,38 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class CardScanGoogleLauncherParseResultTest {
-
-    private val fakeEventsReporter = FakeCardScanEventsReporter()
-    private val launcher = CardScanGoogleLauncher(
-        context = ApplicationProvider.getApplicationContext(),
-        eventsReporter = fakeEventsReporter
-    )
+class CardScanGoogleLauncherTest {
 
     @Test
-    fun `parseActivityResult with RESULT_CANCELED returns Canceled`() = runTest {
+    fun `parseActivityResult with RESULT_CANCELED returns Canceled`() = runScenario {
         val result = ActivityResult(Activity.RESULT_CANCELED, null)
 
         val scanResult = launcher.parseActivityResult(result)
 
         assertThat(scanResult).isInstanceOf(CardScanResult.Canceled::class.java)
 
+        val apiCheckCall = fakeEventsReporter.apiCheckCalls.awaitItem()
+        assertThat(apiCheckCall.available).isEqualTo(true)
         val call = fakeEventsReporter.scanCancelledCalls.awaitItem()
         assertThat(call.implementation).isEqualTo("google_pay")
-
-        fakeEventsReporter.validate()
     }
 
     @Test
-    fun `parseActivityResult with RESULT_OK but null data returns Canceled`() = runTest {
+    fun `parseActivityResult with RESULT_OK but null data returns Canceled`() = runScenario {
         val result = ActivityResult(Activity.RESULT_OK, null)
 
         val scanResult = launcher.parseActivityResult(result)
 
         assertThat(scanResult).isInstanceOf(CardScanResult.Canceled::class.java)
 
+        val apiCheckCall = fakeEventsReporter.apiCheckCalls.awaitItem()
+        assertThat(apiCheckCall.available).isEqualTo(true)
         val call = fakeEventsReporter.scanCancelledCalls.awaitItem()
         assertThat(call.implementation).isEqualTo("google_pay")
-
-        fakeEventsReporter.validate()
     }
 
     @Test
-    fun `parseActivityResult with RESULT_OK and valid data but no PAN returns Failed`() = runTest {
+    fun `parseActivityResult with RESULT_OK and valid data but no PAN returns Failed`() = runScenario {
         // Create an intent without PaymentCardRecognitionResult data
         val intent = Intent().apply {
             // Don't put any PaymentCardRecognitionResult data
@@ -64,77 +62,55 @@ class CardScanGoogleLauncherParseResultTest {
         val failedResult = scanResult as CardScanResult.Failed
         assertThat(failedResult.error.message).isEqualTo("Failed to parse card data")
 
+        val apiCheckCall = fakeEventsReporter.apiCheckCalls.awaitItem()
+        assertThat(apiCheckCall.available).isEqualTo(true)
         val call = fakeEventsReporter.scanFailedCalls.awaitItem()
         assertThat(call.implementation).isEqualTo("google_pay")
         assertThat(call.error?.message).isEqualTo("Failed to parse card data")
-
-        fakeEventsReporter.validate()
     }
 
     @Test
-    fun `parseActivityResult with custom result code returns Canceled`() = runTest {
+    fun `parseActivityResult with custom result code returns Canceled`() = runScenario {
         val result = ActivityResult(123, null) // Some other result code
 
         val scanResult = launcher.parseActivityResult(result)
 
         assertThat(scanResult).isInstanceOf(CardScanResult.Canceled::class.java)
 
+        val apiCheckCall = fakeEventsReporter.apiCheckCalls.awaitItem()
+        assertThat(apiCheckCall.available).isEqualTo(true)
         val call = fakeEventsReporter.scanCancelledCalls.awaitItem()
         assertThat(call.implementation).isEqualTo("google_pay")
-
-        fakeEventsReporter.validate()
     }
 
     @Test
-    fun `launch calls scanStarted event`() = runTest {
+    fun `launch calls scanStarted event`() = runScenario {
         launcher.launch(ApplicationProvider.getApplicationContext())
 
-        val call = fakeEventsReporter.scanStartedCalls.awaitItem()
-        assertThat(call.implementation).isEqualTo("google_pay")
-
-        // Note: We can't test activityLauncher.launch() directly because it's lateinit
-        // and requires Compose initialization, but we can verify the observable behavior
-        fakeEventsReporter.validate()
+        val apiCheckCall = fakeEventsReporter.apiCheckCalls.awaitItem()
+        assertThat(apiCheckCall.available).isEqualTo(true)
+        assertThat(fakeEventsReporter.scanStartedCalls.awaitItem().implementation).isEqualTo("google_pay")
+        assertThat(activityLauncher.launchCall.awaitItem()).isEqualTo(Unit)
     }
 
     @Test
-    fun `init sets isAvailable to false and calls apiCheck on failure`() = runTest {
-        // Create launcher in test - this will trigger the init block
-        val localLauncher = CardScanGoogleLauncher(
-            context = ApplicationProvider.getApplicationContext(),
-            eventsReporter = fakeEventsReporter,
-            paymentCardRecognitionClient = FakePaymentCardRecognitionClient(false)
-        )
-
-        // Check that isAvailable is false (due to Google Play Services not being available in tests)
-        assertThat(localLauncher.isAvailable.value).isFalse()
+    fun `init sets isAvailable to false and calls apiCheck on failure`() = runScenario(false) {
+        assertThat(launcher.isAvailable.value).isFalse()
 
         val apiCheckCall = fakeEventsReporter.apiCheckCalls.awaitItem()
         assertThat(apiCheckCall.implementation).isEqualTo("google_pay")
         assertThat(apiCheckCall.available).isFalse()
         assertThat(apiCheckCall.reason).isNotNull() // Will contain Google Play Services error
-
-        fakeEventsReporter.validate()
     }
 
     @Test
-    fun `init sets isAvailable to true and calls apiCheck on success`() = runTest {
-        // Create launcher with successful fake client - this will trigger the init block
-        val localLauncher = CardScanGoogleLauncher(
-            context = ApplicationProvider.getApplicationContext(),
-            eventsReporter = fakeEventsReporter,
-            paymentCardRecognitionClient = FakePaymentCardRecognitionClient(true)
-        )
-
-        // Check that isAvailable is true (success case)
-        assertThat(localLauncher.isAvailable.value).isTrue()
+    fun `init sets isAvailable to true and calls apiCheck on success`() = runScenario {
+        assertThat(launcher.isAvailable.value).isTrue()
 
         val apiCheckCall = fakeEventsReporter.apiCheckCalls.awaitItem()
         assertThat(apiCheckCall.implementation).isEqualTo("google_pay")
         assertThat(apiCheckCall.available).isTrue()
         assertThat(apiCheckCall.reason).isNull() // No error reason for success
-
-        fakeEventsReporter.validate()
     }
 
     private class FakeCardScanEventsReporter : CardScanEventsReporter {
@@ -186,5 +162,56 @@ class CardScanGoogleLauncherParseResultTest {
         override fun onCardScanApiCheck(implementation: String, available: Boolean, reason: String?) {
             _apiCheckCalls.add(ApiCheckCall(implementation, available, reason))
         }
+    }
+
+    private class FakeActivityLauncher<I> : ActivityResultLauncher<I>() {
+        private val _launchCall = Turbine<Unit>()
+        val launchCall: ReceiveTurbine<Unit> = _launchCall
+        override val contract: ActivityResultContract<I, *>
+            get() = throw NotImplementedError("Not implemented!")
+
+        override fun launch(input: I, options: ActivityOptionsCompat?) {
+            _launchCall.add(Unit)
+        }
+
+        override fun unregister() {
+            throw NotImplementedError("Not implemented!")
+        }
+
+        fun validate() {
+            _launchCall.ensureAllEventsConsumed()
+        }
+    }
+
+    private class Scenario(
+        val launcher: CardScanGoogleLauncher,
+        val fakeEventsReporter: FakeCardScanEventsReporter,
+        val activityLauncher: FakeActivityLauncher<IntentSenderRequest>,
+    )
+
+    private fun runScenario(
+        isFetchClientSuccess: Boolean = true,
+        block: suspend Scenario.() -> Unit
+    ) = runTest {
+        val fakeEventsReporter = FakeCardScanEventsReporter()
+        val activityLauncher = FakeActivityLauncher<IntentSenderRequest>()
+        val launcher = CardScanGoogleLauncher(
+            context = ApplicationProvider.getApplicationContext(),
+            eventsReporter = fakeEventsReporter,
+            paymentCardRecognitionClient = FakePaymentCardRecognitionClient(isFetchClientSuccess)
+        ).apply {
+            this.activityLauncher = activityLauncher
+        }
+
+        val scenario = Scenario(
+            launcher = launcher,
+            fakeEventsReporter = fakeEventsReporter,
+            activityLauncher = activityLauncher
+        )
+
+        scenario.block()
+
+        fakeEventsReporter.validate()
+        activityLauncher.validate()
     }
 }
