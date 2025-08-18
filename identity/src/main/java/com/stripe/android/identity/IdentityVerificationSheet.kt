@@ -132,18 +132,16 @@ interface IdentityVerificationSheet {
             identityVerificationCallback: IdentityVerificationCallback
         ): IdentityVerificationSheet {
             val context = LocalContext.current
-            val lifecycleOwner = LocalLifecycleOwner.current
-            val activityResultRegistryOwner = LocalActivityResultRegistryOwner.current
-                ?: error("ActivityResultRegistryOwner is not available in this Compose context")
+            val activityResultLauncher = rememberLauncherForActivityResult(
+                IdentityVerificationSheetContract(),
+                identityVerificationCallback::onVerificationFlowResult
+            )
 
             return remember(configuration) {
                 StripeIdentityVerificationSheet(
-                    lifecycleOwner = lifecycleOwner,
-                    activityResultRegistryOwner = activityResultRegistryOwner,
-                    identityVerificationSheetContract = IdentityVerificationSheetContract(),
-                    identityVerificationCallback = identityVerificationCallback,
-                    context = context,
-                    configuration = configuration
+                    activityResultLauncher,
+                    context,
+                    configuration
                 )
             }
         }
