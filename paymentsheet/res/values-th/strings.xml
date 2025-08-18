@@ -113,6 +113,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">เมื่อดำเนินการต่อ จะถือว่าคุณตกลงที่จะบันทึกข้อมูลไว้สําหรับการซื้อด้วย %s ในอนาคต</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[เมื่อดำเนินการต่อ จะถือว่าคุณตกลงที่จะบันทึกข้อมูลไว้สำหรับการซื้อด้วย %s ในอนาคต และ <link>Link</link>คุณยังยอมรับ<terms>ข้อกำหนด</terms>และ<privacy>ความเป็นส่วนตัว</privacy>ของ Link ด้วย]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[เมื่อดำเนินการต่อ แสดงว่ายินยอมที่จะบันทึกข้อมูลไว้สำหรับการซื้อด้วย %s ในอนาคต และ <link>Link</link> (ดู<terms>ข้อกำหนด</terms>และ<privacy>ความเป็นส่วนตัว</privacy>)]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[เมื่อดำเนินการต่อ แสดงว่าคุณยินยอมที่จะบันทึกข้อมูลไว้สำหรับการซื้อด้วย %s ในอนาคต และ <link>Link</link> ตาม<terms>ข้อกำหนด</terms>และ<privacy>ความเป็นส่วนตัว</privacy>ของ Link]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">บัตรไม่ได้อัปเดต โปรดลองอีกครั้ง</string>
   <!-- Title shown above a carousel containing available payment methods -->

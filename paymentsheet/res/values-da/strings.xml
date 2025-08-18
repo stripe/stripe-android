@@ -113,6 +113,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Ved at fortsætte accepterer du at gemme dine oplysninger til senere køb med %s.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Ved at fortsætte accepterer du at gemme dine oplysninger til senere køb med %s og <link>Link</link>Du accepterer også Links <terms>vilkår</terms> og <privacy>politik om beskyttelse af personlige oplysninger</privacy>.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Ved at fortsætte accepterer du at gemme dine oplysninger til senere køb med %s og <link>Link</link> (Se <terms>vilkår</terms> og <privacy>privatlivspolitik</privacy>).]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Ved at fortsætte accepterer du at gemme dine oplysninger til senere køb hos %s og <link>Link</link> ifølge Links <terms>vilkår</terms> og <privacy>privatlivspolitik</privacy>.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Kortet blev ikke opdateret. Prøv igen.</string>
   <!-- Title shown above a carousel containing available payment methods -->

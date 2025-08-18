@@ -113,6 +113,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Jatkamalla hyväksyt, että tietosi tallennetaan tulevia ostoksia varten tahon %s kanssa.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Jatkamalla hyväksyt, että tietosi tallennetaan tulevia ostoksia varten tahon %s kanssa ja <link>Linkin kanssa</link>. Hyväksyt myös Linkin <terms>ehdot</terms> ja <privacy>tietosuojakäytännön</privacy>.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Jatkamalla hyväksyt, että tietosi tallennetaan tulevia ostoksia varten tahon %s kanssa ja <link>Linkki</link> (katso <terms>Ehdot</terms> ja <privacy>tietosuoja</privacy>).]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Jatkamalla hyväksyt, että tietosi tallennetaan tulevia ostoksia varten tahon %s ja <link>Linkin kanssa</link> Linkin <terms>ehtojen</terms> ja <privacy>tietosuojakäytännön</privacy> mukaisesti.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Korttia ei päivitetty. Yritä uudelleen.</string>
   <!-- Title shown above a carousel containing available payment methods -->

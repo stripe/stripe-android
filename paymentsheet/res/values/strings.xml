@@ -113,6 +113,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">By continuing, you agree to save your information for future purchases with %s.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[By continuing, you agree to save your information for future purchases with %s and <link>Link</link>. You also agree to Link\'s <terms>Terms</terms> and <privacy>Privacy</privacy>.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[By continuing, you agree to save your information for future purchases with %s and <link>Link</link> (see <terms>Terms</terms> and <privacy>Privacy</privacy>).]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[By continuing, you agree to save your information for future purchases with %s and <link>Link</link> according to Link <terms>terms</terms> and <privacy>privacy</privacy>.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Card was not updated. Please try again.</string>
   <!-- Title shown above a carousel containing available payment methods -->

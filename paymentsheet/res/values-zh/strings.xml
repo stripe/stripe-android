@@ -113,6 +113,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">继续操作则表示您同意保存您的信息，以便将来在%s购物。</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[继续操作则表示您同意保存您的信息，以便将来在%s购物以及 <link>使用 Link</link>您也同意遵守 Link 的<terms>条款</terms>和<privacy>隐私政策</privacy>。]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[继续操作则表示您同意保存您的信息，用于今后在%s和 <link>Link 购物</link> （参见<terms>条款</terms>和<privacy>隐私政策</privacy>）。]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[继续操作则表示您同意保存您的信息，用于今后在%s和 <link>Link 相关的购物</link> 根据 Link <terms>条款</terms>和<privacy>隐私政策</privacy>。]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">卡未更新，请重试。</string>
   <!-- Title shown above a carousel containing available payment methods -->
