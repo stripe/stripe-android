@@ -4,7 +4,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
@@ -13,7 +12,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import kotlinx.parcelize.Parcelize
 
 interface IdentityVerificationSheet {
@@ -136,7 +134,6 @@ interface IdentityVerificationSheet {
                 IdentityVerificationSheetContract(),
                 identityVerificationCallback::onVerificationFlowResult
             )
-
             return remember(configuration) {
                 StripeIdentityVerificationSheet(
                     activityResultLauncher,
