@@ -173,13 +173,6 @@ public final class com/stripe/android/uicore/elements/SameAsShippingElementUIKt 
 	public static final field SAME_AS_SHIPPING_CHECKBOX_TEST_TAG Ljava/lang/String;
 }
 
-public final class com/stripe/android/uicore/elements/TextFieldStateConstants$Error$Blank : com/stripe/android/uicore/elements/TextFieldStateConstants$Error {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/uicore/elements/TextFieldStateConstants$Error$Blank;
-	public fun isBlank ()Z
-	public fun shouldShowError (Z)Z
-}
-
 public final class com/stripe/android/uicore/elements/TextFieldUIKt {
 	public static final fun AnimatedIcons (Ljava/util/List;ZLandroidx/compose/runtime/Composer;I)V
 	public static final fun TextField-ZkbtPhE (Lcom/stripe/android/uicore/elements/TextFieldController;ZILandroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;IILandroidx/compose/ui/focus/FocusRequester;ZZLandroidx/compose/runtime/Composer;II)V
