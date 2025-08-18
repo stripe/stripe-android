@@ -287,8 +287,9 @@ internal data class PaymentMethodMetadata(
         customerRequestedSave: PaymentSelection.CustomerRequestedSave,
         code: PaymentMethodCode
     ): PaymentMethod.AllowRedisplay {
+        val isSettingUp = hasIntentToSetup(code) || linkState?.configuration?.linkSignUpOptInFeatureEnabled == true
         return paymentMethodSaveConsentBehavior.allowRedisplay(
-            isSetupIntent = hasIntentToSetup(code),
+            isSetupIntent = isSettingUp,
             customerRequestedSave = customerRequestedSave,
         )
     }
