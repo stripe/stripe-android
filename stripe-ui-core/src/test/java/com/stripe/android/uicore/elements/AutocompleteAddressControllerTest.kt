@@ -496,6 +496,55 @@ class AutocompleteAddressControllerTest {
     }
 
     @Test
+    fun `Errors should be pulled from internal address element`() = runTest {
+        val controller = createAutocompleteAddressController(
+            phoneNumberConfig = AddressFieldConfiguration.REQUIRED,
+            interactor = TestAutocompleteAddressInteractor.noOp(
+                autocompleteConfig = AutocompleteAddressInteractor.Config(
+                    googlePlacesApiKey = null,
+                    autocompleteCountries = emptySet(),
+                    isPlacesAvailable = false,
+                )
+            ),
+            values = mapOf(
+                IdentifierSpec.Country to "US",
+                IdentifierSpec.PostalCode to "999",
+                IdentifierSpec.Phone to "+1222"
+            )
+        )
+
+        controller.error.test {
+            val error = awaitItem()
+
+            assertThat(error?.errorMessage).isEqualTo(R.string.stripe_address_zip_incomplete)
+
+            controller.addressElementFlow.test {
+                val addressElement = awaitItem()
+
+                addressElement.fields.test {
+                    val fields = awaitItem()
+
+                    val rowElements = fields.filterIsInstance<RowElement>()
+
+                    assertThat(rowElements).hasSize(1)
+
+                    val zipCodeElement = rowElements[0].fields.find { element ->
+                        element.identifier == IdentifierSpec.PostalCode
+                    }
+
+                    assertThat(zipCodeElement).isNotNull()
+
+                    requireNotNull(zipCodeElement).setRawValue(mapOf(IdentifierSpec.PostalCode to "99999"))
+                }
+            }
+
+            val nextError = expectMostRecentItem()
+
+            assertThat(nextError?.errorMessage).isEqualTo(R.string.stripe_incomplete_phone_number)
+        }
+    }
+
+    @Test
     fun `on condensed to expanded form, should change address controllers`() = runTest {
         TestAutocompleteAddressInteractor.test(
             autocompleteConfig = AutocompleteAddressInteractor.Config(
