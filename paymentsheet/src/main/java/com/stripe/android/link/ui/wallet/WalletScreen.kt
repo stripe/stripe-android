@@ -18,8 +18,10 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalTextStyle
@@ -46,6 +48,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
@@ -53,6 +56,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataContract
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
+import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
@@ -241,14 +245,6 @@ private fun PaymentDetailsSection(
     Column(
         modifier = modifier
     ) {
-        if (state.paymentSelectionHint != null) {
-            Text(
-                modifier = Modifier.padding(bottom = 16.dp),
-                text = state.paymentSelectionHint.resolve(),
-                style = LinkTheme.typography.body,
-                color = LinkTheme.colors.textPrimary,
-            )
-        }
         PaymentMethodSection(
             state = state,
             isExpanded = isExpanded,
@@ -262,6 +258,12 @@ private fun PaymentDetailsSection(
             hideBottomSheetContent = hideBottomSheetContent,
             onLogoutClicked = onLogoutClicked,
         )
+        if (state.paymentSelectionHint != null) {
+            PaymentSelectionHint(
+                modifier = Modifier.padding(top = 12.dp),
+                hint = state.paymentSelectionHint
+            )
+        }
 
         AnimatedVisibility(visible = state.mandate != null) {
             state.mandate?.let { mandate ->
@@ -284,6 +286,48 @@ private fun PaymentDetailsSection(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun PaymentSelectionHint(
+    hint: ResolvableString?,
+    modifier: Modifier = Modifier,
+) {
+    if (hint != null) {
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .background(
+                    color = LinkTheme.colors.surfaceSecondary,
+                    shape = RoundedCornerShape(12.dp)
+                )
+                .padding(horizontal = 20.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            Icon(
+                modifier = Modifier
+                    .padding(top = 2.dp)
+                    .size(16.dp),
+                painter = painterResource(com.stripe.android.ui.core.R.drawable.stripe_ic_info_outlined),
+                tint = LinkTheme.colors.iconTertiary,
+                contentDescription = null,
+            )
+            Text(
+                modifier = Modifier.padding(start = 8.dp),
+                text = hint.resolve(),
+                style = LinkTheme.typography.detail,
+                color = LinkTheme.colors.textTertiary,
+            )
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun PaymentSelectionHintPreview() {
+    DefaultLinkTheme {
+        PaymentSelectionHint(resolvableString("Debit cards are most likely to be accepted."))
     }
 }
 
