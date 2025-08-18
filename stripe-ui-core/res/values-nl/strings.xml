@@ -50,6 +50,8 @@
   <string name="stripe_address_zip_incomplete">Uw postcode is onvolledig.</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
   <string name="stripe_address_zip_invalid">Je postcode is ongeldig.</string>
+  <!-- Error text indicating the zip/postal code is invalid, used for addresses of unknown country -->
+  <string name="stripe_address_zip_or_postal_invalid">Je postcode is ongeldig.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
   <string name="stripe_address_zip_postal_invalid">Je postcode is ongeldig</string>
   <!-- Label for a checkbox that makes customers billing address same as their shipping address -->

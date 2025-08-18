@@ -173,60 +173,6 @@ public final class com/stripe/android/uicore/elements/SameAsShippingElementUIKt 
 	public static final field SAME_AS_SHIPPING_CHECKBOX_TEST_TAG Ljava/lang/String;
 }
 
-public abstract class com/stripe/android/uicore/elements/TextFieldStateConstants$Error : com/stripe/android/uicore/elements/TextFieldState {
-	public static final field $stable I
-	public synthetic fun <init> (I[Ljava/lang/Object;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public synthetic fun <init> (I[Ljava/lang/Object;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun getError ()Lcom/stripe/android/uicore/elements/FieldError;
-	protected fun getErrorMessageResId ()I
-	protected fun getFormatArgs ()[Ljava/lang/Object;
-	public fun isFull ()Z
-	public fun isValid ()Z
-}
-
-public final class com/stripe/android/uicore/elements/TextFieldStateConstants$Error$Blank : com/stripe/android/uicore/elements/TextFieldStateConstants$Error {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/uicore/elements/TextFieldStateConstants$Error$Blank;
-	public fun isBlank ()Z
-	public fun shouldShowError (Z)Z
-}
-
-public final class com/stripe/android/uicore/elements/TextFieldStateConstants$Error$Incomplete : com/stripe/android/uicore/elements/TextFieldStateConstants$Error {
-	public static final field $stable I
-	public fun <init> (I)V
-	public fun isBlank ()Z
-	public fun shouldShowError (Z)Z
-}
-
-public final class com/stripe/android/uicore/elements/TextFieldStateConstants$Error$Invalid : com/stripe/android/uicore/elements/TextFieldStateConstants$Error {
-	public static final field $stable I
-	public fun <init> (I[Ljava/lang/Object;Z)V
-	public synthetic fun <init> (I[Ljava/lang/Object;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun isBlank ()Z
-	public fun isFull ()Z
-	public fun shouldShowError (Z)Z
-}
-
-public abstract class com/stripe/android/uicore/elements/TextFieldStateConstants$Valid : com/stripe/android/uicore/elements/TextFieldState {
-	public static final field $stable I
-	public fun getError ()Lcom/stripe/android/uicore/elements/FieldError;
-	public fun isBlank ()Z
-	public fun isValid ()Z
-	public fun shouldShowError (Z)Z
-}
-
-public final class com/stripe/android/uicore/elements/TextFieldStateConstants$Valid$Full : com/stripe/android/uicore/elements/TextFieldStateConstants$Valid {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/uicore/elements/TextFieldStateConstants$Valid$Full;
-	public fun isFull ()Z
-}
-
-public final class com/stripe/android/uicore/elements/TextFieldStateConstants$Valid$Limitless : com/stripe/android/uicore/elements/TextFieldStateConstants$Valid {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/uicore/elements/TextFieldStateConstants$Valid$Limitless;
-	public fun isFull ()Z
-}
-
 public final class com/stripe/android/uicore/elements/TextFieldUIKt {
 	public static final fun AnimatedIcons (Ljava/util/List;ZLandroidx/compose/runtime/Composer;I)V
 	public static final fun TextField-ZkbtPhE (Lcom/stripe/android/uicore/elements/TextFieldController;ZILandroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;IILandroidx/compose/ui/focus/FocusRequester;ZZLandroidx/compose/runtime/Composer;II)V

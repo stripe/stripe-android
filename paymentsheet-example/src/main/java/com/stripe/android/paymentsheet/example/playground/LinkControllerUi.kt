@@ -50,6 +50,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.stripe.android.link.LinkController
@@ -318,11 +319,11 @@ private fun ConfirmButton(
         modifier = modifier
             .clip(CircleShape)
             .clickable(onClick = onClick, enabled = enabled)
-            .background(color = Color.Black)
+            .background(color = MaterialTheme.colors.primary)
             .padding(horizontal = 16.dp, vertical = 16.dp)
             .fillMaxWidth(),
         style = MaterialTheme.typography.h6,
-        color = Color.White,
+        color = MaterialTheme.colors.onPrimary,
         textAlign = TextAlign.Center,
         text = "Confirm",
     )
@@ -334,11 +335,18 @@ private fun PaymentMethodButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val (bgColor, contentColor) =
+        if (MaterialTheme.colors.isLight) {
+            Color.LightGray to Color.Black
+        } else {
+            Color.DarkGray to Color.White
+        }
+
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(20.dp))
             .clickable(onClick = onClick)
-            .background(color = Color.Black.copy(alpha = 0.1f))
+            .background(color = bgColor)
             .heightIn(min = 80.dp)
             .padding(horizontal = 16.dp, vertical = 16.dp)
             .fillMaxWidth(),
@@ -369,13 +377,14 @@ private fun PaymentMethodButton(
                             modifier = Modifier,
                             text = preview.label,
                             style = MaterialTheme.typography.h6,
+                            color = contentColor,
                         )
                         preview.sublabel?.let { sublabel ->
                             Text(
                                 modifier = Modifier.padding(top = 2.dp),
                                 text = sublabel,
                                 style = MaterialTheme.typography.body2,
-                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                                color = contentColor.copy(alpha = 0.6f),
                             )
                         }
                     }
@@ -384,6 +393,7 @@ private fun PaymentMethodButton(
                         modifier = Modifier.size(iconSize),
                         painter = painterResource(R.drawable.stripe_ic_paymentsheet_pm_card),
                         contentDescription = null,
+                        tint = contentColor,
                     )
                     Column(
                         modifier = Modifier
@@ -394,6 +404,7 @@ private fun PaymentMethodButton(
                             modifier = Modifier,
                             text = "Choose payment method",
                             style = MaterialTheme.typography.h6,
+                            color = contentColor,
                         )
                     }
                 }
@@ -403,12 +414,12 @@ private fun PaymentMethodButton(
             modifier = Modifier.size(18.dp),
             painter = painterResource(com.stripe.android.paymentsheet.R.drawable.stripe_ic_chevron_right),
             contentDescription = null,
-            tint = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+            tint = contentColor.copy(alpha = 0.6f),
         )
     }
 }
 
-@Preview(showBackground = true)
+@PreviewLightDark
 @Composable
 private fun PaymentMethodButtonPreview() {
     val context = LocalContext.current

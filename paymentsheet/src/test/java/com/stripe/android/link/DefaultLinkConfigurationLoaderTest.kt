@@ -1,6 +1,7 @@
 package com.stripe.android.link
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.link.exceptions.LinkUnavailableException
 import com.stripe.android.link.gate.FakeLinkGate
@@ -21,7 +22,11 @@ internal class DefaultLinkConfigurationLoaderTest {
     private val logger = FakeLogger()
     private val linkGate = FakeLinkGate()
     private val linkGateFactory = LinkGate.Factory { linkGate }
-    private val configuration = LinkController.Configuration.Builder("Test Merchant").build()
+    private val configuration =
+        LinkController.Configuration.Builder(
+            merchantDisplayName = "Test Merchant",
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        ).build()
     private val linkConfiguration = TestFactory.LINK_CONFIGURATION
 
     private val linkState = LinkState(
@@ -102,7 +107,10 @@ internal class DefaultLinkConfigurationLoaderTest {
             PaymentSheet.BillingDetailsCollectionConfiguration(
                 phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
             )
-        val controllerConfig = LinkController.Configuration.Builder(TestFactory.MERCHANT_NAME)
+        val controllerConfig = LinkController.Configuration.Builder(
+            merchantDisplayName = TestFactory.MERCHANT_NAME,
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+        )
             .defaultBillingDetails(defaultBillingDetails)
             .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
             .build()

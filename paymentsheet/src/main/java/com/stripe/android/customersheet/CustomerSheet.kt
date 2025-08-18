@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
+import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.model.CardBrand
@@ -466,7 +467,7 @@ class CustomerSheet internal constructor(
                 lifecycleOwner = activity,
                 viewModelStoreOwner = activity,
                 activityResultRegistryOwner = activity,
-                statusBarColor = { activity.window.statusBarColor },
+                statusBarColor = { StatusBarCompat.color(activity) },
                 integration = CustomerSheetIntegration.Adapter(customerAdapter),
                 callback = callback,
             )
@@ -491,7 +492,7 @@ class CustomerSheet internal constructor(
                 lifecycleOwner = activity,
                 viewModelStoreOwner = activity,
                 activityResultRegistryOwner = activity,
-                statusBarColor = { activity.window.statusBarColor },
+                statusBarColor = { StatusBarCompat.color(activity) },
                 integration = CustomerSheetIntegration.CustomerSession(customerSessionProvider),
                 callback = callback,
             )
@@ -516,7 +517,7 @@ class CustomerSheet internal constructor(
                 viewModelStoreOwner = fragment,
                 activityResultRegistryOwner = (fragment.host as? ActivityResultRegistryOwner)
                     ?: fragment.requireActivity(),
-                statusBarColor = { fragment.activity?.window?.statusBarColor },
+                statusBarColor = { StatusBarCompat.color(fragment.requireActivity()) },
                 integration = CustomerSheetIntegration.Adapter(customerAdapter),
                 callback = callback,
             )
@@ -542,7 +543,7 @@ class CustomerSheet internal constructor(
                 viewModelStoreOwner = fragment,
                 activityResultRegistryOwner = (fragment.host as? ActivityResultRegistryOwner)
                     ?: fragment.requireActivity(),
-                statusBarColor = { fragment.activity?.window?.statusBarColor },
+                statusBarColor = { StatusBarCompat.color(fragment.requireActivity()) },
                 integration = CustomerSheetIntegration.CustomerSession(customerSessionProvider),
                 callback = callback,
             )

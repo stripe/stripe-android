@@ -5,6 +5,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.FakeLinkAuth
 import com.stripe.android.link.account.LinkAccountHolder
@@ -124,8 +126,17 @@ class LinkControllerInteractorTest {
         val loadedConfiguration = LinkTestUtils.createLinkConfiguration()
         linkConfigurationLoader.linkConfigurationResult = Result.success(loadedConfiguration)
 
-        assertThat(interactor.configure(createControllerConfig())).isEqualTo(LinkController.ConfigureResult.Success)
+        val controllerConfig =
+            LinkController.Configuration.Builder(
+                merchantDisplayName = "Example",
+                publishableKey = "pk_123",
+                stripeAccountId = "acct_123"
+            ).build()
+        assertThat(interactor.configure(controllerConfig)).isEqualTo(LinkController.ConfigureResult.Success)
         assertThat(linkComponent.configuration).isEqualTo(loadedConfiguration)
+        val paymentConfiguration = PaymentConfiguration.getInstance(application)
+        assertThat(paymentConfiguration.publishableKey).isEqualTo(controllerConfig.publishableKey)
+        assertThat(paymentConfiguration.stripeAccountId).isEqualTo(controllerConfig.stripeAccountId)
     }
 
     @Test
@@ -382,7 +393,8 @@ class LinkControllerInteractorTest {
             .isEqualTo(
                 LinkLaunchMode.PaymentMethodSelection(
                     selectedPayment = null,
-                    sharePaymentDetailsImmediatelyAfterCreation = false
+                    sharePaymentDetailsImmediatelyAfterCreation = false,
+                    shouldShowSecondaryCta = false,
                 )
             )
 
@@ -901,6 +913,7 @@ class LinkControllerInteractorTest {
 
     private fun createInteractor(): LinkControllerInteractor {
         return LinkControllerInteractor(
+            application = application,
             logger = logger,
             linkConfigurationLoader = linkConfigurationLoader,
             linkAccountHolder = linkAccountHolder,
@@ -922,14 +935,18 @@ class LinkControllerInteractorTest {
         )
         linkConfigurationLoader.linkConfigurationResult = Result.success(linkConfiguration)
         interactor.configure(
-            LinkController.Configuration.Builder("Test")
+            LinkController.Configuration.Builder("Test", ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
                 .apply { defaultBillingDetails?.let { defaultBillingDetails(it.getOrNull()) } }
                 .apply { billingDetailsCollectionConfiguration?.let { billingDetailsCollectionConfiguration(it) } }
                 .build()
         )
     }
 
-    private fun createControllerConfig() = LinkController.Configuration.default(application)
+    private fun createControllerConfig() =
+        LinkController.Configuration.default(
+            context = application,
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+        )
 
     private fun signIn() {
         linkAccountHolder.set(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))

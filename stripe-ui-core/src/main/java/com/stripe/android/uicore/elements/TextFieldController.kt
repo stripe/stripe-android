@@ -14,7 +14,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.LayoutDirection
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Blank
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -157,7 +156,13 @@ class SimpleTextFieldController(
         overrideContentDescriptionProvider?.invoke(it) ?: it.resolvableString
     }
 
-    private val _fieldState = MutableStateFlow<TextFieldState>(Blank)
+    private val _fieldState = MutableStateFlow(
+        if (textFieldConfig.optional) {
+            TextFieldStateConstants.Valid.Limitless
+        } else {
+            TextFieldStateConstants.Error.Blank
+        }
+    )
     override val fieldState: StateFlow<TextFieldState> = _fieldState.asStateFlow()
 
     override val loading: StateFlow<Boolean> = textFieldConfig.loading
@@ -172,8 +177,11 @@ class SimpleTextFieldController(
     /**
      * An error must be emitted if it is visible or not visible.
      **/
-    override val error: StateFlow<FieldError?> = visibleError.mapAsStateFlow { visibleError ->
-        _fieldState.value.getError()?.takeIf { visibleError }
+    override val error: StateFlow<FieldError?> = combineAsStateFlow(
+        visibleError,
+        _fieldState
+    ) { visibleError, fieldState ->
+        fieldState.getError()?.takeIf { visibleError }
     }
 
     override val isComplete: StateFlow<Boolean> = _fieldState.mapAsStateFlow {
