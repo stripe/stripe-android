@@ -1209,6 +1209,174 @@ class DefaultEventReporterTest {
         )
     }
 
+    @Test
+    fun `onCardScanStarted should fire analytics request with expected event value`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onCardScanStarted("google_pay")
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_cardscan_scan_started" &&
+                    req.params["implementation"] == "google_pay"
+            }
+        )
+    }
+
+    @Test
+    fun `onCardScanSucceeded should fire analytics request with expected event value`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onCardScanSucceeded("google_pay")
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_cardscan_success" &&
+                    req.params["implementation"] == "google_pay"
+            }
+        )
+    }
+
+    @Test
+    fun `onCardScanFailed should fire analytics request with expected event value`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        val testError = Throwable("Card scan failed")
+        completeEventReporter.onCardScanFailed("google_pay", testError)
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_cardscan_failed" &&
+                    req.params["implementation"] == "google_pay" &&
+                    req.params["error_message"] == "Card scan failed"
+            }
+        )
+    }
+
+    @Test
+    fun `onCardScanFailed with null error should fire analytics request with null error_message`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onCardScanFailed("google_pay", null)
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_cardscan_failed" &&
+                    req.params["implementation"] == "google_pay" &&
+                    req.params["error_message"] == null
+            }
+        )
+    }
+
+    @Test
+    fun `onCardScanCancelled should fire analytics request with expected event value`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onCardScanCancelled("google_pay")
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_cardscan_cancel" &&
+                    req.params["implementation"] == "google_pay"
+            }
+        )
+    }
+
+    @Test
+    fun `onCardScanApiCheck should fire analytics request with expected event value for success`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onCardScanApiCheck("google_pay", true, null)
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_cardscan_api_check" &&
+                    req.params["implementation"] == "google_pay" &&
+                    req.params["available"] == true &&
+                    req.params["reason"] == null
+            }
+        )
+    }
+
+    @Test
+    fun `onCardScanApiCheck should fire analytics request with expected event value for failure`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onCardScanApiCheck("google_pay", false, "API not available")
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_cardscan_api_check" &&
+                    req.params["implementation"] == "google_pay" &&
+                    req.params["available"] == false &&
+                    req.params["reason"] == "API not available"
+            }
+        )
+    }
+
+    @Test
+    fun `card scan events should work with different implementation names`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onCardScanStarted("bouncer")
+        completeEventReporter.onCardScanSucceeded("stripe")
+        completeEventReporter.onCardScanFailed("custom", null)
+        completeEventReporter.onCardScanCancelled("test")
+        completeEventReporter.onCardScanApiCheck("ml_kit", true, null)
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_cardscan_scan_started" &&
+                    req.params["implementation"] == "bouncer"
+            }
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_cardscan_success" &&
+                    req.params["implementation"] == "stripe"
+            }
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_cardscan_failed" &&
+                    req.params["implementation"] == "custom"
+            }
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_cardscan_cancel" &&
+                    req.params["implementation"] == "test"
+            }
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_cardscan_api_check" &&
+                    req.params["implementation"] == "ml_kit" &&
+                    req.params["available"] == true
+            }
+        )
+    }
+
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
     private fun createEventReporter(
         mode: EventReporter.Mode,
