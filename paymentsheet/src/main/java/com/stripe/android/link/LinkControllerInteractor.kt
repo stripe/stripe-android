@@ -282,7 +282,7 @@ internal class LinkControllerInteractor @Inject constructor(
 
                 val imageLoader = StripeImageLoader(context)
                 val iconLoader = PaymentSelection.IconLoader(context.resources, imageLoader)
-                val preview = result.selectedPayment?.toPreview(context, iconLoader)
+                val preview = result.selectedPayment?.details?.toPreview(context, iconLoader)
 
                 _presentPaymentMethodsResultFlow.tryEmit(LinkController.PresentPaymentMethodsResult.Success(preview))
             }
