@@ -8,7 +8,7 @@ import androidx.annotation.RestrictTo
 object StatusBarCompat {
     @Suppress("DEPRECATION")
     fun color(activity: Activity): Int? {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+        return if (Build.VERSION.SDK_INT > Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             null
         } else {
             activity.window?.statusBarColor
@@ -17,7 +17,7 @@ object StatusBarCompat {
 
     @Suppress("DEPRECATION")
     fun setColor(activity: Activity, color: Int) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             activity.window?.let { window ->
                 window.statusBarColor = color
             }

@@ -74,7 +74,7 @@ internal class Stripe3ds2TransactionActivity : AppCompatActivity() {
         setContentView(viewBinding.root)
 
         args.statusBarColor?.let {
-            StatusBarCompat.setColor(activity = this,  color = it)
+            StatusBarCompat.setColor(activity = this, color = it)
         }
 
         val viewModel by viewModels<Stripe3ds2TransactionViewModel> { viewModelFactory }
