@@ -74,6 +74,23 @@ class SelectionUtilsTest {
     }
 
     @Test
+    fun `should not be able to save if initialization mode is PI deferred with 'None' SFU`() {
+        assertThat(
+            NEW_SELECTION.canSave(
+                PaymentElementLoader.InitializationMode.DeferredIntent(
+                    intentConfiguration = PaymentSheet.IntentConfiguration(
+                        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                            amount = 10L,
+                            currency = "USD",
+                            setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.None,
+                        ),
+                    ),
+                )
+            )
+        ).isFalse()
+    }
+
+    @Test
     fun `should be able to save if customer requested in PI deferred without future setup mode`() {
         assertThat(
             NEW_SELECTION_WITH_CUSTOMER_REQUEST.canSave(
@@ -103,9 +120,29 @@ class SelectionUtilsTest {
         ).isTrue()
     }
 
-    @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
     @Test
-    fun `should be able to save if type is SFU in payment method options for payment mode`() {
+    fun `should be savable if type has 'OffSession' SFU in payment method options for payment mode`() = perLpmSfuTest(
+        setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
+        shouldBeSavable = true,
+    )
+
+    @Test
+    fun `should be savable if type has 'OnSession' SFU in payment method options for payment mode`() = perLpmSfuTest(
+        setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
+        shouldBeSavable = true,
+    )
+
+    @Test
+    fun `should not be savable if type has 'None' SFU in payment method options for payment mode`() = perLpmSfuTest(
+        setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.None,
+        shouldBeSavable = false,
+    )
+
+    @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
+    private fun perLpmSfuTest(
+        setupFutureUse: PaymentSheet.IntentConfiguration.SetupFutureUse,
+        shouldBeSavable: Boolean,
+    ) {
         assertThat(
             NEW_SELECTION.canSave(
                 PaymentElementLoader.InitializationMode.DeferredIntent(
@@ -113,18 +150,16 @@ class SelectionUtilsTest {
                         mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                             amount = 5000,
                             currency = "CAD",
-                            paymentMethodOptions =
-                            PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
+                            paymentMethodOptions = PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
                                 setupFutureUsageValues = mapOf(
-                                    PaymentMethod.Type.Card to
-                                        PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
-                                )
-                            )
-                        )
+                                    PaymentMethod.Type.Card to setupFutureUse,
+                                ),
+                            ),
+                        ),
                     )
                 )
             )
-        ).isTrue()
+        ).isEqualTo(shouldBeSavable)
 
         assertThat(
             NEW_BANK_SELECTION.canSave(
@@ -133,18 +168,14 @@ class SelectionUtilsTest {
                         mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                             amount = 5000,
                             currency = "CAD",
-                            paymentMethodOptions =
-                            PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
-                                setupFutureUsageValues = mapOf(
-                                    PaymentMethod.Type.USBankAccount to
-                                        PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
-                                )
-                            )
-                        )
-                    )
+                            paymentMethodOptions = PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
+                                setupFutureUsageValues = mapOf(PaymentMethod.Type.USBankAccount to setupFutureUse),
+                            ),
+                        ),
+                    ),
                 )
             )
-        ).isTrue()
+        ).isEqualTo(shouldBeSavable)
     }
 
     private companion object {

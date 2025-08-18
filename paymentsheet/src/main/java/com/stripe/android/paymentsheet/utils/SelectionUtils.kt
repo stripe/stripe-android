@@ -28,7 +28,7 @@ internal fun PaymentSelection.New.canSave(
 private fun PaymentSelection.New.canSaveIfNotRequested(
     intentConfiguration: PaymentSheet.IntentConfiguration
 ): Boolean {
-    return intentConfiguration.mode.setupFutureUse != null || intentConfiguration.run {
+    return intentConfiguration.mode.setupFutureUse.isSavable() || intentConfiguration.run {
         when (mode) {
             is PaymentSheet.IntentConfiguration.Mode.Payment -> mode.canSave(paymentMethodCreateParams)
             is PaymentSheet.IntentConfiguration.Mode.Setup -> false
@@ -42,9 +42,16 @@ private fun PaymentSheet.IntentConfiguration.Mode.Payment.canSave(
 ): Boolean {
     return paymentMethodOptions?.setupFutureUsageValues?.let { setupFutureUsageValues ->
         PaymentMethod.Type.fromCode(createParams.typeCode)?.let {
-            setupFutureUsageValues.containsKey(it)
+            setupFutureUsageValues[it].isSavable()
         } ?: false
     } ?: false
+}
+
+private fun PaymentSheet.IntentConfiguration.SetupFutureUse?.isSavable() = when (this) {
+    PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
+    PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession -> true
+    PaymentSheet.IntentConfiguration.SetupFutureUse.None,
+    null -> false
 }
 
 internal fun PaymentSelection.getSetAsDefaultPaymentMethodFromPaymentSelection(): Boolean? {
