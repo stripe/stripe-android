@@ -22,6 +22,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.customersheet.CustomerSheetViewAction
 import com.stripe.android.customersheet.CustomerSheetViewModel
 import com.stripe.android.customersheet.CustomerSheetViewState
+import com.stripe.android.customersheet.analytics.CustomerSheetEvent
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
@@ -32,6 +33,7 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodUI
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
+import com.stripe.android.ui.core.cardscan.CardScanEventsReporter
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
@@ -239,6 +241,10 @@ internal fun AddPaymentMethod(
         DefaultAnalyticsEventReporter(viewActionHandler)
     }
 
+    val cardScanEventReporter = remember(viewActionHandler) {
+        DefaultCardScanEventReporter(viewActionHandler)
+    }
+
     if (displayForm) {
         CompositionLocalProvider(
             LocalCardNumberCompletedEventReporter provides eventReporter,
@@ -363,5 +369,56 @@ private class DefaultCardBrandDisallowedReporter(
 ) : CardBrandDisallowedReporter {
     override fun onDisallowedCardBrandEntered(brand: CardBrand) {
         viewActionHandler.invoke(CustomerSheetViewAction.OnDisallowedCardBrandEntered(brand))
+    }
+}
+
+private class DefaultCardScanEventReporter(
+    private val viewActionHandler: (event: CustomerSheetViewAction) -> Unit
+) : CardScanEventsReporter {
+    override fun onCardScanStarted(implementation: String) {
+        viewActionHandler.invoke(
+            CustomerSheetViewAction.OnCardScanEvent(
+                CustomerSheetEvent.CardScanStarted(implementation = implementation)
+            )
+        )
+    }
+
+    override fun onCardScanSucceeded(implementation: String) {
+        viewActionHandler.invoke(
+            CustomerSheetViewAction.OnCardScanEvent(
+                CustomerSheetEvent.CardScanSucceeded(implementation = implementation)
+            )
+        )
+    }
+
+    override fun onCardScanFailed(implementation: String, error: Throwable?) {
+        viewActionHandler.invoke(
+            CustomerSheetViewAction.OnCardScanEvent(
+                CustomerSheetEvent.CardScanFailed(
+                    implementation = implementation,
+                    error = error
+                )
+            )
+        )
+    }
+
+    override fun onCardScanCancelled(implementation: String) {
+        viewActionHandler.invoke(
+            CustomerSheetViewAction.OnCardScanEvent(
+                CustomerSheetEvent.CardScanCancelled(implementation = implementation)
+            )
+        )
+    }
+
+    override fun onCardScanApiCheck(implementation: String, available: Boolean, reason: String?) {
+        viewActionHandler.invoke(
+            CustomerSheetViewAction.OnCardScanEvent(
+                CustomerSheetEvent.CardScanApiCheck(
+                    implementation = implementation,
+                    available = available,
+                    reason = reason
+                )
+            )
+        )
     }
 }

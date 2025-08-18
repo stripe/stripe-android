@@ -71,6 +71,7 @@ import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
+import com.stripe.android.ui.core.cardscan.CardScanEvent
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -274,6 +275,7 @@ internal class CustomerSheetViewModel(
             is CustomerSheetViewAction.OnCardNumberInputCompleted -> onCardNumberInputCompleted()
             is CustomerSheetViewAction.OnDisallowedCardBrandEntered -> onDisallowedCardBrandEntered(viewAction.brand)
             is CustomerSheetViewAction.OnAnalyticsEvent -> onAnalyticsEvent(viewAction.event)
+            is CustomerSheetViewAction.OnCardScanEvent -> onCardScanEvent(viewAction.event)
             is CustomerSheetViewAction.OnBackPressed -> onBackPressed()
             is CustomerSheetViewAction.OnEditPressed -> onEditPressed()
             is CustomerSheetViewAction.OnModifyItem -> onModifyItem(viewAction.paymentMethod)
@@ -930,6 +932,10 @@ internal class CustomerSheetViewModel(
 
     private fun onAnalyticsEvent(event: AnalyticsEvent) {
         eventReporter.onAnalyticsEvent(event)
+    }
+
+    private fun onCardScanEvent(event: CardScanEvent) {
+        eventReporter.onCardScanEvent(event)
     }
 
     private fun onDisallowedCardBrandEntered(brand: CardBrand) {

@@ -8,6 +8,7 @@ import com.stripe.android.customersheet.CustomerSheetIntegration
 import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.customersheet.util.getDefaultPaymentMethodsEnabledForCustomerSheet
 import com.stripe.android.model.CardBrand
+import com.stripe.android.ui.core.cardscan.CardScanEvent
 
 internal sealed class CustomerSheetEvent : AnalyticsEvent {
 
@@ -270,6 +271,59 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
         )
     }
 
+    class CardScanStarted(
+        implementation: String,
+    ) : CustomerSheetEvent(), CardScanEvent {
+        override val eventName: String = CS_CARDSCAN_SCAN_STARTED
+        override val additionalParams: Map<String, Any?> = mapOf(
+            "implementation" to implementation
+        )
+    }
+
+    class CardScanSucceeded(
+        implementation: String,
+    ) : CustomerSheetEvent(), CardScanEvent {
+        override val eventName: String = CS_CARDSCAN_SUCCESS
+        override val additionalParams: Map<String, Any?> = mapOf(
+            "implementation" to implementation
+        )
+    }
+
+    class CardScanFailed(
+        implementation: String,
+        error: Throwable?,
+    ) : CustomerSheetEvent(), CardScanEvent {
+        override val eventName: String = CS_CARDSCAN_FAILED
+        override val additionalParams: Map<String, Any?> = mapOf(
+            "implementation" to implementation,
+            FIELD_ERROR_MESSAGE to error?.message
+        )
+    }
+
+    class CardScanCancelled(
+        implementation: String,
+    ) : CustomerSheetEvent(), CardScanEvent {
+        override val eventName: String = CS_CARDSCAN_CANCEL
+        override val additionalParams: Map<String, Any?> = mapOf(
+            "implementation" to implementation
+        )
+    }
+
+    class CardScanApiCheck(
+        implementation: String,
+        available: Boolean,
+        reason: String?,
+    ) : CustomerSheetEvent(), CardScanEvent {
+        override val eventName: String = CS_CARDSCAN_API_CHECK
+        override val additionalParams: Map<String, Any?> = buildMap {
+            if (reason != null) {
+                put("reason", reason)
+            }
+            put("implementation", implementation)
+            put("available", available)
+        }
+    }
+
     internal companion object {
         const val CS_INIT_WITH_CUSTOMER_ADAPTER = "cs_init_with_customer_adapter"
         const val CS_INIT_WITH_CUSTOMER_SESSION = "cs_init_with_customer_session"
@@ -324,6 +378,12 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
         const val CS_UPDATE_PAYMENT_METHOD = "cs_update_card"
         const val CS_UPDATE_PAYMENT_METHOD_FAILED = "cs_update_card_failed"
         const val CS_DISALLOWED_CARD_BRAND = "cs_disallowed_card_brand"
+
+        const val CS_CARDSCAN_SCAN_STARTED = "cs_cardscan_scan_started"
+        const val CS_CARDSCAN_SUCCESS = "cs_cardscan_success"
+        const val CS_CARDSCAN_FAILED = "cs_cardscan_failed"
+        const val CS_CARDSCAN_CANCEL = "cs_cardscan_cancel"
+        const val CS_CARDSCAN_API_CHECK = "cs_cardscan_api_check"
 
         const val FIELD_GOOGLE_PAY_ENABLED = "google_pay_enabled"
         const val FIELD_BILLING = "default_billing_details"

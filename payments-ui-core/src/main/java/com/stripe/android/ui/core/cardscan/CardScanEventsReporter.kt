@@ -31,3 +31,6 @@ interface CardScanEventsReporter {
      */
     fun onCardScanApiCheck(implementation: String, available: Boolean, reason: String? = null)
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface CardScanEvent
