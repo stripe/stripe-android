@@ -15,4 +15,9 @@ internal enum class StripeEmbeddedComponent(val componentName: String) {
      * Represents the Payouts component: [https://docs.stripe.com/connect/supported-embedded-components/payouts](https://docs.stripe.com/connect/supported-embedded-components/payouts)
      */
     PAYOUTS("payouts"),
+
+    /**
+     * Represents the Payments component: [https://docs.stripe.com/connect/supported-embedded-components/payments](https://docs.stripe.com/connect/supported-embedded-components/payments)
+     */
+    PAYMENTS("payments"),
 }
