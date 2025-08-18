@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 class PaymentAuthWebViewClient(
     private val logger: Logger,
-    private val isPageLoaded: MutableStateFlow<Boolean>,
+    private val isPageLoaded: MutableStateFlow<Boolean> = MutableStateFlow(false),
     private val clientSecret: String,
     returnUrl: String?,
     private val activityStarter: (Intent) -> Unit,

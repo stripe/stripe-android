@@ -90,7 +90,10 @@ internal class PayNowActivity : AppCompatActivity() {
                     onDismissed = { /* Not applicable here */ },
                 ) {
                     if (shouldShowWebView) {
-                        PayNowWebView(args.qrCodeUrl) {
+                        PayNowWebView(
+                            url = args.qrCodeUrl,
+                            clientSecret = args.clientSecret,
+                        ) {
                             _shouldShowWebView.value = false
                         }
                     } else {
