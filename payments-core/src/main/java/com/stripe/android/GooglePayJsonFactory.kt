@@ -5,6 +5,7 @@ import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.model.CardBrand
 import kotlinx.parcelize.Parcelize
@@ -169,7 +170,7 @@ class GooglePayJsonFactory internal constructor(
          * Merchant name encoded as UTF-8. Merchant name is rendered in the payment sheet.
          * In TEST environment, or if a merchant isn't recognized, a “Pay Unverified Merchant” message is displayed in the payment sheet.
          */
-        merchantInfo: MerchantInfo? = null,
+        merchantInfo: MerchantInfo,
 
         /**
          * Set to false if you don't support credit cards
@@ -200,13 +201,18 @@ class GooglePayJsonFactory internal constructor(
                     )
                 }
 
-                if (merchantInfo != null && !merchantInfo.merchantName.isNullOrEmpty()) {
-                    put(
-                        "merchantInfo",
-                        JSONObject()
-                            .put("merchantName", merchantInfo.merchantName)
-                    )
-                }
+                put(
+                    "merchantInfo",
+                    JSONObject().apply {
+                        put("softwareInfo", JSONObject()
+                            .put("id", merchantInfo.softwareInfo.id.code)
+                            .put("version", StripeSdkVersion.VERSION_NAME)
+                        )
+                        if (!merchantInfo.merchantName.isNullOrEmpty()) {
+                            put("merchantName", merchantInfo.merchantName)
+                        }
+                    }
+                )
             }
     }
 
@@ -500,6 +506,26 @@ class GooglePayJsonFactory internal constructor(
         }
     }
 
+    @Parcelize
+    data class SoftwareInfo(
+        internal val id: SoftwareId
+    ) : Parcelable {
+        /**
+         * An identifier for the library
+         */
+        enum class SoftwareId(internal val code: String) {
+            /**
+             * An identifier for the flow using the payment sheet UI
+             */
+            Launcher("android/stripe-launcher"),
+
+            /**
+             * An identifier for the flow using the custom element UI
+             */
+            Elements("android/stripe-elements"),
+        }
+    }
+
     /**
      * [MerchantInfo](https://developers.google.com/pay/api/android/reference/request-objects#MerchantInfo)
      */
@@ -510,7 +536,12 @@ class GooglePayJsonFactory internal constructor(
          * In TEST environment, or if a merchant isn't recognized, a “Pay Unverified Merchant”
          * message is displayed in the payment sheet.
          */
-        internal val merchantName: String? = null
+        internal val merchantName: String? = null,
+
+        /**
+         * Basic information about the library used to make calls to Google Pay from this SDK.
+         */
+        internal val softwareInfo: SoftwareInfo
     ) : Parcelable
 
     private companion object {

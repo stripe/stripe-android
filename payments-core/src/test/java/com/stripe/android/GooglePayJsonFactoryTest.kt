@@ -136,6 +136,10 @@ class GooglePayJsonFactoryTest {
                     "phoneNumberRequired": true
                 },
                 "merchantInfo": {
+                    "softwareInfo": {
+                        "id": "android/stripe-launcher",
+                        "version": "${StripeSdkVersion.VERSION_NAME}"
+                    },
                     "merchantName": "Widget Store"
                 }
             }
@@ -158,7 +162,10 @@ class GooglePayJsonFactoryTest {
                 isPhoneNumberRequired = true
             ),
             merchantInfo = GooglePayJsonFactory.MerchantInfo(
-                merchantName = "Widget Store"
+                merchantName = "Widget Store",
+                softwareInfo = GooglePayJsonFactory.SoftwareInfo(
+                    id = GooglePayJsonFactory.SoftwareInfo.SoftwareId.Launcher
+                )
             ),
             shippingAddressParameters = GooglePayJsonFactory.ShippingAddressParameters(
                 isRequired = true,
@@ -177,7 +184,12 @@ class GooglePayJsonFactoryTest {
                 currencyCode = "USD",
                 totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
                 countryCode = "us"
-            )
+            ),
+            merchantInfo = GooglePayJsonFactory.MerchantInfo(
+                softwareInfo = GooglePayJsonFactory.SoftwareInfo(
+                    id = GooglePayJsonFactory.SoftwareInfo.SoftwareId.Launcher
+                )
+            ),
         )
         val countryCode = createPaymentDataRequestJson
             .getJSONObject("transactionInfo")
@@ -192,7 +204,12 @@ class GooglePayJsonFactoryTest {
             transactionInfo = GooglePayJsonFactory.TransactionInfo(
                 currencyCode = "usd",
                 totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final
-            )
+            ),
+            merchantInfo = GooglePayJsonFactory.MerchantInfo(
+                softwareInfo = GooglePayJsonFactory.SoftwareInfo(
+                    id = GooglePayJsonFactory.SoftwareInfo.SoftwareId.Launcher
+                )
+            ),
         )
         val currencyCode = createPaymentDataRequestJson
             .getJSONObject("transactionInfo")
@@ -214,7 +231,12 @@ class GooglePayJsonFactoryTest {
             shippingAddressParameters = GooglePayJsonFactory.ShippingAddressParameters(
                 isRequired = true,
                 allowedCountryCodes = setOf("us", "de")
-            )
+            ),
+            merchantInfo = GooglePayJsonFactory.MerchantInfo(
+                softwareInfo = GooglePayJsonFactory.SoftwareInfo(
+                    id = GooglePayJsonFactory.SoftwareInfo.SoftwareId.Launcher
+                )
+            ),
         )
 
         val allowedCountryCodes = createPaymentDataRequestJson
@@ -559,7 +581,12 @@ class GooglePayJsonFactoryTest {
                 currencyCode = "USD",
                 totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final,
                 totalPrice = 100
-            )
+            ),
+            merchantInfo = GooglePayJsonFactory.MerchantInfo(
+                softwareInfo = GooglePayJsonFactory.SoftwareInfo(
+                    id = GooglePayJsonFactory.SoftwareInfo.SoftwareId.Launcher
+                )
+            ),
         )
 
         val paymentDataAllowedCardNetworks = paymentDataRequestJson
