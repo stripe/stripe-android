@@ -8,7 +8,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.authentication.PaymentNextActionHandler
-import com.stripe.android.payments.core.authentication.WebIntentNextActionHandler
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.view.AuthActivityStarterHost
 
@@ -63,8 +62,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
 
     override fun onNewActivityResultCaller(
         activityResultCaller: ActivityResultCaller,
-        activityResultCallback: ActivityResultCallback<PaymentFlowResult.Unvalidated>,
-        webIntentNextActionHandler: WebIntentNextActionHandler?
+        activityResultCallback: ActivityResultCallback<PaymentFlowResult.Unvalidated>
     ) {
         pollingLauncher = activityResultCaller.registerForActivityResult(
             PollingContract(),

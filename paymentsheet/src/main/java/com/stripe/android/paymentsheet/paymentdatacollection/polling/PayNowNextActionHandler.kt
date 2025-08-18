@@ -10,7 +10,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.authentication.PaymentNextActionHandler
-import com.stripe.android.payments.core.authentication.WebIntentNextActionHandler
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.utils.AnimationConstants
 import com.stripe.android.view.AuthActivityStarterHost
@@ -70,8 +69,7 @@ internal class PayNowNextActionHandler : PaymentNextActionHandler<StripeIntent>(
     // TODO: potentially this should implement polling next action handler so that all this is shared.
     override fun onNewActivityResultCaller(
         activityResultCaller: ActivityResultCaller,
-        activityResultCallback: ActivityResultCallback<PaymentFlowResult.Unvalidated>,
-        webIntentNextActionHandler: WebIntentNextActionHandler?
+        activityResultCallback: ActivityResultCallback<PaymentFlowResult.Unvalidated>
     ) {
         pollingLauncher = activityResultCaller.registerForActivityResult(
             PayNowContract(),

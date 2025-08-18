@@ -94,10 +94,9 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
     override fun onNewActivityResultCaller(
         activityResultCaller: ActivityResultCaller,
         activityResultCallback: ActivityResultCallback<PaymentFlowResult.Unvalidated>,
-        webIntentNextActionHandler: WebIntentNextActionHandler?,
     ) {
         allNextActionHandlers.forEach {
-            it.onNewActivityResultCaller(activityResultCaller, activityResultCallback, this.webIntentNextActionHandler)
+            it.onNewActivityResultCaller(activityResultCaller, activityResultCallback)
         }
         paymentRelayLauncher = activityResultCaller.registerForActivityResult(
             PaymentRelayContract(),
