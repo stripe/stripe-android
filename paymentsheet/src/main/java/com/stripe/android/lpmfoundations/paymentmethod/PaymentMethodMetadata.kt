@@ -71,6 +71,14 @@ internal data class PaymentMethodMetadata(
     val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
     val termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay>,
 ) : Parcelable {
+
+    val alwaysSaveForFutureUse: Boolean
+        get() {
+            // When this (now poorly named) feature flag is enabled for a merchant, we always show the reuse mandate,
+            // since the merchant will save the payment method for future use.
+            return linkState?.configuration?.linkSignUpOptInFeatureEnabled == true
+        }
+
     fun hasIntentToSetup(code: PaymentMethodCode): Boolean {
         return when (stripeIntent) {
             is PaymentIntent -> stripeIntent.isSetupFutureUsageSet(code)
@@ -287,7 +295,7 @@ internal data class PaymentMethodMetadata(
         customerRequestedSave: PaymentSelection.CustomerRequestedSave,
         code: PaymentMethodCode
     ): PaymentMethod.AllowRedisplay {
-        val isSettingUp = hasIntentToSetup(code) || linkState?.configuration?.linkSignUpOptInFeatureEnabled == true
+        val isSettingUp = hasIntentToSetup(code) || alwaysSaveForFutureUse
         return paymentMethodSaveConsentBehavior.allowRedisplay(
             isSetupIntent = isSettingUp,
             customerRequestedSave = customerRequestedSave,
