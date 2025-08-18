@@ -85,19 +85,17 @@ internal class LinkButtonScreenshotTest {
     )
 
     @get:Rule
-    val surfacePaparazziRule = PaparazziRule(
-        SystemAppearance.entries,
-        LinkButtonAppearance.entries,
-        FontSize.entries,
+    val themesRule = PaparazziRule(
+        LinkButtonThemes.entries,
         boxModifier = Modifier
             .padding(0.dp)
             .fillMaxWidth(),
     )
 
     @get:Rule
-    val themesPaparazziRule = PaparazziRule(
+    val surfacePaparazziRule = PaparazziRule(
         SystemAppearance.entries,
-        LinkButtonThemes.entries,
+        LinkButtonAppearance.entries,
         FontSize.entries,
         boxModifier = Modifier
             .padding(0.dp)
@@ -180,6 +178,42 @@ internal class LinkButtonScreenshotTest {
                     ).toDefaultPaymentUI(true)!!,
                 ),
                 enabled = true,
+                onClick = { }
+            )
+        }
+    }
+
+    @Test
+    fun testNewUserWithThemes() {
+        themesRule.snapshot {
+            LinkButton(
+                state = LinkButtonState.Default,
+                enabled = true,
+                theme = LinkButtonThemes.currentTheme,
+                onClick = { }
+            )
+        }
+    }
+
+    @Test
+    fun testExistingUserWithThemes() {
+        themesRule.snapshot {
+            LinkButton(
+                state = LinkButtonState.Email("jaynewstrom@test.com"),
+                enabled = true,
+                theme = LinkButtonThemes.currentTheme,
+                onClick = { }
+            )
+        }
+    }
+
+    @Test
+    fun testDisabledUserWithThemes() {
+        themesRule.snapshot {
+            LinkButton(
+                state = LinkButtonState.Email("jaynewstrom@test.com"),
+                enabled = false,
+                theme = LinkButtonThemes.currentTheme,
                 onClick = { }
             )
         }
