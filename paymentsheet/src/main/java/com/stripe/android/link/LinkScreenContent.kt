@@ -7,7 +7,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import com.stripe.android.link.model.LinkAccount
-import com.stripe.android.link.model.LinkAppearance
 import com.stripe.android.link.ui.FullScreenContent
 import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.link.ui.LinkContentScrollHandler

@@ -14,11 +14,11 @@ import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
-import com.stripe.android.link.model.LinkAppearance
 import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
@@ -722,7 +722,18 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     !isUsingWalletButtons
                 }
                 is SavedSelection.PaymentMethod -> {
-                    customer?.paymentMethods?.find { it.id == selection.id }?.toPaymentSelection()
+                    val customerPaymentMethod = customer?.paymentMethods?.find { it.id == selection.id }
+                    if (customerPaymentMethod != null) {
+                        customerPaymentMethod.toPaymentSelection()
+                    } else if (selection.isLinkOrigin) {
+                        // The payment method wasn't attached to the customer, but is of Link origin. Offer
+                        // Link as the initial payment selection.
+                        PaymentSelection.Link().takeIf {
+                            !isUsingWalletButtons
+                        }
+                    } else {
+                        null
+                    }
                 }
                 is SavedSelection.None -> null
             }

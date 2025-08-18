@@ -32,18 +32,19 @@ internal class RealRedirectResolver(
                 val connection = (URL(url).openConnection() as HttpURLConnection).apply {
                     connectTimeout = RedirectTimeoutInMillis
                     readTimeout = RedirectTimeoutInMillis
+                    instanceFollowRedirects = false
 
                     if (this is HttpsURLConnection) {
                         configureSSL()
                     }
                 }
 
-                // Seems like we need to call getResponseCode() so that HttpURLConnection internally
-                // follows the redirect. If we didn't call this method, connection.url would be the
-                // same as the provided url, making this method redundant.
-                connection.responseCode
-
-                connection.url.toString()
+                val locationHeader = connection.getHeaderField("Location")
+                if (!locationHeader.isNullOrEmpty()) {
+                    locationHeader
+                } else {
+                    url
+                }
             }.getOrElse {
                 url
             }

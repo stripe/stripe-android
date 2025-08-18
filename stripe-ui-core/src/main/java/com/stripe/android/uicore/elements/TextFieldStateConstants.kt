@@ -52,6 +52,7 @@ class TextFieldStateConstants {
             override fun isFull(): Boolean = preventMoreInput
         }
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         object Blank : Error(R.string.stripe_blank_and_required) {
             override fun shouldShowError(hasFocus: Boolean): Boolean = false
             override fun isBlank(): Boolean = true

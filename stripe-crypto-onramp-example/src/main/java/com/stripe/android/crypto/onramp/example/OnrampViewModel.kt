@@ -9,7 +9,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
@@ -24,7 +23,7 @@ import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
 import com.stripe.android.crypto.onramp.model.OnrampSetWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
 import com.stripe.android.crypto.onramp.model.PaymentOptionDisplayData
-import com.stripe.android.link.model.LinkAppearance
+import com.stripe.android.link.LinkAppearance
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -48,17 +47,14 @@ internal class OnrampViewModel(
     private var selectedPaymentInfo: PaymentOptionDisplayData? = null
 
     init {
-        @Suppress("MaxLineLength")
-        PaymentConfiguration.init(
-            application,
-            "pk_test_51K9W3OHMaDsveWq0oLP0ZjldetyfHIqyJcz27k2BpMGHxu9v9Cei2tofzoHncPyk3A49jMkFEgTOBQyAMTUffRLa00xzzARtZO"
-        )
         onrampCoordinator = OnrampCoordinator.Builder()
             .build(application, savedStateHandle)
 
         viewModelScope.launch {
-            @Suppress("MagicNumber")
+            @Suppress("MagicNumber", "MaxLineLength")
             val configuration = OnrampConfiguration(
+                merchantDisplayName = "Onramp Example",
+                publishableKey = "pk_test_51K9W3OHMaDsveWq0oLP0ZjldetyfHIqyJcz27k2BpMGHxu9v9Cei2tofzoHncPyk3A49jMkFEgTOBQyAMTUffRLa00xzzARtZO",
                 appearance = LinkAppearance(
                     lightColors = LinkAppearance.Colors(
                         primary = Color.Blue,

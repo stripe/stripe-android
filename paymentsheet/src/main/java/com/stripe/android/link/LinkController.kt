@@ -13,7 +13,6 @@ import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.link.injection.DaggerLinkControllerComponent
 import com.stripe.android.link.injection.LinkControllerPresenterComponent
-import com.stripe.android.link.model.LinkAppearance
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -135,6 +134,8 @@ class LinkController @Inject internal constructor(
     @Poko
     class Configuration internal constructor(
         internal val merchantDisplayName: String,
+        internal val publishableKey: String,
+        internal val stripeAccountId: String?,
         internal val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
         internal val defaultBillingDetails: PaymentSheet.BillingDetails?,
         internal val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
@@ -153,8 +154,10 @@ class LinkController @Inject internal constructor(
              * Your customer-facing business name.
              */
             private val merchantDisplayName: String,
-            private val appearance: LinkAppearance? = null
+            private val publishableKey: String,
+            private val stripeAccountId: String? = null,
         ) {
+            private var appearance: LinkAppearance? = null
             private var cardBrandAcceptance: PaymentSheet.CardBrandAcceptance =
                 ConfigurationDefaults.cardBrandAcceptance
             private var defaultBillingDetails: PaymentSheet.BillingDetails? =
@@ -162,6 +165,16 @@ class LinkController @Inject internal constructor(
             private var billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
                 ConfigurationDefaults.billingDetailsCollectionConfiguration
             private var allowUserEmailEdits: Boolean = true
+
+            /**
+             * Configure the appearance of Link UI components.
+             *
+             * @param appearance The [LinkAppearance] configuration for customizing Link UI styling.
+             * @return This builder instance for method chaining.
+             */
+            fun appearance(appearance: LinkAppearance) = apply {
+                this.appearance = appearance
+            }
 
             /**
              * Configuration for which card brands should be accepted or blocked.
@@ -215,19 +228,24 @@ class LinkController @Inject internal constructor(
              * @return A new [Configuration] with the specified settings.
              */
             fun build(): Configuration = Configuration(
-                allowUserEmailEdits = allowUserEmailEdits,
                 merchantDisplayName = merchantDisplayName,
+                publishableKey = publishableKey,
+                stripeAccountId = stripeAccountId,
                 cardBrandAcceptance = cardBrandAcceptance,
                 defaultBillingDetails = defaultBillingDetails,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                allowUserEmailEdits = allowUserEmailEdits,
                 linkAppearance = appearance
             )
         }
 
         internal companion object {
-            fun default(context: Context): Configuration {
+            fun default(context: Context, publishableKey: String): Configuration {
                 val appName = context.applicationInfo.loadLabel(context.packageManager).toString()
-                return Builder(appName).build()
+                return Builder(
+                    merchantDisplayName = appName,
+                    publishableKey = publishableKey
+                ).build()
             }
         }
     }
