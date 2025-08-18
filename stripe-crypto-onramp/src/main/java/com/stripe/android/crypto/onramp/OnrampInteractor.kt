@@ -35,11 +35,15 @@ internal class OnrampInteractor @Inject constructor(
     suspend fun configure(configuration: OnrampConfiguration) {
         _state.value = _state.value.copy(configuration = configuration)
 
+        // We are *not* calling `PaymentConfiguration.init()` here because we're relying on
+        // `LinkController.configure()` to do it.
         linkController.configure(
             LinkController.Configuration.Builder(
-                merchantDisplayName = "Onramp Merchant",
-                appearance = configuration.appearance
-            ).build()
+                merchantDisplayName = configuration.merchantDisplayName,
+                publishableKey = configuration.publishableKey,
+            )
+                .appearance(configuration.appearance)
+                .build()
         )
     }
 
