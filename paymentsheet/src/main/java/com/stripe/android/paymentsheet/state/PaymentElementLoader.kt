@@ -722,7 +722,18 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     !isUsingWalletButtons
                 }
                 is SavedSelection.PaymentMethod -> {
-                    customer?.paymentMethods?.find { it.id == selection.id }?.toPaymentSelection()
+                    val customerPaymentMethod = customer?.paymentMethods?.find { it.id == selection.id }
+                    if (customerPaymentMethod != null) {
+                        customerPaymentMethod.toPaymentSelection()
+                    } else if (selection.isLinkOrigin) {
+                        // The payment method wasn't attached to the customer, but is of Link origin. Offer
+                        // Link as the initial payment selection.
+                        PaymentSelection.Link().takeIf {
+                            !isUsingWalletButtons
+                        }
+                    } else {
+                        null
+                    }
                 }
                 is SavedSelection.None -> null
             }
