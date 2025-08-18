@@ -37,6 +37,7 @@ com.stripe.android.googlepaylauncher
 com.stripe.android.model
 com.stripe.android.model.parsers
 com.stripe.android.model.wallets
+com.stripe.android.payments
 com.stripe.android.payments.bankaccount
 com.stripe.android.payments.bankaccount.navigation
 com.stripe.android.payments.core.injection
@@ -50,7 +51,6 @@ com.stripe.android.model
 module:paymentsheet
 com.stripe.android
 com.stripe.android.customersheet
-com.stripe.android.link.model
 com.stripe.android.link.ui.verification
 com.stripe.android.paymentelement
 com.stripe.android.paymentsheet
