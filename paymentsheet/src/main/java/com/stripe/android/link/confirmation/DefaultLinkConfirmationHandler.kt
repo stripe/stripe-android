@@ -173,9 +173,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
             is SetupIntent -> true
         }
 
-        val isAlwaysShowingMandate = configuration.linkSignUpOptInFeatureEnabled
-
-        return if (isSettingUp || isAlwaysShowingMandate) {
+        return if (isSettingUp || configuration.alwaysSaveForFutureUse) {
             configuration.saveConsentBehavior.overrideAllowRedisplay ?: PaymentMethod.AllowRedisplay.LIMITED
         } else {
             PaymentMethod.AllowRedisplay.UNSPECIFIED
