@@ -36,13 +36,17 @@ class AddressElement(
     override val allowsUserInteraction: Boolean = true
     override val mandateText: ResolvableString? = null
 
+    private val emailElement = EmailElement(
+        initialValue = rawValuesMap[IdentifierSpec.Email]
+    )
+
     private val nameElement = SimpleTextElement(
         IdentifierSpec.Name,
         SimpleTextFieldController(
             textFieldConfig = SimpleTextFieldConfig(
-                label = resolvableString(CoreR.string.stripe_address_label_full_name)
+                label = resolvableString(CoreR.string.stripe_address_label_full_name),
+                optional = addressInputMode.nameConfig == AddressFieldConfiguration.OPTIONAL,
             ),
-            showOptionalLabel = addressInputMode.nameConfig == AddressFieldConfiguration.OPTIONAL,
             initialValue = rawValuesMap[IdentifierSpec.Name]
         )
     )
@@ -192,13 +196,18 @@ class AddressElement(
             }
         }
 
-        val fields = if (addressInputMode.phoneNumberConfig != AddressFieldConfiguration.HIDDEN) {
-            baseElements.plus(phoneNumberElement)
-        } else {
-            baseElements
-        }
+        baseElements
+            .toMutableList()
+            .apply {
+                if (addressInputMode.emailConfig != AddressFieldConfiguration.HIDDEN) {
+                    add(emailElement)
+                }
 
-        fields
+                if (addressInputMode.phoneNumberConfig != AddressFieldConfiguration.HIDDEN) {
+                    add(phoneNumberElement)
+                }
+            }
+            .toList()
     }
 
     private val controller = AddressController(fields)

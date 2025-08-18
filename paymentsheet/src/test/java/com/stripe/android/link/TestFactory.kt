@@ -26,6 +26,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
+import com.stripe.android.networking.RequestSurface
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -263,6 +264,7 @@ internal object TestFactory {
 
     val NATIVE_LINK_ARGS = NativeLinkArgs(
         configuration = LINK_CONFIGURATION,
+        requestSurface = RequestSurface.PaymentElement,
         publishableKey = "",
         stripeAccountId = "",
         linkExpressMode = LinkExpressMode.DISABLED,

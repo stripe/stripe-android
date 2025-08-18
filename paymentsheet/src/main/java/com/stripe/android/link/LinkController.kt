@@ -2,19 +2,25 @@ package com.stripe.android.link
 
 import android.app.Application
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
-import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.configuration.ConfigurationDefaults
+import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.link.injection.DaggerLinkControllerComponent
 import com.stripe.android.link.injection.LinkControllerPresenterComponent
 import com.stripe.android.link.model.LinkAppearance
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -233,7 +239,6 @@ class LinkController @Inject internal constructor(
      * @param createdPaymentMethod The [PaymentMethod] created from the selected Link payment method, if any.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    @Parcelize
     @Poko
     class State
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -247,7 +252,7 @@ class LinkController @Inject internal constructor(
         val merchantLogoUrl: String? = null,
         val selectedPaymentMethodPreview: PaymentMethodPreview? = null,
         val createdPaymentMethod: PaymentMethod? = null,
-    ) : Parcelable {
+    ) {
         /**
          * Whether the Link consumer account is verified. Null if no account is loaded.
          */
@@ -541,18 +546,33 @@ class LinkController @Inject internal constructor(
     /**
      * Preview information for a Link payment method.
      *
-     * @param iconRes The drawable resource ID for the payment method icon.
      * @param label The main label text (e.g., "Link").
-     * @param sublabel Additional descriptive text (e.g., "Card •••• 1234").
+     * @param sublabel Additional descriptive text (e.g., "Visa •••• 4242").
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    @Parcelize
     @Poko
-    class PaymentMethodPreview(
-        @DrawableRes val iconRes: Int,
+    class PaymentMethodPreview
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
+        private val imageLoader: suspend () -> Drawable,
         val label: String,
-        val sublabel: String?
-    ) : Parcelable
+        val sublabel: String?,
+    ) {
+        /**
+         * An image representing a payment method; e.g. the VISA logo.
+         */
+        @IgnoredOnParcel
+        val icon: Drawable by lazy {
+            DelegateDrawable(imageLoader)
+        }
+
+        /**
+         * An image representing a payment method; e.g. the VISA logo.
+         */
+        val iconPainter: Painter
+            @Composable
+            get() = rememberDrawablePainter(icon)
+    }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
@@ -562,11 +582,29 @@ class LinkController @Inject internal constructor(
             application: Application,
             savedStateHandle: SavedStateHandle
         ): LinkController {
+            return create(
+                application = application,
+                savedStateHandle = savedStateHandle,
+                // Temporarily "android_crypto_onramp" until backend is ready.
+                // Should be "android_link_controller" instead.
+                requestSurface = RequestSurface.CryptoOnramp,
+            )
+        }
+
+        // Internal use only.
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @JvmStatic
+        fun create(
+            application: Application,
+            savedStateHandle: SavedStateHandle,
+            requestSurface: RequestSurface,
+        ): LinkController {
             return DaggerLinkControllerComponent.factory()
                 .build(
                     application = application,
                     savedStateHandle = savedStateHandle,
                     paymentElementCallbackIdentifier = "LinkController",
+                    requestSurface = requestSurface,
                 )
                 .linkController
         }

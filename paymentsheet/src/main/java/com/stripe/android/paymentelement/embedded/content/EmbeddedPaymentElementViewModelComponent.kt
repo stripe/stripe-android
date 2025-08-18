@@ -16,6 +16,7 @@ import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.injection.PaymentsIntegrityModule
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -66,6 +67,7 @@ import kotlin.coroutines.CoroutineContext
         MobileSessionIdModule::class,
         CardScanModule::class,
         EmbeddedLinkExtrasModule::class,
+        PaymentsIntegrityModule::class,
         LinkHoldbackExposureModule::class,
     ],
 )

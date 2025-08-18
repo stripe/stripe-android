@@ -18,8 +18,6 @@ internal object PayPalDefinition : PaymentMethodDefinition {
 
     override val supportedAsSavedPaymentMethod: Boolean = false
 
-    override val supportsTermDisplayConfiguration: Boolean = true
-
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf()
@@ -57,6 +55,7 @@ private object PayPalUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDat
         return transformSpecToElements.transform(
             metadata = metadata,
             specs = sharedDataSpec.fields + localLayoutSpecs,
+            termsDisplay = metadata.termsDisplayForType(PayPalDefinition.type),
         )
     }
 }

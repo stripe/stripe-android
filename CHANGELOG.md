@@ -2,11 +2,18 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [FIXED][11332](https://github.com/stripe/stripe-android/pull/11332) Added additional spacing between the section title and section content for payment form screens.
+
+## 21.23.0 - 2025-08-12
+### PaymentSheet
+* [ADDED][11303](https://github.com/stripe/stripe-android/pull/11303) You no longer need to set the backend PaymentIntent setup_future_usage or payment_method_options setup_future_usage values to match the client's IntentConfiguration; the client will automatically configure this for you.
+* [CHANGED][11307](https://github.com/stripe/stripe-android/pull/11307) The value of `shouldSavePaymentMethod` passed to `CreateIntentCallback.onCreateIntent` is now `true` if `SetupFutureUse` is `OffSession` or `OnSession` in your `IntentConfiguration`.
+
 ## 21.22.2 - 2025-08-11
 ### PaymentSheet
 * [ADDED][11179](https://github.com/stripe/stripe-android/pull/11179) More specific error messaging for postal codes
 * [FIXED][11280](https://github.com/stripe/stripe-android/pull/11280) Flows initiated with PaymentSheet.IntentConfiguration now show specific API error messages instead of generic fallback messages
-* [ADDED][11303](https://github.com/stripe/stripe-android/pull/11303) You no longer need to set the backend PaymentIntent setup_future_usage or payment_method_options setup_future_usage values to match the client's IntentConfiguration; the client will automatically configure this for you.
 
 ## 21.22.1 - 2025-08-04
 

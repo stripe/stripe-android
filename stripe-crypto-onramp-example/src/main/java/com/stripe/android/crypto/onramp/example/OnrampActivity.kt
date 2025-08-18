@@ -17,15 +17,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.AppBarDefaults
 import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
@@ -38,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.stripe.android.core.utils.FeatureFlags
@@ -74,18 +79,28 @@ internal class OnrampActivity : ComponentActivity() {
 
         setContent {
             OnrampExampleTheme {
-                OnrampScreen(
-                    viewModel = viewModel,
-                    onAuthenticateUser = { email ->
-                        onrampPresenter.authenticateExistingLinkUser(email)
+                Scaffold(
+                    topBar = {
+                        TopAppBar(
+                            windowInsets = AppBarDefaults.topAppBarWindowInsets,
+                            title = { Text("Onramp Coordinator") },
+                        )
                     },
-                    onRegisterWalletAddress = { address, network ->
-                        viewModel.registerWalletAddress(address, network)
-                    },
-                    onStartVerification = {
-                        onrampPresenter.promptForIdentityVerification()
-                    }
-                )
+                ) { innerPadding ->
+                    OnrampScreen(
+                        modifier = Modifier.padding(innerPadding),
+                        viewModel = viewModel,
+                        onAuthenticateUser = {
+                            onrampPresenter.presentForVerification()
+                        },
+                        onRegisterWalletAddress = { address, network ->
+                            viewModel.registerWalletAddress(address, network)
+                        },
+                        onStartVerification = {
+                            onrampPresenter.promptForIdentityVerification()
+                        }
+                    )
+                }
             }
         }
     }
@@ -95,7 +110,8 @@ internal class OnrampActivity : ComponentActivity() {
 @Suppress("LongMethod")
 internal fun OnrampScreen(
     viewModel: OnrampViewModel,
-    onAuthenticateUser: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    onAuthenticateUser: () -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onStartVerification: () -> Unit
 ) {
@@ -112,16 +128,10 @@ internal fun OnrampScreen(
     }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Text(
-            text = "Onramp Coordinator",
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 24.dp)
-        )
-
         when (val currentState = uiState) {
             is OnrampUiState.EmailInput -> {
                 EmailInputScreen(
@@ -330,7 +340,7 @@ private fun RegistrationButtons(
 @Composable
 private fun AuthenticationScreen(
     email: String,
-    onAuthenticate: (String) -> Unit,
+    onAuthenticate: () -> Unit,
     onBack: () -> Unit
 ) {
     Column {
@@ -351,7 +361,7 @@ private fun AuthenticationScreen(
         )
 
         Button(
-            onClick = { onAuthenticate(email) },
+            onClick = onAuthenticate,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 24.dp)
@@ -410,7 +420,7 @@ private fun AuthenticatedOperationsScreen(
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(bottom = 16.dp)
         )
-		
+
         // Network Selection
         Box {
             OutlinedTextField(
@@ -544,13 +554,15 @@ private fun KYCTextField(
     onChange: (String) -> Unit
 ) {
     OutlinedTextField(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 24.dp),
         value = value,
         onValueChange = onChange,
         label = { Text(label) },
+        singleLine = true,
         enabled = true,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 24.dp)
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
     )
 }
 

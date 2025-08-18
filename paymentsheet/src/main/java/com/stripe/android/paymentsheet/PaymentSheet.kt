@@ -622,6 +622,7 @@ class PaymentSheet internal constructor(
         @Parcelize
         @Poko
         class SellerDetails(
+            val businessName: String,
             val networkId: String,
             val externalId: String,
         ) : Parcelable
@@ -1121,8 +1122,6 @@ class PaymentSheet internal constructor(
             /**
              * A map for specifying when legal agreements are displayed for each payment method type.
              * If the payment method is not specified in the list, the TermsDisplay value will default to automatic.
-             *
-             * Valid payment method types include: amazon_pay, card, cashapp, klarna, paypal, revolut_pay, satispay.
              */
             fun termsDisplay(termsDisplay: Map<PaymentMethod.Type, TermsDisplay>) = apply {
                 this.termsDisplay = termsDisplay
@@ -2769,7 +2768,51 @@ class PaymentSheet internal constructor(
          * If `false` (the default), those values will only be used to prefill the corresponding fields in the form.
          */
         val attachDefaultsToPaymentMethod: Boolean = false,
+
+        /**
+         * A list of two-letter country codes representing countries the customers can select.
+         *
+         * If the set is empty (the default), we display all countries.
+         */
+        private val allowedCountries: Set<String> = emptySet(),
     ) : Parcelable {
+        constructor(
+            /**
+             * How to collect the name field.
+             */
+            name: CollectionMode = CollectionMode.Automatic,
+
+            /**
+             * How to collect the phone field.
+             */
+            phone: CollectionMode = CollectionMode.Automatic,
+
+            /**
+             * How to collect the email field.
+             */
+            email: CollectionMode = CollectionMode.Automatic,
+
+            /**
+             * How to collect the billing address.
+             */
+            address: AddressCollectionMode = AddressCollectionMode.Automatic,
+
+            /**
+             * Whether the values included in [PaymentSheet.Configuration.defaultBillingDetails]
+             * should be attached to the payment method, this includes fields that aren't displayed in the form.
+             *
+             * If `false` (the default), those values will only be used to prefill the corresponding fields in the
+             * form.
+             */
+            attachDefaultsToPaymentMethod: Boolean = false,
+        ) : this(
+            name = name,
+            phone = phone,
+            email = email,
+            address = address,
+            attachDefaultsToPaymentMethod = attachDefaultsToPaymentMethod,
+            allowedCountries = emptySet(),
+        )
 
         internal val collectsName: Boolean
             get() = name == CollectionMode.Always
@@ -2788,6 +2831,11 @@ class PaymentSheet internal constructor(
 
         private val collectsFullAddress: Boolean
             get() = address == AddressCollectionMode.Full
+
+        @IgnoredOnParcel
+        internal val allowedBillingCountries by lazy {
+            allowedCountries.map { it.uppercase() }.toSet()
+        }
 
         internal fun toBillingAddressParameters(): GooglePayJsonFactory.BillingAddressParameters {
             val format = when (address) {
@@ -2944,7 +2992,6 @@ class PaymentSheet internal constructor(
      */
     @Poko
     @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class CustomPaymentMethod internal constructor(
         val id: String,
         internal val subtitle: ResolvableString?,

@@ -68,6 +68,7 @@ internal class PreparePaymentMethodTest {
                             currency = "USD",
                         ),
                         sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                            businessName = "My business, Inc.",
                             networkId = "network_123",
                             externalId = "external_123",
                         )
@@ -127,6 +128,7 @@ internal class PreparePaymentMethodTest {
                             currency = "USD",
                         ),
                         sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                            businessName = "My business, Inc.",
                             networkId = "network_456",
                             externalId = "external_456",
                         )
@@ -197,6 +199,7 @@ internal class PreparePaymentMethodTest {
                         currency = "USD",
                     ),
                     sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                        businessName = "My business, Inc.",
                         networkId = "network_789",
                         externalId = "external_789",
                     )

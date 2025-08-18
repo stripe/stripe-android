@@ -58,9 +58,13 @@ class DefaultLinkAccountManagerTest {
     fun `When customerEmail is set in arguments then it is looked up`() = runSuspendTest {
         val linkRepository = object : FakeLinkRepository() {
             var callCount = 0
-            override suspend fun lookupConsumer(email: String, customerId: String?): Result<ConsumerSessionLookup> {
+            override suspend fun lookupConsumer(
+                email: String,
+                sessionId: String,
+                customerId: String?
+            ): Result<ConsumerSessionLookup> {
                 if (email == TestFactory.EMAIL) callCount += 1
-                return super.lookupConsumer(email, customerId)
+                return super.lookupConsumer(email = email, sessionId = sessionId, customerId = customerId)
             }
         }
         assertThat(
@@ -174,9 +178,13 @@ class DefaultLinkAccountManagerTest {
     fun `signInWithUserInput sends correct parameters and starts session for existing user`() = runSuspendTest {
         val linkRepository = object : FakeLinkRepository() {
             var callCount = 0
-            override suspend fun lookupConsumer(email: String, customerId: String?): Result<ConsumerSessionLookup> {
+            override suspend fun lookupConsumer(
+                email: String,
+                sessionId: String,
+                customerId: String?
+            ): Result<ConsumerSessionLookup> {
                 if (email == TestFactory.EMAIL) callCount += 1
-                return super.lookupConsumer(email, customerId)
+                return super.lookupConsumer(email = email, sessionId = sessionId, customerId = customerId)
             }
         }
         val accountManager = accountManager(linkRepository = linkRepository)
@@ -490,9 +498,13 @@ class DefaultLinkAccountManagerTest {
                 return details
             }
 
-            override suspend fun lookupConsumer(email: String, customerId: String?): Result<ConsumerSessionLookup> {
+            override suspend fun lookupConsumer(
+                email: String,
+                sessionId: String,
+                customerId: String?
+            ): Result<ConsumerSessionLookup> {
                 callCount += 1
-                return super.lookupConsumer(email, customerId)
+                return super.lookupConsumer(email = email, sessionId = sessionId, customerId = customerId)
             }
         }
         val accountManager = accountManager(linkRepository = linkRepository)

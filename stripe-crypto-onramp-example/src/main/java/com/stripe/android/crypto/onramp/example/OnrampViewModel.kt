@@ -54,6 +54,7 @@ internal class OnrampViewModel(
             .build(application, savedStateHandle)
 
         viewModelScope.launch {
+            @Suppress("MagicNumber")
             val configuration = OnrampConfiguration(
                 appearance = LinkAppearance(
                     lightColors = LinkAppearance.Colors(
@@ -61,8 +62,8 @@ internal class OnrampViewModel(
                         borderSelected = Color.Red
                     ),
                     darkColors = LinkAppearance.Colors(
-                        primary = Color.Red,
-                        borderSelected = Color.Blue
+                        primary = Color(0xFF9886E6),
+                        borderSelected = Color.White
                     ),
                     style = LinkAppearance.Style.AUTOMATIC,
                     primaryButton = LinkAppearance.PrimaryButton()
@@ -84,7 +85,7 @@ internal class OnrampViewModel(
         currentEmail = email.trim()
         _uiState.value = OnrampUiState.Loading
 
-        val result = onrampCoordinator.isLinkUser(currentEmail)
+        val result = onrampCoordinator.lookupLinkUser(currentEmail)
         when (result) {
             is OnrampLinkLookupResult.Completed -> {
                 if (result.isLinkUser) {
@@ -144,7 +145,7 @@ internal class OnrampViewModel(
 
     fun registerNewLinkUser(userInfo: LinkUserInfo) {
         viewModelScope.launch {
-            val result = onrampCoordinator.registerNewLinkUser(userInfo)
+            val result = onrampCoordinator.registerLinkUser(userInfo)
             when (result) {
                 is OnrampRegisterUserResult.Completed -> {
                     _message.value = "Registration successful"

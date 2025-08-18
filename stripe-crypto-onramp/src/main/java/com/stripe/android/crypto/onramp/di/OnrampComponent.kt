@@ -15,7 +15,6 @@ import javax.inject.Singleton
 @Component(
     modules = [
         OnrampModule::class,
-        OnrampInteractorModule::class,
         StripeRepositoryModule::class,
         ResourceRepositoryModule::class,
         CoreCommonModule::class,

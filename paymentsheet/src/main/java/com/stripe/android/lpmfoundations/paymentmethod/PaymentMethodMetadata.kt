@@ -78,8 +78,17 @@ internal data class PaymentMethodMetadata(
         }
     }
 
-    fun mandateAllowed(paymentMethodType: PaymentMethod.Type): Boolean {
+    fun mandateAllowed(paymentMethodType: PaymentMethod.Type?): Boolean {
         return termsDisplay[paymentMethodType] != PaymentSheet.TermsDisplay.NEVER
+    }
+
+    fun termsDisplayForCode(paymentMethodCode: String): PaymentSheet.TermsDisplay {
+        val paymentMethodDefinition = PaymentMethodRegistry.definitionsByCode[paymentMethodCode]
+        return termsDisplayForType(paymentMethodDefinition?.type)
+    }
+
+    fun termsDisplayForType(paymentMethodType: PaymentMethod.Type?): PaymentSheet.TermsDisplay {
+        return termsDisplay[paymentMethodType] ?: PaymentSheet.TermsDisplay.AUTOMATIC
     }
 
     fun requiresMandate(paymentMethodCode: String): Boolean {
@@ -415,7 +424,11 @@ internal data class PaymentMethodMetadata(
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(null),
                 linkConfiguration = PaymentSheet.LinkConfiguration(),
                 linkMode = null,
-                linkState = null,
+                linkState = LinkState(
+                    configuration = configuration,
+                    signupMode = null,
+                    loginState = LinkState.LoginState.LoggedIn
+                ),
                 paymentMethodIncentive = null,
                 isGooglePayReady = false,
                 displayableCustomPaymentMethods = emptyList(),

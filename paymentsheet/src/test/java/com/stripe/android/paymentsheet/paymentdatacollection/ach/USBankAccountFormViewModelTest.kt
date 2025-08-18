@@ -7,6 +7,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
@@ -86,7 +87,8 @@ class USBankAccountFormViewModelTest {
         linkMode = null,
         setAsDefaultPaymentMethodEnabled = false,
         setAsDefaultMatchesSaveForFutureUse = false,
-        financialConnectionsAvailability = FinancialConnectionsAvailability.Full
+        financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+        termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
     )
 
     private val mockCollectBankAccountLauncher = mock<CollectBankAccountLauncher>()
@@ -1106,6 +1108,21 @@ class USBankAccountFormViewModelTest {
     }
 
     @Test
+    fun `Produces null mandate text when termsDisplay=NEVER`() = runTest {
+        val viewModel = createViewModel(args = defaultArgs.copy(termsDisplay = PaymentSheet.TermsDisplay.NEVER))
+
+        viewModel.currentScreenState.test {
+            assertThat(awaitItem().linkedBankAccount).isNull()
+
+            val unverifiedAccount = mockManuallyEnteredBankAccount(usesMicrodeposits = false)
+            viewModel.handleCollectBankAccountResult(unverifiedAccount)
+
+            val mandateCollectionViewState = awaitItem()
+            assertThat(mandateCollectionViewState.linkedBankAccount?.mandateText).isNull()
+        }
+    }
+
+    @Test
     fun `allowRedisplay returns Unspecified when save behavior is Legacy, not setting up, and no checkbox`() =
         testAllowRedisplay(
             showCheckbox = false,
@@ -1536,6 +1553,52 @@ class USBankAccountFormViewModelTest {
             viewModel.emailController.onValueChange("email@email.com")
             assertThat(awaitItem()?.paymentMethodCreateParams?.billingDetails?.email).isEqualTo("email@email.com")
         }
+    }
+
+    @Test
+    fun `Contains all supported billing countries when allowed countries is empty`() {
+        val viewModel = createViewModel(
+            args = defaultArgs.run {
+                copy(
+                    formArgs = formArgs.copy(
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            name = CollectionMode.Automatic,
+                            phone = CollectionMode.Automatic,
+                            email = CollectionMode.Automatic,
+                            address = AddressCollectionMode.Full,
+                            allowedCountries = emptySet()
+                        )
+                    )
+                )
+            }
+        )
+
+        assertThat(viewModel.addressElement.countryElement.controller.displayItems)
+            .hasSize(CountryUtils.supportedBillingCountries.size)
+    }
+
+    @Test
+    fun `Contains only countries provided through billing configuration`() {
+        val viewModel = createViewModel(
+            args = defaultArgs.run {
+                copy(
+                    formArgs = formArgs.copy(
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            name = CollectionMode.Automatic,
+                            phone = CollectionMode.Automatic,
+                            email = CollectionMode.Automatic,
+                            address = AddressCollectionMode.Full,
+                            allowedCountries = setOf("US", "CA")
+                        )
+                    )
+                )
+            }
+        )
+
+        assertThat(viewModel.addressElement.countryElement.controller.displayItems).containsExactly(
+            "\uD83C\uDDFA\uD83C\uDDF8 United States",
+            "\uD83C\uDDE8\uD83C\uDDE6 Canada"
+        )
     }
 
     @Test

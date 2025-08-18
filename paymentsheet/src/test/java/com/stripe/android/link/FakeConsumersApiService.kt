@@ -58,6 +58,7 @@ internal open class FakeConsumersApiService : ConsumersApiService {
     override suspend fun lookupConsumerSession(
         email: String,
         requestSurface: String,
+        sessionId: String,
         doNotLogConsumerFunnelEvent: Boolean,
         requestOptions: ApiRequest.Options,
         customerId: String?
@@ -66,7 +67,8 @@ internal open class FakeConsumersApiService : ConsumersApiService {
             LookupCall(
                 email = email,
                 requestOptions = requestOptions,
-                requestSurface = requestSurface
+                requestSurface = requestSurface,
+                sessionId = sessionId,
             )
         )
         return lookupConsumerSessionResult
@@ -171,6 +173,7 @@ internal open class FakeConsumersApiService : ConsumersApiService {
     data class LookupCall(
         val email: String,
         val requestSurface: String,
+        val sessionId: String,
         val requestOptions: ApiRequest.Options
     )
 

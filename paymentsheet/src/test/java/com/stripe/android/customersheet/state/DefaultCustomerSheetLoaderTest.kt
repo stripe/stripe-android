@@ -21,6 +21,7 @@ import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
@@ -571,6 +572,61 @@ internal class DefaultCustomerSheetLoaderTest {
         assertThat(eventReporter.onLoadFailedCalls.awaitItem().message).isEqualTo("oops")
     }
 
+    @Test
+    fun `Retains all payment method when 'allowedCountries' is empty`() = runTest {
+        val paymentMethods = createCardsWithDifferentBillingDetails()
+
+        val loader = createCustomerSheetLoader(
+            paymentMethods = paymentMethods,
+        )
+
+        val result = loader.load(
+            configuration = CustomerSheet.Configuration.builder(
+                merchantDisplayName = "Merchant, Inc."
+            )
+                .billingDetailsCollectionConfiguration(
+                    PaymentSheet.BillingDetailsCollectionConfiguration(
+                        allowedCountries = emptySet(),
+                    ),
+                )
+                .build(),
+        )
+
+        val customerPaymentMethods = result.getOrNull()?.customerPaymentMethods
+
+        assertThat(customerPaymentMethods).isNotNull()
+        assertThat(customerPaymentMethods).containsExactlyElementsIn(paymentMethods)
+    }
+
+    @Test
+    fun `Filters out countries not in 'allowedCountries' array`() = runTest {
+        val paymentMethods = createCardsWithDifferentBillingDetails()
+
+        val loader = createCustomerSheetLoader(
+            paymentMethods = paymentMethods,
+        )
+
+        val result = loader.load(
+            configuration = CustomerSheet.Configuration.builder(
+                merchantDisplayName = "Merchant, Inc."
+            )
+                .billingDetailsCollectionConfiguration(
+                    PaymentSheet.BillingDetailsCollectionConfiguration(
+                        allowedCountries = setOf("CA", "mx"),
+                    ),
+                )
+                .build(),
+        )
+
+        val customerPaymentMethods = result.getOrNull()?.customerPaymentMethods
+
+        assertThat(customerPaymentMethods).isNotNull()
+        assertThat(customerPaymentMethods).containsExactly(
+            paymentMethods[1],
+            paymentMethods[4],
+        )
+    }
+
     private fun createCustomerSheetLoader(
         isGooglePayReady: Boolean = true,
         isLiveModeProvider: () -> Boolean = { false },
@@ -685,6 +741,45 @@ internal class DefaultCustomerSheetLoaderTest {
             workContext = workContext,
         )
     }
+
+    private fun createCardsWithDifferentBillingDetails(): List<PaymentMethod> = listOf(
+        PaymentMethodFactory.card(
+            last4 = "4242",
+            billingDetails = null,
+        ),
+        PaymentMethodFactory.card(
+            last4 = "4444",
+            billingDetails = PaymentMethod.BillingDetails(
+                address = Address(
+                    country = "CA",
+                )
+            )
+        ),
+        PaymentMethodFactory.card(
+            last4 = "4444",
+            billingDetails = PaymentMethod.BillingDetails(
+                address = Address(
+                    country = "US",
+                )
+            )
+        ),
+        PaymentMethodFactory.card(
+            last4 = "4444",
+            billingDetails = PaymentMethod.BillingDetails(
+                address = Address(
+                    country = "US",
+                )
+            )
+        ),
+        PaymentMethodFactory.card(
+            last4 = "4444",
+            billingDetails = PaymentMethod.BillingDetails(
+                address = Address(
+                    country = "MX",
+                )
+            )
+        ),
+    )
 
     private fun createCardBrandChoice(isCbcEligible: Boolean?): ElementsSession.CardBrandChoice? {
         return isCbcEligible?.let {

@@ -53,7 +53,7 @@ fun CardDetailsSectionElementUI(
             }
         }
         SectionElementUI(
-            modifier = Modifier.padding(top = 4.dp),
+            modifier = Modifier.padding(top = 8.dp),
             enabled = enabled,
             element = SectionElement(
                 IdentifierSpec.Generic("credit_details"),

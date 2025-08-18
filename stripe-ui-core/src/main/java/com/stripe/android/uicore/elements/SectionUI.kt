@@ -57,7 +57,7 @@ internal fun SectionTitle(titleText: ResolvableString?) {
         H6Text(
             text = it.resolve(),
             modifier = Modifier
-                .padding(bottom = 4.dp)
+                .padding(bottom = 8.dp)
                 .semantics(mergeDescendants = true) { // Need to prevent form as focusable accessibility
                     heading()
                 }

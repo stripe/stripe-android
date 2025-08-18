@@ -79,7 +79,11 @@ internal class DefaultLinkAccountManager @Inject constructor(
         startSession: Boolean,
         customerId: String?
     ): Result<LinkAccount?> =
-        linkRepository.lookupConsumer(email, customerId)
+        linkRepository.lookupConsumer(
+            email = email,
+            sessionId = config.elementsSessionId,
+            customerId = customerId
+        )
             .onFailure { error ->
                 linkEventsReporter.onAccountLookupFailure(error)
             }.map { consumerSessionLookup ->

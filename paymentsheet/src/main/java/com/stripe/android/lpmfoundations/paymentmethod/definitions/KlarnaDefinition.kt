@@ -18,8 +18,6 @@ internal object KlarnaDefinition : PaymentMethodDefinition {
 
     override val supportedAsSavedPaymentMethod: Boolean = false
 
-    override val supportsTermDisplayConfiguration: Boolean = true
-
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf()
@@ -56,7 +54,8 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDat
         }
         return transformSpecToElements.transform(
             metadata = metadata,
-            specs = sharedDataSpec.fields + localLayoutSpecs
+            specs = sharedDataSpec.fields + localLayoutSpecs,
+            termsDisplay = metadata.termsDisplayForType(KlarnaDefinition.type),
         )
     }
 }

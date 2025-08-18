@@ -17,8 +17,6 @@ internal object SatispayDefinition : PaymentMethodDefinition {
 
     override val supportedAsSavedPaymentMethod: Boolean = false
 
-    override val supportsTermDisplayConfiguration: Boolean = true
-
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf()
@@ -54,7 +52,8 @@ private object SatispayUiDefinitionFactory : UiDefinitionFactory.RequiresSharedD
         }
         return transformSpecToElements.transform(
             metadata = metadata,
-            specs = sharedDataSpec.fields + localLayoutSpecs
+            specs = sharedDataSpec.fields + localLayoutSpecs,
+            termsDisplay = metadata.termsDisplayForType(SatispayDefinition.type),
         )
     }
 }

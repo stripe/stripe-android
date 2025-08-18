@@ -47,4 +47,9 @@ class EmailConfigTest {
         assertThat(emailConfig.filter("example@email.com\n\t "))
             .isEqualTo("example@email.com")
     }
+
+    @Test
+    fun `verify when option, determine state returns limitless when empty`() {
+        assertThat(EmailConfig(optional = true).determineState("")).isEqualTo(Limitless)
+    }
 }

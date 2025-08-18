@@ -121,6 +121,7 @@ import kotlin.coroutines.CoroutineContext
 class StripeApiRepository @JvmOverloads internal constructor(
     private val context: Context,
     private val publishableKeyProvider: () -> String,
+    private val requestSurface: RequestSurface,
     private val appInfo: AppInfo? = Stripe.appInfo,
     private val logger: Logger = Logger.noop(),
     private val workContext: CoroutineContext = Dispatchers.IO,
@@ -134,7 +135,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     private val fraudDetectionDataRepository: FraudDetectionDataRepository =
         DefaultFraudDetectionDataRepository(context, workContext),
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory =
-        DefaultCardAccountRangeRepositoryFactory(context, productUsageTokens, analyticsRequestExecutor),
+        DefaultCardAccountRangeRepositoryFactory(context, productUsageTokens, requestSurface, analyticsRequestExecutor),
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =
         PaymentAnalyticsRequestFactory(context, publishableKeyProvider, productUsageTokens),
     private val fraudDetectionDataParamsUtils: FraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils(),
@@ -147,6 +148,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     constructor(
         appContext: Context,
         @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+        requestSurface: RequestSurface,
         @IOContext workContext: CoroutineContext,
         @Named(PRODUCT_USAGE) productUsageTokens: Set<String>,
         paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
@@ -155,6 +157,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     ) : this(
         context = appContext,
         publishableKeyProvider = publishableKeyProvider,
+        requestSurface = requestSurface,
         logger = logger,
         workContext = workContext,
         productUsageTokens = productUsageTokens,
@@ -418,6 +421,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             )
         }
     }
+
     private suspend fun confirmSetupIntentInternal(
         confirmSetupIntentParams: ConfirmSetupIntentParams,
         options: ApiRequest.Options,
@@ -1187,7 +1191,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 url = sharePaymentDetailsUrl,
                 options = requestOptions,
                 params = mapOf(
-                    "request_surface" to "android_payment_element",
+                    "request_surface" to requestSurface.value,
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
@@ -1209,7 +1213,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 url = logoutConsumerUrl,
                 options = requestOptions,
                 params = mapOf(
-                    "request_surface" to "android_payment_element",
+                    "request_surface" to requestSurface.value,
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
@@ -1564,7 +1568,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 listConsumerPaymentDetailsUrl,
                 requestOptions,
                 mapOf(
-                    "request_surface" to "android_payment_element",
+                    "request_surface" to requestSurface.value,
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to clientSecret
                     ),
@@ -1584,7 +1588,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 listShippingAddresses,
                 requestOptions,
                 mapOf(
-                    "request_surface" to "android_payment_element",
+                    "request_surface" to requestSurface.value,
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to clientSecret
                     ),
@@ -1605,7 +1609,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     getConsumerPaymentDetailsUrl(paymentDetailsId),
                     requestOptions,
                     mapOf(
-                        "request_surface" to "android_payment_element",
+                        "request_surface" to requestSurface.value,
                         "credentials" to mapOf(
                             "consumer_session_client_secret" to clientSecret
                         )
@@ -1626,7 +1630,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 getConsumerPaymentDetailsUrl(paymentDetailsUpdateParams.id),
                 requestOptions,
                 mapOf(
-                    "request_surface" to "android_payment_element",
+                    "request_surface" to requestSurface.value,
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to clientSecret
                     )

@@ -22,6 +22,8 @@ import com.stripe.android.paymentsheet.example.playground.settings.GooglePaySett
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.TermsDisplay
+import com.stripe.android.paymentsheet.example.playground.settings.TermsDisplaySettingsDefinition
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
 import com.stripe.android.test.core.TestParameters
@@ -60,6 +62,7 @@ internal class TestSepaDebit : BasePlaygroundTest() {
             testParameters = testParameters.copyPlaygroundSettings { settings ->
                 settings[AutomaticPaymentMethodsSettingsDefinition] = true
                 settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT_WITH_SETUP
+                settings[TermsDisplaySettingsDefinition] = TermsDisplay.NEVER_SEPA_FAMILY
             },
         ) {
             fillOutIban()

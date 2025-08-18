@@ -180,7 +180,7 @@ internal class AutocompleteViewModel @Inject constructor(
                 queryFlow.collect { query ->
                     query?.let {
                         searchJob?.cancel()
-                        if (query.length > MIN_CHARS_AUTOCOMPLETE) {
+                        if (query.length >= MIN_CHARS_AUTOCOMPLETE) {
                             searchJob = launch {
                                 delay(SEARCH_DEBOUNCE_MS)
                                 if (isActive) {
@@ -265,6 +265,6 @@ internal class AutocompleteViewModel @Inject constructor(
     companion object {
         const val SEARCH_DEBOUNCE_MS = 400L
         const val MAX_DISPLAYED_RESULTS = 4
-        const val MIN_CHARS_AUTOCOMPLETE = 3
+        const val MIN_CHARS_AUTOCOMPLETE = 2
     }
 }

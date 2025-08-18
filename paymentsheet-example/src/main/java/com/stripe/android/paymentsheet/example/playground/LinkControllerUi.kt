@@ -35,11 +35,9 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -47,25 +45,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import com.stripe.android.link.LinkController
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 import com.stripe.android.ui.core.R
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @Composable
 internal fun LinkControllerUi(
     modifier: Modifier,
     controllerState: LinkController.State,
     playgroundState: LinkControllerPlaygroundState,
-    onEmailChange: (email: String) -> Unit,
     onPaymentMethodButtonClick: (email: String) -> Unit,
     onCreatePaymentMethodClick: () -> Unit,
+    onLookupClick: (email: String) -> Unit,
     onAuthenticationClick: (email: String, existingOnly: Boolean) -> Unit,
     onRegisterConsumerClick: (email: String, phone: String, country: String, name: String?) -> Unit,
     onErrorMessage: (message: String) -> Unit,
@@ -77,15 +75,6 @@ internal fun LinkControllerUi(
     var registrationCountry by rememberSaveable { mutableStateOf("US") }
     var registrationName by rememberSaveable { mutableStateOf("") }
     val errorToPresent = playgroundState.linkControllerError()
-
-    val scope = rememberCoroutineScope()
-    DisposableEffect(email) {
-        val job = scope.launch {
-            delay(500L)
-            onEmailChange(email)
-        }
-        onDispose { job.cancel() }
-    }
 
     LaunchedEffect(errorToPresent) {
         if (errorToPresent != null) {
@@ -196,6 +185,11 @@ internal fun LinkControllerUi(
         }
         Divider(Modifier.padding(bottom = 10.dp))
 
+        LookupButton(
+            modifier = Modifier.fillMaxWidth(),
+            email = email,
+            onClick = { onLookupClick(email) },
+        )
         AuthenticateButton(
             modifier = Modifier.fillMaxWidth(),
             email = email,
@@ -304,9 +298,9 @@ private fun LinkControllerUiPreview() {
             modifier = Modifier,
             controllerState = LinkController.State(),
             playgroundState = LinkControllerPlaygroundState(),
-            onEmailChange = {},
             onPaymentMethodButtonClick = {},
             onCreatePaymentMethodClick = {},
+            onLookupClick = {},
             onAuthenticationClick = { _, _ -> },
             onRegisterConsumerClick = { _, _, _, _ -> },
             onErrorMessage = {},
@@ -363,7 +357,7 @@ private fun PaymentMethodButton(
                 if (preview != null) {
                     Image(
                         modifier = Modifier.size(iconSize),
-                        painter = painterResource(preview.iconRes),
+                        painter = preview.iconPainter,
                         contentDescription = null,
                     )
                     Column(
@@ -381,9 +375,7 @@ private fun PaymentMethodButton(
                                 modifier = Modifier.padding(top = 2.dp),
                                 text = sublabel,
                                 style = MaterialTheme.typography.body2,
-                                color = MaterialTheme.colors.onSurface.copy(
-                                    alpha = 0.6f
-                                ),
+                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
                             )
                         }
                     }
@@ -419,6 +411,7 @@ private fun PaymentMethodButton(
 @Preview(showBackground = true)
 @Composable
 private fun PaymentMethodButtonPreview() {
+    val context = LocalContext.current
     PaymentSheetExampleTheme {
         Column {
             PaymentMethodButton(
@@ -429,9 +422,14 @@ private fun PaymentMethodButtonPreview() {
             PaymentMethodButton(
                 modifier = Modifier.padding(16.dp),
                 preview = LinkController.PaymentMethodPreview(
+                    imageLoader = {
+                        ContextCompat.getDrawable(
+                            context,
+                            com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_link_arrow,
+                        )!!
+                    },
                     label = "Link",
                     sublabel = "Visa (Personal) •••• 4242",
-                    iconRes = com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_link_arrow,
                 ),
                 onClick = {},
             )
@@ -459,6 +457,29 @@ private fun LabeledCheckbox(
             text = label,
             maxLines = 1,
             style = MaterialTheme.typography.body2,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
+private fun LookupButton(
+    email: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier,
+    ) {
+        Text(
+            text = buildString {
+                append("Lookup")
+                if (email.isNotBlank()) {
+                    append(" ${email.trim()}")
+                }
+            },
+            maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
     }

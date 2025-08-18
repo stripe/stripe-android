@@ -11,8 +11,10 @@ import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampIdentityVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
+import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
+import com.stripe.android.link.NoLinkAccountFoundException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -43,12 +45,15 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         .build()
 
     private val sheet = IdentityVerificationSheet.create(
-        activity,
+        from = activity,
         configuration = IdentityVerificationSheet.Configuration(
             brandLogo = linkController.state(activity).value.merchantLogoUrl?.toUri() ?: fallbackMerchantLogoUri,
         ),
         identityVerificationCallback = ::handleIdentityVerificationResult,
     )
+
+    private val currentLinkAccount: LinkController.LinkAccount?
+        get() = interactor.state.value.linkControllerState?.internalLinkAccount
 
     init {
         // Observe Link controller state
@@ -59,7 +64,14 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
-    fun authenticateExistingLinkUser(email: String) {
+    fun presentForVerification() {
+        val email = currentLinkAccount?.email
+        if (email == null) {
+            onrampCallbacks.authenticationCallback.onResult(
+                OnrampVerificationResult.Failed(NoLinkAccountFoundException())
+            )
+            return
+        }
         linkPresenter.authenticateExistingConsumer(email)
     }
 

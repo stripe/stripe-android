@@ -17,11 +17,17 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.wallet.displayName
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformToBankIcon
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.ui.getCardBrandIconForVerticalMode
+import com.stripe.android.paymentsheet.ui.getLinkIcon
+import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -75,11 +81,13 @@ internal class LinkControllerInteractor @Inject constructor(
     val authenticationResultFlow = _authenticationResultFlow.asSharedFlow()
 
     fun state(context: Context): StateFlow<LinkController.State> {
+        val imageLoader = StripeImageLoader(context)
+        val iconLoader = PaymentSelection.IconLoader(context.resources, imageLoader)
         return combineAsStateFlow(_internalLinkAccount, _state) { account, state ->
             LinkController.State(
                 internalLinkAccount = account,
                 merchantLogoUrl = state.linkComponent?.configuration?.merchantLogoUrl,
-                selectedPaymentMethodPreview = state.selectedPaymentMethod?.toPreview(context),
+                selectedPaymentMethodPreview = state.selectedPaymentMethod?.toPreview(context, iconLoader),
                 createdPaymentMethod = state.createdPaymentMethod,
             )
         }
@@ -302,15 +310,19 @@ internal class LinkControllerInteractor @Inject constructor(
                 component.linkAuth.lookUp(
                     email = email,
                     emailSource = EmailSource.USER_ACTION,
-                    startSession = false,
+                    startSession = true,
                     customerId = null,
                 )
                     .toResult()
-                    .map { it != null }
             }
             .fold(
-                onSuccess = { LinkController.LookupConsumerResult.Success(email, it) },
-                onFailure = { LinkController.LookupConsumerResult.Failed(email, it) }
+                onSuccess = { account ->
+                    updateStateOnAccountUpdate(LinkAccountUpdate.Value(account))
+                    LinkController.LookupConsumerResult.Success(email, account != null)
+                },
+                onFailure = {
+                    LinkController.LookupConsumerResult.Failed(email, it)
+                }
             )
     }
 
@@ -418,16 +430,36 @@ internal class LinkControllerInteractor @Inject constructor(
         }
     }
 
-    private fun LinkPaymentMethod.toPreview(context: Context): LinkController.PaymentMethodPreview {
+    private fun LinkPaymentMethod.toPreview(
+        context: Context,
+        iconLoader: PaymentSelection.IconLoader
+    ): LinkController.PaymentMethodPreview {
+        val label = context.getString(com.stripe.android.R.string.stripe_link)
         val sublabel = buildString {
             append(details.displayName.resolve(context))
             append(" •••• ")
             append(details.last4)
         }
+        val drawableResourceId = when (val details = details) {
+            is ConsumerPaymentDetails.BankAccount -> {
+                TransformToBankIcon(bankName = details.bankName)
+            }
+            is ConsumerPaymentDetails.Card ->
+                details.brand.getCardBrandIconForVerticalMode()
+            is ConsumerPaymentDetails.Passthrough ->
+                getLinkIcon(iconOnly = true)
+        }
+
         return LinkController.PaymentMethodPreview(
-            iconRes = R.drawable.stripe_ic_paymentsheet_link_arrow,
-            label = context.getString(com.stripe.android.R.string.stripe_link),
-            sublabel = sublabel
+            imageLoader = {
+                iconLoader.load(
+                    drawableResourceId = drawableResourceId,
+                    lightThemeIconUrl = null,
+                    darkThemeIconUrl = null,
+                )
+            },
+            label = label,
+            sublabel = sublabel,
         )
     }
 

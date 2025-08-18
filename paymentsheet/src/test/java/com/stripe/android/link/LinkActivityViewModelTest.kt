@@ -31,6 +31,7 @@ import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.utils.TestNavigationManager
+import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentsheet.addresselement.AutocompleteActivityLauncher
@@ -136,6 +137,7 @@ internal class LinkActivityViewModelTest {
     fun `initializer creates ViewModel when args are valid`() {
         val mockArgs = NativeLinkArgs(
             configuration = mock(),
+            requestSurface = RequestSurface.PaymentElement,
             publishableKey = "",
             stripeAccountId = null,
             linkExpressMode = LinkExpressMode.DISABLED,
