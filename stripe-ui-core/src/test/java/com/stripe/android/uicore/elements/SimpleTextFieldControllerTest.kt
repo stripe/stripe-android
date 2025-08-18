@@ -50,7 +50,7 @@ internal class SimpleTextFieldControllerTest {
             assertThat(awaitItem()).isNull()
             controller.onValueChange("showWhenNoFocus")
             shadowOf(getMainLooper()).idle()
-            assertThat(awaitItem()).isEqualTo(ShowWhenNoFocus.getError())
+            assertThat(expectMostRecentItem()).isEqualTo(ShowWhenNoFocus.getError())
         }
     }
 
@@ -154,7 +154,7 @@ internal class SimpleTextFieldControllerTest {
             shadowOf(getMainLooper()).idle()
 
             assertThat(visibleErrors.awaitItem()).isEqualTo(false)
-            assertThat(errors.awaitItem()).isNull()
+            assertThat(errors.expectMostRecentItem()).isNull()
         }
     }
 
@@ -217,6 +217,24 @@ internal class SimpleTextFieldControllerTest {
     fun `Verify 'showOptionalLabel' is false when 'optional' is false in config`() {
         val controller = createControllerWithState(isOptional = false)
         assertThat(controller.showOptionalLabel).isFalse()
+    }
+
+    @Test
+    fun `Verify initial state is 'Limitless' when 'optional' is true in config`() = runTest {
+        val controller = createControllerWithState(isOptional = true)
+
+        controller.fieldState.test {
+            assertThat(awaitItem()).isEqualTo(Limitless)
+        }
+    }
+
+    @Test
+    fun `Verify initial state is 'Blank' when 'optional' is false in config`() = runTest {
+        val controller = createControllerWithState(isOptional = false)
+
+        controller.fieldState.test {
+            assertThat(awaitItem()).isEqualTo(Blank)
+        }
     }
 
     private fun createControllerWithState(

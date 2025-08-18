@@ -6,7 +6,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
-import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -33,8 +32,6 @@ class AutocompleteAddressController(
 
     private var expandForm = false
 
-    override val error: StateFlow<FieldError?> = stateFlowOf(null)
-
     val countryElement = CountryElement(
         IdentifierSpec.Country,
         countryDropdownFieldController,
@@ -54,6 +51,10 @@ class AutocompleteAddressController(
 
     val addressController = addressElementFlow.flatMapLatestAsStateFlow {
         it.addressController
+    }
+
+    override val error: StateFlow<FieldError?> = addressController.flatMapLatestAsStateFlow {
+        it.error
     }
 
     init {
