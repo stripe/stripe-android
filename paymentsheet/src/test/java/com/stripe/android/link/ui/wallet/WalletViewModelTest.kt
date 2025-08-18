@@ -941,21 +941,17 @@ class WalletViewModelTest {
 
     @Test
     fun `paymentSelectionHint is present based on enablePaymentSelectionHint`() = runTest(dispatcher) {
-        val hint = "Select your payment method"
         listOf(
             false to null,
-            true to hint,
+            true to resolvableString(R.string.stripe_wallet_prefer_debit_card_hint),
         ).forEach { (enableHint, expectedHint) ->
             val configuration = TestFactory.LINK_CONFIGURATION.copy(
-                flags = mapOf("link_mobile_enable_payment_selection_hint" to enableHint)
+                flags = mapOf("link_show_prefer_debit_card_hint" to enableHint)
             )
 
             val viewModel = createViewModel(
                 configuration = configuration,
-                linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(
-                    selectedPayment = null,
-                    hint = hint
-                )
+                linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment = null)
             )
 
             assertThat(viewModel.uiState.value.paymentSelectionHint)

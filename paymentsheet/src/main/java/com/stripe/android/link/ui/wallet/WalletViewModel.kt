@@ -89,7 +89,7 @@ internal class WalletViewModel @Inject constructor(
             primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent, linkLaunchMode),
             secondaryButtonLabel = configuration.stripeIntent.secondaryButtonLabel(linkLaunchMode),
             addPaymentMethodOptions = getAddPaymentMethodOptions(),
-            paymentSelectionHint = linkLaunchMode.paymentSelectionHint,
+            paymentSelectionHint = paymentSelectionHint,
             isAutoSelecting = shouldAutoSelectDefaultPaymentMethod(),
             signupToggleEnabled = configuration.linkSignUpOptInFeatureEnabled,
             billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
@@ -104,12 +104,13 @@ internal class WalletViewModel @Inject constructor(
             is LinkLaunchMode.Authentication -> null
         }
 
-    private val LinkLaunchMode.paymentSelectionHint: String?
-        get() = (this as? LinkLaunchMode.PaymentMethodSelection)?.hint
-            ?.takeIf {
+    private val paymentSelectionHint: ResolvableString?
+        get() = R.string.stripe_wallet_prefer_debit_card_hint
+            .takeIf {
                 configuration.enableLinkPaymentSelectionHint ||
                     FeatureFlags.forceEnableLinkPaymentSelectionHint.isEnabled
             }
+            ?.let { resolvableString(it) }
 
     val uiState: StateFlow<WalletUiState> = _uiState.asStateFlow()
 

@@ -46,7 +46,7 @@ internal data class LinkConfiguration(
         get() = if (enableDisplayableDefaultValuesInEce) customerId else null
 
     val enableLinkPaymentSelectionHint: Boolean
-        get() = flags["link_mobile_enable_payment_selection_hint"] == true
+        get() = flags["link_show_prefer_debit_card_hint"] == true
 
     @Parcelize
     data class CustomerInfo(

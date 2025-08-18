@@ -244,7 +244,7 @@ private fun PaymentDetailsSection(
         if (state.paymentSelectionHint != null) {
             Text(
                 modifier = Modifier.padding(bottom = 16.dp),
-                text = state.paymentSelectionHint,
+                text = state.paymentSelectionHint.resolve(),
                 style = LinkTheme.typography.body,
                 color = LinkTheme.colors.textPrimary,
             )

@@ -299,4 +299,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_update_card">Update card</string>
   <!-- A text notice shown when the user selects an expired card. -->
   <string name="stripe_wallet_update_expired_card_error">This card has expired. Update your card info or choose a different payment method.</string>
+  <!-- Hint shown when selecting a payment method indicating debit cards are preferred. -->
+  <string name="stripe_wallet_prefer_debit_card_hint">Debit cards are most likely to be accepted.</string>
 </resources>

@@ -82,8 +82,6 @@ internal class LinkControllerPlaygroundViewModel(
     }
 
     fun onPaymentMethodClick(email: String) {
-        linkControllerPresenter?.paymentSelectionHint =
-            "Lorem ipsum dolor sit amet consectetur adipiscing elit."
         linkControllerPresenter?.presentPaymentMethods(email = email.takeIf { it.isNotBlank() })
     }
 
