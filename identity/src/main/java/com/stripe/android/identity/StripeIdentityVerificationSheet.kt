@@ -1,8 +1,10 @@
 package com.stripe.android.identity
 
 import android.content.Context
+import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistryOwner
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -14,29 +16,55 @@ import com.stripe.android.identity.injection.DaggerIdentityVerificationSheetComp
 import com.stripe.android.identity.injection.IdentityVerificationSheetComponent
 
 internal class StripeIdentityVerificationSheet internal constructor(
-    lifecycleOwner: LifecycleOwner,
-    activityResultRegistryOwner: ActivityResultRegistryOwner,
-    identityVerificationSheetContract: IdentityVerificationSheetContract,
-    private val identityVerificationCallback: IdentityVerificationSheet.IdentityVerificationCallback,
+    private val activityResultLauncher: ActivityResultLauncher<IdentityVerificationSheetContract.Args>,
     context: Context,
     private val configuration: IdentityVerificationSheet.Configuration
 ) : IdentityVerificationSheet, Injector {
 
-    private val activityResultLauncher: ActivityResultLauncher<IdentityVerificationSheetContract.Args>
+    constructor(
+        from: ComponentActivity,
+        configuration: IdentityVerificationSheet.Configuration,
+        identityVerificationCallback: IdentityVerificationSheet.IdentityVerificationCallback
+    ) : this(
+        from.registerForActivityResult(
+            IdentityVerificationSheetContract(),
+            identityVerificationCallback::onVerificationFlowResult
+        ),
+        from,
+        configuration
+    )
 
-    @InjectorKey
-    private val injectorKey: String =
-        WeakMapInjectorRegistry.nextKey(requireNotNull(StripeIdentityVerificationSheet::class.simpleName))
+    constructor(
+        from: Fragment,
+        configuration: IdentityVerificationSheet.Configuration,
+        identityVerificationCallback: IdentityVerificationSheet.IdentityVerificationCallback
+    ) : this(
+        from.registerForActivityResult(
+            IdentityVerificationSheetContract(),
+            identityVerificationCallback::onVerificationFlowResult
+        ),
+        from.requireContext(),
+        configuration
+    )
 
-    init {
-        check(lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.INITIALIZED))
-
-        activityResultLauncher = activityResultRegistryOwner.activityResultRegistry.register(
-            key = "StripeIdentityVerificationSheet_ActivityResultLauncher",
-            contract = identityVerificationSheetContract,
+    constructor(
+        configuration: IdentityVerificationSheet.Configuration,
+        context: Context,
+        lifecycleOwner: LifecycleOwner,
+        activityResultRegistryOwner: ActivityResultRegistryOwner,
+        identityVerificationSheetContract: IdentityVerificationSheetContract,
+        identityVerificationCallback: IdentityVerificationSheet.IdentityVerificationCallback
+    ) : this(
+        activityResultRegistryOwner.activityResultRegistry.register(
+            "StripeIdentityVerificationSheet_ActivityResultLauncher",
+            identityVerificationSheetContract
         ) { result ->
             identityVerificationCallback.onVerificationFlowResult(result)
-        }
+        },
+        context,
+        configuration
+    ) {
+        check(lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.INITIALIZED))
 
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
@@ -45,6 +73,14 @@ internal class StripeIdentityVerificationSheet internal constructor(
                 }
             }
         )
+    }
+
+    @InjectorKey
+    private val injectorKey: String =
+        WeakMapInjectorRegistry.nextKey(requireNotNull(StripeIdentityVerificationSheet::class.simpleName))
+
+    init {
+        WeakMapInjectorRegistry.register(this, injectorKey)
     }
 
     private val identityVerificationSheetComponent: IdentityVerificationSheetComponent =

@@ -114,10 +114,10 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
         val logoUri = linkController.state(activity).value.merchantLogoUrl?.toUri() ?: fallbackMerchantLogoUri
 
-        return IdentityVerificationSheet.create(
+        return IdentityVerificationSheet.onrampCreate(
             from = activity,
             configuration = IdentityVerificationSheet.Configuration(brandLogo = logoUri),
-            identityVerificationCallback = ::handleIdentityVerificationResult,
+            identityVerificationCallback = ::handleIdentityVerificationResult
         )
     }
 }
