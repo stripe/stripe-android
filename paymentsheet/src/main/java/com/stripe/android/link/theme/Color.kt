@@ -31,7 +31,7 @@ private val Critical400 = Color(0xFFFA4A67)
 
 // ECE Link Theme Colors
 internal val EceLinkWhiteTextPrimary = Color(0xFF0D0D0D)
-internal val EceLinkWhiteDivider = Color(0x1F000000)
+internal val EceLinkWhiteDivider = Color(0xFFD4D4D4)
 internal val EceLinkWhiteBackground = Color(0xFFFFFFFF)
 
 internal data class LinkColors(

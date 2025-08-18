@@ -5,6 +5,7 @@ package com.stripe.android.link.ui
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -82,6 +83,13 @@ private val LinkButtonTheme.dividerColor: Color
         LinkButtonTheme.DEFAULT -> LinkTheme.colors.separatorOnPrimaryButton
     }
 
+private val LinkButtonTheme.borderColor: Color?
+    @Composable
+    get() = when (this) {
+        LinkButtonTheme.WHITE -> EceLinkWhiteDivider
+        LinkButtonTheme.DEFAULT -> null
+    }
+
 private val LinkButtonTheme.logoRes: Int
     @Composable
     @DrawableRes
@@ -89,6 +97,13 @@ private val LinkButtonTheme.logoRes: Int
         LinkButtonTheme.WHITE -> R.drawable.stripe_link_logo
         LinkButtonTheme.DEFAULT -> com.stripe.android.uicore.R.drawable.stripe_link_logo_bw
     }
+
+@Composable
+private fun Modifier.themeBorder(theme: LinkButtonTheme): Modifier {
+    return theme.borderColor?.let { borderColor ->
+        this.border(1.dp, borderColor, LinkButtonShape)
+    } ?: this
+}
 
 @Composable
 private fun LinkButtonTheme.buttonColors(): ButtonColors = when (this) {
@@ -176,6 +191,7 @@ internal fun LinkButton(
                 modifier = modifier
                     .fillMaxWidth()
                     .defaultMinSize(minHeight = PrimaryButtonTheme.shape.height)
+                    .themeBorder(theme)
                     .testTag(LinkButtonTestTag),
                 enabled = enabled,
                 shape = LinkButtonShape,
