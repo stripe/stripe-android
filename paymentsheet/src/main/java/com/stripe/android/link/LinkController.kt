@@ -372,7 +372,7 @@ class LinkController @Inject internal constructor(
          * The user successfully selected a payment method from Link.
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data object Success : PresentPaymentMethodsResult
+        class Success internal constructor(val paymentMethod: PaymentMethodPreview?) : PresentPaymentMethodsResult
 
         /**
          * The user canceled the Link payment methods selection.

@@ -196,14 +196,14 @@ internal class LinkControllerInteractor @Inject constructor(
         )
     }
 
-    fun onLinkActivityResult(result: LinkActivityResult) {
+    fun onLinkActivityResult(result: LinkActivityResult, context: Context) {
         val currentLaunchMode = _state.value.currentLaunchMode
         updateState { it.copy(currentLaunchMode = null) }
         updateStateOnAccountUpdate(result.linkAccountUpdate)
 
         when (currentLaunchMode) {
             is LinkLaunchMode.PaymentMethodSelection ->
-                handlePaymentMethodSelectionResult(result)
+                handlePaymentMethodSelectionResult(result, context)
             is LinkLaunchMode.Authentication ->
                 handleAuthenticationResult(result)
             else ->
@@ -254,7 +254,7 @@ internal class LinkControllerInteractor @Inject constructor(
         }
     }
 
-    private fun handlePaymentMethodSelectionResult(result: LinkActivityResult) {
+    private fun handlePaymentMethodSelectionResult(result: LinkActivityResult, context: Context) {
         when (result) {
             is LinkActivityResult.Canceled -> {
                 logger.debug("$tag: presentPaymentMethods canceled")
@@ -267,7 +267,12 @@ internal class LinkControllerInteractor @Inject constructor(
                 updateState {
                     it.copy(selectedPaymentMethod = result.selectedPayment)
                 }
-                _presentPaymentMethodsResultFlow.tryEmit(LinkController.PresentPaymentMethodsResult.Success)
+
+                val imageLoader = StripeImageLoader(context)
+                val iconLoader = PaymentSelection.IconLoader(context.resources, imageLoader)
+                val preview = result.selectedPayment?.toPreview(context, iconLoader)
+
+                _presentPaymentMethodsResultFlow.tryEmit(LinkController.PresentPaymentMethodsResult.Success(preview))
             }
             is LinkActivityResult.Failed -> {
                 logger.debug("$tag: presentPaymentMethods failed")

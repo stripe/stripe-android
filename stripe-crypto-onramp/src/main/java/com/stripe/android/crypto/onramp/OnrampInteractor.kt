@@ -183,9 +183,7 @@ internal class OnrampInteractor @Inject constructor(
         result: LinkController.PresentPaymentMethodsResult
     ): OnrampCollectPaymentResult = when (result) {
         is LinkController.PresentPaymentMethodsResult.Success -> {
-            val paymentMethodPreview = paymentMethodPreview()
-
-            paymentMethodPreview?.let {
+            result.paymentMethod?.let {
                 OnrampCollectPaymentResult.Completed(
                     displayData = PaymentOptionDisplayData(
                         icon = it.icon,
@@ -206,9 +204,6 @@ internal class OnrampInteractor @Inject constructor(
     private fun consumerSessionClientSecret(): String? =
         _state.value.linkControllerState?.internalLinkAccount?.consumerSessionClientSecret
             ?: linkController.state(application).value.internalLinkAccount?.consumerSessionClientSecret
-
-    private fun paymentMethodPreview(): LinkController.PaymentMethodPreview? =
-        linkController.state(application).value.selectedPaymentMethodPreview
 
     fun onLinkControllerState(linkState: LinkController.State) {
         _state.value = _state.value.copy(linkControllerState = linkState)
