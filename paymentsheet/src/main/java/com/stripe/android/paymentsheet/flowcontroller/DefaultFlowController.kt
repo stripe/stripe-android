@@ -660,13 +660,8 @@ internal class DefaultFlowController @Inject internal constructor(
          */
         val selectionToSave = when (currentSelection) {
             is PaymentSelection.New -> stripeIntent.paymentMethod.takeIf {
-                // This solves a particular use case where the feature flag below determines whether the reuse
-                // mandate is shown. Even though this doesn't use SFU, we treat it as if it did.
-                val forceSave = viewModel.state?.paymentSheetState?.linkConfiguration?.linkSignUpOptInFeatureEnabled
-                currentInitializationMode != null && currentSelection.canSave(
-                    initializationMode = currentInitializationMode,
-                    forceSave = forceSave == true,
-                )
+                val alwaysSave = viewModel.state?.paymentSheetState?.alwaysSaveForFutureUse == true
+                currentInitializationMode != null && (currentSelection.canSave(currentInitializationMode) || alwaysSave)
             }?.let { method ->
                 PaymentSelection.Saved(method)
             }
