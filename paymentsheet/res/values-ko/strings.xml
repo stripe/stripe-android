@@ -113,6 +113,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">계속 진행하시면, 향후 구매 시 사용하기 위해 귀하의 정보를 %s에 저장하는 데 동의하시는 것입니다.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[계속 진행하시면, 향후 구매 시 사용하기 위해 귀하의 정보를 %s 및 <link>Link</link>에 저장하는 데 동의하는 것입니다. 또한 Link의 <terms>약관</terms> 및 <privacy>개인정보정책</privacy>에 동의하시는 것입니다.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[계속 진행하시면, 향후 구매 시 사용하기 위해 귀하의 정보를 %s 및 <link>Link</link> (<terms>약관</terms> 및 <privacy>개인정보 보호</privacy> 참조)에 저장하는 데 동의하시는 것입니다.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[계속 진행하시면, 향후 구매 시 사용하기 위해 귀하의 정보를 %s 및 <link>Link</link> 에 Link <terms>약관</terms> 및 <privacy>개인정보 보호</privacy>에 따라 저장하시는 데 동의하시는 것입니다.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">카드가 업데이트되지 않았습니다. 다시 시도하십시오.</string>
   <!-- Title shown above a carousel containing available payment methods -->

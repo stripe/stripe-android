@@ -113,6 +113,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Pokračováním vyjadřujete souhlas s uložením vašich informací pro budoucí nákupy u %s.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Pokračováním vyjadřujete souhlas s uložením vašich informací pro budoucí nákupy u %s a pomocí služby <link>Link</link>. Také vyjadřujete souhlas s <terms>Podmínkami</terms> a <privacy>Ochranou osobních údajů</privacy> služby Link.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Pokračováním vyjadřujete souhlas s uložením vašich informací pro budoucí nákupy pomocí služby %s a pomocí služby <link>Link</link> (viz <terms>Podmínky</terms> a <privacy>Ochrana osobních údajů</privacy>).]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Karta nebyla aktualizována. Zkuste to prosím znovu.</string>
   <!-- Title shown above a carousel containing available payment methods -->

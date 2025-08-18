@@ -113,6 +113,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Z nadaljevanjem se strinjate, da se vaši podatki shranijo za prihodnje nakupe pri %s.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Z nadaljevanjem se strinjate, da se vaši podatki shranijo za prihodnje nakupe pri %s in <link>Link</link>. Strinjate se tudi s <terms>Pogoji</terms> in <privacy>Politiko zasebnosti</privacy> Link.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Z nadaljevanjem se strinjate, da se vaši podatki shranijo za prihodnje nakupe pri %s in <link>Link</link> (glejte <terms>Pogoji</terms> in <privacy>Politika o zasebnost</privacy>).]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Z nadaljevanjem se strinjate, da se vaši podatki shranijo za prihodnje nakupe pri %s in <link>Link</link> glede na povezavo <terms>pogoji</terms> in <privacy>zasebnost</privacy>.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Kartica ni bila posodobljena. Poskusite znova.</string>
   <!-- Title shown above a carousel containing available payment methods -->

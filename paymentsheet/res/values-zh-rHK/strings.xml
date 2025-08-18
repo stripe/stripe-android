@@ -113,6 +113,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">繼續即表示您同意儲存您的資訊,以便將來透過 %s 進行購買。</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[繼續即表示您同意儲存您的資訊，以便將來透過 %s 和 Link 進行 <link>購買</link>。您也同意 Link 的<terms>條款</terms>和<privacy>隱私政策</privacy>。]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[繼續即表示您同意儲存您的個人資料，以便將來透過 %s <link>和 Link 進行購物</link> （請參閱<terms>條款</terms>與<privacy>隱私政策</privacy>）。]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[繼續即表示您同意儲存您的個人資料，以便將來 <link>根據 Link <terms>條款</terms>與<privacy>私隱政策</privacy></link> 透過 Link 購物。]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">卡未更新，請重試。</string>
   <!-- Title shown above a carousel containing available payment methods -->
