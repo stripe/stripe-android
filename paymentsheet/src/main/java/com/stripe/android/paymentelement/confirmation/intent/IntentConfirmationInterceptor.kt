@@ -622,7 +622,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             paymentMethod = paymentMethod,
             optionsParams = paymentMethodOptionsParams,
             extraParams = paymentMethodExtraParams,
-            intentConfigSetupFutureUsage = intentConfigSetupFutureUsage
+            intentConfigSetupFutureUsage = intentConfigSetupFutureUsage,
+            radarOptions = null
         )
         return NextStep.Confirm(
             confirmParams = confirmParams,
