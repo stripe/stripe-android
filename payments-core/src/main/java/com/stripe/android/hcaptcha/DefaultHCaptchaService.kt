@@ -10,7 +10,9 @@ import com.stripe.hcaptcha.config.HCaptchaSize
 import com.stripe.hcaptcha.task.OnFailureListener
 import com.stripe.hcaptcha.task.OnSuccessListener
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeout
 import kotlin.coroutines.resume
+import kotlin.time.Duration.Companion.seconds
 
 internal class DefaultHCaptchaService(
     private val hCaptchaProvider: HCaptchaProvider
@@ -22,12 +24,14 @@ internal class DefaultHCaptchaService(
     ): HCaptchaService.Result {
         val hCaptcha = hCaptchaProvider.get()
         val result = runCatching {
-            startVerification(
-                activity = activity,
-                siteKey = siteKey,
-                rqData = rqData,
-                hCaptcha = hCaptcha
-            )
+            withTimeout(1.5.seconds) {
+                startVerification(
+                    activity = activity,
+                    siteKey = siteKey,
+                    rqData = rqData,
+                    hCaptcha = hCaptcha
+                )
+            }
         }.getOrElse { e ->
             HCaptchaService.Result.Failure(e)
         }
