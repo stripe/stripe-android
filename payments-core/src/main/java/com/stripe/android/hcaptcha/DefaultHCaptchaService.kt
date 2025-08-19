@@ -24,7 +24,7 @@ internal class DefaultHCaptchaService(
     ): HCaptchaService.Result {
         val hCaptcha = hCaptchaProvider.get()
         val result = runCatching {
-            withTimeout(1.5.seconds) {
+            withTimeout(0.3.seconds) {
                 startVerification(
                     activity = activity,
                     siteKey = siteKey,
