@@ -303,7 +303,6 @@ private fun PaymentSelectionHint(
                     shape = RoundedCornerShape(12.dp)
                 )
                 .padding(horizontal = 20.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.Center,
         ) {
             Icon(
                 modifier = Modifier
