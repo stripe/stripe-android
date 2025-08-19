@@ -536,6 +536,7 @@ class LinkControllerInteractorTest {
                     shippingAddress = null,
                 )
             )
+
             assertThat(awaitItem()).isEqualTo(LinkController.PresentPaymentMethodsResult.Success)
         }
 

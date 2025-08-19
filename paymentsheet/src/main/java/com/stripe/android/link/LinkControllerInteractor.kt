@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.DrawableRes
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.flatMapCatching
 import com.stripe.android.link.LinkController.AuthenticationResult
@@ -280,6 +281,7 @@ internal class LinkControllerInteractor @Inject constructor(
                 updateState {
                     it.copy(selectedPaymentMethod = result.selectedPayment)
                 }
+
                 _presentPaymentMethodsResultFlow.tryEmit(LinkController.PresentPaymentMethodsResult.Success)
             }
             is LinkActivityResult.Failed -> {
@@ -501,7 +503,7 @@ internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
     val drawableResourceId = getIconDrawableRes(context.isSystemDarkTheme())
 
     return LinkController.PaymentMethodPreview(
-        imageLoader = {
+        icon = DelegateDrawable {
             iconLoader.load(
                 drawableResourceId = drawableResourceId,
                 lightThemeIconUrl = null,

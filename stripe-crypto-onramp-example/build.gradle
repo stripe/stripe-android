@@ -25,6 +25,7 @@ android {
 dependencies {
     implementation project(':stripe-crypto-onramp')
     implementation project(':payments')
+    implementation project(":stripe-ui-core")
 
     implementation libs.compose.activity
     implementation libs.compose.material
