@@ -503,6 +503,7 @@ internal class PlaygroundSettings private constructor(
             CollectEmailSettingsDefinition,
             CollectPhoneSettingsDefinition,
             CollectAddressSettingsDefinition,
+            AllowedBillingCountriesSettingsDefinition,
             AutocompleteAddressSettingsDefinition,
             DefaultShippingAddressSettingsDefinition,
             DelayedPaymentMethodsSettingsDefinition,
