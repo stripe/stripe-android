@@ -70,6 +70,5 @@ private def create_pr_description()
     Bump version to `#{@version}`
     EOS
 
-    template["<!-- Simple summary of what was changed. -->"] = summary
-    template
+    template.sub("<!-- Simple summary of what was changed. -->", summary)
 end

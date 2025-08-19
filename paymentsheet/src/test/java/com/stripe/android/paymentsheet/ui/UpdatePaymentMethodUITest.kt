@@ -52,7 +52,7 @@ class UpdatePaymentMethodUITest {
     }
 
     @Test
-    fun canRemoveIsTrue_removeButtonHidden() = runScenario(
+    fun canRemoveIsTrue_removeButtonShown() = runScenario(
         canRemove = true,
     ) {
         composeRule.onNodeWithTag(UPDATE_PM_REMOVE_BUTTON_TEST_TAG).assertExists()

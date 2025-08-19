@@ -4,7 +4,7 @@ require_relative 'common'
 
 def update_read_me()
   replace_in_file("README.md",
-      /implementation 'com.stripe:stripe-android:[.\d]+'/,
+      /implementation 'com.stripe:stripe-android:[\d.]+'/,
       "implementation 'com.stripe:stripe-android:#{@version}'",
   )
   execute_or_fail("git add README.md")
@@ -12,7 +12,7 @@ def update_read_me()
 
 def update_stripe_sdk_version()
   replace_in_file("stripe-core/src/main/java/com/stripe/android/core/version/StripeSdkVersion.kt",
-      /const val VERSION_NAME = "[.\d]+"/,
+      /const val VERSION_NAME = "[\d.]+"/,
       %Q{const val VERSION_NAME = "#{@version}"},
   )
   execute_or_fail("git add stripe-core/src/main/java/com/stripe/android/core/version/StripeSdkVersion.kt")
@@ -20,7 +20,7 @@ end
 
 def update_gradle_properties()
   replace_in_file("gradle.properties",
-      /VERSION_NAME=[.\d]+/,
+      /VERSION_NAME=[\d.]+/,
       "VERSION_NAME=#{@version}",
   )
   execute_or_fail("git add gradle.properties")
@@ -52,7 +52,7 @@ end
 
 def update_3ds2_version()
     replace_in_file("3ds2sdk/src/main/kotlin/com/stripe/android/stripe3ds2/SdkVersion.kt",
-      /internal const val VERSION_NAME = "[.\d]+"/,
+      /internal const val VERSION_NAME = "[\d.]+"/,
       %Q{internal const val VERSION_NAME = "#{@version}"},
     )
     execute_or_fail("git add 3ds2sdk/src/main/kotlin/com/stripe/android/stripe3ds2/SdkVersion.kt")
