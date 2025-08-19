@@ -99,6 +99,7 @@ sealed interface StripeIntent : StripeModel {
         DisplayBoletoDetails("boleto_display_details"),
         DisplayKonbiniDetails("konbini_display_details"),
         DisplayMultibancoDetails("multibanco_display_details"),
+        DisplayPayNowDetails("paynow_display_qr_code"),
         SwishRedirect("swish_handle_redirect_or_display_qr_code");
 
         @Keep
@@ -222,6 +223,15 @@ sealed interface StripeIntent : StripeModel {
              */
             override val hostedVoucherUrl: String? = null,
         ) : NextActionData(), DisplayVoucherDetails
+
+        @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class DisplayPayNowDetails(
+            /**
+             * URL of a webpage containing the QR code for this payment.
+             */
+            val qrCodeUrl: String? = null,
+        ) : NextActionData()
 
         /**
          * Contains instructions for authenticating by redirecting your customer to another
