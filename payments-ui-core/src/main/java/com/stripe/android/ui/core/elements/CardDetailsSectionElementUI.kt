@@ -45,8 +45,8 @@ fun CardDetailsSectionElementUI(
                         heading()
                     }
             )
-            if (controller.isCardScanEnabled
-                && (controller.isStripeCardScanAvailable() || FeatureFlags.cardScanGooglePayMigration.isEnabled)
+            if (controller.isCardScanEnabled &&
+                (controller.isStripeCardScanAvailable() || FeatureFlags.cardScanGooglePayMigration.isEnabled)
             ) {
                 ScanCardButtonUI(
                     enabled = enabled,
@@ -57,9 +57,11 @@ fun CardDetailsSectionElementUI(
                                 scannedCard.pan
                             )
                             scannedCard.expirationDate?.let { expirationDate ->
-                                controller.cardDetailsElement.controller.expirationDateElement.controller.onRawValueChange(
-                                    "${expirationDate.month}/${expirationDate.year % 100}"
-                                )
+                                controller.cardDetailsElement.controller.expirationDateElement.controller
+                                    .onRawValueChange(
+                                        @Suppress("MagicNumber")
+                                        "${expirationDate.month}/${expirationDate.year % 100}"
+                                    )
                             }
                         }
                     }

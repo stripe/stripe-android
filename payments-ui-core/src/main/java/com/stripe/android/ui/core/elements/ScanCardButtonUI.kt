@@ -33,6 +33,7 @@ import com.stripe.android.uicore.LocalIconStyle
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
+@Suppress("LongMethod") // Should be removed along with feature flag when ready
 internal fun ScanCardButtonUI(
     enabled: Boolean,
     elementsSessionId: String?,
@@ -56,51 +57,52 @@ internal fun ScanCardButtonUI(
         remember { mutableStateOf(false) }
     }
 
-    if (!FeatureFlags.cardScanGooglePayMigration.isEnabled || isCardScanGoogleAvailable)
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.clickable(
-            interactionSource = remember { MutableInteractionSource() },
-            indication = null,
-            enabled = enabled,
-            onClick = {
-                if (FeatureFlags.cardScanGooglePayMigration.isEnabled) {
-                    cardScanGoogleLauncher?.launch(context)
-                } else {
-                    cardScanLauncher.launch(
-                        input = CardScanContract.Args(
-                            configuration = CardScanConfiguration(
-                                elementsSessionId = elementsSessionId
+    if (!FeatureFlags.cardScanGooglePayMigration.isEnabled || isCardScanGoogleAvailable) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                enabled = enabled,
+                onClick = {
+                    if (FeatureFlags.cardScanGooglePayMigration.isEnabled) {
+                        cardScanGoogleLauncher?.launch(context)
+                    } else {
+                        cardScanLauncher.launch(
+                            input = CardScanContract.Args(
+                                configuration = CardScanConfiguration(
+                                    elementsSessionId = elementsSessionId
+                                )
                             )
                         )
-                    )
+                    }
                 }
+            )
+        ) {
+            val iconStyle = LocalIconStyle.current
+
+            val icon = when (iconStyle) {
+                IconStyle.Filled -> R.drawable.stripe_ic_photo_camera
+                IconStyle.Outlined -> R.drawable.stripe_ic_photo_camera_outlined
             }
-        )
-    ) {
-        val iconStyle = LocalIconStyle.current
 
-        val icon = when (iconStyle) {
-            IconStyle.Filled -> R.drawable.stripe_ic_photo_camera
-            IconStyle.Outlined -> R.drawable.stripe_ic_photo_camera_outlined
+            Image(
+                painter = painterResource(icon),
+                contentDescription = stringResource(
+                    R.string.stripe_scan_card
+                ),
+                colorFilter = ColorFilter.tint(MaterialTheme.colors.primary),
+                modifier = Modifier
+                    .width(18.dp)
+                    .height(18.dp)
+            )
+            Text(
+                stringResource(R.string.stripe_scan_card),
+                Modifier
+                    .padding(start = 4.dp),
+                color = MaterialTheme.colors.primary,
+                style = MaterialTheme.typography.h6
+            )
         }
-
-        Image(
-            painter = painterResource(icon),
-            contentDescription = stringResource(
-                R.string.stripe_scan_card
-            ),
-            colorFilter = ColorFilter.tint(MaterialTheme.colors.primary),
-            modifier = Modifier
-                .width(18.dp)
-                .height(18.dp)
-        )
-        Text(
-            stringResource(R.string.stripe_scan_card),
-            Modifier
-                .padding(start = 4.dp),
-            color = MaterialTheme.colors.primary,
-            style = MaterialTheme.typography.h6
-        )
     }
 }
