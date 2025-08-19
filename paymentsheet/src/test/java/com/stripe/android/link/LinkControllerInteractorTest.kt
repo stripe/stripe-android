@@ -491,8 +491,7 @@ class LinkControllerInteractorTest {
             interactor.onLinkActivityResult(
                 LinkActivityResult.PaymentMethodObtained(
                     paymentMethod = mock()
-                ),
-                context = application
+                )
             )
             expectNoEvents()
         }
@@ -514,8 +513,7 @@ class LinkControllerInteractorTest {
                 LinkActivityResult.Canceled(
                     reason = LinkActivityResult.Canceled.Reason.BackPressed,
                     linkAccountUpdate = LinkAccountUpdate.Value(null)
-                ),
-                context = application
+                )
             )
             assertThat(awaitItem()).isEqualTo(LinkController.PresentPaymentMethodsResult.Canceled)
         }
@@ -536,14 +534,10 @@ class LinkControllerInteractorTest {
                     linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                     selectedPayment = linkPaymentMethod,
                     shippingAddress = null,
-                ),
-                context = application
-
+                )
             )
 
-            val result = awaitItem() as LinkController.PresentPaymentMethodsResult.Success
-            assertThat(result.paymentMethod?.label).isEqualTo("Link")
-            assertThat(result.paymentMethod?.sublabel).isEqualTo("Visa Credit •••• 4242")
+            assertThat(awaitItem()).isEqualTo(LinkController.PresentPaymentMethodsResult.Success)
         }
 
         interactor.state(application).test {
@@ -566,8 +560,7 @@ class LinkControllerInteractorTest {
                 LinkActivityResult.Failed(
                     error = error,
                     linkAccountUpdate = LinkAccountUpdate.Value(null)
-                ),
-                context = application
+                )
             )
             val result = awaitItem()
             assertThat(result).isInstanceOf(LinkController.PresentPaymentMethodsResult.Failed::class.java)
@@ -585,8 +578,7 @@ class LinkControllerInteractorTest {
             LinkActivityResult.Canceled(
                 reason = LinkActivityResult.Canceled.Reason.BackPressed,
                 linkAccountUpdate = LinkAccountUpdate.Value(null)
-            ),
-            context = application
+            )
         )
 
         interactor.state(application).test {

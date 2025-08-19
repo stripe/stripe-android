@@ -51,12 +51,10 @@ internal class LinkControllerCoordinatorTest {
         val activityResultRegistryOwner = object : ActivityResultRegistryOwner {
             override val activityResultRegistry = registry
         }
-        val context: Context = ApplicationProvider.getApplicationContext()
 
         return LinkControllerCoordinator(
             interactor = viewModel,
             lifecycleOwner = lifecycleOwner,
-            context = context,
             activityResultRegistryOwner = activityResultRegistryOwner,
             linkActivityContract = linkActivityContract,
             selectedPaymentMethodCallback = { presentPaymentMethodsResults.add(it) },
@@ -84,9 +82,7 @@ internal class LinkControllerCoordinatorTest {
         lifecycleOwner.setCurrentState(Lifecycle.State.STARTED)
         createCoordinator()
 
-        val presentResult = LinkController.PresentPaymentMethodsResult.Success(
-            testPaymentMethodPreview()
-        )
+        val presentResult = LinkController.PresentPaymentMethodsResult.Success
         presentPaymentMethodsResultFlow.emit(presentResult)
 
         val authResult = LinkController.AuthenticationResult.Success
@@ -102,9 +98,7 @@ internal class LinkControllerCoordinatorTest {
         createCoordinator()
 
         presentPaymentMethodsResultFlow.emit(
-            LinkController.PresentPaymentMethodsResult.Success(
-                testPaymentMethodPreview()
-            )
+            LinkController.PresentPaymentMethodsResult.Success
         )
         authenticationResultFlow.emit(LinkController.AuthenticationResult.Success)
 
@@ -117,9 +111,7 @@ internal class LinkControllerCoordinatorTest {
         lifecycleOwner.setCurrentState(Lifecycle.State.STARTED)
         createCoordinator()
 
-        val result1 = LinkController.PresentPaymentMethodsResult.Success(
-            testPaymentMethodPreview()
-        )
+        val result1 = LinkController.PresentPaymentMethodsResult.Success
         val result2 = LinkController.PresentPaymentMethodsResult.Canceled
         val result3 = LinkController.PresentPaymentMethodsResult.Failed(Exception("Error"))
 
@@ -151,7 +143,6 @@ internal class LinkControllerCoordinatorTest {
         )
         verify(viewModel).onLinkActivityResult(
             testResult,
-            context = ApplicationProvider.getApplicationContext()
         )
     }
 
@@ -161,22 +152,12 @@ internal class LinkControllerCoordinatorTest {
         createCoordinator()
 
         presentPaymentMethodsResultFlow.emit(
-            LinkController.PresentPaymentMethodsResult.Success(
-                testPaymentMethodPreview()
-            )
+            LinkController.PresentPaymentMethodsResult.Success
         )
         assertThat(presentPaymentMethodsResults).isEmpty()
 
         lifecycleOwner.setCurrentState(Lifecycle.State.STARTED)
         presentPaymentMethodsResultFlow.emit(LinkController.PresentPaymentMethodsResult.Canceled)
         assertThat(presentPaymentMethodsResults).containsExactly(LinkController.PresentPaymentMethodsResult.Canceled)
-    }
-
-    private fun testPaymentMethodPreview(): LinkController.PaymentMethodPreview {
-        return LinkController.PaymentMethodPreview(
-            imageLoader = { mock<android.graphics.drawable.Drawable>() },
-            label = "Link",
-            sublabel = "Visa Credit •••• 4242"
-        )
     }
 }
