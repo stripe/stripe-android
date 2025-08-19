@@ -19,7 +19,6 @@ import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runFlowControllerTest
 import com.stripe.android.testing.PaymentMethodFactory
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -47,11 +46,6 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
     @Before
     fun initIntents() {
         Intents.init()
-    }
-
-    @After
-    fun releaseIntents() {
-        Intents.release()
     }
 
     @Test

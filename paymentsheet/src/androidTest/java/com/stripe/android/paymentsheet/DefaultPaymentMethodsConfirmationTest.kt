@@ -19,7 +19,6 @@ import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.paymentelementtestpages.FormPage
 import com.stripe.paymentelementtestpages.VerticalModePage
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -51,11 +50,6 @@ internal class DefaultPaymentMethodsConfirmationTest {
     @Before
     fun initIntents() {
         Intents.init()
-    }
-
-    @After
-    fun releaseIntents() {
-        Intents.release()
     }
 
     @Test
