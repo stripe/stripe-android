@@ -38,8 +38,8 @@ class DefaultIntentStatusPoller @Inject constructor(
         }
     }
 
-    private suspend fun performPoll(force: Boolean = false) {
-        if (force || attempts < config.maxAttempts) {
+    private suspend fun performPoll() {
+        if (attempts < config.maxAttempts) {
             attempts += 1
 
             _state.value = fetchIntentStatus()
