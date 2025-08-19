@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
@@ -57,6 +59,7 @@ internal class OAuthConsentViewModel @Inject constructor(
 
     private fun onConsentSubmitted(consentGranted: Boolean) {
         viewModelScope.launch {
+            updateViewState { it.copy(errorMessage = null) }
             linkAccountManager.consentUpdate(consentGranted).fold(
                 onSuccess = {
                     dismissWithResult(
@@ -66,8 +69,8 @@ internal class OAuthConsentViewModel @Inject constructor(
                         )
                     )
                 },
-                onFailure = {
-                    // TODO: Error handling
+                onFailure = { error ->
+                    updateViewState { it.copy(errorMessage = error.stripeErrorMessage()) }
                 }
             )
         }
@@ -101,5 +104,6 @@ internal data class OAuthConsentViewState(
     val merchantName: String,
     val userEmail: String,
     val merchantLogoUrl: String?,
-    val consentPane: ConsentUi.ConsentPane?
+    val consentPane: ConsentUi.ConsentPane?,
+    val errorMessage: ResolvableString? = null,
 )

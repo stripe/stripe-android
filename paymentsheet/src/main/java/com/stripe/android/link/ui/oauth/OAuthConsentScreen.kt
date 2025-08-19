@@ -30,13 +30,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
+import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.image.LocalStripeImageLoader
 import com.stripe.android.model.ConsentUi
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -50,6 +54,7 @@ internal fun OAuthConsentScreen(
         merchantLogoUrl = viewState.merchantLogoUrl,
         userEmail = viewState.userEmail,
         pane = consentPane,
+        errorMessage = viewState.errorMessage,
         onAllowClick = viewModel::onAllowClick,
         onDenyClick = viewModel::onDenyClick,
     )
@@ -60,6 +65,7 @@ internal fun OAuthConsentScreen(
     merchantLogoUrl: String?,
     userEmail: String,
     pane: ConsentUi.ConsentPane,
+    errorMessage: ResolvableString? = null,
     onAllowClick: () -> Unit,
     onDenyClick: (() -> Unit)? = null,
 ) {
@@ -69,8 +75,13 @@ internal fun OAuthConsentScreen(
         UserSection(userEmail)
         ScopesSection(pane.scopesSection)
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(8.dp))
+        errorMessage?.let {
+            Spacer(Modifier.height(16.dp))
+            ErrorSection(it)
+        }
         pane.disclaimer?.let {
+            Spacer(Modifier.height(16.dp))
             Disclaimer(it)
         }
         Spacer(Modifier.height(16.dp))
@@ -81,6 +92,20 @@ internal fun OAuthConsentScreen(
             onDenyClick = onDenyClick
         )
     }
+}
+
+@Composable
+private fun ErrorSection(
+    errorMessage: ResolvableString,
+) {
+    ErrorText(
+        modifier = Modifier
+            .border(1.dp, LinkTheme.colors.textTertiary, RoundedCornerShape(12.dp))
+            .padding(horizontal = 16.dp)
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.Start,
+        text = errorMessage.resolve(),
+    )
 }
 
 @Composable
@@ -205,8 +230,8 @@ private fun ScopeItem(
         )
         Column(
             modifier = Modifier
-            .weight(1f)
-            .padding(start = 8.dp)
+                .weight(1f)
+                .padding(start = 8.dp)
         ) {
             if (header != null) {
                 Text(
@@ -308,7 +333,7 @@ private fun OAuthConsentScreenPreview() {
             OAuthConsentScreenPreviewHelper(
                 merchantLogoUrl = null,
                 userEmail = "jane.diaz@example.com",
-                pane = consentPanePreview
+                pane = consentPanePreview,
             )
         }
     }
@@ -319,11 +344,13 @@ private fun OAuthConsentScreenPreviewHelper(
     merchantLogoUrl: String?,
     userEmail: String,
     pane: ConsentUi.ConsentPane,
+    errorMessage: ResolvableString? = null,
 ) {
     OAuthConsentScreen(
         merchantLogoUrl = merchantLogoUrl,
         userEmail = userEmail,
         pane = pane,
+        errorMessage = errorMessage,
         onAllowClick = {},
         onDenyClick = {},
     )
