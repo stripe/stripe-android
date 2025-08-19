@@ -590,6 +590,113 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
+    fun `onLinkResultFromFlowController with logout should fallback to default saved payment method`() = runTest {
+        val savedPaymentMethods = PaymentMethodFixtures.createCards(3)
+        val defaultPaymentMethodId = savedPaymentMethods.first().id
+
+        val customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+            paymentMethods = savedPaymentMethods,
+            defaultPaymentMethodId = defaultPaymentMethodId
+        )
+
+        val flowController = createFlowController(
+            customer = customer,
+            paymentSelection = PaymentSelection.Link(
+                selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
+                    details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+                    collectedCvc = null,
+                    billingPhone = null
+                )
+            )
+        )
+
+        flowController.configureExpectingSuccess(
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    // Enable default payment method feature
+                    attachDefaultsToPaymentMethod = true
+                )
+            )
+        )
+
+        // Verify initial state - should have Link selected (getPaymentOption() returns null for Link)
+        // Link selections don't have payment options until configured
+
+        // Simulate Link logout through the public API
+        flowController.onLinkResultFromFlowController(
+            LinkActivityResult.Canceled(
+                reason = Reason.LoggedOut,
+                linkAccountUpdate = LinkAccountUpdate.Value(null)
+            )
+        )
+
+        // Should fall back to default saved payment method - verify using getPaymentOption()
+        val paymentOption = flowController.getPaymentOption()
+        assertThat(paymentOption).isNotNull()
+        assertThat(paymentOption?.paymentMethodType).isEqualTo("card")
+        assertThat(paymentOption?.label).isEqualTo("···· ${savedPaymentMethods.first().card?.last4}")
+
+        // Verify callback was invoked with the fallback payment option
+        verify(paymentOptionResultCallback).onPaymentOptionResult(
+            argThat { result ->
+                result.paymentOption != null &&
+                    result.paymentOption?.paymentMethodType == "card" &&
+                    result.didCancel // should be true since canceled = true for logout
+            }
+        )
+    }
+
+    @Test
+    fun `onLinkResultFromFlowController with logout and no default should fallback to first saved payment method`() =
+        runTest {
+            val savedPaymentMethods = PaymentMethodFixtures.createCards(3)
+
+            val customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+                paymentMethods = savedPaymentMethods,
+                defaultPaymentMethodId = null // No default set
+            )
+
+            val flowController = createFlowController(
+                customer = customer,
+                paymentSelection = PaymentSelection.Link(
+                    selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
+                        details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+                        collectedCvc = null,
+                        billingPhone = null
+                    )
+                )
+            )
+
+            flowController.configureExpectingSuccess()
+
+            // Verify initial state - should have Link selected (getPaymentOption() returns null for Link)
+            // Link selections don't have payment options until configured
+
+            // Simulate Link logout through the public API
+            flowController.onLinkResultFromFlowController(
+                LinkActivityResult.Canceled(
+                    reason = Reason.LoggedOut,
+                    linkAccountUpdate = LinkAccountUpdate.Value(null)
+                )
+            )
+
+            // Should fall back to first saved payment method (most recently used) - verify using getPaymentOption()
+            val paymentOption = flowController.getPaymentOption()
+            assertThat(paymentOption).isNotNull()
+            assertThat(paymentOption?.paymentMethodType).isEqualTo("card")
+            assertThat(paymentOption?.label).isEqualTo("···· ${savedPaymentMethods.first().card?.last4}")
+
+            // Verify callback was invoked
+            verify(paymentOptionResultCallback).onPaymentOptionResult(
+                argThat { result ->
+                    result.paymentOption != null &&
+                        result.paymentOption?.paymentMethodType == "card" &&
+                        result.didCancel // should be true since canceled = true for logout
+                }
+            )
+        }
+
+    @Test
     fun `onPaymentOptionResult() with saved payment method selection result should invoke callback with payment option`() =
         runTest {
             val flowController = createFlowController()

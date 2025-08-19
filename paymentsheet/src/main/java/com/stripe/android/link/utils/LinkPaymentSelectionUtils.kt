@@ -1,7 +1,6 @@
 package com.stripe.android.link.utils
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
 
@@ -26,16 +25,9 @@ internal fun determineFallbackPaymentSelection(
         // Use default payment method if available
         customer.paymentMethods.firstOrNull { paymentMethod ->
             customer.defaultPaymentMethodId != null && paymentMethod.id == customer.defaultPaymentMethodId
-        }?.toPaymentSelection()
+        }
     } else {
         // Fall back to first customer payment method (most recently used appears first)
-        customer.paymentMethods.firstOrNull()?.toPaymentSelection()
-    }
-}
-
-/**
- * Converts a PaymentMethod to a PaymentSelection.Saved
- */
-private fun PaymentMethod.toPaymentSelection(): PaymentSelection.Saved {
-    return PaymentSelection.Saved(this)
+        customer.paymentMethods.firstOrNull()
+    }?.let { PaymentSelection.Saved(it) }
 }
