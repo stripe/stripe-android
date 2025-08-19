@@ -1,12 +1,15 @@
 package com.stripe.android.ui.core.elements
 
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AddressFieldConfiguration
 import com.stripe.android.uicore.elements.AddressInputMode
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.DropdownFieldController
+import com.stripe.android.uicore.elements.FieldError
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SameAsShippingController
@@ -564,6 +567,46 @@ class AddressElementTest {
 
         phoneNumberController.onRawValueChange("1234567890")
         assertThat(phoneNumberController.isComplete.value).isTrue()
+    }
+
+    @Test
+    fun `on validating, should update all internal fields of validation state`() = runTest {
+        val addressElement = AddressElement(
+            IdentifierSpec.Generic("address"),
+            mapOf(
+                IdentifierSpec.Country to "CA"
+            ),
+            countryElement = countryElement,
+            addressInputMode = AddressInputMode.NoAutocomplete(
+                phoneNumberConfig = AddressFieldConfiguration.REQUIRED
+            ),
+            sameAsShippingElement = null,
+            shippingValuesMap = null,
+        )
+
+        addressElement.fields.test {
+            val fields = awaitItem()
+
+            fields.element(IdentifierSpec.Country).errorTest(fieldError = null)
+            fields.element(IdentifierSpec.Line1).errorTest(fieldError = null)
+            fields.element(IdentifierSpec.Line2).errorTest(fieldError = null)
+            fields.element(IdentifierSpec.State).errorTest(fieldError = null)
+            fields.element(IdentifierSpec.PostalCode).errorTest(fieldError = null)
+            fields.element(IdentifierSpec.City).errorTest(fieldError = null)
+
+            addressElement.onValidationStateChanged(true)
+
+            fields.element(IdentifierSpec.Country).errorTest(fieldError = null)
+            fields.element(IdentifierSpec.Line1)
+                .errorTest(fieldError = FieldError(R.string.stripe_blank_and_required))
+            fields.element(IdentifierSpec.Line2).errorTest(fieldError = null)
+            fields.element(IdentifierSpec.State)
+                .errorTest(fieldError = FieldError(R.string.stripe_blank_and_required))
+            fields.element(IdentifierSpec.PostalCode)
+                .errorTest(fieldError = FieldError(R.string.stripe_blank_and_required))
+            fields.element(IdentifierSpec.City)
+                .errorTest(fieldError = FieldError(R.string.stripe_blank_and_required))
+        }
     }
 
     private fun createAddressElement(initialValues: Map<IdentifierSpec, String>): AddressElement {

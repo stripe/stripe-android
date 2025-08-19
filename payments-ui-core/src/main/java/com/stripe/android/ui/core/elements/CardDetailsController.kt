@@ -121,6 +121,12 @@ internal class CardDetailsController(
         it.filterNotNull().firstOrNull()
     }
 
+    override fun onValidationStateChanged(isValidating: Boolean) {
+        fields.forEach {
+            it.onValidationStateChanged(isValidating)
+        }
+    }
+
     @Composable
     override fun ComposeUI(
         enabled: Boolean,

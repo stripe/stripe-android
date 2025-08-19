@@ -580,6 +580,32 @@ class AutocompleteAddressControllerTest {
         }
     }
 
+    @Test
+    fun `on validating, should update all internal fields of validation state`() =
+        fieldsTest { controller ->
+            val fields = awaitItem()
+
+            fields.element(IdentifierSpec.Country).errorTest(fieldError = null)
+            fields.element(IdentifierSpec.Line1).errorTest(fieldError = null)
+            fields.element(IdentifierSpec.Line2).errorTest(fieldError = null)
+            fields.element(IdentifierSpec.State).errorTest(fieldError = null)
+            fields.element(IdentifierSpec.PostalCode).errorTest(fieldError = null)
+            fields.element(IdentifierSpec.City).errorTest(fieldError = null)
+
+            controller.onValidationStateChanged(true)
+
+            fields.element(IdentifierSpec.Country).errorTest(fieldError = null)
+            fields.element(IdentifierSpec.Line1)
+                .errorTest(fieldError = FieldError(R.string.stripe_blank_and_required))
+            fields.element(IdentifierSpec.Line2).errorTest(fieldError = null)
+            fields.element(IdentifierSpec.State)
+                .errorTest(fieldError = FieldError(R.string.stripe_blank_and_required))
+            fields.element(IdentifierSpec.PostalCode)
+                .errorTest(fieldError = FieldError(R.string.stripe_blank_and_required))
+            fields.element(IdentifierSpec.City)
+                .errorTest(fieldError = FieldError(R.string.stripe_blank_and_required))
+        }
+
     private fun noAutocompleteTest(
         autocompleteConfig: AutocompleteAddressInteractor.Config,
     ) = elementsTest(
@@ -704,6 +730,55 @@ class AutocompleteAddressControllerTest {
             identifier = IdentifierSpec.SameAsShipping,
             controller = SameAsShippingController(initialValue = false)
         )
+    }
+
+    private fun List<SectionFieldElement>.element(identifierSpec: IdentifierSpec): SectionFieldElement {
+        val element = nullableElement(identifierSpec)
+
+        assertThat(element).isNotNull()
+
+        return requireNotNull(element)
+    }
+
+    private fun List<SectionFieldElement>.nullableElement(identifierSpec: IdentifierSpec): SectionFieldElement? {
+        for (element in this) {
+            if (element is RowElement) {
+                element.fields.nullableElement(identifierSpec)?.let {
+                    return it
+                }
+            } else if (element.identifier == identifierSpec) {
+                return element
+            }
+        }
+
+        return null
+    }
+
+    private suspend fun SectionFieldElement.errorTest(fieldError: FieldError?) {
+        sectionFieldErrorController().error.test {
+            fieldError?.let {
+                val error = awaitItem()
+
+                assertThat(error?.errorMessage).isEqualTo(it.errorMessage)
+                assertThat(error?.formatArgs).isEqualTo(it.formatArgs)
+            } ?: run {
+                assertThat(awaitItem()).isNull()
+            }
+        }
+    }
+
+    private fun fieldsTest(
+        block: suspend TurbineTestContext<List<SectionFieldElement>>.(controller: AutocompleteAddressController) -> Unit
+    ) = runTest {
+        val controller = createAutocompleteAddressController()
+
+        controller.addressElementFlow.test {
+            val addressElement = awaitItem()
+
+            addressElement.fields.test {
+                block(this, controller)
+            }
+        }
     }
 
     private class TestAutocompleteAddressInteractor private constructor(
