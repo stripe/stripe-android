@@ -63,6 +63,7 @@ internal class DefaultLinkAuth @Inject constructor(
         } else {
             linkAccountManager.lookupConsumer(
                 email = email,
+                linkAuthIntentId = null,
                 startSession = startSession,
                 customerId = customerId
             )
@@ -104,6 +105,7 @@ internal class DefaultLinkAuth @Inject constructor(
             linkAccountManager.mobileLookupConsumer(
                 email = email,
                 emailSource = emailSource,
+                linkAuthIntentId = null,
                 verificationToken = verificationToken,
                 appId = applicationId,
                 startSession = startSession,

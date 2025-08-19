@@ -89,7 +89,10 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
                         )
                     }
                     // confirm verification
-                    val result: Result<LinkAccount> = linkAccountManager.confirmVerification(code)
+                    val result: Result<LinkAccount> = linkAccountManager.confirmVerification(
+                        code = code,
+                        consentGranted = null
+                    )
                     onConfirmationResult(verificationState, result)
                 }
             }

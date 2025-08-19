@@ -85,7 +85,10 @@ internal class VerificationViewModel @Inject constructor(
             )
         }
 
-        linkAccountManager.confirmVerification(code).fold(
+        linkAccountManager.confirmVerification(
+            code = code,
+            consentGranted = null
+        ).fold(
             onSuccess = { account ->
                 updateViewState { it.copy(isProcessing = false) }
                 // Handle Authentication mode logic in ViewModel

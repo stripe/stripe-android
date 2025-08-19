@@ -40,4 +40,6 @@ data class ConsumerSessionLookup(
     val publishableKey: String? = null,
     @SerialName("displayable_payment_details")
     val displayablePaymentDetails: DisplayablePaymentDetails? = null,
+    @SerialName("consent_ui")
+    val consentUi: ConsentUi? = null,
 ) : StripeModel

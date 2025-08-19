@@ -65,7 +65,8 @@ internal class LinkApiRepository @Inject constructor(
     }
 
     override suspend fun lookupConsumer(
-        email: String,
+        email: String?,
+        linkAuthIntentId: String?,
         sessionId: String,
         customerId: String?
     ): Result<ConsumerSessionLookup> = withContext(workContext) {
@@ -73,6 +74,7 @@ internal class LinkApiRepository @Inject constructor(
             requireNotNull(
                 consumersApiService.lookupConsumerSession(
                     email = email,
+                    linkAuthIntentId = linkAuthIntentId,
                     requestSurface = requestSurface.value,
                     sessionId = sessionId,
                     doNotLogConsumerFunnelEvent = false,
@@ -91,6 +93,7 @@ internal class LinkApiRepository @Inject constructor(
             requireNotNull(
                 consumersApiService.lookupConsumerSession(
                     email = email,
+                    linkAuthIntentId = null,
                     requestSurface = requestSurface.value,
                     sessionId = sessionId,
                     doNotLogConsumerFunnelEvent = true,
@@ -102,8 +105,9 @@ internal class LinkApiRepository @Inject constructor(
     }
 
     override suspend fun mobileLookupConsumer(
-        email: String,
-        emailSource: EmailSource,
+        email: String?,
+        emailSource: EmailSource?,
+        linkAuthIntentId: String?,
         verificationToken: String,
         appId: String,
         sessionId: String,
@@ -113,6 +117,7 @@ internal class LinkApiRepository @Inject constructor(
             consumersApiService.mobileLookupConsumerSession(
                 email = email,
                 emailSource = emailSource,
+                linkAuthIntentId = linkAuthIntentId,
                 requestSurface = requestSurface.value,
                 verificationToken = verificationToken,
                 appId = appId,
@@ -369,7 +374,8 @@ internal class LinkApiRepository @Inject constructor(
     override suspend fun confirmVerification(
         verificationCode: String,
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
+        consumerPublishableKey: String?,
+        consentGranted: Boolean?
     ): Result<ConsumerSession> {
         return runCatching {
             requireNotNull(
@@ -378,6 +384,7 @@ internal class LinkApiRepository @Inject constructor(
                     verificationCode = verificationCode,
                     requestSurface = requestSurface.value,
                     type = VerificationType.SMS,
+                    consentGranted = consentGranted,
                     requestOptions = consumerPublishableKey?.let {
                         ApiRequest.Options(it)
                     } ?: ApiRequest.Options(
@@ -387,6 +394,19 @@ internal class LinkApiRepository @Inject constructor(
                 )
             )
         }
+    }
+
+    override suspend fun consentUpdate(
+        consumerSessionClientSecret: String,
+        consentGranted: Boolean,
+        consumerPublishableKey: String?
+    ): Result<Unit> = withContext(workContext) {
+        consumersApiService.consentUpdate(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            consentGranted = consentGranted,
+            requestSurface = requestSurface.value,
+            requestOptions = buildRequestOptions(consumerPublishableKey)
+        )
     }
 
     override suspend fun listPaymentDetails(

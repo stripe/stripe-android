@@ -233,6 +233,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             verificationCode = verificationCode,
             type = type,
             requestSurface = requestSurface,
+            consentGranted = null,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
         ).also { session ->
             updateCachedConsumerSession("confirmConsumerVerification", session)
@@ -322,6 +323,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
     ): ConsumerSessionLookup = consumersApiService.mobileLookupConsumerSession(
         email = email,
         emailSource = emailSource,
+        linkAuthIntentId = null,
         requestSurface = requestSurface,
         verificationToken = verificationToken,
         appId = appId,
