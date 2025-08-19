@@ -11,6 +11,7 @@
     <string name="stripe_paymentsheet_payment_method_afterpay">Afterpay</string>
     <string name="stripe_paymentsheet_payment_method_clearpay">Clearpay</string>
     <string name="stripe_paymentsheet_payment_method_paypal">PayPal</string>
+    <string name="stripe_paymentsheet_payment_method_paynow">PayNow</string>
     <string name="stripe_paymentsheet_payment_method_us_bank_account">US bank account</string>
     <string name="stripe_paymentsheet_payment_method_instant_debits">Bank</string>
     <string name="stripe_paymentsheet_payment_method_upi">UPI</string>
