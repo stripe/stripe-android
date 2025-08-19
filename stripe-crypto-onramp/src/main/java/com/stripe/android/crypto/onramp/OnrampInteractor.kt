@@ -210,10 +210,6 @@ internal class OnrampInteractor @Inject constructor(
         _state.value.linkControllerState?.internalLinkAccount?.consumerSessionClientSecret
             ?: linkController.state(application).value.internalLinkAccount?.consumerSessionClientSecret
 
-    private fun paymentMethodPreview(): LinkController.PaymentMethodPreview? =
-        _state.value.linkControllerState?.selectedPaymentMethodPreview
-            ?: linkController.state(application).value.selectedPaymentMethodPreview
-
     fun onLinkControllerState(linkState: LinkController.State) {
         _state.value = _state.value.copy(linkControllerState = linkState)
     }

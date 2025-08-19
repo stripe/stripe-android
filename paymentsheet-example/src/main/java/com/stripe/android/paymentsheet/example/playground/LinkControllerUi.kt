@@ -379,7 +379,6 @@ private fun PaymentMethodButton(
                             style = MaterialTheme.typography.h6,
                             color = contentColor,
                         )
-
                         preview.sublabel?.let { sublabel ->
                             Text(
                                 modifier = Modifier.padding(top = 2.dp),

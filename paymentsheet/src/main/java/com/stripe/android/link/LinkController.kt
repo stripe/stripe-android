@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.configuration.ConfigurationDefaults
-import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.link.injection.DaggerLinkControllerComponent
 import com.stripe.android.link.injection.LinkControllerPresenterComponent
 import com.stripe.android.model.PaymentMethod
@@ -19,7 +18,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Singleton

@@ -64,7 +64,7 @@ internal class OnrampViewModel(
                         primary = Color(0xFF9886E6),
                         borderSelected = Color.White
                     ),
-                    style = LinkAppearance.Style.ALWAYS_DARK,
+                    style = LinkAppearance.Style.AUTOMATIC,
                     primaryButton = LinkAppearance.PrimaryButton()
                 )
             )
