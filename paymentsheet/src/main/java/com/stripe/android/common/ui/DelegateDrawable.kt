@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 internal class DelegateDrawable(
-    private val imageLoader: suspend () -> Drawable,
+    imageLoader: suspend () -> Drawable,
 ) : Drawable() {
     @Volatile
     private var delegate: Drawable = ShapeDrawable()

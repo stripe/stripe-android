@@ -1,6 +1,5 @@
 package com.stripe.android.link
 
-import android.content.Context
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -16,7 +15,6 @@ import javax.inject.Inject
 internal class LinkControllerCoordinator @Inject constructor(
     private val interactor: LinkControllerInteractor,
     private val lifecycleOwner: LifecycleOwner,
-    private val context: Context,
     activityResultRegistryOwner: ActivityResultRegistryOwner,
     linkActivityContract: NativeLinkActivityContract,
     private val selectedPaymentMethodCallback: LinkController.PresentPaymentMethodsCallback,
@@ -31,7 +29,7 @@ internal class LinkControllerCoordinator @Inject constructor(
             key = "LinkController_LinkActivityResultLauncher",
             contract = linkActivityContract,
         ) { result ->
-            interactor.onLinkActivityResult(result, context)
+            interactor.onLinkActivityResult(result)
         }
 
         lifecycleOwner.lifecycleScope.launch {

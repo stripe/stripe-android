@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.DrawableRes
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.flatMapCatching
 import com.stripe.android.link.LinkController.AuthenticationResult
@@ -208,14 +209,14 @@ internal class LinkControllerInteractor @Inject constructor(
         )
     }
 
-    fun onLinkActivityResult(result: LinkActivityResult, context: Context) {
+    fun onLinkActivityResult(result: LinkActivityResult) {
         val currentLaunchMode = _state.value.currentLaunchMode
         updateState { it.copy(currentLaunchMode = null) }
         updateStateOnAccountUpdate(result.linkAccountUpdate)
 
         when (currentLaunchMode) {
             is LinkLaunchMode.PaymentMethodSelection ->
-                handlePaymentMethodSelectionResult(result, context)
+                handlePaymentMethodSelectionResult(result)
             is LinkLaunchMode.Authentication ->
                 handleAuthenticationResult(result)
             else ->
@@ -266,7 +267,7 @@ internal class LinkControllerInteractor @Inject constructor(
         }
     }
 
-    private fun handlePaymentMethodSelectionResult(result: LinkActivityResult, context: Context) {
+    private fun handlePaymentMethodSelectionResult(result: LinkActivityResult) {
         when (result) {
             is LinkActivityResult.Canceled -> {
                 logger.debug("$tag: presentPaymentMethods canceled")
@@ -280,11 +281,7 @@ internal class LinkControllerInteractor @Inject constructor(
                     it.copy(selectedPaymentMethod = result.selectedPayment)
                 }
 
-                val imageLoader = StripeImageLoader(context)
-                val iconLoader = PaymentSelection.IconLoader(context.resources, imageLoader)
-                val preview = result.selectedPayment?.details?.toPreview(context, iconLoader)
-
-                _presentPaymentMethodsResultFlow.tryEmit(LinkController.PresentPaymentMethodsResult.Success(preview))
+                _presentPaymentMethodsResultFlow.tryEmit(LinkController.PresentPaymentMethodsResult.Success)
             }
             is LinkActivityResult.Failed -> {
                 logger.debug("$tag: presentPaymentMethods failed")
@@ -505,7 +502,7 @@ internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
     val drawableResourceId = getIconDrawableRes(context.isSystemDarkTheme())
 
     return LinkController.PaymentMethodPreview(
-        imageLoader = {
+        icon = DelegateDrawable {
             iconLoader.load(
                 drawableResourceId = drawableResourceId,
                 lightThemeIconUrl = null,

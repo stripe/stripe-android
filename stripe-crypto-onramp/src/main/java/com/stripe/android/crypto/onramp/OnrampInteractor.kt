@@ -1,6 +1,7 @@
 package com.stripe.android.crypto.onramp
 
 import android.app.Application
+import android.content.Context
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
@@ -30,7 +31,6 @@ internal class OnrampInteractor @Inject constructor(
     private val linkController: LinkController,
     private val cryptoApiRepository: CryptoApiRepository,
 ) {
-
     private val _state = MutableStateFlow(OnrampState())
     val state: StateFlow<OnrampState> = _state.asStateFlow()
 
@@ -184,10 +184,11 @@ internal class OnrampInteractor @Inject constructor(
     }
 
     fun handleSelectPaymentResult(
-        result: LinkController.PresentPaymentMethodsResult
+        result: LinkController.PresentPaymentMethodsResult,
+        context: Context,
     ): OnrampCollectPaymentResult = when (result) {
         is LinkController.PresentPaymentMethodsResult.Success -> {
-            result.paymentMethod?.let {
+            linkController.state(context).value.selectedPaymentMethodPreview?.let {
                 OnrampCollectPaymentResult.Completed(
                     displayData = PaymentOptionDisplayData(
                         icon = it.icon,
