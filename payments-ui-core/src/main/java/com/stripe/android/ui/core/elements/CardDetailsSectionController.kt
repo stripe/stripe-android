@@ -32,4 +32,8 @@ class CardDetailsSectionController(
     internal val isStripeCardScanAvailable = DefaultIsStripeCardScanAvailable()
 
     override val error = cardDetailsElement.controller.error
+
+    override fun onValidationStateChanged(isValidating: Boolean) {
+        cardDetailsElement.onValidationStateChanged(isValidating)
+    }
 }
