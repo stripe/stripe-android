@@ -180,6 +180,9 @@ constructor(
             is StripeIntent.NextActionData.DisplayMultibancoDetails -> {
                 StripeIntent.NextActionType.DisplayMultibancoDetails
             }
+            is StripeIntent.NextActionData.DisplayPayNowDetails -> {
+                StripeIntent.NextActionType.DisplayPayNowDetails
+            }
             is StripeIntent.NextActionData.VerifyWithMicrodeposits -> {
                 StripeIntent.NextActionType.VerifyWithMicrodeposits
             }

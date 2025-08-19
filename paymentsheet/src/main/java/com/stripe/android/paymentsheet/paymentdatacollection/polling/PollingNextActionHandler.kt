@@ -20,6 +20,9 @@ private const val UPI_MAX_ATTEMPTS = 12
 private const val BLIK_TIME_LIMIT_IN_SECONDS = 60
 private const val BLIK_INITIAL_DELAY_IN_SECONDS = 5
 private const val BLIK_MAX_ATTEMPTS = 12
+private const val PAYNOW_TIME_LIMIT_IN_SECONDS = 60 * 60
+private const val PAYNOW_INITIAL_DELAY_IN_SECONDS = 5
+private const val PAYNOW_MAX_ATTEMPTS = 12
 
 internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>() {
 
@@ -49,6 +52,16 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                     initialDelayInSeconds = BLIK_INITIAL_DELAY_IN_SECONDS,
                     maxAttempts = BLIK_MAX_ATTEMPTS,
                     ctaText = R.string.stripe_blik_confirm_payment,
+                    stripeAccountId = requestOptions.stripeAccount,
+                )
+            PaymentMethod.Type.PayNow ->
+                PollingContract.Args(
+                    clientSecret = requireNotNull(actionable.clientSecret),
+                    statusBarColor = host.statusBarColor,
+                    timeLimitInSeconds = PAYNOW_TIME_LIMIT_IN_SECONDS,
+                    initialDelayInSeconds = PAYNOW_INITIAL_DELAY_IN_SECONDS,
+                    maxAttempts = PAYNOW_MAX_ATTEMPTS,
+                    ctaText = R.string.stripe_paynow_confirm_payment,
                     stripeAccountId = requestOptions.stripeAccount,
                 )
             else ->
