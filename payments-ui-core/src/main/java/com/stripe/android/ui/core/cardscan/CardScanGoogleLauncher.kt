@@ -10,7 +10,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import com.google.android.gms.wallet.CreditCardExpirationDate
 import com.google.android.gms.wallet.PaymentCardRecognitionResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -53,15 +52,16 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
             val data = result.data ?: return CardScanResult.Canceled
             val paymentCardRecognitionResult = PaymentCardRecognitionResult.getFromIntent(data)
             val pan = paymentCardRecognitionResult?.pan
-            val expirationDate = paymentCardRecognitionResult?.creditCardExpirationDate
             return if (pan != null) {
-                CardScanResult.Completed(ScannedCard(pan, expirationDate))
+                CardScanResult.Completed(ScannedCard(pan))
             } else {
                 val error = Throwable("Failed to parse card data")
                 CardScanResult.Failed(error)
             }
+        } else if (result.resultCode == Activity.RESULT_CANCELED) {
+            return CardScanResult.Canceled
         }
-        return CardScanResult.Canceled
+        return CardScanResult.Failed(Throwable("Null data or unexpected result code: ${result.resultCode}"))
     }
 
     companion object {
@@ -99,5 +99,4 @@ internal sealed interface CardScanResult {
  */
 internal data class ScannedCard(
     val pan: String,
-    val expirationDate: CreditCardExpirationDate?
 )

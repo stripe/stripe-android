@@ -48,23 +48,17 @@ fun CardDetailsSectionElementUI(
             if (controller.isCardScanEnabled &&
                 (controller.isStripeCardScanAvailable() || FeatureFlags.cardScanGooglePayMigration.isEnabled)
             ) {
+                val onGoogleCardScanResult: (CardScanResult) -> Unit = { result ->
+                    (result as? CardScanResult.Completed)?.scannedCard?.let { scannedCard ->
+                        controller.cardDetailsElement.controller.numberElement.controller.onRawValueChange(
+                            scannedCard.pan
+                        )
+                    }
+                }
                 ScanCardButtonUI(
                     enabled = enabled,
                     elementsSessionId = controller.elementsSessionId,
-                    onGoogleCardScanResult = { result ->
-                        (result as? CardScanResult.Completed)?.scannedCard?.let { scannedCard ->
-                            controller.cardDetailsElement.controller.numberElement.controller.onRawValueChange(
-                                scannedCard.pan
-                            )
-                            scannedCard.expirationDate?.let { expirationDate ->
-                                controller.cardDetailsElement.controller.expirationDateElement.controller
-                                    .onRawValueChange(
-                                        @Suppress("MagicNumber")
-                                        "${expirationDate.month}/${expirationDate.year % 100}"
-                                    )
-                            }
-                        }
-                    }
+                    onGoogleCardScanResult = onGoogleCardScanResult
                 ) {
                     controller.cardDetailsElement.controller.numberElement.controller.onCardScanResult(it)
                 }

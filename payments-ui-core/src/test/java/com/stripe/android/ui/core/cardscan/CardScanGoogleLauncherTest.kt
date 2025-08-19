@@ -10,7 +10,7 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
-import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -25,16 +25,18 @@ class CardScanGoogleLauncherTest {
 
         val scanResult = launcher.parseActivityResult(result)
 
-        Truth.assertThat(scanResult).isInstanceOf(CardScanResult.Canceled::class.java)
+        assertThat(scanResult).isInstanceOf(CardScanResult.Canceled::class.java)
     }
 
     @Test
-    fun `parseActivityResult with RESULT_OK but null data returns Canceled`() = runScenario {
+    fun `parseActivityResult with RESULT_OK but null data returns Failed`() = runScenario {
         val result = ActivityResult(Activity.RESULT_OK, null)
 
         val scanResult = launcher.parseActivityResult(result)
 
-        Truth.assertThat(scanResult).isInstanceOf(CardScanResult.Canceled::class.java)
+        assertThat(scanResult).isInstanceOf(CardScanResult.Failed::class.java)
+        val failedResult = scanResult as CardScanResult.Failed
+        assertThat(failedResult.error.message).isEqualTo("Null data or unexpected result code: -1")
     }
 
     @Test
@@ -47,33 +49,35 @@ class CardScanGoogleLauncherTest {
 
         val scanResult = launcher.parseActivityResult(result)
 
-        Truth.assertThat(scanResult).isInstanceOf(CardScanResult.Failed::class.java)
+        assertThat(scanResult).isInstanceOf(CardScanResult.Failed::class.java)
         val failedResult = scanResult as CardScanResult.Failed
-        Truth.assertThat(failedResult.error.message).isEqualTo("Failed to parse card data")
+        assertThat(failedResult.error.message).isEqualTo("Failed to parse card data")
     }
 
     @Test
-    fun `parseActivityResult with custom result code returns Canceled`() = runScenario {
+    fun `parseActivityResult with custom result code returns Failed`() = runScenario {
         val result = ActivityResult(123, null) // Some other result code
 
         val scanResult = launcher.parseActivityResult(result)
 
-        Truth.assertThat(scanResult).isInstanceOf(CardScanResult.Canceled::class.java)
+        assertThat(scanResult).isInstanceOf(CardScanResult.Failed::class.java)
+        val failedResult = scanResult as CardScanResult.Failed
+        assertThat(failedResult.error.message).isEqualTo("Null data or unexpected result code: 123")
     }
 
     @Test
     fun `card scan launcher should be able to launch card scan activity`() = runScenario {
-        Truth.assertThat(launcher.isAvailable.value).isTrue()
+        assertThat(launcher.isAvailable.value).isTrue()
 
         launcher.launch(ApplicationProvider.getApplicationContext())
-        Truth.assertThat(activityLauncher.launchCall.awaitItem()).isEqualTo(Unit)
+        assertThat(activityLauncher.launchCall.awaitItem()).isEqualTo(Unit)
     }
 
     @Test
     fun `card scan launcher should not be available when fetchIntent fails`() = runScenario(
-        isFetchClientSuccess = false
+        isFetchClientSucceed = false
     ) {
-        Truth.assertThat(launcher.isAvailable.value).isFalse()
+        assertThat(launcher.isAvailable.value).isFalse()
         launcher.launch(ApplicationProvider.getApplicationContext())
         // No launch call should be made since fetchIntent failed
     }
@@ -103,13 +107,13 @@ class CardScanGoogleLauncherTest {
     )
 
     private fun runScenario(
-        isFetchClientSuccess: Boolean = true,
+        isFetchClientSucceed: Boolean = true,
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val activityLauncher = FakeActivityLauncher<IntentSenderRequest>()
         val launcher = CardScanGoogleLauncher(
             context = ApplicationProvider.getApplicationContext(),
-            paymentCardRecognitionClient = FakePaymentCardRecognitionClient(isFetchClientSuccess)
+            paymentCardRecognitionClient = FakePaymentCardRecognitionClient(isFetchClientSucceed)
         ).apply {
             this.activityLauncher = activityLauncher
         }

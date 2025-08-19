@@ -10,7 +10,7 @@ import com.google.android.gms.wallet.WalletConstants
 internal interface PaymentCardRecognitionClient {
     fun fetchIntent(
         context: Context,
-        onFailure: (Exception) -> Unit = {},
+        onFailure: (Throwable) -> Unit = {},
         onSuccess: (IntentSenderRequest) -> Unit
     )
 }
@@ -18,10 +18,10 @@ internal interface PaymentCardRecognitionClient {
 internal class DefaultPaymentCardRecognitionClient : PaymentCardRecognitionClient {
     override fun fetchIntent(
         context: Context,
-        onFailure: (Exception) -> Unit,
+        onFailure: (Throwable) -> Unit,
         onSuccess: (IntentSenderRequest) -> Unit
     ) {
-        try {
+        runCatching {
             val paymentsClient = createPaymentsClient(context)
             val request = PaymentCardRecognitionIntentRequest.getDefaultInstance()
 
@@ -34,7 +34,7 @@ internal class DefaultPaymentCardRecognitionClient : PaymentCardRecognitionClien
                 .addOnFailureListener { e ->
                     onFailure(e)
                 }
-        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+        }.onFailure { e ->
             onFailure(e)
         }
     }

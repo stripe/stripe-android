@@ -4,13 +4,13 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.IntentSenderRequest
 
-class FakePaymentCardRecognitionClient(private val shouldSuccess: Boolean) : PaymentCardRecognitionClient {
+class FakePaymentCardRecognitionClient(private val shouldSucceed: Boolean) : PaymentCardRecognitionClient {
     override fun fetchIntent(
         context: Context,
-        onFailure: (Exception) -> Unit,
+        onFailure: (Throwable) -> Unit,
         onSuccess: (IntentSenderRequest) -> Unit
     ) {
-        if (shouldSuccess) {
+        if (shouldSucceed) {
             val mockPendingIntent = android.app.PendingIntent.getActivity(
                 context,
                 0,
