@@ -207,6 +207,7 @@ internal object TestFactory {
         stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
         merchantName = MERCHANT_NAME,
         merchantCountryCode = "",
+        merchantLogoUrl = null,
         customerInfo = LINK_CUSTOMER_INFO,
         shippingDetails = null,
         flags = emptyMap(),
@@ -231,7 +232,7 @@ internal object TestFactory {
         linkSignUpOptInFeatureEnabled = false,
         linkSignUpOptInInitialValue = false,
         customerId = null,
-        merchantLogoUrl = null
+        saveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(null),
     )
 
     val LINK_WALLET_PRIMARY_BUTTON_LABEL = Amount(

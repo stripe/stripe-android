@@ -5,6 +5,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
@@ -75,6 +76,7 @@ internal object LinkTestUtils {
             flags = mapOf(),
             merchantName = "Test merchant inc.",
             merchantCountryCode = "US",
+            merchantLogoUrl = null,
             passthroughModeEnabled = false,
             cardBrandChoice = cardBrandChoice,
             cardBrandFilter = cardBrandFilter,
@@ -97,7 +99,7 @@ internal object LinkTestUtils {
             linkSignUpOptInInitialValue = false,
             skipWalletInFlowController = false,
             customerId = null,
-            merchantLogoUrl = null
+            saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         )
     }
 }

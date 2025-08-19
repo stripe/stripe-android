@@ -380,7 +380,7 @@ private fun getSavedIcon(selection: PaymentSelection.Saved): Int {
         return R.drawable.stripe_ic_paymentsheet_link_arrow
     }
 
-    return when (val resourceId = selection.paymentMethod.getSavedPaymentMethodIcon()) {
+    return when (val resourceId = selection.paymentMethod.getSavedPaymentMethodIcon(forPaymentOption = true)) {
         R.drawable.stripe_ic_paymentsheet_card_unknown_ref -> {
             when (selection.walletType) {
                 PaymentSelection.Saved.WalletType.Link -> getLinkIcon(iconOnly = true)

@@ -646,7 +646,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             allowUserEmailEdits = configuration.link.allowUserEmailEdits,
             skipWalletInFlowController = elementsSession.linkMobileSkipWalletInFlowController,
             customerId = elementsSession.customer?.session?.customerId,
-            linkAppearance = linkAppearance
+            linkAppearance = linkAppearance,
+            saveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
         )
 
         // CBF isn't currently supported in the web flow.

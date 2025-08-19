@@ -10,6 +10,7 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
@@ -592,6 +593,7 @@ class ConfirmationHandlerOptionKtxTest {
             stripeIntent = PaymentIntentFactory.create(),
             merchantName = "Merchant, Inc.",
             merchantCountryCode = "CA",
+            merchantLogoUrl = null,
             customerInfo = LinkConfiguration.CustomerInfo(
                 name = "John Doe",
                 email = null,
@@ -623,7 +625,7 @@ class ConfirmationHandlerOptionKtxTest {
             linkSignUpOptInFeatureEnabled = false,
             linkSignUpOptInInitialValue = false,
             customerId = null,
-            merchantLogoUrl = null
+            saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         )
     }
 }

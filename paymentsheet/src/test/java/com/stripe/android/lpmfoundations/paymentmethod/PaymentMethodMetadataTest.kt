@@ -2060,6 +2060,7 @@ internal class PaymentMethodMetadataTest {
             ),
             merchantName = "Merchant Inc.",
             merchantCountryCode = "CA",
+            merchantLogoUrl = null,
             shippingDetails = null,
             flags = mapOf(),
             cardBrandChoice = LinkConfiguration.CardBrandChoice(
@@ -2086,7 +2087,7 @@ internal class PaymentMethodMetadataTest {
             linkSignUpOptInFeatureEnabled = false,
             linkSignUpOptInInitialValue = false,
             customerId = null,
-            merchantLogoUrl = null
+            saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         )
     }
 
