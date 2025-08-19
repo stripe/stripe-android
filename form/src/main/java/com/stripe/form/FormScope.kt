@@ -119,7 +119,6 @@ class FormScope(
         return fields.toImmutableList()
     }
 
-
     private fun updateValue(change: ValueChange<*>) {
         values = HashMap(values)
             .apply {

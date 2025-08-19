@@ -6,7 +6,6 @@ import com.stripe.form.Key
 import com.stripe.form.ValueChange
 import com.stripe.form.buildForm
 import com.stripe.form.fields.DropdownSpec
-import com.stripe.form.fields.card.CardDetailsSpec
 import com.stripe.form.find
 import com.stripe.form.key
 import com.stripe.form.text.TextSpec
@@ -98,10 +97,11 @@ class CustomFormViewModel : ViewModel() {
 
         _state.update {
             it.copy(
-                valid = (sliderChange?.isComplete ?: false) && (checkChange?.isComplete
-                    ?: false) && (dropdownChange?.isComplete ?: false) && (nameChange?.isComplete ?: false),
+                valid = (sliderChange?.isComplete ?: false) && (
+                    checkChange?.isComplete
+                        ?: false
+                    ) && (dropdownChange?.isComplete ?: false) && (nameChange?.isComplete ?: false),
             )
         }
-
     }
 }

@@ -81,8 +81,6 @@ class CustomFormViewModelTest {
             )
 
             assertThat(awaitItem().valid).isTrue()
-
-
         }
     }
 }

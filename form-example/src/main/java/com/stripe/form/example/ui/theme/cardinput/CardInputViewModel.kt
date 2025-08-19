@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 
-class CardInputViewModel: ViewModel() {
+class CardInputViewModel : ViewModel() {
     private val _state = MutableStateFlow(State())
     val state: StateFlow<State> = _state
     val key = key<CardDetailsSpec.Output>()
@@ -37,6 +37,5 @@ class CardInputViewModel: ViewModel() {
                 valid = output?.isComplete ?: false,
             )
         }
-
     }
 }

@@ -88,7 +88,6 @@ data class TextFieldSpec(
         }
     }
 
-
     @Immutable
     data class TextFieldState(
         override val key: Key<TextFieldValue>,

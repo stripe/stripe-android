@@ -82,7 +82,6 @@ data class CardNumberSpec(
         override val validator: (String) -> ValidationResult = { ValidationResult.Valid }
     ) : FormFieldState<String> {
         override val key = KEY
-
     }
 
     companion object {
@@ -125,5 +124,4 @@ private object CardNumberVisualTransformation : VisualTransformation {
 
         return TransformedText(AnnotatedString(out), creditCardOffsetTranslator)
     }
-
 }

@@ -1,6 +1,5 @@
 package com.stripe.form.fields
 
-import android.os.Parcelable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.Checkbox
 import androidx.compose.runtime.Composable

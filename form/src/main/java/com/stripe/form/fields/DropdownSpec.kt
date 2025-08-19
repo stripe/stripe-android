@@ -71,7 +71,6 @@ data class DropdownSpec(
                     }
                 }
             }
-
         }
     }
 

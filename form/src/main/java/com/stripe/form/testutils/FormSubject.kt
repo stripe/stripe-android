@@ -106,7 +106,10 @@ inline fun <reified T : ContentSpec> contentOf(
     return ContentSpecAssertion(
         type = T::class.java,
         assertions = assertions?.let { block ->
-            { spec -> block(spec as T) }
+            {
+                    spec ->
+                block(spec as T)
+            }
         }
     )
 }

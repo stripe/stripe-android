@@ -15,7 +15,7 @@ import com.stripe.form.ValueChange
 
 class CustomSliderSpec(
     override val state: State
-): FormFieldSpec<Float> {
+) : FormFieldSpec<Float> {
 
     @Composable
     override fun Content(modifier: Modifier) {
@@ -40,5 +40,5 @@ class CustomSliderSpec(
         val initialValue: Float = .5f,
         override val onValueChange: (ValueChange<Float>) -> Unit,
         override val validator: (Float) -> ValidationResult = { ValidationResult.Valid }
-    ): FormFieldState<Float>
+    ) : FormFieldState<Float>
 }

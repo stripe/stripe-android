@@ -24,7 +24,7 @@ import java.util.Calendar
 
 data class ExpiryDateSpec(
     override val state: State
-): FormFieldSpec<String> {
+) : FormFieldSpec<String> {
 
     @Composable
     override fun Content(modifier: Modifier) {
@@ -66,7 +66,7 @@ data class ExpiryDateSpec(
         val visualTransformation: (String) -> VisualTransformation = { ExpiryDateVisualTransformation() },
         override val onValueChange: (ValueChange<String>) -> Unit,
         override val validator: (String) -> ValidationResult = { ExpiryValidator.validateResult(it) }
-    ): FormFieldState<String> {
+    ) : FormFieldState<String> {
         override val key = KEY
     }
 
@@ -75,7 +75,7 @@ data class ExpiryDateSpec(
     }
 }
 
-private object ExpiryValidator: Validator<String> {
+private object ExpiryValidator : Validator<String> {
     override fun validateResult(value: String): ValidationResult {
         val newString = convertTo4DigitDate(value)
         return when {
@@ -123,7 +123,6 @@ private object ExpiryValidator: Validator<String> {
             ValidationResult.Valid
         }
     }
-
 }
 
 fun convertTo4DigitDate(input: String) =

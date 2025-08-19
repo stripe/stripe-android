@@ -7,7 +7,7 @@ import com.stripe.form.text.TextSpec
 
 class CvcValidator(
     private val cardBrand: CardBrand
-): Validator<String> {
+) : Validator<String> {
     override fun validateResult(value: String): ValidationResult {
         if (cardBrand.isValidCvc(value)) {
             return ValidationResult.Valid

@@ -8,7 +8,7 @@ import androidx.compose.ui.res.painterResource
 import com.stripe.android.form.example.R
 import com.stripe.form.ContentSpec
 
-class MooDengSpec: ContentSpec {
+class MooDengSpec : ContentSpec {
     @Composable
     override fun Content(modifier: Modifier) {
         Image(

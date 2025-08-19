@@ -118,5 +118,4 @@ private object CardDetailsValidator : Validator<CardDetailsSpec.Output> {
         if (isValid) return ValidationResult.Valid
         return ValidationResult.Invalid()
     }
-
 }

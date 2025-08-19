@@ -50,5 +50,4 @@ data class WelcomeSpec(
             color = color
         )
     }
-
 }
