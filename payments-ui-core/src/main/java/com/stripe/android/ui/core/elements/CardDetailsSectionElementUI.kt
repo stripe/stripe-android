@@ -13,7 +13,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.cardscan.CardScanResult
 import com.stripe.android.uicore.elements.H6Text
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionController
@@ -43,10 +45,20 @@ fun CardDetailsSectionElementUI(
                         heading()
                     }
             )
-            if (controller.isCardScanEnabled && controller.isStripeCardScanAvailable()) {
+            if (controller.isCardScanEnabled &&
+                (controller.isStripeCardScanAvailable() || FeatureFlags.cardScanGooglePayMigration.isEnabled)
+            ) {
+                val onGoogleCardScanResult: (CardScanResult) -> Unit = { result ->
+                    (result as? CardScanResult.Completed)?.scannedCard?.let { scannedCard ->
+                        controller.cardDetailsElement.controller.numberElement.controller.onRawValueChange(
+                            scannedCard.pan
+                        )
+                    }
+                }
                 ScanCardButtonUI(
                     enabled = enabled,
-                    elementsSessionId = controller.elementsSessionId
+                    elementsSessionId = controller.elementsSessionId,
+                    onGoogleCardScanResult = onGoogleCardScanResult
                 ) {
                     controller.cardDetailsElement.controller.numberElement.controller.onCardScanResult(it)
                 }
