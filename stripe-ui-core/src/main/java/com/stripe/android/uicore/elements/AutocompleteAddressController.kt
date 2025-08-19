@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,14 +33,25 @@ class AutocompleteAddressController(
 
     private var expandForm = false
 
+    private val isValidating = MutableStateFlow(false)
+
     val countryElement = CountryElement(
         IdentifierSpec.Country,
         countryDropdownFieldController,
     )
 
-    val addressElementFlow = MutableStateFlow(
+    private val _addressElementFlow = MutableStateFlow(
         createAddressElement(initialValues, toAddressInputMode(expandForm, initialValues))
     )
+
+    val addressElementFlow = combineAsStateFlow(
+        _addressElementFlow,
+        isValidating,
+    ) { element, isValidating ->
+        element.apply {
+            onValidationStateChanged(isValidating)
+        }
+    }
 
     val formFieldValues = addressElementFlow.flatMapLatestAsStateFlow { addressElement ->
         addressElement.getFormFieldValueFlow()
@@ -74,7 +86,7 @@ class AutocompleteAddressController(
                     countryDropdownFieldController.onRawValueChange(it)
                 }
 
-                addressElementFlow.value =
+                _addressElementFlow.value =
                     createAddressElement(newValues, toAddressInputMode(expandForm, newValues))
             }
         }
@@ -135,6 +147,10 @@ class AutocompleteAddressController(
                 },
             )
         }
+    }
+
+    override fun onValidationStateChanged(isValidating: Boolean) {
+        this.isValidating.value = isValidating
     }
 
     private fun getCurrentValues() = formFieldValues.value.toMap().mapValues {

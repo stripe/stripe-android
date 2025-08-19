@@ -146,4 +146,8 @@ class CardBillingAddressElement(
     override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) = addressElement.setRawValue(rawValuesMap)
 
     override fun getTextFieldIdentifiers() = addressElement.getTextFieldIdentifiers()
+
+    override fun onValidationStateChanged(isValidating: Boolean) {
+        addressElement.onValidationStateChanged(isValidating)
+    }
 }

@@ -107,4 +107,8 @@ internal class CardDetailsElement(
         }
         return combineAsStateFlow(flows) { it.toList() }
     }
+
+    override fun onValidationStateChanged(isValidating: Boolean) {
+        controller.onValidationStateChanged(isValidating)
+    }
 }
