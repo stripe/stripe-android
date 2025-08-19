@@ -56,7 +56,8 @@ internal open class FakeConsumersApiService : ConsumersApiService {
     }
 
     override suspend fun lookupConsumerSession(
-        email: String,
+        email: String?,
+        linkAuthIntentId: String?,
         requestSurface: String,
         sessionId: String,
         doNotLogConsumerFunnelEvent: Boolean,
@@ -66,6 +67,7 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         lookupCalls.add(
             LookupCall(
                 email = email,
+                linkAuthIntentId = linkAuthIntentId,
                 requestOptions = requestOptions,
                 requestSurface = requestSurface,
                 sessionId = sessionId,
@@ -75,8 +77,9 @@ internal open class FakeConsumersApiService : ConsumersApiService {
     }
 
     override suspend fun mobileLookupConsumerSession(
-        email: String,
-        emailSource: EmailSource,
+        email: String?,
+        emailSource: EmailSource?,
+        linkAuthIntentId: String?,
         requestSurface: String,
         verificationToken: String,
         appId: String,
@@ -88,6 +91,7 @@ internal open class FakeConsumersApiService : ConsumersApiService {
             MobileLookupCall(
                 email = email,
                 emailSource = emailSource,
+                linkAuthIntentId = linkAuthIntentId,
                 requestOptions = requestOptions,
                 verificationToken = verificationToken,
                 appId = appId,
@@ -115,8 +119,18 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         verificationCode: String,
         requestSurface: String,
         type: VerificationType,
+        consentGranted: Boolean?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun consentUpdate(
+        consumerSessionClientSecret: String,
+        consentGranted: Boolean,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options
+    ): Result<Unit> {
         TODO("Not yet implemented")
     }
 
@@ -171,15 +185,17 @@ internal open class FakeConsumersApiService : ConsumersApiService {
     }
 
     data class LookupCall(
-        val email: String,
+        val email: String?,
+        val linkAuthIntentId: String?,
         val requestSurface: String,
         val sessionId: String,
         val requestOptions: ApiRequest.Options
     )
 
     data class MobileLookupCall(
-        val email: String,
-        val emailSource: EmailSource,
+        val email: String?,
+        val emailSource: EmailSource?,
+        val linkAuthIntentId: String?,
         val requestSurface: String,
         val verificationToken: String,
         val appId: String,
