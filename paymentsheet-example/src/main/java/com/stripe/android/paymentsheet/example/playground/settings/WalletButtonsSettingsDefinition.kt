@@ -57,24 +57,18 @@ internal object WalletButtonsSettingsDefinition :
         val configuration = when (value) {
             WalletButtonsPlaygroundType.Disabled -> {
                 PaymentSheet.WalletButtonsConfiguration(
-                    willDisplayExternally = false,
+                    willDisplayExternally = false
                 )
             }
             WalletButtonsPlaygroundType.Enabled -> {
                 PaymentSheet.WalletButtonsConfiguration(
-                    willDisplayExternally = true,
-                    buttonThemes = PaymentSheet.ButtonThemes(
-                        link = PaymentSheet.ButtonThemes.LinkButtonTheme.WHITE
-                    )
+                    willDisplayExternally = true
                 )
             }
             WalletButtonsPlaygroundType.EnabledWithOnlyLink -> {
                 PaymentSheet.WalletButtonsConfiguration(
                     willDisplayExternally = true,
-                    walletsToShow = listOf("link"),
-                    buttonThemes = PaymentSheet.ButtonThemes(
-                        link = PaymentSheet.ButtonThemes.LinkButtonTheme.WHITE
-                    )
+                    walletsToShow = listOf("link")
                 )
             }
         }

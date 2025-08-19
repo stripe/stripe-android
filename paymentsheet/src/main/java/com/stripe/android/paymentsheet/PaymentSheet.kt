@@ -3272,7 +3272,7 @@ class PaymentSheet internal constructor(
         /**
          * Theme configuration for Link button
          */
-        val link: LinkButtonTheme = LinkButtonTheme.DEFAULT,
+        val link: LinkButtonTheme = LinkButtonTheme.WHITE,
     ) : Parcelable {
 
         /**

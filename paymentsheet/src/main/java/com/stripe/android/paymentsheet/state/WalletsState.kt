@@ -44,7 +44,9 @@ internal data class WalletsState(
             onGooglePayPressed: () -> Unit,
             onLinkPressed: () -> Unit,
             isSetupIntent: Boolean,
-            buttonThemes: PaymentSheet.ButtonThemes = PaymentSheet.ButtonThemes()
+            buttonThemes: PaymentSheet.ButtonThemes = PaymentSheet.ButtonThemes(
+                link = LinkButtonTheme.DEFAULT
+            )
         ): WalletsState? {
             val link = if (isLinkAvailable == true) {
                 // non-ECE link buttons don't support default payment details.
