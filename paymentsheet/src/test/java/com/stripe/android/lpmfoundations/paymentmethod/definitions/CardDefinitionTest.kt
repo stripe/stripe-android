@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
@@ -26,8 +27,10 @@ import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.AutocompleteAddressController
 import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.uicore.elements.filterOutHiddenIdentifiers
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -68,15 +71,66 @@ class CardDefinitionTest {
                 )
             )
         )
-        assertThat(formElements).hasSize(3)
-        assertThat(formElements[0].identifier.v1).isEqualTo("billing_details[email]_section")
-        assertThat(formElements[1].identifier.v1).isEqualTo("card_details")
-        assertThat(formElements[2].identifier.v1).isEqualTo("credit_billing_section")
+        assertThat(formElements).hasSize(2)
+        assertThat(formElements[0].identifier.v1).isEqualTo("card_details")
+        assertThat(formElements[1].identifier.v1).isEqualTo("credit_billing_section")
 
-        val contactElement = formElements[0] as SectionElement
-        assertThat(contactElement.fields).hasSize(2)
-        assertThat(contactElement.fields[0].identifier.v1).isEqualTo("billing_details[email]")
-        assertThat(contactElement.fields[1].identifier.v1).isEqualTo("billing_details[phone]")
+        val contactElement = formElements[1] as SectionElement
+        assertThat(contactElement.fields).hasSize(1)
+
+        val cardBillingElement = contactElement.fields[0] as CardBillingAddressElement
+        val billingElements = cardBillingElement.addressController.value.fieldsFlowable.value
+
+        assertThat(billingElements.size).isEqualTo(7)
+
+        assertThat(billingElements[0].identifier.v1).isEqualTo("billing_details[address][country]")
+        assertThat(billingElements[1].identifier.v1).isEqualTo("billing_details[address][line1]")
+        assertThat(billingElements[2].identifier.v1).isEqualTo("billing_details[address][line2]")
+
+        assertThat(billingElements[3]).isInstanceOf<RowElement>()
+
+        val rowElement = billingElements[3] as RowElement
+
+        assertThat(rowElement.fields[0].identifier.v1).isEqualTo("billing_details[address][city]")
+        assertThat(rowElement.fields[1].identifier.v1).isEqualTo("billing_details[address][postal_code]")
+
+        assertThat(billingElements[4].identifier.v1).isEqualTo("billing_details[address][state]")
+        assertThat(billingElements[5].identifier.v1).isEqualTo("billing_details[email]")
+        assertThat(billingElements[6].identifier.v1).isEqualTo("billing_details[phone]")
+    }
+
+    @Test
+    fun `createFormElements returns requested contact information fields`() {
+        val formElements = CardDefinition.formElements(
+            PaymentMethodMetadataFactory.create(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                )
+            )
+        )
+        assertThat(formElements).hasSize(2)
+        assertThat(formElements[0].identifier.v1).isEqualTo("card_details")
+        assertThat(formElements[1].identifier.v1).isEqualTo("credit_billing_section")
+
+        val contactInformationElement = formElements[1] as SectionElement
+        val contactInformationFields = contactInformationElement.fields
+
+        val cardBillingElement = contactInformationFields[0] as CardBillingAddressElement
+        val billingElements = cardBillingElement.addressController.value.fieldsFlowable.value
+
+        assertThat(billingElements.size).isEqualTo(6)
+
+        val billingElementsWithHiddenIdentifiers = billingElements
+            .filterOutHiddenIdentifiers(cardBillingElement.hiddenIdentifiers.value)
+
+        assertThat(billingElementsWithHiddenIdentifiers.size).isEqualTo(2)
+
+        assertThat(billingElementsWithHiddenIdentifiers[0].identifier.v1)
+            .isEqualTo("billing_details[email]")
+        assertThat(billingElementsWithHiddenIdentifiers[1].identifier.v1)
+            .isEqualTo("billing_details[phone]")
     }
 
     @Test
@@ -243,11 +297,11 @@ class CardDefinitionTest {
 
         assertThat(formElements).hasSize(3)
 
-        testStaticMandateElement(metadata, formElements[2])
+        testCombinedLinkMandateElement(formElements[2])
     }
 
     @Test
-    fun `createFormElements returns no mandate if linkSignUpOptInFeatureEnabled but no email passed in`() {
+    fun `createFormElements returns mandate when linkSignUpOptInFeatureEnabled even with no email`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             linkState = LinkState(
@@ -270,8 +324,8 @@ class CardDefinitionTest {
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
         )
 
-        assertThat(formElements).hasSize(2)
-        assertThat(formElements.filterIsInstance<CombinedLinkMandateElement>()).isEmpty()
+        assertThat(formElements).hasSize(3)
+        testCombinedLinkMandateElement(formElements[2])
     }
 
     @Test
@@ -353,6 +407,66 @@ class CardDefinitionTest {
     }
 
     @Test
+    fun `createFormElements contains all supported billing countries when allowed countries is empty`() {
+        val formElements = CardDefinition.formElements(
+            metadata = PaymentMethodMetadataFactory.create(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                    phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    allowedCountries = emptySet(),
+                )
+            ),
+        )
+
+        assertThat(formElements).hasSize(2)
+        assertThat(formElements.getOrNull(1)).isInstanceOf<SectionElement>()
+
+        val sectionElement = formElements[1] as SectionElement
+        val sectionFields = sectionElement.fields
+
+        assertThat(sectionFields.size).isEqualTo(1)
+        assertThat(sectionFields.firstOrNull()).isInstanceOf<CardBillingAddressElement>()
+
+        val addressElement = sectionFields.first() as CardBillingAddressElement
+
+        assertThat(addressElement.countryElement.controller.displayItems)
+            .hasSize(CountryUtils.supportedBillingCountries.size)
+    }
+
+    @Test
+    fun `createFormElements contains only countries provided through billing configuration`() {
+        val formElements = CardDefinition.formElements(
+            metadata = PaymentMethodMetadataFactory.create(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                    phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    allowedCountries = setOf("US", "CA")
+                )
+            ),
+        )
+
+        assertThat(formElements).hasSize(2)
+        assertThat(formElements.getOrNull(1)).isInstanceOf<SectionElement>()
+
+        val sectionElement = formElements[1] as SectionElement
+        val sectionFields = sectionElement.fields
+
+        assertThat(sectionFields.size).isEqualTo(1)
+        assertThat(sectionFields.firstOrNull()).isInstanceOf<CardBillingAddressElement>()
+
+        val addressElement = sectionFields.first() as CardBillingAddressElement
+
+        assertThat(addressElement.countryElement.controller.displayItems).containsExactly(
+            "\uD83C\uDDFA\uD83C\uDDF8 United States",
+            "\uD83C\uDDE8\uD83C\uDDE6 Canada"
+        )
+    }
+
+    @Test
     fun `createFormElements includes mandate when termsDisplay is AUTOMATIC`() {
         val termsDisplay = mapOf(
             PaymentMethod.Type.Card to PaymentSheet.TermsDisplay.AUTOMATIC
@@ -417,13 +531,12 @@ class CardDefinitionTest {
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
         )
 
-        // Should only include card_details and billing section, no mandate
+        // Should include card_details, billing section, link_form, and combined mandate (Link enabled)
         assertThat(formElements).hasSize(4)
         assertThat(formElements[0].identifier.v1).isEqualTo("card_details")
         assertThat(formElements[1].identifier.v1).isEqualTo("credit_billing_section")
         assertThat(formElements[2].identifier.v1).isEqualTo("link_form")
-        assertThat(formElements[3].identifier.v1).isEqualTo("card_mandate")
-        assertThat(formElements[3]).isInstanceOf<CombinedLinkMandateElement>()
+        testCombinedLinkMandateElement(formElements[3])
     }
 
     @Test

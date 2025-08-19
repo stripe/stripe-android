@@ -18,6 +18,7 @@ import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -673,6 +674,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 stripeIntent = PaymentIntentFactory.create(),
                 merchantName = "Merchant Inc.",
                 merchantCountryCode = "CA",
+                merchantLogoUrl = null,
                 customerInfo = LinkConfiguration.CustomerInfo(
                     name = "Jphn Doe",
                     email = "johndoe@email.com",
@@ -703,7 +705,8 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 linkAppearance = null,
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
-                customerId = null
+                customerId = null,
+                saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             ),
             userInput = userInput,
         )

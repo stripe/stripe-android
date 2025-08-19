@@ -91,6 +91,8 @@ internal class WalletViewModel @Inject constructor(
             addPaymentMethodOptions = getAddPaymentMethodOptions(),
             paymentSelectionHint = linkLaunchMode.paymentSelectionHint,
             isAutoSelecting = shouldAutoSelectDefaultPaymentMethod(),
+            signupToggleEnabled = configuration.linkSignUpOptInFeatureEnabled,
+            billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
         )
     )
 
@@ -653,14 +655,20 @@ internal fun StripeIntent.isSetupForFutureUsage(passthroughModeEnabled: Boolean)
     }
 }
 
-private fun StripeIntent.secondaryButtonLabel(linkLaunchMode: LinkLaunchMode): ResolvableString {
+private fun StripeIntent.secondaryButtonLabel(linkLaunchMode: LinkLaunchMode): ResolvableString? {
     return when (linkLaunchMode) {
         is LinkLaunchMode.Full,
         is LinkLaunchMode.Confirmation -> when (this) {
             is PaymentIntent -> resolvableString(R.string.stripe_wallet_pay_another_way)
             is SetupIntent -> resolvableString(R.string.stripe_wallet_continue_another_way)
         }
-        is LinkLaunchMode.PaymentMethodSelection,
-        is LinkLaunchMode.Authentication -> resolvableString(R.string.stripe_wallet_continue_another_way)
+        is LinkLaunchMode.PaymentMethodSelection -> {
+            if (linkLaunchMode.shouldShowSecondaryCta) {
+                resolvableString(R.string.stripe_wallet_continue_another_way)
+            } else {
+                null
+            }
+        }
+        is LinkLaunchMode.Authentication -> null
     }
 }

@@ -5,6 +5,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.common.validation.isSupportedWithBillingConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
@@ -13,11 +14,11 @@ import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
-import com.stripe.android.link.model.LinkAppearance
 import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
@@ -221,6 +222,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         val customer = async {
             createCustomerState(
+                configuration = configuration,
                 customerInfo = customerInfo,
                 metadata = paymentMethodMetadata.await(),
                 savedSelection = savedSelection,
@@ -425,6 +427,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     }
 
     private suspend fun createCustomerState(
+        configuration: CommonConfiguration,
         customerInfo: CustomerInfo?,
         metadata: PaymentMethodMetadata,
         savedSelection: Deferred<SavedSelection>,
@@ -460,7 +463,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                         isPaymentMethodSetAsDefaultEnabled = metadata.customerMetadata
                             ?.isPaymentMethodSetAsDefaultEnabled
                             ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
-                    ).filter { cardBrandFilter.isAccepted(it) },
+                    ).filter { paymentMethod ->
+                        cardBrandFilter.isAccepted(paymentMethod) &&
+                            paymentMethod.isSupportedWithBillingConfig(
+                                configuration.billingDetailsCollectionConfiguration
+                            )
+                    },
             )
         }
     }
@@ -612,6 +620,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             stripeIntent = elementsSession.stripeIntent,
             merchantName = configuration.merchantDisplayName,
             merchantCountryCode = elementsSession.merchantCountry,
+            merchantLogoUrl = elementsSession.merchantLogoUrl,
             customerInfo = customerInfo,
             shippingDetails = shippingDetails?.takeIf { it.isCheckboxSelected == true },
             passthroughModeEnabled = elementsSession.linkPassthroughModeEnabled,
@@ -637,7 +646,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             allowUserEmailEdits = configuration.link.allowUserEmailEdits,
             skipWalletInFlowController = elementsSession.linkMobileSkipWalletInFlowController,
             customerId = elementsSession.customer?.session?.customerId,
-            linkAppearance = linkAppearance
+            linkAppearance = linkAppearance,
+            saveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
         )
 
         // CBF isn't currently supported in the web flow.
@@ -714,7 +724,18 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     !isUsingWalletButtons
                 }
                 is SavedSelection.PaymentMethod -> {
-                    customer?.paymentMethods?.find { it.id == selection.id }?.toPaymentSelection()
+                    val customerPaymentMethod = customer?.paymentMethods?.find { it.id == selection.id }
+                    if (customerPaymentMethod != null) {
+                        customerPaymentMethod.toPaymentSelection()
+                    } else if (selection.isLinkOrigin) {
+                        // The payment method wasn't attached to the customer, but is of Link origin. Offer
+                        // Link as the initial payment selection.
+                        PaymentSelection.Link().takeIf {
+                            !isUsingWalletButtons
+                        }
+                    } else {
+                        null
+                    }
                 }
                 is SavedSelection.None -> null
             }

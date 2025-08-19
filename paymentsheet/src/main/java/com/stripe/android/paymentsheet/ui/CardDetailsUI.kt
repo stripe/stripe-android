@@ -52,13 +52,6 @@ internal fun CardDetailsEditUI(
         ?.collectAsState()
 
     Column {
-        // Contact section - show if we have contact elements
-        if (state.contactSectionElements.isNotEmpty()) {
-            ContactInformationSection(
-                contactElements = state.contactSectionElements
-            )
-        }
-
         // Card section - show if we have card details
         state.cardDetailsState?.let { cardDetails ->
             CardDetailsFormUI(
@@ -160,24 +153,6 @@ private fun CardDetailsFormUI(
                 CvcField(cardBrand = payload.brand, modifier = Modifier.weight(1F))
             }
         }
-    }
-}
-
-@Composable
-private fun ContactInformationSection(
-    contactElements: List<SectionFieldElement>,
-) {
-    if (contactElements.isNotEmpty()) {
-        SectionElementUI(
-            enabled = true,
-            element = SectionElement.wrap(
-                sectionFieldElements = contactElements,
-                label = resolvableString(CoreR.string.stripe_contact_information)
-            ),
-            hiddenIdentifiers = emptySet(),
-            lastTextFieldIdentifier = null
-        )
-        Spacer(Modifier.height(32.dp))
     }
 }
 

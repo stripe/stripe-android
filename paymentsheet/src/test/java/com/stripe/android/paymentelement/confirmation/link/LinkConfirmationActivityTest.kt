@@ -22,6 +22,7 @@ import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.NativeLinkArgs
 import com.stripe.android.link.TestFactory
+import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
@@ -203,6 +204,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                         "native_link_args",
                         NativeLinkArgs(
                             configuration = TestFactory.LINK_CONFIGURATION,
+                            requestSurface = RequestSurface.PaymentElement,
                             publishableKey = PUBLISHABLE_KEY,
                             stripeAccountId = null,
                             linkExpressMode = LinkExpressMode.ENABLED,

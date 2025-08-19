@@ -466,6 +466,7 @@ internal class ElementsSessionRepositoryTest {
                     sharedPaymentTokenSessionWithMode =
                     PaymentSheet.IntentConfiguration.Mode.Payment(amount = 1234, currency = "cad"),
                     sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                        businessName = "My business, Inc.",
                         networkId = "network_123",
                         externalId = "external_123",
                     ),

@@ -3,6 +3,7 @@ package com.stripe.android.link.ui.signup
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.LinkMode
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -83,6 +84,7 @@ class SignUpScreenStateTest {
             stripeIntent = PaymentIntentFactory.create(),
             merchantName = "Merchant, Inc.",
             merchantCountryCode = "US",
+            merchantLogoUrl = null,
             customerInfo = customerInfo,
             shippingDetails = null,
             passthroughModeEnabled = true,
@@ -106,7 +108,8 @@ class SignUpScreenStateTest {
             linkSignUpOptInFeatureEnabled = false,
             linkSignUpOptInInitialValue = false,
             skipWalletInFlowController = false,
-            customerId = null
+            customerId = null,
+            saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         )
     }
 

@@ -9,7 +9,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
@@ -24,7 +23,7 @@ import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
 import com.stripe.android.crypto.onramp.model.OnrampSetWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
 import com.stripe.android.crypto.onramp.model.PaymentOptionDisplayData
-import com.stripe.android.link.model.LinkAppearance
+import com.stripe.android.link.LinkAppearance
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -48,24 +47,22 @@ internal class OnrampViewModel(
     private var selectedPaymentInfo: PaymentOptionDisplayData? = null
 
     init {
-        @Suppress("MaxLineLength")
-        PaymentConfiguration.init(
-            application,
-            "pk_test_51K9W3OHMaDsveWq0oLP0ZjldetyfHIqyJcz27k2BpMGHxu9v9Cei2tofzoHncPyk3A49jMkFEgTOBQyAMTUffRLa00xzzARtZO"
-        )
         onrampCoordinator = OnrampCoordinator.Builder()
             .build(application, savedStateHandle)
 
         viewModelScope.launch {
+            @Suppress("MagicNumber", "MaxLineLength")
             val configuration = OnrampConfiguration(
+                merchantDisplayName = "Onramp Example",
+                publishableKey = "pk_test_51K9W3OHMaDsveWq0oLP0ZjldetyfHIqyJcz27k2BpMGHxu9v9Cei2tofzoHncPyk3A49jMkFEgTOBQyAMTUffRLa00xzzARtZO",
                 appearance = LinkAppearance(
                     lightColors = LinkAppearance.Colors(
                         primary = Color.Blue,
                         borderSelected = Color.Red
                     ),
                     darkColors = LinkAppearance.Colors(
-                        primary = Color.Red,
-                        borderSelected = Color.Blue
+                        primary = Color(0xFF9886E6),
+                        borderSelected = Color.White
                     ),
                     style = LinkAppearance.Style.ALWAYS_DARK,
                     primaryButton = LinkAppearance.PrimaryButton()
@@ -118,7 +115,9 @@ internal class OnrampViewModel(
                 currentCustomerId = result.customerId
                 _message.value = "Authentication successful! You can now perform authenticated operations."
                 _uiState.value = OnrampUiState.AuthenticatedOperations(
-                    currentEmail, currentCustomerId, selectedPaymentInfo
+                    currentEmail,
+                    currentCustomerId,
+                    selectedPaymentInfo
                 )
             }
             is OnrampVerificationResult.Cancelled -> {
@@ -136,7 +135,9 @@ internal class OnrampViewModel(
             is OnrampIdentityVerificationResult.Completed -> {
                 _message.value = "Identity Verification completed"
                 _uiState.value = OnrampUiState.AuthenticatedOperations(
-                    currentEmail, currentCustomerId, selectedPaymentInfo
+                    currentEmail,
+                    currentCustomerId,
+                    selectedPaymentInfo
                 )
             }
             is OnrampIdentityVerificationResult.Cancelled -> {
@@ -156,7 +157,9 @@ internal class OnrampViewModel(
 
                 _message.value = "Payment selection completed"
                 _uiState.value = OnrampUiState.AuthenticatedOperations(
-                    currentEmail, currentCustomerId, selectedPaymentInfo
+                    currentEmail,
+                    currentCustomerId,
+                    selectedPaymentInfo
                 )
             }
             is OnrampCollectPaymentResult.Cancelled -> {
@@ -165,7 +168,9 @@ internal class OnrampViewModel(
             is OnrampCollectPaymentResult.Failed -> {
                 _message.value = "Payment selection failed: ${result.error.message}"
                 _uiState.value = OnrampUiState.AuthenticatedOperations(
-                    currentEmail, currentCustomerId, selectedPaymentInfo
+                    currentEmail,
+                    currentCustomerId,
+                    selectedPaymentInfo
                 )
             }
         }
@@ -200,13 +205,17 @@ internal class OnrampViewModel(
                 is OnrampSetWalletAddressResult.Completed -> {
                     _message.value = "Wallet address registered successfully!"
                     _uiState.value = OnrampUiState.AuthenticatedOperations(
-                        currentEmail, currentCustomerId, selectedPaymentInfo
+                        currentEmail,
+                        currentCustomerId,
+                        selectedPaymentInfo
                     )
                 }
                 is OnrampSetWalletAddressResult.Failed -> {
                     _message.value = "Failed to register wallet address: ${result.error.message}"
                     _uiState.value = OnrampUiState.AuthenticatedOperations(
-                        currentEmail, currentCustomerId, selectedPaymentInfo
+                        currentEmail,
+                        currentCustomerId,
+                        selectedPaymentInfo
                     )
                 }
             }
@@ -227,7 +236,9 @@ internal class OnrampViewModel(
                 is OnrampKYCResult.Failed -> {
                     _message.value = "KYC Collection failed: ${result.error.message}"
                     _uiState.value = OnrampUiState.AuthenticatedOperations(
-                        currentEmail, currentCustomerId, selectedPaymentInfo
+                        currentEmail,
+                        currentCustomerId,
+                        selectedPaymentInfo
                     )
                 }
             }

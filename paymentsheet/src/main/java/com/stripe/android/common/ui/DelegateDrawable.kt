@@ -23,7 +23,7 @@ import kotlinx.coroutines.withContext
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal class DelegateDrawable(
-    private val imageLoader: suspend () -> Drawable,
+    imageLoader: suspend () -> Drawable,
 ) : Drawable() {
     @Volatile
     private var delegate: Drawable = ShapeDrawable()

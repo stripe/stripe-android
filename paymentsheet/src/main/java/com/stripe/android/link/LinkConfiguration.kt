@@ -2,7 +2,7 @@ package com.stripe.android.link
 
 import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
-import com.stripe.android.link.model.LinkAppearance
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -16,6 +16,7 @@ internal data class LinkConfiguration(
     val stripeIntent: StripeIntent,
     val merchantName: String,
     val merchantCountryCode: String?,
+    val merchantLogoUrl: String?,
     val customerInfo: CustomerInfo,
     val shippingDetails: AddressDetails?,
     val passthroughModeEnabled: Boolean,
@@ -40,8 +41,16 @@ internal data class LinkConfiguration(
     val linkAppearance: LinkAppearance?,
     val linkSignUpOptInFeatureEnabled: Boolean,
     val linkSignUpOptInInitialValue: Boolean,
-    private val customerId: String?
+    private val customerId: String?,
+    val saveConsentBehavior: PaymentMethodSaveConsentBehavior,
 ) : Parcelable {
+
+    val alwaysSaveForFutureUse: Boolean
+        get() {
+            // When this (now poorly named) feature flag is enabled for a merchant, we always show the reuse mandate,
+            // since the merchant will save the payment method for future use.
+            return linkSignUpOptInFeatureEnabled
+        }
 
     val customerIdForEceDefaultValues: String?
         get() = if (enableDisplayableDefaultValuesInEce) customerId else null

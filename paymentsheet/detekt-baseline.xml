@@ -29,6 +29,7 @@
     <ID>LargeClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest</ID>
     <ID>LargeClass:PaymentSheetActivityTest.kt$PaymentSheetActivityTest</ID>
     <ID>LargeClass:PaymentSheetViewModelTest.kt$PaymentSheetViewModelTest</ID>
+    <ID>LargeClass:PlaceholderHelperTest.kt$PlaceholderHelperTest</ID>
     <ID>LargeClass:USBankAccountFormViewModel.kt$USBankAccountFormViewModel : ViewModel</ID>
     <ID>LargeClass:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest</ID>
     <ID>LargeClass:WalletScreenTest.kt$WalletScreenTest</ID>

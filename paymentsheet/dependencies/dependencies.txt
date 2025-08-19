@@ -816,7 +816,7 @@
 |    |    +--- androidx.fragment:fragment-ktx:1.8.6 (*)
 |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1 (*)
 |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1 (*)
-|    |    +--- com.nimbusds:nimbus-jose-jwt:9.46
+|    |    +--- com.nimbusds:nimbus-jose-jwt:10.4.2
 |    |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.1.10 (*)
 |    +--- com.google.accompanist:accompanist-themeadapter-appcompat:0.36.0
 |    |    +--- com.google.accompanist:accompanist-themeadapter-core:0.36.0
@@ -929,6 +929,7 @@
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.10.1 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0 (*)
+|    +--- com.google.android.gms:play-services-wallet:19.4.0 (*)
 |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.1.10 (*)
 +--- project :stripe-ui-core (*)
 +--- project :stripe-attestation

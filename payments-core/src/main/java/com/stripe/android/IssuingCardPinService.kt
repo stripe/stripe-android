@@ -368,9 +368,10 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
             return IssuingCardPinService(
                 keyProvider,
                 StripeApiRepository(
-                    context,
-                    { publishableKey },
-                    appInfo,
+                    context = context,
+                    publishableKeyProvider = { publishableKey },
+                    requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
+                    appInfo = appInfo,
                     paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                         context,
                         { publishableKey },

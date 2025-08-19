@@ -175,6 +175,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         AutocompleteAddressElement(
             identifier = IdentifierSpec.Generic("billing_details[address]"),
             initialValues = defaultAddress?.asFormFieldValues() ?: emptyMap(),
+            countryCodes = collectionConfiguration.allowedBillingCountries,
             sameAsShippingElement = sameAsShippingElement,
             interactorFactory = it,
             shippingValuesMap = args.formArgs.shippingDetails?.toIdentifierMap(args.formArgs.billingDetails),
@@ -184,6 +185,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     val addressElement = autocompleteAddressElement ?: AddressElement(
         _identifier = IdentifierSpec.Generic("billing_details[address]"),
         rawValuesMap = defaultAddress?.asFormFieldValues() ?: emptyMap(),
+        countryCodes = collectionConfiguration.allowedBillingCountries,
         sameAsShippingElement = sameAsShippingElement,
         shippingValuesMap = args.formArgs.shippingDetails?.toIdentifierMap(args.formArgs.billingDetails),
     )
@@ -747,7 +749,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private fun buildMandateText(
         isVerifyWithMicrodeposits: Boolean,
         isSaveForFutureUseSelected: Boolean = saveForFutureUseCheckedFlow.value,
-    ): ResolvableString {
+    ): ResolvableString? {
+        if (args.termsDisplay == PaymentSheet.TermsDisplay.NEVER) {
+            return null
+        }
         return USBankAccountTextBuilder.buildMandateAndMicrodepositsText(
             merchantName = formattedMerchantName(),
             isVerifyingMicrodeposits = isVerifyWithMicrodeposits,
@@ -815,6 +820,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val financialConnectionsAvailability: FinancialConnectionsAvailability?,
         val setAsDefaultPaymentMethodEnabled: Boolean,
         val setAsDefaultMatchesSaveForFutureUse: Boolean,
+        val termsDisplay: PaymentSheet.TermsDisplay,
     )
 
     private companion object {

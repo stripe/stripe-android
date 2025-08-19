@@ -31,6 +31,7 @@ import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.SignUpParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.VerificationType
+import com.stripe.android.networking.RequestSurface
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.repository.ConsumersApiService
@@ -46,6 +47,7 @@ import kotlin.coroutines.CoroutineContext
 @SuppressWarnings("TooManyFunctions")
 internal class LinkApiRepository @Inject constructor(
     application: Application,
+    private val requestSurface: RequestSurface,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
     private val stripeRepository: StripeRepository,
@@ -64,13 +66,15 @@ internal class LinkApiRepository @Inject constructor(
 
     override suspend fun lookupConsumer(
         email: String,
+        sessionId: String,
         customerId: String?
     ): Result<ConsumerSessionLookup> = withContext(workContext) {
         runCatching {
             requireNotNull(
                 consumersApiService.lookupConsumerSession(
                     email = email,
-                    requestSurface = REQUEST_SURFACE,
+                    requestSurface = requestSurface.value,
+                    sessionId = sessionId,
                     doNotLogConsumerFunnelEvent = false,
                     requestOptions = buildRequestOptions(),
                     customerId = customerId
@@ -80,13 +84,15 @@ internal class LinkApiRepository @Inject constructor(
     }
 
     override suspend fun lookupConsumerWithoutBackendLoggingForExposure(
-        email: String
+        email: String,
+        sessionId: String,
     ): Result<ConsumerSessionLookup> = withContext(workContext) {
         runCatching {
             requireNotNull(
                 consumersApiService.lookupConsumerSession(
                     email = email,
-                    requestSurface = REQUEST_SURFACE,
+                    requestSurface = requestSurface.value,
+                    sessionId = sessionId,
                     doNotLogConsumerFunnelEvent = true,
                     requestOptions = buildRequestOptions(),
                     customerId = null
@@ -107,7 +113,7 @@ internal class LinkApiRepository @Inject constructor(
             consumersApiService.mobileLookupConsumerSession(
                 email = email,
                 emailSource = emailSource,
-                requestSurface = REQUEST_SURFACE,
+                requestSurface = requestSurface.value,
                 verificationToken = verificationToken,
                 appId = appId,
                 requestOptions = buildRequestOptions(),
@@ -135,7 +141,7 @@ internal class LinkApiRepository @Inject constructor(
                 currency = null,
                 incentiveEligibilitySession = null,
                 consentAction = consentAction,
-                requestSurface = REQUEST_SURFACE
+                requestSurface = requestSurface.value
             ),
             requestOptions = buildRequestOptions(),
         )
@@ -164,7 +170,7 @@ internal class LinkApiRepository @Inject constructor(
                 currency = currency,
                 incentiveEligibilitySession = incentiveEligibilitySession,
                 consentAction = consentAction,
-                requestSurface = REQUEST_SURFACE,
+                requestSurface = requestSurface.value,
                 verificationToken = verificationToken,
                 appId = appId
             ),
@@ -185,7 +191,7 @@ internal class LinkApiRepository @Inject constructor(
                 cardPaymentMethodCreateParamsMap = paymentMethodCreateParams.toParamMap(),
                 email = userEmail,
             ),
-            requestSurface = REQUEST_SURFACE,
+            requestSurface = requestSurface.value,
             requestOptions = buildRequestOptions(consumerPublishableKey),
         ).mapCatching {
             val paymentDetails = it.paymentDetails.first()
@@ -223,7 +229,7 @@ internal class LinkApiRepository @Inject constructor(
                 billingEmailAddress = userEmail,
                 billingAddress = null
             ),
-            requestSurface = REQUEST_SURFACE,
+            requestSurface = requestSurface.value,
             requestOptions = buildRequestOptions(),
         ).mapCatching {
             it.paymentDetails.first()
@@ -284,11 +290,15 @@ internal class LinkApiRepository @Inject constructor(
         expectedPaymentMethodType: String,
         billingPhone: String?,
         cvc: String?,
+        allowRedisplay: String?,
     ): Result<SharePaymentDetails> = withContext(workContext) {
         val fraudParams = fraudDetectionDataRepository.getCached()?.params.orEmpty()
         val paymentMethodParams = mapOf("expand" to listOf("payment_method"))
         val optionsParams = cvc?.let {
             mapOf("payment_method_options" to mapOf("card" to mapOf("cvc" to it)))
+        } ?: emptyMap()
+        val allowRedisplayParams = allowRedisplay?.let {
+            mapOf("allow_redisplay" to allowRedisplay)
         } ?: emptyMap()
 
         consumersApiService.sharePaymentDetails(
@@ -296,8 +306,8 @@ internal class LinkApiRepository @Inject constructor(
             paymentDetailsId = paymentDetailsId,
             expectedPaymentMethodType = expectedPaymentMethodType,
             requestOptions = buildRequestOptions(),
-            requestSurface = REQUEST_SURFACE,
-            extraParams = paymentMethodParams + fraudParams + optionsParams,
+            requestSurface = requestSurface.value,
+            extraParams = paymentMethodParams + fraudParams + optionsParams + allowRedisplayParams,
             billingPhone = billingPhone,
         )
     }
@@ -341,7 +351,7 @@ internal class LinkApiRepository @Inject constructor(
                 consumersApiService.startConsumerVerification(
                     consumerSessionClientSecret = consumerSessionClientSecret,
                     locale = locale ?: Locale.US,
-                    requestSurface = REQUEST_SURFACE,
+                    requestSurface = requestSurface.value,
                     type = VerificationType.SMS,
                     customEmailType = null,
                     connectionsMerchantName = null,
@@ -366,7 +376,7 @@ internal class LinkApiRepository @Inject constructor(
                 consumersApiService.confirmConsumerVerification(
                     consumerSessionClientSecret = consumerSessionClientSecret,
                     verificationCode = verificationCode,
-                    requestSurface = REQUEST_SURFACE,
+                    requestSurface = requestSurface.value,
                     type = VerificationType.SMS,
                     requestOptions = consumerPublishableKey?.let {
                         ApiRequest.Options(it)
@@ -455,7 +465,7 @@ internal class LinkApiRepository @Inject constructor(
             consumerSessionClientSecret = consumerSessionClientSecret,
             intentToken = stripeIntent.clientSecret,
             linkMode = linkMode,
-            requestSurface = REQUEST_SURFACE,
+            requestSurface = requestSurface.value,
             requestOptions = consumerPublishableKey?.let {
                 ApiRequest.Options(it)
             } ?: ApiRequest.Options(
@@ -475,7 +485,6 @@ internal class LinkApiRepository @Inject constructor(
     }
 
     private companion object {
-        const val REQUEST_SURFACE = "android_payment_element"
         const val ALLOW_REDISPLAY_PARAM = "allow_redisplay"
     }
 }

@@ -113,6 +113,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Al continuar, aceptas guardar tu información para futuras compras con %s.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Al continuar, aceptas guardar tu información para futuras compras con %s y <link>Link</link>. También aceptas las <terms>Condiciones</terms> y la <privacy>Política de privacidad</privacy> de Link.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Al continuar, aceptas guardar tu información para futuras compras con %s y <link>Link</link> (consulta <terms>Condiciones</terms> y <privacy>Privacidad</privacy>).]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">No se actualizó la tarjeta. Vuelve a intentarlo.</string>
   <!-- Title shown above a carousel containing available payment methods -->

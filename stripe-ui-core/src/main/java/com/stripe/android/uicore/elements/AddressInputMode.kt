@@ -9,6 +9,7 @@ import kotlinx.parcelize.Parcelize
 sealed class AddressInputMode : Parcelable {
     abstract val phoneNumberConfig: AddressFieldConfiguration
     abstract val nameConfig: AddressFieldConfiguration
+    abstract val emailConfig: AddressFieldConfiguration
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
@@ -17,6 +18,7 @@ sealed class AddressInputMode : Parcelable {
         override val autocompleteCountries: Set<String>?,
         override val phoneNumberConfig: AddressFieldConfiguration,
         override val nameConfig: AddressFieldConfiguration,
+        override val emailConfig: AddressFieldConfiguration,
         override val onNavigation: () -> Unit
     ) : AddressInputMode(), AutocompleteCapableInputMode
 
@@ -27,6 +29,7 @@ sealed class AddressInputMode : Parcelable {
         override val autocompleteCountries: Set<String>?,
         override val phoneNumberConfig: AddressFieldConfiguration,
         override val nameConfig: AddressFieldConfiguration,
+        override val emailConfig: AddressFieldConfiguration,
         override val onNavigation: () -> Unit,
     ) : AddressInputMode(), AutocompleteCapableInputMode
 
@@ -36,6 +39,8 @@ sealed class AddressInputMode : Parcelable {
         override val phoneNumberConfig: AddressFieldConfiguration =
             AddressFieldConfiguration.HIDDEN,
         override val nameConfig: AddressFieldConfiguration =
+            AddressFieldConfiguration.HIDDEN,
+        override val emailConfig: AddressFieldConfiguration =
             AddressFieldConfiguration.HIDDEN,
     ) : AddressInputMode()
 }

@@ -3,6 +3,7 @@ package com.stripe.android.ui.core.elements
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.R
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.elements.PostalCodeConfig
@@ -139,10 +140,58 @@ class PostalCodeConfigTest {
         }
     }
 
-    private fun createConfigForCountry(country: String): PostalCodeConfig {
+    @Test
+    fun `when optional & empty, should be valid and have no error`() {
+        with(createConfigForCountry(country = "AZ", optional = true)) {
+            val emptyInputState = determineStateForInput("")
+
+            assertThat(emptyInputState.getError()).isNull()
+            assertThat(emptyInputState.isValid()).isTrue()
+        }
+
+        with(createConfigForCountry(country = "CA", optional = true)) {
+            val emptyInputState = determineStateForInput("")
+
+            assertThat(emptyInputState.getError()).isNull()
+            assertThat(emptyInputState.isValid()).isTrue()
+        }
+    }
+
+    @Test
+    fun `when optional & blank, should be invalid and have an error`() {
+        with(createConfigForCountry(country = "AZ", optional = true)) {
+            val blankInputState = determineState("   ")
+
+            assertThat(blankInputState.isValid()).isFalse()
+            assertThat(blankInputState.getError()?.errorMessage)
+                .isEqualTo(UiCoreR.string.stripe_address_postal_code_invalid)
+        }
+
+        with(createConfigForCountry(country = "CA", optional = true)) {
+            val blankInputState = determineState("   ")
+
+            assertThat(blankInputState.isValid()).isFalse()
+            assertThat(blankInputState.getError()?.errorMessage)
+                .isEqualTo(UiCoreR.string.stripe_address_postal_code_invalid)
+        }
+
+        with(createConfigForCountry(country = "US", optional = true)) {
+            val blankInputState = determineState("   ")
+
+            assertThat(blankInputState.isValid()).isFalse()
+            assertThat(blankInputState.getError()?.errorMessage)
+                .isEqualTo(UiCoreR.string.stripe_address_zip_invalid)
+        }
+    }
+
+    private fun createConfigForCountry(
+        country: String,
+        optional: Boolean = false
+    ): PostalCodeConfig {
         return PostalCodeConfig(
             label = resolvableString(R.string.stripe_address_label_postal_code),
-            country = country
+            country = country,
+            optional = optional,
         )
     }
 

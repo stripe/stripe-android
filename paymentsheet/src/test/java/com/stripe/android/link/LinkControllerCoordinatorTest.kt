@@ -49,6 +49,7 @@ internal class LinkControllerCoordinatorTest {
         val activityResultRegistryOwner = object : ActivityResultRegistryOwner {
             override val activityResultRegistry = registry
         }
+
         return LinkControllerCoordinator(
             interactor = viewModel,
             lifecycleOwner = lifecycleOwner,
@@ -94,7 +95,9 @@ internal class LinkControllerCoordinatorTest {
         lifecycleOwner.setCurrentState(Lifecycle.State.CREATED)
         createCoordinator()
 
-        presentPaymentMethodsResultFlow.emit(LinkController.PresentPaymentMethodsResult.Success)
+        presentPaymentMethodsResultFlow.emit(
+            LinkController.PresentPaymentMethodsResult.Success
+        )
         authenticationResultFlow.emit(LinkController.AuthenticationResult.Success)
 
         assertThat(presentPaymentMethodsResults).isEmpty()
@@ -136,7 +139,9 @@ internal class LinkControllerCoordinatorTest {
                 launchMode = LinkLaunchMode.PaymentMethodSelection(null),
             )
         )
-        verify(viewModel).onLinkActivityResult(testResult)
+        verify(viewModel).onLinkActivityResult(
+            testResult,
+        )
     }
 
     @Test
@@ -144,7 +149,9 @@ internal class LinkControllerCoordinatorTest {
         lifecycleOwner.setCurrentState(Lifecycle.State.CREATED)
         createCoordinator()
 
-        presentPaymentMethodsResultFlow.emit(LinkController.PresentPaymentMethodsResult.Success)
+        presentPaymentMethodsResultFlow.emit(
+            LinkController.PresentPaymentMethodsResult.Success
+        )
         assertThat(presentPaymentMethodsResults).isEmpty()
 
         lifecycleOwner.setCurrentState(Lifecycle.State.STARTED)

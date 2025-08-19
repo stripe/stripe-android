@@ -26,6 +26,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
+import com.stripe.android.networking.RequestSurface
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -206,6 +207,7 @@ internal object TestFactory {
         stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
         merchantName = MERCHANT_NAME,
         merchantCountryCode = "",
+        merchantLogoUrl = null,
         customerInfo = LINK_CUSTOMER_INFO,
         shippingDetails = null,
         flags = emptyMap(),
@@ -229,7 +231,8 @@ internal object TestFactory {
         linkAppearance = null,
         linkSignUpOptInFeatureEnabled = false,
         linkSignUpOptInInitialValue = false,
-        customerId = null
+        customerId = null,
+        saveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(null),
     )
 
     val LINK_WALLET_PRIMARY_BUTTON_LABEL = Amount(
@@ -262,6 +265,7 @@ internal object TestFactory {
 
     val NATIVE_LINK_ARGS = NativeLinkArgs(
         configuration = LINK_CONFIGURATION,
+        requestSurface = RequestSurface.PaymentElement,
         publishableKey = "",
         stripeAccountId = "",
         linkExpressMode = LinkExpressMode.DISABLED,

@@ -1,6 +1,7 @@
 package com.stripe.android.crypto.onramp
 
 import android.app.Application
+import android.content.Context
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
@@ -30,18 +31,21 @@ internal class OnrampInteractor @Inject constructor(
     private val linkController: LinkController,
     private val cryptoApiRepository: CryptoApiRepository,
 ) {
-
     private val _state = MutableStateFlow(OnrampState())
     val state: StateFlow<OnrampState> = _state.asStateFlow()
 
     suspend fun configure(configuration: OnrampConfiguration) {
         _state.value = _state.value.copy(configuration = configuration)
 
+        // We are *not* calling `PaymentConfiguration.init()` here because we're relying on
+        // `LinkController.configure()` to do it.
         linkController.configure(
             LinkController.Configuration.Builder(
-                merchantDisplayName = "Onramp Merchant",
-                appearance = configuration.appearance
-            ).build()
+                merchantDisplayName = configuration.merchantDisplayName,
+                publishableKey = configuration.publishableKey,
+            )
+                .appearance(configuration.appearance)
+                .build()
         )
     }
 
@@ -180,12 +184,11 @@ internal class OnrampInteractor @Inject constructor(
     }
 
     fun handleSelectPaymentResult(
-        result: LinkController.PresentPaymentMethodsResult
+        result: LinkController.PresentPaymentMethodsResult,
+        context: Context,
     ): OnrampCollectPaymentResult = when (result) {
         is LinkController.PresentPaymentMethodsResult.Success -> {
-            val paymentMethodPreview = paymentMethodPreview()
-
-            paymentMethodPreview?.let {
+            linkController.state(context).value.selectedPaymentMethodPreview?.let {
                 OnrampCollectPaymentResult.Completed(
                     displayData = PaymentOptionDisplayData(
                         icon = it.icon,

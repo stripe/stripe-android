@@ -691,6 +691,125 @@ class InputAddressViewModelTest {
         }
     }
 
+    @Test
+    fun `Does not use initial shipping address if not allowed`() = doesNotUseAddressTest(
+        config = AddressLauncher.Configuration.Builder()
+            .allowedCountries(setOf("CA"))
+            .address(
+                AddressDetails(
+                    name = "John Doe",
+                    address = PaymentSheet.Address(
+                        line1 = "123 Apple Street",
+                        line2 = "",
+                        city = "San Francisco",
+                        country = "US",
+                        state = "CA",
+                        postalCode = "99999"
+                    ),
+                )
+            )
+            .additionalFields(
+                AddressLauncher.AdditionalFieldsConfiguration(
+                    phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
+                )
+            )
+            .build()
+    )
+
+    @OptIn(AddressElementSameAsBillingPreview::class)
+    @Test
+    fun `Does not use initial billing address if not allowed`() = doesNotUseAddressTest(
+        config = AddressLauncher.Configuration.Builder()
+            .allowedCountries(setOf("CA"))
+            .billingAddress(
+                PaymentSheet.BillingDetails(
+                    name = "John Doe",
+                    address = PaymentSheet.Address(
+                        line1 = "123 Apple Street",
+                        line2 = "",
+                        city = "San Francisco",
+                        country = "US",
+                        state = "CA",
+                        postalCode = "99999"
+                    ),
+                )
+            )
+            .additionalFields(
+                AddressLauncher.AdditionalFieldsConfiguration(
+                    phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
+                )
+            )
+            .build()
+    )
+
+    @OptIn(AddressElementSameAsBillingPreview::class)
+    @Test
+    fun `Does not use initial shipping or billing address if not allowed`() = doesNotUseAddressTest(
+        config = AddressLauncher.Configuration.Builder()
+            .allowedCountries(setOf("CA"))
+            .address(
+                AddressDetails(
+                    name = "Jane Doe",
+                    address = PaymentSheet.Address(
+                        line1 = "123 Coffee Street",
+                        city = "San Jose",
+                        country = "US",
+                        state = "CA",
+                        postalCode = "77777"
+                    ),
+                )
+            )
+            .billingAddress(
+                PaymentSheet.BillingDetails(
+                    name = "John Doe",
+                    address = PaymentSheet.Address(
+                        line1 = "123 Apple Street",
+                        line2 = "",
+                        city = "San Francisco",
+                        country = "US",
+                        state = "CA",
+                        postalCode = "99999"
+                    ),
+                )
+            )
+            .additionalFields(
+                AddressLauncher.AdditionalFieldsConfiguration(
+                    phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
+                )
+            )
+            .build()
+    )
+
+    private fun doesNotUseAddressTest(
+        config: AddressLauncher.Configuration,
+    ) = runTest {
+        val viewModel = createViewModel(
+            config = config,
+        )
+
+        turbineScope {
+            val shippingSameAsBillingStateTurbine = viewModel.shippingSameAsBillingState.testIn(scope = this)
+            val formValuesTurbine = viewModel.addressFormController.uncompletedFormValues.testIn(scope = this)
+
+            assertThat(shippingSameAsBillingStateTurbine.awaitItem())
+                .isEqualTo(InputAddressViewModel.ShippingSameAsBillingState.Hide)
+            assertThat(formValuesTurbine.awaitItem()).containsExactlyEntriesIn(
+                mapOf(
+                    IdentifierSpec.Name to FormFieldEntry(value = "", isComplete = false),
+                    IdentifierSpec.Country to FormFieldEntry(value = "CA", isComplete = true),
+                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
+                    IdentifierSpec.Line1 to FormFieldEntry(value = "", isComplete = false),
+                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
+                    IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false)
+                )
+            )
+
+            shippingSameAsBillingStateTurbine.cancel()
+            formValuesTurbine.cancel()
+        }
+    }
+
     @OptIn(AddressElementSameAsBillingPreview::class)
     private fun billingSameAsShippingInitialValueTest(
         address: AddressDetails?,

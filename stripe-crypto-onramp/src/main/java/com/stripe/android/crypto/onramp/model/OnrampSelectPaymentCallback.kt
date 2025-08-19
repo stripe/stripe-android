@@ -37,7 +37,12 @@ sealed class OnrampCollectPaymentResult {
 @Poko
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PaymentOptionDisplayData internal constructor(
+
+    /**
+     * User facing icon represented payment method.
+     */
     val icon: Drawable,
+	
     /**
      * User facing strings representing payment method information
      */

@@ -17,6 +17,23 @@ internal class RealRedirectResolverTest {
     val networkRule = NetworkRule()
 
     @Test
+    fun `Does not attempt to resolve after the first redirect`() = runTest {
+        val resolver = buildResolver()
+        val url = buildPmRedirectsUrl()
+
+        networkRule.enqueue(
+            path("/authorize/acct_1234567890"),
+            method("GET"),
+        ) { response ->
+            response.setResponseCode(302)
+            response.addHeader("Location", url)
+        }
+
+        val result = resolver(url)
+        assertThat(result).isEqualTo(url)
+    }
+
+    @Test
     fun `Resolves redirect if original URL returns corresponding status code`() = runTest {
         val resolver = buildResolver()
         val url = buildPmRedirectsUrl()

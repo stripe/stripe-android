@@ -81,9 +81,10 @@ internal class BillingDetailsFormUITest {
         val form = BillingDetailsForm(
             billingDetails = billingDetails,
             addressCollectionMode = addressCollectionMode,
-            collectName = false,
+            nameCollection = NameCollection.Disabled,
             collectEmail = false,
             collectPhone = false,
+            allowedBillingCountries = emptySet(),
         )
         composeRule.setContent {
             BillingDetailsFormUI(

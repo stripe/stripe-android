@@ -6,7 +6,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
-import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -22,6 +21,7 @@ class AutocompleteAddressController(
     ),
     private val phoneNumberConfig: AddressFieldConfiguration,
     private val nameConfig: AddressFieldConfiguration,
+    private val emailConfig: AddressFieldConfiguration,
     private val sameAsShippingElement: SameAsShippingElement?,
     private val shippingValuesMap: Map<IdentifierSpec, String?>?,
     private val hideCountry: Boolean = false,
@@ -31,8 +31,6 @@ class AutocompleteAddressController(
     private val config = interactor.autocompleteConfig
 
     private var expandForm = false
-
-    override val error: StateFlow<FieldError?> = stateFlowOf(null)
 
     val countryElement = CountryElement(
         IdentifierSpec.Country,
@@ -53,6 +51,10 @@ class AutocompleteAddressController(
 
     val addressController = addressElementFlow.flatMapLatestAsStateFlow {
         it.addressController
+    }
+
+    override val error: StateFlow<FieldError?> = addressController.flatMapLatestAsStateFlow {
+        it.error
     }
 
     init {
@@ -101,13 +103,18 @@ class AutocompleteAddressController(
         val googlePlacesApiKey = config.googlePlacesApiKey
 
         return if (googlePlacesApiKey == null) {
-            AddressInputMode.NoAutocomplete(phoneNumberConfig, nameConfig)
+            AddressInputMode.NoAutocomplete(
+                phoneNumberConfig = phoneNumberConfig,
+                nameConfig = nameConfig,
+                emailConfig = emailConfig,
+            )
         } else if (expandForm || values[IdentifierSpec.Line1] != null) {
             AddressInputMode.AutocompleteExpanded(
                 googleApiKey = googlePlacesApiKey,
                 autocompleteCountries = config.autocompleteCountries,
                 phoneNumberConfig = phoneNumberConfig,
                 nameConfig = nameConfig,
+                emailConfig = emailConfig,
                 onNavigation = {
                     interactor.onAutocomplete(
                         country = countryDropdownFieldController.rawFieldValue.value ?: ""
@@ -120,6 +127,7 @@ class AutocompleteAddressController(
                 autocompleteCountries = config.autocompleteCountries,
                 phoneNumberConfig = phoneNumberConfig,
                 nameConfig = nameConfig,
+                emailConfig = emailConfig,
                 onNavigation = {
                     interactor.onAutocomplete(
                         country = countryDropdownFieldController.rawFieldValue.value ?: ""

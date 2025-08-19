@@ -68,7 +68,7 @@ private object BacsDebitUiDefinitionFactory : UiDefinitionFactory.RequiresShared
                 apiPath = IdentifierSpec.BillingAddress,
                 field = PlaceholderSpec.PlaceholderField.BillingAddress
             ),
-            BacsDebitConfirmSpec()
+            BacsDebitConfirmSpec().takeIf { metadata.mandateAllowed(BacsDebitDefinition.type) }
         )
 
         return transformSpecToElements.transform(

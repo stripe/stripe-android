@@ -978,6 +978,7 @@ class DefaultIntentConfirmationInterceptorTest {
                             currency = "usd",
                         ),
                         sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                            businessName = "My business, Inc.",
                             networkId = "network_id",
                             externalId = "external_id"
                         )
@@ -1023,11 +1024,10 @@ class DefaultIntentConfirmationInterceptorTest {
             val nextStep = interceptor.intercept(
                 initializationMode = InitializationMode.DeferredIntent(
                     intentConfiguration = PaymentSheet.IntentConfiguration(
-                        sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                            amount = 1099L,
-                            currency = "usd",
-                        ),
+                        sharedPaymentTokenSessionWithMode =
+                        PaymentSheet.IntentConfiguration.Mode.Payment(amount = 1099L, currency = "usd"),
                         sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                            businessName = "My business, Inc.",
                             networkId = "network_id",
                             externalId = "external_id"
                         )
@@ -1100,6 +1100,7 @@ class DefaultIntentConfirmationInterceptorTest {
                             currency = "usd",
                         ),
                         sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                            businessName = "My business, Inc.",
                             networkId = "network_id",
                             externalId = "external_id"
                         )
@@ -1169,6 +1170,7 @@ class DefaultIntentConfirmationInterceptorTest {
                             currency = "usd",
                         ),
                         sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                            businessName = "My business, Inc.",
                             networkId = "network_id",
                             externalId = "external_id"
                         )

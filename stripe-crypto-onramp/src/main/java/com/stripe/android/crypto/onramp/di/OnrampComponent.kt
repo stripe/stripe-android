@@ -15,7 +15,6 @@ import javax.inject.Singleton
 @Component(
     modules = [
         OnrampModule::class,
-        OnrampInteractorModule::class,
         StripeRepositoryModule::class,
         ResourceRepositoryModule::class,
         CoreCommonModule::class,
@@ -25,14 +24,11 @@ import javax.inject.Singleton
 internal interface OnrampComponent {
     val onrampCoordinator: OnrampCoordinator
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        @BindsInstance
-        fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
-
-        fun build(): OnrampComponent
+    @Component.Factory
+    interface Factory {
+        fun build(
+            @BindsInstance application: Application,
+            @BindsInstance savedStateHandle: SavedStateHandle
+        ): OnrampComponent
     }
 }

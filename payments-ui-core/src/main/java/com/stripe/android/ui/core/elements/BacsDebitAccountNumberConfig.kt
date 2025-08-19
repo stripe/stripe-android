@@ -33,6 +33,8 @@ class BacsDebitAccountNumberConfig : TextFieldConfig {
 
     override val loading: StateFlow<Boolean> = MutableStateFlow(false)
 
+    override val optional: Boolean = false
+
     override fun determineState(input: String): TextFieldState {
         return when {
             input.isBlank() -> TextFieldStateConstants.Error.Blank

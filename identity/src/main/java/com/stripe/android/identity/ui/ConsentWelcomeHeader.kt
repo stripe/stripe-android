@@ -9,12 +9,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -60,6 +62,7 @@ internal fun ConsentWelcomeHeader(
                     modifier = Modifier
                         .width(64.dp)
                         .height(64.dp)
+                        .clip(RoundedCornerShape(10.dp))
                 )
             } else {
                 Image(
@@ -70,13 +73,15 @@ internal fun ConsentWelcomeHeader(
                     ),
                     modifier = Modifier
                         .width(64.dp)
-                        .height(64.dp),
+                        .height(64.dp)
+                        .clip(RoundedCornerShape(10.dp)),
                     contentDescription = stringResource(id = R.string.stripe_description_merchant_logo)
                 )
             }
             Image(
                 painter = painterResource(id = R.drawable.stripe_ellipsis_icon),
                 modifier = Modifier
+                    .padding(horizontal = 16.dp)
                     .width(16.dp)
                     .height(16.dp),
                 contentDescription = stringResource(id = R.string.stripe_description_ellipsis)
@@ -86,7 +91,8 @@ internal fun ConsentWelcomeHeader(
                 painter = painterResource(id = R.drawable.stripe_square),
                 modifier = Modifier
                     .width(64.dp)
-                    .height(64.dp),
+                    .height(64.dp)
+                    .clip(RoundedCornerShape(10.dp)),
                 contentDescription = stringResource(id = R.string.stripe_description_stripe_logo)
             )
         }

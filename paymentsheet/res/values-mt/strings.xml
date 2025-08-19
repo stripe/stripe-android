@@ -113,6 +113,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Billi tkompli, taqbel li tissejvja l-informazzjoni tiegħek għal xiri futur ma\' %s.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Billi tkompli, taqbel li tissejvja l-informazzjoni tiegħek għal xiri futur ma\' %s u <link>Link</link>. Inti taqbel ukoll mat-<terms>Termini</terms> u <privacy>l-Privatezza</privacy> ta’ Link.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Billi tkompli, int taqbel li tissejvja l-informazzjoni tiegħek għal xirjiet futuri ma\' %s u <link>Ħolqa</link> (ara t-<terms>Termini</terms> u l-<privacy>Privatezza</privacy>).]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Billi tkompli, int taqbel li tissejvja l-informazzjoni tiegħek għal xirjiet futuri ma\' %s u <link>Ħolqa</link> skont il-Ħolqa <terms>termini</terms> u <privacy>privatezza</privacy>.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Il-karta ma nbidlitx. Jekk jogħġbok erġa\' pprova.</string>
   <!-- Title shown above a carousel containing available payment methods -->

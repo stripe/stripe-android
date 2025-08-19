@@ -80,13 +80,13 @@ internal class DefaultCardNumberController(
     workContext: CoroutineContext,
     staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     override val initialValue: String?,
-    override val showOptionalLabel: Boolean = false,
     private val cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
 ) : CardNumberController() {
     override val capitalization: KeyboardCapitalization = cardTextFieldConfig.capitalization
     override val keyboardType: KeyboardType = cardTextFieldConfig.keyboard
     override val debugLabel = cardTextFieldConfig.debugLabel
+    override val showOptionalLabel: Boolean = false
 
     override val label: StateFlow<ResolvableString> = stateFlowOf(cardTextFieldConfig.label)
 

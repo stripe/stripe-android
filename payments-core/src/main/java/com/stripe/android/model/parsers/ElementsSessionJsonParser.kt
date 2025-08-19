@@ -80,6 +80,7 @@ internal class ElementsSessionJsonParser(
         val googlePayPreference = json.optString(FIELD_GOOGLE_PAY_PREFERENCE)
 
         val merchantCountry = json.optString(FIELD_MERCHANT_COUNTRY)
+        val merchantLogoUrl = StripeJsonUtils.optString(json, FIELD_MERCHANT_LOGO_URL)
 
         val passiveCaptcha = json.optJSONObject(FIELD_PASSIVE_CAPTCHA)?.let {
             PassiveCaptchaJsonParser().parse(it)
@@ -92,6 +93,7 @@ internal class ElementsSessionJsonParser(
                 stripeIntent = stripeIntent,
                 customer = customer,
                 merchantCountry = merchantCountry,
+                merchantLogoUrl = merchantLogoUrl,
                 cardBrandChoice = cardBrandChoice,
                 isGooglePayEnabled = googlePayPreference != "disabled",
                 externalPaymentMethodData = externalPaymentMethodData,
@@ -338,7 +340,8 @@ internal class ElementsSessionJsonParser(
 
             ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                 isPaymentMethodSaveEnabled = paymentMethodSaveFeature == VALUE_ENABLED,
-                isPaymentMethodRemoveEnabled = paymentMethodRemoveFeature == VALUE_ENABLED,
+                isPaymentMethodRemoveEnabled = paymentMethodRemoveFeature == VALUE_ENABLED ||
+                    paymentMethodRemoveFeature == VALUE_PARTIAL,
                 canRemoveLastPaymentMethod = paymentMethodRemoveLastFeature == VALUE_ENABLED,
                 isPaymentMethodSetAsDefaultEnabled = paymentMethodSetAsDefaultFeature == VALUE_ENABLED,
                 allowRedisplayOverride = allowRedisplayOverride,
@@ -364,7 +367,8 @@ internal class ElementsSessionJsonParser(
             val paymentMethodSyncDefaultFeature = customerSheetFeatures.optString(FIELD_PAYMENT_METHOD_SYNC_DEFAULT)
 
             ElementsSession.Customer.Components.CustomerSheet.Enabled(
-                isPaymentMethodRemoveEnabled = paymentMethodRemoveFeature == VALUE_ENABLED,
+                isPaymentMethodRemoveEnabled = paymentMethodRemoveFeature == VALUE_ENABLED ||
+                    paymentMethodRemoveFeature == VALUE_PARTIAL,
                 canRemoveLastPaymentMethod = paymentMethodRemoveLastFeature == VALUE_ENABLED,
                 isPaymentMethodSyncDefaultEnabled = paymentMethodSyncDefaultFeature == VALUE_ENABLED,
             )
@@ -470,6 +474,7 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_LINK_SIGN_UP_OPT_IN_FEATURE_ENABLED = "link_sign_up_opt_in_feature_enabled"
         private const val FIELD_LINK_SIGN_UP_OPT_IN_INITIAL_VALUE = "link_sign_up_opt_in_initial_value"
         private const val FIELD_MERCHANT_COUNTRY = "merchant_country"
+        private const val FIELD_MERCHANT_LOGO_URL = "merchant_logo_url"
         private const val FIELD_PAYMENT_METHOD_PREFERENCE = "payment_method_preference"
         private const val FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES = "unactivated_payment_method_types"
         private const val FIELD_PAYMENT_METHOD_SPECS = "payment_method_specs"
@@ -501,6 +506,7 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_PAYMENT_METHOD_SET_AS_DEFAULT = "payment_method_set_as_default"
         private const val FIELD_PAYMENT_METHOD_SYNC_DEFAULT = "payment_method_sync_default"
         private const val VALUE_ENABLED = FIELD_ENABLED
+        private const val VALUE_PARTIAL = "partial"
         const val FIELD_GOOGLE_PAY_PREFERENCE = "google_pay_preference"
         private const val FIELD_EXPERIMENTS_DATA = "experiments_data"
         private const val FIELD_EXPERIMENTS_ASSIGNMENTS = "experiment_assignments"

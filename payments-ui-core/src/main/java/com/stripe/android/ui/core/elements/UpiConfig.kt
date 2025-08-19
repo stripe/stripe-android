@@ -32,6 +32,7 @@ class UpiConfig : TextFieldConfig {
     override val visualTransformation: VisualTransformation? = null
     override val trailingIcon: StateFlow<TextFieldIcon?> = MutableStateFlow(value = null)
     override val loading: StateFlow<Boolean> = MutableStateFlow(value = false)
+    override val optional: Boolean = false
 
     override fun determineState(input: String): TextFieldState {
         val isValid = upiPattern.matches(input) && input.length <= UPI_MAX_LENGTH

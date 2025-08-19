@@ -333,14 +333,15 @@ private fun ActionSection(
             onButtonClick = onPrimaryButtonClick,
             iconEnd = PaymentsUiCoreR.drawable.stripe_ic_lock
         )
-
-        SecondaryButton(
-            modifier = Modifier
-                .testTag(WALLET_SCREEN_PAY_ANOTHER_WAY_BUTTON),
-            enabled = !state.primaryButtonState.isBlocking,
-            label = state.secondaryButtonLabel.resolve(),
-            onClick = onPayAnotherWayClicked
-        )
+        state.secondaryButtonLabel?.let { secondaryButtonLabel ->
+            SecondaryButton(
+                modifier = Modifier
+                    .testTag(WALLET_SCREEN_PAY_ANOTHER_WAY_BUTTON),
+                enabled = !state.primaryButtonState.isBlocking,
+                label = secondaryButtonLabel.resolve(),
+                onClick = onPayAnotherWayClicked
+            )
+        }
     }
 }
 

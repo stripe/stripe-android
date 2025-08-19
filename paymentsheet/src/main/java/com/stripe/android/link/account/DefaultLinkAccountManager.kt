@@ -79,7 +79,11 @@ internal class DefaultLinkAccountManager @Inject constructor(
         startSession: Boolean,
         customerId: String?
     ): Result<LinkAccount?> =
-        linkRepository.lookupConsumer(email, customerId)
+        linkRepository.lookupConsumer(
+            email = email,
+            sessionId = config.elementsSessionId,
+            customerId = customerId
+        )
             .onFailure { error ->
                 linkEventsReporter.onAccountLookupFailure(error)
             }.map { consumerSessionLookup ->
@@ -339,6 +343,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         expectedPaymentMethodType: String,
         billingPhone: String?,
         cvc: String?,
+        allowRedisplay: String?,
     ): Result<SharePaymentDetails> {
         return runCatching {
             requireNotNull(linkAccountHolder.linkAccountInfo.value.account)
@@ -349,6 +354,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 expectedPaymentMethodType = expectedPaymentMethodType,
                 billingPhone = billingPhone,
                 cvc = cvc,
+                allowRedisplay = allowRedisplay,
             ).getOrThrow()
         }
     }

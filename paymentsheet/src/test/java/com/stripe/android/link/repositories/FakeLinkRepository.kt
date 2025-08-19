@@ -45,6 +45,7 @@ internal open class FakeLinkRepository : LinkRepository {
 
     override suspend fun lookupConsumer(
         email: String,
+        sessionId: String,
         customerId: String?
     ): Result<ConsumerSessionLookup> {
         lookupConsumerCalls.add(
@@ -56,7 +57,8 @@ internal open class FakeLinkRepository : LinkRepository {
     }
 
     override suspend fun lookupConsumerWithoutBackendLoggingForExposure(
-        email: String
+        email: String,
+        sessionId: String
     ): Result<ConsumerSessionLookup> {
         lookupConsumerWithoutBackendLoggingCalls.add(
             item = LookupCall(
@@ -148,7 +150,8 @@ internal open class FakeLinkRepository : LinkRepository {
         paymentDetailsId: String,
         expectedPaymentMethodType: String,
         cvc: String?,
-        billingPhone: String?
+        billingPhone: String?,
+        allowRedisplay: String?,
     ) = sharePaymentDetails
 
     override suspend fun createPaymentMethod(

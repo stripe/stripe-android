@@ -19,6 +19,7 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.utils.requireApplication
+import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -119,6 +120,7 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
 @Component(
     modules = [
         StripeRepositoryModule::class,
+        PaymentElementRequestSurfaceModule::class,
         DefaultConfirmationModule::class,
         LpmNetworkTestModule::class,
     ]

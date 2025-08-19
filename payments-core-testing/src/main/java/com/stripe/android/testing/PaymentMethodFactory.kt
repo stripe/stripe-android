@@ -8,7 +8,12 @@ import kotlin.random.Random
 
 object PaymentMethodFactory {
 
-    fun card(last4: String, id: String? = null, addCbcNetworks: Boolean = false): PaymentMethod {
+    fun card(
+        last4: String,
+        id: String? = null,
+        addCbcNetworks: Boolean = false,
+        billingDetails: PaymentMethod.BillingDetails? = null,
+    ): PaymentMethod {
         val card = if (id == null) {
             card(random = true)
         } else {
@@ -16,7 +21,11 @@ object PaymentMethodFactory {
         }
 
         return card.run {
-            update(last4, addCbcNetworks)
+            update(
+                last4 = last4,
+                addCbcNetworks = addCbcNetworks,
+                billingDetails = billingDetails,
+            )
         }
     }
 
@@ -25,6 +34,7 @@ object PaymentMethodFactory {
         addCbcNetworks: Boolean,
         brand: CardBrand = CardBrand.Visa,
         fingerprint: String? = card?.fingerprint,
+        billingDetails: PaymentMethod.BillingDetails? = null,
     ): PaymentMethod {
         return copy(
             card = card?.copy(
@@ -38,7 +48,8 @@ object PaymentMethodFactory {
                 displayBrand = "cartes_bancaries".takeIf { addCbcNetworks },
                 brand = brand,
                 fingerprint = fingerprint,
-            )
+            ),
+            billingDetails = billingDetails,
         )
     }
 

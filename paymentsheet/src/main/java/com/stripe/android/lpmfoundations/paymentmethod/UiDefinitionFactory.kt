@@ -42,6 +42,7 @@ internal sealed interface UiDefinitionFactory {
         val setAsDefaultMatchesSaveForFutureUse: Boolean,
         val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
         val linkInlineHandler: LinkInlineHandler?,
+        val isLinkUI: Boolean = false,
     ) {
         interface Factory {
             fun create(
@@ -61,6 +62,7 @@ internal sealed interface UiDefinitionFactory {
                 private val setAsDefaultMatchesSaveForFutureUse: Boolean =
                     FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
                 private val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
+                private val isLinkUI: Boolean = false,
             ) : Factory {
                 override fun create(
                     metadata: PaymentMethodMetadata,
@@ -86,6 +88,7 @@ internal sealed interface UiDefinitionFactory {
                         setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
                         autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
                         linkInlineHandler = linkInlineHandler,
+                        isLinkUI = isLinkUI,
                     )
                 }
 
