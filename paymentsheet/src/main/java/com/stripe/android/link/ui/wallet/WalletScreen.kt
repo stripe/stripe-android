@@ -323,14 +323,6 @@ private fun PaymentSelectionHint(
     }
 }
 
-@PreviewLightDark
-@Composable
-private fun PaymentSelectionHintPreview() {
-    DefaultLinkTheme {
-        PaymentSelectionHint(resolvableString("Debit cards are most likely to be accepted."))
-    }
-}
-
 @Composable
 private fun ErrorSection(errorMessage: ResolvableString?) {
     AnimatedVisibility(

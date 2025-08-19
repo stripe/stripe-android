@@ -196,9 +196,11 @@ internal class WalletScreenScreenshotTest {
     fun testPaymentSelectionHintLong() {
         snapshot(
             state = walletUiState(
-                paymentSelectionHint = ("Lorem ipsum dolor sit amet, consectetur adipiscing elit, " +
-                    "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.").resolvableString
-            ),
+                paymentSelectionHint = buildString {
+                    append("Lorem ipsum dolor sit amet, consectetur adipiscing elit, ")
+                    append("sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")
+                }.resolvableString
+            )
         )
     }
 
