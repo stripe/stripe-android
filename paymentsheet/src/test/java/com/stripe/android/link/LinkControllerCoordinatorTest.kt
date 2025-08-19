@@ -1,10 +1,8 @@
 package com.stripe.android.link
 
-import android.content.Context
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.utils.FakeActivityResultRegistry
