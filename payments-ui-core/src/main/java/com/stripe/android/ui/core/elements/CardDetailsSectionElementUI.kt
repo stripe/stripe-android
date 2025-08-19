@@ -53,6 +53,12 @@ fun CardDetailsSectionElementUI(
                         controller.cardDetailsElement.controller.numberElement.controller.onRawValueChange(
                             scannedCard.pan
                         )
+                        scannedCard.expirationDate?.let {
+                            @Suppress("MagicNumber")
+                            controller.cardDetailsElement.controller.expirationDateElement.controller.onRawValueChange(
+                                "${it.month}/${it.year % 100}"
+                            )
+                        }
                     }
                 }
                 ScanCardButtonUI(
