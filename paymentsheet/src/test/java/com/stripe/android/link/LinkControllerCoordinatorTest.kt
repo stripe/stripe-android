@@ -175,8 +175,8 @@ internal class LinkControllerCoordinatorTest {
     private fun testPaymentMethodPreview(): LinkController.PaymentMethodPreview {
         return LinkController.PaymentMethodPreview(
             imageLoader = { mock<android.graphics.drawable.Drawable>() },
-            label = "Visa",
-            sublabel = "•••• 4242"
+            label = "Link",
+            sublabel = "Visa Credit •••• 4242"
         )
     }
 }

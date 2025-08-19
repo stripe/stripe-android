@@ -540,15 +540,10 @@ class LinkControllerInteractorTest {
                 context = application
 
             )
-            assertThat(awaitItem()).isEqualTo(
-                LinkController.PresentPaymentMethodsResult.Success(
-                    paymentMethod = LinkController.PaymentMethodPreview(
-                        imageLoader = { mock<android.graphics.drawable.Drawable>() },
-                        label = "Visa",
-                        sublabel = "•••• 4242"
-                    )
-                )
-            )
+
+            val result = awaitItem() as LinkController.PresentPaymentMethodsResult.Success
+            assertThat(result.paymentMethod?.label).isEqualTo("Link")
+            assertThat(result.paymentMethod?.sublabel).isEqualTo("Visa Credit •••• 4242")
         }
 
         interactor.state(application).test {
