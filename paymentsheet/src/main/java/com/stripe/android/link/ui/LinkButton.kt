@@ -28,6 +28,7 @@ import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentAlpha
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -57,7 +58,6 @@ import com.stripe.android.common.ui.InlineContentTemplateBuilder
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.EceLinkWhiteBackground
-import com.stripe.android.link.theme.EceLinkWhiteDivider
 import com.stripe.android.link.theme.EceLinkWhiteTextPrimary
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.LinkThemeConfig.contentOnPrimaryButton
@@ -68,6 +68,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.ButtonThemes.LinkButtonTheme
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.PrimaryButtonTheme
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.stripeColors
 
 private val LinkButtonTheme.textColor: Color
     @Composable
@@ -79,14 +80,14 @@ private val LinkButtonTheme.textColor: Color
 private val LinkButtonTheme.dividerColor: Color
     @Composable
     get() = when (this) {
-        LinkButtonTheme.WHITE -> EceLinkWhiteDivider
+        LinkButtonTheme.WHITE -> MaterialTheme.stripeColors.componentBorder
         LinkButtonTheme.DEFAULT -> LinkTheme.colors.separatorOnPrimaryButton
     }
 
 private val LinkButtonTheme.borderColor: Color?
     @Composable
     get() = when (this) {
-        LinkButtonTheme.WHITE -> EceLinkWhiteDivider
+        LinkButtonTheme.WHITE -> MaterialTheme.stripeColors.componentBorder
         LinkButtonTheme.DEFAULT -> null
     }
 
