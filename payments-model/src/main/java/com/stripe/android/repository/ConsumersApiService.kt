@@ -133,13 +133,6 @@ interface ConsumersApiService {
         requestSurface: String,
         requestOptions: ApiRequest.Options
     ): Result<LinkAccountSession>
-
-    suspend fun consentUpdate(
-        consumerSessionClientSecret: String,
-        consentGranted: Boolean,
-        requestSurface: String,
-        requestOptions: ApiRequest.Options
-    ): Result<Unit>
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)

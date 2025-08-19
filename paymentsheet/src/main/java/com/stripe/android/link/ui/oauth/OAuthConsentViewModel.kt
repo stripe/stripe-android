@@ -2,6 +2,7 @@ package com.stripe.android.link.ui.oauth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
@@ -16,6 +17,7 @@ import com.stripe.android.model.ConsentUi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class OAuthConsentViewModel @Inject constructor(
@@ -46,25 +48,29 @@ internal class OAuthConsentViewModel @Inject constructor(
     }
 
     fun onAllowClick() {
-        // TODO: Submit consent result
-        // TODO: Error handling
-        dismissWithResult(
-            LinkActivityResult.Completed(
-                linkAccountUpdate = LinkAccountUpdate.Value(linkAccount),
-                authorizationConsentGranted = true,
-            )
-        )
+        onConsentSubmitted(consentGranted = true)
     }
 
     fun onDenyClick() {
-        // TODO: Submit consent result
-        // TODO: Error handling
-        dismissWithResult(
-            LinkActivityResult.Completed(
-                linkAccountUpdate = LinkAccountUpdate.Value(linkAccount),
-                authorizationConsentGranted = false,
+        onConsentSubmitted(consentGranted = false)
+    }
+
+    private fun onConsentSubmitted(consentGranted: Boolean) {
+        viewModelScope.launch {
+            linkAccountManager.consentUpdate(consentGranted).fold(
+                onSuccess = {
+                    dismissWithResult(
+                        LinkActivityResult.Completed(
+                            linkAccountUpdate = LinkAccountUpdate.Value(linkAccount),
+                            authorizationConsentGranted = consentGranted,
+                        )
+                    )
+                },
+                onFailure = {
+                    // TODO: Error handling
+                }
             )
-        )
+        }
     }
 
     private fun updateViewState(block: (OAuthConsentViewState) -> OAuthConsentViewState) {
