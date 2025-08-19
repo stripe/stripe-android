@@ -163,7 +163,7 @@ class LinkFormElementTest {
             linkSignUpOptInInitialValue = false,
             customerId = null,
             saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
-            forceSetupFutureUseBehavior = false,
+            forceSetupFutureUseBehaviorAndNewMandate = false,
         )
     }
 

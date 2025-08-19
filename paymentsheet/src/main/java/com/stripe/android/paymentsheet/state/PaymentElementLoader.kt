@@ -31,7 +31,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.toPaymentSheetSaveConsentBehavior
 import com.stripe.android.model.ElementsSession
-import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_FORCE_SETUP_FUTURE_USE_BEHAVIOR
+import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
@@ -648,7 +648,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             customerId = elementsSession.customer?.session?.customerId,
             linkAppearance = linkAppearance,
             saveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
-            forceSetupFutureUseBehavior = elementsSession.flags[ELEMENTS_FORCE_SETUP_FUTURE_USE_BEHAVIOR] == true,
+            forceSetupFutureUseBehaviorAndNewMandate = elementsSession
+                .flags[ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT] == true,
         )
 
         // CBF isn't currently supported in the web flow.

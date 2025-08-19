@@ -232,7 +232,7 @@ internal object TestFactory {
         linkSignUpOptInInitialValue = false,
         customerId = null,
         saveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(null),
-        forceSetupFutureUseBehavior = false,
+        forceSetupFutureUseBehaviorAndNewMandate = false,
     )
 
     val LINK_WALLET_PRIMARY_BUTTON_LABEL = Amount(

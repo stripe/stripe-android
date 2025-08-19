@@ -15,7 +15,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPayme
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.LinkCardBrandDefinition
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
-import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_FORCE_SETUP_FUTURE_USE_BEHAVIOR
+import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -71,7 +71,7 @@ internal data class PaymentMethodMetadata(
     val elementsSessionId: String,
     val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
     val termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay>,
-    val forceSetupFutureUseBehavior: Boolean,
+    val forceSetupFutureUseBehaviorAndNewMandate: Boolean,
 ) : Parcelable {
 
     fun hasIntentToSetup(code: PaymentMethodCode): Boolean {
@@ -290,7 +290,7 @@ internal data class PaymentMethodMetadata(
         customerRequestedSave: PaymentSelection.CustomerRequestedSave,
         code: PaymentMethodCode
     ): PaymentMethod.AllowRedisplay {
-        val isSettingUp = hasIntentToSetup(code) || forceSetupFutureUseBehavior
+        val isSettingUp = hasIntentToSetup(code) || forceSetupFutureUseBehaviorAndNewMandate
         return paymentMethodSaveConsentBehavior.allowRedisplay(
             isSetupIntent = isSettingUp,
             customerRequestedSave = customerRequestedSave,
@@ -344,7 +344,8 @@ internal data class PaymentMethodMetadata(
                 elementsSessionId = elementsSession.elementsSessionId,
                 shopPayConfiguration = configuration.shopPayConfiguration,
                 termsDisplay = configuration.termsDisplay,
-                forceSetupFutureUseBehavior = elementsSession.flags[ELEMENTS_FORCE_SETUP_FUTURE_USE_BEHAVIOR] == true,
+                forceSetupFutureUseBehaviorAndNewMandate = elementsSession
+                    .flags[ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT] == true,
             )
         }
 
@@ -391,7 +392,8 @@ internal data class PaymentMethodMetadata(
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession),
                 shopPayConfiguration = null,
                 termsDisplay = emptyMap(),
-                forceSetupFutureUseBehavior = elementsSession.flags[ELEMENTS_FORCE_SETUP_FUTURE_USE_BEHAVIOR] == true,
+                forceSetupFutureUseBehaviorAndNewMandate = elementsSession
+                    .flags[ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT] == true,
             )
         }
 
@@ -443,7 +445,7 @@ internal data class PaymentMethodMetadata(
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),
                 shopPayConfiguration = null,
                 termsDisplay = emptyMap(),
-                forceSetupFutureUseBehavior = configuration.forceSetupFutureUseBehavior
+                forceSetupFutureUseBehaviorAndNewMandate = configuration.forceSetupFutureUseBehaviorAndNewMandate
             )
         }
     }

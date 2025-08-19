@@ -42,7 +42,7 @@ internal data class LinkConfiguration(
     val linkSignUpOptInInitialValue: Boolean,
     private val customerId: String?,
     val saveConsentBehavior: PaymentMethodSaveConsentBehavior,
-    val forceSetupFutureUseBehavior: Boolean,
+    val forceSetupFutureUseBehaviorAndNewMandate: Boolean,
 ) : Parcelable {
 
     val customerIdForEceDefaultValues: String?

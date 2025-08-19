@@ -109,10 +109,10 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                 metadata = metadata
             )
 
-            val forceSetupFutureUseBehavior = metadata.forceSetupFutureUseBehavior
+            val forceSetupFutureUseBehaviorAndNewMandate = metadata.forceSetupFutureUseBehaviorAndNewMandate
 
             // sign up opt in combines save for future usage and link signup acceptance
-            if (canChangeSaveForFutureUsage && forceSetupFutureUseBehavior.not()) {
+            if (canChangeSaveForFutureUsage && forceSetupFutureUseBehaviorAndNewMandate.not()) {
                 addSavePaymentOptionElements(
                     metadata = metadata,
                     arguments = arguments,
@@ -138,7 +138,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
             }
 
             val mandateAllowed = metadata.mandateAllowed(CardDefinition.type)
-            if (forceSetupFutureUseBehavior) {
+            if (forceSetupFutureUseBehaviorAndNewMandate) {
                 add(
                     CombinedLinkMandateElement(
                         identifier = IdentifierSpec.Generic("card_mandate"),

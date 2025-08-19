@@ -41,7 +41,7 @@ internal sealed interface PaymentSheetState : Parcelable {
             get() {
                 // When this feature flag is enabled for a merchant, we always show the
                 // reuse mandate, since the merchant will save the payment method for future use.
-                return paymentMethodMetadata.forceSetupFutureUseBehavior
+                return paymentMethodMetadata.forceSetupFutureUseBehaviorAndNewMandate
             }
     }
 }

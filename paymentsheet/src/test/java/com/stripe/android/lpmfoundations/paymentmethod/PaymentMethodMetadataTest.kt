@@ -1150,7 +1150,7 @@ internal class PaymentMethodMetadataTest {
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             shopPayConfiguration = null,
             termsDisplay = emptyMap(),
-            forceSetupFutureUseBehavior = false,
+            forceSetupFutureUseBehaviorAndNewMandate = false,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1225,7 +1225,7 @@ internal class PaymentMethodMetadataTest {
             elementsSessionId = "session_1234",
             shopPayConfiguration = null,
             termsDisplay = emptyMap(),
-            forceSetupFutureUseBehavior = false,
+            forceSetupFutureUseBehaviorAndNewMandate = false,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -2088,7 +2088,7 @@ internal class PaymentMethodMetadataTest {
             linkSignUpOptInInitialValue = false,
             customerId = null,
             saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
-            forceSetupFutureUseBehavior = false,
+            forceSetupFutureUseBehaviorAndNewMandate = false,
         )
     }
 

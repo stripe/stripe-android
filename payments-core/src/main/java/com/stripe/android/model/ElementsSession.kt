@@ -195,7 +195,9 @@ data class ElementsSession(
         ELEMENTS_DISABLE_LINK_GLOBAL_HOLDBACK_LOOKUP("elements_disable_link_global_holdback_lookup"),
         ELEMENTS_ENABLE_LINK_SPM("elements_enable_link_spm"),
         ELEMENTS_ENABLE_PASSIVE_CAPTCHA("elements_enable_passive_captcha"),
-        ELEMENTS_FORCE_SETUP_FUTURE_USE_BEHAVIOR("elements_force_setup_future_use_behavior")
+        ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT(
+            "elements_mobile_force_setup_future_use_behavior_and_new_mandate_text"
+        )
     }
 
     /**

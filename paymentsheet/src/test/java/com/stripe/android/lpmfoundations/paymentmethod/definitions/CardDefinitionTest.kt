@@ -283,7 +283,7 @@ class CardDefinitionTest {
     fun `createFormElements returns mandate when has intent to setup`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
-            forceSetupFutureUseBehavior = true,
+            forceSetupFutureUseBehaviorAndNewMandate = true,
             linkState = LinkState(
                 signupMode = null,
                 configuration = createLinkConfiguration(),
@@ -302,10 +302,10 @@ class CardDefinitionTest {
     }
 
     @Test
-    fun `createFormElements returns mandate when forceSetupFutureUseBehavior even with no email`() {
+    fun `createFormElements returns mandate when forceSetupFutureUseBehaviorAndNewMandate even with no email`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            forceSetupFutureUseBehavior = true,
+            forceSetupFutureUseBehaviorAndNewMandate = true,
             linkState = LinkState(
                 signupMode = null,
                 configuration = createLinkConfiguration().copy(
@@ -367,7 +367,7 @@ class CardDefinitionTest {
     fun `createFormElements returns mandate below link_form when has intent to setup`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
-            forceSetupFutureUseBehavior = true,
+            forceSetupFutureUseBehaviorAndNewMandate = true,
             linkState = LinkState(
                 signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
                 configuration = createLinkConfiguration(),
@@ -518,7 +518,7 @@ class CardDefinitionTest {
         )
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
-            forceSetupFutureUseBehavior = true,
+            forceSetupFutureUseBehaviorAndNewMandate = true,
             termsDisplay = termsDisplay,
             linkState = LinkState(
                 configuration = TestFactory.LINK_CONFIGURATION,

@@ -706,7 +706,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 linkSignUpOptInInitialValue = false,
                 customerId = null,
                 saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
-                forceSetupFutureUseBehavior = false,
+                forceSetupFutureUseBehaviorAndNewMandate = false,
             ),
             userInput = userInput,
         )
