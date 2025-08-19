@@ -483,6 +483,17 @@ internal class DefaultLinkAccountManager @Inject constructor(
             }
     }
 
+    override suspend fun consentUpdate(consentGranted: Boolean): Result<Unit> {
+        val linkAccount = linkAccountHolder.linkAccountInfo.value.account
+            ?: return Result.failure(NoLinkAccountFoundException())
+
+        return linkRepository.consentUpdate(
+            consumerSessionClientSecret = linkAccount.clientSecret,
+            consentGranted = consentGranted,
+            consumerPublishableKey = linkAccount.consumerPublishableKey
+        )
+    }
+
     override suspend fun listPaymentDetails(paymentMethodTypes: Set<String>): Result<ConsumerPaymentDetails> {
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
             ?: return Result.failure(NoLinkAccountFoundException())

@@ -144,6 +144,11 @@ internal interface LinkAccountManager {
     suspend fun confirmVerification(code: String, consentGranted: Boolean?): Result<LinkAccount>
 
     /**
+     * Update consent status for the current Link account.
+     */
+    suspend fun consentUpdate(consentGranted: Boolean): Result<Unit>
+
+    /**
      * Fetch all saved payment methods for the signed in consumer.
      */
     suspend fun listPaymentDetails(paymentMethodTypes: Set<String>): Result<ConsumerPaymentDetails>

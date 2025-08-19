@@ -5,6 +5,7 @@ import com.stripe.android.core.AppInfo
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
+import com.stripe.android.core.networking.executeRequestWithErrorParsing
 import com.stripe.android.core.networking.executeRequestWithModelJsonParser
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
@@ -86,6 +87,13 @@ interface ConsumersApiService {
         requestOptions: ApiRequest.Options
     ): ConsumerSession
 
+    suspend fun consentUpdate(
+        consumerSessionClientSecret: String,
+        consentGranted: Boolean,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options
+    ): Result<Unit>
+
     suspend fun attachLinkConsumerToLinkAccountSession(
         consumerSessionClientSecret: String,
         clientSecret: String,
@@ -125,6 +133,13 @@ interface ConsumersApiService {
         requestSurface: String,
         requestOptions: ApiRequest.Options
     ): Result<LinkAccountSession>
+
+    suspend fun consentUpdate(
+        consumerSessionClientSecret: String,
+        consentGranted: Boolean,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options
+    ): Result<Unit>
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -309,6 +324,29 @@ class ConsumersApiServiceImpl(
         ),
         responseJsonParser = ConsumerSessionJsonParser()
     )
+
+    override suspend fun consentUpdate(
+        consumerSessionClientSecret: String,
+        consentGranted: Boolean,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options
+    ): Result<Unit> {
+        return executeRequestWithErrorParsing(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createPost(
+                url = consentUpdateUrl,
+                options = requestOptions,
+                params = mapOf(
+                    "request_surface" to requestSurface,
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    ),
+                    "consent_granted" to consentGranted
+                )
+            )
+        )
+    }
 
     override suspend fun attachLinkConsumerToLinkAccountSession(
         consumerSessionClientSecret: String,
@@ -503,6 +541,11 @@ class ConsumersApiServiceImpl(
          * @return `https://api.stripe.com/v1/consumers/incentives/update_available`
          */
         private val updateAvailableIncentivesUrl: String = getApiUrl("consumers/incentives/update_available")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/sessions/consent_update`
+         */
+        internal val consentUpdateUrl: String = getApiUrl("consumers/sessions/consent_update")
 
         private fun getApiUrl(path: String): String {
             return "${ApiRequest.API_HOST}/v1/$path"

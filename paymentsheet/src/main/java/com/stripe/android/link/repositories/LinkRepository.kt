@@ -148,6 +148,15 @@ internal interface LinkRepository {
     ): Result<ConsumerSession>
 
     /**
+     * Update consent status for the signed in consumer.
+     */
+    suspend fun consentUpdate(
+        consumerSessionClientSecret: String,
+        consentGranted: Boolean,
+        consumerPublishableKey: String?
+    ): Result<Unit>
+
+    /**
      * Fetch all saved payment methods for the signed in consumer.
      */
     suspend fun listPaymentDetails(
