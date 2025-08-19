@@ -26,6 +26,7 @@ sealed interface ConfirmStripeIntentParams : StripeParamsModel, Parcelable {
         internal const val PARAM_MANDATE_ID: String = "mandate"
         internal const val PARAM_MANDATE_DATA = "mandate_data"
         internal const val PARAM_SET_AS_DEFAULT_PAYMENT_METHOD = "set_as_default_payment_method"
+        internal const val PARAM_RADAR_OPTIONS = "radar_options"
     }
 }
 

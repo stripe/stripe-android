@@ -97,6 +97,7 @@ internal interface IntentConfirmationInterceptor {
         paymentMethodExtraParams: PaymentMethodExtraParams? = null,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         customerRequestedSave: Boolean,
+        hCaptchaToken: String?
     ): NextStep
 
     suspend fun intercept(
@@ -106,6 +107,7 @@ internal interface IntentConfirmationInterceptor {
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams? = null,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        hCaptchaToken: String?
     ): NextStep
 
     companion object {
@@ -175,6 +177,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodExtraParams: PaymentMethodExtraParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         customerRequestedSave: Boolean,
+        hCaptchaToken: String?
     ): NextStep {
         return when (initializationMode) {
             is PaymentElementLoader.InitializationMode.DeferredIntent -> {
@@ -194,6 +197,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     ),
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     customerRequestedSave = customerRequestedSave,
+                    hCaptchaToken = hCaptchaToken
                 )
             }
 
@@ -205,6 +209,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethodCreateParams = paymentMethodCreateParams,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
                     paymentMethodExtraParams = paymentMethodExtraParams,
+                    hCaptchaToken = hCaptchaToken
                 )
             }
 
@@ -215,6 +220,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     shippingValues = shippingValues,
                     paymentMethodCreateParams = paymentMethodCreateParams,
                     paymentMethodExtraParams = paymentMethodExtraParams,
+                    hCaptchaToken = hCaptchaToken
                 )
             }
         }
@@ -227,6 +233,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        hCaptchaToken: String?
     ): NextStep {
         return when (initializationMode) {
             is PaymentElementLoader.InitializationMode.DeferredIntent -> {
@@ -245,6 +252,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                         paymentMethodOptionsParams = updatedPaymentMethodOptionsParams,
                         intentConfiguration = initializationMode.intentConfiguration
                     ),
+                    hCaptchaToken = hCaptchaToken
                 )
             }
 
@@ -283,6 +291,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodExtraParams: PaymentMethodExtraParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         customerRequestedSave: Boolean,
+        hCaptchaToken: String?
     ): NextStep {
         val productUsage = buildSet {
             addAll(paymentMethodCreateParams.attribution)
@@ -308,6 +317,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                         paymentMethodOptionsParams = paymentMethodOptionsParams,
                         intentConfiguration = intentConfiguration
                     ),
+                    hCaptchaToken = hCaptchaToken
                 )
             },
             onFailure = { error ->
@@ -326,6 +336,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodExtraParams: PaymentMethodExtraParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         shouldSavePaymentMethod: Boolean,
+        hCaptchaToken: String?
     ): NextStep {
         return when (intentConfiguration.intentBehavior) {
             is PaymentSheet.IntentConfiguration.IntentBehavior.Default -> handleDeferredIntent(
@@ -335,6 +346,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 paymentMethodExtraParams = paymentMethodExtraParams,
                 shippingValues = shippingValues,
                 shouldSavePaymentMethod = shouldSavePaymentMethod,
+                hCaptchaToken = hCaptchaToken
             )
             is PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken -> handlePreparePaymentMethod(
                 paymentMethod = paymentMethod,
@@ -350,6 +362,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodExtraParams: PaymentMethodExtraParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         shouldSavePaymentMethod: Boolean,
+        hCaptchaToken: String?
     ): NextStep {
         return when (val callback = waitForIntentCallback()) {
             is CreateIntentCallback -> {
@@ -361,6 +374,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     shouldSavePaymentMethod = shouldSavePaymentMethod,
                     shippingValues = shippingValues,
+                    hCaptchaToken = hCaptchaToken
                 )
             }
 
@@ -506,6 +520,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodExtraParams: PaymentMethodExtraParams?,
         shouldSavePaymentMethod: Boolean,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        hCaptchaToken: String?
     ): NextStep {
         val result = createIntentCallback.onCreateIntent(
             paymentMethod = paymentMethod,
@@ -524,6 +539,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                         paymentMethodOptionsParams = paymentMethodOptionsParams,
                         paymentMethodExtraParams = paymentMethodExtraParams,
                         shippingValues = shippingValues,
+                        hCaptchaToken = hCaptchaToken
                     )
                 }
             }
@@ -546,6 +562,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        hCaptchaToken: String?
     ): NextStep {
         return retrieveStripeIntent(clientSecret).mapCatching { intent ->
             if (intent.isConfirmed) {
@@ -637,6 +654,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
         paymentMethodExtraParams: PaymentMethodExtraParams? = null,
+        hCaptchaToken: String?
     ): NextStep {
         val paramsFactory = ConfirmStripeIntentParamsFactory.createFactory(
             clientSecret = clientSecret,
@@ -652,6 +670,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             paymentMethodCreateParams,
             paymentMethodOptionsParams,
             paymentMethodExtraParams,
+            hCaptchaToken
         )
 
         return NextStep.Confirm(

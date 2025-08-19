@@ -6,6 +6,7 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDAT
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_ID
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RADAR_OPTIONS
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RETURN_URL
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_SET_AS_DEFAULT_PAYMENT_METHOD
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_USE_STRIPE_SDK
@@ -64,7 +65,9 @@ constructor(
      *   https://docs.stripe.com/api/setup_intents/confirm#confirm_setup_intent-payment_method_options
      * ).
      */
-    val paymentMethodOptions: PaymentMethodOptionsParams? = null
+    val paymentMethodOptions: PaymentMethodOptionsParams? = null,
+
+    internal val radarOptions: RadarOptions? = null
 ) : ConfirmStripeIntentParams {
 
     override fun shouldUseStripeSdk(): Boolean {
@@ -94,6 +97,10 @@ constructor(
         ).plus(
             setAsDefaultPaymentMethod?.let {
                 mapOf(PARAM_SET_AS_DEFAULT_PAYMENT_METHOD to it)
+            }.orEmpty()
+        ).plus(
+            radarOptions?.let {
+                mapOf(PARAM_RADAR_OPTIONS to it.toParamMap())
             }.orEmpty()
         ).plus(paymentMethodParamMap)
     }
@@ -224,6 +231,7 @@ constructor(
                 mandateId = mandateId,
                 mandateData = mandateData,
                 setAsDefaultPaymentMethod = null,
+                radarOptions = null
             )
         }
 
@@ -233,6 +241,7 @@ constructor(
             mandateData: MandateDataParams? = null,
             mandateId: String? = null,
             setAsDefaultPaymentMethod: Boolean?,
+            radarOptions: RadarOptions?
         ): ConfirmSetupIntentParams {
             return ConfirmSetupIntentParams(
                 clientSecret = clientSecret,
@@ -241,6 +250,7 @@ constructor(
                 mandateData = mandateData,
                 setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
                 paymentMethodCode = paymentMethodCreateParams.code,
+                radarOptions = radarOptions
             )
         }
 

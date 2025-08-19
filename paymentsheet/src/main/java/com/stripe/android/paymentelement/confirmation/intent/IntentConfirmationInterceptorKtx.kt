@@ -10,7 +10,8 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
     confirmationOption: PaymentMethodConfirmationOption,
     intent: StripeIntent,
     initializationMode: PaymentElementLoader.InitializationMode,
-    shippingDetails: AddressDetails?
+    shippingDetails: AddressDetails?,
+    hCaptchaToken: String?
 ): IntentConfirmationInterceptor.NextStep {
     return when (confirmationOption) {
         is PaymentMethodConfirmationOption.New -> {
@@ -22,6 +23,7 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
                 paymentMethodExtraParams = confirmationOption.extraParams,
                 shippingValues = shippingDetails?.toConfirmPaymentIntentShipping(),
                 customerRequestedSave = confirmationOption.shouldSave,
+                hCaptchaToken = hCaptchaToken
             )
         }
         is PaymentMethodConfirmationOption.Saved -> {
@@ -32,6 +34,7 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
                 paymentMethodOptionsParams = confirmationOption.optionsParams,
                 paymentMethodExtraParams = null,
                 shippingValues = shippingDetails?.toConfirmPaymentIntentShipping(),
+                hCaptchaToken = hCaptchaToken
             )
         }
     }
