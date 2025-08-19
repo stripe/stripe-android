@@ -2084,7 +2084,8 @@ internal class PaymentMethodMetadataTest {
             linkAppearance = null,
             linkSignUpOptInFeatureEnabled = false,
             linkSignUpOptInInitialValue = false,
-            customerId = null
+            customerId = null,
+            saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         )
     }
 
