@@ -11,6 +11,7 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.model.RadarOptions
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.setupFutureUsage
@@ -27,27 +28,31 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
         paymentMethodType: PaymentMethod.Type,
         optionsParams: PaymentMethodOptionsParams?,
         extraParams: PaymentMethodExtraParams?,
-        intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?
+        intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+        radarOptions: RadarOptions?
     ): T
 
     abstract fun create(
         createParams: PaymentMethodCreateParams,
         optionsParams: PaymentMethodOptionsParams? = null,
         extraParams: PaymentMethodExtraParams? = null,
+        radarOptions: RadarOptions? = null
     ): T
 
     fun create(
         paymentMethod: PaymentMethod,
         optionsParams: PaymentMethodOptionsParams?,
         extraParams: PaymentMethodExtraParams?,
-        intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?
+        intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+        radarOptions: RadarOptions?
     ): T {
         return create(
             paymentMethodId = paymentMethod.id.orEmpty(),
             paymentMethodType = requireNotNull(paymentMethod.type),
             optionsParams = optionsParams,
             extraParams = extraParams,
-            intentConfigSetupFutureUsage = intentConfigSetupFutureUsage
+            intentConfigSetupFutureUsage = intentConfigSetupFutureUsage,
+            radarOptions = radarOptions
         )
     }
 
@@ -81,7 +86,8 @@ internal class ConfirmPaymentIntentParamsFactory(
         paymentMethodType: PaymentMethod.Type,
         optionsParams: PaymentMethodOptionsParams?,
         extraParams: PaymentMethodExtraParams?,
-        intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?
+        intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+        radarOptions: RadarOptions?
     ): ConfirmPaymentIntentParams {
         return ConfirmPaymentIntentParams.createWithSetAsDefaultPaymentMethod(
             paymentMethodId = paymentMethodId,
@@ -91,7 +97,8 @@ internal class ConfirmPaymentIntentParamsFactory(
             shipping = shipping,
             setAsDefaultPaymentMethod = extraParams?.extractSetAsDefaultPaymentMethodFromExtraParams(),
             paymentMethodCode = paymentMethodType.code,
-            setupFutureUsage = intentConfigSetupFutureUsage
+            setupFutureUsage = intentConfigSetupFutureUsage,
+            radarOptions = radarOptions
         )
     }
 
@@ -99,13 +106,15 @@ internal class ConfirmPaymentIntentParamsFactory(
         createParams: PaymentMethodCreateParams,
         optionsParams: PaymentMethodOptionsParams?,
         extraParams: PaymentMethodExtraParams?,
+        radarOptions: RadarOptions?
     ): ConfirmPaymentIntentParams {
         return ConfirmPaymentIntentParams.createWithSetAsDefaultPaymentMethod(
             paymentMethodCreateParams = createParams,
             clientSecret = clientSecret,
             paymentMethodOptions = optionsParams,
             shipping = shipping,
-            setAsDefaultPaymentMethod = extraParams?.extractSetAsDefaultPaymentMethodFromExtraParams()
+            setAsDefaultPaymentMethod = extraParams?.extractSetAsDefaultPaymentMethodFromExtraParams(),
+            radarOptions = radarOptions
         )
     }
 }
@@ -120,7 +129,8 @@ internal class ConfirmSetupIntentParamsFactory(
         paymentMethodType: PaymentMethod.Type,
         optionsParams: PaymentMethodOptionsParams?,
         extraParams: PaymentMethodExtraParams?,
-        intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?
+        intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+        radarOptions: RadarOptions?
     ): ConfirmSetupIntentParams {
         return ConfirmSetupIntentParams.createWithSetAsDefaultPaymentMethod(
             paymentMethodId = paymentMethodId,
@@ -128,6 +138,7 @@ internal class ConfirmSetupIntentParamsFactory(
             mandateData = mandateData(intent, paymentMethodType, null, null),
             setAsDefaultPaymentMethod = extraParams?.extractSetAsDefaultPaymentMethodFromExtraParams(),
             paymentMethodCode = paymentMethodType.code,
+            radarOptions = radarOptions
         )
     }
 
@@ -135,11 +146,13 @@ internal class ConfirmSetupIntentParamsFactory(
         createParams: PaymentMethodCreateParams,
         optionsParams: PaymentMethodOptionsParams?,
         extraParams: PaymentMethodExtraParams?,
+        radarOptions: RadarOptions?
     ): ConfirmSetupIntentParams {
         return ConfirmSetupIntentParams.createWithSetAsDefaultPaymentMethod(
             paymentMethodCreateParams = createParams,
             clientSecret = clientSecret,
-            setAsDefaultPaymentMethod = extraParams?.extractSetAsDefaultPaymentMethodFromExtraParams()
+            setAsDefaultPaymentMethod = extraParams?.extractSetAsDefaultPaymentMethodFromExtraParams(),
+            radarOptions = radarOptions
         )
     }
 }

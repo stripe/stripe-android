@@ -3,7 +3,11 @@ package com.stripe.android.identity
 import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.InjectorKey
@@ -42,6 +46,34 @@ internal class StripeIdentityVerificationSheet internal constructor(
         from.requireContext(),
         configuration
     )
+
+    constructor(
+        configuration: IdentityVerificationSheet.Configuration,
+        context: Context,
+        lifecycleOwner: LifecycleOwner,
+        activityResultRegistryOwner: ActivityResultRegistryOwner,
+        identityVerificationSheetContract: IdentityVerificationSheetContract,
+        identityVerificationCallback: IdentityVerificationSheet.IdentityVerificationCallback
+    ) : this(
+        activityResultLauncher = activityResultRegistryOwner.activityResultRegistry.register(
+            "StripeIdentityVerificationSheet_ActivityResultLauncher",
+            identityVerificationSheetContract
+        ) { result ->
+            identityVerificationCallback.onVerificationFlowResult(result)
+        },
+        context = context,
+        configuration = configuration
+    ) {
+        check(lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.INITIALIZED))
+
+        lifecycleOwner.lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onDestroy(owner: LifecycleOwner) {
+                    activityResultLauncher.unregister()
+                }
+            }
+        )
+    }
 
     @InjectorKey
     private val injectorKey: String =

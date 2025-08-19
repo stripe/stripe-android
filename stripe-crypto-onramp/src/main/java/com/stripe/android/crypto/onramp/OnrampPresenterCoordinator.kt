@@ -1,7 +1,9 @@
 package com.stripe.android.crypto.onramp
 
+import android.content.ContentResolver
 import android.net.Uri
 import androidx.activity.ComponentActivity
+import androidx.core.net.toUri
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.exception.APIException
@@ -14,6 +16,7 @@ import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.NoLinkAccountFoundException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -26,6 +29,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     private val onrampCallbacks: OnrampCallbacks,
     private val coroutineScope: CoroutineScope,
 ) {
+    private val linkControllerState = linkController.state(activity)
 
     private val linkPresenter = linkController.createPresenter(
         activity = activity,
@@ -33,14 +37,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         authenticationCallback = ::handleAuthenticationResult
     )
 
-    private val sheet = IdentityVerificationSheet.create(
-        from = activity,
-        configuration = IdentityVerificationSheet.Configuration(
-            brandLogo = Uri.Builder() // Temporary until we determine how to pass this in.
-                .build()
-        ),
-        identityVerificationCallback = ::handleIdentityVerificationResult,
-    )
+    private var identityVerificationSheet: IdentityVerificationSheet? = null
 
     private val currentLinkAccount: LinkController.LinkAccount?
         get() = interactor.state.value.linkControllerState?.internalLinkAccount
@@ -48,8 +45,15 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     init {
         // Observe Link controller state
         lifecycleOwner.lifecycleScope.launch {
-            linkController.state(activity).collect { state ->
+            linkControllerState.collect { state ->
                 interactor.onLinkControllerState(state)
+            }
+        }
+
+        // Update the identity verification sheet when the merchant logo URL changes.
+        lifecycleOwner.lifecycleScope.launch {
+            linkControllerState.distinctUntilChangedBy { it.merchantLogoUrl }.collect { state ->
+                identityVerificationSheet = createIdentityVerificationSheet(state.merchantLogoUrl)
             }
         }
     }
@@ -70,7 +74,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             when (val verification = interactor.startIdentityVerification()) {
                 is OnrampStartVerificationResult.Completed -> {
                     verification.response.ephemeralKey?.let {
-                        sheet.present(
+                        identityVerificationSheet?.present(
                             verificationSessionId = verification.response.id,
                             ephemeralKeySecret = verification.response.ephemeralKey
                         )
@@ -118,5 +122,22 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 interactor.handleSelectPaymentResult(result, activity)
             )
         }
+    }
+
+    private fun createIdentityVerificationSheet(merchantLogoUrl: String?): IdentityVerificationSheet {
+        val fallbackMerchantLogoUri: Uri = Uri.Builder()
+            .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+            .authority(activity.packageName)
+            .appendPath("drawable")
+            .appendPath("stripe_ic_business")
+            .build()
+
+        val logoUri = merchantLogoUrl?.toUri() ?: fallbackMerchantLogoUri
+
+        return IdentityVerificationSheet.onrampCreate(
+            from = activity,
+            configuration = IdentityVerificationSheet.Configuration(brandLogo = logoUri),
+            identityVerificationCallback = ::handleIdentityVerificationResult
+        )
     }
 }

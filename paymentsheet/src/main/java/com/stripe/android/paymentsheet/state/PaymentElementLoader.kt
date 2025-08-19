@@ -620,6 +620,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             stripeIntent = elementsSession.stripeIntent,
             merchantName = configuration.merchantDisplayName,
             merchantCountryCode = elementsSession.merchantCountry,
+            merchantLogoUrl = elementsSession.merchantLogoUrl,
             customerInfo = customerInfo,
             shippingDetails = shippingDetails?.takeIf { it.isCheckboxSelected == true },
             passthroughModeEnabled = elementsSession.linkPassthroughModeEnabled,
@@ -645,7 +646,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             allowUserEmailEdits = configuration.link.allowUserEmailEdits,
             skipWalletInFlowController = elementsSession.linkMobileSkipWalletInFlowController,
             customerId = elementsSession.customer?.session?.customerId,
-            linkAppearance = linkAppearance
+            linkAppearance = linkAppearance,
+            saveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
         )
 
         // CBF isn't currently supported in the web flow.
