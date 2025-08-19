@@ -503,7 +503,6 @@ internal class PlaygroundSettings private constructor(
             CollectEmailSettingsDefinition,
             CollectPhoneSettingsDefinition,
             CollectAddressSettingsDefinition,
-            AllowedBillingCountriesSettingsDefinition,
             AutocompleteAddressSettingsDefinition,
             DefaultShippingAddressSettingsDefinition,
             DelayedPaymentMethodsSettingsDefinition,
@@ -547,6 +546,10 @@ internal class PlaygroundSettings private constructor(
                 listOf(PlaygroundConfigurationData.IntegrationType.LinkController)
             ),
             TermsDisplaySettingsDefinition,
+            FeatureFlagSettingsDefinition(
+                FeatureFlags.enablePayNow,
+                allowedIntegrationTypes = PlaygroundConfigurationData.IntegrationType.paymentFlows().toList(),
+            )
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
