@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
@@ -18,6 +19,8 @@ import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.paymentelementtestpages.FormPage
 import com.stripe.paymentelementtestpages.VerticalModePage
+import org.junit.After
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -44,6 +47,16 @@ internal class DefaultPaymentMethodsConfirmationTest {
 
     // Confirmation behavior between horizontal and vertical doesn't differ, so we're testing with vertical mode only.
     private val layoutType: PaymentSheetLayoutType = PaymentSheetLayoutType.Vertical()
+
+    @Before
+    fun initIntents() {
+        Intents.init()
+    }
+
+    @After
+    fun releaseIntents() {
+        Intents.release()
+    }
 
     @Test
     fun setNewPMAsDefault_withSavedPaymentMethods_sendsSetAsDefaultParamInConfirmCall() = runProductIntegrationTest(
