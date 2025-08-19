@@ -347,23 +347,24 @@ internal class PassiveChallengeConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'action' should work with Saved PaymentMethodConfirmationOption when passiveCaptchaParams is not null`() = runTest {
-        val definition = createPassiveChallengeConfirmationDefinition()
+    fun `'action' should work with Saved PaymentMethodConfirmationOption when passiveCaptchaParams is not null`() =
+        runTest {
+            val definition = createPassiveChallengeConfirmationDefinition()
 
-        val action = definition.action(
-            confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
-        )
+            val action = definition.action(
+                confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED,
+                confirmationParameters = CONFIRMATION_PARAMETERS,
+            )
 
-        assertThat(action)
-            .isInstanceOf<ConfirmationDefinition.Action.Launch<PassiveChallengeActivityContract.Args>>()
+            assertThat(action)
+                .isInstanceOf<ConfirmationDefinition.Action.Launch<PassiveChallengeActivityContract.Args>>()
 
-        val launchAction = action.asLaunch()
+            val launchAction = action.asLaunch()
 
-        assertThat(launchAction.launcherArguments.passiveCaptchaParams).isEqualTo(PASSIVE_CAPTCHA_PARAMS)
-        assertThat(launchAction.receivesResultInProcess).isFalse()
-        assertThat(launchAction.deferredIntentConfirmationType).isNull()
-    }
+            assertThat(launchAction.launcherArguments.passiveCaptchaParams).isEqualTo(PASSIVE_CAPTCHA_PARAMS)
+            assertThat(launchAction.receivesResultInProcess).isFalse()
+            assertThat(launchAction.deferredIntentConfirmationType).isNull()
+        }
 
     @Test
     fun `'launch' should work with Saved PaymentMethodConfirmationOption`() = runTest {
