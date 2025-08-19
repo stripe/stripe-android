@@ -207,6 +207,7 @@ internal object TestFactory {
         stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
         merchantName = MERCHANT_NAME,
         merchantCountryCode = "",
+        merchantLogoUrl = null,
         customerInfo = LINK_CUSTOMER_INFO,
         shippingDetails = null,
         flags = emptyMap(),

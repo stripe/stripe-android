@@ -76,6 +76,7 @@ internal object LinkTestUtils {
             flags = mapOf(),
             merchantName = "Test merchant inc.",
             merchantCountryCode = "US",
+            merchantLogoUrl = null,
             passthroughModeEnabled = false,
             cardBrandChoice = cardBrandChoice,
             cardBrandFilter = cardBrandFilter,

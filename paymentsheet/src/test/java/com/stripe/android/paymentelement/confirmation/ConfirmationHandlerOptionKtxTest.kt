@@ -593,6 +593,7 @@ class ConfirmationHandlerOptionKtxTest {
             stripeIntent = PaymentIntentFactory.create(),
             merchantName = "Merchant, Inc.",
             merchantCountryCode = "CA",
+            merchantLogoUrl = null,
             customerInfo = LinkConfiguration.CustomerInfo(
                 name = "John Doe",
                 email = null,

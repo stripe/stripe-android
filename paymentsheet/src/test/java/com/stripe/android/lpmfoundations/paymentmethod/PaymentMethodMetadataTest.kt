@@ -1337,7 +1337,8 @@ internal class PaymentMethodMetadataTest {
             flags = emptyMap(),
             orderedPaymentMethodTypesAndWallets = orderedPaymentMethodTypesAndWallets,
             experimentsData = null,
-            passiveCaptcha = null
+            passiveCaptcha = null,
+            merchantLogoUrl = null
         )
     }
 
@@ -2059,6 +2060,7 @@ internal class PaymentMethodMetadataTest {
             ),
             merchantName = "Merchant Inc.",
             merchantCountryCode = "CA",
+            merchantLogoUrl = null,
             shippingDetails = null,
             flags = mapOf(),
             cardBrandChoice = LinkConfiguration.CardBrandChoice(

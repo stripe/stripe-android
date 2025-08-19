@@ -84,6 +84,7 @@ class SignUpScreenStateTest {
             stripeIntent = PaymentIntentFactory.create(),
             merchantName = "Merchant, Inc.",
             merchantCountryCode = "US",
+            merchantLogoUrl = null,
             customerInfo = customerInfo,
             shippingDetails = null,
             passthroughModeEnabled = true,
