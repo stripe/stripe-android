@@ -49,6 +49,7 @@ internal object PaymentMethodMetadataFactory {
             PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS,
         shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = SHOP_PAY_CONFIGURATION,
         termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay> = emptyMap(),
+        forceSetupFutureUseBehavior: Boolean = false,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -81,6 +82,7 @@ internal object PaymentMethodMetadataFactory {
             financialConnectionsAvailability = financialConnectionsAvailability,
             shopPayConfiguration = shopPayConfiguration,
             termsDisplay = termsDisplay,
+            forceSetupFutureUseBehavior = forceSetupFutureUseBehavior,
         )
     }
 

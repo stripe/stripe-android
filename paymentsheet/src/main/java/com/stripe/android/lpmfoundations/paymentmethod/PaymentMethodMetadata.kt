@@ -15,6 +15,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPayme
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.LinkCardBrandDefinition
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_FORCE_SETUP_FUTURE_USE_BEHAVIOR
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -70,14 +71,8 @@ internal data class PaymentMethodMetadata(
     val elementsSessionId: String,
     val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
     val termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay>,
+    val forceSetupFutureUseBehavior: Boolean,
 ) : Parcelable {
-
-    val alwaysSaveForFutureUse: Boolean
-        get() {
-            // When this (now poorly named) feature flag is enabled for a merchant, we always show the reuse mandate,
-            // since the merchant will save the payment method for future use.
-            return linkState?.configuration?.linkSignUpOptInFeatureEnabled == true
-        }
 
     fun hasIntentToSetup(code: PaymentMethodCode): Boolean {
         return when (stripeIntent) {
@@ -295,7 +290,7 @@ internal data class PaymentMethodMetadata(
         customerRequestedSave: PaymentSelection.CustomerRequestedSave,
         code: PaymentMethodCode
     ): PaymentMethod.AllowRedisplay {
-        val isSettingUp = hasIntentToSetup(code) || alwaysSaveForFutureUse
+        val isSettingUp = hasIntentToSetup(code) || forceSetupFutureUseBehavior
         return paymentMethodSaveConsentBehavior.allowRedisplay(
             isSetupIntent = isSettingUp,
             customerRequestedSave = customerRequestedSave,
@@ -349,6 +344,7 @@ internal data class PaymentMethodMetadata(
                 elementsSessionId = elementsSession.elementsSessionId,
                 shopPayConfiguration = configuration.shopPayConfiguration,
                 termsDisplay = configuration.termsDisplay,
+                forceSetupFutureUseBehavior = elementsSession.flags[ELEMENTS_FORCE_SETUP_FUTURE_USE_BEHAVIOR] == true,
             )
         }
 
@@ -395,6 +391,7 @@ internal data class PaymentMethodMetadata(
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession),
                 shopPayConfiguration = null,
                 termsDisplay = emptyMap(),
+                forceSetupFutureUseBehavior = elementsSession.flags[ELEMENTS_FORCE_SETUP_FUTURE_USE_BEHAVIOR] == true,
             )
         }
 
@@ -446,6 +443,7 @@ internal data class PaymentMethodMetadata(
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),
                 shopPayConfiguration = null,
                 termsDisplay = emptyMap(),
+                forceSetupFutureUseBehavior = configuration.forceSetupFutureUseBehavior
             )
         }
     }

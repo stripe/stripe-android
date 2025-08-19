@@ -625,6 +625,7 @@ class ConfirmationHandlerOptionKtxTest {
             linkSignUpOptInInitialValue = false,
             customerId = null,
             saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+            forceSetupFutureUseBehavior = false,
         )
     }
 }

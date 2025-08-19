@@ -109,6 +109,7 @@ class SignUpScreenStateTest {
             skipWalletInFlowController = false,
             customerId = null,
             saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+            forceSetupFutureUseBehavior = false,
         )
     }
 

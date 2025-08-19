@@ -173,7 +173,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
             is SetupIntent -> true
         }
 
-        return if (isSettingUp || configuration.alwaysSaveForFutureUse) {
+        return if (isSettingUp || configuration.forceSetupFutureUseBehavior) {
             configuration.saveConsentBehavior.overrideAllowRedisplay ?: PaymentMethod.AllowRedisplay.LIMITED
         } else {
             PaymentMethod.AllowRedisplay.UNSPECIFIED
