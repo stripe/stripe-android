@@ -1,8 +1,10 @@
 package com.stripe.android.link
 
+import android.content.Context
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.utils.FakeActivityResultRegistry
@@ -49,9 +51,12 @@ internal class LinkControllerCoordinatorTest {
         val activityResultRegistryOwner = object : ActivityResultRegistryOwner {
             override val activityResultRegistry = registry
         }
+        val context: Context = ApplicationProvider.getApplicationContext()
+
         return LinkControllerCoordinator(
             interactor = viewModel,
             lifecycleOwner = lifecycleOwner,
+            context = context,
             activityResultRegistryOwner = activityResultRegistryOwner,
             linkActivityContract = linkActivityContract,
             selectedPaymentMethodCallback = { presentPaymentMethodsResults.add(it) },
@@ -79,7 +84,9 @@ internal class LinkControllerCoordinatorTest {
         lifecycleOwner.setCurrentState(Lifecycle.State.STARTED)
         createCoordinator()
 
-        val presentResult = LinkController.PresentPaymentMethodsResult.Success
+        val presentResult = LinkController.PresentPaymentMethodsResult.Success(
+            testPaymentMethodPreview()
+        )
         presentPaymentMethodsResultFlow.emit(presentResult)
 
         val authResult = LinkController.AuthenticationResult.Success
@@ -94,7 +101,11 @@ internal class LinkControllerCoordinatorTest {
         lifecycleOwner.setCurrentState(Lifecycle.State.CREATED)
         createCoordinator()
 
-        presentPaymentMethodsResultFlow.emit(LinkController.PresentPaymentMethodsResult.Success)
+        presentPaymentMethodsResultFlow.emit(
+            LinkController.PresentPaymentMethodsResult.Success(
+                testPaymentMethodPreview()
+            )
+        )
         authenticationResultFlow.emit(LinkController.AuthenticationResult.Success)
 
         assertThat(presentPaymentMethodsResults).isEmpty()
@@ -106,7 +117,9 @@ internal class LinkControllerCoordinatorTest {
         lifecycleOwner.setCurrentState(Lifecycle.State.STARTED)
         createCoordinator()
 
-        val result1 = LinkController.PresentPaymentMethodsResult.Success
+        val result1 = LinkController.PresentPaymentMethodsResult.Success(
+            testPaymentMethodPreview()
+        )
         val result2 = LinkController.PresentPaymentMethodsResult.Canceled
         val result3 = LinkController.PresentPaymentMethodsResult.Failed(Exception("Error"))
 
@@ -136,7 +149,10 @@ internal class LinkControllerCoordinatorTest {
                 launchMode = LinkLaunchMode.PaymentMethodSelection(null),
             )
         )
-        verify(viewModel).onLinkActivityResult(testResult)
+        verify(viewModel).onLinkActivityResult(
+            testResult,
+            context = ApplicationProvider.getApplicationContext()
+        )
     }
 
     @Test
@@ -144,11 +160,23 @@ internal class LinkControllerCoordinatorTest {
         lifecycleOwner.setCurrentState(Lifecycle.State.CREATED)
         createCoordinator()
 
-        presentPaymentMethodsResultFlow.emit(LinkController.PresentPaymentMethodsResult.Success)
+        presentPaymentMethodsResultFlow.emit(
+            LinkController.PresentPaymentMethodsResult.Success(
+                testPaymentMethodPreview()
+            )
+        )
         assertThat(presentPaymentMethodsResults).isEmpty()
 
         lifecycleOwner.setCurrentState(Lifecycle.State.STARTED)
         presentPaymentMethodsResultFlow.emit(LinkController.PresentPaymentMethodsResult.Canceled)
         assertThat(presentPaymentMethodsResults).containsExactly(LinkController.PresentPaymentMethodsResult.Canceled)
+    }
+
+    private fun testPaymentMethodPreview(): LinkController.PaymentMethodPreview {
+        return LinkController.PaymentMethodPreview(
+            imageLoader = { mock<android.graphics.drawable.Drawable>() },
+            label = "Visa",
+            sublabel = "•••• 4242"
+        )
     }
 }
