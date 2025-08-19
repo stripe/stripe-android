@@ -7,6 +7,7 @@ import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Blank
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Invalid
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Valid.Full
@@ -237,6 +238,76 @@ internal class SimpleTextFieldControllerTest {
         }
     }
 
+    @Test
+    fun `Verify 'onValidationStateChanged' has visible error`() = runTest {
+        val controller = createControllerWithState(
+            isOptional = false
+        )
+
+        turbineScope {
+            val visibleErrorTurbine = controller.visibleError.testIn(this)
+            val errorTurbine = controller.error.testIn(this)
+
+            assertThat(visibleErrorTurbine.awaitItem()).isFalse()
+            assertThat(errorTurbine.awaitItem()).isNull()
+
+            controller.onValidationStateChanged(true)
+
+            assertThat(visibleErrorTurbine.awaitItem()).isTrue()
+            assertThat(errorTurbine.awaitItem()?.errorMessage).isEqualTo(R.string.stripe_blank_and_required)
+
+            visibleErrorTurbine.cancelAndIgnoreRemainingEvents()
+            errorTurbine.cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `Verify 'onValidationStateChanged' has no visible error when optional`() = runTest {
+        val controller = createControllerWithState(
+            isOptional = true
+        )
+
+        turbineScope {
+            val visibleErrorTurbine = controller.visibleError.testIn(this)
+            val errorTurbine = controller.error.testIn(this)
+
+            assertThat(visibleErrorTurbine.awaitItem()).isFalse()
+            assertThat(errorTurbine.awaitItem()).isNull()
+
+            controller.onValidationStateChanged(true)
+
+            visibleErrorTurbine.expectNoEvents()
+            errorTurbine.expectNoEvents()
+
+            visibleErrorTurbine.cancelAndIgnoreRemainingEvents()
+            errorTurbine.cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `Verify 'onValidationStateChanged' has no visible error when complete`() = runTest {
+        val controller = createControllerWithState(
+            isOptional = false
+        )
+
+        turbineScope {
+            val visibleErrorTurbine = controller.visibleError.testIn(this)
+            val errorTurbine = controller.error.testIn(this)
+
+            assertThat(visibleErrorTurbine.awaitItem()).isFalse()
+            assertThat(errorTurbine.awaitItem()).isNull()
+
+            controller.onValueChange("limitless")
+            controller.onValidationStateChanged(true)
+
+            visibleErrorTurbine.expectNoEvents()
+            errorTurbine.expectNoEvents()
+
+            visibleErrorTurbine.cancelAndIgnoreRemainingEvents()
+            errorTurbine.cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     private fun createControllerWithState(
         isOptional: Boolean = false,
         nullPlaceHolder: Boolean = true,
@@ -281,7 +352,7 @@ internal class SimpleTextFieldControllerTest {
             override fun isFull(): Boolean = false
             override fun isBlank(): Boolean = false
 
-            override fun shouldShowError(hasFocus: Boolean): Boolean = !hasFocus
+            override fun shouldShowError(hasFocus: Boolean, isValidating: Boolean): Boolean = !hasFocus || isValidating
             override fun getError() = fieldError
         }
     }

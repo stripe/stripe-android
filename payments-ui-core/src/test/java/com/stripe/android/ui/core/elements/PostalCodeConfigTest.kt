@@ -184,6 +184,58 @@ class PostalCodeConfigTest {
         }
     }
 
+    @Test
+    fun `test shouldShowError is true when field has focus and isValidating is true`() {
+        with(createConfigForCountry("US")) {
+            val state = determineStateForInput("123")
+
+            assertThat(state.shouldShowError(hasFocus = true, isValidating = true)).isTrue()
+        }
+    }
+
+    @Test
+    fun `test shouldShowError is false when field has focus and isValidating is false`() {
+        with(createConfigForCountry("US")) {
+            val state = determineStateForInput("123")
+
+            assertThat(state.shouldShowError(hasFocus = true, isValidating = false)).isFalse()
+        }
+    }
+
+    @Test
+    fun `test shouldShowError is true when field does not have focus`() {
+        with(createConfigForCountry("US")) {
+            val state = determineStateForInput("123")
+
+            assertThat(state.shouldShowError(hasFocus = false, isValidating = true)).isTrue()
+            assertThat(state.shouldShowError(hasFocus = false, isValidating = false)).isTrue()
+        }
+    }
+
+    @Test
+    fun `test shouldShowError is false when no error exists`() {
+        with(createConfigForCountry("US")) {
+            val state = determineStateForInput("12345")
+
+            assertThat(state.shouldShowError(hasFocus = true, isValidating = true)).isFalse()
+            assertThat(state.shouldShowError(hasFocus = true, isValidating = false)).isFalse()
+            assertThat(state.shouldShowError(hasFocus = false, isValidating = true)).isFalse()
+            assertThat(state.shouldShowError(hasFocus = false, isValidating = false)).isFalse()
+        }
+    }
+
+    @Test
+    fun `test shouldShowError is false with optional field when empty is valid`() {
+        with(createConfigForCountry("US", optional = true)) {
+            val state = determineStateForInput("")
+
+            assertThat(state.shouldShowError(hasFocus = true, isValidating = true)).isFalse()
+            assertThat(state.shouldShowError(hasFocus = false, isValidating = false)).isFalse()
+            assertThat(state.shouldShowError(hasFocus = true, isValidating = false)).isFalse()
+            assertThat(state.shouldShowError(hasFocus = false, isValidating = true)).isFalse()
+        }
+    }
+
     private fun createConfigForCountry(
         country: String,
         optional: Boolean = false
