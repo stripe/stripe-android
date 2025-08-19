@@ -8,6 +8,7 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.ui.core.cardscan.CardScanEvent
 
 internal sealed class CustomerSheetViewAction {
     object OnDismissed : CustomerSheetViewAction()
@@ -15,6 +16,7 @@ internal sealed class CustomerSheetViewAction {
     object OnEditPressed : CustomerSheetViewAction()
     object OnCardNumberInputCompleted : CustomerSheetViewAction()
     class OnAnalyticsEvent(val event: AnalyticsEvent) : CustomerSheetViewAction()
+    class OnCardScanEvent(val event: CardScanEvent) : CustomerSheetViewAction()
     object OnAddCardPressed : CustomerSheetViewAction()
     object OnPrimaryButtonPressed : CustomerSheetViewAction()
     object OnCancelClose : CustomerSheetViewAction()

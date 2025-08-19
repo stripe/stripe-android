@@ -8,6 +8,7 @@ import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetIntegration
 import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.model.CardBrand
+import com.stripe.android.ui.core.cardscan.CardScanEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -237,6 +238,12 @@ internal class DefaultCustomerSheetEventReporter @Inject constructor(
                     additionalParams = emptyMap(),
                 )
             )
+        }
+    }
+
+    override fun onCardScanEvent(event: CardScanEvent) {
+        (event as? CustomerSheetEvent)?.let {
+            fireEvent(it)
         }
     }
 

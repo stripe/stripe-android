@@ -34,6 +34,8 @@ import com.stripe.android.link.ui.paymentmenthod.PaymentMethodViewModel
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
+import com.stripe.android.ui.core.cardscan.CardScanEventsReporter
+import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -128,7 +130,24 @@ internal class PaymentMethodScreenTest {
         composeTestRule.setContent {
             CompositionLocalProvider(
                 LocalCardNumberCompletedEventReporter provides { },
-                LocalCardBrandDisallowedReporter provides { }
+                LocalCardBrandDisallowedReporter provides { },
+                LocalCardScanEventsReporter provides object : CardScanEventsReporter {
+                    override fun onCardScanStarted(implementation: String) {
+                        // No-op implementation for testing purposes
+                    }
+                    override fun onCardScanSucceeded(implementation: String) {
+                        // No-op implementation for testing purposes
+                    }
+                    override fun onCardScanFailed(implementation: String, error: Throwable?) {
+                        // No-op implementation for testing purposes
+                    }
+                    override fun onCardScanCancelled(implementation: String) {
+                        // No-op implementation for testing purposes
+                    }
+                    override fun onCardScanApiCheck(implementation: String, available: Boolean, reason: String?) {
+                        // No-op implementation for testing purposes
+                    }
+                },
             ) {
                 DefaultLinkTheme {
                     PaymentMethodScreen(

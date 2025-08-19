@@ -90,6 +90,7 @@ internal class PaymentSheetAnalyticsTest {
         testContext.validateAnalyticsRequest(eventName = "mc_load_succeeded")
         testContext.validateAnalyticsRequest(eventName = "mc_complete_sheet_newpm_show")
         testContext.validateAnalyticsRequest(eventName = "mc_form_shown")
+        testContext.validateAnalyticsRequest(eventName = "mc_cardscan_api_check")
 
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
@@ -164,6 +165,7 @@ internal class PaymentSheetAnalyticsTest {
         testContext.validateAnalyticsRequest(eventName = "mc_load_succeeded")
         testContext.validateAnalyticsRequest(eventName = "mc_custom_sheet_newpm_show")
         testContext.validateAnalyticsRequest(eventName = "mc_form_shown")
+        testContext.validateAnalyticsRequest(eventName = "mc_cardscan_api_check")
 
         testContext.configureFlowController {
             configureWithPaymentIntent(
@@ -243,6 +245,7 @@ internal class PaymentSheetAnalyticsTest {
         testContext.validateAnalyticsRequest(eventName = "mc_complete_sheet_newpm_show")
         testContext.validateAnalyticsRequest(eventName = "mc_carousel_payment_method_tapped")
         testContext.validateAnalyticsRequest(eventName = "mc_form_shown")
+        testContext.validateAnalyticsRequest(eventName = "mc_cardscan_api_check")
 
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
@@ -317,6 +320,7 @@ internal class PaymentSheetAnalyticsTest {
         testContext.validateAnalyticsRequest(eventName = "mc_load_succeeded")
         testContext.validateAnalyticsRequest(eventName = "mc_custom_sheet_newpm_show")
         testContext.validateAnalyticsRequest(eventName = "mc_form_shown")
+        testContext.validateAnalyticsRequest(eventName = "mc_cardscan_api_check")
 
         testContext.configureFlowController {
             configureWithPaymentIntent(
