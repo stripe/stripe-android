@@ -4,6 +4,7 @@ import androidx.compose.ui.text.AnnotatedString
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.PhoneNumberController
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -145,7 +146,6 @@ internal class PhoneNumberControllerTest {
             assertThat(awaitItem()).isNotNull()
 
             phoneNumberController.onValueChange("1234567891")
-            skipItems(1)
 
             assertThat(awaitItem()).isNull()
         }
@@ -205,6 +205,101 @@ internal class PhoneNumberControllerTest {
 
         lsPhoneNumberController.fieldValue.test {
             assertThat(awaitItem()).isEmpty()
+        }
+    }
+
+    @Test
+    fun `test error is shown when validating and incomplete`() = runTest {
+        val phoneNumberController = PhoneNumberController.createPhoneNumberController(
+            initiallySelectedCountryCode = "US",
+        )
+
+        phoneNumberController.error.test {
+            assertThat(awaitItem()).isNull()
+
+            phoneNumberController.onValueChange("123")
+            assertThat(awaitItem()?.errorMessage).isEqualTo(R.string.stripe_incomplete_phone_number)
+
+            phoneNumberController.onFocusChange(true)
+            assertThat(awaitItem()).isNull()
+
+            phoneNumberController.onValidationStateChanged(true)
+            assertThat(awaitItem()?.errorMessage).isEqualTo(R.string.stripe_incomplete_phone_number)
+        }
+    }
+
+    @Test
+    fun `test error is not shown when not validating and has focus`() = runTest {
+        val phoneNumberController = PhoneNumberController.createPhoneNumberController(
+            initiallySelectedCountryCode = "US",
+        )
+
+        phoneNumberController.error.test {
+            assertThat(awaitItem()).isNull()
+
+            phoneNumberController.onFocusChange(true)
+            phoneNumberController.onValueChange("123")
+
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `test error is shown when not validating, no focus, and incomplete`() = runTest {
+        val phoneNumberController = PhoneNumberController.createPhoneNumberController(
+            initiallySelectedCountryCode = "US",
+        )
+
+        phoneNumberController.error.test {
+            assertThat(awaitItem()).isNull()
+
+            phoneNumberController.onFocusChange(true)
+            phoneNumberController.onValueChange("123")
+
+            phoneNumberController.onFocusChange(false)
+            assertThat(awaitItem()).isNotNull()
+        }
+    }
+
+    @Test
+    fun `test error is not shown when field is complete`() = runTest {
+        val phoneNumberController = PhoneNumberController.createPhoneNumberController(
+            initiallySelectedCountryCode = "US",
+        )
+
+        phoneNumberController.error.test {
+            assertThat(awaitItem()).isNull()
+
+            // Set complete phone number
+            phoneNumberController.onValueChange("1234567890")
+            expectNoEvents()
+
+            phoneNumberController.onValidationStateChanged(true)
+            expectNoEvents()
+
+            phoneNumberController.onFocusChange(false)
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `test error behavior with acceptAnyInput enabled`() = runTest {
+        val phoneNumberController = PhoneNumberController.createPhoneNumberController(
+            initiallySelectedCountryCode = "US",
+            acceptAnyInput = true,
+        )
+
+        phoneNumberController.error.test {
+            assertThat(awaitItem()).isNull()
+
+            phoneNumberController.onValueChange("1")
+            expectNoEvents()
+
+            phoneNumberController.onFocusChange(false)
+            expectNoEvents()
+
+            phoneNumberController.onValidationStateChanged(true)
+            expectNoEvents()
         }
     }
 }

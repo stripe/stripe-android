@@ -701,6 +701,48 @@ internal class CardNumberControllerTest {
         assertThat(cardNumberController.layoutDirection).isEqualTo(LayoutDirection.Ltr)
     }
 
+    @Test
+    fun `Verify 'onValidationStateChanged' with 'true' results in an error when incomplete card number`() = runTest {
+        val cardNumberController = createController()
+
+        cardNumberController.error.test {
+            assertThat(awaitItem()).isNull()
+
+            cardNumberController.onFocusChange(true)
+            cardNumberController.onValueChange("4242")
+
+            cardNumberController.onValidationStateChanged(true)
+            assertThat(awaitItem()?.errorMessage).isEqualTo(StripeR.string.stripe_invalid_card_number)
+        }
+    }
+
+    @Test
+    fun `Verify 'onValidationStateChanged' with 'true' & complete card number shows no error`() = runTest {
+        val cardNumberController = createController()
+
+        cardNumberController.error.test {
+            assertThat(awaitItem()).isNull()
+
+            cardNumberController.onValueChange("4242424242424242")
+            expectNoEvents()
+
+            cardNumberController.onValidationStateChanged(true)
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `Verify 'onValidationStateChanged' with 'true' results in an error when empty card number`() = runTest {
+        val cardNumberController = createController()
+
+        cardNumberController.error.test {
+            assertThat(awaitItem()).isNull()
+
+            cardNumberController.onValidationStateChanged(true)
+            assertThat(awaitItem()?.errorMessage).isEqualTo(StripeUiCoreR.string.stripe_blank_and_required)
+        }
+    }
+
     private fun createController(
         initialValue: String? = null,
         cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
