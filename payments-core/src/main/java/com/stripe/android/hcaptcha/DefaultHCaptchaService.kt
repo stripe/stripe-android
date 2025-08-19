@@ -24,14 +24,12 @@ internal class DefaultHCaptchaService(
     ): HCaptchaService.Result {
         val hCaptcha = hCaptchaProvider.get()
         val result = runCatching {
-            withTimeout(0.3.seconds) {
-                startVerification(
-                    activity = activity,
-                    siteKey = siteKey,
-                    rqData = rqData,
-                    hCaptcha = hCaptcha
-                )
-            }
+            startVerification(
+                activity = activity,
+                siteKey = siteKey,
+                rqData = rqData,
+                hCaptcha = hCaptcha
+            )
         }.getOrElse { e ->
             HCaptchaService.Result.Failure(e)
         }
@@ -67,7 +65,7 @@ internal class DefaultHCaptchaService(
                 loading = false,
                 hideDialog = true,
                 disableHardwareAcceleration = true,
-                retryPredicate = { _, exception -> exception.hCaptchaError == HCaptchaError.SESSION_TIMEOUT }
+                retryPredicate = null
             )
 
             hCaptcha.setup(activity, config).verifyWithHCaptcha(activity)
