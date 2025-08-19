@@ -18,7 +18,7 @@ interface TextFieldState {
      * there are some cases such as incomplete or blank where the error is not
      * displayed, but also not valid.
      */
-    fun shouldShowError(hasFocus: Boolean): Boolean
+    fun shouldShowError(hasFocus: Boolean, isValidating: Boolean = false): Boolean
 
     /**
      * Indicates an field is valid and field extraction can happen
