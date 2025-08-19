@@ -55,14 +55,14 @@ internal class StripeIdentityVerificationSheet internal constructor(
         identityVerificationSheetContract: IdentityVerificationSheetContract,
         identityVerificationCallback: IdentityVerificationSheet.IdentityVerificationCallback
     ) : this(
-        activityResultRegistryOwner.activityResultRegistry.register(
+        activityResultLauncher = activityResultRegistryOwner.activityResultRegistry.register(
             "StripeIdentityVerificationSheet_ActivityResultLauncher",
             identityVerificationSheetContract
         ) { result ->
             identityVerificationCallback.onVerificationFlowResult(result)
         },
-        context,
-        configuration
+        context = context,
+        configuration = configuration
     ) {
         check(lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.INITIALIZED))
 
