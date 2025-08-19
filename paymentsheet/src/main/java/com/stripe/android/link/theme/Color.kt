@@ -4,7 +4,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import com.stripe.android.link.model.LinkAppearance
+import com.stripe.android.link.LinkAppearance
 import com.stripe.android.uicore.SectionStyle
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults

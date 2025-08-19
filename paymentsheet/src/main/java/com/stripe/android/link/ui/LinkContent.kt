@@ -21,7 +21,7 @@ import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.NoPaymentDetailsFoundException
 import com.stripe.android.link.linkViewModel
 import com.stripe.android.link.model.LinkAccount
-import com.stripe.android.link.model.LinkAppearance
+import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkAppearanceTheme
 import com.stripe.android.link.theme.LinkTheme

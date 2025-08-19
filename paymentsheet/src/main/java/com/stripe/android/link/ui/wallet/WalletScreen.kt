@@ -53,7 +53,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataContract
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
-import com.stripe.android.link.model.LinkAppearance
+import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.LinkAppearanceTheme
 import com.stripe.android.link.theme.LinkTheme

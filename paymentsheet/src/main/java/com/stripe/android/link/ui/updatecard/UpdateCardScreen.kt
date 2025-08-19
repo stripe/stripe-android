@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.model.LinkAppearance
+import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkAppearanceTheme
 import com.stripe.android.link.theme.LinkTheme
