@@ -196,18 +196,11 @@ class AddressElement(
             }
         }
 
-        baseElements
-            .toMutableList()
-            .apply {
-                if (addressInputMode.emailConfig != AddressFieldConfiguration.HIDDEN) {
-                    add(emailElement)
-                }
-
-                if (addressInputMode.phoneNumberConfig != AddressFieldConfiguration.HIDDEN) {
-                    add(phoneNumberElement)
-                }
-            }
-            .toList()
+        arrangeFieldsForInputMode(
+            baseElements = baseElements,
+            inputMode = addressInputMode,
+            country = country
+        )
     }
 
     private val controller = AddressController(fields)
@@ -244,6 +237,44 @@ class AddressElement(
 
     override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
         this.rawValuesMap = rawValuesMap
+    }
+
+    /**
+     * Arranges form fields based on input mode:
+     * - For autocomplete flows: Email → Phone → Address fields (better UX for quick entry)
+     * - For manual entry flows: Address fields → Email → Phone (traditional form order)
+     */
+    private fun arrangeFieldsForInputMode(
+        baseElements: List<SectionFieldElement>,
+        inputMode: AddressInputMode,
+        country: String?
+    ): List<SectionFieldElement> {
+        val isAutocompleteActive = when (inputMode) {
+            is AddressInputMode.AutocompleteCondensed -> inputMode.supportsAutoComplete(country, isPlacesAvailable)
+            is AddressInputMode.AutocompleteExpanded -> true
+            else -> false
+        }
+        val emailField = when {
+            addressInputMode.emailConfig != AddressFieldConfiguration.HIDDEN -> emailElement
+            else -> null
+        }
+        val phoneField = when {
+            addressInputMode.phoneNumberConfig != AddressFieldConfiguration.HIDDEN -> phoneNumberElement
+            else -> null
+        }
+        return if (isAutocompleteActive) {
+            buildList {
+                emailField?.let { add(it) }
+                phoneField?.let { add(it) }
+                addAll(baseElements)
+            }
+        } else {
+            buildList {
+                addAll(baseElements)
+                emailField?.let { add(it) }
+                phoneField?.let { add(it) }
+            }
+        }
     }
 }
 
