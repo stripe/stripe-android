@@ -13,6 +13,7 @@ object FeatureFlags {
     val forceEnableNativeFinancialConnections = FeatureFlag("Force enable FC Native")
     val showInlineOtpInWalletButtons = FeatureFlag("Show Inline Signup in Wallet Buttons")
     val forceEnableLinkPaymentSelectionHint = FeatureFlag("Force enable payment selection hint")
+    val enablePayNow = FeatureFlag("Enable PayNow")
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

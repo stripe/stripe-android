@@ -1,5 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.AffirmDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.AfterpayClearpayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.AlipayDefinition
@@ -42,49 +43,54 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.ZipDefinition
 
 internal object PaymentMethodRegistry {
 
-    val all: Set<PaymentMethodDefinition> = setOf(
-        AffirmDefinition,
-        AfterpayClearpayDefinition,
-        AlipayDefinition,
-        AlmaDefinition,
-        AmazonPayDefinition,
-        AuBecsDebitDefinition,
-        BacsDebitDefinition,
-        BancontactDefinition,
-        BillieDefinition,
-        BlikDefinition,
-        BoletoDefinition,
-        CardDefinition,
-        CashAppPayDefinition,
-        CryptoDefinition,
-        EpsDefinition,
-        FpxDefinition,
-        GiroPayDefinition,
-        GrabPayDefinition,
-        IdealDefinition,
-        InstantDebitsDefinition,
-        KlarnaDefinition,
-        KonbiniDefinition,
-        MobilePayDefinition,
-        MultibancoDefinition,
-        OxxoDefinition,
-        P24Definition,
-        PayPalDefinition,
-        PayNowDefinition,
-        RevolutPayDefinition,
-        SatispayDefinition,
-        SepaDebitDefinition,
-        SofortDefinition,
-        SunbitDefinition,
-        SwishDefinition,
-        TwintDefinition,
-        UpiDefinition,
-        UsBankAccountDefinition,
-        WeChatPayDefinition,
-        ZipDefinition,
-    )
+    val all: Set<PaymentMethodDefinition>
+        get() {
+            val alwaysEnabled = setOf(
+                AffirmDefinition,
+                AfterpayClearpayDefinition,
+                AlipayDefinition,
+                AlmaDefinition,
+                AmazonPayDefinition,
+                AuBecsDebitDefinition,
+                BacsDebitDefinition,
+                BancontactDefinition,
+                BillieDefinition,
+                BlikDefinition,
+                BoletoDefinition,
+                CardDefinition,
+                CashAppPayDefinition,
+                CryptoDefinition,
+                EpsDefinition,
+                FpxDefinition,
+                GiroPayDefinition,
+                GrabPayDefinition,
+                IdealDefinition,
+                InstantDebitsDefinition,
+                KlarnaDefinition,
+                KonbiniDefinition,
+                MobilePayDefinition,
+                MultibancoDefinition,
+                OxxoDefinition,
+                P24Definition,
+                PayPalDefinition,
+                RevolutPayDefinition,
+                SatispayDefinition,
+                SepaDebitDefinition,
+                SofortDefinition,
+                SunbitDefinition,
+                SwishDefinition,
+                TwintDefinition,
+                UpiDefinition,
+                UsBankAccountDefinition,
+                WeChatPayDefinition,
+                ZipDefinition,
+            )
+            return if (FeatureFlags.enablePayNow.isEnabled) {
+                alwaysEnabled.plus(PayNowDefinition)
+            } else {
+                alwaysEnabled
+            }
+        }
 
-    val definitionsByCode: Map<String, PaymentMethodDefinition> by lazy {
-        all.associateBy { it.type.code }
-    }
+    val definitionsByCode: Map<String, PaymentMethodDefinition> = all.associateBy { it.type.code }
 }
