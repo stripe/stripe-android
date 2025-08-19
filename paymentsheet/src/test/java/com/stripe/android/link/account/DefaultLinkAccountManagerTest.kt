@@ -12,11 +12,14 @@ import com.stripe.android.link.TestFactory
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.ConsentPresentation
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.model.LinkAuthIntentInfo
 import com.stripe.android.link.repositories.FakeLinkRepository
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.model.ConsentUi
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
@@ -1055,6 +1058,30 @@ class DefaultLinkAccountManagerTest {
         val result = accountManager.createLinkAccountSession()
 
         assertThat(result.exceptionOrNull()).isEqualTo(error)
+    }
+
+    @Test
+    fun `setLinkAccountFromLookupResult creates LinkAccount with LinkAuthIntentInfo`() = runSuspendTest {
+        val accountManager = accountManager()
+        val consentSection = ConsentUi.ConsentSection("disclaimer")
+        val lookup = TestFactory.CONSUMER_SESSION_LOOKUP.copy(
+            consentUi = ConsentUi(
+                consentPane = null,
+                consentSection = consentSection,
+            )
+        )
+        val linkAuthIntentId = "lai_123"
+        val account = accountManager.setLinkAccountFromLookupResult(
+            lookup = lookup,
+            startSession = true,
+            linkAuthIntentId = linkAuthIntentId,
+        )
+        assertThat(account?.linkAuthIntentInfo).isEqualTo(
+            LinkAuthIntentInfo(
+                linkAuthIntentId = linkAuthIntentId,
+                consentPresentation = ConsentPresentation.Inline(consentSection)
+            )
+        )
     }
 
     @Test
