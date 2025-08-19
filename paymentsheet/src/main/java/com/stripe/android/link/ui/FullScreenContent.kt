@@ -13,9 +13,9 @@ import androidx.navigation.compose.rememberNavController
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.link.LinkAction
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.model.LinkAccount
-import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
