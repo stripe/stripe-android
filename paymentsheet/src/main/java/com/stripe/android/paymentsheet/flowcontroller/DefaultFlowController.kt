@@ -30,6 +30,7 @@ import com.stripe.android.link.account.updateLinkAccount
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.toLoginState
+import com.stripe.android.link.utils.determineFallbackPaymentSelection
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentMethod
@@ -441,18 +442,25 @@ internal class DefaultFlowController @Inject internal constructor(
     ) {
         val paymentSelection = viewModel.paymentSelection
         if (paymentSelection is Link) {
-            val updated = paymentSelection.copy(
-                selectedPayment = linkPaymentMethod
-            )
-            viewModel.paymentSelection = updated
-
-            val paymentOption = paymentOptionFactory.create(updated)
-
+            val newSelection = if (linkPaymentMethod != null) {
+                // User updated their Link PM - update the Link selection
+                paymentSelection.copy(
+                    selectedPayment = linkPaymentMethod
+                )
+            } else {
+                // User logged out - determine best fallback payment method
+                val state = viewModel.state
+                determineFallbackPaymentSelection(
+                    customer = state?.paymentSheetState?.customer,
+                    metadata = state?.paymentSheetState?.paymentMethodMetadata ?: return
+                )
+            }
+            viewModel.paymentSelection = newSelection
+            val paymentOption = newSelection?.let { paymentOptionFactory.create(it) }
             val result = PaymentOptionResult(
                 paymentOption = paymentOption,
                 didCancel = canceled,
             )
-
             paymentOptionResultCallback.onPaymentOptionResult(result)
         }
     }
