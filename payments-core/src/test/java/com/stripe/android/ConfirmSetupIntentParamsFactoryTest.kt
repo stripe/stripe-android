@@ -9,6 +9,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.RadarOptions
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.SetupIntentFactory
 import org.junit.Test
@@ -146,7 +147,8 @@ class ConfirmSetupIntentParamsFactoryTest {
             paymentMethod = PaymentMethodFactory.cashAppPay(),
             optionsParams = null,
             extraParams = null,
-            intentConfigSetupFutureUsage = null
+            intentConfigSetupFutureUsage = null,
+            radarOptions = null
         )
     }
 
@@ -163,7 +165,8 @@ class ConfirmSetupIntentParamsFactoryTest {
             paymentMethod = paymentMethod,
             optionsParams = null,
             extraParams = extraParams,
-            intentConfigSetupFutureUsage = null
+            intentConfigSetupFutureUsage = null,
+            radarOptions = null
         )
     }
 
@@ -180,7 +183,28 @@ class ConfirmSetupIntentParamsFactoryTest {
             createParams = createParams,
             optionsParams = null,
             extraParams = extraParams,
+            radarOptions = null
         )
+    }
+
+    @Test
+    fun `create() with radarOptions should include radarOptions in result`() {
+        val radarOptions = RadarOptions(hCaptchaToken = "test_token")
+        val factoryWithConfig = ConfirmSetupIntentParamsFactory(
+            clientSecret = CLIENT_SECRET,
+            intent = SetupIntentFactory.create(),
+        )
+
+        val result = factoryWithConfig.create(
+            paymentMethod = PaymentMethodFactory.cashAppPay(),
+            optionsParams = null,
+            extraParams = null,
+            intentConfigSetupFutureUsage = null,
+            radarOptions = radarOptions
+        )
+
+        val params = result.asConfirmSetupIntentParams()
+        assertThat(params.radarOptions).isEqualTo(radarOptions)
     }
 
     private fun ConfirmStripeIntentParams.asConfirmSetupIntentParams(): ConfirmSetupIntentParams {
