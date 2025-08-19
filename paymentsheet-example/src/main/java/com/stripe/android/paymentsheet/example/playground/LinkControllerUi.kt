@@ -433,12 +433,10 @@ private fun PaymentMethodButtonPreview() {
             PaymentMethodButton(
                 modifier = Modifier.padding(16.dp),
                 preview = LinkController.PaymentMethodPreview(
-                    icon =
-                        ContextCompat.getDrawable(
-                            context,
-                            com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_link_arrow,
-                        )!!
-                    ,
+                    icon = ContextCompat.getDrawable(
+                        context,
+                        com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_link_arrow,
+                    )!!,
                     label = "Link",
                     sublabel = "Visa (Personal) •••• 4242",
                 ),
