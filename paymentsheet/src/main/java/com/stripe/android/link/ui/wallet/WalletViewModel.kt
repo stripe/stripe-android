@@ -17,9 +17,9 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentMethod
-import com.stripe.android.link.LinkPaymentMethodFilter
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.LinkScreen.UpdateCard.BillingDetailsUpdateFlow
+import com.stripe.android.link.NoPaymentMethodOptionsAvailable
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.linkAccountUpdate
 import com.stripe.android.link.confirmation.CompleteLinkFlow
@@ -55,13 +55,13 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-internal class WalletViewModel @Inject constructor(
+internal class WalletViewModel(
     private val configuration: LinkConfiguration,
     private val linkAccount: LinkAccount,
     private val linkAccountManager: LinkAccountManager,
     private val completeLinkFlow: CompleteLinkFlow,
+    private val addPaymentMethodOptions: AddPaymentMethodOptions,
     private val logger: Logger,
     private val navigationManager: NavigationManager,
     private val linkLaunchMode: LinkLaunchMode,
@@ -70,8 +70,6 @@ internal class WalletViewModel @Inject constructor(
     private val dismissWithResult: (LinkActivityResult) -> Unit
 ) : ViewModel() {
     private val stripeIntent = configuration.stripeIntent
-
-    private val supportedPaymentMethodTypes = stripeIntent.supportedPaymentMethodTypes(linkAccount)
 
     private val _uiState = MutableStateFlow(
         value = WalletUiState(
@@ -89,7 +87,7 @@ internal class WalletViewModel @Inject constructor(
             userSetIsExpanded = linkLaunchMode.selectedItemId != null,
             primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent, linkLaunchMode),
             secondaryButtonLabel = configuration.stripeIntent.secondaryButtonLabel(linkLaunchMode),
-            addPaymentMethodOptions = getAddPaymentMethodOptions(),
+            addPaymentMethodOptions = addPaymentMethodOptions.values,
             paymentSelectionHint = paymentSelectionHint,
             isAutoSelecting = shouldAutoSelectDefaultPaymentMethod(),
             signupToggleEnabled = configuration.linkSignUpOptInFeatureEnabled,
@@ -97,7 +95,7 @@ internal class WalletViewModel @Inject constructor(
         )
     )
 
-    val LinkLaunchMode.selectedItemId
+    private val LinkLaunchMode.selectedItemId
         get() = when (this) {
             is LinkLaunchMode.Full,
             is LinkLaunchMode.Confirmation -> null
@@ -138,20 +136,35 @@ internal class WalletViewModel @Inject constructor(
 
         viewModelScope.launch {
             linkAccountManager.consumerState.filterNotNull().collectLatest { paymentDetailsState ->
-                if (paymentDetailsState.paymentDetails.isEmpty()) {
-                    navigateAndClearStack(LinkScreen.PaymentMethod)
+                val filteredPaymentDetails = paymentDetailsState.paymentDetails
+                    .filter { paymentMethodFilter?.invoke(it.details) != false }
+                    .toList()
+                if (filteredPaymentDetails.isEmpty()) {
+                    when (addPaymentMethodOptions.default) {
+                        AddPaymentMethodOption.Card -> {
+                            navigateAndClearStack(LinkScreen.PaymentMethod)
+                        }
+                        is AddPaymentMethodOption.Bank -> {
+                            navigateAndClearStack(LinkScreen.Wallet)
+                            presentAddBankAccount()
+                        }
+                        null -> {
+                            dismissWithResult(
+                                LinkActivityResult.Failed(
+                                    error = NoPaymentMethodOptionsAvailable(),
+                                    linkAccountUpdate = linkAccountManager.linkAccountUpdate
+                                )
+                            )
+                        }
+                    }
                 } else {
-                    val paymentDetails = paymentDetailsState.paymentDetails
-                        .filter { paymentMethodFilter?.invoke(it.details) != false }
-                        .toList()
-
                     val currentState = _uiState.updateAndGet {
-                        it.updateWithResponse(paymentDetails)
+                        it.updateWithResponse(filteredPaymentDetails)
                     }
 
                     // Auto-select default payment method only on first load
                     if (shouldAutoSelectDefaultPaymentMethod() && !currentState.hasAttemptedAutoSelection) {
-                        handleAutoSelection(paymentDetails)
+                        handleAutoSelection(filteredPaymentDetails)
                     }
                 }
             }
@@ -542,6 +555,13 @@ internal class WalletViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(addBankAccountState = AddBankAccountState.Idle)
                     }
+                    if (uiState.value.paymentDetailsList.isEmpty()) {
+                        dismissWithResult(
+                            LinkActivityResult.Canceled(
+                                linkAccountUpdate = linkAccountManager.linkAccountUpdate
+                            )
+                        )
+                    }
                 }
                 is FinancialConnectionsSheetResult.Failed -> {
                     onAddBankAccountError(
@@ -592,24 +612,6 @@ internal class WalletViewModel @Inject constructor(
         }
     }
 
-    private fun getAddPaymentMethodOptions(): List<AddPaymentMethodOption> {
-        return buildList {
-            if (
-                linkAccount.consumerPublishableKey != null &&
-                configuration.financialConnectionsAvailability != null &&
-                supportedPaymentMethodTypes.contains(ConsumerPaymentDetails.BankAccount.TYPE) &&
-                (paymentMethodFilter == null || paymentMethodFilter == LinkPaymentMethodFilter.BankAccount)
-            ) {
-                add(AddPaymentMethodOption.Bank(configuration.financialConnectionsAvailability))
-            }
-            if (supportedPaymentMethodTypes.contains(ConsumerPaymentDetails.Card.TYPE) &&
-                (paymentMethodFilter == null || paymentMethodFilter == LinkPaymentMethodFilter.Card)
-            ) {
-                add(AddPaymentMethodOption.Card)
-            }
-        }
-    }
-
     companion object {
         fun factory(
             parentComponent: NativeLinkComponent,
@@ -631,6 +633,7 @@ internal class WalletViewModel @Inject constructor(
                             dismissalCoordinator = parentComponent.dismissalCoordinator,
                             linkLaunchMode = parentComponent.linkLaunchMode
                         ),
+                        addPaymentMethodOptions = parentComponent.addPaymentMethodOptionsFactory.create(linkAccount),
                         logger = parentComponent.logger,
                         navigationManager = parentComponent.navigationManager,
                         dismissalCoordinator = parentComponent.dismissalCoordinator,
