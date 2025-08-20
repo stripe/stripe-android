@@ -129,7 +129,7 @@ constructor(
 
     internal val paymentMethodCode: PaymentMethodCode? = paymentMethodCreateParams?.code,
 
-    internal val radarOptions: RadarOptions? = null
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val radarOptions: RadarOptions? = null
 ) : ConfirmStripeIntentParams {
     fun shouldSavePaymentMethod(): Boolean {
         return savePaymentMethod == true
