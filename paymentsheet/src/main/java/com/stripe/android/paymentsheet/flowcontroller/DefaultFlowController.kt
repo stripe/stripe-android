@@ -448,12 +448,12 @@ internal class DefaultFlowController @Inject internal constructor(
                     selectedPayment = linkPaymentMethod
                 )
             } else {
-                // User logged out - determine best fallback payment method
+                // User logged out - determine best fallback payment method,
+                // or clear selection if there is no fallback
                 val state = viewModel.state
-                determineFallbackPaymentSelection(
-                    customer = state?.paymentSheetState?.customer,
-                    metadata = state?.paymentSheetState?.paymentMethodMetadata ?: return
-                )
+                val fallbackSelection: PaymentSelection? = state?.paymentSheetState
+                    ?.determineFallbackPaymentSelection()
+                fallbackSelection
             }
             viewModel.paymentSelection = newSelection
             val paymentOption = newSelection?.let { paymentOptionFactory.create(it) }

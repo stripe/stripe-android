@@ -3,23 +3,20 @@ package com.stripe.android.link.utils
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
+import com.stripe.android.paymentsheet.state.PaymentSheetState
 
 /**
- * Determines the best fallback payment selection when Link is cleared (e.g., on logout).
+ * Determines the best fallback payment selection.
  * Follows the same logic as initial payment selection: default PM > first customer PM.
  *
- * @param customer The customer state containing payment methods and default PM info
- * @param metadata Payment method metadata containing feature flags and configuration
  * @return The best fallback payment selection, or null if no suitable fallback exists
  */
-internal fun determineFallbackPaymentSelection(
-    customer: CustomerState?,
-    metadata: PaymentMethodMetadata
-): PaymentSelection? {
+internal fun PaymentSheetState.Full.determineFallbackPaymentSelection(): PaymentSelection? {
     if (customer == null) return null
 
     // Check if default payment method feature is enabled
-    val isDefaultPaymentMethodEnabled = metadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled ?: false
+    val isDefaultPaymentMethodEnabled = paymentMethodMetadata
+        .customerMetadata?.isPaymentMethodSetAsDefaultEnabled ?: false
 
     return if (isDefaultPaymentMethodEnabled) {
         // Use default payment method if available
