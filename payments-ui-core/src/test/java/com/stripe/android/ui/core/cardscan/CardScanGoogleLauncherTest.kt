@@ -133,7 +133,7 @@ class CardScanGoogleLauncherTest {
         assertThat(activityLauncher.launchCall.awaitItem()).isEqualTo(Unit)
 
         assertThat(fakeEventsReporter.apiCheckCalls.awaitItem().available).isTrue()
-        assertThat(fakeEventsReporter.scanStartedCalls.awaitItem().implementation). isEqualTo("google_pay")
+        assertThat(fakeEventsReporter.scanStartedCalls.awaitItem().implementation).isEqualTo("google_pay")
     }
 
     @Test
