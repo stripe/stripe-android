@@ -20,7 +20,6 @@ import com.stripe.android.networking.RequestSurface
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
-import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -45,29 +44,25 @@ internal class OnrampModule {
     )
 
     @Provides
-    fun providePaymentConfiguration(appContext: Context): PaymentConfiguration {
-        return PaymentConfiguration.getInstance(appContext)
-    }
-
-    @Provides
     @Named(PUBLISHABLE_KEY)
-    fun providePublishableKey(paymentConfiguration: Provider<PaymentConfiguration>): () -> String =
-        { paymentConfiguration.get().publishableKey }
+    fun providePublishableKey(context: Context): () -> String =
+        { PaymentConfiguration.getInstance(context).publishableKey }
 
     @Provides
     @Named(STRIPE_ACCOUNT_ID)
-    fun provideStripeAccountId(paymentConfiguration: Provider<PaymentConfiguration>): () -> String? =
-        { paymentConfiguration.get().stripeAccountId }
+    fun provideStripeAccountId(context: Context): () -> String? =
+        { PaymentConfiguration.getInstance(context).stripeAccountId }
 
     @Provides
     fun provideCryptoApiRepository(
         stripeNetworkClient: StripeNetworkClient,
-        paymentConfiguration: PaymentConfiguration
+        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+        @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?,
     ): CryptoApiRepository {
         return CryptoApiRepository(
             stripeNetworkClient = stripeNetworkClient,
-            publishableKeyProvider = { paymentConfiguration.publishableKey },
-            stripeAccountIdProvider = { paymentConfiguration.stripeAccountId },
+            publishableKeyProvider = publishableKeyProvider,
+            stripeAccountIdProvider = stripeAccountIdProvider,
             apiVersion = ApiVersion.get().code,
             appInfo = Stripe.appInfo
         )
