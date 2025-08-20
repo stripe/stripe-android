@@ -4,7 +4,6 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
-import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -16,15 +15,11 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
-import com.stripe.android.core.reactnative.ReactNativeSdkInternal
-import com.stripe.android.core.reactnative.UnregisterSignal
-import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -35,7 +30,7 @@ import java.util.Locale
  * A drop-in class that presents a Google Pay sheet to collect customer payment details and use it
  * to confirm a [PaymentIntent] or [SetupIntent]. When successful, will return [Result.Completed].
  *
- * Use [rememberGooglePayLauncher] for Jetpack Compose integrations.
+ * Use [GooglePayLauncherContract] for Jetpack Compose integrations.
  *
  * See the [Google Pay integration guide](https://stripe.com/docs/google-pay) for more details.
  */
@@ -88,49 +83,7 @@ class GooglePayLauncher internal constructor(
                     context = context,
                     productUsage = setOf(PRODUCT_USAGE),
                 ),
-                additionalEnabledNetworks = config.additionalEnabledNetworks
-            )
-        },
-        PaymentAnalyticsRequestFactory(
-            activity,
-            PaymentConfiguration.getInstance(activity).publishableKey,
-            setOf(PRODUCT_USAGE)
-        ),
-        DefaultAnalyticsRequestExecutor()
-    )
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    @ReactNativeSdkInternal
-    constructor(
-        activity: ComponentActivity,
-        signal: UnregisterSignal,
-        config: Config,
-        readyCallback: ReadyCallback,
-        resultCallback: ResultCallback
-    ) : this(
-        activity.lifecycleScope,
-        config,
-        readyCallback,
-        registerForReactNativeActivityResult(
-            activity,
-            signal,
-            GooglePayLauncherContract()
-        ) {
-            resultCallback.onResult(it)
-        },
-        googlePayRepositoryFactory = {
-            val context = activity.application
-
-            DefaultGooglePayRepository(
-                context = context,
-                environment = config.environment,
-                billingAddressParameters = config.billingAddressConfig.convert(),
-                existingPaymentMethodRequired = config.existingPaymentMethodRequired,
-                allowCreditCards = config.allowCreditCards,
-                errorReporter = ErrorReporter.createFallbackInstance(
-                    context = context,
-                    productUsage = setOf(PRODUCT_USAGE),
-                )
+                cardBrandFilter = config.cardBrandFilter
             )
         },
         PaymentAnalyticsRequestFactory(
@@ -307,6 +260,13 @@ class GooglePayLauncher internal constructor(
          *
          * Default: The credit card class is supported for the card networks specified.
          */
+        var allowCreditCards: Boolean = true
+
+        /**
+         * Allows to select the acceptable card brands
+         * Default: Accepts all brands
+         */
+        var cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
         var allowCreditCards: Boolean = true,
 
         /**
