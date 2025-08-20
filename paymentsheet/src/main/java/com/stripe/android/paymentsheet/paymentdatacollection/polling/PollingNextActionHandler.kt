@@ -91,7 +91,6 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
     }
 
     private fun getQrCodeForPayNow(actionable: StripeIntent): String {
-        // TODO: test what happens when null.
         return requireNotNull((actionable.nextActionData as StripeIntent.NextActionData.DisplayPayNowDetails).qrCodeUrl)
     }
 

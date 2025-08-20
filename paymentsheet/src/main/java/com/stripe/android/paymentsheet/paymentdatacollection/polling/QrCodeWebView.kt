@@ -17,15 +17,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 internal const val QR_CODE_WEB_VIEW_TEST_TAG = "qr_code_web_view"
 
 @Composable
-fun QrCodeWebView(
+internal fun QrCodeWebView(
     url: String,
     clientSecret: String,
     onClose: () -> Unit,
 ) {
     val isPageLoaded = MutableStateFlow(false)
     val isPageLoadedState by isPageLoaded.collectAsState()
-    var binding : StripePaymentAuthWebViewActivityBinding? = null
-    
+    var binding: StripePaymentAuthWebViewActivityBinding? = null
+
     AndroidViewBinding(
         factory = { layoutInflater, _, _ ->
             val localBinding = StripePaymentAuthWebViewActivityBinding.inflate(layoutInflater)
@@ -55,5 +55,6 @@ fun QrCodeWebView(
             if (isPageLoadedState) {
                 binding?.progressBar?.isGone = true
             }
-        })
+        }
+    )
 }

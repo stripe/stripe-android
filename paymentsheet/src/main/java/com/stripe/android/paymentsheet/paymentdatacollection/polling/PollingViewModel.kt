@@ -91,11 +91,13 @@ internal class PollingViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(PollingUiState(
-        durationRemaining = args.timeLimit,
-        ctaText = args.ctaText,
-        shouldShowQrCode = args.qrCodeUrl != null,
-    ))
+    private val _uiState = MutableStateFlow(
+        PollingUiState(
+            durationRemaining = args.timeLimit,
+            ctaText = args.ctaText,
+            shouldShowQrCode = args.qrCodeUrl != null,
+        )
+    )
     val uiState: StateFlow<PollingUiState> = _uiState
 
     init {
