@@ -118,6 +118,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
             checkout()
         },
+        onDisabledClick = ::onDisabledClick,
     )
 
     private val _paymentSheetResult = MutableSharedFlow<PaymentSheetResult>(replay = 1)
@@ -491,6 +492,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
+    private fun onDisabledClick() {
+        viewModelScope.launch {
+            validationRequested.emit(Unit)
+        }
+    }
+
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
         viewModelScope.launch(workContext) {
             val confirmationOption = withContext(viewModelScope.coroutineContext) {
@@ -504,8 +511,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
 
             confirmationOption?.let { option ->
-                errorReporter.report(ErrorReporter.SuccessEvent.PAYMENT_SHEET_PAYMENT_SELECTION_ON_CHECKOUT)
-
                 val stripeIntent = awaitStripeIntent()
 
                 confirmationHandler.start(
@@ -522,26 +527,15 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
                 val message = paymentSelection?.let {
                     "Cannot confirm using a ${it::class.qualifiedName} payment selection!"
-                } ?: run {
-                    errorReporter
-                        .report(
-                            ErrorReporter.ExpectedErrorEvent.PAYMENT_SHEET_NO_PAYMENT_SELECTION_ON_CHECKOUT,
-                            StripeException.create(IllegalStateException("No payment selection on checkout!"))
-                        )
-
-                    withContext(viewModelScope.coroutineContext) {
-                        validationRequested.emit(Unit)
-                    }
-
-                    return@launch
-                }
+                } ?: "Cannot confirm without a payment selection!"
 
                 val exception = IllegalStateException(message)
 
-                errorReporter.report(
-                    ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_INVALID_PAYMENT_SELECTION_ON_CHECKOUT,
-                    StripeException.create(exception)
-                )
+                val event = paymentSelection?.let {
+                    ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_INVALID_PAYMENT_SELECTION_ON_CHECKOUT
+                } ?: ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_NO_PAYMENT_SELECTION_ON_CHECKOUT
+
+                errorReporter.report(event, StripeException.create(exception))
 
                 withContext(viewModelScope.coroutineContext) {
                     processConfirmationResult(

@@ -80,6 +80,7 @@ internal class PaymentMethodScreenScreenshotTest {
                         state = state,
                         onFormFieldValuesChanged = {},
                         onPayClicked = {},
+                        onDisabledPayClicked = {},
                     )
                 }
             }

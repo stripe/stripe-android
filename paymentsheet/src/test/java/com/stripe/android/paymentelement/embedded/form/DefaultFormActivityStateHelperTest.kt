@@ -227,7 +227,6 @@ class DefaultFormActivityStateHelperTest {
                     label = "Do something".resolvableString,
                     onClick = {},
                     enabled = true,
-                    clickable = true,
                     lockVisible = true
                 )
             }
@@ -261,7 +260,6 @@ class DefaultFormActivityStateHelperTest {
                     label = "Do something".resolvableString,
                     onClick = {},
                     enabled = true,
-                    clickable = true,
                     lockVisible = true
                 )
             }

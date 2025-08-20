@@ -81,10 +81,13 @@ internal class PaymentMethodViewModel @Inject constructor(
         }
     }
 
+    fun onDisabledPayClicked() {
+        validate()
+    }
+
     fun onPayClicked() {
         val paymentMethodCreateParams = _state.value.paymentMethodCreateParams
         if (paymentMethodCreateParams == null) {
-            validate()
             logger.error("PaymentMethodViewModel: onPayClicked without paymentMethodCreateParams")
             return
         }

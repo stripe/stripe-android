@@ -83,6 +83,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             paymentMethodIncentive = PaymentMethodIncentiveInteractor(
                 paymentMethodMetadata.paymentMethodIncentive
             ).displayedIncentive,
+            // Embedded does not support validation at the moment. Should update here once it does.
             validationRequested = MutableSharedFlow(),
             coroutineScope = viewModelScope,
         )

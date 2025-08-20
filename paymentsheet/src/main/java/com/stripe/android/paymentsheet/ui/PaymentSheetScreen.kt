@@ -13,6 +13,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
@@ -37,6 +38,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -476,25 +478,37 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
 
     val context = LocalContext.current
 
-    AndroidViewBinding(
-        factory = { inflater: LayoutInflater, parent: ViewGroup, attachToParent: Boolean ->
-            val binding = StripeFragmentPrimaryButtonContainerBinding.inflate(inflater, parent, attachToParent)
-            val primaryButton = binding.primaryButton
-            button = primaryButton
-            @Suppress("DEPRECATION")
-            primaryButton.setAppearanceConfiguration(
-                StripeTheme.primaryButtonStyle,
-                tintList = viewModel.config.primaryButtonColor ?: ColorStateList.valueOf(
-                    StripeTheme.primaryButtonStyle.getBackgroundColor(context)
+    Box {
+        AndroidViewBinding(
+            factory = { inflater: LayoutInflater, parent: ViewGroup, attachToParent: Boolean ->
+                val binding = StripeFragmentPrimaryButtonContainerBinding.inflate(inflater, parent, attachToParent)
+                val primaryButton = binding.primaryButton
+                button = primaryButton
+                @Suppress("DEPRECATION")
+                primaryButton.setAppearanceConfiguration(
+                    StripeTheme.primaryButtonStyle,
+                    tintList = viewModel.config.primaryButtonColor ?: ColorStateList.valueOf(
+                        StripeTheme.primaryButtonStyle.getBackgroundColor(context)
+                    )
                 )
+                binding
+            },
+            update = {
+                button?.updateUiState(uiState)
+            },
+            modifier = modifier,
+        )
+
+        if (uiState?.canClickWhileDisabled == true) {
+            Box(
+                Modifier
+                    .matchParentSize()
+                    .pointerInput(Unit) {
+                        detectTapGestures { uiState?.onDisabledClick?.invoke() }
+                    }
             )
-            binding
-        },
-        update = {
-            button?.updateUiState(uiState)
-        },
-        modifier = modifier,
-    )
+        }
+    }
 
     LaunchedEffect(viewModel, button) {
         (viewModel as? PaymentSheetViewModel)?.buyButtonState?.collect { state ->

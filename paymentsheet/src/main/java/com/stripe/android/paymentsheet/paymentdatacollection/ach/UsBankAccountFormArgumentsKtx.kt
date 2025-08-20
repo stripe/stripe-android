@@ -48,7 +48,6 @@ private fun USBankAccountFormArguments.updatePrimaryButton(
                 }
             },
             enabled = enabled,
-            clickable = true,
             lockVisible = isCompleteFlow,
         )
     }

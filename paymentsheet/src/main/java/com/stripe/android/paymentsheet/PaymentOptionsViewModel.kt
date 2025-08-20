@@ -93,6 +93,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             }
             onUserSelection()
         },
+        onDisabledClick = ::onDisabledClick,
     )
 
     private val _paymentOptionsActivityResult = MutableSharedFlow<PaymentOptionsActivityResult>(replay = 1)
@@ -275,10 +276,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     )
                 )
             }
-        } ?: run {
-            viewModelScope.launch {
-                validationRequested.emit(Unit)
-            }
+        }
+    }
+
+    private fun onDisabledClick() {
+        viewModelScope.launch {
+            validationRequested.emit(Unit)
         }
     }
 

@@ -10,6 +10,8 @@ import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.RowElement
+import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.utils.isInstanceOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -151,6 +153,51 @@ internal class CardBillingAddressElementTest {
             assertThat(hasEmail).isTrue()
             assertThat(hasPhone).isTrue()
         }
+
+    @Test
+    fun `Verify that only errors from non-hidden fields are displayed`() = runTest {
+        cardBillingElement.onValidationStateChanged(isValidating = true)
+
+        cardBillingElement.sectionFieldErrorController().error.test {
+            assertThat(awaitItem()).isNotNull()
+
+            val postalCodeField = cardBillingElement
+                .addressController
+                .value
+                .fieldsFlowable
+                .value
+                .findField(IdentifierSpec.PostalCode)
+
+            assertThat(postalCodeField).isNotNull()
+
+            val nonNullPostalCodeField = requireNotNull(postalCodeField)
+
+            nonNullPostalCodeField.setRawValue(
+                mapOf(
+                    IdentifierSpec.PostalCode to "99999"
+                )
+            )
+
+            assertThat(awaitItem()).isNull()
+        }
+    }
+
+    private fun List<SectionFieldElement>.findField(identifierSpec: IdentifierSpec): SectionFieldElement? {
+        for (element in this) {
+            when (element) {
+                is RowElement -> element.fields.findField(identifierSpec)?.let {
+                    return it
+                }
+                else -> element.takeIf {
+                    it.identifier == identifierSpec
+                }?.let {
+                    return it
+                }
+            }
+        }
+
+        return null
+    }
 
     fun verifyPostalShown(hiddenIdentifiers: Set<IdentifierSpec>) {
         Truth.assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.PostalCode)
