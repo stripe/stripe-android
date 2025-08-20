@@ -157,7 +157,7 @@ class GooglePayJsonFactory internal constructor(
      * [PaymentDataRequest](https://developers.google.com/pay/api/android/reference/request-objects#PaymentDataRequest)
      */
     @JvmOverloads
-    fun createPaymentDataRequest(
+    internal fun createPaymentDataRequest(
         /**
          * Details about the authorization of the transaction based upon whether the user agrees to
          * the transaction or not. Includes total price and price status.
@@ -466,7 +466,7 @@ class GooglePayJsonFactory internal constructor(
         /**
          * Set to true to request a full shipping address.
          */
-        internal val isRequired: Boolean = false,
+        val isRequired: Boolean = false,
 
         /**
          * ISO 3166-1 alpha-2 country code values of the countries where shipping is allowed.
@@ -477,12 +477,12 @@ class GooglePayJsonFactory internal constructor(
         /**
          * Set to true if a phone number is required for the provided shipping address.
          */
-        internal val phoneNumberRequired: Boolean = false
+        val phoneNumberRequired: Boolean = false
     ) : Parcelable {
         /**
          * Normalized form of [allowedCountryCodes] (i.e. capitalized country codes)
          */
-        internal val normalizedAllowedCountryCodes: Set<String>
+        val normalizedAllowedCountryCodes: Set<String>
             get() {
                 return allowedCountryCodes.map {
                     it.uppercase()
@@ -502,13 +502,13 @@ class GooglePayJsonFactory internal constructor(
     }
 
     @Parcelize
-    data class SoftwareInfo(
-        internal val id: SoftwareId
+    internal data class SoftwareInfo(
+        val id: SoftwareId
     ) : Parcelable {
         /**
          * An identifier for the library
          */
-        enum class SoftwareId(internal val code: String) {
+        enum class SoftwareId(val code: String) {
             /**
              * An identifier for the flow using the payment sheet UI
              */
@@ -532,12 +532,12 @@ class GooglePayJsonFactory internal constructor(
          * In TEST environment, or if a merchant isn't recognized, a "Pay Unverified Merchant"
          * message is displayed in the payment sheet.
          */
-        internal val merchantName: String? = null,
+        val merchantName: String? = null,
 
         /**
          * Basic information about the library used to make calls to Google Pay from this SDK.
          */
-        internal val softwareInfo: SoftwareInfo
+        val softwareInfo: SoftwareInfo
     ) : Parcelable
 
     private companion object {
