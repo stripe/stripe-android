@@ -30,7 +30,7 @@ import com.stripe.android.link.account.updateLinkAccount
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.toLoginState
-import com.stripe.android.link.utils.determineFallbackPaymentSelection
+import com.stripe.android.link.utils.determineFallbackPaymentSelectionAfterLinkLogout
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentMethod
@@ -450,10 +450,7 @@ internal class DefaultFlowController @Inject internal constructor(
             } else {
                 // User logged out - determine best fallback payment method,
                 // or clear selection if there is no fallback
-                val state = viewModel.state
-                val fallbackSelection: PaymentSelection? = state?.paymentSheetState
-                    ?.determineFallbackPaymentSelection()
-                fallbackSelection
+                viewModel.state?.paymentSheetState?.determineFallbackPaymentSelectionAfterLinkLogout()
             }
             viewModel.paymentSelection = newSelection
             val paymentOption = newSelection?.let { paymentOptionFactory.create(it) }

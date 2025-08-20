@@ -1,8 +1,6 @@
 package com.stripe.android.link.utils
 
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 
 /**
@@ -11,7 +9,7 @@ import com.stripe.android.paymentsheet.state.PaymentSheetState
  *
  * @return The best fallback payment selection, or null if no suitable fallback exists
  */
-internal fun PaymentSheetState.Full.determineFallbackPaymentSelection(): PaymentSelection? {
+internal fun PaymentSheetState.Full.determineFallbackPaymentSelectionAfterLinkLogout(): PaymentSelection? {
     if (customer == null) return null
 
     // Check if default payment method feature is enabled
