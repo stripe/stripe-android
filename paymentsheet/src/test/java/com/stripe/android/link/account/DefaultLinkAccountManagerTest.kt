@@ -12,11 +12,14 @@ import com.stripe.android.link.TestFactory
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.ConsentPresentation
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.model.LinkAuthIntentInfo
 import com.stripe.android.link.repositories.FakeLinkRepository
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.model.ConsentUi
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
@@ -59,12 +62,18 @@ class DefaultLinkAccountManagerTest {
         val linkRepository = object : FakeLinkRepository() {
             var callCount = 0
             override suspend fun lookupConsumer(
-                email: String,
+                email: String?,
+                linkAuthIntentId: String?,
                 sessionId: String,
                 customerId: String?
             ): Result<ConsumerSessionLookup> {
                 if (email == TestFactory.EMAIL) callCount += 1
-                return super.lookupConsumer(email = email, sessionId = sessionId, customerId = customerId)
+                return super.lookupConsumer(
+                    email = email,
+                    sessionId = sessionId,
+                    customerId = customerId,
+                    linkAuthIntentId = linkAuthIntentId,
+                )
             }
         }
         assertThat(
@@ -101,6 +110,7 @@ class DefaultLinkAccountManagerTest {
 
         accountManager.lookupConsumer(
             email = "email",
+            linkAuthIntentId = null,
             startSession = true,
             customerId = null
         )
@@ -117,6 +127,7 @@ class DefaultLinkAccountManagerTest {
 
         accountManager.lookupConsumer(
             email = "email",
+            linkAuthIntentId = null,
             startSession = true,
             customerId = null
         )
@@ -126,6 +137,7 @@ class DefaultLinkAccountManagerTest {
         accountManager.setLinkAccountFromLookupResult(
             lookup = TestFactory.CONSUMER_SESSION_LOOKUP.copy(publishableKey = null),
             startSession = true,
+            linkAuthIntentId = null,
         )
 
         assertThat(accountManager.consumerPublishableKey).isEqualTo(TestFactory.PUBLISHABLE_KEY)
@@ -137,6 +149,7 @@ class DefaultLinkAccountManagerTest {
         accountManager.setLinkAccountFromLookupResult(
             TestFactory.CONSUMER_SESSION_LOOKUP,
             startSession = true,
+            linkAuthIntentId = null,
         )
 
         assertThat(accountManager.consumerPublishableKey).isEqualTo(TestFactory.PUBLISHABLE_KEY)
@@ -147,6 +160,7 @@ class DefaultLinkAccountManagerTest {
                 publishableKey = null,
             ),
             startSession = true,
+            linkAuthIntentId = null,
         )
 
         assertThat(accountManager.consumerPublishableKey).isNull()
@@ -167,6 +181,7 @@ class DefaultLinkAccountManagerTest {
         accountManager(linkRepository = linkRepository, linkEventsReporter = linkEventsReporter)
             .lookupConsumer(
                 email = TestFactory.EMAIL,
+                linkAuthIntentId = null,
                 startSession = false,
                 customerId = null
             )
@@ -179,12 +194,18 @@ class DefaultLinkAccountManagerTest {
         val linkRepository = object : FakeLinkRepository() {
             var callCount = 0
             override suspend fun lookupConsumer(
-                email: String,
+                email: String?,
+                linkAuthIntentId: String?,
                 sessionId: String,
                 customerId: String?
             ): Result<ConsumerSessionLookup> {
                 if (email == TestFactory.EMAIL) callCount += 1
-                return super.lookupConsumer(email = email, sessionId = sessionId, customerId = customerId)
+                return super.lookupConsumer(
+                    email = email,
+                    linkAuthIntentId = linkAuthIntentId,
+                    sessionId = sessionId,
+                    customerId = customerId
+                )
             }
         }
         val accountManager = accountManager(linkRepository = linkRepository)
@@ -400,6 +421,7 @@ class DefaultLinkAccountManagerTest {
         manager.setLinkAccountFromLookupResult(
             TestFactory.CONSUMER_SESSION_LOOKUP,
             startSession = true,
+            linkAuthIntentId = null,
         )
 
         val result = manager.signInWithUserInput(
@@ -434,6 +456,7 @@ class DefaultLinkAccountManagerTest {
         manager.setLinkAccountFromLookupResult(
             TestFactory.CONSUMER_SESSION_LOOKUP,
             startSession = true,
+            linkAuthIntentId = null,
         )
 
         manager.signInWithUserInput(
@@ -499,12 +522,18 @@ class DefaultLinkAccountManagerTest {
             }
 
             override suspend fun lookupConsumer(
-                email: String,
+                email: String?,
+                linkAuthIntentId: String?,
                 sessionId: String,
                 customerId: String?
             ): Result<ConsumerSessionLookup> {
                 callCount += 1
-                return super.lookupConsumer(email = email, sessionId = sessionId, customerId = customerId)
+                return super.lookupConsumer(
+                    email = email,
+                    linkAuthIntentId = linkAuthIntentId,
+                    sessionId = sessionId,
+                    customerId = customerId
+                )
             }
         }
         val accountManager = accountManager(linkRepository = linkRepository)
@@ -512,6 +541,7 @@ class DefaultLinkAccountManagerTest {
         accountManager.setLinkAccountFromLookupResult(
             TestFactory.CONSUMER_SESSION_LOOKUP,
             startSession = true,
+            linkAuthIntentId = null,
         )
 
         accountManager.createCardPaymentDetails(TestFactory.PAYMENT_METHOD_CREATE_PARAMS)
@@ -553,6 +583,7 @@ class DefaultLinkAccountManagerTest {
         accountManager.setLinkAccountFromLookupResult(
             TestFactory.CONSUMER_SESSION_LOOKUP,
             startSession = true,
+            linkAuthIntentId = null,
         )
 
         val result = accountManager.shareCardPaymentDetails(newPaymentDetails)
@@ -580,7 +611,12 @@ class DefaultLinkAccountManagerTest {
         }
         val accountManager = accountManager(linkRepository = linkRepository)
 
-        accountManager.lookupConsumer(TestFactory.EMAIL, false, customerId = null)
+        accountManager.lookupConsumer(
+            email = TestFactory.EMAIL,
+            linkAuthIntentId = null,
+            startSession = false,
+            customerId = null
+        )
 
         assertThat(linkRepository.callCount).isEqualTo(0)
         assertThat(accountManager.linkAccountInfo.value.account).isNull()
@@ -654,7 +690,7 @@ class DefaultLinkAccountManagerTest {
         )
         accountManager.setTestAccount(null, null)
 
-        val result = accountManager.confirmVerification("123")
+        val result = accountManager.confirmVerification(code = "123", consentGranted = null)
 
         assertThat(result.exceptionOrNull()).isInstanceOf(NoLinkAccountFoundException::class.java)
     }
@@ -666,10 +702,16 @@ class DefaultLinkAccountManagerTest {
             override suspend fun confirmVerification(
                 verificationCode: String,
                 consumerSessionClientSecret: String,
-                consumerPublishableKey: String?
+                consumerPublishableKey: String?,
+                consentGranted: Boolean?
             ): Result<ConsumerSession> {
                 callCount += 1
-                return super.confirmVerification(verificationCode, consumerSessionClientSecret, consumerPublishableKey)
+                return super.confirmVerification(
+                    verificationCode = verificationCode,
+                    consumerSessionClientSecret = consumerSessionClientSecret,
+                    consumerPublishableKey = consumerPublishableKey,
+                    consentGranted = consentGranted
+                )
             }
         }
         val linkEventsReporter = object : AccountManagerEventsReporter() {
@@ -683,7 +725,7 @@ class DefaultLinkAccountManagerTest {
 
         linkRepository.confirmVerificationResult = Result.success(TestFactory.CONSUMER_SESSION)
 
-        val result = accountManager.confirmVerification("123")
+        val result = accountManager.confirmVerification(code = "123", consentGranted = null)
 
         assertThat(linkRepository.callCount).isEqualTo(1)
         assertThat(result.isSuccess).isTrue()
@@ -698,7 +740,8 @@ class DefaultLinkAccountManagerTest {
             override suspend fun confirmVerification(
                 verificationCode: String,
                 consumerSessionClientSecret: String,
-                consumerPublishableKey: String?
+                consumerPublishableKey: String?,
+                consentGranted: Boolean?
             ): Result<ConsumerSession> {
                 callCount += 1
                 return Result.failure(error)
@@ -713,7 +756,7 @@ class DefaultLinkAccountManagerTest {
         val accountManager = accountManager(linkRepository = linkRepository, linkEventsReporter = linkEventsReporter)
         accountManager.setTestAccount(TestFactory.CONSUMER_SESSION, null)
 
-        val result = accountManager.confirmVerification("123")
+        val result = accountManager.confirmVerification("123", null)
 
         assertThat(linkRepository.callCount).isEqualTo(1)
         assertThat(result).isEqualTo(Result.failure<LinkAccount>(error))
@@ -833,6 +876,7 @@ class DefaultLinkAccountManagerTest {
         val result = accountManager.mobileLookupConsumer(
             email = TestFactory.CUSTOMER_EMAIL,
             emailSource = TestFactory.EMAIL_SOURCE,
+            linkAuthIntentId = null,
             verificationToken = TestFactory.VERIFICATION_TOKEN,
             appId = TestFactory.APP_ID,
             startSession = false,
@@ -863,6 +907,7 @@ class DefaultLinkAccountManagerTest {
         val result = accountManager.mobileLookupConsumer(
             email = TestFactory.CUSTOMER_EMAIL,
             emailSource = TestFactory.EMAIL_SOURCE,
+            linkAuthIntentId = null,
             verificationToken = TestFactory.VERIFICATION_TOKEN,
             appId = TestFactory.APP_ID,
             startSession = true,
@@ -893,6 +938,7 @@ class DefaultLinkAccountManagerTest {
         val result = accountManager.mobileLookupConsumer(
             email = TestFactory.CUSTOMER_EMAIL,
             emailSource = TestFactory.EMAIL_SOURCE,
+            linkAuthIntentId = null,
             verificationToken = TestFactory.VERIFICATION_TOKEN,
             appId = TestFactory.APP_ID,
             startSession = true,
@@ -989,6 +1035,7 @@ class DefaultLinkAccountManagerTest {
         accountManager.setLinkAccountFromLookupResult(
             lookup = TestFactory.CONSUMER_SESSION_LOOKUP,
             startSession = true,
+            linkAuthIntentId = null,
         )
         assertThat(accountManager.createLinkAccountSession().getOrNull())
             .isEqualTo(TestFactory.LINK_ACCOUNT_SESSION)
@@ -1005,11 +1052,36 @@ class DefaultLinkAccountManagerTest {
         accountManager.setLinkAccountFromLookupResult(
             lookup = TestFactory.CONSUMER_SESSION_LOOKUP,
             startSession = true,
+            linkAuthIntentId = null,
         )
 
         val result = accountManager.createLinkAccountSession()
 
         assertThat(result.exceptionOrNull()).isEqualTo(error)
+    }
+
+    @Test
+    fun `setLinkAccountFromLookupResult creates LinkAccount with LinkAuthIntentInfo`() = runSuspendTest {
+        val accountManager = accountManager()
+        val consentSection = ConsentUi.ConsentSection("disclaimer")
+        val lookup = TestFactory.CONSUMER_SESSION_LOOKUP.copy(
+            consentUi = ConsentUi(
+                consentPane = null,
+                consentSection = consentSection,
+            )
+        )
+        val linkAuthIntentId = "lai_123"
+        val account = accountManager.setLinkAccountFromLookupResult(
+            lookup = lookup,
+            startSession = true,
+            linkAuthIntentId = linkAuthIntentId,
+        )
+        assertThat(account?.linkAuthIntentInfo).isEqualTo(
+            LinkAuthIntentInfo(
+                linkAuthIntentId = linkAuthIntentId,
+                consentPresentation = ConsentPresentation.Inline(consentSection)
+            )
+        )
     }
 
     @Test
@@ -1126,7 +1198,7 @@ class DefaultLinkAccountManagerTest {
                 consumerSession = consumerSession,
                 publishableKey = publishableKey
             )
-            setLinkAccountFromLookupResult(lookup, startSession = true)
+            setLinkAccountFromLookupResult(lookup = lookup, startSession = true, linkAuthIntentId = null)
         } else {
             // To clear account for testing, we create a new LinkAccountHolder and set it to null
             val testLinkAccountHolder = LinkAccountHolder(SavedStateHandle())

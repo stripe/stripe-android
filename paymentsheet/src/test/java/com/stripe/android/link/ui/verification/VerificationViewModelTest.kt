@@ -97,7 +97,7 @@ internal class VerificationViewModelTest {
         }
         val linkAccountManager = object : FakeLinkAccountManager() {
             var codeUsed: String? = null
-            override suspend fun confirmVerification(code: String): Result<LinkAccount> {
+            override suspend fun confirmVerification(code: String, consentGranted: Boolean?): Result<LinkAccount> {
                 codeUsed = code
                 return Result.failure(RuntimeException("Error"))
             }

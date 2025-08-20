@@ -154,9 +154,9 @@ internal class VerificationScreenTest {
     @Test
     fun `title, email, otp should be displayed when verification is in process`() = runTest(dispatcher) {
         val linkAccountManager = object : FakeLinkAccountManager() {
-            override suspend fun confirmVerification(code: String): Result<LinkAccount> {
+            override suspend fun confirmVerification(code: String, consentGranted: Boolean?): Result<LinkAccount> {
                 delay(5500)
-                return super.confirmVerification(code)
+                return super.confirmVerification(code, consentGranted)
             }
         }
 

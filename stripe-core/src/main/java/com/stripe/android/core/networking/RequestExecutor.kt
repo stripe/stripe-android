@@ -88,3 +88,36 @@ suspend fun <Response : StripeModel> executeRequestWithResultParser(
         }
     )
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+suspend fun executeRequestWithErrorParsing(
+    stripeNetworkClient: StripeNetworkClient,
+    stripeErrorJsonParser: StripeErrorJsonParser,
+    request: StripeRequest,
+): Result<Unit> {
+    return runCatching {
+        stripeNetworkClient.executeRequest(request)
+    }.fold(
+        onSuccess = { response ->
+            if (response.isError) {
+                Result.failure(
+                    APIException(
+                        stripeError = stripeErrorJsonParser.parse(response.responseJson()),
+                        requestId = response.requestId?.value,
+                        statusCode = response.code
+                    )
+                )
+            } else {
+                Result.success(Unit)
+            }
+        },
+        onFailure = {
+            Result.failure(
+                APIConnectionException(
+                    "Failed to execute $request",
+                    cause = it
+                )
+            )
+        }
+    )
+}
