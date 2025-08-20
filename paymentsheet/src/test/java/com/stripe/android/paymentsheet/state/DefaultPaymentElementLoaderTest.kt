@@ -3290,7 +3290,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Link is disabled when attestation check fails`() = runTest {
+    fun `Link is enabled when attestation check fails and fflag is off`() = runTest {
         val failingAttestationCheck = FakeLinkAttestationCheck().apply {
             result = LinkAttestationCheck.Result.AttestationFailed(Exception("Attestation failed"))
         }
@@ -3302,7 +3302,40 @@ internal class DefaultPaymentElementLoaderTest {
         val loader = createPaymentElementLoader(
             linkConfigurationCoordinator = linkConfigurationCoordinator,
             linkSettings = createLinkSettings(
-                passthroughModeEnabled = false
+                passthroughModeEnabled = false,
+                linkMobileDisableLinkOnAttestationFailure = false
+            ).copy(useAttestationEndpoints = true),
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            configuration = mockConfiguration().asCommonConfiguration(),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        ).getOrThrow()
+
+        // Verify that Link is disabled when attestation fails
+        assertThat(result.paymentMethodMetadata.linkState?.configuration).isNotNull()
+    }
+
+    @Test
+    fun `Link is disabled when attestation check fails and fflag is on`() = runTest {
+        val failingAttestationCheck = FakeLinkAttestationCheck().apply {
+            result = LinkAttestationCheck.Result.AttestationFailed(Exception("Attestation failed"))
+        }
+
+        val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
+            linkAttestationCheck = failingAttestationCheck
+        )
+
+        val loader = createPaymentElementLoader(
+            linkConfigurationCoordinator = linkConfigurationCoordinator,
+            linkSettings = createLinkSettings(
+                passthroughModeEnabled = false,
+                linkMobileDisableLinkOnAttestationFailure = true
             ).copy(useAttestationEndpoints = true),
         )
 
@@ -3583,7 +3616,8 @@ internal class DefaultPaymentElementLoaderTest {
 
     private fun createLinkSettings(
         passthroughModeEnabled: Boolean,
-        linkSignUpOptInFeatureEnabled: Boolean = false
+        linkSignUpOptInFeatureEnabled: Boolean = false,
+        linkMobileDisableLinkOnAttestationFailure: Boolean = false
     ): ElementsSession.LinkSettings {
         return ElementsSession.LinkSettings(
             linkFundingSources = listOf("card", "bank"),
@@ -3597,10 +3631,9 @@ internal class DefaultPaymentElementLoaderTest {
             disableLinkRuxInFlowController = false,
             linkEnableDisplayableDefaultValuesInEce = false,
             linkMobileSkipWalletInFlowController = false,
-
             linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
             linkSignUpOptInInitialValue = false,
-            linkMobileDisableLinkOnAttestationFailure = false,
+            linkMobileDisableLinkOnAttestationFailure = linkMobileDisableLinkOnAttestationFailure,
         )
     }
 
