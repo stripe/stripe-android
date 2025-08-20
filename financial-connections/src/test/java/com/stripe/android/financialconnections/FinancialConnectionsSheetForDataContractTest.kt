@@ -13,14 +13,10 @@ import kotlin.test.assertFailsWith
 @RunWith(RobolectricTestRunner::class)
 class FinancialConnectionsSheetForDataContractTest {
 
-    private fun intentBuilder(args: FinancialConnectionsSheetActivityArgs): Intent {
-        return Intent()
-    }
-
     @Test
     fun `parseResult() with RESULT_CANCELED should return canceled result`() {
-        val contract = FinancialConnectionsSheetForDataContract(::intentBuilder)
-        val result = contract.parseResult(android.app.Activity.RESULT_CANCELED, Intent())
+        val contract = FinancialConnectionsSheetForDataContract { Intent() }
+        val result = contract.parseResult(android.app.Activity.RESULT_CANCELED, null)
 
         assertThat(result).isInstanceOf(FinancialConnectionsSheetResult.Canceled::class.java)
     }
