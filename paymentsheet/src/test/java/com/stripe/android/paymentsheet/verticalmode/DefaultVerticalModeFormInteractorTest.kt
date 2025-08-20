@@ -5,6 +5,7 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
@@ -19,15 +20,24 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
+import com.stripe.android.paymentsheet.utils.errorTest
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor.ViewAction
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
+import com.stripe.android.uicore.elements.EmailElement
+import com.stripe.android.uicore.elements.FieldError
+import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.uicore.elements.SimpleTextElement
+import com.stripe.android.uicore.elements.SimpleTextFieldConfig
+import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -37,6 +47,7 @@ import org.junit.Test
 import org.junit.rules.TestRule
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verifyNoMoreInteractions
+import com.stripe.android.uicore.R as UiCoreR
 
 internal class DefaultVerticalModeFormInteractorTest {
 
@@ -141,6 +152,52 @@ internal class DefaultVerticalModeFormInteractorTest {
         }
     }
 
+    @Test
+    fun `on validation requested true, form elements should be in validation state`() {
+        runScenario(
+            selectedPaymentMethodCode = "card",
+            formElements = listOf(
+                SectionElement.wrap(
+                    listOf(
+                        SimpleTextElement(
+                            IdentifierSpec.Name,
+                            SimpleTextFieldController(
+                                textFieldConfig = SimpleTextFieldConfig(
+                                    label = resolvableString("")
+                                )
+                            ),
+                        ),
+                        EmailElement()
+                    )
+                )
+            ),
+        ) {
+            interactor.state.test {
+                val state = awaitItem()
+
+                val sectionElement = state.formUiElements[0] as SectionElement
+
+                sectionElement.fields.errorTest(identifierSpec = IdentifierSpec.Name, error = null)
+                sectionElement.fields.errorTest(identifierSpec = IdentifierSpec.Email, error = null)
+
+                validationRequestedSource.emit(Unit)
+
+                val nextState = awaitItem()
+
+                val nextSectionElement = nextState.formUiElements[0] as SectionElement
+
+                nextSectionElement.fields.errorTest(
+                    identifierSpec = IdentifierSpec.Name,
+                    error = FieldError(UiCoreR.string.stripe_blank_and_required),
+                )
+                nextSectionElement.fields.errorTest(
+                    identifierSpec = IdentifierSpec.Email,
+                    error = FieldError(UiCoreR.string.stripe_blank_and_required),
+                )
+            }
+        }
+    }
+
     private fun testSetAsDefaultElements(
         hasSavedPaymentMethods: Boolean,
         block: (SaveForFutureUseElement?, SetAsDefaultPaymentMethodElement?) -> Unit
@@ -180,7 +237,7 @@ internal class DefaultVerticalModeFormInteractorTest {
             eventReporter = eventReporter
         ).create()
 
-        val formElements = setAsDefaultInteractor.state.value.formElements
+        val formElements = setAsDefaultInteractor.state.value.formUiElements
 
         val saveForFutureUseElement = formElements.firstOrNull {
             it.identifier == IdentifierSpec.SaveForFutureUse
@@ -194,11 +251,13 @@ internal class DefaultVerticalModeFormInteractorTest {
 
     private fun runScenario(
         selectedPaymentMethodCode: String,
+        formElements: List<FormElement> = emptyList(),
         testBlock: suspend TestParams.() -> Unit,
     ) {
         val formArguments = mock<FormArguments>()
         val usBankAccountArguments = mock<USBankAccountFormArguments>()
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(false)
+        val validationRequested = MutableSharedFlow<Unit>()
 
         val onFormFieldValuesChangedTurbine = Turbine<Pair<FormFieldValues?, String>>()
         val reportFieldInteractionTurbine = Turbine<String>()
@@ -206,7 +265,7 @@ internal class DefaultVerticalModeFormInteractorTest {
         val interactor = DefaultVerticalModeFormInteractor(
             selectedPaymentMethodCode = selectedPaymentMethodCode,
             formArguments = formArguments,
-            formElements = emptyList(),
+            formElements = formElements,
             onFormFieldValuesChanged = { formValues: FormFieldValues?, selectedPaymentMethodCode: String ->
                 onFormFieldValuesChangedTurbine.add(Pair(formValues, selectedPaymentMethodCode))
             },
@@ -217,6 +276,7 @@ internal class DefaultVerticalModeFormInteractorTest {
             headerInformation = null,
             isLiveMode = true,
             processing = processing,
+            validationRequested = validationRequested,
             coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
             paymentMethodIncentive = stateFlowOf(null),
         )
@@ -224,6 +284,7 @@ internal class DefaultVerticalModeFormInteractorTest {
         TestParams(
             interactor = interactor,
             processingSource = processing,
+            validationRequestedSource = validationRequested,
             onFormFieldValuesChangedTurbine = onFormFieldValuesChangedTurbine,
             reportFieldInteractionTurbine = reportFieldInteractionTurbine,
         ).apply {
@@ -240,6 +301,7 @@ internal class DefaultVerticalModeFormInteractorTest {
     private class TestParams(
         val interactor: DefaultVerticalModeFormInteractor,
         val processingSource: MutableStateFlow<Boolean>,
+        val validationRequestedSource: MutableSharedFlow<Unit>,
         val onFormFieldValuesChangedTurbine: ReceiveTurbine<Pair<FormFieldValues?, String>>,
         val reportFieldInteractionTurbine: ReceiveTurbine<String>,
     )

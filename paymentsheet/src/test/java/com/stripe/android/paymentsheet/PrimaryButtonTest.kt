@@ -91,6 +91,7 @@ class PrimaryButtonTest {
                 label = "Pay $10.99".resolvableString,
                 onClick = {},
                 enabled = true,
+                clickable = true,
                 lockVisible = true,
             )
         )
@@ -161,6 +162,7 @@ class PrimaryButtonTest {
                 label = "Pay $50".resolvableString,
                 lockVisible = true,
                 enabled = true,
+                clickable = true,
                 onClick = {},
             )
         )
@@ -179,6 +181,7 @@ class PrimaryButtonTest {
                 label = "Pay $50".resolvableString,
                 lockVisible = true,
                 enabled = true,
+                clickable = true,
                 onClick = {},
             )
         )
@@ -195,6 +198,7 @@ class PrimaryButtonTest {
                 label = "Pay $50".resolvableString,
                 lockVisible = true,
                 enabled = true,
+                clickable = true,
                 onClick = {},
             )
         )
@@ -213,6 +217,7 @@ class PrimaryButtonTest {
                 label = "Pay $50".resolvableString,
                 lockVisible = true,
                 enabled = true,
+                clickable = true,
                 onClick = {},
             )
         )
@@ -243,10 +248,18 @@ class PrimaryButtonTest {
 
     @Test
     fun `after viewState ready and enabled, label alpha is 100pct`() {
+        primaryButton.updateUiState(
+            PrimaryButton.UIState(
+                label = "Pay $10.99".resolvableString,
+                onClick = {},
+                enabled = true,
+                clickable = true,
+                lockVisible = false,
+            )
+        )
         primaryButton.updateState(
             PrimaryButton.State.Ready
         )
-        primaryButton.isEnabled = true
         assertThat(primaryButton.viewBinding.label.alpha)
             .isEqualTo(1.0f)
         assertThat(primaryButton.viewBinding.lockIcon.alpha)
@@ -255,8 +268,15 @@ class PrimaryButtonTest {
 
     @Test
     fun `when lockVisible set to false, lock is hidden`() {
-        primaryButton.lockVisible = false
-        primaryButton.isEnabled = true
+        primaryButton.updateUiState(
+            PrimaryButton.UIState(
+                label = "Pay $10.99".resolvableString,
+                onClick = {},
+                enabled = true,
+                clickable = true,
+                lockVisible = false,
+            )
+        )
 
         primaryButton.updateState(
             PrimaryButton.State.Ready

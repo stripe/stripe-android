@@ -415,9 +415,11 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `checkout() should confirm saved card payment methods`() = confirmationTest {
+        val errorReporter = FakeErrorReporter()
         val stripeIntent = PAYMENT_INTENT
         val viewModel = createViewModel(
             stripeIntent = stripeIntent,
+            errorReporter = errorReporter,
         )
 
         val optionsParams = PaymentMethodOptionsParams.Card(
@@ -433,6 +435,10 @@ internal class PaymentSheetViewModelTest {
 
         val arguments = startTurbine.awaitItem()
 
+        assertThat(errorReporter.getLoggedErrors()).contains(
+            "paymentsheet.checkout.has_payment_selection"
+        )
+
         assertThat(arguments.confirmationOption).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
                 paymentMethod = CARD_PAYMENT_METHOD,
@@ -444,23 +450,23 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `checkout() with null payment selection, should report event and show failure`() = runTest {
+    fun `checkout() with null payment selection, should report expected event then validate`() = runTest {
         val errorReporter = FakeErrorReporter()
         val viewModel = createViewModel(
             errorReporter = errorReporter,
             initialPaymentSelection = null,
         )
 
-        viewModel.error.test {
-            assertThat(awaitItem()).isNull()
+        viewModel.validationRequested.test {
+            expectNoEvents()
 
             viewModel.checkout()
 
             assertThat(errorReporter.getLoggedErrors()).contains(
-                "unexpected_error.paymentsheet.no_payment_selection"
+                "paymentsheet.checkout.no_payment_selection"
             )
 
-            assertThat(awaitItem()).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+            assertThat(awaitItem()).isNotNull()
         }
     }
 

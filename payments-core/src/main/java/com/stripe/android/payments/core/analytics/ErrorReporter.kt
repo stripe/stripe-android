@@ -158,6 +158,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         FRAUD_DETECTION_API_FAILURE(
             eventName = "fraud_detection_data_repository.api_failure"
         ),
+        PAYMENT_SHEET_NO_PAYMENT_SELECTION_ON_CHECKOUT(
+            eventName = "paymentsheet.checkout.no_payment_selection"
+        ),
         SAVED_PAYMENT_METHOD_RADAR_SESSION_FAILURE(
             eventName = "stripe_android.saved_payment_method_radar_session_failure"
         ),
@@ -230,9 +233,6 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         EXTERNAL_PAYMENT_METHOD_SERIALIZATION_FAILURE(
             partialEventName = "elements.external_payment_methods_serializer.error"
-        ),
-        PAYMENT_SHEET_NO_PAYMENT_SELECTION_ON_CHECKOUT(
-            partialEventName = "paymentsheet.no_payment_selection"
         ),
         PAYMENT_SHEET_INVALID_PAYMENT_SELECTION_ON_CHECKOUT(
             partialEventName = "paymentsheet.invalid_payment_selection"
@@ -312,6 +312,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         CUSTOM_PAYMENT_METHODS_LAUNCH_SUCCESS(
             eventName = "paymentsheet.custom_payment_method.launch_success"
+        ),
+        PAYMENT_SHEET_PAYMENT_SELECTION_ON_CHECKOUT(
+            eventName = "paymentsheet.checkout.has_payment_selection"
         ),
         FOUND_CREATE_INTENT_CALLBACK_WHILE_POLLING(
             eventName = "paymentsheet.polling_for_create_intent_callback.found"
