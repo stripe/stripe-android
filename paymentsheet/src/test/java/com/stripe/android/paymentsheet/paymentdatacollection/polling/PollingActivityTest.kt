@@ -187,7 +187,7 @@ internal class PollingActivityTest {
                 args.clientSecret,
                 args.timeLimitInSeconds.seconds,
                 args.initialDelayInSeconds.seconds,
-                args.maxAttempts,
+                args.pollingStrategy,
                 args.ctaText,
                 args.stripeAccountId
             ),
@@ -225,12 +225,12 @@ internal class PollingActivityTest {
 
         val defaultArgs = PollingContract.Args(
             clientSecret = "client_secret",
-            initialDelayInSeconds = 0,
-            timeLimitInSeconds = 60,
-            maxAttempts = 3,
             statusBarColor = null,
+            timeLimitInSeconds = 60,
+            initialDelayInSeconds = 0,
+            pollingStrategy = IntentStatusPoller.PollingStrategy.ExponentialBackoff(maxAttempts = 3),
             ctaText = R.string.stripe_upi_polling_message,
-            stripeAccountId = null
+            stripeAccountId = null,
         )
     }
 }

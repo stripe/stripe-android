@@ -14,14 +14,16 @@ internal fun exponentialDelayProvider(): () -> Long {
         // Add a minor offset so that we run after the delay has finished,
         // not when it's just about to finish.
         val offset = if (attempt == 1) 1 else 0
-        calculateDelay(attempts = attempt++).inWholeMilliseconds + offset
+        calculateDelayForExponentialBackoff(attempts = attempt++).inWholeMilliseconds + offset
     }
 }
 
 internal fun createIntentStatusPoller(
     enqueuedStatuses: List<StripeIntent.Status>,
     dispatcher: CoroutineDispatcher,
-    maxAttempts: Int = 10,
+    pollingStrategy: IntentStatusPoller.PollingStrategy = IntentStatusPoller.PollingStrategy.ExponentialBackoff(
+        maxAttempts = 10
+    ),
 ): DefaultIntentStatusPoller {
     return DefaultIntentStatusPoller(
         stripeRepository = FakeStripeRepository(enqueuedStatuses),
@@ -33,7 +35,7 @@ internal fun createIntentStatusPoller(
         },
         config = IntentStatusPoller.Config(
             clientSecret = "secret",
-            maxAttempts = maxAttempts,
+            pollingStrategy = pollingStrategy,
         ),
         dispatcher = dispatcher,
     )
