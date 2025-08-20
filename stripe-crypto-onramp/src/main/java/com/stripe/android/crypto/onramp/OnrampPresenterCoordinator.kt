@@ -12,6 +12,7 @@ import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampIdentityVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
+import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.NoLinkAccountFoundException
@@ -93,8 +94,11 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
-    fun collectPaymentMethod() {
-        linkPresenter.presentPaymentMethods(clientEmail())
+    fun collectPaymentMethod(type: PaymentMethodType) {
+        linkPresenter.presentPaymentMethods(
+            email = clientEmail(),
+            paymentMethodType = type.toLinkType()
+        )
     }
 
     private fun clientEmail(): String? =
@@ -141,3 +145,9 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         )
     }
 }
+
+private fun PaymentMethodType.toLinkType(): LinkController.PaymentMethodType =
+    when (this) {
+        PaymentMethodType.Card -> LinkController.PaymentMethodType.Card
+        PaymentMethodType.BankAccount -> LinkController.PaymentMethodType.BankAccount
+    }
