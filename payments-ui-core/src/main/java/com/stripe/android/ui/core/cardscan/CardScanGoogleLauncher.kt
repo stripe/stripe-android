@@ -17,9 +17,11 @@ import kotlinx.coroutines.flow.asStateFlow
 
 internal class CardScanGoogleLauncher @VisibleForTesting constructor(
     context: Context,
+    private val eventsReporter: CardScanEventsReporter,
     private val paymentCardRecognitionClient: PaymentCardRecognitionClient =
         DefaultPaymentCardRecognitionClient()
 ) {
+    private val implementation = "google_pay"
     private val _isAvailable = MutableStateFlow(false)
     val isAvailable: StateFlow<Boolean> = _isAvailable.asStateFlow()
 
@@ -31,9 +33,11 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
             context = context,
             onFailure = { e ->
                 _isAvailable.value = false
+                eventsReporter.onCardScanApiCheck(implementation, false, e.message)
             },
             onSuccess = {
                 _isAvailable.value = true
+                eventsReporter.onCardScanApiCheck(implementation, true)
             }
         )
     }
@@ -41,7 +45,11 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
     fun launch(context: Context) {
         paymentCardRecognitionClient.fetchIntent(
             context = context,
+            onFailure = { e ->
+                eventsReporter.onCardScanFailed(implementation, e)
+            },
             onSuccess = { intentSenderRequest ->
+                eventsReporter.onCardScanStarted("google_pay")
                 activityLauncher.launch(intentSenderRequest)
             }
         )
@@ -49,29 +57,37 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
 
     internal fun parseActivityResult(result: ActivityResult): CardScanResult {
         if (result.resultCode == Activity.RESULT_OK && result.data != null) {
-            val data = result.data ?: return CardScanResult.Canceled
+            val data = result.data ?: return CardScanResult.Canceled.also {
+                eventsReporter.onCardScanCancelled(implementation)
+            }
             val paymentCardRecognitionResult = PaymentCardRecognitionResult.getFromIntent(data)
             val pan = paymentCardRecognitionResult?.pan
             val expirationDate = paymentCardRecognitionResult?.creditCardExpirationDate
             return if (pan != null) {
+                eventsReporter.onCardScanSucceeded(implementation)
                 CardScanResult.Completed(ScannedCard(pan, expirationDate?.month, expirationDate?.year))
             } else {
                 val error = Throwable("Failed to parse card data")
+                eventsReporter.onCardScanFailed("google_pay", error)
                 CardScanResult.Failed(error)
             }
         } else if (result.resultCode == Activity.RESULT_CANCELED) {
+            eventsReporter.onCardScanCancelled(implementation)
             return CardScanResult.Canceled
         }
-        return CardScanResult.Failed(Throwable("Null data or unexpected result code: ${result.resultCode}"))
+        val error = Throwable("Null data or unexpected result code: ${result.resultCode}")
+        eventsReporter.onCardScanFailed("google_pay", error)
+        return CardScanResult.Failed(error)
     }
 
     companion object {
         @Composable
         internal fun rememberCardScanGoogleLauncher(
             context: Context,
+            eventsReporter: CardScanEventsReporter,
             onResult: (CardScanResult) -> Unit
         ): CardScanGoogleLauncher {
-            val launcher = remember(context) { CardScanGoogleLauncher(context) }
+            val launcher = remember(context) { CardScanGoogleLauncher(context, eventsReporter) }
             val activityLauncher = rememberLauncherForActivityResult(
                 ActivityResultContracts.StartIntentSenderForResult(),
             ) { result ->
