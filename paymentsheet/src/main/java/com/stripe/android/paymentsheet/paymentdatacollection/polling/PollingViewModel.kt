@@ -179,6 +179,12 @@ internal class PollingViewModel @Inject constructor(
         poller.stopPolling()
     }
 
+    fun hideQrCode() {
+        _uiState.update {
+            it.copy(shouldShowQrCode = false)
+        }
+    }
+
     private suspend fun observeCountdown(timeLimit: Duration) {
         countdownFlow(timeLimit).collect { duration ->
             _uiState.update {
