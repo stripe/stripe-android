@@ -109,11 +109,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                 metadata = metadata
             )
 
-            val linkSignupOptInEnabled =
-                metadata.linkState?.configuration?.linkSignUpOptInFeatureEnabled == true
-
-            // sign up opt in combines save for future usage and link signup acceptance
-            if (canChangeSaveForFutureUsage && linkSignupOptInEnabled.not()) {
+            if (canChangeSaveForFutureUsage && metadata.forceSetupFutureUseBehaviorAndNewMandate.not()) {
                 addSavePaymentOptionElements(
                     metadata = metadata,
                     arguments = arguments,
@@ -139,7 +135,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
             }
 
             val mandateAllowed = metadata.mandateAllowed(CardDefinition.type)
-            if (linkSignupOptInEnabled) {
+            if (metadata.forceSetupFutureUseBehaviorAndNewMandate) {
                 add(
                     CombinedLinkMandateElement(
                         identifier = IdentifierSpec.Generic("card_mandate"),

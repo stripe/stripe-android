@@ -39,9 +39,9 @@ internal sealed interface PaymentSheetState : Parcelable {
 
         val alwaysSaveForFutureUse: Boolean
             get() {
-                // When this (now poorly named) feature flag is enabled for a merchant, we always show the
+                // When this feature flag is enabled for a merchant, we always show the
                 // reuse mandate, since the merchant will save the payment method for future use.
-                return linkConfiguration?.linkSignUpOptInFeatureEnabled ?: false
+                return paymentMethodMetadata.forceSetupFutureUseBehaviorAndNewMandate
             }
     }
 }
