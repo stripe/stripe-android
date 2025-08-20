@@ -17,26 +17,26 @@ import javax.inject.Inject
 internal class PassiveChallengeConfirmationDefinition @Inject constructor(
     private val errorReporter: ErrorReporter,
 ) : ConfirmationDefinition<
-    PaymentMethodConfirmationOption.New,
+    PaymentMethodConfirmationOption,
     ActivityResultLauncher<PassiveChallengeActivityContract.Args>,
     PassiveChallengeActivityContract.Args,
     PassiveChallengeActivityResult
     > {
     override val key = "ChallengePassive"
 
-    override fun option(confirmationOption: ConfirmationHandler.Option): PaymentMethodConfirmationOption.New? {
-        return confirmationOption as? PaymentMethodConfirmationOption.New
+    override fun option(confirmationOption: ConfirmationHandler.Option): PaymentMethodConfirmationOption? {
+        return confirmationOption as? PaymentMethodConfirmationOption
     }
 
     override fun canConfirm(
-        confirmationOption: PaymentMethodConfirmationOption.New,
+        confirmationOption: PaymentMethodConfirmationOption,
         confirmationParameters: ConfirmationDefinition.Parameters
     ): Boolean {
         return confirmationOption.passiveCaptchaParams != null
     }
 
     override fun toResult(
-        confirmationOption: PaymentMethodConfirmationOption.New,
+        confirmationOption: PaymentMethodConfirmationOption,
         confirmationParameters: ConfirmationDefinition.Parameters,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: PassiveChallengeActivityResult
@@ -44,20 +44,13 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
         return when (result) {
             is PassiveChallengeActivityResult.Failed -> {
                 ConfirmationDefinition.Result.NextStep(
-                    confirmationOption = confirmationOption.copy(
-                        passiveCaptchaParams = null
-                    ),
+                    confirmationOption = confirmationOption.attachToken(null),
                     parameters = confirmationParameters
                 )
             }
             is PassiveChallengeActivityResult.Success -> {
                 ConfirmationDefinition.Result.NextStep(
-                    confirmationOption = confirmationOption.copy(
-                        passiveCaptchaParams = null,
-                        createParams = confirmationOption.createParams.copy(
-                            radarOptions = RadarOptions(result.token)
-                        )
-                    ),
+                    confirmationOption = confirmationOption.attachToken(result.token),
                     parameters = confirmationParameters
                 )
             }
@@ -74,19 +67,20 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
     override fun launch(
         launcher: ActivityResultLauncher<PassiveChallengeActivityContract.Args>,
         arguments: PassiveChallengeActivityContract.Args,
-        confirmationOption: PaymentMethodConfirmationOption.New,
+        confirmationOption: PaymentMethodConfirmationOption,
         confirmationParameters: ConfirmationDefinition.Parameters
     ) {
         launcher.launch(arguments)
     }
 
     override suspend fun action(
-        confirmationOption: PaymentMethodConfirmationOption.New,
+        confirmationOption: PaymentMethodConfirmationOption,
         confirmationParameters: ConfirmationDefinition.Parameters
     ): ConfirmationDefinition.Action<PassiveChallengeActivityContract.Args> {
-        if (confirmationOption.passiveCaptchaParams != null) {
+        val passiveCaptchaParams = confirmationOption.passiveCaptchaParams
+        if (passiveCaptchaParams != null) {
             return ConfirmationDefinition.Action.Launch(
-                launcherArguments = PassiveChallengeActivityContract.Args(confirmationOption.passiveCaptchaParams),
+                launcherArguments = PassiveChallengeActivityContract.Args(passiveCaptchaParams),
                 receivesResultInProcess = false,
                 deferredIntentConfirmationType = null,
             )
@@ -103,5 +97,26 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
             message = "Passive challenge params are null".resolvableString,
             errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal
         )
+    }
+
+    private fun PaymentMethodConfirmationOption.attachToken(token: String?): PaymentMethodConfirmationOption {
+        return when (this) {
+            is PaymentMethodConfirmationOption.New -> {
+                copy(
+                    createParams = createParams.copy(
+                        radarOptions = token?.let {
+                            RadarOptions(it)
+                        }
+                    ),
+                    passiveCaptchaParams = null
+                )
+            }
+            is PaymentMethodConfirmationOption.Saved -> {
+                copy(
+                    hCaptchaToken = token,
+                    passiveCaptchaParams = null
+                )
+            }
+        }
     }
 }
