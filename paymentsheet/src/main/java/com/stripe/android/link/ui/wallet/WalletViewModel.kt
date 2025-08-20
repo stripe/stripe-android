@@ -78,6 +78,7 @@ internal class WalletViewModel @Inject constructor(
             email = linkAccount.email,
             isSettingUp = stripeIntent.isSetupForFutureUsage(configuration.passthroughModeEnabled),
             merchantName = configuration.merchantName,
+            sellerBusinessName = configuration.sellerBusinessName,
             selectedItemId = null,
             cardBrandFilter = configuration.cardBrandFilter,
             collectMissingBillingDetailsForExistingPaymentMethods = configuration

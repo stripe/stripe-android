@@ -75,6 +75,7 @@ internal object LinkTestUtils {
             customerInfo = LinkConfiguration.CustomerInfo(null, null, null, null),
             flags = mapOf(),
             merchantName = "Test merchant inc.",
+            sellerBusinessName = null,
             merchantCountryCode = "US",
             merchantLogoUrl = null,
             passthroughModeEnabled = false,

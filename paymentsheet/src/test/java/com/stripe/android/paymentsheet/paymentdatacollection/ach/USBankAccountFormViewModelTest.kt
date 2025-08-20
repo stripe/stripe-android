@@ -89,6 +89,8 @@ class USBankAccountFormViewModelTest {
         setAsDefaultMatchesSaveForFutureUse = false,
         financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
         termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        sellerBusinessName = null,
+        linkSignUpOptInFeatureEnabled = false,
     )
 
     private val mockCollectBankAccountLauncher = mock<CollectBankAccountLauncher>()
@@ -392,10 +394,14 @@ class USBankAccountFormViewModelTest {
             isSaveForFutureUseSelected = true,
             isInstantDebits = false,
             isSetupFlow = false,
+            sellerBusinessName = null,
+            linkSignUpOptInFeatureEnabled = false,
         )
 
         val continueWithMicrodepositsMandate = USBankAccountTextBuilder.buildMandateAndMicrodepositsText(
             merchantName = MERCHANT_NAME,
+            sellerBusinessName = null,
+            linkSignUpOptInFeatureEnabled = false,
             isVerifyingMicrodeposits = true,
             isSaveForFutureUseSelected = true,
             isInstantDebits = false,
@@ -1048,6 +1054,8 @@ class USBankAccountFormViewModelTest {
             isSaveForFutureUseSelected = false,
             isSetupFlow = false,
             isInstantDebits = false,
+            sellerBusinessName = null,
+            linkSignUpOptInFeatureEnabled = false,
         )
 
         viewModel.currentScreenState.test {
@@ -1067,6 +1075,8 @@ class USBankAccountFormViewModelTest {
 
         val expectedResult = USBankAccountTextBuilder.buildMandateAndMicrodepositsText(
             merchantName = MERCHANT_NAME,
+            sellerBusinessName = null,
+            linkSignUpOptInFeatureEnabled = false,
             isVerifyingMicrodeposits = true,
             isSaveForFutureUseSelected = false,
             isSetupFlow = false,
@@ -1090,6 +1100,8 @@ class USBankAccountFormViewModelTest {
 
         val expectedResult = USBankAccountTextBuilder.buildMandateAndMicrodepositsText(
             merchantName = MERCHANT_NAME,
+            sellerBusinessName = null,
+            linkSignUpOptInFeatureEnabled = false,
             isVerifyingMicrodeposits = false,
             isSaveForFutureUseSelected = false,
             isSetupFlow = false,
@@ -1327,24 +1339,25 @@ class USBankAccountFormViewModelTest {
     }
 
     @Test
-    fun `Creates correct ElementsSessionContext if not attaching defaults to PaymentMethod with specific collection`() = runTest {
-        val args = createArgsForBillingDetailsCollectionInInstantDebits(
-            collectName = false,
-            collectEmail = true,
-            collectPhone = true,
-            collectAddress = false,
-            attachDefaultsToPaymentMethod = false,
-        )
-
-        val elementsSessionContext = testElementsSessionContextGeneration(viewModelArgs = args)
-
-        assertThat(elementsSessionContext?.billingDetails).isEqualTo(
-            ElementsSessionContext.BillingDetails(
-                email = "email@email.com",
-                phone = "+13105551234",
+    fun `Creates correct ElementsSessionContext if not attaching defaults to PaymentMethod with specific collection`() =
+        runTest {
+            val args = createArgsForBillingDetailsCollectionInInstantDebits(
+                collectName = false,
+                collectEmail = true,
+                collectPhone = true,
+                collectAddress = false,
+                attachDefaultsToPaymentMethod = false,
             )
-        )
-    }
+
+            val elementsSessionContext = testElementsSessionContextGeneration(viewModelArgs = args)
+
+            assertThat(elementsSessionContext?.billingDetails).isEqualTo(
+                ElementsSessionContext.BillingDetails(
+                    email = "email@email.com",
+                    phone = "+13105551234",
+                )
+            )
+        }
 
     @Test
     fun `Updates result when 'save for future use' changes after linking account`() = runTest {
@@ -1440,64 +1453,68 @@ class USBankAccountFormViewModelTest {
     }
 
     @Test
-    fun `'setAsDefaultPaymentMethod' hidden when saveForFutureUse checked & setAsDefaultMatchesSaveForFutureUse`() = runTest {
-        testSetAsDefaultPaymentMethod(
-            setAsDefaultMatchesSaveForFutureUse = true,
-        ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement, testContext ->
-            var nextItem = testContext.awaitItem()
-            assertThat(nextItem?.input?.saveForFutureUse).isFalse()
+    fun `'setAsDefaultPaymentMethod' hidden when saveForFutureUse checked & setAsDefaultMatchesSaveForFutureUse`() =
+        runTest {
+            testSetAsDefaultPaymentMethod(
+                setAsDefaultMatchesSaveForFutureUse = true,
+            ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement, testContext ->
+                var nextItem = testContext.awaitItem()
+                assertThat(nextItem?.input?.saveForFutureUse).isFalse()
 
-            saveForFutureUseElement.controller.onValueChange(true)
+                saveForFutureUseElement.controller.onValueChange(true)
 
-            nextItem = testContext.awaitItem()
-            assertThat(nextItem?.input?.saveForFutureUse).isTrue()
-            assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isFalse()
+                nextItem = testContext.awaitItem()
+                assertThat(nextItem?.input?.saveForFutureUse).isTrue()
+                assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isFalse()
+            }
         }
-    }
 
     @Test
-    fun `'setAsDefaultPaymentMethod' fieldVal true, saveForFutureUse checked & setAsDefaultMatchesSaveForFutureUse`() = runTest {
-        testSetAsDefaultPaymentMethod(
-            setAsDefaultMatchesSaveForFutureUse = true,
-        ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement, testContext ->
-            var nextItem = testContext.awaitItem()
-            assertThat(nextItem?.input?.saveForFutureUse).isFalse()
+    fun `'setAsDefaultPaymentMethod' fieldVal true, saveForFutureUse checked & setAsDefaultMatchesSaveForFutureUse`() =
+        runTest {
+            testSetAsDefaultPaymentMethod(
+                setAsDefaultMatchesSaveForFutureUse = true,
+            ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement, testContext ->
+                var nextItem = testContext.awaitItem()
+                assertThat(nextItem?.input?.saveForFutureUse).isFalse()
 
-            saveForFutureUseElement.controller.onValueChange(true)
+                saveForFutureUseElement.controller.onValueChange(true)
 
-            nextItem = testContext.awaitItem()
-            assertThat(nextItem?.input?.saveForFutureUse).isTrue()
-            assertThat(setAsDefaultPaymentMethodElement.controller.fieldValue.value.toBoolean()).isTrue()
+                nextItem = testContext.awaitItem()
+                assertThat(nextItem?.input?.saveForFutureUse).isTrue()
+                assertThat(setAsDefaultPaymentMethodElement.controller.fieldValue.value.toBoolean()).isTrue()
+            }
         }
-    }
 
     @Test
-    fun `'setAsDefaultPaymentMethod' hidden when saveForFutureUse !checked & setAsDefaultMatchesSaveForFutureUse`() = runTest {
-        testSetAsDefaultPaymentMethod(
-            setAsDefaultMatchesSaveForFutureUse = true,
-        ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement, testContext ->
-            val nextItem = testContext.awaitItem()
-            assertThat(nextItem?.input?.saveForFutureUse).isFalse()
+    fun `'setAsDefaultPaymentMethod' hidden when saveForFutureUse !checked & setAsDefaultMatchesSaveForFutureUse`() =
+        runTest {
+            testSetAsDefaultPaymentMethod(
+                setAsDefaultMatchesSaveForFutureUse = true,
+            ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement, testContext ->
+                val nextItem = testContext.awaitItem()
+                assertThat(nextItem?.input?.saveForFutureUse).isFalse()
 
-            saveForFutureUseElement.controller.onValueChange(false)
+                saveForFutureUseElement.controller.onValueChange(false)
 
-            assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isFalse()
+                assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isFalse()
+            }
         }
-    }
 
     @Test
-    fun `setAsDefaultPaymentMethod fieldVal false, saveForFutureUse !checked & setAsDefaultMatchesSaveForFutureUse`() = runTest {
-        testSetAsDefaultPaymentMethod(
-            setAsDefaultMatchesSaveForFutureUse = true,
-        ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement, testContext ->
-            val nextItem = testContext.awaitItem()
-            assertThat(nextItem?.input?.saveForFutureUse).isFalse()
+    fun `setAsDefaultPaymentMethod fieldVal false, saveForFutureUse !checked & setAsDefaultMatchesSaveForFutureUse`() =
+        runTest {
+            testSetAsDefaultPaymentMethod(
+                setAsDefaultMatchesSaveForFutureUse = true,
+            ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement, testContext ->
+                val nextItem = testContext.awaitItem()
+                assertThat(nextItem?.input?.saveForFutureUse).isFalse()
 
-            saveForFutureUseElement.controller.onValueChange(false)
+                saveForFutureUseElement.controller.onValueChange(false)
 
-            assertThat(setAsDefaultPaymentMethodElement.controller.fieldValue.value.toBoolean()).isFalse()
+                assertThat(setAsDefaultPaymentMethodElement.controller.fieldValue.value.toBoolean()).isFalse()
+            }
         }
-    }
 
     @Test
     fun `Updates result when 'setAsDefaultPaymentMethod' changes after linking account`() = runTest {

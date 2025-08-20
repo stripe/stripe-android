@@ -227,6 +227,7 @@ internal class WalletScreenScreenshotTest {
             isProcessing = isProcessing,
             isSettingUp = false,
             merchantName = "Example Inc.",
+            sellerBusinessName = null,
             primaryButtonLabel = primaryButtonLabel,
             secondaryButtonLabel = secondaryButtonLabel,
             hasCompleted = hasCompleted,

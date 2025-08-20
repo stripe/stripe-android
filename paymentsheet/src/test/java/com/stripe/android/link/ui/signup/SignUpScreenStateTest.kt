@@ -83,6 +83,7 @@ class SignUpScreenStateTest {
         return LinkConfiguration(
             stripeIntent = PaymentIntentFactory.create(),
             merchantName = "Merchant, Inc.",
+            sellerBusinessName = null,
             merchantCountryCode = "US",
             merchantLogoUrl = null,
             customerInfo = customerInfo,

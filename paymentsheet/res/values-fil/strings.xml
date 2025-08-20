@@ -268,6 +268,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">Tingnan ang higit pa</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Sa pagpapatuloy, sumasang-ayon ka na pahintulutan ang mga pagbabayad alinsunod sa <terms>mga tuntunin</terms> na ito.]]></string>
+  <!-- Text providing link to terms for bank payments -->
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Sa pagsusumite ng iyong order sa %s, sumasang-ayon kang pahintulutan ang mga pagbabayad alinsunod sa <terms> mga tuntuning ito</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Pagbabayad</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->

@@ -60,6 +60,7 @@ internal object PaymentMethodMetadataFactory {
             paymentMethodOrder = paymentMethodOrder,
             cbcEligibility = cbcEligibility,
             merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
+            sellerBusinessName = null,
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = shippingDetails,
             customerMetadata = CustomerMetadata(
