@@ -29,6 +29,10 @@ private val Critical600 = Color(0xFFC0123C)
 private val Critical500 = Color(0xFFE61947)
 private val Critical400 = Color(0xFFFA4A67)
 
+// ECE Link Theme Colors
+internal val EceLinkWhiteTextPrimary = Neutral900
+internal val EceLinkWhiteBackground = Neutral0
+
 internal data class LinkColors(
     val surfacePrimary: Color,
     val surfaceSecondary: Color,

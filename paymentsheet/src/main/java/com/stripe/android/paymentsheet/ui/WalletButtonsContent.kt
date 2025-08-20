@@ -45,50 +45,53 @@ internal class WalletButtonsContent(
                 Column(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // Render the Link 2FA section verification is in progress
-                    state.link2FAState?.let {
-                        LinkInline2FASection(
-                            verificationState = it.viewState,
-                            otpElement = it.otpElement,
-                            onResend = { interactor.handleViewAction(OnResendCode) }
-                        )
-                        if (state.walletButtons.size > 1) {
-                            WalletsDivider(stringResource(R.string.stripe_paymentsheet_or_use))
-                        }
-                    }
+                    LinkOTPSection(state)
+                    WalletButtons(state)
+                }
+            }
+        }
+    }
 
-                    state.walletButtons.forEach { button ->
-                        when (button) {
-                            is WalletButtonsInteractor.WalletButton.GooglePay -> GooglePayButton(
-                                state = PrimaryButton.State.Ready,
-                                allowCreditCards = button.allowCreditCards,
-                                buttonType = button.googlePayButtonType,
-                                billingAddressParameters = button.billingAddressParameters,
-                                isEnabled = state.buttonsEnabled,
-                                cardBrandFilter = button.cardBrandFilter,
-                                onPressed = {
-                                    interactor.handleViewAction(
-                                        OnButtonPressed(button)
-                                    )
-                                },
-                            )
-                            // Link button is filtered out if the 2FA verification is in progress
-                            is WalletButtonsInteractor.WalletButton.Link -> LinkButton(
-                                state = button.state,
-                                enabled = state.buttonsEnabled,
-                                onClick = {
-                                    interactor.handleViewAction(
-                                        OnButtonPressed(button)
-                                    )
-                                },
-                            )
-                            is WalletButtonsInteractor.WalletButton.ShopPay -> ShopPayButton {
-                                interactor.handleViewAction(
-                                    OnButtonPressed(button)
-                                )
-                            }
-                        }
-                    }
+    @Composable
+    private fun LinkOTPSection(state: WalletButtonsInteractor.State) {
+        state.link2FAState?.let {
+            LinkInline2FASection(
+                verificationState = it.viewState,
+                otpElement = it.otpElement,
+                onResend = { interactor.handleViewAction(OnResendCode) }
+            )
+            if (state.walletButtons.size > 1) {
+                WalletsDivider(stringResource(R.string.stripe_paymentsheet_or_use))
+            }
+        }
+    }
+
+    @Composable
+    private fun WalletButtons(state: WalletButtonsInteractor.State) {
+        state.walletButtons.forEach { button ->
+            when (button) {
+                is WalletButtonsInteractor.WalletButton.GooglePay -> GooglePayButton(
+                    state = PrimaryButton.State.Ready,
+                    allowCreditCards = button.allowCreditCards,
+                    buttonType = button.googlePayButtonType,
+                    billingAddressParameters = button.billingAddressParameters,
+                    isEnabled = state.buttonsEnabled,
+                    cardBrandFilter = button.cardBrandFilter,
+                    onPressed = {
+                        interactor.handleViewAction(OnButtonPressed(button))
+                    },
+                )
+                // Link button is filtered out if the 2FA verification is in progress
+                is WalletButtonsInteractor.WalletButton.Link -> LinkButton(
+                    state = button.state,
+                    enabled = state.buttonsEnabled,
+                    theme = button.theme,
+                    onClick = {
+                        interactor.handleViewAction(OnButtonPressed(button))
+                    },
+                )
+                is WalletButtonsInteractor.WalletButton.ShopPay -> ShopPayButton {
+                    interactor.handleViewAction(OnButtonPressed(button))
                 }
             }
         }

@@ -25,6 +25,7 @@ import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationSt
 import com.stripe.android.paymentelement.embedded.content.EmbeddedLinkHelper
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.ButtonThemes.LinkButtonTheme
 import com.stripe.android.paymentsheet.allowedWalletTypes
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerViewModel
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
@@ -70,6 +71,7 @@ internal interface WalletButtonsInteractor {
         @Stable
         data class Link(
             val state: LinkButtonState,
+            val theme: LinkButtonTheme = LinkButtonTheme.DEFAULT,
         ) : WalletButton {
             override fun createSelection(): PaymentSelection {
                 return PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED)
@@ -162,7 +164,8 @@ internal class DefaultWalletButtonsInteractor(
                                 enableDefaultValues = linkConfiguration?.enableDisplayableDefaultValuesInEce == true,
                                 linkEmail = arguments.linkEmail,
                                 paymentDetails = linkAccountInfo.account?.displayablePaymentDetails
-                            )
+                            ),
+                            theme = arguments.configuration.walletButtons?.buttonThemes?.link ?: LinkButtonTheme.DEFAULT
                         ).takeIf {
                             // Only show Link button if the Link verification state is resolved.
                             linkEmbeddedState.verificationState is VerificationState.RenderButton &&
@@ -238,7 +241,9 @@ internal class DefaultWalletButtonsInteractor(
         } else {
             handleButtonPressed(
                 WalletButton.Link(
-                    state = LinkButtonState.Default
+                    state = LinkButtonState.Default,
+                    theme = arguments.configuration.walletButtons?.buttonThemes?.link
+                        ?: LinkButtonTheme.DEFAULT
                 ),
                 arguments
             )
