@@ -3264,6 +3264,34 @@ class PaymentSheet internal constructor(
     }
 
     /**
+     * Theme configuration for wallet buttons
+     */
+    @Poko
+    @Parcelize
+    class ButtonThemes(
+        /**
+         * Theme configuration for Link button
+         */
+        val link: LinkButtonTheme = LinkButtonTheme.WHITE,
+    ) : Parcelable {
+
+        /**
+         * Link button theme options
+         */
+        enum class LinkButtonTheme {
+            /**
+             * Default green theme
+             */
+            DEFAULT,
+
+            /**
+             * White theme
+             */
+            WHITE
+        }
+    }
+
+    /**
      * Configuration for wallet buttons
      */
     @Poko
@@ -3282,6 +3310,11 @@ class PaymentSheet internal constructor(
          * empty list means all wallets will be shown.
          */
         val walletsToShow: List<String> = emptyList(),
+
+        /**
+         * Theme configuration for wallet buttons
+         */
+        val buttonThemes: ButtonThemes = ButtonThemes(),
     ) : Parcelable
 
     /**

@@ -38,6 +38,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Always check GitHub issues for similar problems before investigating user reports
 - Use GitHub CLI to distinguish between SDK bugs vs integration issues
 
+**Internal Tools**
+- Jira boards: MOBILESDK and RUN_MOBILESDK
+- Trailhead space: mobile-sdk
+
 ## Architecture
 
 This is the **Stripe Android SDK**, a multi-module Android library for payment processing and financial services.
@@ -80,7 +84,16 @@ This is the **Stripe Android SDK**, a multi-module Android library for payment p
 - Custom deployment and versioning scripts in scripts/
 
 **Testing Strategy**
-- Unit tests with JUnit, Mockito, and Truth assertions
+- Unit tests with JUnit, **fakes** (preferred over mocks), and Truth assertions  
+- Use **Turbine** for Flow testing when needed
 - Instrumentation tests using Espresso and AndroidX Test
-- Robolectric for Android unit tests
+- Robolectric for Android unit tests  
 - Screenshot testing with Paparazzi and custom screenshot-testing module
+- Compose UI tests with createComposeRule()
+
+**Testing Patterns**
+- Prefer **fakes over mocks** - create `FakeClassName` implementations when possible
+- Use mocks or indirect testing only when necessary
+- Flow testing: `flow.test { assertThat(awaitItem()).isEqualTo(expected) }`
+- Compose testing: `composeTestRule.onNodeWithText("text").assertIsDisplayed()`
+- Truth assertions: `assertThat(actual).isEqualTo(expected)`

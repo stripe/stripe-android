@@ -6,6 +6,8 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher.BillingAddressConfig
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.model.PaymentMethod.Type.Card
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.ButtonThemes.LinkButtonTheme
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 
@@ -20,6 +22,7 @@ internal data class WalletsState(
 
     data class Link(
         val state: LinkButtonState,
+        val theme: LinkButtonTheme = LinkButtonTheme.DEFAULT,
     )
 
     data class GooglePay(
@@ -40,7 +43,10 @@ internal data class WalletsState(
             googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config?,
             onGooglePayPressed: () -> Unit,
             onLinkPressed: () -> Unit,
-            isSetupIntent: Boolean
+            isSetupIntent: Boolean,
+            buttonThemes: PaymentSheet.ButtonThemes = PaymentSheet.ButtonThemes(
+                link = LinkButtonTheme.DEFAULT
+            )
         ): WalletsState? {
             val link = if (isLinkAvailable == true) {
                 // non-ECE link buttons don't support default payment details.
@@ -49,7 +55,8 @@ internal data class WalletsState(
                         linkEmail = linkEmail,
                         paymentDetails = null,
                         enableDefaultValues = false
-                    )
+                    ),
+                    theme = buttonThemes.link
                 )
             } else {
                 null

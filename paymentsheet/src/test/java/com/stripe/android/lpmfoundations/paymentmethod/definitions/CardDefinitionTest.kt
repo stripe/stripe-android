@@ -283,9 +283,10 @@ class CardDefinitionTest {
     fun `createFormElements returns mandate when has intent to setup`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+            forceSetupFutureUseBehaviorAndNewMandate = true,
             linkState = LinkState(
                 signupMode = null,
-                configuration = createLinkConfiguration().copy(linkSignUpOptInFeatureEnabled = true),
+                configuration = createLinkConfiguration(),
                 loginState = LinkState.LoginState.LoggedOut,
             ),
         )
@@ -301,13 +302,13 @@ class CardDefinitionTest {
     }
 
     @Test
-    fun `createFormElements returns mandate when linkSignUpOptInFeatureEnabled even with no email`() {
+    fun `createFormElements returns mandate when forceSetupFutureUseBehaviorAndNewMandate even with no email`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            forceSetupFutureUseBehaviorAndNewMandate = true,
             linkState = LinkState(
                 signupMode = null,
                 configuration = createLinkConfiguration().copy(
-                    linkSignUpOptInFeatureEnabled = true,
                     customerInfo = LinkConfiguration.CustomerInfo(
                         name = null,
                         email = null,
@@ -366,9 +367,10 @@ class CardDefinitionTest {
     fun `createFormElements returns mandate below link_form when has intent to setup`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+            forceSetupFutureUseBehaviorAndNewMandate = true,
             linkState = LinkState(
                 signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
-                configuration = createLinkConfiguration().copy(linkSignUpOptInFeatureEnabled = true),
+                configuration = createLinkConfiguration(),
                 loginState = LinkState.LoginState.LoggedOut,
             ),
         )
@@ -516,11 +518,10 @@ class CardDefinitionTest {
         )
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+            forceSetupFutureUseBehaviorAndNewMandate = true,
             termsDisplay = termsDisplay,
             linkState = LinkState(
-                configuration = TestFactory.LINK_CONFIGURATION.copy(
-                    linkSignUpOptInFeatureEnabled = true,
-                ),
+                configuration = TestFactory.LINK_CONFIGURATION,
                 loginState = LinkState.LoginState.LoggedOut,
                 signupMode = LinkSignupMode.AlongsideSaveForFutureUse,
             )

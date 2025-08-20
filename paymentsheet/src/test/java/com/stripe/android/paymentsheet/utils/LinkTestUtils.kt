@@ -101,7 +101,8 @@ internal object LinkTestUtils {
             linkMobileDisableLinkOnAttestationFailure = false,
             skipWalletInFlowController = false,
             customerId = null,
-            saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy
+            saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+            forceSetupFutureUseBehaviorAndNewMandate = false,
         )
     }
 }

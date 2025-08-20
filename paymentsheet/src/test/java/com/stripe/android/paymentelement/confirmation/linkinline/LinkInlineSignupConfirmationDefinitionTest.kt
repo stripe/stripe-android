@@ -709,6 +709,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 linkMobileDisableLinkOnAttestationFailure = false,
                 customerId = null,
                 saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+                forceSetupFutureUseBehaviorAndNewMandate = false,
             ),
             userInput = userInput,
         )

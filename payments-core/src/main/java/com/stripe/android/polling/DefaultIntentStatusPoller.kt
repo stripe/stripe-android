@@ -5,6 +5,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.polling.IntentStatusPoller.PollingStrategy
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -38,18 +39,48 @@ class DefaultIntentStatusPoller @Inject constructor(
         }
     }
 
-    private suspend fun performPoll(force: Boolean = false) {
-        if (force || attempts < config.maxAttempts) {
+    private suspend fun performPoll() {
+        when (state.value) {
+            StripeIntent.Status.Canceled,
+            StripeIntent.Status.Succeeded ->
+                // Do not poll when stripe intent is in terminal state.
+                return
+            StripeIntent.Status.Processing,
+            StripeIntent.Status.RequiresAction,
+            StripeIntent.Status.RequiresConfirmation,
+            StripeIntent.Status.RequiresPaymentMethod,
+            StripeIntent.Status.RequiresCapture,
+            null -> {}
+        }
+        when (val pollingStrategy = config.pollingStrategy) {
+            is PollingStrategy.ExponentialBackoff -> performPollWithExponentialBackoff(pollingStrategy)
+            is PollingStrategy.FixedIntervals -> performPollWithFixedIntervals(pollingStrategy)
+        }
+    }
+
+    private suspend fun performPollWithExponentialBackoff(
+        exponentialBackoff: PollingStrategy.ExponentialBackoff,
+    ) {
+        if (attempts < exponentialBackoff.maxAttempts) {
             attempts += 1
 
             _state.value = fetchIntentStatus()
 
-            val canTryAgain = attempts < config.maxAttempts
+            val canTryAgain = attempts < exponentialBackoff.maxAttempts
             if (canTryAgain) {
-                delay(calculateDelay(attempts))
+                delay(calculateDelayForExponentialBackoff(attempts))
                 performPoll()
             }
         }
+    }
+
+    private suspend fun performPollWithFixedIntervals(
+        fixedIntervals: PollingStrategy.FixedIntervals,
+    ) {
+        _state.value = fetchIntentStatus()
+
+        delay(fixedIntervals.retryIntervalInSeconds.seconds)
+        performPoll()
     }
 
     private suspend fun fetchIntentStatus(): StripeIntent.Status? {
@@ -74,7 +105,7 @@ class DefaultIntentStatusPoller @Inject constructor(
     }
 }
 
-internal fun calculateDelay(attempts: Int): Duration {
+internal fun calculateDelayForExponentialBackoff(attempts: Int): Duration {
     val delay = (1.0 + attempts).pow(2)
     return delay.seconds
 }

@@ -165,7 +165,8 @@ class LinkFormElementTest {
             linkSignUpOptInInitialValue = false,
             linkMobileDisableLinkOnAttestationFailure = false,
             customerId = null,
-            saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy
+            saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+            forceSetupFutureUseBehaviorAndNewMandate = false,
         )
     }
 

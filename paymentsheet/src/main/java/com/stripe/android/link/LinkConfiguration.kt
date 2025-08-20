@@ -44,15 +44,9 @@ internal data class LinkConfiguration(
     val linkSignUpOptInInitialValue: Boolean,
     val linkMobileDisableLinkOnAttestationFailure: Boolean,
     private val customerId: String?,
-    val saveConsentBehavior: PaymentMethodSaveConsentBehavior
+    val saveConsentBehavior: PaymentMethodSaveConsentBehavior,
+    val forceSetupFutureUseBehaviorAndNewMandate: Boolean,
 ) : Parcelable {
-
-    val alwaysSaveForFutureUse: Boolean
-        get() {
-            // When this (now poorly named) feature flag is enabled for a merchant, we always show the reuse mandate,
-            // since the merchant will save the payment method for future use.
-            return linkSignUpOptInFeatureEnabled
-        }
 
     val customerIdForEceDefaultValues: String?
         get() = if (enableDisplayableDefaultValuesInEce) customerId else null
