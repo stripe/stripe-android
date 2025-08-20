@@ -240,6 +240,7 @@ private fun ActivePollingScreenPreview() {
                     durationRemaining = 83.seconds,
                     ctaText = R.string.stripe_upi_polling_message,
                     pollingState = PollingState.Active,
+                    shouldShowQrCode = false,
                 ),
                 onCancel = {},
             )
@@ -257,6 +258,7 @@ private fun FailedPollingScreenPreview() {
                     durationRemaining = 83.seconds,
                     ctaText = R.string.stripe_upi_polling_message,
                     pollingState = PollingState.Failed,
+                    shouldShowQrCode = false,
                 ),
                 onCancel = {},
             )
