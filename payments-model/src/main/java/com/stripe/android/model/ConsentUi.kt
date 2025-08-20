@@ -71,5 +71,4 @@ data class ConsentUi(
         @SerialName("default")
         val default: String,
     ) : StripeModel
-
 }
