@@ -56,7 +56,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.reflect.KClass
 
 internal class WalletViewModel @Inject constructor(
     private val configuration: LinkConfiguration,
@@ -106,6 +105,9 @@ internal class WalletViewModel @Inject constructor(
             is LinkLaunchMode.Authentication -> null
         }
 
+    private val paymentMethodFilter
+        get() = (linkLaunchMode as? LinkLaunchMode.PaymentMethodSelection)?.paymentMethodFilter
+
     private val paymentSelectionHint: ResolvableString?
         get() = R.string.stripe_wallet_prefer_debit_card_hint
             .takeIf {
@@ -139,19 +141,8 @@ internal class WalletViewModel @Inject constructor(
                 if (paymentDetailsState.paymentDetails.isEmpty()) {
                     navigateAndClearStack(LinkScreen.PaymentMethod)
                 } else {
-                    val paymentMethodFilter =
-                        (linkLaunchMode as? LinkLaunchMode.PaymentMethodSelection)?.paymentMethodFilter
-                    val filterClass: KClass<out ConsumerPaymentDetails.PaymentDetails>? =
-                        paymentMethodFilter?.let {
-                            when (it) {
-                                LinkPaymentMethodFilter.Card ->
-                                    ConsumerPaymentDetails.Card::class
-                                LinkPaymentMethodFilter.BankAccount ->
-                                    ConsumerPaymentDetails.BankAccount::class
-                            }
-                        }
                     val paymentDetails = paymentDetailsState.paymentDetails
-                        .filter { filterClass?.isInstance(it.details) != false }
+                        .filter { paymentMethodFilter?.invoke(it.details) != false }
                         .toList()
 
                     val currentState = _uiState.updateAndGet {
@@ -472,7 +463,7 @@ internal class WalletViewModel @Inject constructor(
     fun onAddPaymentMethodOptionClicked(option: AddPaymentMethodOption) {
         when (option) {
             is AddPaymentMethodOption.Bank -> {
-                onAddBankAccountClicked()
+                presentAddBankAccount()
             }
             AddPaymentMethodOption.Card -> {
                 navigationManager.tryNavigateTo(LinkScreen.PaymentMethod.route)
@@ -480,7 +471,7 @@ internal class WalletViewModel @Inject constructor(
         }
     }
 
-    private fun onAddBankAccountClicked() {
+    private fun presentAddBankAccount() {
         _uiState.update {
             it.copy(addBankAccountState = AddBankAccountState.Processing())
         }
@@ -606,11 +597,14 @@ internal class WalletViewModel @Inject constructor(
             if (
                 linkAccount.consumerPublishableKey != null &&
                 configuration.financialConnectionsAvailability != null &&
-                supportedPaymentMethodTypes.contains(ConsumerPaymentDetails.BankAccount.TYPE)
+                supportedPaymentMethodTypes.contains(ConsumerPaymentDetails.BankAccount.TYPE) &&
+                (paymentMethodFilter == null || paymentMethodFilter == LinkPaymentMethodFilter.BankAccount)
             ) {
                 add(AddPaymentMethodOption.Bank(configuration.financialConnectionsAvailability))
             }
-            if (supportedPaymentMethodTypes.contains(ConsumerPaymentDetails.Card.TYPE)) {
+            if (supportedPaymentMethodTypes.contains(ConsumerPaymentDetails.Card.TYPE) &&
+                (paymentMethodFilter == null || paymentMethodFilter == LinkPaymentMethodFilter.Card)
+            ) {
                 add(AddPaymentMethodOption.Card)
             }
         }

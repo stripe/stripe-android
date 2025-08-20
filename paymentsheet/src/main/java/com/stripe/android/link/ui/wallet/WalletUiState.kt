@@ -6,13 +6,11 @@ import com.stripe.android.common.validation.isSupportedWithBillingConfig
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkPaymentMethod
-import com.stripe.android.link.LinkPaymentMethodFilter
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.forms.FormFieldEntry
-import kotlin.reflect.KClass
 
 @Immutable
 internal data class WalletUiState(
