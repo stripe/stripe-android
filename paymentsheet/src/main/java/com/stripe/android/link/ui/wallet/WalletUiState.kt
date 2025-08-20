@@ -34,7 +34,7 @@ internal data class WalletUiState(
     val cvcInput: FormFieldEntry = FormFieldEntry(null),
     val addBankAccountState: AddBankAccountState = AddBankAccountState.Idle,
     val alertMessage: ResolvableString? = null,
-    val paymentSelectionHint: String? = null,
+    val paymentSelectionHint: ResolvableString? = null,
     val isAutoSelecting: Boolean = false,
     val hasAttemptedAutoSelection: Boolean = false,
     val signupToggleEnabled: Boolean,

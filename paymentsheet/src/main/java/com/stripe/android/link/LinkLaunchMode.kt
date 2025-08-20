@@ -27,11 +27,6 @@ internal sealed interface LinkLaunchMode : Parcelable {
          * Whether or not a secondary CTA to pay another way should be shown.
          */
         val shouldShowSecondaryCta: Boolean = true,
-
-        /**
-         * Optional hint to be displayed.
-         */
-        val hint: String? = null,
     ) : LinkLaunchMode
 
     /**

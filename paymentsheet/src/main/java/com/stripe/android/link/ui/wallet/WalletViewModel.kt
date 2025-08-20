@@ -89,7 +89,7 @@ internal class WalletViewModel @Inject constructor(
             primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent, linkLaunchMode),
             secondaryButtonLabel = configuration.stripeIntent.secondaryButtonLabel(linkLaunchMode),
             addPaymentMethodOptions = getAddPaymentMethodOptions(),
-            paymentSelectionHint = linkLaunchMode.paymentSelectionHint,
+            paymentSelectionHint = paymentSelectionHint,
             isAutoSelecting = shouldAutoSelectDefaultPaymentMethod(),
             signupToggleEnabled = configuration.linkSignUpOptInFeatureEnabled,
             billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
@@ -104,12 +104,13 @@ internal class WalletViewModel @Inject constructor(
             is LinkLaunchMode.Authentication -> null
         }
 
-    private val LinkLaunchMode.paymentSelectionHint: String?
-        get() = (this as? LinkLaunchMode.PaymentMethodSelection)?.hint
-            ?.takeIf {
+    private val paymentSelectionHint: ResolvableString?
+        get() = R.string.stripe_wallet_prefer_debit_card_hint
+            .takeIf {
                 configuration.enableLinkPaymentSelectionHint ||
                     FeatureFlags.forceEnableLinkPaymentSelectionHint.isEnabled
             }
+            ?.resolvableString
 
     val uiState: StateFlow<WalletUiState> = _uiState.asStateFlow()
 
@@ -659,12 +660,12 @@ private fun StripeIntent.secondaryButtonLabel(linkLaunchMode: LinkLaunchMode): R
     return when (linkLaunchMode) {
         is LinkLaunchMode.Full,
         is LinkLaunchMode.Confirmation -> when (this) {
-            is PaymentIntent -> resolvableString(R.string.stripe_wallet_pay_another_way)
-            is SetupIntent -> resolvableString(R.string.stripe_wallet_continue_another_way)
+            is PaymentIntent -> R.string.stripe_wallet_pay_another_way.resolvableString
+            is SetupIntent -> R.string.stripe_wallet_continue_another_way.resolvableString
         }
         is LinkLaunchMode.PaymentMethodSelection -> {
             if (linkLaunchMode.shouldShowSecondaryCta) {
-                resolvableString(R.string.stripe_wallet_continue_another_way)
+                R.string.stripe_wallet_continue_another_way.resolvableString
             } else {
                 null
             }

@@ -287,8 +287,6 @@ class LinkController @Inject internal constructor(
         private val coordinator: LinkControllerCoordinator,
         private val interactor: LinkControllerInteractor,
     ) {
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        var paymentSelectionHint: String? = null
 
         /**
          * Present the Link payment methods selection screen.
@@ -307,7 +305,6 @@ class LinkController @Inject internal constructor(
             interactor.presentPaymentMethods(
                 launcher = coordinator.linkActivityResultLauncher,
                 email = email,
-                hint = paymentSelectionHint,
             )
         }
 

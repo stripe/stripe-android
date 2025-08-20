@@ -79,7 +79,6 @@ internal class WalletScreenScreenshotTest {
         snapshot(
             state = walletUiState(
                 userSetIsExpanded = false,
-
             ),
         )
     }
@@ -184,6 +183,27 @@ internal class WalletScreenScreenshotTest {
         )
     }
 
+    @Test
+    fun testPaymentSelectionHint() {
+        snapshot(
+            state = walletUiState(
+                paymentSelectionHint = "Lorem ipsum dolor sit amet".resolvableString,
+            ),
+        )
+    }
+
+    @Test
+    fun testPaymentSelectionHintLong() {
+        snapshot(
+            state = walletUiState(
+                paymentSelectionHint = buildString {
+                    append("Lorem ipsum dolor sit amet, consectetur adipiscing elit, ")
+                    append("sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")
+                }.resolvableString
+            )
+        )
+    }
+
     private fun walletUiState(
         paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails> =
             TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
@@ -197,6 +217,7 @@ internal class WalletScreenScreenshotTest {
         addPaymentMethodOptions: List<AddPaymentMethodOption> = listOf(AddPaymentMethodOption.Card),
         userSetIsExpanded: Boolean = false,
         signupToggleEnabled: Boolean = false,
+        paymentSelectionHint: ResolvableString? = null,
     ): WalletUiState {
         return WalletUiState(
             paymentDetailsList = paymentDetailsList,
@@ -214,6 +235,7 @@ internal class WalletScreenScreenshotTest {
             expiryDateInput = expiryDateInput,
             cvcInput = cvcInput,
             alertMessage = alertMessage,
+            paymentSelectionHint = paymentSelectionHint,
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             signupToggleEnabled = signupToggleEnabled,
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),

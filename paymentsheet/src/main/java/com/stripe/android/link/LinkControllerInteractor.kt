@@ -131,7 +131,6 @@ internal class LinkControllerInteractor @Inject constructor(
     fun presentPaymentMethods(
         launcher: ActivityResultLauncher<LinkActivityContract.Args>,
         email: String?,
-        hint: String? = null,
     ) {
         present(
             launcher = launcher,
@@ -146,7 +145,6 @@ internal class LinkControllerInteractor @Inject constructor(
                     selectedPayment = state.selectedPaymentMethod?.details,
                     sharePaymentDetailsImmediatelyAfterCreation = false,
                     shouldShowSecondaryCta = false,
-                    hint = hint,
                 )
             }
         )
