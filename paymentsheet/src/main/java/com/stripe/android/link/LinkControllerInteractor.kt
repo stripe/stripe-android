@@ -86,6 +86,10 @@ internal class LinkControllerInteractor @Inject constructor(
         MutableSharedFlow<LinkController.AuthenticationResult>(replay = 1)
     val authenticationResultFlow = _authenticationResultFlow.asSharedFlow()
 
+    private val _authorizeResultFlow =
+        MutableSharedFlow<LinkController.AuthorizeResult>(replay = 1)
+    val authorizeResultFlow = _authorizeResultFlow.asSharedFlow()
+
     fun state(context: Context): StateFlow<LinkController.State> {
         val imageLoader = StripeImageLoader(context)
         val iconLoader = PaymentSelection.IconLoader(context.resources, imageLoader)
@@ -219,6 +223,8 @@ internal class LinkControllerInteractor @Inject constructor(
                 handlePaymentMethodSelectionResult(result)
             is LinkLaunchMode.Authentication ->
                 handleAuthenticationResult(result)
+            is LinkLaunchMode.Authorization ->
+                handleAuthorizationResult(result)
             else ->
                 logger.warning("$tag: unexpected result for launch mode: $currentLaunchMode")
         }
@@ -280,7 +286,6 @@ internal class LinkControllerInteractor @Inject constructor(
                 updateState {
                     it.copy(selectedPaymentMethod = result.selectedPayment)
                 }
-
                 _presentPaymentMethodsResultFlow.tryEmit(LinkController.PresentPaymentMethodsResult.Success)
             }
             is LinkActivityResult.Failed -> {
@@ -313,6 +318,34 @@ internal class LinkControllerInteractor @Inject constructor(
             }
             is LinkActivityResult.PaymentMethodObtained -> {
                 logger.warning("$tag: authentication unexpected result: $result")
+            }
+        }
+    }
+
+    private fun handleAuthorizationResult(result: LinkActivityResult) {
+        when (result) {
+            is LinkActivityResult.Canceled -> {
+                logger.debug("$tag: authorization canceled")
+                _authorizeResultFlow.tryEmit(LinkController.AuthorizeResult.Canceled)
+            }
+            is LinkActivityResult.Completed -> {
+                logger.debug("$tag: authorization completed")
+                _authorizeResultFlow.tryEmit(
+                    when (result.authorizationConsentGranted) {
+                        true -> LinkController.AuthorizeResult.Consented
+                        false -> LinkController.AuthorizeResult.Denied
+                        null -> LinkController.AuthorizeResult.Canceled // Shouldn't happen.
+                    }
+                )
+            }
+            is LinkActivityResult.Failed -> {
+                logger.debug("$tag: authorization failed")
+                _authorizeResultFlow.tryEmit(
+                    LinkController.AuthorizeResult.Failed(result.error)
+                )
+            }
+            is LinkActivityResult.PaymentMethodObtained -> {
+                logger.warning("$tag: authorization unexpected result: $result")
             }
         }
     }
@@ -374,6 +407,24 @@ internal class LinkControllerInteractor @Inject constructor(
                     LinkController.RegisterConsumerResult.Failed(it)
                 }
             )
+    }
+
+    fun authorize(
+        launcher: ActivityResultLauncher<LinkActivityContract.Args>,
+        linkAuthIntentId: String
+    ) {
+        present(
+            launcher = launcher,
+            email = null,
+            onConfigurationError = { error ->
+                _authorizeResultFlow.tryEmit(
+                    LinkController.AuthorizeResult.Failed(error)
+                )
+            },
+            getLaunchMode = { _, _ ->
+                LinkLaunchMode.Authorization(linkAuthIntentId = linkAuthIntentId)
+            }
+        )
     }
 
     private fun requireLinkComponent(state: State = _state.value): Result<LinkComponent> {

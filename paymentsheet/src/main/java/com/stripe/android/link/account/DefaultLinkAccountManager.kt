@@ -8,6 +8,7 @@ import com.stripe.android.link.ConsumerState
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.NoLinkAccountFoundException
@@ -53,6 +54,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
     private val linkRepository: LinkRepository,
     private val linkEventsReporter: LinkEventsReporter,
     private val errorReporter: ErrorReporter,
+    private val linkLaunchMode: LinkLaunchMode?,
 ) : LinkAccountManager {
 
     override val linkAccountInfo: StateFlow<LinkAccountUpdate.Value>
@@ -196,7 +198,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         val currentEmail = currentAccount?.email ?: config.customerInfo.email
 
         return when (val status = getAccountStatus(currentAccount, canLookupCustomerEmail = true)) {
-            AccountStatus.Verified -> {
+            is AccountStatus.Verified -> {
                 linkEventsReporter.onInvalidSessionState(LinkEventsReporter.SessionState.Verified)
 
                 Result.failure(
@@ -547,23 +549,52 @@ internal class DefaultLinkAccountManager @Inject constructor(
         linkAccount: LinkAccount?,
         canLookupCustomerEmail: Boolean
     ): AccountStatus {
-        // If we already have an account, return its status.
-        if (linkAccount != null) {
-            return linkAccount.accountStatus
-        }
-        // Look up the customer email if possible.
-        return config.customerInfo.email?.takeIf { canLookupCustomerEmail }
-            ?.let { customerEmail ->
-                lookupConsumer(
-                    email = customerEmail,
-                    linkAuthIntentId = null,
-                    startSession = true,
-                    customerId = config.customerIdForEceDefaultValues
-                )
-                    .map { it?.accountStatus }
-                    .getOrElse { AccountStatus.Error }
+        val result =
+            when (val linkLaunchMode = this.linkLaunchMode) {
+                null,
+                is LinkLaunchMode.Authentication,
+                is LinkLaunchMode.Confirmation,
+                LinkLaunchMode.Full,
+                is LinkLaunchMode.PaymentMethodSelection -> {
+                    linkAccount
+                        // If we already have an account, return it.
+                        ?.let { Result.success(it) }
+                        ?: run {
+                            val email = config.customerInfo.email?.takeIf { canLookupCustomerEmail }
+                            email?.let { lookupConsumerByEmail(it) }
+                        }
+                }
+                is LinkLaunchMode.Authorization -> {
+                    val linkAuthIntentId = linkLaunchMode.linkAuthIntentId
+                    linkAccount
+                        // If we already have an account for the LAI, return it.
+                        ?.takeIf { it.linkAuthIntentInfo?.linkAuthIntentId == linkAuthIntentId }
+                        ?.let { Result.success(it) }
+                        ?: lookupConsumerByAuthIntent(linkAuthIntentId)
+                }
             }
+        return result
+            ?.map { it?.accountStatus }
+            ?.getOrElse { AccountStatus.Error }
             ?: AccountStatus.SignedOut
+    }
+
+    private suspend fun lookupConsumerByEmail(email: String): Result<LinkAccount?> {
+        return lookupConsumer(
+            email = email,
+            linkAuthIntentId = null,
+            startSession = true,
+            customerId = config.customerIdForEceDefaultValues
+        )
+    }
+
+    private suspend fun lookupConsumerByAuthIntent(linkAuthIntentId: String?): Result<LinkAccount?> {
+        return lookupConsumer(
+            email = null,
+            linkAuthIntentId = linkAuthIntentId,
+            startSession = true,
+            customerId = config.customerIdForEceDefaultValues
+        )
     }
 
     private val SignUpConsentAction.consumerAction: ConsumerSignUpConsentAction

@@ -52,7 +52,7 @@ internal class LinkAccount(
     @IgnoredOnParcel
     val accountStatus = when {
         isVerified -> {
-            AccountStatus.Verified
+            AccountStatus.Verified(consentPresentation = consentPresentation)
         }
         consumerSession.containsSMSSessionStarted() -> {
             AccountStatus.VerificationStarted

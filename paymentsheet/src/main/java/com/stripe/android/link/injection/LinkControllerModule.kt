@@ -9,6 +9,7 @@ import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.DefaultLinkConfigurationLoader
 import com.stripe.android.link.LinkConfigurationLoader
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule

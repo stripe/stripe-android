@@ -102,6 +102,7 @@ internal class WalletViewModel(
             is LinkLaunchMode.Confirmation -> null
             is LinkLaunchMode.PaymentMethodSelection -> selectedPayment?.id
             is LinkLaunchMode.Authentication -> null
+            is LinkLaunchMode.Authorization -> null
         }
 
     private val paymentMethodFilter
@@ -672,16 +673,18 @@ private fun StripeIntent.secondaryButtonLabel(linkLaunchMode: LinkLaunchMode): R
     return when (linkLaunchMode) {
         is LinkLaunchMode.Full,
         is LinkLaunchMode.Confirmation -> when (this) {
-            is PaymentIntent -> R.string.stripe_wallet_pay_another_way.resolvableString
-            is SetupIntent -> R.string.stripe_wallet_continue_another_way.resolvableString
+            is PaymentIntent -> resolvableString(R.string.stripe_wallet_pay_another_way)
+            is SetupIntent -> resolvableString(R.string.stripe_wallet_continue_another_way)
         }
         is LinkLaunchMode.PaymentMethodSelection -> {
             if (linkLaunchMode.shouldShowSecondaryCta) {
-                R.string.stripe_wallet_continue_another_way.resolvableString
+                resolvableString(R.string.stripe_wallet_continue_another_way)
             } else {
                 null
             }
         }
-        is LinkLaunchMode.Authentication -> null
+        is LinkLaunchMode.Authentication,
+        is LinkLaunchMode.Authorization ->
+            resolvableString(R.string.stripe_wallet_continue_another_way)
     }
 }
