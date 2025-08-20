@@ -81,10 +81,10 @@ internal class LinkControllerPlaygroundViewModel(
         }
     }
 
-    fun onPaymentMethodClick(email: String) {
+    fun onPaymentMethodClick(email: String, paymentMethodType: LinkController.PaymentMethodType?) {
         linkControllerPresenter?.presentPaymentMethods(
             email = email.takeIf { it.isNotBlank() },
-            paymentMethodType = null
+            paymentMethodType = paymentMethodType,
         )
     }
 
