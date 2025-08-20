@@ -15,7 +15,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.cardscan.CardScanResult
 import com.stripe.android.uicore.elements.H6Text
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionController
@@ -48,23 +47,10 @@ fun CardDetailsSectionElementUI(
             if (controller.isCardScanEnabled &&
                 (controller.isStripeCardScanAvailable() || FeatureFlags.cardScanGooglePayMigration.isEnabled)
             ) {
-                val onGoogleCardScanResult: (CardScanResult) -> Unit = { result ->
-                    (result as? CardScanResult.Completed)?.scannedCard?.let { scannedCard ->
-                        controller.cardDetailsElement.controller.numberElement.controller.onRawValueChange(
-                            scannedCard.pan
-                        )
-                        scannedCard.expirationDate?.let {
-                            @Suppress("MagicNumber")
-                            controller.cardDetailsElement.controller.expirationDateElement.controller.onRawValueChange(
-                                "${it.month}/${it.year % 100}"
-                            )
-                        }
-                    }
-                }
                 ScanCardButtonUI(
                     enabled = enabled,
                     elementsSessionId = controller.elementsSessionId,
-                    onGoogleCardScanResult = onGoogleCardScanResult
+                    onGoogleCardScanResult = controller.cardDetailsElement.controller.onCardScanResult
                 ) {
                     controller.cardDetailsElement.controller.numberElement.controller.onCardScanResult(it)
                 }

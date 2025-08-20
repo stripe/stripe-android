@@ -51,8 +51,8 @@ class CardScanGoogleLauncherTest {
             assertThat(scanResult).isInstanceOf(CardScanResult.Completed::class.java)
             val completedResult = scanResult as CardScanResult.Completed
             assertThat(completedResult.scannedCard.pan).isEqualTo("4242424242424242")
-            assertThat(completedResult.scannedCard.expirationDate?.month).isEqualTo(12)
-            assertThat(completedResult.scannedCard.expirationDate?.year).isEqualTo(2042)
+            assertThat(completedResult.scannedCard.expirationMonth).isEqualTo(12)
+            assertThat(completedResult.scannedCard.expirationYear).isEqualTo(2042)
         }
     }
 

@@ -10,7 +10,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import com.google.android.gms.wallet.CreditCardExpirationDate
 import com.google.android.gms.wallet.PaymentCardRecognitionResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -55,7 +54,7 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
             val pan = paymentCardRecognitionResult?.pan
             val expirationDate = paymentCardRecognitionResult?.creditCardExpirationDate
             return if (pan != null) {
-                CardScanResult.Completed(ScannedCard(pan, expirationDate))
+                CardScanResult.Completed(ScannedCard(pan, expirationDate?.month, expirationDate?.year))
             } else {
                 val error = Throwable("Failed to parse card data")
                 CardScanResult.Failed(error)
@@ -101,5 +100,6 @@ internal sealed interface CardScanResult {
  */
 internal data class ScannedCard(
     val pan: String,
-    val expirationDate: CreditCardExpirationDate?
+    val expirationMonth: Int?,
+    val expirationYear: Int?
 )
