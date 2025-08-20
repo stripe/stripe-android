@@ -98,11 +98,10 @@ internal object LinkTestUtils {
             linkAppearance = null,
             linkSignUpOptInFeatureEnabled = false,
             linkSignUpOptInInitialValue = false,
-            linkMobileDisableCacheAttestationResult = false,
-            linkMobileKeepLinkOnAttestationFailure = false,
+            linkMobileDisableLinkOnAttestationFailure = false,
             skipWalletInFlowController = false,
             customerId = null,
-            saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+            saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy
         )
     }
 }

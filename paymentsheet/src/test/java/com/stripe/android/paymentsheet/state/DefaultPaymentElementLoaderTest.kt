@@ -878,7 +878,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkMobileSkipWalletInFlowController = false,
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
-                linkMobileDisableCacheAttestationResult = false
+                linkMobileDisableLinkOnAttestationFailure = false
             )
         )
 
@@ -918,10 +918,9 @@ internal class DefaultPaymentElementLoaderTest {
                 disableLinkRuxInFlowController = false,
                 linkEnableDisplayableDefaultValuesInEce = false,
                 linkMobileSkipWalletInFlowController = false,
-                linkMobileDisableCacheAttestationResult = false,
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
-                linkMobileKeepLinkOnAttestationFailure = false
+                linkMobileDisableLinkOnAttestationFailure = false
             )
         )
 
@@ -1011,7 +1010,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkMobileSkipWalletInFlowController = false,
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
-                linkMobileDisableCacheAttestationResult = false
+                linkMobileDisableLinkOnAttestationFailure = false
             ),
             linkStore = mock {
                 on { hasUsedLink() } doReturn true
@@ -1047,7 +1046,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkMobileSkipWalletInFlowController = false,
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
-                linkMobileDisableCacheAttestationResult = false
+                linkMobileDisableLinkOnAttestationFailure = false
             )
         )
 
@@ -1571,7 +1570,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkMobileSkipWalletInFlowController = false,
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
-                linkMobileDisableCacheAttestationResult = false
+                linkMobileDisableLinkOnAttestationFailure = false
             ),
             linkStore = linkStore,
         )
@@ -3598,10 +3597,10 @@ internal class DefaultPaymentElementLoaderTest {
             disableLinkRuxInFlowController = false,
             linkEnableDisplayableDefaultValuesInEce = false,
             linkMobileSkipWalletInFlowController = false,
-            linkMobileDisableCacheAttestationResult = false,
+
             linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
             linkSignUpOptInInitialValue = false,
-            linkMobileKeepLinkOnAttestationFailure = false,
+            linkMobileDisableLinkOnAttestationFailure = false,
         )
     }
 

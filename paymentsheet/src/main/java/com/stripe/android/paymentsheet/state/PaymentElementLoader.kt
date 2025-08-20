@@ -633,8 +633,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 .collectMissingBillingDetailsForExistingPaymentMethods,
             allowUserEmailEdits = configuration.link.allowUserEmailEdits,
             skipWalletInFlowController = elementsSession.linkMobileSkipWalletInFlowController,
-            linkMobileDisableCacheAttestationResult = elementsSession.linkMobileDisableCacheAttestationResult,
-            linkMobileKeepLinkOnAttestationFailure = elementsSession.linkMobileKeepLinkOnAttestationFailure,
+            linkMobileDisableLinkOnAttestationFailure = elementsSession.linkMobileDisableLinkOnAttestationFailure,
             customerId = elementsSession.customer?.session?.customerId,
             linkAppearance = linkAppearance,
             saveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
@@ -646,10 +645,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             return null
         }
 
-        // If the link attestation check fails, we don't want to proceed with the flow unless
-        // linkMobileKeepLinkOnAttestationFailure is enabled.
+        // If the link attestation check fails, we don't want to proceed with the flow if
+        // linkMobileDisableLinkOnAttestationFailure is enabled.
         val attestationCheck = linkConfigurationCoordinator.linkAttestationCheck(linkConfiguration)
-        if (attestationCheck.invoke().succeeded.not() && !elementsSession.linkMobileKeepLinkOnAttestationFailure) {
+        if (attestationCheck.invoke().succeeded.not() && elementsSession.linkMobileDisableLinkOnAttestationFailure) {
             return null
         }
 

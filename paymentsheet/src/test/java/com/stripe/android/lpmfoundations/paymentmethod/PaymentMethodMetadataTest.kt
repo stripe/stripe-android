@@ -2089,7 +2089,7 @@ internal class PaymentMethodMetadataTest {
             linkAppearance = null,
             linkSignUpOptInFeatureEnabled = false,
             linkSignUpOptInInitialValue = false,
-            linkMobileDisableCacheAttestationResult = false,
+            linkMobileDisableLinkOnAttestationFailure = false,
             customerId = null,
             saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         )

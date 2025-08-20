@@ -26,8 +26,7 @@ internal class DefaultLinkAttestationCheck @Inject constructor(
     @IOContext private val workContext: CoroutineContext
 ) : LinkAttestationCheck {
     override suspend fun invoke(): LinkAttestationCheck.Result {
-        val shouldSkipAttestation = linkConfiguration
-            .linkMobileDisableCacheAttestationResult.not() && linkStore.hasPassedAttestationChecksRecently()
+        val shouldSkipAttestation = linkStore.hasPassedAttestationChecksRecently()
         if (linkGate.useAttestationEndpoints.not()) return LinkAttestationCheck.Result.Successful
         if (shouldSkipAttestation) return LinkAttestationCheck.Result.Successful
 

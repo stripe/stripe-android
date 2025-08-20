@@ -2,7 +2,6 @@ package com.stripe.android.link
 
 import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
-import com.stripe.android.link.model.LinkAppearance
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.StripeIntent
@@ -43,10 +42,9 @@ internal data class LinkConfiguration(
     val linkAppearance: LinkAppearance?,
     val linkSignUpOptInFeatureEnabled: Boolean,
     val linkSignUpOptInInitialValue: Boolean,
+    val linkMobileDisableLinkOnAttestationFailure: Boolean,
     private val customerId: String?,
-    val saveConsentBehavior: PaymentMethodSaveConsentBehavior,
-    val linkMobileDisableCacheAttestationResult: Boolean,
-    val linkMobileKeepLinkOnAttestationFailure: Boolean
+    val saveConsentBehavior: PaymentMethodSaveConsentBehavior
 ) : Parcelable {
 
     val alwaysSaveForFutureUse: Boolean
