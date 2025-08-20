@@ -780,6 +780,55 @@ class InputAddressViewModelTest {
             .build()
     )
 
+    @OptIn(AddressElementSameAsBillingPreview::class)
+    @Test
+    fun `Billing same as shipping box is checked even if initial inputs have slightly different formatting`() =
+        runTest {
+            val viewModel = createViewModel(
+                config = AddressLauncher.Configuration.Builder()
+                    .allowedCountries(setOf("US"))
+                    .address(
+                        AddressDetails(
+                            name = "John Doe",
+                            address = PaymentSheet.Address(
+                                line1 = "123 Apple Street",
+                                line2 = "",
+                                city = "San Francisco",
+                                country = "US",
+                                state = "CA",
+                                postalCode = "99999 "
+                            ),
+                            phoneNumber = "+12347682350"
+                        )
+                    )
+                    .billingAddress(
+                        PaymentSheet.BillingDetails(
+                            name = "John Doe",
+                            address = PaymentSheet.Address(
+                                line1 = "123 Apple Street",
+                                line2 = null,
+                                city = "San Francisco",
+                                country = "US",
+                                state = "CA",
+                                postalCode = "99999"
+                            ),
+                            phone = "(234) 768-2350"
+                        )
+                    )
+                    .additionalFields(
+                        AddressLauncher.AdditionalFieldsConfiguration(
+                            phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.REQUIRED,
+                        )
+                    )
+                    .build()
+            )
+
+            viewModel.shippingSameAsBillingState.test {
+                // Should be checked
+                assertThat(awaitItem()).isEqualTo(createShowState(isChecked = true))
+            }
+        }
+
     private fun doesNotUseAddressTest(
         config: AddressLauncher.Configuration,
     ) = runTest {
