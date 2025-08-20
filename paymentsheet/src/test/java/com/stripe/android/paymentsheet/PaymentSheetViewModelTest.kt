@@ -97,6 +97,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
+import com.stripe.android.paymentsheet.state.WalletLocation
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.ui.CardBrandChoice
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -1984,7 +1985,7 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(isGooglePayReady = true)
 
         viewModel.walletsState.test {
-            assertThat(awaitItem()?.googlePay).isNotNull()
+            assertThat(awaitItem()?.googlePay(WalletLocation.HEADER)).isNotNull()
         }
     }
 
@@ -2002,7 +2003,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.walletsState.test {
             val state = awaitItem()
             assertThat(state).isNotNull()
-            assertThat(state?.googlePay).isNull()
+            assertThat(state?.googlePay(WalletLocation.HEADER)).isNull()
         }
     }
 
@@ -2017,7 +2018,7 @@ internal class PaymentSheetViewModelTest {
         )
 
         viewModel.walletsState.test {
-            assertThat(awaitItem()?.link).isNotNull()
+            assertThat(awaitItem()?.link(WalletLocation.HEADER)).isNotNull()
             expectNoEvents()
         }
     }
@@ -2030,7 +2031,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.walletsState.test {
             val state = awaitItem()
             assertThat(state).isNotNull()
-            assertThat(state?.link).isNull()
+            assertThat(state?.link(WalletLocation.HEADER)).isNull()
         }
     }
 
@@ -3755,7 +3756,7 @@ internal class PaymentSheetViewModelTest {
         )
 
         viewModel.walletsState.test {
-            assertThat(awaitItem()?.googlePay?.buttonType).isEqualTo(googlePayButtonType)
+            assertThat(awaitItem()?.googlePay(WalletLocation.HEADER)?.buttonType).isEqualTo(googlePayButtonType)
         }
     }
 

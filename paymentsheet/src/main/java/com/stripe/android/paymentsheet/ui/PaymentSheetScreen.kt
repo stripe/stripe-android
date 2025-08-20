@@ -63,6 +63,7 @@ import com.stripe.android.paymentsheet.databinding.StripeFragmentPrimaryButtonCo
 import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.state.WalletLocation
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Complete
@@ -414,7 +415,8 @@ internal fun Wallet(
     val padding = StripeTheme.getOuterFormInsets()
 
     Column(modifier = modifier.padding(padding)) {
-        state.googlePay?.let { googlePay ->
+        // Only show Google Pay if allowed in header
+        state.googlePay(WalletLocation.HEADER)?.let { googlePay ->
             GooglePayButton(
                 state = PrimaryButton.State.Ready,
                 allowCreditCards = googlePay.allowCreditCards,
@@ -426,11 +428,11 @@ internal fun Wallet(
             )
         }
 
-        state.link?.let {
-            if (state.googlePay != null) {
+        // Only show Link if allowed in header
+        state.link(WalletLocation.HEADER)?.let {
+            if (state.googlePay(WalletLocation.HEADER) != null) {
                 Spacer(modifier = Modifier.requiredHeight(8.dp))
             }
-
             LinkButton(
                 state = it.state,
                 enabled = state.buttonsEnabled,
@@ -448,10 +450,12 @@ internal fun Wallet(
             else -> Unit
         }
 
-        Spacer(modifier = Modifier.requiredHeight(dividerSpacing))
+        if (state.walletsInHeader) {
+            Spacer(modifier = Modifier.requiredHeight(dividerSpacing))
 
-        val text = stringResource(state.dividerTextResource)
-        WalletsDivider(text)
+            val text = stringResource(state.dividerTextResource)
+            WalletsDivider(text)
+        }
     }
 }
 
