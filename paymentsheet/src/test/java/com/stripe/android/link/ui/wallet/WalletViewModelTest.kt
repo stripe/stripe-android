@@ -1054,7 +1054,12 @@ class WalletViewModelTest {
                 dismissalCoordinator = dismissalCoordinator,
                 linkLaunchMode = linkLaunchMode
             ),
-            linkLaunchMode = linkLaunchMode
+            linkLaunchMode = linkLaunchMode,
+            addPaymentMethodOptions = AddPaymentMethodOptions(
+                linkAccount = linkAccount,
+                configuration = configuration,
+                linkLaunchMode = linkLaunchMode
+            )
         )
     }
 

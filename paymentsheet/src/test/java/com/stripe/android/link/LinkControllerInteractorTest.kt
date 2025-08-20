@@ -216,7 +216,7 @@ class LinkControllerInteractorTest {
         val interactor = createInteractor()
 
         interactor.presentPaymentMethodsResultFlow.test {
-            interactor.presentPaymentMethods(mock(), "test@example.com")
+            interactor.presentPaymentMethods(mock(), "test@example.com", null)
 
             val result = awaitItem()
             assertThat(result).isInstanceOf(LinkController.PresentPaymentMethodsResult.Failed::class.java)
@@ -383,7 +383,7 @@ class LinkControllerInteractorTest {
         configure(interactor)
 
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        interactor.presentPaymentMethods(launcher, "test@example.com")
+        interactor.presentPaymentMethods(launcher, "test@example.com", null)
 
         val call = launcher.calls.awaitItem()
         val args = call.input
@@ -409,7 +409,7 @@ class LinkControllerInteractorTest {
         signIn()
 
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        interactor.presentPaymentMethods(launcher, TestFactory.LINK_ACCOUNT.email)
+        interactor.presentPaymentMethods(launcher, TestFactory.LINK_ACCOUNT.email, null)
 
         val call = launcher.calls.awaitItem()
         val args = call.input
@@ -430,7 +430,7 @@ class LinkControllerInteractorTest {
         }
 
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        interactor.presentPaymentMethods(launcher, "another@email.com")
+        interactor.presentPaymentMethods(launcher, "another@email.com", null)
 
         val call = launcher.calls.awaitItem()
         val args = call.input
@@ -450,7 +450,7 @@ class LinkControllerInteractorTest {
 
         val newEmail = "new@email.com"
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        interactor.presentPaymentMethods(launcher = launcher, email = newEmail)
+        interactor.presentPaymentMethods(launcher = launcher, email = newEmail, paymentMethodType = null)
 
         val customerInfo = launcher.calls.awaitItem().input.configuration.customerInfo
         assertThat(customerInfo.email).isEqualTo(newEmail)
@@ -468,7 +468,7 @@ class LinkControllerInteractorTest {
         configure(interactor, defaultBillingDetails = Optional.of(billingDetails))
 
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        interactor.presentPaymentMethods(launcher = launcher, email = null)
+        interactor.presentPaymentMethods(launcher = launcher, email = null, paymentMethodType = null)
 
         val customerInfo = launcher.calls.awaitItem().input.configuration.customerInfo
         assertThat(customerInfo.email).isEqualTo(TestFactory.CUSTOMER_EMAIL)
@@ -485,7 +485,7 @@ class LinkControllerInteractorTest {
         val initialAccount = linkAccountHolder.linkAccountInfo.first()
 
         // First call onPresentPaymentMethods to set up the launch mode
-        interactor.presentPaymentMethods(FakeActivityResultLauncher(), "test@example.com")
+        interactor.presentPaymentMethods(FakeActivityResultLauncher(), "test@example.com", null)
 
         interactor.presentPaymentMethodsResultFlow.test {
             interactor.onLinkActivityResult(
@@ -506,7 +506,7 @@ class LinkControllerInteractorTest {
         configure(interactor)
 
         // First call onPresentPaymentMethods to set up the launch mode
-        interactor.presentPaymentMethods(FakeActivityResultLauncher(), "test@example.com")
+        interactor.presentPaymentMethods(FakeActivityResultLauncher(), "test@example.com", null)
 
         interactor.presentPaymentMethodsResultFlow.test {
             interactor.onLinkActivityResult(
@@ -525,7 +525,7 @@ class LinkControllerInteractorTest {
         configure(interactor)
 
         // First call onPresentPaymentMethods to set up the launch mode
-        interactor.presentPaymentMethods(FakeActivityResultLauncher(), "test@example.com")
+        interactor.presentPaymentMethods(FakeActivityResultLauncher(), "test@example.com", null)
 
         val linkPaymentMethod = createTestPaymentMethod()
         interactor.presentPaymentMethodsResultFlow.test {
@@ -552,7 +552,7 @@ class LinkControllerInteractorTest {
         configure(interactor)
 
         // First call onPresentPaymentMethods to set up the launch mode
-        interactor.presentPaymentMethods(FakeActivityResultLauncher(), "test@example.com")
+        interactor.presentPaymentMethods(FakeActivityResultLauncher(), "test@example.com", null)
 
         val error = Exception("Error")
         interactor.presentPaymentMethodsResultFlow.test {
@@ -808,7 +808,7 @@ class LinkControllerInteractorTest {
 
         // Call onPresentPaymentMethods with a non-matching email
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        interactor.presentPaymentMethods(launcher, "different@email.com")
+        interactor.presentPaymentMethods(launcher, "different@email.com", null)
 
         // Verify that the account holder was cleared
         assertThat(linkAccountHolder.linkAccountInfo.value.account).isNull()

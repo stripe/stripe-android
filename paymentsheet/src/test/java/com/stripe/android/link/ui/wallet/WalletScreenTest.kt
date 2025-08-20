@@ -807,6 +807,11 @@ internal class WalletScreenTest {
                 linkAccountManager = linkAccountManager,
                 dismissalCoordinator = dismissalCoordinator,
                 linkLaunchMode = linkLaunchMode
+            ),
+            addPaymentMethodOptions = AddPaymentMethodOptions(
+                linkAccount = TestFactory.LINK_ACCOUNT,
+                configuration = TestFactory.LINK_CONFIGURATION,
+                linkLaunchMode = linkLaunchMode
             )
         )
     }
