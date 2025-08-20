@@ -46,18 +46,4 @@ internal class AddressFormController(
             it.second.isComplete
         }
         .toMap()
-
-    private fun parsePhoneNumberConfig(
-        configuration: AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration?
-    ): AddressFieldConfiguration {
-        return when (configuration) {
-            AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN ->
-                AddressFieldConfiguration.HIDDEN
-            AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.OPTIONAL ->
-                AddressFieldConfiguration.OPTIONAL
-            AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.REQUIRED ->
-                AddressFieldConfiguration.REQUIRED
-            null -> AddressFieldConfiguration.OPTIONAL
-        }
-    }
 }
