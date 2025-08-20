@@ -25,24 +25,29 @@ data class CardScanSheetParams(
     val cardScanConfiguration: CardScanConfiguration
 ) : Parcelable
 
+@Deprecated("This is deprecated and will be removed in a future release.")
 sealed interface CardScanSheetResult : Parcelable {
 
     @Parcelize
+    @Deprecated("This is deprecated and will be removed in a future release.")
     data class Completed(
         val scannedCard: ScannedCard
     ) : CardScanSheetResult
 
     @Parcelize
+    @Deprecated("This is deprecated and will be removed in a future release.")
     data class Canceled(
         val reason: CancellationReason
     ) : CardScanSheetResult
 
     @Parcelize
+    @Deprecated("This is deprecated and will be removed in a future release.")
     data class Failed(val error: Throwable) : CardScanSheetResult
 }
 
 private const val CARD_SCAN_FRAGMENT_TAG = "CardScanFragmentTag"
 
+@Deprecated("This is deprecated and will be removed in a future release.")
 class CardScanSheet private constructor() {
 
     private lateinit var launcher: ActivityResultLauncher<CardScanSheetParams>
@@ -50,6 +55,7 @@ class CardScanSheet private constructor() {
     /**
      * Callback to notify when scanning finishes and a result is available.
      */
+    @Deprecated("This is deprecated and will be removed in a future release.")
     fun interface CardScanResultCallback {
         fun onCardScanSheetResult(cardScanSheetResult: CardScanSheetResult)
     }
@@ -63,6 +69,7 @@ class CardScanSheet private constructor() {
          * called before the [ComponentActivity] is created (in the onCreate method).
          */
         @JvmStatic
+        @Deprecated("This is deprecated and will be removed in a future release.")
         fun create(
             from: ComponentActivity,
             cardScanSheetResultCallback: CardScanResultCallback,
@@ -84,6 +91,7 @@ class CardScanSheet private constructor() {
          * created (in the onCreate method).
          */
         @JvmStatic
+        @Deprecated("This is deprecated and will be removed in a future release.")
         fun create(
             from: Fragment,
             cardScanSheetResultCallback: CardScanResultCallback,
@@ -114,6 +122,7 @@ class CardScanSheet private constructor() {
                     UnknownScanException("No data in the result intent")
                 )
 
+        @Deprecated("This is deprecated and will be removed in a future release.")
         fun removeCardScanFragment(
             supportFragmentManager: FragmentManager
         ) {
@@ -149,6 +158,7 @@ class CardScanSheet private constructor() {
      * The ID and Secret are created from this server-server request:
      * https://paper.dropbox.com/doc/Bouncer-Web-API-Review--BTOclListnApWjHdpv4DoaOuAg-Wy0HGlL0XfwAOz9hHuzS1#:h2=Creating-a-CardImageVerificati
      */
+    @Deprecated("This is deprecated and will be removed in a future release.")
     fun present() {
         present(CardScanConfiguration(elementsSessionId = null))
     }
@@ -162,6 +172,7 @@ class CardScanSheet private constructor() {
      * Attach the cardscan fragment to the specified container.
      * Results will be returned in the callback function.
      */
+    @Deprecated("This is deprecated and will be removed in a future release.")
     fun attachCardScanFragment(
         lifecycleOwner: LifecycleOwner,
         supportFragmentManager: FragmentManager,
