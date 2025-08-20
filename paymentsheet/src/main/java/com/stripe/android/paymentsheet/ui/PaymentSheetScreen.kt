@@ -499,7 +499,7 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
             modifier = modifier,
         )
 
-        if (uiState?.canClickWhileDisabled == true) {
+        if (uiState?.canClickWhileDisabled == true && uiState?.enabled != true) {
             Box(
                 Modifier
                     .matchParentSize()

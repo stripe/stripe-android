@@ -4,8 +4,8 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
-import com.stripe.android.uicore.elements.AddressController
-import com.stripe.android.uicore.elements.AutocompleteAddressController
+import com.stripe.android.uicore.elements.AddressElement
+import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.DropdownFieldController
@@ -72,8 +72,8 @@ internal class CardBillingAddressElementTest {
                 address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             )
         ) { cardBillingAddressElement ->
-            assertThat(cardBillingAddressElement.sectionFieldErrorController())
-                .isInstanceOf<AutocompleteAddressController>()
+            assertThat(cardBillingAddressElement.addressElement)
+                .isInstanceOf<AutocompleteAddressElement>()
         }
 
     @Test
@@ -82,7 +82,8 @@ internal class CardBillingAddressElementTest {
             address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
         )
     ) { cardBillingAddressElement ->
-        assertThat(cardBillingAddressElement.sectionFieldErrorController()).isInstanceOf<AddressController>()
+        assertThat(cardBillingAddressElement.addressElement)
+            .isInstanceOf<AddressElement>()
     }
 
     @Test
@@ -91,7 +92,8 @@ internal class CardBillingAddressElementTest {
             address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
         )
     ) { cardBillingAddressElement ->
-        assertThat(cardBillingAddressElement.sectionFieldErrorController()).isInstanceOf<AddressController>()
+        assertThat(cardBillingAddressElement.addressElement)
+            .isInstanceOf<AddressElement>()
     }
 
     @Test
@@ -228,11 +230,7 @@ internal class CardBillingAddressElementTest {
             address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
         )
     ) { cardBillingAddressElement ->
-        val sectionController = cardBillingAddressElement.sectionFieldErrorController()
-
-        assertThat(sectionController).isInstanceOf<AddressController>()
-
-        val addressController = sectionController as AddressController
+        val addressController = cardBillingAddressElement.addressController.value
 
         val addressFields = addressController.fieldsFlowable.value
 
@@ -258,13 +256,9 @@ internal class CardBillingAddressElementTest {
             address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
         )
     ) { cardBillingAddressElement ->
-        val sectionController = cardBillingAddressElement.sectionFieldErrorController()
+        val addressController = cardBillingAddressElement.addressController.value
 
-        assertThat(sectionController).isInstanceOf<AutocompleteAddressController>()
-
-        val autocompleteController = sectionController as AutocompleteAddressController
-
-        val addressFields = autocompleteController.addressController.value.fieldsFlowable.value
+        val addressFields = addressController.fieldsFlowable.value
 
         val hasEmail = addressFields.any { field ->
             field.identifier == IdentifierSpec.Email

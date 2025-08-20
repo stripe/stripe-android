@@ -37,6 +37,8 @@ internal class PrimaryButtonUiStateMapper(
             cvcCompleteFlow
         ) { screen, buttonsEnabled, amount, selection, customPrimaryButton, cvcComplete ->
             screen.buyButtonState.mapAsStateFlow { buyButtonState ->
+                val canClickWhenDisabled = screen.isFormScreen() && buttonsEnabled
+
                 customPrimaryButton ?: PrimaryButton.UIState(
                     label = buyButtonState.buyButtonOverride?.label ?: buyButtonLabel(
                         amount,
@@ -47,8 +49,12 @@ internal class PrimaryButtonUiStateMapper(
                     enabled = buttonsEnabled && selection != null &&
                         cvcRecollectionCompleteOrNotRequired(screen, cvcComplete, selection),
                     lockVisible = buyButtonState.buyButtonOverride?.lockEnabled ?: true,
-                    canClickWhileDisabled = screen.isFormScreen(),
-                    onDisabledClick = onDisabledClick,
+                    canClickWhileDisabled = canClickWhenDisabled,
+                    onDisabledClick = {
+                        if (canClickWhenDisabled) {
+                            onDisabledClick()
+                        }
+                    },
                 ).takeIf { buyButtonState.visible }
             }
         }.flatMapLatestAsStateFlow { it }
@@ -61,13 +67,19 @@ internal class PrimaryButtonUiStateMapper(
             selectionFlow,
             customPrimaryButtonUiStateFlow,
         ) { screen, buttonsEnabled, selection, customPrimaryButton ->
+            val canClickWhenDisabled = screen.isFormScreen() && buttonsEnabled
+
             customPrimaryButton ?: PrimaryButton.UIState(
                 label = continueButtonLabel(config.primaryButtonLabel),
                 onClick = onClick,
                 enabled = buttonsEnabled && selection != null,
                 lockVisible = false,
-                canClickWhileDisabled = screen.isFormScreen(),
-                onDisabledClick = onDisabledClick,
+                canClickWhileDisabled = canClickWhenDisabled,
+                onDisabledClick = {
+                    if (canClickWhenDisabled) {
+                        onDisabledClick()
+                    }
+                },
             ).takeIf {
                 /**
                  * PaymentMethods requireConfirmation when they have mandates / terms of service

@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.stripe.android.core.strings.ResolvableString
@@ -67,7 +68,8 @@ class CardBillingAddressElement(
         AddressFieldConfiguration.HIDDEN
     }
 
-    private val addressElement = autocompleteAddressInteractorFactory?.takeIf {
+    @VisibleForTesting
+    val addressElement = autocompleteAddressInteractorFactory?.takeIf {
         collectionConfiguration.address == BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
     }?.let { factory ->
         AutocompleteAddressElement(

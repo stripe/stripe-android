@@ -3,7 +3,9 @@ package com.stripe.android.paymentsheet.viewmodels
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.cash.turbine.Turbine
 import app.cash.turbine.test
+import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -20,6 +22,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
+import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.verticalmode.FakeVerticalModeFormInteractor
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.elements.CvcConfig
@@ -39,7 +42,6 @@ class PrimaryButtonUiStateMapperTest {
             label = "US Bank Account FTW".resolvableString,
             onClick = {},
             enabled = false,
-            clickable = false,
             lockVisible = true,
         )
 
@@ -505,7 +507,6 @@ class PrimaryButtonUiStateMapperTest {
             label = "US Bank Account FTW".resolvableString,
             onClick = {},
             enabled = false,
-            clickable = false,
             lockVisible = true,
         )
 
@@ -529,8 +530,9 @@ class PrimaryButtonUiStateMapperTest {
     }
 
     @Test
-    fun `button should be clickable but not enabled in the 'AddFirstPaymentMethod' form screen`() =
-        clickableAndEnabledTest(
+    fun `button should not be enabled but clickable while disabled in the 'AddFirstPaymentMethod' form screen`() =
+        clickableWhileDisabledTest(
+            buttonsEnabled = true,
             screen = PaymentSheetScreen.AddFirstPaymentMethod(
                 FakeAddPaymentMethodInteractor(
                     initialState = FakeAddPaymentMethodInteractor.createState(
@@ -538,11 +540,19 @@ class PrimaryButtonUiStateMapperTest {
                     )
                 )
             )
-        )
+        ) { state, disabledButtonTurbine ->
+            assertThat(state.enabled).isFalse()
+            assertThat(state.canClickWhileDisabled).isTrue()
+
+            state.onDisabledClick()
+
+            assertThat(disabledButtonTurbine.awaitItem()).isNotNull()
+        }
 
     @Test
-    fun `button should be clickable but not enabled in the 'AddAnotherPaymentMethod' form screen`() =
-        clickableAndEnabledTest(
+    fun `button should not be enabled but clickable while disabled in the 'AddAnotherPaymentMethod' form screen`() =
+        clickableWhileDisabledTest(
+            buttonsEnabled = true,
             screen = PaymentSheetScreen.AddAnotherPaymentMethod(
                 FakeAddPaymentMethodInteractor(
                     initialState = FakeAddPaymentMethodInteractor.createState(
@@ -550,43 +560,164 @@ class PrimaryButtonUiStateMapperTest {
                     )
                 )
             )
-        )
+        ) { state, disabledButtonTurbine ->
+            assertThat(state.enabled).isFalse()
+            assertThat(state.canClickWhileDisabled).isTrue()
+
+            state.onDisabledClick()
+
+            assertThat(disabledButtonTurbine.awaitItem()).isNotNull()
+        }
 
     @Test
-    fun `button should be clickable but not enabled in the 'VerticalMode' form screen`() =
-        clickableAndEnabledTest(
+    fun `button should not be enabled but clickable while disabled in the 'VerticalMode' form screen`() =
+        clickableWhileDisabledTest(
+            buttonsEnabled = true,
             screen = PaymentSheetScreen.VerticalModeForm(
                 FakeVerticalModeFormInteractor.create(
                     paymentMethodCode = "card",
                     metadata = PaymentMethodMetadataFactory.create(),
                 )
             )
-        )
+        ) { state, disabledButtonTurbine ->
+            assertThat(state.enabled).isFalse()
+            assertThat(state.canClickWhileDisabled).isTrue()
 
-    private fun clickableAndEnabledTest(
+            state.onDisabledClick()
+
+            assertThat(disabledButtonTurbine.awaitItem()).isNotNull()
+        }
+
+    @Test
+    fun `button should not be enabled or clickable while disabled in the 'AddFirstPaymentMethod' form screen`() =
+        clickableWhileDisabledTest(
+            buttonsEnabled = false,
+            screen = PaymentSheetScreen.AddFirstPaymentMethod(
+                FakeAddPaymentMethodInteractor(
+                    initialState = FakeAddPaymentMethodInteractor.createState(
+                        paymentMethodCode = PaymentMethod.Type.USBankAccount.code
+                    )
+                )
+            )
+        ) { state, disabledButtonTurbine ->
+            assertThat(state.enabled).isFalse()
+            assertThat(state.canClickWhileDisabled).isFalse()
+
+            state.onDisabledClick()
+            disabledButtonTurbine.expectNoEvents()
+        }
+
+    @Test
+    fun `button should not be enabled or clickable while disabled in the 'AddAnotherPaymentMethod' form screen`() =
+        clickableWhileDisabledTest(
+            buttonsEnabled = false,
+            screen = PaymentSheetScreen.AddAnotherPaymentMethod(
+                FakeAddPaymentMethodInteractor(
+                    initialState = FakeAddPaymentMethodInteractor.createState(
+                        paymentMethodCode = PaymentMethod.Type.USBankAccount.code
+                    )
+                )
+            )
+        ) { state, disabledButtonTurbine ->
+            assertThat(state.enabled).isFalse()
+            assertThat(state.canClickWhileDisabled).isFalse()
+
+            state.onDisabledClick()
+            disabledButtonTurbine.expectNoEvents()
+        }
+
+    @Test
+    fun `button should not be enabled or clickable while disabled in the 'VerticalMode' form screen`() =
+        clickableWhileDisabledTest(
+            buttonsEnabled = false,
+            screen = PaymentSheetScreen.VerticalModeForm(
+                FakeVerticalModeFormInteractor.create(
+                    paymentMethodCode = "card",
+                    metadata = PaymentMethodMetadataFactory.create(),
+                )
+            )
+        ) { state, disabledButtonTurbine ->
+            assertThat(state.enabled).isFalse()
+            assertThat(state.canClickWhileDisabled).isFalse()
+
+            state.onDisabledClick()
+            disabledButtonTurbine.expectNoEvents()
+        }
+
+    @Test
+    fun `button should not be clickable while disabled if not form screen`() =
+        clickableWhileDisabledTest(
+            buttonsEnabled = true,
+            screen = PaymentSheetScreen.VerticalMode(
+                FakePaymentMethodVerticalLayoutInteractor.create()
+            ),
+        ) { state, disabledButtonTurbine ->
+            assertThat(state.canClickWhileDisabled).isFalse()
+
+            state.onDisabledClick()
+            disabledButtonTurbine.expectNoEvents()
+        }
+
+    private fun clickableWhileDisabledTest(
+        buttonsEnabled: Boolean,
         screen: PaymentSheetScreen,
+        block: suspend (state: PrimaryButton.UIState, onDisabledClickTurbine: Turbine<Unit>) -> Unit,
     ) = runTest {
+        val onDisabledClickTurbine = Turbine<Unit>()
+
         val mapper = createMapper(
             isProcessingPayment = true,
             currentScreenFlow = stateFlowOf(screen),
-            buttonsEnabledFlow = stateFlowOf(true),
+            buttonsEnabledFlow = stateFlowOf(buttonsEnabled),
             amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
             selectionFlow = stateFlowOf(null),
             customPrimaryButtonUiStateFlow = stateFlowOf(null),
-            cvcFlow = stateFlowOf(false)
+            cvcFlow = stateFlowOf(false),
+            onDisabledClick = {
+                onDisabledClickTurbine.add(Unit)
+            }
         )
 
-        val result = mapper.forCustomFlow()
+        val customResult = mapper.forCustomFlow()
 
-        result.test {
-            val button = awaitItem()
+        turbineScope {
+            onDisabledClickTurbine.expectNoEvents()
+
+            val resultTurbine = customResult.testIn(this)
+
+            val button = resultTurbine.awaitItem()
 
             assertThat(button).isNotNull()
 
             val nonNullButton = requireNotNull(button)
 
-            assertThat(nonNullButton.enabled).isFalse()
-            assertThat(nonNullButton.clickable).isTrue()
+            block(nonNullButton, onDisabledClickTurbine)
+
+            resultTurbine.expectNoEvents()
+            onDisabledClickTurbine.expectNoEvents()
+
+            resultTurbine.cancelAndIgnoreRemainingEvents()
+        }
+
+        val completeResult = mapper.forCompleteFlow()
+
+        turbineScope {
+            onDisabledClickTurbine.expectNoEvents()
+
+            val resultTurbine = completeResult.testIn(this)
+
+            val button = resultTurbine.awaitItem()
+
+            assertThat(button).isNotNull()
+
+            val nonNullButton = requireNotNull(button)
+
+            block(nonNullButton, onDisabledClickTurbine)
+
+            resultTurbine.expectNoEvents()
+            onDisabledClickTurbine.expectNoEvents()
+
+            resultTurbine.cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -599,6 +730,7 @@ class PrimaryButtonUiStateMapperTest {
         selectionFlow: StateFlow<PaymentSelection?>,
         customPrimaryButtonUiStateFlow: StateFlow<PrimaryButton.UIState?>,
         cvcFlow: StateFlow<Boolean>,
+        onDisabledClick: () -> Unit = {},
     ): PrimaryButtonUiStateMapper {
         return PrimaryButtonUiStateMapper(
             config = config,
@@ -610,6 +742,7 @@ class PrimaryButtonUiStateMapperTest {
             customPrimaryButtonUiStateFlow = customPrimaryButtonUiStateFlow,
             cvcCompleteFlow = cvcFlow,
             onClick = {},
+            onDisabledClick = onDisabledClick,
         )
     }
 

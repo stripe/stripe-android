@@ -73,51 +73,71 @@ internal fun PrimaryButton(
                     disabledBackgroundColor = LinkTheme.colors.buttonBrand,
                 )
             ) {
-                when (state) {
-                    PrimaryButtonState.Processing -> LinkSpinner(
-                        modifier = Modifier
-                            .size(20.dp)
-                            .semantics { testTag = ProgressIndicatorTestTag },
-                        backgroundColor = LinkTheme.colors.surfaceBackdrop.copy(alpha = 0.1f),
-                        strokeWidth = 4.dp,
-                        filledColor = LinkTheme.colors.contentOnPrimaryButton,
-                    )
-                    PrimaryButtonState.Completed -> Icon(
-                        painter = painterResource(id = R.drawable.stripe_link_complete),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(24.dp)
-                            .semantics {
-                                testTag = CompletedIconTestTag
-                            },
-                        tint = LinkTheme.colors.contentOnPrimaryButton
-                    )
-                    else -> Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        PrimaryButtonIcon(iconStart)
-                        Text(
-                            text = label,
-                            modifier = Modifier.weight(1f),
-                            color = LinkTheme.colors.contentOnPrimaryButton
-                                .copy(alpha = LocalContentAlpha.current),
-                            textAlign = TextAlign.Center,
-                            style = LinkTheme.typography.bodyEmphasized,
-                        )
-                        PrimaryButtonIcon(iconEnd)
-                    }
-                }
+                PrimaryContent(
+                    state = state,
+                    label = label,
+                    iconStart = iconStart,
+                    iconEnd = iconEnd,
+                )
             }
 
-            DisabledButton(allowedDisabledClicks, onDisabledButtonClick)
+            DisabledButton(
+                state = state,
+                allowedDisabledClicks = allowedDisabledClicks,
+                onDisabledButtonClick = onDisabledButtonClick,
+            )
+        }
+    }
+}
+
+@Composable
+private fun PrimaryContent(
+    state: PrimaryButtonState,
+    label: String,
+    @DrawableRes iconStart: Int? = null,
+    @DrawableRes iconEnd: Int? = null
+) {
+    when (state) {
+        PrimaryButtonState.Processing -> LinkSpinner(
+            modifier = Modifier
+                .size(20.dp)
+                .semantics { testTag = ProgressIndicatorTestTag },
+            backgroundColor = LinkTheme.colors.surfaceBackdrop.copy(alpha = 0.1f),
+            strokeWidth = 4.dp,
+            filledColor = LinkTheme.colors.contentOnPrimaryButton,
+        )
+        PrimaryButtonState.Completed -> Icon(
+            painter = painterResource(id = R.drawable.stripe_link_complete),
+            contentDescription = null,
+            modifier = Modifier
+                .size(24.dp)
+                .semantics {
+                    testTag = CompletedIconTestTag
+                },
+            tint = LinkTheme.colors.contentOnPrimaryButton
+        )
+        else -> Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            PrimaryButtonIcon(iconStart)
+            Text(
+                text = label,
+                modifier = Modifier.weight(1f),
+                color = LinkTheme.colors.contentOnPrimaryButton
+                    .copy(alpha = LocalContentAlpha.current),
+                textAlign = TextAlign.Center,
+                style = LinkTheme.typography.bodyEmphasized,
+            )
+            PrimaryButtonIcon(iconEnd)
         }
     }
 }
 
 @Composable
 private fun BoxScope.DisabledButton(
+    state: PrimaryButtonState,
     allowedDisabledClicks: Boolean,
     onDisabledButtonClick: () -> Unit,
 ) {
-    if (allowedDisabledClicks) {
+    if (state == PrimaryButtonState.Disabled && allowedDisabledClicks) {
         Box(
             Modifier
                 .matchParentSize()
