@@ -1367,6 +1367,67 @@ class DefaultIntentConfirmationInterceptorTest {
             )
         }
 
+    @Test
+    fun `Returns confirm params with hCaptchaToken set as RadarOptions when hCaptchaToken provided`() = runTest {
+        val hCaptchaToken = "test-hcaptcha-token"
+
+        val confirmParams = interceptWithSavedPaymentMethod(hCaptchaToken = hCaptchaToken)
+
+        assertRadarOptionsEquals(confirmParams, hCaptchaToken)
+    }
+
+    @Test
+    fun `Returns confirm params with null RadarOptions when hCaptchaToken is null`() = runTest {
+        val confirmParams = interceptWithSavedPaymentMethod(hCaptchaToken = null)
+
+        assertRadarOptionsIsNull(confirmParams)
+    }
+
+    @Test
+    fun `Returns confirm params with hCaptchaToken for deferred intent confirmation`() = runTest {
+        val hCaptchaToken = "deferred-hcaptcha-token"
+
+        val confirmParams = interceptWithDeferredIntent(hCaptchaToken = hCaptchaToken)
+
+        assertRadarOptionsEquals(confirmParams, hCaptchaToken)
+    }
+
+    @Test
+    fun `Returns confirm params with null RadarOptions for deferred intent when hCaptchaToken is null`() = runTest {
+        val confirmParams = interceptWithDeferredIntent(hCaptchaToken = null)
+
+        assertRadarOptionsIsNull(confirmParams)
+    }
+
+    @Test
+    fun `hCaptchaToken is properly passed through extension function for saved payment method`() = runTest {
+        val hCaptchaToken = "extension-hcaptcha-token"
+
+        val confirmParams = interceptWithSavedPaymentMethod(hCaptchaToken = hCaptchaToken)
+
+        assertRadarOptionsEquals(confirmParams, hCaptchaToken)
+    }
+
+    @Test
+    fun `hCaptchaToken is not set for new payment method confirmation option`() = runTest {
+        val interceptor = createIntentConfirmationInterceptor()
+
+        val nextStep = interceptor.intercept(
+            confirmationOption = PaymentMethodConfirmationOption.New(
+                createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                optionsParams = null,
+                extraParams = null,
+                shouldSave = false
+            ),
+            intent = PaymentIntentFactory.create(),
+            initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
+            shippingDetails = null,
+        )
+
+        val confirmParams = nextStep.asConfirmParams()
+        assertRadarOptionsIsNull(confirmParams)
+    }
+
     private fun testNoProvider(
         event: ErrorReporter.ErrorEvent,
         failureMessage: String,
@@ -1550,67 +1611,6 @@ class DefaultIntentConfirmationInterceptorTest {
         val paymentMethodId: String,
         val requestOptions: ApiRequest.Options
     )
-
-    @Test
-    fun `Returns confirm params with hCaptchaToken set as RadarOptions when hCaptchaToken provided`() = runTest {
-        val hCaptchaToken = "test-hcaptcha-token"
-
-        val confirmParams = interceptWithSavedPaymentMethod(hCaptchaToken = hCaptchaToken)
-
-        assertRadarOptionsEquals(confirmParams, hCaptchaToken)
-    }
-
-    @Test
-    fun `Returns confirm params with null RadarOptions when hCaptchaToken is null`() = runTest {
-        val confirmParams = interceptWithSavedPaymentMethod(hCaptchaToken = null)
-
-        assertRadarOptionsIsNull(confirmParams)
-    }
-
-    @Test
-    fun `Returns confirm params with hCaptchaToken for deferred intent confirmation`() = runTest {
-        val hCaptchaToken = "deferred-hcaptcha-token"
-
-        val confirmParams = interceptWithDeferredIntent(hCaptchaToken = hCaptchaToken)
-
-        assertRadarOptionsEquals(confirmParams, hCaptchaToken)
-    }
-
-    @Test
-    fun `Returns confirm params with null RadarOptions for deferred intent when hCaptchaToken is null`() = runTest {
-        val confirmParams = interceptWithDeferredIntent(hCaptchaToken = null)
-
-        assertRadarOptionsIsNull(confirmParams)
-    }
-
-    @Test
-    fun `hCaptchaToken is properly passed through extension function for saved payment method`() = runTest {
-        val hCaptchaToken = "extension-hcaptcha-token"
-
-        val confirmParams = interceptWithSavedPaymentMethod(hCaptchaToken = hCaptchaToken)
-
-        assertRadarOptionsEquals(confirmParams, hCaptchaToken)
-    }
-
-    @Test
-    fun `hCaptchaToken is not set for new payment method confirmation option`() = runTest {
-        val interceptor = createIntentConfirmationInterceptor()
-
-        val nextStep = interceptor.intercept(
-            confirmationOption = PaymentMethodConfirmationOption.New(
-                createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                optionsParams = null,
-                extraParams = null,
-                shouldSave = false
-            ),
-            intent = PaymentIntentFactory.create(),
-            initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
-            shippingDetails = null,
-        )
-
-        val confirmParams = nextStep.asConfirmParams()
-        assertRadarOptionsIsNull(confirmParams)
-    }
 
     private suspend fun interceptWithSavedPaymentMethod(
         hCaptchaToken: String?
