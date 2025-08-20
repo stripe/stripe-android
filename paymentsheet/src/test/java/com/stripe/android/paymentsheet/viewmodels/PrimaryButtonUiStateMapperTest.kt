@@ -6,6 +6,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
@@ -19,6 +20,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
+import com.stripe.android.paymentsheet.verticalmode.FakeVerticalModeFormInteractor
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.elements.CvcConfig
 import com.stripe.android.ui.core.elements.CvcController
@@ -37,6 +39,7 @@ class PrimaryButtonUiStateMapperTest {
             label = "US Bank Account FTW".resolvableString,
             onClick = {},
             enabled = false,
+            clickable = false,
             lockVisible = true,
         )
 
@@ -502,6 +505,7 @@ class PrimaryButtonUiStateMapperTest {
             label = "US Bank Account FTW".resolvableString,
             onClick = {},
             enabled = false,
+            clickable = false,
             lockVisible = true,
         )
 
@@ -521,6 +525,68 @@ class PrimaryButtonUiStateMapperTest {
 
         result.test {
             assertThat(awaitItem()).isEqualTo(usBankButton)
+        }
+    }
+
+    @Test
+    fun `button should be clickable but not enabled in the 'AddFirstPaymentMethod' form screen`() =
+        clickableAndEnabledTest(
+            screen = PaymentSheetScreen.AddFirstPaymentMethod(
+                FakeAddPaymentMethodInteractor(
+                    initialState = FakeAddPaymentMethodInteractor.createState(
+                        paymentMethodCode = PaymentMethod.Type.USBankAccount.code
+                    )
+                )
+            )
+        )
+
+    @Test
+    fun `button should be clickable but not enabled in the 'AddAnotherPaymentMethod' form screen`() =
+        clickableAndEnabledTest(
+            screen = PaymentSheetScreen.AddAnotherPaymentMethod(
+                FakeAddPaymentMethodInteractor(
+                    initialState = FakeAddPaymentMethodInteractor.createState(
+                        paymentMethodCode = PaymentMethod.Type.USBankAccount.code
+                    )
+                )
+            )
+        )
+
+    @Test
+    fun `button should be clickable but not enabled in the 'VerticalMode' form screen`() =
+        clickableAndEnabledTest(
+            screen = PaymentSheetScreen.VerticalModeForm(
+                FakeVerticalModeFormInteractor.create(
+                    paymentMethodCode = "card",
+                    metadata = PaymentMethodMetadataFactory.create(),
+                )
+            )
+        )
+
+    private fun clickableAndEnabledTest(
+        screen: PaymentSheetScreen,
+    ) = runTest {
+        val mapper = createMapper(
+            isProcessingPayment = true,
+            currentScreenFlow = stateFlowOf(screen),
+            buttonsEnabledFlow = stateFlowOf(true),
+            amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
+            selectionFlow = stateFlowOf(null),
+            customPrimaryButtonUiStateFlow = stateFlowOf(null),
+            cvcFlow = stateFlowOf(false)
+        )
+
+        val result = mapper.forCustomFlow()
+
+        result.test {
+            val button = awaitItem()
+
+            assertThat(button).isNotNull()
+
+            val nonNullButton = requireNotNull(button)
+
+            assertThat(nonNullButton.enabled).isFalse()
+            assertThat(nonNullButton.clickable).isTrue()
         }
     }
 

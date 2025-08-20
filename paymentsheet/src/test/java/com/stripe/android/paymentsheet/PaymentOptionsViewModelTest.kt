@@ -1032,6 +1032,29 @@ internal class PaymentOptionsViewModelTest {
         }
     }
 
+    @Test
+    fun `On user selection with a null selection, should request validation`() =
+        runTest {
+            val viewModel = createViewModel(
+                args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                    paymentSelection = null,
+                    paymentMethods = emptyList(),
+                    isGooglePayReady = false,
+                    linkState = null
+                )
+            )
+
+            viewModel.onUserSelection()
+
+            viewModel.validationRequested.test {
+                expectNoEvents()
+
+                viewModel.onUserSelection()
+
+                assertThat(awaitItem()).isNotNull()
+            }
+        }
+
     /**
      * Helper function to test user cancellation scenarios
      */

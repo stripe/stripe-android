@@ -52,7 +52,7 @@ internal fun VerticalModeFormUI(
         FormElement(
             enabled = enabled,
             selectedPaymentMethodCode = state.selectedPaymentMethodCode,
-            formElements = state.formElements,
+            formElements = state.formUiElements,
             formArguments = state.formArguments,
             usBankAccountFormArguments = state.usBankAccountFormArguments,
             horizontalPaddingValues = horizontalPadding,
