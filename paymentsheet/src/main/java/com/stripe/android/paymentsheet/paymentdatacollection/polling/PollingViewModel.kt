@@ -231,6 +231,7 @@ internal class PollingViewModel @Inject constructor(
         val pollingStrategy: PollingStrategy,
         @StringRes val ctaText: Int,
         val stripeAccountId: String?,
+        val qrCodeUrl: String?,
     )
 }
 

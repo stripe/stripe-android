@@ -212,7 +212,8 @@ private fun createPollingViewModel(
             initialDelay = initialDelay,
             pollingStrategy = IntentStatusPoller.PollingStrategy.ExponentialBackoff(maxAttempts = 10),
             ctaText = R.string.stripe_upi_polling_message,
-            stripeAccountId = null
+            stripeAccountId = null,
+            qrCodeUrl = null,
         ),
         poller = poller,
         timeProvider = timeProvider,

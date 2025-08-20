@@ -189,7 +189,8 @@ internal class PollingActivityTest {
                 args.initialDelayInSeconds.seconds,
                 args.pollingStrategy,
                 args.ctaText,
-                args.stripeAccountId
+                args.stripeAccountId,
+                args.qrCodeUrl,
             ),
             poller = poller,
             timeProvider = timeProvider,
