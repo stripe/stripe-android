@@ -17,6 +17,7 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentMethod
+import com.stripe.android.link.LinkPaymentMethodFilter
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.LinkScreen.UpdateCard.BillingDetailsUpdateFlow
 import com.stripe.android.link.account.LinkAccountManager
@@ -55,6 +56,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.reflect.KClass
 
 internal class WalletViewModel @Inject constructor(
     private val configuration: LinkConfiguration,
@@ -137,13 +139,28 @@ internal class WalletViewModel @Inject constructor(
                 if (paymentDetailsState.paymentDetails.isEmpty()) {
                     navigateAndClearStack(LinkScreen.PaymentMethod)
                 } else {
+                    val paymentMethodFilter =
+                        (linkLaunchMode as? LinkLaunchMode.PaymentMethodSelection)?.paymentMethodFilter
+                    val filterClass: KClass<out ConsumerPaymentDetails.PaymentDetails>? =
+                        paymentMethodFilter?.let {
+                            when (it) {
+                                LinkPaymentMethodFilter.Card ->
+                                    ConsumerPaymentDetails.Card::class
+                                LinkPaymentMethodFilter.BankAccount ->
+                                    ConsumerPaymentDetails.BankAccount::class
+                            }
+                        }
+                    val paymentDetails = paymentDetailsState.paymentDetails
+                        .filter { filterClass?.isInstance(it.details) != false }
+                        .toList()
+
                     val currentState = _uiState.updateAndGet {
-                        it.updateWithResponse(paymentDetailsState.paymentDetails)
+                        it.updateWithResponse(paymentDetails)
                     }
 
                     // Auto-select default payment method only on first load
                     if (shouldAutoSelectDefaultPaymentMethod() && !currentState.hasAttemptedAutoSelection) {
-                        handleAutoSelection(paymentDetailsState.paymentDetails)
+                        handleAutoSelection(paymentDetails)
                     }
                 }
             }

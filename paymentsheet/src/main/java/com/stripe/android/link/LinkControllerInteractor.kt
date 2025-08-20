@@ -9,7 +9,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.flatMapCatching
-import com.stripe.android.link.LinkController.AuthenticationResult
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.attestation.LinkAttestationCheck
@@ -84,7 +83,7 @@ internal class LinkControllerInteractor @Inject constructor(
     val presentPaymentMethodsResultFlow = _presentPaymentMethodsResultFlow.asSharedFlow()
 
     private val _authenticationResultFlow =
-        MutableSharedFlow<AuthenticationResult>(replay = 1)
+        MutableSharedFlow<LinkController.AuthenticationResult>(replay = 1)
     val authenticationResultFlow = _authenticationResultFlow.asSharedFlow()
 
     fun state(context: Context): StateFlow<LinkController.State> {
@@ -131,6 +130,7 @@ internal class LinkControllerInteractor @Inject constructor(
     fun presentPaymentMethods(
         launcher: ActivityResultLauncher<LinkActivityContract.Args>,
         email: String?,
+        paymentMethodType: LinkController.PaymentMethodType?,
     ) {
         present(
             launcher = launcher,
@@ -143,6 +143,7 @@ internal class LinkControllerInteractor @Inject constructor(
             getLaunchMode = { _, state ->
                 LinkLaunchMode.PaymentMethodSelection(
                     selectedPayment = state.selectedPaymentMethod?.details,
+                    paymentMethodFilter = paymentMethodType?.toFilter(),
                     sharePaymentDetailsImmediatelyAfterCreation = false,
                     shouldShowSecondaryCta = false,
                 )
@@ -174,13 +175,13 @@ internal class LinkControllerInteractor @Inject constructor(
             email = email,
             onConfigurationError = { error ->
                 _authenticationResultFlow.tryEmit(
-                    AuthenticationResult.Failed(error)
+                    LinkController.AuthenticationResult.Failed(error)
                 )
             },
             getLaunchMode = { linkAccount, _ ->
                 if (linkAccount?.isVerified == true) {
                     logger.debug("$tag: account is already verified, skipping authentication")
-                    _authenticationResultFlow.tryEmit(AuthenticationResult.Success)
+                    _authenticationResultFlow.tryEmit(LinkController.AuthenticationResult.Success)
                     null
                 } else {
                     LinkLaunchMode.Authentication(existingOnly = existingOnly)
@@ -298,16 +299,16 @@ internal class LinkControllerInteractor @Inject constructor(
         when (result) {
             is LinkActivityResult.Canceled -> {
                 logger.debug("$tag: authentication canceled")
-                _authenticationResultFlow.tryEmit(AuthenticationResult.Canceled)
+                _authenticationResultFlow.tryEmit(LinkController.AuthenticationResult.Canceled)
             }
             is LinkActivityResult.Completed -> {
                 logger.debug("$tag: authentication completed")
-                _authenticationResultFlow.tryEmit(AuthenticationResult.Success)
+                _authenticationResultFlow.tryEmit(LinkController.AuthenticationResult.Success)
             }
             is LinkActivityResult.Failed -> {
                 logger.debug("$tag: authentication failed")
                 _authenticationResultFlow.tryEmit(
-                    AuthenticationResult.Failed(result.error)
+                    LinkController.AuthenticationResult.Failed(result.error)
                 )
             }
             is LinkActivityResult.PaymentMethodObtained -> {
@@ -541,3 +542,9 @@ internal fun ConsumerPaymentDetails.PaymentDetails.getIconDrawableRes(isDarkThem
             getLinkIcon(iconOnly = true)
     }
 }
+
+private fun LinkController.PaymentMethodType.toFilter(): LinkPaymentMethodFilter =
+    when (this) {
+        LinkController.PaymentMethodType.Card -> LinkPaymentMethodFilter.Card
+        LinkController.PaymentMethodType.BankAccount -> LinkPaymentMethodFilter.BankAccount
+    }

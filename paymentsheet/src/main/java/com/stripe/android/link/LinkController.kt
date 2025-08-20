@@ -301,10 +301,14 @@ class LinkController @Inject internal constructor(
          * matches an existing Link account, the account's payment methods will be available for selection.
          * If null, the user will need to sign in or create a Link account.
          */
-        fun presentPaymentMethods(email: String?) {
+        fun presentPaymentMethods(
+            email: String?,
+            paymentMethodType: PaymentMethodType? = null
+        ) {
             interactor.presentPaymentMethods(
                 launcher = coordinator.linkActivityResultLauncher,
                 email = email,
+                paymentMethodType = paymentMethodType,
             )
         }
 
@@ -554,6 +558,12 @@ class LinkController @Inject internal constructor(
 
         /** The user is fully logged in and verified. */
         LoggedIn,
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class PaymentMethodType {
+        Card,
+        BankAccount;
     }
 
     /**
