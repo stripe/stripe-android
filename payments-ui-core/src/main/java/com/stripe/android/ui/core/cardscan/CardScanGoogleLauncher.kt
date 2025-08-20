@@ -52,8 +52,9 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
             val data = result.data ?: return CardScanResult.Canceled
             val paymentCardRecognitionResult = PaymentCardRecognitionResult.getFromIntent(data)
             val pan = paymentCardRecognitionResult?.pan
+            val expirationDate = paymentCardRecognitionResult?.creditCardExpirationDate
             return if (pan != null) {
-                CardScanResult.Completed(ScannedCard(pan))
+                CardScanResult.Completed(ScannedCard(pan, expirationDate?.month, expirationDate?.year))
             } else {
                 val error = Throwable("Failed to parse card data")
                 CardScanResult.Failed(error)
@@ -99,4 +100,6 @@ internal sealed interface CardScanResult {
  */
 internal data class ScannedCard(
     val pan: String,
+    val expirationMonth: Int?,
+    val expirationYear: Int?
 )

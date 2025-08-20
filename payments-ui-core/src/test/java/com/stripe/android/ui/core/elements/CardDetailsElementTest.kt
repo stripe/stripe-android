@@ -9,6 +9,8 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.stripecardscan.R
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.ui.core.cardscan.CardScanResult
+import com.stripe.android.ui.core.cardscan.ScannedCard
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.TextFieldIcon
@@ -255,6 +257,44 @@ class CardDetailsElementTest {
                     IdentifierSpec.CardCvc to FormFieldEntry("321", true),
                     IdentifierSpec.PreferredCardBrand to FormFieldEntry("cartes_bancaires", true),
                     IdentifierSpec.CardBrand to FormFieldEntry("cartes_bancaires", true),
+                    IdentifierSpec.CardExpMonth to FormFieldEntry("01", true),
+                    IdentifierSpec.CardExpYear to FormFieldEntry("2030", true)
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `test card scan result should fill in card number and expiration date`() = runTest {
+        val cardController = CardDetailsController(
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            initialValues = emptyMap(),
+            uiContext = testDispatcher,
+            workContext = testDispatcher,
+        )
+        val cardDetailsElement = CardDetailsElement(
+            IdentifierSpec.Generic("card_details"),
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            initialValues = emptyMap(),
+            controller = cardController
+        )
+
+        cardController.onCardScanResult(
+            CardScanResult.Completed(
+                scannedCard = ScannedCard(
+                    pan = "4242424242424242",
+                    expirationMonth = 1,
+                    expirationYear = 2030,
+                )
+            )
+        )
+
+        cardDetailsElement.getFormFieldValueFlow().test {
+            assertThat(awaitItem()).containsExactlyElementsIn(
+                listOf(
+                    IdentifierSpec.CardNumber to FormFieldEntry("4242424242424242", true),
+                    IdentifierSpec.CardCvc to FormFieldEntry("", false),
+                    IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
                     IdentifierSpec.CardExpMonth to FormFieldEntry("01", true),
                     IdentifierSpec.CardExpYear to FormFieldEntry("2030", true)
                 )

@@ -10,14 +10,51 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
+import com.google.android.gms.wallet.CreditCardExpirationDate
+import com.google.android.gms.wallet.PaymentCardRecognitionResult
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.mockStatic
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class CardScanGoogleLauncherTest {
+
+    @Test
+    fun `parseActivityResult with valid GPCR data returns Completed`() = runScenario {
+        val mockResult = mock<PaymentCardRecognitionResult>()
+        val mockExpirationDate = mock<CreditCardExpirationDate>()
+
+        whenever(mockResult.pan).thenReturn("4242424242424242")
+        whenever(mockResult.creditCardExpirationDate).thenReturn(mockExpirationDate)
+        whenever(mockExpirationDate.month).thenReturn(12)
+        whenever(mockExpirationDate.year).thenReturn(2042)
+
+        mockStatic(PaymentCardRecognitionResult::class.java).use { mockedStatic ->
+            mockedStatic.`when`<PaymentCardRecognitionResult> {
+                PaymentCardRecognitionResult.getFromIntent(any())
+            }.thenReturn(mockResult)
+
+            val intent = Intent().putExtra(
+                "com.google.android.gms.wallet.PaymentCardRecognitionResult",
+                mockResult
+            )
+            val result = ActivityResult(Activity.RESULT_OK, intent)
+
+            val scanResult = launcher.parseActivityResult(result)
+
+            assertThat(scanResult).isInstanceOf(CardScanResult.Completed::class.java)
+            val completedResult = scanResult as CardScanResult.Completed
+            assertThat(completedResult.scannedCard.pan).isEqualTo("4242424242424242")
+            assertThat(completedResult.scannedCard.expirationMonth).isEqualTo(12)
+            assertThat(completedResult.scannedCard.expirationYear).isEqualTo(2042)
+        }
+    }
 
     @Test
     fun `parseActivityResult with RESULT_CANCELED returns Canceled`() = runScenario {
