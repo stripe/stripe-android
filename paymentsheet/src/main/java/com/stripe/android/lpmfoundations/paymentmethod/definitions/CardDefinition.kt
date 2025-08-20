@@ -282,7 +282,7 @@ internal class CombinedLinkMandateElement(
             // non-signup version of the mandate text.
             mandateText = if (linkState?.isExpanded == true && isLinkUI.not()) {
                 stringResource(
-                    id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_on,
+                    id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_on_v3,
                     formatArgs = arrayOf(merchantName)
                 ).replaceHyperlinks()
             } else {

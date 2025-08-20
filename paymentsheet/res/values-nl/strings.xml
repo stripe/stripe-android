@@ -115,6 +115,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Door verder te gaan, ga je ermee akkoord jouw informatie op te slaan voor toekomstige aankopen bij %s en <link>Link</link>Je gaat ook akkoord met Link\'s <terms>Voorwaarden</terms> en <privacy>Privacy</privacy>.]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Door verder te gaan, ga je ermee akkoord dat jouw informatie wordt opgeslagen voor toekomstige aankopen bij %s en <link>Link</link> (zie <terms>Voorwaarden</terms> en <privacy>Privacy</privacy>).]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Door verder te gaan, ga je ermee akkoord dat jouw informatie wordt opgeslagen voor toekomstige aankopen bij %s en <link>Link</link> volgens Link <terms>voorwaarden</terms> en <privacy>privacy</privacy>.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">De betaalkaart is niet bijgewerkt. Probeer het opnieuw.</string>
   <!-- Title shown above a carousel containing available payment methods -->
