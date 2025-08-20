@@ -18,6 +18,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.model.RadarOptions
 import com.stripe.android.model.RadarSessionWithHCaptcha
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
@@ -51,6 +52,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import java.util.Objects
+import javax.inject.Provider
 import com.stripe.android.R as PaymentsCoreR
 
 @OptIn(SharedPaymentTokenSessionPreview::class)
@@ -81,6 +83,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodOptionsParams = null,
             shippingValues = null,
             paymentMethodExtraParams = null,
+            hCaptchaToken = null,
         )
 
         val confirmNextStep = nextStep as? IntentConfirmationInterceptor.NextStep.Confirm
@@ -186,6 +189,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodOptionsParams = null,
             shippingValues = null,
             paymentMethodExtraParams = null,
+            hCaptchaToken = null,
         )
     }
 
@@ -266,6 +270,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodOptionsParams = null,
             paymentMethodExtraParams = null,
             shippingValues = null,
+            hCaptchaToken = null,
         )
     }
 
@@ -321,6 +326,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     paymentMethodOptionsParams = null,
                     paymentMethodExtraParams = null,
                     shippingValues = null,
+                    hCaptchaToken = null,
                 )
             }
 
@@ -446,6 +452,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodOptionsParams = null,
             paymentMethodExtraParams = null,
             shippingValues = null,
+            hCaptchaToken = null,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -488,6 +495,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodOptionsParams = null,
             paymentMethodExtraParams = null,
             shippingValues = null,
+            hCaptchaToken = null,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -528,6 +536,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodOptionsParams = null,
             paymentMethodExtraParams = null,
             shippingValues = null,
+            hCaptchaToken = null,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -582,6 +591,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodOptionsParams = null,
             paymentMethodExtraParams = null,
             shippingValues = null,
+            hCaptchaToken = null,
         )
 
         assertThat(nextStep).isInstanceOf<IntentConfirmationInterceptor.NextStep.Confirm>()
@@ -627,6 +637,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodOptionsParams = null,
             paymentMethodExtraParams = null,
             shippingValues = null,
+            hCaptchaToken = null,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -679,6 +690,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodOptionsParams = null,
             paymentMethodExtraParams = null,
             shippingValues = null,
+            hCaptchaToken = null,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -735,6 +747,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 ).takeIf { input },
                 paymentMethodExtraParams = null,
                 shippingValues = null,
+                hCaptchaToken = null,
             )
         }
 
@@ -792,6 +805,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodOptionsParams = null,
             paymentMethodExtraParams = null,
             shippingValues = null,
+            hCaptchaToken = null,
         )
 
         assertThat(observedValue).isTrue()
@@ -847,6 +861,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodOptionsParams = null,
             paymentMethodExtraParams = null,
             shippingValues = null,
+            hCaptchaToken = null,
         )
 
         assertThat(observedValue).isTrue()
@@ -887,6 +902,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodOptionsParams = null,
             paymentMethodExtraParams = null,
             shippingValues = null,
+            hCaptchaToken = null,
         )
 
         verify(stripeRepository, never()).retrieveStripeIntent(any(), any(), any())
@@ -934,6 +950,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 paymentMethodOptionsParams = null,
                 paymentMethodExtraParams = null,
                 shippingValues = null,
+                hCaptchaToken = null,
             )
 
             val failedStep = nextStep.asFail()
@@ -989,6 +1006,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 paymentMethodOptionsParams = null,
                 paymentMethodExtraParams = null,
                 shippingValues = null,
+                hCaptchaToken = null,
             )
         }
 
@@ -1038,6 +1056,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 paymentMethodOptionsParams = null,
                 paymentMethodExtraParams = null,
                 shippingValues = providedShippingAddress,
+                hCaptchaToken = null,
             )
 
             assertThat(nextStep).isEqualTo(
@@ -1410,16 +1429,17 @@ class DefaultIntentConfirmationInterceptorTest {
         }
     }
 
-    private fun createIntentConfirmationInterceptor(): DefaultIntentConfirmationInterceptor {
+    private fun createIntentConfirmationInterceptor(
+        stripeRepository: StripeRepository = object : AbsFakeStripeRepository() {},
+        intentCreationCallbackProvider: Provider<CreateIntentCallback?> = Provider<CreateIntentCallback?> { null }
+    ): DefaultIntentConfirmationInterceptor {
         return DefaultIntentConfirmationInterceptor(
-            stripeRepository = object : AbsFakeStripeRepository() {},
+            stripeRepository = stripeRepository,
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
             errorReporter = FakeErrorReporter(),
             allowsManualConfirmation = false,
-            intentCreationCallbackProvider = {
-                null
-            },
+            intentCreationCallbackProvider = intentCreationCallbackProvider,
             preparePaymentMethodHandlerProvider = {
                 null
             },
@@ -1530,6 +1550,144 @@ class DefaultIntentConfirmationInterceptorTest {
         val paymentMethodId: String,
         val requestOptions: ApiRequest.Options
     )
+
+    @Test
+    fun `Returns confirm params with hCaptchaToken set as RadarOptions when hCaptchaToken provided`() = runTest {
+        val hCaptchaToken = "test-hcaptcha-token"
+
+        val confirmParams = interceptWithSavedPaymentMethod(hCaptchaToken = hCaptchaToken)
+
+        assertRadarOptionsEquals(confirmParams, hCaptchaToken)
+    }
+
+    @Test
+    fun `Returns confirm params with null RadarOptions when hCaptchaToken is null`() = runTest {
+        val confirmParams = interceptWithSavedPaymentMethod(hCaptchaToken = null)
+
+        assertRadarOptionsIsNull(confirmParams)
+    }
+
+    @Test
+    fun `Returns confirm params with hCaptchaToken for deferred intent confirmation`() = runTest {
+        val hCaptchaToken = "deferred-hcaptcha-token"
+
+        val confirmParams = interceptWithDeferredIntent(hCaptchaToken = hCaptchaToken)
+
+        assertRadarOptionsEquals(confirmParams, hCaptchaToken)
+    }
+
+    @Test
+    fun `Returns confirm params with null RadarOptions for deferred intent when hCaptchaToken is null`() = runTest {
+        val confirmParams = interceptWithDeferredIntent(hCaptchaToken = null)
+
+        assertRadarOptionsIsNull(confirmParams)
+    }
+
+    @Test
+    fun `hCaptchaToken is properly passed through extension function for saved payment method`() = runTest {
+        val hCaptchaToken = "extension-hcaptcha-token"
+
+        val confirmParams = interceptWithSavedPaymentMethod(hCaptchaToken = hCaptchaToken)
+
+        assertRadarOptionsEquals(confirmParams, hCaptchaToken)
+    }
+
+    @Test
+    fun `hCaptchaToken is not set for new payment method confirmation option`() = runTest {
+        val interceptor = createIntentConfirmationInterceptor()
+
+        val nextStep = interceptor.intercept(
+            confirmationOption = PaymentMethodConfirmationOption.New(
+                createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                optionsParams = null,
+                extraParams = null,
+                shouldSave = false
+            ),
+            intent = PaymentIntentFactory.create(),
+            initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
+            shippingDetails = null,
+        )
+
+        val confirmParams = nextStep.asConfirmParams()
+        assertRadarOptionsIsNull(confirmParams)
+    }
+
+    private suspend fun interceptWithSavedPaymentMethod(
+        hCaptchaToken: String?
+    ): ConfirmPaymentIntentParams? {
+        val interceptor = createIntentConfirmationInterceptor()
+
+        val nextStep = interceptor.intercept(
+            confirmationOption = PaymentMethodConfirmationOption.Saved(
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                optionsParams = null,
+                hCaptchaToken = hCaptchaToken
+            ),
+            intent = PaymentIntentFactory.create(),
+            initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
+            shippingDetails = null,
+        )
+
+        return nextStep.asConfirmParams()
+    }
+
+    private suspend fun interceptWithDeferredIntent(
+        hCaptchaToken: String?
+    ): ConfirmPaymentIntentParams? {
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val interceptor = createIntentConfirmationInterceptor(
+            stripeRepository = object : AbsFakeStripeRepository() {
+                override suspend fun retrieveStripeIntent(
+                    clientSecret: String,
+                    options: ApiRequest.Options,
+                    expandFields: List<String>
+                ): Result<StripeIntent> {
+                    return Result.success(
+                        PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                            status = StripeIntent.Status.RequiresConfirmation,
+                        )
+                    )
+                }
+            },
+            intentCreationCallbackProvider = {
+                succeedingCreateIntentCallback(paymentMethod)
+            }
+        )
+
+        val nextStep = interceptor.intercept(
+            initializationMode = InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1099L,
+                        currency = "usd",
+                    ),
+                ),
+            ),
+            intent = PaymentIntentFactory.create(),
+            paymentMethod = paymentMethod,
+            paymentMethodOptionsParams = null,
+            paymentMethodExtraParams = null,
+            shippingValues = null,
+            hCaptchaToken = hCaptchaToken
+        )
+
+        return nextStep.asConfirmParams()
+    }
+
+    private fun IntentConfirmationInterceptor.NextStep.asConfirmParams(): ConfirmPaymentIntentParams? {
+        val confirmNextStep = this as? IntentConfirmationInterceptor.NextStep.Confirm
+        return confirmNextStep?.confirmParams as? ConfirmPaymentIntentParams
+    }
+
+    private fun assertRadarOptionsEquals(confirmParams: ConfirmPaymentIntentParams?, expectedToken: String) {
+        assertThat(confirmParams?.toParamMap()?.get("radar_options")).isEqualTo(
+            RadarOptions(expectedToken).toParamMap()
+        )
+    }
+
+    private fun assertRadarOptionsIsNull(confirmParams: ConfirmPaymentIntentParams?) {
+        assertThat(confirmParams?.toParamMap()?.get("radar_options")).isNull()
+    }
 
     private companion object {
         const val CREATE_INTENT_CALLBACK_MESSAGE =
