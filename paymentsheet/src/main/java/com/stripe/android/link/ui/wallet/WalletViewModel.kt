@@ -142,13 +142,15 @@ internal class WalletViewModel(
                 val filteredPaymentDetails = paymentDetailsState.paymentDetails
                     .filter { paymentMethodFilter?.invoke(it.details) != false }
                     .toList()
+                val currentState = _uiState.updateAndGet {
+                    it.updateWithResponse(filteredPaymentDetails)
+                }
                 if (filteredPaymentDetails.isEmpty()) {
                     when (addPaymentMethodOptions.default) {
                         AddPaymentMethodOption.Card -> {
                             navigateAndClearStack(LinkScreen.PaymentMethod)
                         }
                         is AddPaymentMethodOption.Bank -> {
-                            navigateAndClearStack(LinkScreen.Wallet)
                             presentAddBankAccount()
                         }
                         null -> {
@@ -161,10 +163,6 @@ internal class WalletViewModel(
                         }
                     }
                 } else {
-                    val currentState = _uiState.updateAndGet {
-                        it.updateWithResponse(filteredPaymentDetails)
-                    }
-
                     // Auto-select default payment method only on first load
                     if (shouldAutoSelectDefaultPaymentMethod() && !currentState.hasAttemptedAutoSelection) {
                         handleAutoSelection(filteredPaymentDetails)
@@ -205,10 +203,6 @@ internal class WalletViewModel(
                         errorMessage = if (isAfterAdding) null else it.errorMessage,
                         addBankAccountState = if (isAfterAdding) AddBankAccountState.Idle else it.addBankAccountState,
                     )
-                }
-
-                if (response.paymentDetails.isEmpty()) {
-                    navigateAndClearStack(LinkScreen.PaymentMethod)
                 }
             },
             // If we can't load the payment details there's nothing to see here

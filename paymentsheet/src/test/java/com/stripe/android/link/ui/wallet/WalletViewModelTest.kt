@@ -1082,32 +1082,30 @@ class WalletViewModelTest {
     }
 
     @Test
-    fun `navigates to Wallet when BankAccount filter results in empty list`() = runTest(dispatcher) {
+    fun `presents AddBankAccount when BankAccount filter results in empty list`() = runTest(dispatcher) {
         val linkAccountManager = WalletLinkAccountManager()
         linkAccountManager.listPaymentDetailsResult = Result.success(
             ConsumerPaymentDetails(paymentDetails = listOf(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD))
         )
 
-        var navigatedScreen: LinkScreen? = null
         val configuration = TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
                 linkFundingSources = listOf(ConsumerPaymentDetails.BankAccount.TYPE)
             )
         )
 
-        createViewModel(
+        val vm = createViewModel(
             linkAccount = TestFactory.LINK_ACCOUNT_WITH_PK,
             configuration = configuration,
             linkAccountManager = linkAccountManager,
             linkLaunchMode = createPaymentMethodSelectionMode(
                 paymentMethodFilter = LinkPaymentMethodFilter.BankAccount
             ),
-            navigateAndClearStack = { screen -> navigatedScreen = screen }
+            navigateAndClearStack = {}
         )
 
-        advanceUntilIdle()
-
-        assertThat(navigatedScreen).isEqualTo(LinkScreen.Wallet)
+        assertThat(vm.uiState.value.addBankAccountState)
+            .isInstanceOf(AddBankAccountState.Processing::class.java)
     }
 
     @Test
