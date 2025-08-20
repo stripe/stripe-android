@@ -196,6 +196,84 @@ class PollingViewModelTest {
         assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Failed)
         assertThat(fakePoller.pollingTurbine.awaitItem()).isFalse()
     }
+
+    @Test
+    fun `QR code shown on start when QR code available`() = runTest(testDispatcher) {
+        val viewModel = createPollingViewModel(
+            qrCodeUrl = "valid_url"
+        )
+
+        assertThat(viewModel.uiState.value.shouldShowQrCode).isTrue()
+    }
+
+    @Test
+    fun `QR code hidden on start when QR code not available`() = runTest(testDispatcher) {
+        val viewModel = createPollingViewModel(
+            qrCodeUrl = null,
+        )
+
+        assertThat(viewModel.uiState.value.shouldShowQrCode).isFalse()
+    }
+
+    @Test
+    fun `QR code hidden on cancel`() = runTest(testDispatcher) {
+        val viewModel = createPollingViewModel(
+            qrCodeUrl = "valid_url"
+        )
+
+        viewModel.handleCancel()
+
+        assertThat(viewModel.uiState.value.shouldShowQrCode).isFalse()
+    }
+
+    @Test
+    fun `QR code hidden on hide QR code`() = runTest(testDispatcher) {
+        val viewModel = createPollingViewModel(
+            qrCodeUrl = "valid_url"
+        )
+
+        viewModel.hideQrCode()
+
+        assertThat(viewModel.uiState.value.shouldShowQrCode).isFalse()
+    }
+
+    @Test
+    fun `QR code hidden when polling state is not active`() = runTest(testDispatcher) {
+        val fakePoller = FakeIntentStatusPoller()
+        val viewModel = createPollingViewModel(
+            qrCodeUrl = "valid_url",
+            poller = fakePoller,
+        )
+
+        assertThat(viewModel.uiState.value.shouldShowQrCode).isTrue()
+        assertThat(fakePoller.pollingTurbine.awaitItem()).isTrue()
+
+        fakePoller.emitNextPollResult(StripeIntent.Status.Succeeded)
+
+        assertThat(fakePoller.pollingTurbine.awaitItem()).isFalse()
+        assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Success)
+        assertThat(viewModel.uiState.value.shouldShowQrCode).isFalse()
+    }
+
+    @Test
+    fun `QR code not shown when previously hidden and polling state changes`() = runTest(testDispatcher) {
+        val fakePoller = FakeIntentStatusPoller()
+        val viewModel = createPollingViewModel(
+            qrCodeUrl = "valid_url",
+            poller = fakePoller,
+        )
+
+        assertThat(viewModel.uiState.value.shouldShowQrCode).isTrue()
+
+        viewModel.hideQrCode()
+        assertThat(viewModel.uiState.value.shouldShowQrCode).isFalse()
+
+        fakePoller.emitNextPollResult(StripeIntent.Status.RequiresAction)
+
+        assertThat(fakePoller.pollingTurbine.awaitItem()).isTrue()
+        assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Active)
+        assertThat(viewModel.uiState.value.shouldShowQrCode).isFalse()
+    }
 }
 
 private fun createPollingViewModel(
@@ -204,6 +282,7 @@ private fun createPollingViewModel(
     poller: IntentStatusPoller = FakeIntentStatusPoller(),
     timeProvider: TimeProvider = FakeTimeProvider(),
     savedStateHandle: SavedStateHandle = SavedStateHandle(),
+    qrCodeUrl: String? = null,
 ): PollingViewModel {
     return PollingViewModel(
         args = PollingViewModel.Args(
@@ -213,7 +292,7 @@ private fun createPollingViewModel(
             pollingStrategy = IntentStatusPoller.PollingStrategy.ExponentialBackoff(maxAttempts = 10),
             ctaText = R.string.stripe_upi_polling_message,
             stripeAccountId = null,
-            qrCodeUrl = null,
+            qrCodeUrl = qrCodeUrl,
         ),
         poller = poller,
         timeProvider = timeProvider,

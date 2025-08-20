@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.paymentdatacollection.polling
 import android.os.Build
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -42,6 +43,22 @@ internal class PollingActivityTest {
             composeTestRule
                 .onNodeWithText("Approve payment")
                 .assertIsDisplayed()
+        }
+    }
+
+    @Test
+    fun `Displays qr code screen when activity is opened and qr code url available`() {
+        val scenario = pollingScenario(
+            args = defaultArgs.copy(qrCodeUrl = "valid_url")
+        )
+
+        scenario.onActivity {
+            composeTestRule.waitUntil(timeoutMillis = 5_000) {
+                composeTestRule
+                    .onAllNodesWithTag(QR_CODE_WEB_VIEW_TEST_TAG)
+                    .fetchSemanticsNodes()
+                    .isNotEmpty()
+            }
         }
     }
 
