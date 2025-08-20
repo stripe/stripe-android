@@ -300,6 +300,7 @@ class LinkController @Inject internal constructor(
          * @param email The email address to use for Link account lookup. If provided and the email
          * matches an existing Link account, the account's payment methods will be available for selection.
          * If null, the user will need to sign in or create a Link account.
+         * @param paymentMethodType Optional filter for the type of payment methods to present.
          */
         fun presentPaymentMethods(
             email: String?,
@@ -560,6 +561,9 @@ class LinkController @Inject internal constructor(
         LoggedIn,
     }
 
+    /**
+     * The type of payment method to present for selection.
+     */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class PaymentMethodType {
         Card,
