@@ -14,6 +14,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.paymentdatacollection.polling.di.DaggerPollingComponent
 import com.stripe.android.polling.IntentStatusPoller
+import com.stripe.android.polling.IntentStatusPoller.PollingStrategy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -206,7 +207,7 @@ internal class PollingViewModel @Inject constructor(
 
             val config = IntentStatusPoller.Config(
                 clientSecret = args.clientSecret,
-                maxAttempts = args.maxAttempts,
+                pollingStrategy = args.pollingStrategy,
             )
 
             return DaggerPollingComponent
@@ -227,7 +228,7 @@ internal class PollingViewModel @Inject constructor(
         val clientSecret: String,
         val timeLimit: Duration,
         val initialDelay: Duration,
-        val maxAttempts: Int,
+        val pollingStrategy: PollingStrategy,
         @StringRes val ctaText: Int,
         val stripeAccountId: String?,
     )

@@ -32,7 +32,7 @@ internal class PollingActivity : AppCompatActivity() {
             clientSecret = args.clientSecret,
             timeLimit = args.timeLimitInSeconds.seconds,
             initialDelay = args.initialDelayInSeconds.seconds,
-            maxAttempts = args.maxAttempts,
+            pollingStrategy = args.pollingStrategy,
             ctaText = args.ctaText,
             stripeAccountId = args.stripeAccountId,
         )

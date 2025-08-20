@@ -45,9 +45,42 @@ class DefaultIntentStatusPollerTest {
     }
 
     @Test
+    fun `Updates state when polling result changes - fixed intervals`() = runTest(testDispatcher) {
+        val statuses = listOf(
+            RequiresAction,
+            RequiresCapture,
+            Succeeded,
+        )
+        val retryIntervalInSeconds = 1
+        // Add an offset to the delay time so that we run after the delay has finished.
+        val delayTimeInMillis = (retryIntervalInSeconds * 1000 + 10).toLong()
+
+        val poller = createIntentStatusPoller(
+            enqueuedStatuses = statuses,
+            pollingStrategy = IntentStatusPoller.PollingStrategy.FixedIntervals(retryIntervalInSeconds),
+            dispatcher = testDispatcher,
+        )
+
+        assertThat(poller.state.value).isNull()
+
+        poller.startPolling(scope = this@runTest)
+        assertThat(poller.state.value).isEqualTo(RequiresAction)
+
+        advanceTimeBy(delayTimeInMillis)
+        assertThat(poller.state.value).isEqualTo(RequiresCapture)
+
+        advanceTimeBy(delayTimeInMillis)
+        assertThat(poller.state.value).isEqualTo(Succeeded)
+
+        poller.stopPolling()
+    }
+
+    @Test
     fun `Stops when reaching max attempts`() = runTest(testDispatcher) {
         val poller = createIntentStatusPoller(
-            maxAttempts = 3,
+            pollingStrategy = IntentStatusPoller.PollingStrategy.ExponentialBackoff(
+                maxAttempts = 3
+            ),
             enqueuedStatuses = listOf(
                 RequiresPaymentMethod,
                 RequiresConfirmation,
@@ -74,6 +107,29 @@ class DefaultIntentStatusPollerTest {
 
         // The state should be unchanged
         assertThat(poller.state.value).isEqualTo(RequiresAction)
+    }
+
+    @Test
+    fun `Stops polling when intent reaches terminal state`() = runTest(testDispatcher) {
+        val poller = createIntentStatusPoller(
+            enqueuedStatuses = listOf(
+                Succeeded,
+                RequiresAction,
+            ),
+            dispatcher = testDispatcher,
+        )
+
+        val nextDelay = exponentialDelayProvider()
+
+        assertThat(poller.state.value).isNull()
+
+        poller.startPolling(scope = this@runTest)
+        assertThat(poller.state.value).isEqualTo(Succeeded)
+
+        advanceTimeBy(nextDelay())
+
+        // The state should be unchanged
+        assertThat(poller.state.value).isEqualTo(Succeeded)
     }
 
     @Test

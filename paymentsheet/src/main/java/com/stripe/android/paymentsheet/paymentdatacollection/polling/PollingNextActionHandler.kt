@@ -11,6 +11,7 @@ import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.authentication.PaymentNextActionHandler
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.polling.IntentStatusPoller.PollingStrategy
 import com.stripe.android.uicore.utils.AnimationConstants
 import com.stripe.android.view.AuthActivityStarterHost
 
@@ -22,7 +23,6 @@ private const val BLIK_INITIAL_DELAY_IN_SECONDS = 5
 private const val BLIK_MAX_ATTEMPTS = 12
 private const val PAYNOW_TIME_LIMIT_IN_SECONDS = 60 * 60
 private const val PAYNOW_INITIAL_DELAY_IN_SECONDS = 5
-private const val PAYNOW_MAX_ATTEMPTS = 12
 
 internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>() {
 
@@ -40,7 +40,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                     statusBarColor = host.statusBarColor,
                     timeLimitInSeconds = UPI_TIME_LIMIT_IN_SECONDS,
                     initialDelayInSeconds = UPI_INITIAL_DELAY_IN_SECONDS,
-                    maxAttempts = UPI_MAX_ATTEMPTS,
+                    pollingStrategy = PollingStrategy.ExponentialBackoff(maxAttempts = UPI_MAX_ATTEMPTS),
                     ctaText = R.string.stripe_upi_polling_message,
                     stripeAccountId = requestOptions.stripeAccount,
                 )
@@ -50,7 +50,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                     statusBarColor = host.statusBarColor,
                     timeLimitInSeconds = BLIK_TIME_LIMIT_IN_SECONDS,
                     initialDelayInSeconds = BLIK_INITIAL_DELAY_IN_SECONDS,
-                    maxAttempts = BLIK_MAX_ATTEMPTS,
+                    pollingStrategy = PollingStrategy.ExponentialBackoff(maxAttempts = BLIK_MAX_ATTEMPTS),
                     ctaText = R.string.stripe_blik_confirm_payment,
                     stripeAccountId = requestOptions.stripeAccount,
                 )
@@ -60,7 +60,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                     statusBarColor = host.statusBarColor,
                     timeLimitInSeconds = PAYNOW_TIME_LIMIT_IN_SECONDS,
                     initialDelayInSeconds = PAYNOW_INITIAL_DELAY_IN_SECONDS,
-                    maxAttempts = PAYNOW_MAX_ATTEMPTS,
+                    pollingStrategy = PollingStrategy.FixedIntervals(retryIntervalInSeconds = 1),
                     ctaText = R.string.stripe_paynow_confirm_payment,
                     stripeAccountId = requestOptions.stripeAccount,
                 )
