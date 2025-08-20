@@ -1637,7 +1637,7 @@ class USBankAccountFormViewModelTest {
     }
 
     @Test
-    fun `If missing required fields, should validate expected fields & reset validation on 'reset'`() = runTest {
+    fun `If missing required fields, 'validate' should validate fields & reset validation on 'reset'`() = runTest {
         val viewModel = createViewModel(
             args = defaultArgs.run {
                 copy(
@@ -1667,7 +1667,7 @@ class USBankAccountFormViewModelTest {
             assertThat(phoneErrorTurbine.awaitItem()).isNull()
             assertThat(addressErrorTurbine.awaitItem()).isNull()
 
-            viewModel.handlePrimaryButtonClick()
+            viewModel.validate()
 
             assertThat(nameErrorTurbine.awaitItem()).isNotNull()
             assertThat(emailErrorTurbine.awaitItem()).isNotNull()

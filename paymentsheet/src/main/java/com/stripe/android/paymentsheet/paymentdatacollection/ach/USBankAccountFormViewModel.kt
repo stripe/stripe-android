@@ -484,16 +484,17 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     fun handlePrimaryButtonClick() {
         val screenState = currentScreenState.value
-        val hasRequiredFields = requiredFields.value
-        if (screenState.linkedBankAccount == null && hasRequiredFields) {
+        if (screenState.linkedBankAccount == null) {
             screenStateWithoutSaveForFutureUse.update {
                 it.processing()
             }
 
             collectBankAccount(args.clientSecret)
-        } else if (!hasRequiredFields) {
-            setValidationState(true)
         }
+    }
+
+    fun validate() {
+        setValidationState(true)
     }
 
     fun reset(error: ResolvableString? = null) {
