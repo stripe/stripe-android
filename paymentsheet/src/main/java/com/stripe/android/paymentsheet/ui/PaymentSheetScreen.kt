@@ -56,7 +56,6 @@ import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.ui.LinkButton
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
-import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
@@ -64,6 +63,7 @@ import com.stripe.android.paymentsheet.databinding.StripeFragmentPrimaryButtonCo
 import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.state.WalletLocation
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Complete
@@ -353,7 +353,6 @@ private fun PaymentSheetContent(
                 onGooglePayPressed = state.onGooglePayPressed,
                 onLinkPressed = state.onLinkPressed,
                 dividerSpacing = currentScreen.walletsDividerSpacing,
-                walletsAllowedInHeader = state.walletsAllowedInHeader,
                 modifier = Modifier.padding(bottom = bottomSpacing),
                 cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance)
             )
@@ -410,43 +409,35 @@ internal fun Wallet(
     onGooglePayPressed: () -> Unit,
     onLinkPressed: () -> Unit,
     dividerSpacing: Dp,
-    walletsAllowedInHeader: List<WalletType>,
     modifier: Modifier = Modifier,
     cardBrandFilter: CardBrandFilter
 ) {
     val padding = StripeTheme.getOuterFormInsets()
-    var hasWalletButtons = false
 
     Column(modifier = modifier.padding(padding)) {
         // Only show Google Pay if allowed in header
-        if (walletsAllowedInHeader.contains(WalletType.GooglePay)) {
-            state.googlePay?.let { googlePay ->
-                hasWalletButtons = true
-                GooglePayButton(
-                    state = PrimaryButton.State.Ready,
-                    allowCreditCards = googlePay.allowCreditCards,
-                    buttonType = googlePay.buttonType,
-                    billingAddressParameters = googlePay.billingAddressParameters,
-                    isEnabled = state.buttonsEnabled,
-                    onPressed = onGooglePayPressed,
-                    cardBrandFilter = cardBrandFilter
-                )
-            }
+        state.googlePay(WalletLocation.HEADER)?.let { googlePay ->
+            GooglePayButton(
+                state = PrimaryButton.State.Ready,
+                allowCreditCards = googlePay.allowCreditCards,
+                buttonType = googlePay.buttonType,
+                billingAddressParameters = googlePay.billingAddressParameters,
+                isEnabled = state.buttonsEnabled,
+                onPressed = onGooglePayPressed,
+                cardBrandFilter = cardBrandFilter
+            )
         }
 
         // Only show Link if allowed in header
-        if (walletsAllowedInHeader.contains(WalletType.Link)) {
-            state.link?.let {
-                if (hasWalletButtons) {
-                    Spacer(modifier = Modifier.requiredHeight(8.dp))
-                }
-                hasWalletButtons = true
-                LinkButton(
-                    state = it.state,
-                    enabled = state.buttonsEnabled,
-                    onClick = onLinkPressed,
-                )
+        state.link(WalletLocation.HEADER)?.let {
+            if (state.googlePay(WalletLocation.HEADER) != null) {
+                Spacer(modifier = Modifier.requiredHeight(8.dp))
             }
+            LinkButton(
+                state = it.state,
+                enabled = state.buttonsEnabled,
+                onClick = onLinkPressed,
+            )
         }
 
         when (processingState) {
@@ -459,7 +450,7 @@ internal fun Wallet(
             else -> Unit
         }
 
-        if (hasWalletButtons) {
+        if (state.walletsInHeader) {
             Spacer(modifier = Modifier.requiredHeight(dividerSpacing))
 
             val text = stringResource(state.dividerTextResource)

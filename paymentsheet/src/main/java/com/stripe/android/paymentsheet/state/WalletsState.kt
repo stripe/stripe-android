@@ -13,15 +13,43 @@ import com.stripe.android.paymentsheet.PaymentSheet.ButtonThemes.LinkButtonTheme
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 
+internal enum class WalletLocation {
+    HEADER,
+    INLINE
+}
+
 internal data class WalletsState(
-    val link: Link?,
-    val googlePay: GooglePay?,
+    private val link: Link?,
+    private val googlePay: GooglePay?,
+    private val walletsAllowedInHeader: List<WalletType>,
     val buttonsEnabled: Boolean,
     @StringRes val dividerTextResource: Int,
     val onGooglePayPressed: () -> Unit,
     val onLinkPressed: () -> Unit,
-    val walletsAllowedInHeader: List<WalletType>,
 ) {
+
+    /**
+     * Returns Link data if it should be displayed in the specified location, null otherwise.
+     */
+    fun link(location: WalletLocation): Link? {
+        return when (location) {
+            WalletLocation.HEADER -> link?.takeIf { walletsAllowedInHeader.contains(WalletType.Link) }
+            WalletLocation.INLINE -> link?.takeUnless { walletsAllowedInHeader.contains(WalletType.Link) }
+        }
+    }
+
+    /**
+     * Returns GooglePay data if it should be displayed in the specified location, null otherwise.
+     */
+    fun googlePay(location: WalletLocation): GooglePay? {
+        return when (location) {
+            WalletLocation.HEADER -> googlePay?.takeIf { walletsAllowedInHeader.contains(WalletType.GooglePay) }
+            WalletLocation.INLINE -> googlePay?.takeUnless { walletsAllowedInHeader.contains(WalletType.GooglePay) }
+        }
+    }
+
+    val walletsInHeader
+        get() = link(WalletLocation.HEADER) != null || googlePay(WalletLocation.HEADER) != null
 
     data class Link(
         val state: LinkButtonState,

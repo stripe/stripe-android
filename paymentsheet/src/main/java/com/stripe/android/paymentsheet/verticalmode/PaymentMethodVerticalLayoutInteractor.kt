@@ -5,7 +5,6 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -21,6 +20,7 @@ import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.mandateTextFromPaymentMethodMetadata
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.state.WalletLocation
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -273,7 +273,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     }
 
     override val showsWalletsHeader: StateFlow<Boolean> = walletsState.mapAsStateFlow { walletsState ->
-        walletsState != null && walletsState.walletsAllowedInHeader.isNotEmpty()
+        walletsState != null && walletsState.walletsInHeader
     }
 
     init {
@@ -334,8 +334,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         val wallets = mutableListOf<DisplayablePaymentMethod>()
 
         // Add Link inline if NOT allowed in header
-        if (walletsState?.link != null && !(walletsState.walletsAllowedInHeader.contains(WalletType.Link))) {
-            val subtitle = when (val state = walletsState.link.state) {
+        walletsState?.link(WalletLocation.INLINE)?.let { linkData ->
+            val subtitle = when (val state = linkData.state) {
                 is LinkButtonState.Email -> state.email.resolvableString
                 is LinkButtonState.DefaultPayment,
                 is LinkButtonState.Default ->
@@ -359,7 +359,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         }
 
         // Add Google Pay inline if NOT allowed in header
-        if (walletsState?.googlePay != null && !(walletsState.walletsAllowedInHeader.contains(WalletType.GooglePay))) {
+        walletsState?.googlePay(WalletLocation.INLINE)?.let {
             wallets += DisplayablePaymentMethod(
                 code = "google_pay",
                 displayName = PaymentsCoreR.string.stripe_google_pay.resolvableString,
