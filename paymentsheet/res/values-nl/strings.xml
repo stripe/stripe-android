@@ -266,6 +266,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">Meer weergeven</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Als je doorgaat, stem je in dat betalingen worden geautoriseerd in overeenstemming met deze <terms>voorwaarden</terms>.]]></string>
+  <!-- Text providing link to terms for bank payments -->
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Door je bestelling te plaatsen bij %s, autoriseer je betalingen in overeenstemming met <terms>deze voorwaarden</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Betaling</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->

@@ -266,6 +266,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">さらに表示</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[続行すると、これらの<terms>規約</terms>に従って支払いをオーソリすることに同意したものとみなされます。]]></string>
+  <!-- Text providing link to terms for bank payments -->
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[%s に注文を送信することにより、<terms>これらの規約</terms> に従って決済を承認することに同意したものとみなされます。]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">決済</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->

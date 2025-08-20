@@ -268,6 +268,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">Показать ещё</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Продолжая использование, вы тем самым соглашаетесь авторизовать платежи согласно данным <terms>условиям</terms>.]]></string>
+  <!-- Text providing link to terms for bank payments -->
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Отправляя заказ в %s, вы соглашаетесь разрешить платежи в соответствии с <terms>этими условиями</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Платеж</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->

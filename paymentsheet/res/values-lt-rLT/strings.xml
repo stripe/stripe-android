@@ -266,6 +266,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">Peržiūrėti daugiau</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Tęsdami sutinkate autorizuoti mokėjimus pagal šias <terms>sąlygas</terms>.]]></string>
+  <!-- Text providing link to terms for bank payments -->
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Pateikdami užsakymą %s, sutinkate mokėjimus autorizuoti pagal <terms>šias sąlygas</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Mokėjimas</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
