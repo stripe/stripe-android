@@ -19,6 +19,7 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
+import com.stripe.android.link.ui.wallet.AddPaymentMethodOptions
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
@@ -42,7 +43,6 @@ internal annotation class NativeLinkScope
 @Component(
     modules = [
         NativeLinkModule::class,
-        LinkViewModelModule::class,
         ApplicationIdModule::class,
         DefaultConfirmationModule::class,
         LinkPassthroughConfirmationModule::class,
@@ -66,6 +66,7 @@ internal interface NativeLinkComponent {
     val dismissalCoordinator: LinkDismissalCoordinator
     val linkLaunchMode: LinkLaunchMode
     val autocompleteLauncher: AutocompleteLauncher
+    val addPaymentMethodOptionsFactory: AddPaymentMethodOptions.Factory
 
     @Component.Builder
     interface Builder {
