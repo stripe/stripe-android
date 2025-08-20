@@ -109,8 +109,11 @@ internal class WalletViewModel(
     private val paymentSelectionHint: ResolvableString?
         get() = R.string.stripe_wallet_prefer_debit_card_hint
             .takeIf {
-                configuration.enableLinkPaymentSelectionHint ||
-                    FeatureFlags.forceEnableLinkPaymentSelectionHint.isEnabled
+                val isFeatureEnabled =
+                    configuration.enableLinkPaymentSelectionHint ||
+                        FeatureFlags.forceEnableLinkPaymentSelectionHint.isEnabled
+                val canSelectCard = addPaymentMethodOptions.values.contains(AddPaymentMethodOption.Card)
+                isFeatureEnabled && canSelectCard
             }
             ?.resolvableString
 
