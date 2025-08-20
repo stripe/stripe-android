@@ -95,7 +95,6 @@ class CustomPaymentMethodsAnalyticsTest {
         }
 
         validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
-        validateAnalyticsRequest(eventName = "paymentsheet.checkout.has_payment_selection")
         validateAnalyticsRequest(
             eventName = "paymentsheet.custom_payment_method.launch_success",
             query("custom_payment_method_type", "cpmt_123")

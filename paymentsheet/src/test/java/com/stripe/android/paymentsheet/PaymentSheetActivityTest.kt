@@ -493,10 +493,7 @@ internal class PaymentSheetActivityTest {
             composeTestRule.onNodeWithTag(
                 TEST_TAG_LIST + "card",
             ).onChildren().assertAny(isSelected())
-            assertThat(activity.buyButton.isEnabled).isTrue()
-            assertThat(activity.buyButton.isClickable).isTrue()
-            assertThat(activity.buyButton.viewBinding.label.alpha).isEqualTo(0.5f)
-            assertThat(activity.buyButton.viewBinding.lockIcon.alpha).isEqualTo(0.5f)
+            assertThat(activity.buyButton.isEnabled).isFalse()
         }
     }
 
@@ -510,18 +507,12 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).onActivity { activity ->
             // Initially empty card
             assertThat(activity.buyButton.isVisible).isTrue()
-            assertThat(activity.buyButton.isEnabled).isTrue()
-            assertThat(activity.buyButton.isClickable).isTrue()
-            assertThat(activity.buyButton.viewBinding.label.alpha).isEqualTo(0.5f)
-            assertThat(activity.buyButton.viewBinding.lockIcon.alpha).isEqualTo(0.5f)
+            assertThat(activity.buyButton.isEnabled).isFalse()
 
             // Update to Google Pay
             viewModel.checkoutWithGooglePay()
             assertThat(activity.buyButton.isVisible).isTrue()
-            assertThat(activity.buyButton.isEnabled).isTrue()
-            assertThat(activity.buyButton.isClickable).isTrue()
-            assertThat(activity.buyButton.viewBinding.label.alpha).isEqualTo(0.5f)
-            assertThat(activity.buyButton.viewBinding.lockIcon.alpha).isEqualTo(0.5f)
+            assertThat(activity.buyButton.isEnabled).isFalse()
             assertThat(viewModel.contentVisible.value).isFalse()
 
             googlePayListener.onActivityResult(GooglePayPaymentMethodLauncher.Result.Canceled)
@@ -534,18 +525,12 @@ internal class PaymentSheetActivityTest {
             Espresso.onIdle()
             assertThat(activity.buyButton.isVisible).isTrue()
             assertThat(activity.buyButton.isEnabled).isTrue()
-            assertThat(activity.buyButton.isClickable).isTrue()
-            assertThat(activity.buyButton.viewBinding.label.alpha).isEqualTo(1f)
-            assertThat(activity.buyButton.viewBinding.lockIcon.alpha).isEqualTo(1f)
 
             // Back to empty/invalid card
             viewModel.updateSelection(null)
             Espresso.onIdle()
             assertThat(activity.buyButton.isVisible).isTrue()
-            assertThat(activity.buyButton.isEnabled).isTrue()
-            assertThat(activity.buyButton.isClickable).isTrue()
-            assertThat(activity.buyButton.viewBinding.label.alpha).isEqualTo(0.5f)
-            assertThat(activity.buyButton.viewBinding.lockIcon.alpha).isEqualTo(0.5f)
+            assertThat(activity.buyButton.isEnabled).isFalse()
 
             // New valid card
             viewModel.updateSelection(
@@ -558,9 +543,6 @@ internal class PaymentSheetActivityTest {
             Espresso.onIdle()
             assertThat(activity.buyButton.isVisible).isTrue()
             assertThat(activity.buyButton.isEnabled).isTrue()
-            assertThat(activity.buyButton.isClickable).isTrue()
-            assertThat(activity.buyButton.viewBinding.label.alpha).isEqualTo(1f)
-            assertThat(activity.buyButton.viewBinding.lockIcon.alpha).isEqualTo(1f)
         }
     }
 

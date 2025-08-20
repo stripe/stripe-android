@@ -1033,7 +1033,7 @@ internal class PaymentOptionsViewModelTest {
     }
 
     @Test
-    fun `On user selection with a null selection, should request validation`() =
+    fun `On disabled click, should request validation`() =
         runTest {
             val viewModel = createViewModel(
                 args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
@@ -1044,12 +1044,12 @@ internal class PaymentOptionsViewModelTest {
                 )
             )
 
-            viewModel.onUserSelection()
+            val primaryButtonUiState = viewModel.primaryButtonUiState.value
 
             viewModel.validationRequested.test {
                 expectNoEvents()
 
-                viewModel.onUserSelection()
+                primaryButtonUiState?.onDisabledClick?.invoke()
 
                 assertThat(awaitItem()).isNotNull()
             }

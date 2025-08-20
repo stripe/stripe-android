@@ -24,6 +24,7 @@ internal class PrimaryButtonUiStateMapper(
     private val customPrimaryButtonUiStateFlow: StateFlow<PrimaryButton.UIState?>,
     private val cvcCompleteFlow: StateFlow<Boolean>,
     private val onClick: () -> Unit,
+    private val onDisabledClick: () -> Unit,
 ) {
 
     fun forCompleteFlow(): StateFlow<PrimaryButton.UIState?> {
@@ -35,10 +36,9 @@ internal class PrimaryButtonUiStateMapper(
             customPrimaryButtonUiStateFlow,
             cvcCompleteFlow
         ) { screen, buttonsEnabled, amount, selection, customPrimaryButton, cvcComplete ->
-            val canContinue = buttonsEnabled && selection != null &&
-                cvcRecollectionCompleteOrNotRequired(screen, cvcComplete, selection)
-
             screen.buyButtonState.mapAsStateFlow { buyButtonState ->
+                val canClickWhenDisabled = screen.isFormScreen() && buttonsEnabled
+
                 customPrimaryButton ?: PrimaryButton.UIState(
                     label = buyButtonState.buyButtonOverride?.label ?: buyButtonLabel(
                         amount,
@@ -46,9 +46,15 @@ internal class PrimaryButtonUiStateMapper(
                         isProcessingPayment
                     ),
                     onClick = onClick,
-                    clickable = buttonsEnabled && (canContinue || screen.isFormScreen()),
-                    enabled = buttonsEnabled && canContinue,
+                    enabled = buttonsEnabled && selection != null &&
+                        cvcRecollectionCompleteOrNotRequired(screen, cvcComplete, selection),
                     lockVisible = buyButtonState.buyButtonOverride?.lockEnabled ?: true,
+                    canClickWhileDisabled = canClickWhenDisabled,
+                    onDisabledClick = {
+                        if (canClickWhenDisabled) {
+                            onDisabledClick()
+                        }
+                    },
                 ).takeIf { buyButtonState.visible }
             }
         }.flatMapLatestAsStateFlow { it }
@@ -61,12 +67,19 @@ internal class PrimaryButtonUiStateMapper(
             selectionFlow,
             customPrimaryButtonUiStateFlow,
         ) { screen, buttonsEnabled, selection, customPrimaryButton ->
+            val canClickWhenDisabled = screen.isFormScreen() && buttonsEnabled
+
             customPrimaryButton ?: PrimaryButton.UIState(
                 label = continueButtonLabel(config.primaryButtonLabel),
                 onClick = onClick,
                 enabled = buttonsEnabled && selection != null,
-                clickable = buttonsEnabled && (selection != null || screen.isFormScreen()),
                 lockVisible = false,
+                canClickWhileDisabled = canClickWhenDisabled,
+                onDisabledClick = {
+                    if (canClickWhenDisabled) {
+                        onDisabledClick()
+                    }
+                },
             ).takeIf {
                 /**
                  * PaymentMethods requireConfirmation when they have mandates / terms of service

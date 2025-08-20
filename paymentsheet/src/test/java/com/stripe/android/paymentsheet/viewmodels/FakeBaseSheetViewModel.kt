@@ -68,7 +68,6 @@ internal class FakeBaseSheetViewModel private constructor(
                             label = "Gimme money!".resolvableString,
                             onClick = {},
                             enabled = false,
-                            clickable = false,
                             lockVisible = true,
                         )
                     }

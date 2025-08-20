@@ -25,7 +25,7 @@ import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
-import com.stripe.android.uicore.elements.AutocompleteAddressController
+import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SameAsShippingElement
@@ -404,8 +404,8 @@ class CardDefinitionTest {
         }
 
         assertThat(cardBillingAddressElements).hasSize(1)
-        assertThat(cardBillingAddressElements.firstOrNull()?.sectionFieldErrorController())
-            .isInstanceOf<AutocompleteAddressController>()
+        assertThat(cardBillingAddressElements.firstOrNull()?.addressElement)
+            .isInstanceOf<AutocompleteAddressElement>()
     }
 
     @Test
