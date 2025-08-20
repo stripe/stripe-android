@@ -8,7 +8,8 @@ internal class FakeCardScanEventsReporter : CardScanEventsReporter {
     data class ScanFailedCall(val implementation: String, val error: Throwable?)
     data class ScanSucceededCall(val implementation: String)
     data class ScanStartedCall(val implementation: String)
-    data class ApiCheckCall(val implementation: String, val available: Boolean, val reason: String?)
+    data class ApiCheckSucceededCall(val implementation: String)
+    data class ApiCheckFailedCall(val implementation: String, val error: Throwable?)
 
     private val _scanCancelledCalls = Turbine<ScanCancelledCall>()
     val scanCancelledCalls: ReceiveTurbine<ScanCancelledCall> = _scanCancelledCalls
@@ -22,15 +23,19 @@ internal class FakeCardScanEventsReporter : CardScanEventsReporter {
     private val _scanStartedCalls = Turbine<ScanStartedCall>()
     val scanStartedCalls: ReceiveTurbine<ScanStartedCall> = _scanStartedCalls
 
-    private val _apiCheckCalls = Turbine<ApiCheckCall>()
-    val apiCheckCalls: ReceiveTurbine<ApiCheckCall> = _apiCheckCalls
+    private val _apiCheckSucceededCalls = Turbine<ApiCheckSucceededCall>()
+    val apiCheckSucceededCalls: ReceiveTurbine<ApiCheckSucceededCall> = _apiCheckSucceededCalls
+
+    private val _apiCheckFailedCalls = Turbine<ApiCheckFailedCall>()
+    val apiCheckFailedCalls: ReceiveTurbine<ApiCheckFailedCall> = _apiCheckFailedCalls
 
     fun validate() {
         _scanCancelledCalls.ensureAllEventsConsumed()
         _scanFailedCalls.ensureAllEventsConsumed()
         _scanSucceededCalls.ensureAllEventsConsumed()
         _scanStartedCalls.ensureAllEventsConsumed()
-        _apiCheckCalls.ensureAllEventsConsumed()
+        _apiCheckSucceededCalls.ensureAllEventsConsumed()
+        _apiCheckFailedCalls.ensureAllEventsConsumed()
     }
 
     override fun onCardScanCancelled(implementation: String) {
@@ -49,7 +54,11 @@ internal class FakeCardScanEventsReporter : CardScanEventsReporter {
         _scanStartedCalls.add(ScanStartedCall(implementation))
     }
 
-    override fun onCardScanApiCheck(implementation: String, available: Boolean, reason: String?) {
-        _apiCheckCalls.add(ApiCheckCall(implementation, available, reason))
+    override fun onCardScanApiCheckSucceeded(implementation: String) {
+        _apiCheckSucceededCalls.add(ApiCheckSucceededCall(implementation))
+    }
+
+    override fun onCardScanApiCheckFailed(implementation: String, error: Throwable?) {
+        _apiCheckFailedCalls.add(ApiCheckFailedCall(implementation, error))
     }
 }

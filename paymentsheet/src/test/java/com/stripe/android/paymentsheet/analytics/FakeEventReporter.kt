@@ -287,7 +287,10 @@ internal class FakeEventReporter : EventReporter {
     override fun onCardScanCancelled(implementation: String) {
     }
 
-    override fun onCardScanApiCheck(implementation: String, available: Boolean, reason: String?) {
+    override fun onCardScanApiCheckSucceeded(implementation: String) {
+    }
+
+    override fun onCardScanApiCheckFailed(implementation: String, error: Throwable?) {
     }
 
     data class PaymentFailureCall(

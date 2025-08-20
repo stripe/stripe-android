@@ -687,12 +687,23 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onCardScanApiCheck(implementation: String, available: Boolean, reason: String?) {
+    override fun onCardScanApiCheckSucceeded(implementation: String) {
         fireEvent(
-            PaymentSheetEvent.CardScanApiCheck(
+            PaymentSheetEvent.CardScanApiCheckSucceeded(
                 implementation = implementation,
-                available = available,
-                reason = reason,
+                isDeferred = isDeferred,
+                isSpt = isSpt,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
+    override fun onCardScanApiCheckFailed(implementation: String, error: Throwable?) {
+        fireEvent(
+            PaymentSheetEvent.CardScanApiCheckFailed(
+                implementation = implementation,
+                error = error,
                 isDeferred = isDeferred,
                 isSpt = isSpt,
                 linkEnabled = linkEnabled,

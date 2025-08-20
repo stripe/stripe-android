@@ -1247,14 +1247,14 @@ class DefaultEventReporterTest {
             simulateInit()
         }
 
-        val testError = Throwable("Card scan failed")
+        val testError = IllegalStateException("Card scan failed")
         completeEventReporter.onCardScanFailed("google_pay", testError)
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_cardscan_failed" &&
                     req.params["implementation"] == "google_pay" &&
-                    req.params["error_message"] == "Card scan failed"
+                    req.params["error_message"] == "IllegalStateException"
             }
         )
     }
@@ -1293,37 +1293,34 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `onCardScanApiCheck should fire analytics request with expected event value for success`() {
+    fun `onCardScanApiCheckSucceeded should fire analytics request with expected event value`() {
         val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
             simulateInit()
         }
 
-        completeEventReporter.onCardScanApiCheck("google_pay", true, null)
+        completeEventReporter.onCardScanApiCheckSucceeded("google_pay")
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "mc_cardscan_api_check" &&
-                    req.params["implementation"] == "google_pay" &&
-                    req.params["available"] == true &&
-                    req.params["reason"] == null
+                req.params["event"] == "mc_cardscan_api_check_succeeded" &&
+                    req.params["implementation"] == "google_pay"
             }
         )
     }
 
     @Test
-    fun `onCardScanApiCheck should fire analytics request with expected event value for failure`() {
+    fun `onCardScanApiCheckFailed should fire analytics request with expected event value`() {
         val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
             simulateInit()
         }
 
-        completeEventReporter.onCardScanApiCheck("google_pay", false, "API not available")
+        completeEventReporter.onCardScanApiCheckFailed("google_pay", IllegalStateException("API not available"))
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "mc_cardscan_api_check" &&
+                req.params["event"] == "mc_cardscan_api_check_failed" &&
                     req.params["implementation"] == "google_pay" &&
-                    req.params["available"] == false &&
-                    req.params["reason"] == "API not available"
+                    req.params["error_message"] == "IllegalStateException"
             }
         )
     }
@@ -1338,7 +1335,7 @@ class DefaultEventReporterTest {
         completeEventReporter.onCardScanSucceeded("stripe")
         completeEventReporter.onCardScanFailed("custom", null)
         completeEventReporter.onCardScanCancelled("test")
-        completeEventReporter.onCardScanApiCheck("ml_kit", true, null)
+        completeEventReporter.onCardScanApiCheckSucceeded("ml_kit")
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
@@ -1370,9 +1367,8 @@ class DefaultEventReporterTest {
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "mc_cardscan_api_check" &&
-                    req.params["implementation"] == "ml_kit" &&
-                    req.params["available"] == true
+                req.params["event"] == "mc_cardscan_api_check_succeeded" &&
+                    req.params["implementation"] == "ml_kit"
             }
         )
     }

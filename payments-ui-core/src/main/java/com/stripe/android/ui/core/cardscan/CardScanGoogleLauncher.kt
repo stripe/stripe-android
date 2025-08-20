@@ -33,11 +33,11 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
             context = context,
             onFailure = { e ->
                 _isAvailable.value = false
-                eventsReporter.onCardScanApiCheck(implementation, false, e.message)
+                eventsReporter.onCardScanApiCheckFailed(implementation, e)
             },
             onSuccess = {
                 _isAvailable.value = true
-                eventsReporter.onCardScanApiCheck(implementation, true)
+                eventsReporter.onCardScanApiCheckSucceeded(implementation)
             }
         )
     }
@@ -56,28 +56,40 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
     }
 
     internal fun parseActivityResult(result: ActivityResult): CardScanResult {
-        if (result.resultCode == Activity.RESULT_OK && result.data != null) {
-            val data = result.data ?: return CardScanResult.Canceled.also {
-                eventsReporter.onCardScanCancelled(implementation)
+        val scanResult = when {
+            result.resultCode == Activity.RESULT_OK && result.data != null -> {
+                val data = result.data ?: return CardScanResult.Canceled
+                val paymentCardRecognitionResult = PaymentCardRecognitionResult.getFromIntent(data)
+                val pan = paymentCardRecognitionResult?.pan
+                val expirationDate = paymentCardRecognitionResult?.creditCardExpirationDate
+                if (pan != null) {
+                    CardScanResult.Completed(ScannedCard(pan, expirationDate?.month, expirationDate?.year))
+                } else {
+                    CardScanResult.Failed(
+                        CardScanParseException("PAN not found in PaymentCardRecognitionResult")
+                    )
+                }
             }
-            val paymentCardRecognitionResult = PaymentCardRecognitionResult.getFromIntent(data)
-            val pan = paymentCardRecognitionResult?.pan
-            val expirationDate = paymentCardRecognitionResult?.creditCardExpirationDate
-            return if (pan != null) {
-                eventsReporter.onCardScanSucceeded(implementation)
-                CardScanResult.Completed(ScannedCard(pan, expirationDate?.month, expirationDate?.year))
-            } else {
-                val error = Throwable("Failed to parse card data")
-                eventsReporter.onCardScanFailed("google_pay", error)
-                CardScanResult.Failed(error)
+            result.resultCode == Activity.RESULT_CANCELED -> {
+                CardScanResult.Canceled
             }
-        } else if (result.resultCode == Activity.RESULT_CANCELED) {
-            eventsReporter.onCardScanCancelled(implementation)
-            return CardScanResult.Canceled
+            else -> {
+                CardScanResult.Failed(
+                    CardScanActivityResultException(
+                        "Invalid activity result: code=${result.resultCode}, hasData=${result.data != null}"
+                    )
+                )
+            }
         }
-        val error = Throwable("Null data or unexpected result code: ${result.resultCode}")
-        eventsReporter.onCardScanFailed("google_pay", error)
-        return CardScanResult.Failed(error)
+
+        // Report events based on the result
+        when (scanResult) {
+            is CardScanResult.Completed -> eventsReporter.onCardScanSucceeded(implementation)
+            is CardScanResult.Canceled -> eventsReporter.onCardScanCancelled(implementation)
+            is CardScanResult.Failed -> eventsReporter.onCardScanFailed(implementation, scanResult.error)
+        }
+
+        return scanResult
     }
 
     companion object {
@@ -119,3 +131,13 @@ internal data class ScannedCard(
     val expirationMonth: Int?,
     val expirationYear: Int?
 )
+
+/**
+ * Exception thrown when card scan data parsing fails
+ */
+internal class CardScanParseException(message: String) : Exception(message)
+
+/**
+ * Exception thrown when activity result is invalid
+ */
+internal class CardScanActivityResultException(message: String) : Exception(message)

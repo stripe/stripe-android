@@ -28,9 +28,14 @@ interface CardScanEventsReporter {
     fun onCardScanCancelled(implementation: String)
 
     /**
-     * Card scan API availability check.
+     * Card scan API availability check succeeded.
      */
-    fun onCardScanApiCheck(implementation: String, available: Boolean, reason: String? = null)
+    fun onCardScanApiCheckSucceeded(implementation: String)
+
+    /**
+     * Card scan API availability check failed.
+     */
+    fun onCardScanApiCheckFailed(implementation: String, error: Throwable? = null)
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

@@ -743,7 +743,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val eventName: String = "mc_cardscan_failed"
         override val additionalParams: Map<String, Any?> = mapOf(
             "implementation" to implementation,
-            FIELD_ERROR_MESSAGE to error?.message
+            FIELD_ERROR_MESSAGE to error?.javaClass?.simpleName
         )
     }
 
@@ -760,23 +760,32 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         )
     }
 
-    class CardScanApiCheck(
+    class CardScanApiCheckSucceeded(
         implementation: String,
-        available: Boolean,
-        reason: String?,
         override val isDeferred: Boolean,
         override val isSpt: Boolean,
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
     ) : PaymentSheetEvent() {
-        override val eventName: String = "mc_cardscan_api_check"
-        override val additionalParams: Map<String, Any?> = buildMap {
-            if (reason != null) {
-                put("reason", reason)
-            }
-            put("implementation", implementation)
-            put("available", available)
-        }
+        override val eventName: String = "mc_cardscan_api_check_succeeded"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            "implementation" to implementation
+        )
+    }
+
+    class CardScanApiCheckFailed(
+        implementation: String,
+        error: Throwable?,
+        override val isDeferred: Boolean,
+        override val isSpt: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_cardscan_api_check_failed"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            "implementation" to implementation,
+            FIELD_ERROR_MESSAGE to error?.javaClass?.simpleName
+        )
     }
 
     private fun standardParams(
