@@ -23,11 +23,15 @@ import com.stripe.android.link.account.linkAccountUpdate
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.injection.DaggerNativeLinkComponent
+import com.stripe.android.link.injection.LINK_EXPRESS_MODE
 import com.stripe.android.link.injection.NativeLinkComponent
+import com.stripe.android.link.injection.NativeLinkScope
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.link.ui.signup.SignUpViewModel
+import com.stripe.android.link.ui.wallet.AddPaymentMethodOption
+import com.stripe.android.link.ui.wallet.AddPaymentMethodOptions
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.addresselement.AutocompleteActivityLauncher
@@ -48,9 +52,11 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
 @SuppressWarnings("TooManyFunctions")
+@NativeLinkScope
 internal class LinkActivityViewModel @Inject constructor(
     val activityRetainedComponent: NativeLinkComponent,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
@@ -61,10 +67,11 @@ internal class LinkActivityViewModel @Inject constructor(
     val linkConfiguration: LinkConfiguration,
     private val linkAttestationCheck: LinkAttestationCheck,
     val savedStateHandle: SavedStateHandle,
-    private val linkExpressMode: LinkExpressMode,
+    @Named(LINK_EXPRESS_MODE) private val linkExpressMode: LinkExpressMode,
     private val navigationManager: NavigationManager,
     val linkLaunchMode: LinkLaunchMode,
     private val autocompleteLauncher: AutocompleteActivityLauncher,
+    private val addPaymentMethodOptionsFactory: AddPaymentMethodOptions.Factory,
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
     val linkConfirmationHandler = linkConfirmationHandlerFactory.create(confirmationHandler)
@@ -350,12 +357,18 @@ internal class LinkActivityViewModel @Inject constructor(
         // Otherwise, we get a weird scaling animation when we display the first non-loading screen.
         delay(LINK_DEFAULT_ANIMATION_DELAY_MILLIS)
 
+        val linkAccount = this.linkAccount
+
         return ScreenState.FullScreen(
             initialDestination = when (accountStatus) {
                 AccountStatus.Verified -> {
                     if (linkAccount?.completedSignup == true && linkLaunchMode.selectedPayment() == null) {
                         // We just completed signup, but haven't added a payment method yet.
-                        LinkScreen.PaymentMethod
+                        when (addPaymentMethodOptionsFactory.create(linkAccount).default) {
+                            is AddPaymentMethodOption.Bank -> LinkScreen.Wallet
+                            // Default to previous behavior, even though this could be better.
+                            else -> LinkScreen.PaymentMethod
+                        }
                     } else {
                         // We have a verified account, or we're relaunching after signing up and adding a payment,
                         // then show the wallet.

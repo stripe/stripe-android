@@ -30,6 +30,7 @@ import com.stripe.android.link.confirmation.Result
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.signup.SignUpViewModel
+import com.stripe.android.link.ui.wallet.AddPaymentMethodOptions
 import com.stripe.android.link.utils.TestNavigationManager
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -790,6 +791,7 @@ internal class LinkActivityViewModelTest {
         launchWeb: (LinkConfiguration) -> Unit = {},
         autocompleteLauncher: AutocompleteActivityLauncher = TestAutocompleteLauncher.noOp(),
         linkConfiguration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
+        addPaymentMethodOptionsFactory: AddPaymentMethodOptions.Factory = mock(),
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
             linkAccountManager = linkAccountManager,
@@ -805,6 +807,7 @@ internal class LinkActivityViewModelTest {
             linkLaunchMode = linkLaunchMode,
             linkConfirmationHandlerFactory = { linkConfirmationHandler },
             autocompleteLauncher = autocompleteLauncher,
+            addPaymentMethodOptionsFactory = addPaymentMethodOptionsFactory,
         ).apply {
             this.launchWebFlow = launchWeb
         }
