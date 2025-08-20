@@ -16,7 +16,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 internal interface VerticalModeFormInteractor {
     val isLiveMode: Boolean
@@ -30,11 +33,16 @@ internal interface VerticalModeFormInteractor {
     data class State(
         val selectedPaymentMethodCode: String,
         val isProcessing: Boolean,
+        private val isValidating: Boolean,
         val usBankAccountFormArguments: USBankAccountFormArguments,
         val formArguments: FormArguments,
-        val formElements: List<FormElement>,
+        private val formElements: List<FormElement>,
         val headerInformation: FormHeaderInformation?,
-    )
+    ) {
+        val formUiElements = formElements.onEach { element ->
+            element.onValidationStateChanged(isValidating)
+        }
+    }
 
     sealed interface ViewAction {
         data object FieldInteraction : ViewAction
@@ -52,23 +60,36 @@ internal class DefaultVerticalModeFormInteractor(
     private val headerInformation: FormHeaderInformation?,
     override val isLiveMode: Boolean,
     processing: StateFlow<Boolean>,
+    validationRequested: SharedFlow<Unit>,
     paymentMethodIncentive: StateFlow<PaymentMethodIncentive?>,
     private val coroutineScope: CoroutineScope,
 ) : VerticalModeFormInteractor {
+    private val isValidating = MutableStateFlow(false)
+
     override val state: StateFlow<VerticalModeFormInteractor.State> = combineAsStateFlow(
         processing,
         paymentMethodIncentive,
-    ) { isProcessing, paymentMethodIncentive ->
+        isValidating,
+    ) { isProcessing, paymentMethodIncentive, isValidating ->
         VerticalModeFormInteractor.State(
             selectedPaymentMethodCode = selectedPaymentMethodCode,
             isProcessing = isProcessing,
             usBankAccountFormArguments = usBankAccountArguments,
             formArguments = formArguments,
             formElements = formElements,
+            isValidating = isValidating,
             headerInformation = headerInformation?.copy(
                 promoBadge = paymentMethodIncentive?.takeIfMatches(selectedPaymentMethodCode)?.displayText,
             ),
         )
+    }
+
+    init {
+        coroutineScope.launch {
+            validationRequested.collect {
+                isValidating.value = true
+            }
+        }
     }
 
     override fun handleViewAction(viewAction: VerticalModeFormInteractor.ViewAction) {
@@ -121,6 +142,7 @@ internal class DefaultVerticalModeFormInteractor(
                 processing = viewModel.processing,
                 paymentMethodIncentive = bankFormInteractor.paymentMethodIncentiveInteractor.displayedIncentive,
                 reportFieldInteraction = viewModel.analyticsListener::reportFieldInteraction,
+                validationRequested = viewModel.validationRequested,
                 coroutineScope = coroutineScope,
             )
         }

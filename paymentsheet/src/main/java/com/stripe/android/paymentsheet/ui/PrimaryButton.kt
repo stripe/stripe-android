@@ -59,6 +59,7 @@ internal class PrimaryButton @JvmOverloads constructor(
     private var originalLabel: ResolvableString? = null
 
     private var defaultLabelColor: Int? = null
+    private var uiEnabled: Boolean = false
 
     @VisibleForTesting
     internal var externalLabel: ResolvableString? = null
@@ -99,6 +100,8 @@ internal class PrimaryButton @JvmOverloads constructor(
 
         isClickable = true
         isEnabled = false
+
+        updateAlpha()
     }
 
     fun setAppearanceConfiguration(
@@ -218,16 +221,11 @@ internal class PrimaryButton @JvmOverloads constructor(
         }
     }
 
-    override fun setEnabled(enabled: Boolean) {
-        super.setEnabled(enabled)
-        updateAlpha()
-    }
-
     override fun onInitializeAccessibilityNodeInfo(info: AccessibilityNodeInfo?) {
         super.onInitializeAccessibilityNodeInfo(info)
         // Indicate this custom view is a button, so TalkBack can announce it as such.
         info?.className = Button::class.java.name
-        info?.isEnabled = isEnabled
+        info?.isEnabled = uiEnabled
     }
 
     fun updateUiState(uiState: UIState?) {
@@ -241,9 +239,13 @@ internal class PrimaryButton @JvmOverloads constructor(
                 setLabel(uiState.label)
                 ViewCompat.setStateDescription(this, uiState.label.resolve(context))
                 updateLockVisibility(canShow = true)
+                isClickable = uiState.clickable
             }
 
-            isEnabled = uiState.enabled
+            isEnabled = uiState.clickable || uiState.enabled
+            uiEnabled = uiState.enabled
+
+            updateAlpha()
 
             setOnClickListener { uiState.onClick() }
         }
@@ -276,7 +278,7 @@ internal class PrimaryButton @JvmOverloads constructor(
             viewBinding.label,
             viewBinding.lockIcon
         ).forEach { view ->
-            view.alpha = if ((state == null || state is State.Ready) && !isEnabled) {
+            view.alpha = if ((state == null || state is State.Ready) && !uiEnabled) {
                 0.5f
             } else {
                 1.0f
@@ -308,6 +310,7 @@ internal class PrimaryButton @JvmOverloads constructor(
         val label: ResolvableString,
         val onClick: () -> Unit,
         val enabled: Boolean,
+        val clickable: Boolean,
         val lockVisible: Boolean,
     )
 }

@@ -35,6 +35,9 @@ internal class PrimaryButtonUiStateMapper(
             customPrimaryButtonUiStateFlow,
             cvcCompleteFlow
         ) { screen, buttonsEnabled, amount, selection, customPrimaryButton, cvcComplete ->
+            val canContinue = buttonsEnabled && selection != null &&
+                cvcRecollectionCompleteOrNotRequired(screen, cvcComplete, selection)
+
             screen.buyButtonState.mapAsStateFlow { buyButtonState ->
                 customPrimaryButton ?: PrimaryButton.UIState(
                     label = buyButtonState.buyButtonOverride?.label ?: buyButtonLabel(
@@ -43,8 +46,8 @@ internal class PrimaryButtonUiStateMapper(
                         isProcessingPayment
                     ),
                     onClick = onClick,
-                    enabled = buttonsEnabled && selection != null &&
-                        cvcRecollectionCompleteOrNotRequired(screen, cvcComplete, selection),
+                    clickable = buttonsEnabled && (canContinue || screen.isFormScreen()),
+                    enabled = buttonsEnabled && canContinue,
                     lockVisible = buyButtonState.buyButtonOverride?.lockEnabled ?: true,
                 ).takeIf { buyButtonState.visible }
             }
@@ -62,6 +65,7 @@ internal class PrimaryButtonUiStateMapper(
                 label = continueButtonLabel(config.primaryButtonLabel),
                 onClick = onClick,
                 enabled = buttonsEnabled && selection != null,
+                clickable = buttonsEnabled && (selection != null || screen.isFormScreen()),
                 lockVisible = false,
             ).takeIf {
                 /**
@@ -77,6 +81,10 @@ internal class PrimaryButtonUiStateMapper(
             }
         }
     }
+
+    private fun PaymentSheetScreen.isFormScreen() = this is PaymentSheetScreen.VerticalModeForm ||
+        this is PaymentSheetScreen.AddAnotherPaymentMethod ||
+        this is PaymentSheetScreen.AddFirstPaymentMethod
 
     private fun cvcRecollectionCompleteOrNotRequired(
         screen: PaymentSheetScreen,

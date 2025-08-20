@@ -174,6 +174,7 @@ internal class VerticalModeFormUITest {
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             ),
             formElements = CardDefinition.formElements(),
+            isValidating = false,
             headerInformation = headerInformation,
         )
     }
@@ -203,6 +204,7 @@ internal class VerticalModeFormUITest {
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             ),
             formElements = emptyList(),
+            isValidating = false,
             headerInformation = headerInformation,
         )
     }
@@ -236,6 +238,7 @@ internal class VerticalModeFormUITest {
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             ),
             formElements = KlarnaDefinition.formElements(paymentMethodMetadata),
+            isValidating = false,
             headerInformation = headerInformation,
         )
     }

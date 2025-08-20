@@ -2107,6 +2107,7 @@ class CustomerSheetViewModelTest {
                             label = "Continue".resolvableString,
                             enabled = true,
                             lockVisible = false,
+                            clickable = true,
                             onClick = {}
                         )
                     }

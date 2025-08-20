@@ -119,6 +119,7 @@ internal class PaymentSheetAnalyticsTest {
         }
 
         testContext.validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
+        testContext.validateAnalyticsRequest(eventName = "paymentsheet.checkout.has_payment_selection")
         testContext.validateAnalyticsRequest(
             eventName = "stripe_android.paymenthandler.confirm.started",
             query("intent_id", "pi_example"),
@@ -275,6 +276,7 @@ internal class PaymentSheetAnalyticsTest {
         }
 
         testContext.validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
+        testContext.validateAnalyticsRequest(eventName = "paymentsheet.checkout.has_payment_selection")
         testContext.validateAnalyticsRequest(
             eventName = "stripe_android.paymenthandler.confirm.started",
             query("intent_id", "pi_example"),
