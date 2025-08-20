@@ -54,6 +54,7 @@ import com.stripe.android.crypto.onramp.model.IdType
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
+import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.model.PaymentOptionDisplayData
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.image.rememberDrawablePainter
@@ -103,10 +104,9 @@ internal class OnrampActivity : ComponentActivity() {
                         onStartVerification = {
                             onrampPresenter.promptForIdentityVerification()
                         },
-                        onCollectPayment = {
-                            onrampPresenter.collectPaymentMethod()
+                        onCollectPayment = { type ->
+                            onrampPresenter.collectPaymentMethod(type)
                         }
-						
                     )
                 }
             }
@@ -122,7 +122,7 @@ internal fun OnrampScreen(
     onAuthenticateUser: () -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onStartVerification: () -> Unit,
-    onCollectPayment: () -> Unit
+    onCollectPayment: (type: PaymentMethodType) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
@@ -186,7 +186,7 @@ internal fun OnrampScreen(
                     onRegisterWalletAddress = onRegisterWalletAddress,
                     onCollectKYC = { kycInfo -> viewModel.collectKycInfo(kycInfo) },
                     onStartVerification = onStartVerification,
-                    onCollectPayment = { onCollectPayment() },
+                    onCollectPayment = onCollectPayment,
                     onBack = {
                         viewModel.onBackToEmailInput()
                     }
@@ -398,7 +398,7 @@ private fun AuthenticatedOperationsScreen(
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onCollectKYC: (KycInfo) -> Unit,
     onStartVerification: () -> Unit,
-    onCollectPayment: () -> Unit,
+    onCollectPayment: (type: PaymentMethodType) -> Unit,
     onBack: () -> Unit
 ) {
     var walletAddress by remember { mutableStateOf("") }
@@ -529,12 +529,21 @@ private fun AuthenticatedOperationsScreen(
         )
 
         Button(
-            onClick = { onCollectPayment() },
+            onClick = { onCollectPayment(PaymentMethodType.Card) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
+        ) {
+            Text("Collect Card")
+        }
+
+        Button(
+            onClick = { onCollectPayment(PaymentMethodType.BankAccount) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 24.dp)
         ) {
-            Text("Collect Payment Method")
+            Text("Collect Bank Account")
         }
 
         TextButton(

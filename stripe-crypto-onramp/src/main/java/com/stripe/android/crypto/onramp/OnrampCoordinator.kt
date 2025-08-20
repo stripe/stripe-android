@@ -16,6 +16,7 @@ import com.stripe.android.crypto.onramp.model.OnrampKYCResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
 import com.stripe.android.crypto.onramp.model.OnrampSetWalletAddressResult
+import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import javax.inject.Inject
 
 /**
@@ -134,9 +135,11 @@ class OnrampCoordinator @Inject internal constructor(
 
         /**
          * Presents a payment selection UI to the user.
+         *
+         * @param type The payment method type to collect.
          */
-        fun collectPaymentMethod() {
-            coordinator.collectPaymentMethod()
+        fun collectPaymentMethod(type: PaymentMethodType) {
+            coordinator.collectPaymentMethod(type)
         }
     }
 
