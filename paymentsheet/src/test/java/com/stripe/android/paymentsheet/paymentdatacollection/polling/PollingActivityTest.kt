@@ -231,6 +231,7 @@ internal class PollingActivityTest {
             pollingStrategy = IntentStatusPoller.PollingStrategy.ExponentialBackoff(maxAttempts = 3),
             ctaText = R.string.stripe_upi_polling_message,
             stripeAccountId = null,
+            qrCodeUrl = null,
         )
     }
 }

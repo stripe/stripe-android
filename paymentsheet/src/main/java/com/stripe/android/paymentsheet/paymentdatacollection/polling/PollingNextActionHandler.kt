@@ -43,6 +43,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                     pollingStrategy = PollingStrategy.ExponentialBackoff(maxAttempts = UPI_MAX_ATTEMPTS),
                     ctaText = R.string.stripe_upi_polling_message,
                     stripeAccountId = requestOptions.stripeAccount,
+                    qrCodeUrl = null,
                 )
             PaymentMethod.Type.Blik ->
                 PollingContract.Args(
@@ -53,6 +54,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                     pollingStrategy = PollingStrategy.ExponentialBackoff(maxAttempts = BLIK_MAX_ATTEMPTS),
                     ctaText = R.string.stripe_blik_confirm_payment,
                     stripeAccountId = requestOptions.stripeAccount,
+                    qrCodeUrl = null,
                 )
             PaymentMethod.Type.PayNow ->
                 PollingContract.Args(
@@ -63,6 +65,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                     pollingStrategy = PollingStrategy.FixedIntervals(retryIntervalInSeconds = 1),
                     ctaText = R.string.stripe_paynow_confirm_payment,
                     stripeAccountId = requestOptions.stripeAccount,
+                    qrCodeUrl = getQrCodeForPayNow(actionable),
                 )
             else ->
                 error(
@@ -85,6 +88,11 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
         } else {
             localPollingAuthenticator.launch(args, options)
         }
+    }
+
+    private fun getQrCodeForPayNow(actionable: StripeIntent): String {
+        // TODO: test what happens when null.
+        return requireNotNull((actionable.nextActionData as StripeIntent.NextActionData.DisplayPayNowDetails).qrCodeUrl)
     }
 
     override fun onNewActivityResultCaller(
