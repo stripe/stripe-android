@@ -1,8 +1,10 @@
 package com.stripe.android.link.ui.paymentmethod
 
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.PaymentConfirmed
 import com.stripe.android.link.LinkActivityResult
@@ -25,7 +27,9 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.FakeLogger
+import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -63,6 +67,7 @@ class PaymentMethodViewModelTest {
                 formArguments = TestFactory.CARD_FORM_ARGS,
                 formElements = TestFactory.CARD_FORM_ELEMENTS,
                 primaryButtonState = PrimaryButtonState.Disabled,
+                isValidating = false,
                 primaryButtonLabel = completePaymentButtonLabel(
                     TestFactory.LINK_CONFIGURATION.stripeIntent,
                     LinkLaunchMode.Full
@@ -212,7 +217,7 @@ class PaymentMethodViewModelTest {
     }
 
     @Test
-    fun `onPayClicked logs when payment selection is null`() = runTest {
+    fun `onPayClicked logs when payment selection is null & sets state to validate`() = runTest {
         val linkConfirmationHandler = FakeLinkConfirmationHandler()
         val logger = FakeLogger()
 
@@ -225,8 +230,31 @@ class PaymentMethodViewModelTest {
 
         assertThat(linkConfirmationHandler.confirmWithLinkPaymentDetailsCall).isEmpty()
         assertThat(viewModel.state.value.primaryButtonState).isEqualTo(PrimaryButtonState.Disabled)
+
+        val formElements = viewModel.state.value.formUiElements
+
+        assertThat(formElements).hasSize(2)
+
+        assertThat(formElements[0]).isInstanceOf<CardDetailsSectionElement>()
+
+        val cardDetailsSectionElement = formElements[0] as CardDetailsSectionElement
+
+        cardDetailsSectionElement.controller.error.test {
+            assertThat(awaitItem()).isNotNull()
+        }
+
+        assertThat(formElements[1]).isInstanceOf<SectionElement>()
+
+        val sectionElement = formElements[1] as SectionElement
+
+        sectionElement.controller.error.test {
+            assertThat(awaitItem()).isNotNull()
+        }
+
         assertThat(logger.errorLogs)
-            .containsExactly("PaymentMethodViewModel: onPayClicked without paymentMethodCreateParams" to null)
+            .containsExactly(
+                "PaymentMethodViewModel: onPayClicked without paymentMethodCreateParams" to null
+            )
     }
 
     private fun createViewModel(

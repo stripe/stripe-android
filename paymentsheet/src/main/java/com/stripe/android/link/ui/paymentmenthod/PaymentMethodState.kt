@@ -8,9 +8,14 @@ import com.stripe.android.uicore.elements.FormElement
 
 internal data class PaymentMethodState(
     val formArguments: FormArguments,
-    val formElements: List<FormElement>,
+    private val formElements: List<FormElement>,
     val primaryButtonState: PrimaryButtonState,
     val primaryButtonLabel: ResolvableString,
+    private val isValidating: Boolean,
     val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
     val errorMessage: ResolvableString? = null
-)
+) {
+    val formUiElements: List<FormElement> = formElements.onEach { element ->
+        element.onValidationStateChanged(isValidating)
+    }
+}

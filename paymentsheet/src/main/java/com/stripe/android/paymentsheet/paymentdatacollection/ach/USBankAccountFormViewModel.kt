@@ -484,18 +484,22 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     fun handlePrimaryButtonClick() {
         val screenState = currentScreenState.value
-        if (screenState.linkedBankAccount == null) {
+        val hasRequiredFields = requiredFields.value
+        if (screenState.linkedBankAccount == null && hasRequiredFields) {
             screenStateWithoutSaveForFutureUse.update {
                 it.processing()
             }
 
             collectBankAccount(args.clientSecret)
+        } else if (!hasRequiredFields) {
+            setValidationState(true)
         }
     }
 
     fun reset(error: ResolvableString? = null) {
         hasLaunched = false
         shouldReset = false
+        setValidationState(false)
         screenStateWithoutSaveForFutureUse.value = args.toInitialState(error = error)
         saveForFutureUseElement.controller.onValueChange(true)
     }
@@ -503,6 +507,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     fun onDestroy() {
         if (shouldReset) {
             reset()
+        } else {
+            setValidationState(false)
         }
         collectBankAccountLauncher?.unregister()
         collectBankAccountLauncher = null
@@ -594,6 +600,13 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             prefillDetails = makePrefillDetails(),
             incentiveEligibilitySession = incentiveEligibilitySession,
         )
+    }
+
+    private fun setValidationState(isValidating: Boolean) {
+        nameController.onValidationStateChanged(isValidating)
+        phoneController.onValidationStateChanged(isValidating)
+        emailController.onValidationStateChanged(isValidating)
+        addressElement.onValidationStateChanged(isValidating)
     }
 
     private fun makeElementsSessionContextBillingDetails(): ElementsSessionContext.BillingDetails {

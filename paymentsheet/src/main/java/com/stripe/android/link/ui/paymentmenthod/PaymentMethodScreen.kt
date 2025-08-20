@@ -50,7 +50,7 @@ internal fun PaymentMethodBody(
                 args = state.formArguments,
                 enabled = true,
                 onFormFieldValuesChanged = onFormFieldValuesChanged,
-                formElements = state.formElements,
+                formElements = state.formUiElements,
             )
         }
 

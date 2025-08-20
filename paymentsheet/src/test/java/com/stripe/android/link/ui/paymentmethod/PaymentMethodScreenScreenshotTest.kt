@@ -44,6 +44,15 @@ internal class PaymentMethodScreenScreenshotTest {
     }
 
     @Test
+    fun `form with button disabled & validation`() {
+        snapshot(
+            state = state(
+                isValidating = true
+            )
+        )
+    }
+
+    @Test
     fun `form with button enabled`() {
         snapshot(
             state = state(
@@ -79,7 +88,8 @@ internal class PaymentMethodScreenScreenshotTest {
 
     private fun state(
         primaryButtonState: PrimaryButtonState = PrimaryButtonState.Disabled,
-        errorMessage: ResolvableString? = null
+        errorMessage: ResolvableString? = null,
+        isValidating: Boolean = false,
     ): PaymentMethodState {
         val metadata = PaymentMethodMetadataFactory.create()
         val uiDefinitionArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
@@ -102,6 +112,7 @@ internal class PaymentMethodScreenScreenshotTest {
             primaryButtonState = primaryButtonState,
             primaryButtonLabel = "$50".resolvableString,
             errorMessage = errorMessage,
+            isValidating = isValidating,
             paymentMethodCreateParams = null
         )
     }

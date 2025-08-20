@@ -53,7 +53,8 @@ internal class PaymentMethodViewModel @Inject constructor(
             formElements = formHelper.formElementsForCode(PaymentMethod.Type.Card.code),
             formArguments = formHelper.createFormArguments(PaymentMethod.Type.Card.code),
             primaryButtonState = PrimaryButtonState.Disabled,
-            primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent, linkLaunchMode)
+            primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent, linkLaunchMode),
+            isValidating = false,
         )
     )
 
@@ -83,11 +84,12 @@ internal class PaymentMethodViewModel @Inject constructor(
     fun onPayClicked() {
         val paymentMethodCreateParams = _state.value.paymentMethodCreateParams
         if (paymentMethodCreateParams == null) {
+            validate()
             logger.error("PaymentMethodViewModel: onPayClicked without paymentMethodCreateParams")
             return
         }
         viewModelScope.launch {
-            clearErrorMessage()
+            clearErrors()
             updateButtonState(PrimaryButtonState.Processing)
 
             dismissalCoordinator.withDismissalDisabled {
@@ -159,9 +161,15 @@ internal class PaymentMethodViewModel @Inject constructor(
         }
     }
 
-    private fun clearErrorMessage() {
+    private fun validate() {
+        _state.update { state ->
+            state.copy(isValidating = true)
+        }
+    }
+
+    private fun clearErrors() {
         _state.update {
-            it.copy(errorMessage = null)
+            it.copy(errorMessage = null, isValidating = false)
         }
     }
 
