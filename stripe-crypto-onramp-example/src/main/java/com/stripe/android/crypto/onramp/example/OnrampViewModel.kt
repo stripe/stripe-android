@@ -12,6 +12,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.github.kittinunf.result.Result
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.crypto.onramp.OnrampCoordinator
+import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
 import com.stripe.android.crypto.onramp.example.network.TestBackendRepository
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
@@ -313,17 +314,12 @@ internal class OnrampViewModel(
             when (result) {
                 is Result.Success -> {
                     val response = result.value
-                    if (response.id != null) {
-                        _message.value = "Onramp session created successfully! Session ID: ${response.id}"
-                        _uiState.update {
-                            it.copy(
-                                screen = Screen.AuthenticatedOperations,
-                                onrampSessionId = response.id
-                            )
-                        }
-                    } else {
-                        _message.value = "Failed to create onramp session: ${response.error ?: "Unknown error"}"
-                        _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
+                    _message.value = "Onramp session created successfully! Session ID: ${response.id}"
+                    _uiState.update {
+                        it.copy(
+                            screen = Screen.AuthenticatedOperations,
+                            onrampSession = response
+                        )
                     }
                 }
                 is Result.Failure -> {
@@ -380,7 +376,7 @@ data class OnrampUiState(
     val walletAddress: String? = null,
     val network: CryptoNetwork? = null,
     val authToken: String? = null,
-    val onrampSessionId: String? = null,
+    val onrampSession: OnrampSessionResponse? = null,
 )
 
 enum class Screen {

@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.crypto.onramp.OnrampCoordinator
+import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.DateOfBirth
 import com.stripe.android.crypto.onramp.model.IdType
@@ -190,7 +191,7 @@ internal fun OnrampScreen(
                 AuthenticatedOperationsScreen(
                     email = uiState.email,
                     customerId = uiState.customerId ?: "",
-                    onrampSessionId = uiState.onrampSessionId,
+                    onrampSessionResponse = uiState.onrampSession,
                     selectedPaymentData = uiState.selectedPaymentData,
                     onRegisterWalletAddress = onRegisterWalletAddress,
                     onCollectKYC = { kycInfo -> viewModel.collectKycInfo(kycInfo) },
@@ -405,7 +406,7 @@ private fun AuthenticationScreen(
 private fun AuthenticatedOperationsScreen(
     email: String,
     customerId: String,
-    onrampSessionId: String?,
+    onrampSessionResponse: OnrampSessionResponse?,
     selectedPaymentData: PaymentOptionDisplayData?,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onCollectKYC: (KycInfo) -> Unit,
@@ -443,11 +444,42 @@ private fun AuthenticatedOperationsScreen(
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        onrampSessionId?.let {
+        onrampSessionResponse?.let { response ->
             Text(
-                text = "Onramp Session ID: $it",
+                text = "Onramp Session ID: ${response.id}",
                 modifier = Modifier.padding(bottom = 24.dp)
             )
+            Text(
+                text = "Session Status: ${response.status}",
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Text(
+                text = "Total Amount: ${response.sourceTotalAmount}",
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Text(
+                text = "Payment Method: ${response.paymentMethod}",
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            response.transactionDetails.let { details ->
+                Text(
+                    text = buildString {
+                        append("Exchange Amount: ${details.sourceExchangeAmount}")
+                        append(" ${details.sourceCurrency} → ${details.destinationExchangeAmount}")
+                        append(" ${details.destinationCurrency}")
+                    },
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                Text(
+                    text = "Network Fee: ${details.fees.networkFeeAmount}",
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                Text(
+                    text = "Transaction Fee: ${details.fees.transactionFeeAmount}",
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+            }
         } ?: run {
             Spacer(modifier = Modifier.height(16.dp))
         }

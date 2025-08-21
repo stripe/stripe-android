@@ -11,7 +11,6 @@ import com.github.kittinunf.fuel.core.requests.suspendable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.DeserializationStrategy
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import com.github.kittinunf.result.Result as ApiResult
 
@@ -47,7 +46,7 @@ class TestBackendRepository {
         sourceCurrency: String = "usd",
         destinationCurrency: String = "eth",
         customerIpAddress: String = "127.0.0.1"
-    ): ApiResult<CreateOnrampSessionResponse, FuelError> {
+    ): ApiResult<OnrampSessionResponse, FuelError> {
         return withContext(Dispatchers.IO) {
             val request = CreateOnrampSessionRequest(
                 uiMode = "headless",
@@ -69,7 +68,24 @@ class TestBackendRepository {
                 .header("Authorization", "Bearer $authToken")
                 .jsonBody(requestBody)
                 .suspendable()
-                .awaitModel(CreateOnrampSessionResponse.serializer(), json)
+                .awaitModel(OnrampSessionResponse.serializer(), json)
+        }
+    }
+
+    @Suppress("unused")
+    suspend fun checkout(
+        cosId: String,
+        authToken: String
+    ): ApiResult<OnrampSessionResponse, FuelError> {
+        return withContext(Dispatchers.IO) {
+            val request = CheckoutRequest(cosId = cosId)
+            val requestBody = json.encodeToString(CheckoutRequest.serializer(), request)
+
+            Fuel.post("$baseUrl/checkout")
+                .header("Authorization", "Bearer $authToken")
+                .jsonBody(requestBody)
+                .suspendable()
+                .awaitModel(OnrampSessionResponse.serializer(), json)
         }
     }
 }
