@@ -92,9 +92,6 @@ class OnrampCoordinator @Inject internal constructor(
      * Creates a crypto payment token for the payment method currently selected on the coordinator.
      * Call after a successful [Presenter.collectPaymentMethod].
      *
-     * Throws an error if no payment method has been selected, the Link account is not verified,
-     * required session credentials are missing, the payment method creation fails, or a network/API error occurs.
-     *
      * @return The crypto payment token ID.
      */
     suspend fun createCryptoPaymentToken(): OnrampCreateCryptoPaymentTokenResult {

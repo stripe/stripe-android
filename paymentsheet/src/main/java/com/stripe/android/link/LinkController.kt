@@ -455,7 +455,7 @@ class LinkController @Inject internal constructor(
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Poko
-        class Success internal constructor(val paymentMethod: PaymentMethod): CreatePaymentMethodResult
+        class Success internal constructor(val paymentMethod: PaymentMethod) : CreatePaymentMethodResult
 
         /**
          * An error occurred while creating the payment method.
