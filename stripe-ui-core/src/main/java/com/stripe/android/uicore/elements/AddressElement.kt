@@ -55,7 +55,8 @@ class AddressElement(
 
     private val addressAutoCompleteElement = AddressTextFieldElement(
         identifier = IdentifierSpec.OneLineAddress,
-        config = SimpleTextFieldConfig(label = resolvableString(R.string.stripe_address_label_address)),
+        label = resolvableString(R.string.stripe_address_label_address),
+        optional = false,
         onNavigation = (addressInputMode as? AddressInputMode.AutocompleteCondensed)?.onNavigation
     )
 
