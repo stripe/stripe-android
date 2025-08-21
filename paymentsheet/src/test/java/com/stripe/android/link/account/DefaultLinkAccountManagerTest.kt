@@ -227,6 +227,7 @@ class DefaultLinkAccountManagerTest {
                 actualEmail: String,
                 actualPhone: String?,
                 actualCountry: String?,
+                countryInferringMethod: String,
                 actualName: String?,
                 actualConsentAction: ConsumerSignUpConsentAction
             ): Result<ConsumerSessionSignup> {
@@ -241,6 +242,7 @@ class DefaultLinkAccountManagerTest {
                     actualEmail,
                     actualPhone,
                     actualCountry,
+                    countryInferringMethod,
                     actualName,
                     actualConsentAction
                 )
@@ -270,11 +272,12 @@ class DefaultLinkAccountManagerTest {
                 email: String,
                 phone: String?,
                 country: String?,
+                countryInferringMethod: String,
                 name: String?,
                 consentAction: ConsumerSignUpConsentAction
             ): Result<ConsumerSessionSignup> {
                 if (consentAction == ConsumerSignUpConsentAction.Checkbox) callCount += 1
-                return super.consumerSignUp(email, phone, country, name, consentAction)
+                return super.consumerSignUp(email, phone, country, countryInferringMethod, name, consentAction)
             }
         }
         accountManager(linkRepository = linkRepository).signInWithUserInput(
@@ -295,13 +298,14 @@ class DefaultLinkAccountManagerTest {
                     email: String,
                     phone: String?,
                     country: String?,
+                    countryInferringMethod: String,
                     name: String?,
                     consentAction: ConsumerSignUpConsentAction
                 ): Result<ConsumerSessionSignup> {
                     if (consentAction == ConsumerSignUpConsentAction.CheckboxWithPrefilledEmail) {
                         callCount += 1
                     }
-                    return super.consumerSignUp(email, phone, country, name, consentAction)
+                    return super.consumerSignUp(email, phone, country, countryInferringMethod, name, consentAction)
                 }
             }
             accountManager(linkRepository = linkRepository).signInWithUserInput(
@@ -322,13 +326,14 @@ class DefaultLinkAccountManagerTest {
                     email: String,
                     phone: String?,
                     country: String?,
+                    countryInferringMethod: String,
                     name: String?,
                     consentAction: ConsumerSignUpConsentAction
                 ): Result<ConsumerSessionSignup> {
                     if (consentAction == ConsumerSignUpConsentAction.CheckboxWithPrefilledEmailAndPhone) {
                         callCount += 1
                     }
-                    return super.consumerSignUp(email, phone, country, name, consentAction)
+                    return super.consumerSignUp(email, phone, country, countryInferringMethod, name, consentAction)
                 }
             }
             accountManager(linkRepository = linkRepository).signInWithUserInput(
@@ -348,13 +353,14 @@ class DefaultLinkAccountManagerTest {
                 email: String,
                 phone: String?,
                 country: String?,
+                countryInferringMethod: String,
                 name: String?,
                 consentAction: ConsumerSignUpConsentAction
             ): Result<ConsumerSessionSignup> {
                 if (consentAction == ConsumerSignUpConsentAction.Implied) {
                     callCount += 1
                 }
-                return super.consumerSignUp(email, phone, country, name, consentAction)
+                return super.consumerSignUp(email, phone, country, countryInferringMethod, name, consentAction)
             }
         }
         accountManager(linkRepository = linkRepository).signInWithUserInput(
@@ -375,11 +381,12 @@ class DefaultLinkAccountManagerTest {
                     email: String,
                     phone: String?,
                     country: String?,
+                    countryInferringMethod: String,
                     name: String?,
                     consentAction: ConsumerSignUpConsentAction
                 ): Result<ConsumerSessionSignup> {
                     consentActions.add(consentAction)
-                    return super.consumerSignUp(email, phone, country, name, consentAction)
+                    return super.consumerSignUp(email, phone, country, countryInferringMethod, name, consentAction)
                 }
             }
             accountManager(linkRepository = linkRepository).signInWithUserInput(
@@ -969,6 +976,7 @@ class DefaultLinkAccountManagerTest {
             verificationToken = TestFactory.VERIFICATION_TOKEN,
             appId = TestFactory.APP_ID,
             country = TestFactory.COUNTRY,
+            countryInferringMethod = "PHONE_NUMBER",
             phone = TestFactory.CUSTOMER_PHONE,
             name = TestFactory.CUSTOMER_NAME,
             consentAction = SignUpConsentAction.Implied
@@ -1004,6 +1012,7 @@ class DefaultLinkAccountManagerTest {
             verificationToken = TestFactory.VERIFICATION_TOKEN,
             appId = TestFactory.APP_ID,
             country = TestFactory.COUNTRY,
+            countryInferringMethod = "PHONE_NUMBER",
             phone = TestFactory.CUSTOMER_PHONE,
             name = TestFactory.CUSTOMER_NAME,
             consentAction = SignUpConsentAction.Implied

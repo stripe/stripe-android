@@ -182,6 +182,7 @@ class LinkApiRepositoryTest {
             email = TestFactory.EMAIL,
             phone = TestFactory.CUSTOMER_PHONE,
             country = TestFactory.COUNTRY,
+            countryInferringMethod = TestFactory.COUNTRY_INFERRING_METHOD,
             name = TestFactory.CUSTOMER_NAME,
             consentAction = TestFactory.CONSENT_ACTION
         )
@@ -211,6 +212,7 @@ class LinkApiRepositoryTest {
             email = TestFactory.EMAIL,
             phone = TestFactory.CUSTOMER_PHONE,
             country = TestFactory.COUNTRY,
+            countryInferringMethod = TestFactory.COUNTRY_INFERRING_METHOD,
             name = TestFactory.CUSTOMER_NAME,
             consentAction = TestFactory.CONSENT_ACTION
         )
@@ -227,6 +229,7 @@ class LinkApiRepositoryTest {
             email = TestFactory.EMAIL,
             phoneNumber = TestFactory.CUSTOMER_PHONE,
             country = TestFactory.COUNTRY,
+            countryInferringMethod = TestFactory.COUNTRY_INFERRING_METHOD,
             name = TestFactory.CUSTOMER_NAME,
             consentAction = TestFactory.CONSENT_ACTION,
             verificationToken = TestFactory.VERIFICATION_TOKEN,
@@ -263,6 +266,7 @@ class LinkApiRepositoryTest {
             email = TestFactory.EMAIL,
             phoneNumber = TestFactory.CUSTOMER_PHONE,
             country = TestFactory.COUNTRY,
+            countryInferringMethod = TestFactory.COUNTRY_INFERRING_METHOD,
             name = TestFactory.CUSTOMER_NAME,
             consentAction = TestFactory.CONSENT_ACTION,
             verificationToken = TestFactory.VERIFICATION_TOKEN,
