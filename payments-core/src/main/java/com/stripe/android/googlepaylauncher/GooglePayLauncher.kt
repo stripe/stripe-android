@@ -132,7 +132,8 @@ class GooglePayLauncher internal constructor(
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
                     productUsage = setOf(PRODUCT_USAGE)
-                )
+                ),
+                cardBrandFilter = config.cardBrandFilter
             )
         },
         paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
