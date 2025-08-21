@@ -38,12 +38,14 @@ import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.F
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.FIELD_SYNC_DEFAULT_ENABLED
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.analytics.DefaultCustomerSheetEventReporter
+import com.stripe.android.customersheet.analytics.CustomerSheetEvent
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Test
+import kotlin.time.Duration.Companion.seconds
 import org.junit.runner.RunWith
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.mock
@@ -443,6 +445,150 @@ class CustomerSheetEventReporterTest {
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == PaymentAnalyticsEvent.FileCreate.eventName
+            }
+        )
+    }
+
+    @Test
+    fun `onCardScanEvent() with CardScanStarted should fire analytics request with expected event value`() {
+        val event = CustomerSheetEvent.CardScanStarted("google_pay")
+        eventReporter.onCardScanEvent(event)
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "cs_cardscan_scan_started" &&
+                    req.params["implementation"] == "google_pay"
+            }
+        )
+    }
+
+    @Test
+    fun `onCardScanEvent() with CardScanSucceeded should fire analytics request with expected event value`() {
+        val event = CustomerSheetEvent.CardScanSucceeded("google_pay", 2.seconds)
+        eventReporter.onCardScanEvent(event)
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "cs_cardscan_success" &&
+                    req.params["implementation"] == "google_pay" &&
+                    req.params["duration"] == 2f
+            }
+        )
+    }
+
+    @Test
+    fun `onCardScanEvent() with CardScanFailed should fire analytics request with expected event value`() {
+        val testError = IllegalStateException("Card scan failed")
+        val event = CustomerSheetEvent.CardScanFailed("google_pay", 1.seconds, testError)
+        eventReporter.onCardScanEvent(event)
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "cs_cardscan_failed" &&
+                    req.params["implementation"] == "google_pay" &&
+                    req.params["duration"] == 1f &&
+                    req.params["error_message"] == "Card scan failed"
+            }
+        )
+    }
+
+    @Test
+    fun `onCardScanEvent() with CardScanFailed and null error should fire analytics request with null error_message`() {
+        val event = CustomerSheetEvent.CardScanFailed("google_pay", 1.seconds, null)
+        eventReporter.onCardScanEvent(event)
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "cs_cardscan_failed" &&
+                    req.params["implementation"] == "google_pay" &&
+                    req.params["duration"] == 1f &&
+                    req.params["error_message"] == null
+            }
+        )
+    }
+
+    @Test
+    fun `onCardScanEvent() with CardScanCancelled should fire analytics request with expected event value`() {
+        val event = CustomerSheetEvent.CardScanCancelled("google_pay", 3.seconds)
+        eventReporter.onCardScanEvent(event)
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "cs_cardscan_cancel" &&
+                    req.params["implementation"] == "google_pay" &&
+                    req.params["duration"] == 3f
+            }
+        )
+    }
+
+    @Test
+    fun `onCardScanEvent() with CardScanApiCheckSucceeded should fire analytics request with expected event value`() {
+        val event = CustomerSheetEvent.CardScanApiCheckSucceeded("google_pay")
+        eventReporter.onCardScanEvent(event)
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "cs_cardscan_api_check_succeeded" &&
+                    req.params["implementation"] == "google_pay"
+            }
+        )
+    }
+
+    @Test
+    fun `onCardScanEvent() with CardScanApiCheckFailed should fire analytics request with expected event value`() {
+        val testError = IllegalStateException("API not available")
+        val event = CustomerSheetEvent.CardScanApiCheckFailed("google_pay", testError)
+        eventReporter.onCardScanEvent(event)
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "cs_cardscan_api_check_failed" &&
+                    req.params["implementation"] == "google_pay" &&
+                    req.params["error_message"] == "IllegalStateException"
+            }
+        )
+    }
+
+    @Test
+    fun `onCardScanEvent() should work with different implementation names`() {
+        eventReporter.onCardScanEvent(CustomerSheetEvent.CardScanStarted("bouncer"))
+        eventReporter.onCardScanEvent(CustomerSheetEvent.CardScanSucceeded("stripe", 1.seconds))
+        eventReporter.onCardScanEvent(CustomerSheetEvent.CardScanFailed("custom", 2.seconds, null))
+        eventReporter.onCardScanEvent(CustomerSheetEvent.CardScanCancelled("test", 1.seconds))
+        eventReporter.onCardScanEvent(CustomerSheetEvent.CardScanApiCheckSucceeded("ml_kit"))
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "cs_cardscan_scan_started" &&
+                    req.params["implementation"] == "bouncer"
+            }
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "cs_cardscan_success" &&
+                    req.params["implementation"] == "stripe"
+            }
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "cs_cardscan_failed" &&
+                    req.params["implementation"] == "custom"
+            }
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "cs_cardscan_cancel" &&
+                    req.params["implementation"] == "test"
+            }
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "cs_cardscan_api_check_succeeded" &&
+                    req.params["implementation"] == "ml_kit"
             }
         )
     }
