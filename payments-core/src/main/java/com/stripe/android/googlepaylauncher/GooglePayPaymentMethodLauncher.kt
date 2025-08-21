@@ -292,7 +292,13 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         /**
          * Set this property to enable other card networks in additional to the default list, such as "INTERAC"
          */
-        internal val additionalEnabledNetworks: List<String> = emptyList()
+        internal val additionalEnabledNetworks: List<String> = emptyList(),
+        /**
+         * Allows to filter card brands while saving a payment method
+         *
+         * Default: Accepts all card brands
+         */
+        var cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
     ) : Parcelable {
 
         internal val isJcbEnabled: Boolean
