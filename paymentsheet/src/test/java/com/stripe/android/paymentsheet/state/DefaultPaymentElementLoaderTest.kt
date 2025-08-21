@@ -746,7 +746,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Considers Link logged in if the account is verified`() = runTest {
-        val loader = createPaymentElementLoader(linkAccountState = AccountStatus.Verified)
+        val loader = createPaymentElementLoader(linkAccountState = AccountStatus.Verified(null))
 
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
@@ -1095,7 +1095,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `Disables Link inline signup if user already has an verified account`() = runTest {
         val loader = createPaymentElementLoader(
-            linkAccountState = AccountStatus.Verified,
+            linkAccountState = AccountStatus.Verified(null),
         )
 
         val result = loader.load(
@@ -3715,7 +3715,7 @@ internal class DefaultPaymentElementLoaderTest {
         isGooglePayReady: Boolean = true,
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         customerRepo: CustomerRepository = customerRepository,
-        linkAccountState: AccountStatus = AccountStatus.Verified,
+        linkAccountState: AccountStatus = AccountStatus.Verified(null),
         error: Throwable? = null,
         linkSettings: ElementsSession.LinkSettings? = null,
         linkGate: LinkGate = FakeLinkGate(),

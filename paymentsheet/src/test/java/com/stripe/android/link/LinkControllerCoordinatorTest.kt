@@ -39,6 +39,7 @@ internal class LinkControllerCoordinatorTest {
 
     private val presentPaymentMethodsResults = mutableListOf<LinkController.PresentPaymentMethodsResult>()
     private val authenticationResults = mutableListOf<LinkController.AuthenticationResult>()
+    private val authorizeResults = mutableListOf<LinkController.AuthorizeResult>()
 
     private val lifecycleOwner = TestLifecycleOwner(initialState = Lifecycle.State.INITIALIZED)
 
@@ -57,6 +58,7 @@ internal class LinkControllerCoordinatorTest {
             linkActivityContract = linkActivityContract,
             selectedPaymentMethodCallback = { presentPaymentMethodsResults.add(it) },
             authenticationCallback = { authenticationResults.add(it) },
+            authorizeCallback = { authorizeResults.add(it) },
         )
     }
 

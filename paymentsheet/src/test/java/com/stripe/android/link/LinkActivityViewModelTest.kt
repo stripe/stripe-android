@@ -44,6 +44,8 @@ import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
 import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.navigation.PopUpToBehavior
 import com.stripe.android.utils.DummyActivityResultCaller
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -294,7 +296,7 @@ internal class LinkActivityViewModelTest {
         val linkAccountManager = FakeLinkAccountManager()
 
         val vm = createViewModel(linkAccountManager = linkAccountManager)
-        linkAccountManager.setAccountStatus(AccountStatus.Verified)
+        linkAccountManager.setAccountStatus(AccountStatus.Verified(null))
 
         vm.onCreate(mock())
 
@@ -532,7 +534,7 @@ internal class LinkActivityViewModelTest {
     }
 
     @Test
-    fun `onCreate should dismiss 2fa on when succeeded`() = runTest {
+    fun `onCreate should dismiss 2fa on when succeeded`() = runTest(dispatcher) {
         val linkAccountManager = FakeLinkAccountManager()
         linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
 
@@ -542,17 +544,15 @@ internal class LinkActivityViewModelTest {
         )
         linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
 
-        vm.onCreate(mock())
+        vm.linkScreenState.test {
+            assertThat(awaitItem()).isEqualTo(ScreenState.Loading)
+            vm.onCreate(mock())
+            assertThat(awaitItem()).isEqualTo(ScreenState.VerificationDialog(TestFactory.LINK_ACCOUNT))
 
-        advanceUntilIdle()
-
-        assertThat(vm.linkScreenState.value).isEqualTo(ScreenState.VerificationDialog(TestFactory.LINK_ACCOUNT))
-
-        vm.onVerificationSucceeded()
-
-        advanceUntilIdle()
-
-        assertThat(vm.linkScreenState.value).isInstanceOf(ScreenState.FullScreen::class.java)
+            linkAccountManager.setAccountStatus(AccountStatus.Verified(null))
+            vm.onVerificationSucceeded()
+            assertThat(awaitItem()).isInstanceOf(ScreenState.FullScreen::class.java)
+        }
     }
 
     @Test

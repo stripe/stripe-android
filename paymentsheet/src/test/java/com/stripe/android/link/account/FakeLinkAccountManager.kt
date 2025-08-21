@@ -33,7 +33,7 @@ internal open class FakeLinkAccountManager(
 ) : LinkAccountManager {
     override val linkAccountInfo: StateFlow<LinkAccountUpdate.Value> = linkAccountHolder.linkAccountInfo
 
-    private val _accountStatus = MutableStateFlow(AccountStatus.SignedOut)
+    private val _accountStatus = MutableStateFlow<AccountStatus>(AccountStatus.SignedOut)
     override val accountStatus: Flow<AccountStatus> = accountStatusOverride ?: _accountStatus
 
     private val _consumerState =
