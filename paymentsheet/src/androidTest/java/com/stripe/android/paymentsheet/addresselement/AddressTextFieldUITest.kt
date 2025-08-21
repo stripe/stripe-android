@@ -10,7 +10,6 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.elements.AddressTextFieldController
 import com.stripe.android.uicore.elements.AddressTextFieldUI
-import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -40,7 +39,7 @@ class AddressTextFieldUITest {
             DefaultStripeTheme {
                 AddressTextFieldUI(
                     controller = AddressTextFieldController(
-                        SimpleTextFieldConfig(label = resolvableString(UiCoreR.string.stripe_address_label_address))
+                        label = resolvableString(UiCoreR.string.stripe_address_label_address),
                     ),
                     onClick = onClick
                 )
