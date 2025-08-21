@@ -313,12 +313,18 @@ internal class OnrampViewModel(
             when (result) {
                 is Result.Success -> {
                     val response = result.value
-                    if (response.sessionId != null) {
-                        _message.value = "Onramp session created successfully! Session ID: ${response.sessionId}"
+                    if (response.id != null) {
+                        _message.value = "Onramp session created successfully! Session ID: ${response.id}"
+                        _uiState.update {
+                            it.copy(
+                                screen = Screen.AuthenticatedOperations,
+                                onrampSessionId = response.id
+                            )
+                        }
                     } else {
                         _message.value = "Failed to create onramp session: ${response.error ?: "Unknown error"}"
+                        _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
                     }
-                    _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
                 }
                 is Result.Failure -> {
                     _message.value = "Failed to create onramp session: ${result.error.message}"
@@ -374,6 +380,7 @@ data class OnrampUiState(
     val walletAddress: String? = null,
     val network: CryptoNetwork? = null,
     val authToken: String? = null,
+    val onrampSessionId: String? = null,
 )
 
 enum class Screen {

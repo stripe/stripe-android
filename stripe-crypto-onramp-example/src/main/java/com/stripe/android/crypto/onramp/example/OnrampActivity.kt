@@ -190,6 +190,7 @@ internal fun OnrampScreen(
                 AuthenticatedOperationsScreen(
                     email = uiState.email,
                     customerId = uiState.customerId ?: "",
+                    onrampSessionId = uiState.onrampSessionId,
                     selectedPaymentData = uiState.selectedPaymentData,
                     onRegisterWalletAddress = onRegisterWalletAddress,
                     onCollectKYC = { kycInfo -> viewModel.collectKycInfo(kycInfo) },
@@ -404,6 +405,7 @@ private fun AuthenticationScreen(
 private fun AuthenticatedOperationsScreen(
     email: String,
     customerId: String,
+    onrampSessionId: String?,
     selectedPaymentData: PaymentOptionDisplayData?,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onCollectKYC: (KycInfo) -> Unit,
@@ -414,7 +416,7 @@ private fun AuthenticatedOperationsScreen(
     onBack: () -> Unit
 ) {
     // hardcoded sample ETH wallet
-    var walletAddressInput by remember { mutableStateOf("0x424242424242424242424242424242424242424242") }
+    var walletAddressInput by remember { mutableStateOf("0x742d35Cc6634C0532925a3b844Bc454e4438f44e") }
     var selectedNetwork by remember { mutableStateOf(CryptoNetwork.Ethereum) }
     var isDropdownExpanded by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
@@ -438,8 +440,17 @@ private fun AuthenticatedOperationsScreen(
 
         Text(
             text = "Customer ID: $customerId",
-            modifier = Modifier.padding(bottom = 24.dp)
+            modifier = Modifier.padding(bottom = 8.dp)
         )
+
+        onrampSessionId?.let {
+            Text(
+                text = "Onramp Session ID: $it",
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
+        } ?: run {
+            Spacer(modifier = Modifier.height(16.dp))
+        }
 
         selectedPaymentData?.let {
             Image(
