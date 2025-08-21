@@ -14,22 +14,6 @@ import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.json.Json
 import com.github.kittinunf.result.Result as ApiResult
 
-/**
- * Awaits the [ApiResult] and deserializes it into the desired type [T].
- */
-suspend fun <T : Any> Request.awaitModel(
-    serializer: DeserializationStrategy<T>,
-    json: Json = Json,
-): ApiResult<T, FuelError> {
-    val deserializer = object : Deserializable<T> {
-        override fun deserialize(response: Response): T {
-            val body = response.body().asString("application/json")
-            return json.decodeFromString(serializer, body)
-        }
-    }
-    return awaitResult(deserializer)
-}
-
 class TestBackendRepository {
 
     private val baseUrl = "https://crypto-onramp-example.stripedemos.com"
@@ -38,10 +22,25 @@ class TestBackendRepository {
         ignoreUnknownKeys = true
     }
 
+    suspend fun createAuthIntent(
+        email: String
+    ): ApiResult<CreateAuthIntentResponse, FuelError> {
+        return withContext(Dispatchers.IO) {
+            val request = CreateAuthIntentRequest(email = email)
+            val requestBody = json.encodeToString(CreateAuthIntentRequest.serializer(), request)
+
+            Fuel.post("$baseUrl/auth_intent/create")
+                .jsonBody(requestBody)
+                .suspendable()
+                .awaitModel(CreateAuthIntentResponse.serializer(), json)
+        }
+    }
+
     suspend fun createOnrampSession(
         paymentToken: String,
         walletAddress: String,
         cryptoCustomerId: String,
+        authToken: String,
         destinationNetwork: String = "ethereum",
         sourceAmount: Double = 10.0,
         sourceCurrency: String = "usd",
@@ -64,9 +63,26 @@ class TestBackendRepository {
             val requestBody = json.encodeToString(CreateOnrampSessionRequest.serializer(), request)
 
             Fuel.post("$baseUrl/create_onramp_session")
+                .header("Authorization", "Bearer $authToken")
                 .jsonBody(requestBody)
                 .suspendable()
                 .awaitModel(CreateOnrampSessionResponse.serializer(), json)
         }
     }
+}
+
+/**
+ * Awaits the [ApiResult] and deserializes it into the desired type [T].
+ */
+suspend fun <T : Any> Request.awaitModel(
+    serializer: DeserializationStrategy<T>,
+    json: Json = Json,
+): ApiResult<T, FuelError> {
+    val deserializer = object : Deserializable<T> {
+        override fun deserialize(response: Response): T {
+            val body = response.body().asString("application/json")
+            return json.decodeFromString(serializer, body)
+        }
+    }
+    return awaitResult(deserializer)
 }

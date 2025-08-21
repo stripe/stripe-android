@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+@Suppress("TooManyFunctions")
 internal class OnrampViewModel(
     application: Application,
     savedStateHandle: SavedStateHandle
@@ -90,6 +91,10 @@ internal class OnrampViewModel(
         val result = onrampCoordinator.lookupLinkUser(currentEmail)
         when (result) {
             is OnrampLinkLookupResult.Completed -> {
+                // Temporarily create an auth intent for the user after checking if they exist
+                // TODO(carlosmuvi): use OAuth flow using the LAI to authenticate user.
+                createAuthIntentForUser(currentEmail)
+
                 if (result.isLinkUser) {
                     _message.value = "User exists in Link. Please authenticate:"
                     _uiState.update { it.copy(screen = Screen.Authentication) }
@@ -101,6 +106,22 @@ internal class OnrampViewModel(
             is OnrampLinkLookupResult.Failed -> {
                 _message.value = "Lookup failed: ${result.error.message}"
                 _uiState.update { it.copy(screen = Screen.EmailInput) }
+            }
+        }
+    }
+
+    private fun createAuthIntentForUser(email: String) {
+        viewModelScope.launch {
+            val result = testBackendRepository.createAuthIntent(email)
+            when (result) {
+                is Result.Success -> {
+                    val response = result.value
+                    _uiState.update { it.copy(authToken = response.token) }
+                    _message.value = "Auth intent created successfully"
+                }
+                is Result.Failure -> {
+                    _message.value = "Failed to create auth intent: ${result.error.message}"
+                }
             }
         }
     }
@@ -264,22 +285,17 @@ internal class OnrampViewModel(
         val walletAddress = currentState.walletAddress
         val customerId = currentState.customerId
         val network = currentState.network
+        val authToken = currentState.authToken
 
         // Check what's missing and provide helpful guidance
-        val missingItems = mutableListOf<String>()
-        if (customerId.isNullOrBlank()) missingItems.add("customer authentication")
-        if (walletAddress.isNullOrBlank()) missingItems.add("wallet address registration")
-        if (currentState.selectedPaymentData == null) missingItems.add("payment method selection")
-        if (paymentToken.isNullOrBlank()) missingItems.add("crypto payment token creation")
-        if (missingItems.isNotEmpty()) {
-            val message = when (missingItems.size) {
-                1 -> "Please complete ${missingItems[0]} first"
-                2 -> "Please complete ${missingItems[0]} and ${missingItems[1]} first"
-                else -> "Please complete the following steps first: ${missingItems.joinToString(", ")}"
-            }
-            _message.value = message
-            return
-        }
+        val validParams = validateOnrampSessionParams(
+            customerId = customerId,
+            walletAddress = walletAddress,
+            currentState = currentState,
+            paymentToken = paymentToken,
+            authToken = authToken
+        )
+        if (validParams.not()) return
 
         _uiState.update { it.copy(screen = Screen.Loading) }
 
@@ -290,6 +306,7 @@ internal class OnrampViewModel(
                 paymentToken = paymentToken!!,
                 walletAddress = walletAddress!!,
                 cryptoCustomerId = customerId!!,
+                authToken = authToken!!,
                 destinationNetwork = destinationNetwork
             )
 
@@ -309,6 +326,31 @@ internal class OnrampViewModel(
                 }
             }
         }
+    }
+
+    private fun validateOnrampSessionParams(
+        customerId: String?,
+        walletAddress: String?,
+        currentState: OnrampUiState,
+        paymentToken: String?,
+        authToken: String?
+    ): Boolean {
+        val missingItems = mutableListOf<String>()
+        if (customerId.isNullOrBlank()) missingItems.add("customer authentication")
+        if (walletAddress.isNullOrBlank()) missingItems.add("wallet address registration")
+        if (currentState.selectedPaymentData == null) missingItems.add("payment method selection")
+        if (paymentToken.isNullOrBlank()) missingItems.add("crypto payment token creation")
+        if (authToken.isNullOrBlank()) missingItems.add("authentication token")
+        if (missingItems.isNotEmpty()) {
+            val message = when (missingItems.size) {
+                1 -> "Please complete ${missingItems[0]} first"
+                2 -> "Please complete ${missingItems[0]} and ${missingItems[1]} first"
+                else -> "Please complete the following steps first: ${missingItems.joinToString(", ")}"
+            }
+            _message.value = message
+            return true
+        }
+        return false
     }
 
     class Factory : ViewModelProvider.Factory {
@@ -331,6 +373,7 @@ data class OnrampUiState(
     val cryptoPaymentToken: String? = null,
     val walletAddress: String? = null,
     val network: CryptoNetwork? = null,
+    val authToken: String? = null,
 )
 
 enum class Screen {
