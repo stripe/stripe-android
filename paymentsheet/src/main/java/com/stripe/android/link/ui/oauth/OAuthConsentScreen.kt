@@ -3,7 +3,6 @@ package com.stripe.android.link.ui.oauth
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -71,10 +70,12 @@ internal fun OAuthConsentScreen(
 ) {
     ScrollableTopLevelColumn {
         MerchantLogo(merchantLogoUrl)
+        Spacer(Modifier.height(16.dp))
         Title(pane.title)
+        Spacer(Modifier.height(24.dp))
         UserSection(userEmail)
+        Spacer(Modifier.height(24.dp))
         ScopesSection(pane.scopesSection)
-
         Spacer(Modifier.height(8.dp))
         errorMessage?.let {
             Spacer(Modifier.height(16.dp))
@@ -91,6 +92,7 @@ internal fun OAuthConsentScreen(
             onAllowClick = onAllowClick,
             onDenyClick = onDenyClick
         )
+        Spacer(Modifier.height(4.dp))
     }
 }
 
@@ -100,7 +102,7 @@ private fun ErrorSection(
 ) {
     ErrorText(
         modifier = Modifier
-            .border(1.dp, LinkTheme.colors.textTertiary, RoundedCornerShape(12.dp))
+            .border(1.dp, LinkTheme.colors.outline, RoundedCornerShape(12.dp))
             .padding(horizontal = 16.dp)
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.Start,
@@ -141,10 +143,7 @@ private fun MerchantLogo(
 @Composable
 private fun Title(title: String) {
     Text(
-        modifier = Modifier.padding(
-            vertical = 16.dp,
-            horizontal = 32.dp,
-        ),
+        modifier = Modifier.fillMaxWidth(),
         text = title,
         style = LinkTheme.typography.title,
         textAlign = TextAlign.Center,
@@ -155,13 +154,11 @@ private fun Title(title: String) {
 @Composable
 private fun UserSection(email: String) {
     Row(
-        modifier = Modifier
-            .border(1.dp, LinkTheme.colors.textTertiary, CircleShape)
-            .padding(8.dp),
+        modifier = Modifier.border(1.dp, LinkTheme.colors.outline, CircleShape),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            modifier = Modifier.padding(horizontal = 8.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
             text = email,
             style = LinkTheme.typography.detail,
             color = LinkTheme.colors.textPrimary,
@@ -173,17 +170,15 @@ private fun UserSection(email: String) {
 private fun ScopesSection(section: ConsentUi.ConsentPane.ScopesSection) {
     val imageLoader = LocalStripeImageLoader.current
     Text(
-        modifier = Modifier
-            .padding(top = 16.dp)
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         text = section.header,
         style = LinkTheme.typography.detail,
-        color = LinkTheme.colors.textPrimary,
+        color = LinkTheme.colors.textTertiary,
     )
     Spacer(Modifier.height(16.dp))
     Column(
         modifier = Modifier
-            .border(1.dp, LinkTheme.colors.textTertiary, RoundedCornerShape(12.dp))
+            .border((0.5).dp, LinkTheme.colors.outline, RoundedCornerShape(12.dp))
             .padding(16.dp)
             .fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -231,7 +226,7 @@ private fun ScopeItem(
         Column(
             modifier = Modifier
                 .weight(1f)
-                .padding(start = 8.dp)
+                .padding(start = 16.dp)
         ) {
             if (header != null) {
                 Text(
@@ -361,7 +356,7 @@ internal val consentPanePreview = run {
         "https://b.stripecdn.com/connections-statics-srv/assets/SailIcon--lock-primary-3x.png"
     val scopeIcon = ConsentUi.Icon(scopeIconUrl)
     ConsentUi.ConsentPane(
-        title = "Connect Powdur\nwith Link",
+        title = "Connect Powdur with Link",
         scopesSection = ConsentUi.ConsentPane.ScopesSection(
             header = "Powdur will have access to:",
             scopes = listOf(

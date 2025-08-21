@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.common.exception.stripeErrorMessage
-import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
@@ -26,7 +25,6 @@ internal class OAuthConsentViewModel @Inject constructor(
     private val linkAccount: LinkAccount,
     private val linkConfiguration: LinkConfiguration,
     private val linkAccountManager: LinkAccountManager,
-    private val logger: Logger,
     private val dismissWithResult: (LinkActivityResult) -> Unit,
 ) : ViewModel() {
 
