@@ -105,7 +105,6 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     private fun clientEmail(): String? =
         interactor.state.value.linkControllerState?.internalLinkAccount?.email
 
-
     private fun handleAuthenticationResult(result: LinkController.AuthenticationResult) {
         coroutineScope.launch {
             onrampCallbacks.authenticationCallback.onResult(

@@ -1000,6 +1000,7 @@ class LinkControllerInteractorTest {
         }
     }
 
+    @Suppress("LongMethod")
     @Test
     fun `onLinkActivityResult() with Authorization results`() = runTest {
         data class AuthorizationTestCase(

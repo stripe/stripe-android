@@ -45,6 +45,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
 
+@Suppress("TooManyFunctions")
 @Singleton
 internal class LinkControllerInteractor @Inject constructor(
     private val application: Application,

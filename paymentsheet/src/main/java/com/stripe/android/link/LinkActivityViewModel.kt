@@ -176,9 +176,7 @@ internal class LinkActivityViewModel @Inject constructor(
             )
             is LinkLaunchMode.Authorization -> dismissWithResult(
                 LinkActivityResult.Failed(
-                    error = IllegalStateException(
-                        "authorization only is not supported in web mode"
-                    ),
+                    error = IllegalStateException("Authorization mode is not supported in web"),
                     linkAccountUpdate = LinkAccountUpdate.None
                 )
             )
@@ -338,7 +336,8 @@ internal class LinkActivityViewModel @Inject constructor(
         val authorizingAuthIntent = linkLaunchMode is LinkLaunchMode.Authorization
         val cannotChangeEmails = !linkConfiguration.allowUserEmailEdits
         val accountNotFound = accountStatus == AccountStatus.SignedOut || accountStatus == AccountStatus.Error
-        if (accountNotFound && (authorizingAuthIntent || authenticatingExistingAccount || cannotChangeEmails)) {
+        val accountRequired = authorizingAuthIntent || authenticatingExistingAccount || cannotChangeEmails
+        if (accountNotFound && accountRequired) {
             dismissWithResult(
                 LinkActivityResult.Failed(
                     error = NoLinkAccountFoundException(),
@@ -348,9 +347,9 @@ internal class LinkActivityViewModel @Inject constructor(
             return
         }
 
-        if (linkLaunchMode is LinkLaunchMode.Authorization &&
+        if (authorizingAuthIntent &&
             accountStatus is AccountStatus.Verified &&
-            linkAccount?.consentPresentation is ConsentPresentation.Inline
+            accountStatus.consentPresentation is ConsentPresentation.Inline
         ) {
             // Already completed verification with inline consent.
             dismissWithResult(LinkActivityResult.Completed(linkAccountManager.linkAccountUpdate))

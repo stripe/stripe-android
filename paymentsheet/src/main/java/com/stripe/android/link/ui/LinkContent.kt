@@ -102,6 +102,7 @@ internal fun LinkContent(
     }
 }
 
+@SuppressWarnings("LongMethod")
 @Composable
 private fun Screens(
     navController: NavHostController,
