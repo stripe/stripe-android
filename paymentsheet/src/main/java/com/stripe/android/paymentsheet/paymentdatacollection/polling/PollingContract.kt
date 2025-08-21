@@ -34,6 +34,7 @@ internal class PollingContract :
         val pollingStrategy: PollingStrategy,
         @StringRes val ctaText: Int,
         val stripeAccountId: String?,
+        val qrCodeUrl: String?,
     ) : Parcelable {
 
         internal companion object {
