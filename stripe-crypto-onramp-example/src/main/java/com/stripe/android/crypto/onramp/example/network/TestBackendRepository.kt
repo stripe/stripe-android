@@ -63,6 +63,8 @@ class TestBackendRepository {
             val requestBody = json.encodeToString(CreateOnrampSessionRequest.serializer(), request)
 
             Fuel.post("$baseUrl/create_onramp_session")
+                .timeout(60000) // 10 minutes timeout
+                .timeoutRead(60000) // 10 minutes read timeout
                 .header("Authorization", "Bearer $authToken")
                 .jsonBody(requestBody)
                 .suspendable()

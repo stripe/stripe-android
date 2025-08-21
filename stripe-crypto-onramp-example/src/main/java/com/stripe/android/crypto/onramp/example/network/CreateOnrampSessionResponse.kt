@@ -5,7 +5,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CreateOnrampSessionResponse(
-    @SerialName("session_id")
-    val sessionId: String? = null,
+    @SerialName("id")
+    val id: String? = null,
+    @SerialName("client_secret")
+    val clientSecret: String? = null,
+    @SerialName("error")
     val error: String? = null
 )

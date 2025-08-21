@@ -348,9 +348,9 @@ internal class OnrampViewModel(
                 else -> "Please complete the following steps first: ${missingItems.joinToString(", ")}"
             }
             _message.value = message
-            return true
+            return false
         }
-        return false
+        return true
     }
 
     class Factory : ViewModelProvider.Factory {

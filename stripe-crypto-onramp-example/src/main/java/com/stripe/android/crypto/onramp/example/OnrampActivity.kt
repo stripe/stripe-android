@@ -413,7 +413,8 @@ private fun AuthenticatedOperationsScreen(
     onCreateOnrampSession: () -> Unit,
     onBack: () -> Unit
 ) {
-    var walletAddressInput by remember { mutableStateOf("") }
+    // hardcoded sample ETH wallet
+    var walletAddressInput by remember { mutableStateOf("0x424242424242424242424242424242424242424242") }
     var selectedNetwork by remember { mutableStateOf(CryptoNetwork.Ethereum) }
     var isDropdownExpanded by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
@@ -487,7 +488,7 @@ private fun AuthenticatedOperationsScreen(
                 expanded = isDropdownExpanded,
                 onDismissRequest = { isDropdownExpanded = false }
             ) {
-                CryptoNetwork.values().forEach { network ->
+                CryptoNetwork.entries.forEach { network ->
                     DropdownMenuItem(
                         onClick = {
                             selectedNetwork = network
