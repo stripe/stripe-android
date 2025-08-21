@@ -119,6 +119,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
             checkout()
         },
+        onDisabledClick = ::onDisabledClick,
     )
 
     private val _paymentSheetResult = MutableSharedFlow<PaymentSheetResult>(replay = 1)
@@ -490,6 +491,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             newSelection
         } else {
             paymentSelection
+        }
+    }
+
+    private fun onDisabledClick() {
+        viewModelScope.launch {
+            validationRequested.emit(Unit)
         }
     }
 

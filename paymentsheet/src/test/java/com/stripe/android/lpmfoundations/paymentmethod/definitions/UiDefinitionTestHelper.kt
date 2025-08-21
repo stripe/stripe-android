@@ -18,7 +18,8 @@ internal fun PaymentMethodDefinition.CreateFormUi(
     paymentMethodExtraParams: PaymentMethodExtraParams? = null,
     initialLinkUserInput: UserInput? = null,
     linkConfigurationCoordinator: LinkConfigurationCoordinator? = null,
-    autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null
+    autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
+    isValidating: Boolean = false,
 ) {
     val formElements = formElements(
         metadata = metadata,
@@ -27,7 +28,9 @@ internal fun PaymentMethodDefinition.CreateFormUi(
         initialLinkUserInput = initialLinkUserInput,
         linkConfigurationCoordinator = linkConfigurationCoordinator,
         autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
-    )
+    ).onEach { element ->
+        element.onValidationStateChanged(isValidating)
+    }
     FormUI(
         hiddenIdentifiers = emptySet(),
         enabled = true,

@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
+import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
@@ -1752,6 +1753,58 @@ class USBankAccountFormViewModelTest {
         )
 
         assertThat(viewModel.addressElement).isInstanceOf<AutocompleteAddressElement>()
+    }
+
+    @Test
+    fun `If missing required fields, 'validate' should validate fields & reset validation on 'reset'`() = runTest {
+        val viewModel = createViewModel(
+            args = defaultArgs.run {
+                copy(
+                    formArgs = formArgs.copy(
+                        billingDetails = null,
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            name = CollectionMode.Always,
+                            phone = CollectionMode.Always,
+                            email = CollectionMode.Always,
+                            address = AddressCollectionMode.Full,
+                            allowedCountries = emptySet()
+                        )
+                    )
+                )
+            }
+        )
+
+        turbineScope {
+            val nameErrorTurbine = viewModel.nameController.error.testIn(this)
+            val emailErrorTurbine = viewModel.emailController.error.testIn(this)
+            val phoneErrorTurbine = viewModel.phoneController.error.testIn(this)
+            val addressErrorTurbine =
+                viewModel.addressElement.sectionFieldErrorController().error.testIn(this)
+
+            assertThat(nameErrorTurbine.awaitItem()).isNull()
+            assertThat(emailErrorTurbine.awaitItem()).isNull()
+            assertThat(phoneErrorTurbine.awaitItem()).isNull()
+            assertThat(addressErrorTurbine.awaitItem()).isNull()
+
+            viewModel.validate()
+
+            assertThat(nameErrorTurbine.awaitItem()).isNotNull()
+            assertThat(emailErrorTurbine.awaitItem()).isNotNull()
+            assertThat(phoneErrorTurbine.awaitItem()).isNotNull()
+            assertThat(addressErrorTurbine.awaitItem()).isNotNull()
+
+            viewModel.onDestroy()
+
+            assertThat(nameErrorTurbine.awaitItem()).isNull()
+            assertThat(emailErrorTurbine.awaitItem()).isNull()
+            assertThat(phoneErrorTurbine.awaitItem()).isNull()
+            assertThat(addressErrorTurbine.expectMostRecentItem()).isNull()
+
+            nameErrorTurbine.cancelAndIgnoreRemainingEvents()
+            emailErrorTurbine.cancelAndIgnoreRemainingEvents()
+            phoneErrorTurbine.cancelAndIgnoreRemainingEvents()
+            addressErrorTurbine.cancelAndIgnoreRemainingEvents()
+        }
     }
 
     private fun testElementsSessionContextGeneration(

@@ -281,13 +281,14 @@ internal class DefaultCardNumberController(
     }
     override val fieldState: StateFlow<TextFieldState> = _fieldState
 
+    private val _isValidating = MutableStateFlow(false)
     private val _hasFocus = MutableStateFlow(false)
 
     override val loading: StateFlow<Boolean> = accountRangeService.isLoading
 
     override val visibleError: StateFlow<Boolean> =
-        combineAsStateFlow(_fieldState, _hasFocus) { fieldState, hasFocus ->
-            fieldState.shouldShowError(hasFocus)
+        combineAsStateFlow(_fieldState, _hasFocus, _isValidating) { fieldState, hasFocus, isValidating ->
+            fieldState.shouldShowError(hasFocus, isValidating)
         }
 
     /**
@@ -335,6 +336,10 @@ internal class DefaultCardNumberController(
         mostRecentUserSelectedBrand.value = CardBrand.fromCode(item.id)
     }
 
+    override fun onValidationStateChanged(isValidating: Boolean) {
+        _isValidating.value = isValidating
+    }
+
     fun determineSelectedBrand(
         previous: CardBrand?,
         allChoices: List<CardBrand>,
@@ -372,9 +377,7 @@ internal class DefaultCardNumberController(
 
         // Remember the last state indicating whether it was a disallowed card brand error
         var lastLoggedCardBrand by rememberSaveable { mutableStateOf<CardBrand?>(null) }
-        var hasReportedIncompleteCardNumberRequiringMoreThan16Digits by rememberSaveable {
-            mutableStateOf(false)
-        }
+        var hasReportedIncompleteCardNumberRequiringMoreThan16Digits by rememberSaveable { mutableStateOf(false) }
 
         LaunchedEffect(Unit) {
             // Drop the set empty value & initial value

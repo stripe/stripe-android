@@ -66,6 +66,20 @@ internal class PaymentSheetScreenAddFirstPaymentMethodScreenshotTest {
     }
 
     @Test
+    fun displaysCardWithValidation() {
+        val metadata = PaymentMethodMetadataFactory.create()
+        val interactor = FakeAddPaymentMethodInteractor(initialState = createState(isValidating = true))
+        val initialScreen = AddFirstPaymentMethod(interactor)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = true)
+
+        paparazziRule.snapshot {
+            ViewModelStoreOwnerContext {
+                PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+            }
+        }
+    }
+
+    @Test
     fun displaysError() {
         val metadata = PaymentMethodMetadataFactory.create()
         val interactor = FakeAddPaymentMethodInteractor(initialState = createState())

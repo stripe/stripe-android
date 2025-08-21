@@ -31,6 +31,7 @@ internal fun PaymentMethodScreen(
         state = state,
         onFormFieldValuesChanged = viewModel::formValuesChanged,
         onPayClicked = viewModel::onPayClicked,
+        onDisabledPayClicked = viewModel::onDisabledPayClicked,
     )
 }
 
@@ -39,6 +40,7 @@ internal fun PaymentMethodBody(
     state: PaymentMethodState,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
     onPayClicked: () -> Unit,
+    onDisabledPayClicked: () -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
     val uuid = rememberSaveable { UUID.randomUUID().toString() }
@@ -50,7 +52,7 @@ internal fun PaymentMethodBody(
                 args = state.formArguments,
                 enabled = true,
                 onFormFieldValuesChanged = onFormFieldValuesChanged,
-                formElements = state.formElements,
+                formElements = state.formUiElements,
             )
         }
 
@@ -71,6 +73,8 @@ internal fun PaymentMethodBody(
             modifier = Modifier.padding(vertical = 16.dp),
             label = state.primaryButtonLabel.resolve(),
             state = state.primaryButtonState,
+            allowedDisabledClicks = true,
+            onDisabledButtonClick = onDisabledPayClicked,
             onButtonClick = {
                 focusManager.clearFocus()
                 onPayClicked()

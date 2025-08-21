@@ -1033,6 +1033,29 @@ internal class PaymentOptionsViewModelTest {
         }
     }
 
+    @Test
+    fun `On disabled click, should request validation`() =
+        runTest {
+            val viewModel = createViewModel(
+                args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                    paymentSelection = null,
+                    paymentMethods = emptyList(),
+                    isGooglePayReady = false,
+                    linkState = null
+                )
+            )
+
+            val primaryButtonUiState = viewModel.primaryButtonUiState.value
+
+            viewModel.validationRequested.test {
+                expectNoEvents()
+
+                primaryButtonUiState?.onDisabledClick?.invoke()
+
+                assertThat(awaitItem()).isNotNull()
+            }
+        }
+
     /**
      * Helper function to test user cancellation scenarios
      */

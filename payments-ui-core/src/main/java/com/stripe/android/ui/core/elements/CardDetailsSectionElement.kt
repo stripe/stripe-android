@@ -37,4 +37,8 @@ class CardDetailsSectionElement(
 
     override fun getTextFieldIdentifiers(): StateFlow<List<IdentifierSpec>> =
         controller.cardDetailsElement.getTextFieldIdentifiers()
+
+    override fun onValidationStateChanged(isValidating: Boolean) {
+        controller.onValidationStateChanged(isValidating)
+    }
 }

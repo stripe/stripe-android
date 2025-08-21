@@ -34,7 +34,7 @@ internal fun AddPaymentMethod(
         supportedPaymentMethods = state.supportedPaymentMethods,
         selectedItemCode = state.selectedPaymentMethodCode,
         incentive = state.incentive,
-        formElements = state.formElements,
+        formElements = state.formUiElements,
         onItemSelectedListener = { selectedLpm ->
             interactor.handleViewAction(
                 AddPaymentMethodInteractor.ViewAction.OnPaymentMethodSelected(
