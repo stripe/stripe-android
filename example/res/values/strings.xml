@@ -16,6 +16,7 @@
     <string name="googlepaycomposelauncher_example">Confirm payment in Compose with GooglePayLauncher</string>
     <string name="googlepayplayground_example">Test GooglePayLauncher Configurations</string>
     <string name="googlepaypaymentmethodlauncher_example">Create payment method with GooglePayPaymentMethodLauncher</string>
+    <string name="googlepaypaymentmethodcomposelauncherwithfilter_example">Create payment in Compose method with GooglePayPaymentMethodLauncher filtering Visa</string>
     <string name="googlepaypaymentmethodcomposelauncher_example">Create payment method in Compose with GooglePayPaymentMethodLauncher</string>
     <string name="launch_payment_session">Payment Session</string>
     <string name="launch_payment_session_from_fragment">Fragment Examples</string>
