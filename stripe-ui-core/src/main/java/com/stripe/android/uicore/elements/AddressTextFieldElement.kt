@@ -7,7 +7,6 @@ import com.stripe.android.core.strings.ResolvableString
 class AddressTextFieldElement(
     override val identifier: IdentifierSpec,
     label: ResolvableString,
-    optional: Boolean,
     onNavigation: (() -> Unit)? = null
 ) : SectionSingleFieldElement(identifier) {
     override val allowsUserInteraction: Boolean = true
@@ -16,7 +15,6 @@ class AddressTextFieldElement(
     override val controller: AddressTextFieldController =
         AddressTextFieldController(
             label = label,
-            optional = optional,
             onNavigation = onNavigation
         )
 }

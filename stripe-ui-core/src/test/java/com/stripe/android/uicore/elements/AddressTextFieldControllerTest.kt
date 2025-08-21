@@ -10,7 +10,7 @@ import kotlin.test.Test
 class AddressTextFieldControllerTest {
     @Test
     fun `on raw field change, should not update value or field value states`() = runTest {
-        val controller = createAddressController(optional = false)
+        val controller = createAddressController()
 
         turbineScope {
             val rawFieldValueTurbine = controller.rawFieldValue.testIn(this)
@@ -31,9 +31,7 @@ class AddressTextFieldControllerTest {
 
     @Test
     fun `Verify 'onValidationStateChanged' has visible error`() = runTest {
-        val controller = createAddressController(
-            optional = false
-        )
+        val controller = createAddressController()
 
         turbineScope {
             val errorTurbine = controller.error.testIn(this)
@@ -48,31 +46,9 @@ class AddressTextFieldControllerTest {
         }
     }
 
-    @Test
-    fun `Verify 'onValidationStateChanged' has no visible error when optional`() = runTest {
-        val controller = createAddressController(
-            optional = true
-        )
-
-        turbineScope {
-            val errorTurbine = controller.error.testIn(this)
-
-            assertThat(errorTurbine.awaitItem()).isNull()
-
-            controller.onValidationStateChanged(true)
-
-            errorTurbine.expectNoEvents()
-
-            errorTurbine.cancelAndIgnoreRemainingEvents()
-        }
-    }
-
-    private fun createAddressController(
-        optional: Boolean,
-    ): AddressTextFieldController {
+    private fun createAddressController(): AddressTextFieldController {
         return AddressTextFieldController(
             label = resolvableString(value = "Name"),
-            optional = optional,
         )
     }
 }

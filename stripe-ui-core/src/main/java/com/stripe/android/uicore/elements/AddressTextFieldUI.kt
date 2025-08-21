@@ -35,7 +35,7 @@ fun AddressTextFieldUI(
         enabled = false,
         onValueChange = {},
         errorMessage = null,
-        isError = error != null,
+        isError = isError,
         label = {
             FormLabel(label.resolve())
         },

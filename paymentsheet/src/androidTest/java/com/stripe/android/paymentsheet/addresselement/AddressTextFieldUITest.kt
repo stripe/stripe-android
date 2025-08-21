@@ -40,7 +40,6 @@ class AddressTextFieldUITest {
                 AddressTextFieldUI(
                     controller = AddressTextFieldController(
                         label = resolvableString(UiCoreR.string.stripe_address_label_address),
-                        optional = false,
                     ),
                     onClick = onClick
                 )
