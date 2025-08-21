@@ -6,6 +6,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.ContextUtils.packageInfo
+import com.stripe.android.customersheet.analytics.CustomerSheetEvent
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_ADD_PAYMENT_METHOD_SCREEN_PRESENTED
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_ADD_PAYMENT_METHOD_VIA_CREATE_ATTACH_FAILED
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_ADD_PAYMENT_METHOD_VIA_CREATE_ATTACH_SUCCEEDED
@@ -38,20 +39,19 @@ import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.F
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.FIELD_SYNC_DEFAULT_ENABLED
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.analytics.DefaultCustomerSheetEventReporter
-import com.stripe.android.customersheet.analytics.CustomerSheetEvent
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Test
-import kotlin.time.Duration.Companion.seconds
 import org.junit.runner.RunWith
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.robolectric.RobolectricTestRunner
+import kotlin.time.Duration.Companion.seconds
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
