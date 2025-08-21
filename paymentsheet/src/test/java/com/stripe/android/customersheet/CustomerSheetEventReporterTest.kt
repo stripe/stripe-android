@@ -487,7 +487,7 @@ class CustomerSheetEventReporterTest {
                 req.params["event"] == "cs_cardscan_failed" &&
                     req.params["implementation"] == "google_pay" &&
                     req.params["duration"] == 1f &&
-                    req.params["error_message"] == "Card scan failed"
+                    req.params["error_message"] == "IllegalStateException"
             }
         )
     }

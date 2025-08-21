@@ -304,7 +304,7 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
             duration.mapOfDurationInSeconds() +
                 mapOf(
                     FIELD_IMPLEMENTATION to implementation,
-                    FIELD_ERROR_MESSAGE to error?.message
+                    FIELD_ERROR_MESSAGE to error?.javaClass?.simpleName
                 )
     }
 
