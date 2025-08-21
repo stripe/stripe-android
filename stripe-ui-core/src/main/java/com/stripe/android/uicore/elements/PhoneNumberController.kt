@@ -58,7 +58,7 @@ class PhoneNumberController private constructor(
         initiallySelectedCountryCode
     )
 
-    private val phoneNumberFormatter = countryDropdownController.selectedIndex.mapAsStateFlow {
+    internal val phoneNumberFormatter = countryDropdownController.selectedIndex.mapAsStateFlow {
         PhoneNumberFormatter.forCountry(
             countryConfig.countries[it ?: 0].code.value
         )

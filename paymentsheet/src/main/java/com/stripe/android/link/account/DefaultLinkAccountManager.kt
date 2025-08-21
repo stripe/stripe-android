@@ -154,6 +154,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             is UserInput.SignUp -> signUpIfValidSessionState(
                 email = userInput.email,
                 country = userInput.country,
+                countryInferringMethod = userInput.countryInferringMethod,
                 phone = userInput.phone,
                 name = userInput.name,
                 consentAction = userInput.consentAction,
@@ -189,6 +190,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         email: String,
         phone: String?,
         country: String?,
+        countryInferringMethod: String,
         name: String?,
         consentAction: SignUpConsentAction
     ): Result<LinkAccount> {
@@ -223,6 +225,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     email = email,
                     phone = phone,
                     country = country,
+                    countryInferringMethod = countryInferringMethod,
                     name = name,
                     consentAction = consentAction
                 ).onSuccess {
@@ -238,23 +241,31 @@ internal class DefaultLinkAccountManager @Inject constructor(
         email: String,
         phone: String?,
         country: String?,
+        countryInferringMethod: String,
         name: String?,
         consentAction: SignUpConsentAction
     ): Result<LinkAccount> =
-        linkRepository.consumerSignUp(email, phone, country, name, consentAction.consumerAction)
-            .map { consumerSessionSignup ->
-                setAccount(
-                    consumerSession = consumerSessionSignup.consumerSession,
-                    publishableKey = consumerSessionSignup.publishableKey,
-                    displayablePaymentDetails = null,
-                    linkAuthIntentInfo = null,
-                )
-            }
+        linkRepository.consumerSignUp(
+            email = email,
+            phone = phone,
+            country = country,
+            countryInferringMethod = countryInferringMethod,
+            name = name,
+            consentAction = consentAction.consumerAction
+        ).map { consumerSessionSignup ->
+            setAccount(
+                consumerSession = consumerSessionSignup.consumerSession,
+                publishableKey = consumerSessionSignup.publishableKey,
+                displayablePaymentDetails = null,
+                linkAuthIntentInfo = null,
+            )
+        }
 
     override suspend fun mobileSignUp(
         email: String,
         phone: String,
         country: String,
+        countryInferringMethod: String,
         name: String?,
         verificationToken: String,
         appId: String,
@@ -265,6 +276,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             email = email,
             phoneNumber = phone,
             country = country,
+            countryInferringMethod = countryInferringMethod,
             consentAction = consentAction.consumerAction,
             verificationToken = verificationToken,
             appId = appId,

@@ -132,6 +132,7 @@ internal class LinkApiRepository @Inject constructor(
         email: String,
         phone: String?,
         country: String?,
+        countryInferringMethod: String,
         name: String?,
         consentAction: ConsumerSignUpConsentAction
     ): Result<ConsumerSessionSignup> = withContext(workContext) {
@@ -140,6 +141,7 @@ internal class LinkApiRepository @Inject constructor(
                 email = email,
                 phoneNumber = phone,
                 country = country,
+                countryInferringMethod = countryInferringMethod,
                 name = name,
                 locale = locale,
                 amount = null,
@@ -157,6 +159,7 @@ internal class LinkApiRepository @Inject constructor(
         email: String,
         phoneNumber: String,
         country: String,
+        countryInferringMethod: String,
         consentAction: ConsumerSignUpConsentAction,
         amount: Long?,
         currency: String?,
@@ -169,6 +172,7 @@ internal class LinkApiRepository @Inject constructor(
                 email = email,
                 phoneNumber = phoneNumber,
                 country = country,
+                countryInferringMethod = countryInferringMethod,
                 name = name,
                 locale = locale,
                 amount = amount,

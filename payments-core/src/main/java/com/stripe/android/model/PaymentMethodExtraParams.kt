@@ -44,7 +44,8 @@ sealed class PaymentMethodExtraParams(
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Card(
-        val setAsDefault: Boolean? = null
+        val setAsDefault: Boolean? = null,
+        val phoneNumberCountry: String? = null,
     ) : PaymentMethodExtraParams(PaymentMethod.Type.Card) {
         override fun createTypeParams(): List<Pair<String, Any?>> {
             return listOf(

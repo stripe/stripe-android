@@ -360,6 +360,7 @@ internal class LinkControllerInteractor @Inject constructor(
                     email = email,
                     phoneNumber = phone,
                     country = country,
+                    countryInferringMethod = "PHONE_NUMBER",
                     name = name,
                     consentAction = SignUpConsentAction.Implied
                 ).toResult()

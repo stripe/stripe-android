@@ -110,6 +110,12 @@ data class IdentifierSpec(
             destination = ParameterDestination.Local.Extras
         )
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val PhoneNumberCountry = IdentifierSpec(
+            v1 = "phone_number_country",
+            destination = ParameterDestination.Local.Extras
+        )
+
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
         fun get(value: String) = when (value) {
             CardBrand.v1 -> CardBrand

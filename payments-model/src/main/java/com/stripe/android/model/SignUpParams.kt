@@ -8,6 +8,7 @@ data class SignUpParams(
     val email: String,
     val phoneNumber: String?,
     val country: String?,
+    val countryInferringMethod: String?,
     val name: String?,
     val locale: Locale?,
     val amount: Long?,
@@ -33,7 +34,10 @@ data class SignUpParams(
 
         phoneNumber?.takeIf { it.isNotBlank() }?.let {
             params["phone_number"] = it
-            params["country_inferring_method"] = "PHONE_NUMBER"
+        }
+
+        countryInferringMethod?.let {
+            params["country_inferring_method"] = it
         }
 
         country?.takeIf { it.isNotBlank() }?.let {
