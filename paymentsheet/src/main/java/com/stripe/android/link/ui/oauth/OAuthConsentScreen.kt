@@ -244,7 +244,7 @@ private fun ScopeItem(
         val modifier = Modifier
             .padding(top = 2.dp)
             .clip(RoundedCornerShape(10.dp))
-            .size(32.dp)
+            .size(36.dp)
             .background(LinkTheme.colors.surfaceSecondary)
             .padding(10.dp)
         StripeImage(
