@@ -11,6 +11,7 @@ import com.github.kittinunf.fuel.core.requests.suspendable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import com.github.kittinunf.result.Result as ApiResult
 
@@ -82,6 +83,8 @@ class TestBackendRepository {
             val requestBody = json.encodeToString(CheckoutRequest.serializer(), request)
 
             Fuel.post("$baseUrl/checkout")
+                .timeout(SESSION_CREATION_TIMEOUT)
+                .timeoutRead(SESSION_CREATION_TIMEOUT)
                 .header("Authorization", "Bearer $authToken")
                 .jsonBody(requestBody)
                 .suspendable()

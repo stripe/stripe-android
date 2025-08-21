@@ -23,12 +23,58 @@ public final class com/stripe/android/crypto/onramp/model/DateOfBirth$Companion 
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public synthetic class com/stripe/android/crypto/onramp/model/GetOnrampSessionResponse$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/stripe/android/crypto/onramp/model/GetOnrampSessionResponse$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/crypto/onramp/model/GetOnrampSessionResponse;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/crypto/onramp/model/GetOnrampSessionResponse;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+}
+
+public final class com/stripe/android/crypto/onramp/model/GetOnrampSessionResponse$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
 public final class com/stripe/android/crypto/onramp/model/LinkUserInfo$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/crypto/onramp/model/LinkUserInfo;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/crypto/onramp/model/LinkUserInfo;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampCheckoutCallback {
+	public abstract fun onResult (Lcom/stripe/android/crypto/onramp/model/OnrampCheckoutResult;)V
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampCheckoutResult {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampCheckoutResult$Canceled : com/stripe/android/crypto/onramp/model/OnrampCheckoutResult {
+	public static final field INSTANCE Lcom/stripe/android/crypto/onramp/model/OnrampCheckoutResult$Canceled;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampCheckoutResult$Completed : com/stripe/android/crypto/onramp/model/OnrampCheckoutResult {
+	public static final field INSTANCE Lcom/stripe/android/crypto/onramp/model/OnrampCheckoutResult$Completed;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampCheckoutResult$Failed : com/stripe/android/crypto/onramp/model/OnrampCheckoutResult {
+	public fun <init> (Ljava/lang/Throwable;)V
+	public final fun component1 ()Ljava/lang/Throwable;
+	public final fun copy (Ljava/lang/Throwable;)Lcom/stripe/android/crypto/onramp/model/OnrampCheckoutResult$Failed;
+	public static synthetic fun copy$default (Lcom/stripe/android/crypto/onramp/model/OnrampCheckoutResult$Failed;Ljava/lang/Throwable;ILjava/lang/Object;)Lcom/stripe/android/crypto/onramp/model/OnrampCheckoutResult$Failed;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/Throwable;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/crypto/onramp/model/OnrampConfiguration$Creator : android/os/Parcelable$Creator {

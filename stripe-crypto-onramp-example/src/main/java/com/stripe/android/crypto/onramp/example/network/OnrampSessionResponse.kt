@@ -33,46 +33,44 @@ data class OnrampSessionResponse(
     val sourceTotalAmount: String,
     val status: String,
     @SerialName("transaction_details")
-    val transactionDetails: CheckoutTransactionDetails,
+    val transactionDetails: OnrampTransactionDetails,
     @SerialName("ui_mode")
     val uiMode: String
 )
 
 @Serializable
-data class CheckoutTransactionDetails(
+data class OnrampTransactionDetails(
     @SerialName("destination_currency")
-    val destinationCurrency: String,
+    val destinationCurrency: String? = null,
     @SerialName("destination_exchange_amount")
-    val destinationExchangeAmount: String,
+    val destinationExchangeAmount: String? = null,
     @SerialName("destination_network")
-    val destinationNetwork: String,
-    val fees: CheckoutFees,
+    val destinationNetwork: String? = null,
+    val fees: OnrampFees,
     @SerialName("last_error")
     val lastError: String? = null,
     @SerialName("lock_wallet_address")
     val lockWalletAddress: Boolean,
-    @SerialName("quote_expiration")
-    val quoteExpiration: String,
     @SerialName("source_currency")
-    val sourceCurrency: String,
+    val sourceCurrency: String? = null,
     @SerialName("source_exchange_amount")
-    val sourceExchangeAmount: String,
+    val sourceExchangeAmount: String? = null,
     @SerialName("supported_destination_currencies")
-    val supportedDestinationCurrencies: List<String>,
+    val supportedDestinationCurrencies: List<String>? = null,
     @SerialName("supported_destination_networks")
-    val supportedDestinationNetworks: List<String>,
+    val supportedDestinationNetworks: List<String>? = null,
     @SerialName("transaction_id")
     val transactionId: String? = null,
     @SerialName("transaction_limit")
     val transactionLimit: Long,
     @SerialName("wallet_address")
-    val walletAddress: String,
+    val walletAddress: String? = null,
     @SerialName("wallet_addresses")
     val walletAddresses: List<String>? = null
 )
 
 @Serializable
-data class CheckoutFees(
+data class OnrampFees(
     @SerialName("network_fee_amount")
     val networkFeeAmount: String,
     @SerialName("transaction_fee_amount")
