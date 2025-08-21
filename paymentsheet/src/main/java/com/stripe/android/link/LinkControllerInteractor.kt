@@ -339,11 +339,11 @@ internal class LinkControllerInteractor @Inject constructor(
             )
     }
 
-    suspend fun createPaymentMethod(): LinkController.CreatePaymentMethodResult {
-        val paymentMethodResult = performCreatePaymentMethod()
+    suspend fun createPaymentMethod(apiKey: String? = null): LinkController.CreatePaymentMethodResult {
+        val paymentMethodResult = performCreatePaymentMethod(apiKey)
         updateState { it.copy(createdPaymentMethod = paymentMethodResult.getOrNull()) }
         return paymentMethodResult.fold(
-            onSuccess = { LinkController.CreatePaymentMethodResult.Success },
+            onSuccess = { LinkController.CreatePaymentMethodResult.Success(it) },
             onFailure = { LinkController.CreatePaymentMethodResult.Failed(it) },
         )
     }
@@ -418,7 +418,7 @@ internal class LinkControllerInteractor @Inject constructor(
         )
     }
 
-    private suspend fun performCreatePaymentMethod(): Result<PaymentMethod> {
+    private suspend fun performCreatePaymentMethod(apiKey: String?): Result<PaymentMethod> {
         val state = _state.value
         val component = requireLinkComponent(state)
             .getOrElse { return Result.failure(it) }
@@ -432,6 +432,7 @@ internal class LinkControllerInteractor @Inject constructor(
                 expectedPaymentMethodType = computeExpectedPaymentMethodType(configuration, paymentMethod.details),
                 cvc = paymentMethod.collectedCvc,
                 billingPhone = null,
+                apiKey = apiKey,
             ).map { shareDetails ->
                 val json = JSONObject(shareDetails.encodedPaymentMethod)
                 PaymentMethodJsonParser().parse(json)

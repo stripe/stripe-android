@@ -356,6 +356,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         billingPhone: String?,
         cvc: String?,
         allowRedisplay: String?,
+        apiKey: String?
     ): Result<SharePaymentDetails> {
         return runCatching {
             requireNotNull(linkAccountHolder.linkAccountInfo.value.account)
@@ -367,6 +368,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 billingPhone = billingPhone,
                 cvc = cvc,
                 allowRedisplay = allowRedisplay,
+                apiKey = apiKey,
             ).getOrThrow()
         }
     }

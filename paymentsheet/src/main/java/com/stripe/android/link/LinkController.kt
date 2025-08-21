@@ -63,6 +63,11 @@ class LinkController @Inject internal constructor(
         return interactor.createPaymentMethod()
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun createPaymentMethodForOnramp(apiKey: String): CreatePaymentMethodResult {
+        return interactor.createPaymentMethod(apiKey)
+    }
+
     /**
      * Look up whether the provided email address is associated with an existing Link consumer account.
      *
@@ -449,7 +454,8 @@ class LinkController @Inject internal constructor(
          * The payment method was created successfully.
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data object Success : CreatePaymentMethodResult
+        @Poko
+        class Success internal constructor(val paymentMethod: PaymentMethod) : CreatePaymentMethodResult
 
         /**
          * An error occurred while creating the payment method.

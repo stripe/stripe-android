@@ -12,6 +12,7 @@ import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
+import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
 import com.stripe.android.crypto.onramp.model.OnrampKYCResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
@@ -85,6 +86,16 @@ class OnrampCoordinator @Inject internal constructor(
      */
     suspend fun collectKycInfo(info: KycInfo): OnrampKYCResult {
         return interactor.collectKycInfo(info)
+    }
+
+    /**
+     * Creates a crypto payment token for the payment method currently selected on the coordinator.
+     * Call after a successful [Presenter.collectPaymentMethod].
+     *
+     * @return A [OnrampCreateCryptoPaymentTokenResult] containing the crypto payment token ID.
+     */
+    suspend fun createCryptoPaymentToken(): OnrampCreateCryptoPaymentTokenResult {
+        return interactor.createCryptoPaymentToken()
     }
 
     /**

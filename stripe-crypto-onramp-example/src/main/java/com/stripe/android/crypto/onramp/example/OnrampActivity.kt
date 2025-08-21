@@ -106,6 +106,9 @@ internal class OnrampActivity : ComponentActivity() {
                         },
                         onCollectPayment = { type ->
                             onrampPresenter.collectPaymentMethod(type)
+                        },
+                        onCreatePaymentToken = {
+                            viewModel.createCryptoPaymentToken()
                         }
                     )
                 }
@@ -122,7 +125,8 @@ internal fun OnrampScreen(
     onAuthenticateUser: () -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onStartVerification: () -> Unit,
-    onCollectPayment: (type: PaymentMethodType) -> Unit
+    onCollectPayment: (type: PaymentMethodType) -> Unit,
+    onCreatePaymentToken: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
@@ -141,20 +145,20 @@ internal fun OnrampScreen(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        when (val currentState = uiState) {
-            is OnrampUiState.EmailInput -> {
+        when (uiState.screen) {
+            Screen.EmailInput -> {
                 EmailInputScreen(
                     onCheckUser = { email ->
                         viewModel.checkIfLinkUser(email)
                     }
                 )
             }
-            is OnrampUiState.Loading -> {
+            Screen.Loading -> {
                 LoadingScreen()
             }
-            is OnrampUiState.Registration -> {
+            Screen.Registration -> {
                 RegistrationScreen(
-                    initialEmail = currentState.email,
+                    initialEmail = uiState.email,
                     onRegister = { email, phone, country, fullName ->
                         val userInfo = LinkUserInfo(
                             email = email.trim(),
@@ -169,24 +173,25 @@ internal fun OnrampScreen(
                     }
                 )
             }
-            is OnrampUiState.Authentication -> {
+            Screen.Authentication -> {
                 AuthenticationScreen(
-                    email = currentState.email,
+                    email = uiState.email,
                     onAuthenticate = onAuthenticateUser,
                     onBack = {
                         viewModel.onBackToEmailInput()
                     }
                 )
             }
-            is OnrampUiState.AuthenticatedOperations -> {
+            Screen.AuthenticatedOperations -> {
                 AuthenticatedOperationsScreen(
-                    email = currentState.email,
-                    customerId = currentState.customerId,
-                    selectedPaymentData = currentState.selectedPaymentData,
+                    email = uiState.email,
+                    customerId = uiState.customerId ?: "",
+                    selectedPaymentData = uiState.selectedPaymentData,
                     onRegisterWalletAddress = onRegisterWalletAddress,
                     onCollectKYC = { kycInfo -> viewModel.collectKycInfo(kycInfo) },
                     onStartVerification = onStartVerification,
                     onCollectPayment = onCollectPayment,
+                    onCreatePaymentToken = onCreatePaymentToken,
                     onBack = {
                         viewModel.onBackToEmailInput()
                     }
@@ -399,6 +404,7 @@ private fun AuthenticatedOperationsScreen(
     onCollectKYC: (KycInfo) -> Unit,
     onStartVerification: () -> Unit,
     onCollectPayment: (type: PaymentMethodType) -> Unit,
+    onCreatePaymentToken: () -> Unit,
     onBack: () -> Unit
 ) {
     var walletAddress by remember { mutableStateOf("") }
@@ -541,9 +547,18 @@ private fun AuthenticatedOperationsScreen(
             onClick = { onCollectPayment(PaymentMethodType.BankAccount) },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 24.dp)
+                .padding(bottom = 8.dp)
         ) {
             Text("Collect Bank Account")
+        }
+
+        Button(
+            onClick = onCreatePaymentToken,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
+        ) {
+            Text("Create Crypto Payment Token")
         }
 
         TextButton(
@@ -552,6 +567,8 @@ private fun AuthenticatedOperationsScreen(
         ) {
             Text("Back to Email Input")
         }
+
+        Spacer(Modifier.height(24.dp))
     }
 }
 

@@ -262,7 +262,7 @@ class LinkControllerInteractorTest {
         linkAccountManager.createCardPaymentDetailsResult = Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
 
         assertThat(interactor.createPaymentMethod())
-            .isEqualTo(LinkController.CreatePaymentMethodResult.Success)
+            .isEqualTo(LinkController.CreatePaymentMethodResult.Success(paymentMethod))
 
         interactor.state(application).test {
             assertThat(awaitItem().createdPaymentMethod).isEqualTo(paymentMethod)
@@ -308,7 +308,7 @@ class LinkControllerInteractorTest {
         )
 
         assertThat(interactor.createPaymentMethod())
-            .isEqualTo(LinkController.CreatePaymentMethodResult.Success)
+            .isEqualTo(LinkController.CreatePaymentMethodResult.Success(paymentMethod))
 
         interactor.state(application).test {
             assertThat(awaitItem().createdPaymentMethod).isEqualTo(paymentMethod)
