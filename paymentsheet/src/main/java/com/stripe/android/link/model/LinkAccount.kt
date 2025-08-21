@@ -11,7 +11,7 @@ import kotlinx.parcelize.Parcelize
  * Immutable object representing a Link account.
  */
 @Parcelize
-internal class LinkAccount(
+internal data class LinkAccount(
     private val consumerSession: ConsumerSession,
     val consumerPublishableKey: String? = null,
     val displayablePaymentDetails: DisplayablePaymentDetails? = null,
