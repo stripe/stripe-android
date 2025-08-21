@@ -66,6 +66,7 @@ class ConsumersApiServiceImplTest {
                 email = email,
                 phoneNumber = "+15555555568",
                 country = "US",
+                countryInferringMethod = "PHONE_NUMBER",
                 name = null,
                 locale = Locale.US,
                 amount = 1234,

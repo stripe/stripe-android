@@ -187,6 +187,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             email = email,
             phoneNumber = phoneNumber,
             country = country,
+            countryInferringMethod = "PHONE_NUMBER",
             name = null,
             locale = locale,
             amount = elementsSessionContext?.amount,

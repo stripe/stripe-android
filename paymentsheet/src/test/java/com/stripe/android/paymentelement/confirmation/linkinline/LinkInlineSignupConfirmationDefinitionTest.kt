@@ -247,7 +247,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         val signInCall = coordinatorScenario.signInCalls.awaitItem()
 
         assertThat(signInCall.configuration).isEqualTo(confirmationOption.linkConfiguration)
-        assertThat(signInCall.userInput).isEqualTo(confirmationOption.userInput)
+        assertThat(signInCall.userInput).isEqualTo(confirmationOption.sanitizedUserInput)
 
         val secondGetAccountStatusFlowCall = coordinatorScenario.getAccountStatusFlowCalls.awaitItem()
 

@@ -154,6 +154,7 @@ internal open class FakeLinkAccountManager(
         email: String,
         phone: String?,
         country: String?,
+        countryInferringMethod: String,
         name: String?,
         consentAction: SignUpConsentAction
     ): Result<LinkAccount> {
@@ -173,6 +174,7 @@ internal open class FakeLinkAccountManager(
         email: String,
         phone: String,
         country: String,
+        countryInferringMethod: String,
         name: String?,
         verificationToken: String,
         appId: String,

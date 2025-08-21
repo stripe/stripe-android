@@ -179,6 +179,7 @@ internal class SignUpViewModel @Inject constructor(
                 email = emailController.fieldValue.value,
                 phoneNumber = phoneNumberController.getE164PhoneNumber(phoneNumberController.fieldValue.value),
                 country = phoneNumberController.getCountryCode(),
+                countryInferringMethod = "PHONE_NUMBER",
                 name = nameController.fieldValue.value,
                 consentAction = SignUpConsentAction.Implied
             )

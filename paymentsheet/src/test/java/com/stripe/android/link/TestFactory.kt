@@ -59,6 +59,7 @@ internal object TestFactory {
     const val AMOUNT = 100L
     const val CURRENCY = "USD"
     const val COUNTRY = "US"
+    const val COUNTRY_INFERRING_METHOD = "PHONE_NUMBER"
 
     val VERIFIED_SESSION = ConsumerSession.VerificationSession(
         type = ConsumerSession.VerificationSession.SessionType.Sms,

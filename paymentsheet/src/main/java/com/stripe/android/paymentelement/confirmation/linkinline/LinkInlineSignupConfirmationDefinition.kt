@@ -83,7 +83,7 @@ internal class LinkInlineSignupConfirmationDefinition(
         linkInlineSignupConfirmationOption: LinkInlineSignupConfirmationOption,
     ): PaymentMethodConfirmationOption {
         val configuration = linkInlineSignupConfirmationOption.linkConfiguration
-        val userInput = linkInlineSignupConfirmationOption.userInput
+        val userInput = linkInlineSignupConfirmationOption.sanitizedUserInput
 
         return when (linkConfigurationCoordinator.getAccountStatusFlow(configuration).first()) {
             AccountStatus.Verified -> createOptionAfterAttachingToLink(linkInlineSignupConfirmationOption, userInput)

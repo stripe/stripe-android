@@ -70,6 +70,7 @@ internal interface LinkRepository {
         email: String,
         phone: String?,
         country: String?,
+        countryInferringMethod: String,
         name: String?,
         consentAction: ConsumerSignUpConsentAction
     ): Result<ConsumerSessionSignup>
@@ -79,6 +80,7 @@ internal interface LinkRepository {
         email: String,
         phoneNumber: String,
         country: String,
+        countryInferringMethod: String,
         consentAction: ConsumerSignUpConsentAction,
         amount: Long?,
         currency: String?,

@@ -24,6 +24,7 @@ internal class DefaultLinkAuth @Inject constructor(
         email: String,
         phoneNumber: String,
         country: String,
+        countryInferringMethod: String,
         name: String?,
         consentAction: SignUpConsentAction
     ): LinkAuthResult {
@@ -32,6 +33,7 @@ internal class DefaultLinkAuth @Inject constructor(
                 email = email,
                 phoneNumber = phoneNumber,
                 country = country,
+                countryInferringMethod = countryInferringMethod,
                 name = name,
                 consentAction = consentAction
             )
@@ -40,6 +42,7 @@ internal class DefaultLinkAuth @Inject constructor(
                 email = email,
                 phone = phoneNumber,
                 country = country,
+                countryInferringMethod = countryInferringMethod,
                 name = name,
                 consentAction = consentAction
             )
@@ -75,6 +78,7 @@ internal class DefaultLinkAuth @Inject constructor(
         email: String,
         phoneNumber: String,
         country: String,
+        countryInferringMethod: String,
         name: String?,
         consentAction: SignUpConsentAction
     ): Result<LinkAccount> {
@@ -84,6 +88,7 @@ internal class DefaultLinkAuth @Inject constructor(
                 email = email,
                 phone = phoneNumber,
                 country = country,
+                countryInferringMethod = countryInferringMethod,
                 name = name,
                 consentAction = consentAction,
                 verificationToken = verificationToken,
