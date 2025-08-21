@@ -109,13 +109,14 @@ internal class CustomerMetadataTest {
         }
 
     private fun createEnabledMobilePaymentElement(
-        isPaymentMethodRemoveEnabled: Boolean = true,
+        paymentMethodRemove: ElementsSession.Customer.Components.PaymentMethodRemoveFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
         canRemoveLastPaymentMethod: Boolean = true,
         isPaymentMethodSetAsDefaultEnabled: Boolean = true,
     ): ElementsSession.Customer.Components.MobilePaymentElement.Enabled {
         return ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
             isPaymentMethodSaveEnabled = true,
-            isPaymentMethodRemoveEnabled = isPaymentMethodRemoveEnabled,
+            paymentMethodRemove = paymentMethodRemove,
             canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
             allowRedisplayOverride = null,
             isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled
@@ -139,14 +140,15 @@ internal class CustomerMetadataTest {
         paymentElementDisabled: Boolean = false,
         canRemoveLastPaymentMethodConfigValue: Boolean = true,
         canRemoveLastPaymentMethod: Boolean = true,
-        canRemovePaymentMethods: Boolean = true,
+        paymentMethodRemove: ElementsSession.Customer.Components.PaymentMethodRemoveFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
         block: (CustomerMetadata.Permissions) -> Unit
     ) {
         val mobilePaymentElementComponent = if (paymentElementDisabled) {
             ElementsSession.Customer.Components.MobilePaymentElement.Disabled
         } else {
             createEnabledMobilePaymentElement(
-                isPaymentMethodRemoveEnabled = canRemovePaymentMethods,
+                paymentMethodRemove = paymentMethodRemove,
                 canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
             )
         }
