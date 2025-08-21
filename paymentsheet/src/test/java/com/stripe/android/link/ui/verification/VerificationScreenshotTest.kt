@@ -27,6 +27,7 @@ internal class VerificationScreenshotTest(
                     otpElement = testCase.content.otpElement,
                     onBack = {},
                     onResendCodeClick = {},
+                    onConsentShown = {},
                     onChangeEmailClick = {},
                     didShowCodeSentNotification = {},
                     onFocusRequested = {},
