@@ -14,8 +14,10 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.ui.core.cardscan.CardScanEventsReporter
 
-internal interface EventReporter {
+@Suppress("TooManyFunctions")
+internal interface EventReporter : CardScanEventsReporter {
 
     /**
      * PaymentSheet has been instantiated or FlowController has finished its configuration.

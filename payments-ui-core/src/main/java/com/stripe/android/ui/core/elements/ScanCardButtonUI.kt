@@ -28,6 +28,7 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cardscan.CardScanContract
 import com.stripe.android.ui.core.cardscan.CardScanGoogleLauncher.Companion.rememberCardScanGoogleLauncher
 import com.stripe.android.ui.core.cardscan.CardScanResult
+import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
 import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.LocalIconStyle
 import com.stripe.android.uicore.utils.collectAsState
@@ -47,7 +48,8 @@ internal fun ScanCardButtonUI(
 
     val context = LocalContext.current
     val cardScanGoogleLauncher = if (FeatureFlags.cardScanGooglePayMigration.isEnabled) {
-        rememberCardScanGoogleLauncher(context, onGoogleCardScanResult)
+        val eventsReporter = LocalCardScanEventsReporter.current
+        rememberCardScanGoogleLauncher(context, eventsReporter, onGoogleCardScanResult)
     } else {
         null
     }

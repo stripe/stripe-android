@@ -706,6 +706,97 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         )
     }
 
+    class CardScanStarted(
+        implementation: String,
+        override val isDeferred: Boolean,
+        override val isSpt: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_cardscan_scan_started"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            "implementation" to implementation
+        )
+    }
+
+    class CardScanSucceeded(
+        implementation: String,
+        duration: Duration?,
+        override val isDeferred: Boolean,
+        override val isSpt: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_cardscan_success"
+        override val additionalParams: Map<String, Any?> =
+            duration.durationInSecondsFromStart() +
+                mapOf(
+                    "implementation" to implementation
+                )
+    }
+
+    class CardScanFailed(
+        implementation: String,
+        duration: Duration?,
+        error: Throwable?,
+        override val isDeferred: Boolean,
+        override val isSpt: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_cardscan_failed"
+        override val additionalParams: Map<String, Any?> =
+            duration.durationInSecondsFromStart() +
+                mapOf(
+                    "implementation" to implementation,
+                    FIELD_ERROR_MESSAGE to error?.javaClass?.simpleName
+                )
+    }
+
+    class CardScanCancelled(
+        implementation: String,
+        duration: Duration?,
+        override val isDeferred: Boolean,
+        override val isSpt: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_cardscan_cancel"
+        override val additionalParams: Map<String, Any?> =
+            duration.durationInSecondsFromStart() +
+                mapOf(
+                    "implementation" to implementation
+                )
+    }
+
+    class CardScanApiCheckSucceeded(
+        implementation: String,
+        override val isDeferred: Boolean,
+        override val isSpt: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_cardscan_api_check_succeeded"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            "implementation" to implementation
+        )
+    }
+
+    class CardScanApiCheckFailed(
+        implementation: String,
+        error: Throwable?,
+        override val isDeferred: Boolean,
+        override val isSpt: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_cardscan_api_check_failed"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            "implementation" to implementation,
+            FIELD_ERROR_MESSAGE to error?.javaClass?.simpleName
+        )
+    }
+
     private fun standardParams(
         isDecoupled: Boolean,
         isSpt: Boolean,
@@ -843,3 +934,9 @@ internal fun PaymentSelection.linkContext(): String? {
 
 @Suppress("DEPRECATION")
 internal fun PaymentSheet.Configuration.primaryButtonColorUsage(): Boolean = primaryButtonColor != null
+
+private fun Duration?.durationInSecondsFromStart(): Map<String, Float> {
+    return this?.let {
+        mapOf("duration" to it.toDouble(DurationUnit.SECONDS).toFloat())
+    } ?: emptyMap()
+}

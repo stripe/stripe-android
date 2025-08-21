@@ -53,6 +53,10 @@ class CardScanGoogleLauncherTest {
             assertThat(completedResult.scannedCard.pan).isEqualTo("4242424242424242")
             assertThat(completedResult.scannedCard.expirationMonth).isEqualTo(12)
             assertThat(completedResult.scannedCard.expirationYear).isEqualTo(2042)
+
+            assertThat(fakeEventsReporter.apiCheckSucceededCalls.awaitItem()).isNotNull()
+            assertThat(fakeEventsReporter.scanSucceededCalls.awaitItem().implementation)
+                .isEqualTo("google_pay")
         }
     }
 
@@ -63,6 +67,10 @@ class CardScanGoogleLauncherTest {
         val scanResult = launcher.parseActivityResult(result)
 
         assertThat(scanResult).isInstanceOf(CardScanResult.Canceled::class.java)
+
+        assertThat(fakeEventsReporter.apiCheckSucceededCalls.awaitItem()).isNotNull()
+        assertThat(fakeEventsReporter.scanCancelledCalls.awaitItem().implementation)
+            .isEqualTo("google_pay")
     }
 
     @Test
@@ -73,7 +81,12 @@ class CardScanGoogleLauncherTest {
 
         assertThat(scanResult).isInstanceOf(CardScanResult.Failed::class.java)
         val failedResult = scanResult as CardScanResult.Failed
-        assertThat(failedResult.error.message).isEqualTo("Null data or unexpected result code: -1")
+        assertThat(failedResult.error).isInstanceOf(CardScanActivityResultException::class.java)
+
+        assertThat(fakeEventsReporter.apiCheckSucceededCalls.awaitItem()).isNotNull()
+        val scanFailedCall = fakeEventsReporter.scanFailedCalls.awaitItem()
+        assertThat(scanFailedCall.implementation).isEqualTo("google_pay")
+        assertThat(scanFailedCall.error).isInstanceOf(CardScanActivityResultException::class.java)
     }
 
     @Test
@@ -88,7 +101,12 @@ class CardScanGoogleLauncherTest {
 
         assertThat(scanResult).isInstanceOf(CardScanResult.Failed::class.java)
         val failedResult = scanResult as CardScanResult.Failed
-        assertThat(failedResult.error.message).isEqualTo("Failed to parse card data")
+        assertThat(failedResult.error).isInstanceOf(CardScanParseException::class.java)
+
+        assertThat(fakeEventsReporter.apiCheckSucceededCalls.awaitItem()).isNotNull()
+        val scanFailedCall = fakeEventsReporter.scanFailedCalls.awaitItem()
+        assertThat(scanFailedCall.implementation).isEqualTo("google_pay")
+        assertThat(scanFailedCall.error).isInstanceOf(CardScanParseException::class.java)
     }
 
     @Test
@@ -99,7 +117,12 @@ class CardScanGoogleLauncherTest {
 
         assertThat(scanResult).isInstanceOf(CardScanResult.Failed::class.java)
         val failedResult = scanResult as CardScanResult.Failed
-        assertThat(failedResult.error.message).isEqualTo("Null data or unexpected result code: 123")
+        assertThat(failedResult.error).isInstanceOf(CardScanActivityResultException::class.java)
+
+        assertThat(fakeEventsReporter.apiCheckSucceededCalls.awaitItem()).isNotNull()
+        val scanFailedCall = fakeEventsReporter.scanFailedCalls.awaitItem()
+        assertThat(scanFailedCall.implementation).isEqualTo("google_pay")
+        assertThat(scanFailedCall.error).isInstanceOf(CardScanActivityResultException::class.java)
     }
 
     @Test
@@ -108,6 +131,9 @@ class CardScanGoogleLauncherTest {
 
         launcher.launch(ApplicationProvider.getApplicationContext())
         assertThat(activityLauncher.launchCall.awaitItem()).isEqualTo(Unit)
+
+        assertThat(fakeEventsReporter.apiCheckSucceededCalls.awaitItem()).isNotNull()
+        assertThat(fakeEventsReporter.scanStartedCalls.awaitItem().implementation).isEqualTo("google_pay")
     }
 
     @Test
@@ -117,6 +143,9 @@ class CardScanGoogleLauncherTest {
         assertThat(launcher.isAvailable.value).isFalse()
         launcher.launch(ApplicationProvider.getApplicationContext())
         // No launch call should be made since fetchIntent failed
+
+        val apiCheckFailedCall = fakeEventsReporter.apiCheckFailedCalls.awaitItem()
+        assertThat(apiCheckFailedCall.error?.message).isEqualTo("Failed to fetch intent")
     }
 
     private class FakeActivityLauncher<I> : ActivityResultLauncher<I>() {
@@ -140,6 +169,7 @@ class CardScanGoogleLauncherTest {
 
     private class Scenario(
         val launcher: CardScanGoogleLauncher,
+        val fakeEventsReporter: FakeCardScanEventsReporter,
         val activityLauncher: FakeActivityLauncher<IntentSenderRequest>,
     )
 
@@ -148,8 +178,10 @@ class CardScanGoogleLauncherTest {
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val activityLauncher = FakeActivityLauncher<IntentSenderRequest>()
+        val fakeEventsReporter = FakeCardScanEventsReporter()
         val launcher = CardScanGoogleLauncher(
             context = ApplicationProvider.getApplicationContext(),
+            eventsReporter = fakeEventsReporter,
             paymentCardRecognitionClient = FakePaymentCardRecognitionClient(isFetchClientSucceed)
         ).apply {
             this.activityLauncher = activityLauncher
@@ -157,6 +189,7 @@ class CardScanGoogleLauncherTest {
 
         val scenario = Scenario(
             launcher = launcher,
+            fakeEventsReporter = fakeEventsReporter,
             activityLauncher = activityLauncher
         )
 

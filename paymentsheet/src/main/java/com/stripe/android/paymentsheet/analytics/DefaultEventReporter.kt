@@ -34,6 +34,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
+@Suppress("LargeClass", "TooManyFunctions")
 @OptIn(ExperimentalAnalyticEventCallbackApi::class)
 internal class DefaultEventReporter @Inject internal constructor(
     context: Context,
@@ -631,6 +632,89 @@ internal class DefaultEventReporter @Inject internal constructor(
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
                 didReceiveECEClick = didReceiveECEClick,
+            )
+        )
+    }
+
+    override fun onCardScanStarted(implementation: String) {
+        durationProvider.start(DurationProvider.Key.CardScan)
+        fireEvent(
+            PaymentSheetEvent.CardScanStarted(
+                implementation = implementation,
+                isDeferred = isDeferred,
+                isSpt = isSpt,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
+    override fun onCardScanSucceeded(implementation: String) {
+        val duration = durationProvider.end(DurationProvider.Key.CardScan)
+        fireEvent(
+            PaymentSheetEvent.CardScanSucceeded(
+                implementation = implementation,
+                duration = duration,
+                isDeferred = isDeferred,
+                isSpt = isSpt,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
+    override fun onCardScanFailed(implementation: String, error: Throwable?) {
+        val duration = durationProvider.end(DurationProvider.Key.CardScan)
+        fireEvent(
+            PaymentSheetEvent.CardScanFailed(
+                implementation = implementation,
+                duration = duration,
+                error = error,
+                isDeferred = isDeferred,
+                isSpt = isSpt,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
+    override fun onCardScanCancelled(
+        implementation: String
+    ) {
+        val duration = durationProvider.end(DurationProvider.Key.CardScan)
+        fireEvent(
+            PaymentSheetEvent.CardScanCancelled(
+                implementation = implementation,
+                duration = duration,
+                isDeferred = isDeferred,
+                isSpt = isSpt,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
+    override fun onCardScanApiCheckSucceeded(implementation: String) {
+        fireEvent(
+            PaymentSheetEvent.CardScanApiCheckSucceeded(
+                implementation = implementation,
+                isDeferred = isDeferred,
+                isSpt = isSpt,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
+    override fun onCardScanApiCheckFailed(implementation: String, error: Throwable?) {
+        fireEvent(
+            PaymentSheetEvent.CardScanApiCheckFailed(
+                implementation = implementation,
+                error = error,
+                isDeferred = isDeferred,
+                isSpt = isSpt,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
             )
         )
     }
