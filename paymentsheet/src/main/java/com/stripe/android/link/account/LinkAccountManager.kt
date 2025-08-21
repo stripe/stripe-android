@@ -128,6 +128,7 @@ internal interface LinkAccountManager {
         billingPhone: String?,
         cvc: String?,
         allowRedisplay: String? = null,
+        apiKey: String? = null,
     ): Result<SharePaymentDetails>
 
     suspend fun createLinkAccountSession(): Result<LinkAccountSession>

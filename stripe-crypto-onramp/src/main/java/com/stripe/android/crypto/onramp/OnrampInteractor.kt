@@ -2,11 +2,13 @@ package com.stripe.android.crypto.onramp
 
 import android.app.Application
 import android.content.Context
+import com.stripe.android.core.utils.flatMapCatching
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
+import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
 import com.stripe.android.crypto.onramp.model.OnrampIdentityVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampKYCResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
@@ -145,6 +147,38 @@ internal class OnrampInteractor @Inject constructor(
         } ?: run {
             return OnrampStartVerificationResult.Failed(IllegalStateException("Missing consumer secret"))
         }
+    }
+
+    suspend fun createCryptoPaymentToken(): OnrampCreateCryptoPaymentTokenResult {
+        val secret = consumerSessionClientSecret()
+            ?: return OnrampCreateCryptoPaymentTokenResult.Failed(IllegalStateException("Missing consumer secret"))
+        return cryptoApiRepository.getPlatformSettings()
+            .map { it.publishableKey }
+            .mapCatching { apiKey ->
+                when (val result = linkController.createPaymentMethodForOnramp(apiKey = apiKey)) {
+                    is LinkController.CreatePaymentMethodResult.Success -> {
+                        result.paymentMethod
+                    }
+                    is LinkController.CreatePaymentMethodResult.Failed -> {
+                        throw result.error
+                    }
+                }
+            }
+            .flatMapCatching { paymentMethod ->
+                cryptoApiRepository.createPaymentToken(
+                    consumerSessionClientSecret = secret,
+                    paymentMethod = paymentMethod.id!!,
+                )
+            }
+            .map { cryptoPayment -> cryptoPayment.id }
+            .fold(
+                onSuccess = { cryptoPaymentToken ->
+                    OnrampCreateCryptoPaymentTokenResult.Completed(cryptoPaymentToken)
+                },
+                onFailure = { error ->
+                    OnrampCreateCryptoPaymentTokenResult.Failed(error)
+                }
+            )
     }
 
     suspend fun handleAuthenticationResult(

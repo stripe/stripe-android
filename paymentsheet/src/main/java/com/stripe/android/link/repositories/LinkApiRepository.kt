@@ -296,6 +296,7 @@ internal class LinkApiRepository @Inject constructor(
         billingPhone: String?,
         cvc: String?,
         allowRedisplay: String?,
+        apiKey: String?
     ): Result<SharePaymentDetails> = withContext(workContext) {
         val fraudParams = fraudDetectionDataRepository.getCached()?.params.orEmpty()
         val paymentMethodParams = mapOf("expand" to listOf("payment_method"))
@@ -310,7 +311,7 @@ internal class LinkApiRepository @Inject constructor(
             consumerSessionClientSecret = consumerSessionClientSecret,
             paymentDetailsId = paymentDetailsId,
             expectedPaymentMethodType = expectedPaymentMethodType,
-            requestOptions = buildRequestOptions(),
+            requestOptions = buildRequestOptions(apiKey),
             requestSurface = requestSurface.value,
             extraParams = paymentMethodParams + fraudParams + optionsParams + allowRedisplayParams,
             billingPhone = billingPhone,
@@ -496,11 +497,11 @@ internal class LinkApiRepository @Inject constructor(
     }
 
     private fun buildRequestOptions(
-        consumerAccountPublishableKey: String? = null,
+        apiKey: String? = null,
     ): ApiRequest.Options {
         return ApiRequest.Options(
-            apiKey = consumerAccountPublishableKey ?: publishableKeyProvider(),
-            stripeAccount = stripeAccountIdProvider().takeUnless { consumerAccountPublishableKey != null },
+            apiKey = apiKey ?: publishableKeyProvider(),
+            stripeAccount = stripeAccountIdProvider().takeUnless { apiKey != null },
         )
     }
 
