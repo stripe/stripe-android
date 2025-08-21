@@ -1236,7 +1236,8 @@ class DefaultEventReporterTest {
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_cardscan_success" &&
-                    req.params["implementation"] == "google_pay"
+                    req.params["implementation"] == "google_pay" &&
+                    (req.params["duration"] as Float) > 0
             }
         )
     }
@@ -1254,6 +1255,7 @@ class DefaultEventReporterTest {
             argWhere { req ->
                 req.params["event"] == "mc_cardscan_failed" &&
                     req.params["implementation"] == "google_pay" &&
+                    (req.params["duration"] as Float) > 0 &&
                     req.params["error_message"] == "IllegalStateException"
             }
         )
@@ -1271,6 +1273,7 @@ class DefaultEventReporterTest {
             argWhere { req ->
                 req.params["event"] == "mc_cardscan_failed" &&
                     req.params["implementation"] == "google_pay" &&
+                    (req.params["duration"] as Float) > 0 &&
                     req.params["error_message"] == null
             }
         )
@@ -1287,6 +1290,7 @@ class DefaultEventReporterTest {
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_cardscan_cancel" &&
+                    (req.params["duration"] as Float) > 0 &&
                     req.params["implementation"] == "google_pay"
             }
         )

@@ -637,6 +637,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onCardScanStarted(implementation: String) {
+        durationProvider.start(DurationProvider.Key.CardScan)
         fireEvent(
             PaymentSheetEvent.CardScanStarted(
                 implementation = implementation,
@@ -649,9 +650,11 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onCardScanSucceeded(implementation: String) {
+        val duration = durationProvider.end(DurationProvider.Key.CardScan)
         fireEvent(
             PaymentSheetEvent.CardScanSucceeded(
                 implementation = implementation,
+                duration = duration,
                 isDeferred = isDeferred,
                 isSpt = isSpt,
                 linkEnabled = linkEnabled,
@@ -661,9 +664,11 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onCardScanFailed(implementation: String, error: Throwable?) {
+        val duration = durationProvider.end(DurationProvider.Key.CardScan)
         fireEvent(
             PaymentSheetEvent.CardScanFailed(
                 implementation = implementation,
+                duration = duration,
                 error = error,
                 isDeferred = isDeferred,
                 isSpt = isSpt,
@@ -676,9 +681,11 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onCardScanCancelled(
         implementation: String
     ) {
+        val duration = durationProvider.end(DurationProvider.Key.CardScan)
         fireEvent(
             PaymentSheetEvent.CardScanCancelled(
                 implementation = implementation,
+                duration = duration,
                 isDeferred = isDeferred,
                 isSpt = isSpt,
                 linkEnabled = linkEnabled,
