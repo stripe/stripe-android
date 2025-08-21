@@ -9,8 +9,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.github.kittinunf.result.Result
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.crypto.onramp.OnrampCoordinator
+import com.stripe.android.crypto.onramp.example.network.TestBackendRepository
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
@@ -36,7 +38,12 @@ internal class OnrampViewModel(
     savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
 
-    val onrampCoordinator: OnrampCoordinator
+    val onrampCoordinator: OnrampCoordinator =
+        OnrampCoordinator
+            .Builder()
+            .build(application, savedStateHandle)
+
+    private val testBackendRepository = TestBackendRepository()
 
     private val _uiState = MutableStateFlow(OnrampUiState())
     val uiState: StateFlow<OnrampUiState> = _uiState.asStateFlow()
@@ -45,8 +52,6 @@ internal class OnrampViewModel(
     val message: StateFlow<String?> = _message.asStateFlow()
 
     init {
-        onrampCoordinator = OnrampCoordinator.Builder()
-            .build(application, savedStateHandle)
 
         viewModelScope.launch {
             @Suppress("MagicNumber", "MaxLineLength")
@@ -194,7 +199,13 @@ internal class OnrampViewModel(
             when (result) {
                 is OnrampSetWalletAddressResult.Completed -> {
                     _message.value = "Wallet address registered successfully!"
-                    _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
+                    _uiState.update {
+                        it.copy(
+                            screen = Screen.AuthenticatedOperations,
+                            walletAddress = walletAddress.trim(),
+                            network = network
+                        )
+                    }
                 }
                 is OnrampSetWalletAddressResult.Failed -> {
                     _message.value = "Failed to register wallet address: ${result.error.message}"
@@ -247,6 +258,59 @@ internal class OnrampViewModel(
         }
     }
 
+    fun createOnrampSession() {
+        val currentState = _uiState.value
+        val paymentToken = currentState.cryptoPaymentToken
+        val walletAddress = currentState.walletAddress
+        val customerId = currentState.customerId
+        val network = currentState.network
+
+        // Check what's missing and provide helpful guidance
+        val missingItems = mutableListOf<String>()
+        if (customerId.isNullOrBlank()) missingItems.add("customer authentication")
+        if (walletAddress.isNullOrBlank()) missingItems.add("wallet address registration")
+        if (currentState.selectedPaymentData == null) missingItems.add("payment method selection")
+        if (paymentToken.isNullOrBlank()) missingItems.add("crypto payment token creation")
+        if (missingItems.isNotEmpty()) {
+            val message = when (missingItems.size) {
+                1 -> "Please complete ${missingItems[0]} first"
+                2 -> "Please complete ${missingItems[0]} and ${missingItems[1]} first"
+                else -> "Please complete the following steps first: ${missingItems.joinToString(", ")}"
+            }
+            _message.value = message
+            return
+        }
+
+        _uiState.update { it.copy(screen = Screen.Loading) }
+
+        viewModelScope.launch {
+            val destinationNetwork = network?.value ?: "ethereum"
+
+            val result = testBackendRepository.createOnrampSession(
+                paymentToken = paymentToken!!,
+                walletAddress = walletAddress!!,
+                cryptoCustomerId = customerId!!,
+                destinationNetwork = destinationNetwork
+            )
+
+            when (result) {
+                is Result.Success -> {
+                    val response = result.value
+                    if (response.sessionId != null) {
+                        _message.value = "Onramp session created successfully! Session ID: ${response.sessionId}"
+                    } else {
+                        _message.value = "Failed to create onramp session: ${response.error ?: "Unknown error"}"
+                    }
+                    _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
+                }
+                is Result.Failure -> {
+                    _message.value = "Failed to create onramp session: ${result.error.message}"
+                    _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
+                }
+            }
+        }
+    }
+
     class Factory : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(
@@ -265,6 +329,8 @@ data class OnrampUiState(
     val customerId: String? = null,
     val selectedPaymentData: PaymentOptionDisplayData? = null,
     val cryptoPaymentToken: String? = null,
+    val walletAddress: String? = null,
+    val network: CryptoNetwork? = null,
 )
 
 enum class Screen {

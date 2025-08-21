@@ -109,6 +109,9 @@ internal class OnrampActivity : ComponentActivity() {
                         },
                         onCreatePaymentToken = {
                             viewModel.createCryptoPaymentToken()
+                        },
+                        onCreateOnrampSession = {
+                            viewModel.createOnrampSession()
                         }
                     )
                 }
@@ -127,6 +130,7 @@ internal fun OnrampScreen(
     onStartVerification: () -> Unit,
     onCollectPayment: (type: PaymentMethodType) -> Unit,
     onCreatePaymentToken: () -> Unit,
+    onCreateOnrampSession: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
@@ -192,6 +196,7 @@ internal fun OnrampScreen(
                     onStartVerification = onStartVerification,
                     onCollectPayment = onCollectPayment,
                     onCreatePaymentToken = onCreatePaymentToken,
+                    onCreateOnrampSession = onCreateOnrampSession,
                     onBack = {
                         viewModel.onBackToEmailInput()
                     }
@@ -405,9 +410,10 @@ private fun AuthenticatedOperationsScreen(
     onStartVerification: () -> Unit,
     onCollectPayment: (type: PaymentMethodType) -> Unit,
     onCreatePaymentToken: () -> Unit,
+    onCreateOnrampSession: () -> Unit,
     onBack: () -> Unit
 ) {
-    var walletAddress by remember { mutableStateOf("") }
+    var walletAddressInput by remember { mutableStateOf("") }
     var selectedNetwork by remember { mutableStateOf(CryptoNetwork.Ethereum) }
     var isDropdownExpanded by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
@@ -495,8 +501,8 @@ private fun AuthenticatedOperationsScreen(
         }
 
         OutlinedTextField(
-            value = walletAddress,
-            onValueChange = { walletAddress = it },
+            value = walletAddressInput,
+            onValueChange = { walletAddressInput = it },
             label = { Text("Wallet Address") },
             placeholder = { Text("0x1234567890abcdef...") },
             modifier = Modifier
@@ -505,7 +511,7 @@ private fun AuthenticatedOperationsScreen(
         )
 
         Button(
-            onClick = { onRegisterWalletAddress(walletAddress, selectedNetwork) },
+            onClick = { onRegisterWalletAddress(walletAddressInput, selectedNetwork) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 24.dp)
@@ -559,6 +565,15 @@ private fun AuthenticatedOperationsScreen(
                 .padding(bottom = 8.dp)
         ) {
             Text("Create Crypto Payment Token")
+        }
+
+        Button(
+            onClick = onCreateOnrampSession,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
+        ) {
+            Text("🚀 Checkout - Create Onramp Session")
         }
 
         TextButton(
