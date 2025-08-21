@@ -279,6 +279,125 @@ class USBankAccountFormViewModelTest {
     }
 
     @Test
+    fun `Correctly creates selection when default address`() = runTest {
+        val customerAddress = CUSTOMER_ADDRESS.asAddressModel()
+        val viewModel = createViewModel(
+            defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        attachDefaultsToPaymentMethod = true,
+                        name = CollectionMode.Always,
+                        email = CollectionMode.Always,
+                        phone = CollectionMode.Always,
+                        address = AddressCollectionMode.Full,
+                    ),
+                    billingDetails = PaymentSheet.BillingDetails(
+                        name = CUSTOMER_NAME,
+                        email = CUSTOMER_EMAIL,
+                        phone = CUSTOMER_PHONE,
+                        address = CUSTOMER_ADDRESS,
+                    )
+                ),
+                savedPaymentMethod = null,
+            )
+        )
+
+        viewModel.handleCollectBankAccountResult(mockManuallyEnteredBankAccount(usesMicrodeposits = true))
+
+        viewModel.linkedAccount.test {
+            val paymentSelection = awaitItem()
+
+            assertThat(paymentSelection?.input).isNotNull()
+
+            val input = requireNotNull(paymentSelection?.input)
+
+            assertThat(input.name).isEqualTo(CUSTOMER_NAME)
+            assertThat(input.email).isEqualTo(CUSTOMER_EMAIL)
+            assertThat(input.phone).isEqualTo(CUSTOMER_PHONE)
+            assertThat(input.address).isEqualTo(customerAddress)
+
+            assertThat(paymentSelection?.paymentMethodCreateParams).isNotNull()
+
+            val paymentMethodCreateParams = requireNotNull(paymentSelection?.paymentMethodCreateParams)
+
+            assertThat(paymentMethodCreateParams.billingDetails).isNotNull()
+
+            val billingDetails = requireNotNull(paymentMethodCreateParams.billingDetails)
+
+            assertThat(billingDetails.name).isEqualTo(CUSTOMER_NAME)
+            assertThat(billingDetails.email).isEqualTo(CUSTOMER_EMAIL)
+            assertThat(billingDetails.phone).isEqualTo(CUSTOMER_PHONE)
+            assertThat(billingDetails.address).isEqualTo(customerAddress)
+        }
+    }
+
+    @Test
+    fun `Correctly creates selection when no default address`() = runTest {
+        val viewModel = createViewModel(
+            defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        attachDefaultsToPaymentMethod = true,
+                        name = CollectionMode.Always,
+                        email = CollectionMode.Always,
+                        phone = CollectionMode.Always,
+                        address = AddressCollectionMode.Full,
+                    ),
+                    billingDetails = null
+                ),
+                savedPaymentMethod = null,
+            )
+        )
+
+        val customerAddress = CUSTOMER_ADDRESS.asAddressModel()
+
+        viewModel.nameController.onValueChange(CUSTOMER_NAME)
+        viewModel.emailController.onValueChange(CUSTOMER_EMAIL)
+        viewModel.phoneController.onValueChange(CUSTOMER_PHONE.removePrefix("+1"))
+        viewModel.addressElement.addressController.test {
+            val controller = awaitItem()
+
+            controller.fieldsFlowable.test {
+                val formFieldValues = customerAddress.asFormFieldValues()
+
+                awaitItem().forEach { field ->
+                    field.setRawValue(formFieldValues)
+                }
+
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+        viewModel.handleCollectBankAccountResult(mockManuallyEnteredBankAccount(usesMicrodeposits = true))
+
+        viewModel.linkedAccount.test {
+            val paymentSelection = awaitItem()
+
+            assertThat(paymentSelection?.input).isNotNull()
+
+            val input = requireNotNull(paymentSelection?.input)
+
+            assertThat(input.name).isEqualTo(CUSTOMER_NAME)
+            assertThat(input.email).isEqualTo(CUSTOMER_EMAIL)
+            assertThat(input.phone).isEqualTo(CUSTOMER_PHONE)
+            assertThat(input.address).isEqualTo(customerAddress)
+
+            assertThat(paymentSelection?.paymentMethodCreateParams).isNotNull()
+
+            val paymentMethodCreateParams = requireNotNull(paymentSelection?.paymentMethodCreateParams)
+
+            assertThat(paymentMethodCreateParams.billingDetails).isNotNull()
+
+            val billingDetails = requireNotNull(paymentMethodCreateParams.billingDetails)
+
+            assertThat(billingDetails.name).isEqualTo(CUSTOMER_NAME)
+            assertThat(billingDetails.email).isEqualTo(CUSTOMER_EMAIL)
+            assertThat(billingDetails.phone).isEqualTo(CUSTOMER_PHONE)
+            assertThat(billingDetails.address).isEqualTo(customerAddress)
+        }
+    }
+
+    @Test
     fun `Correctly restores input when re-opening screen`() = runTest {
         val input = PaymentSelection.New.USBankAccount.Input(
             name = "Some One",
