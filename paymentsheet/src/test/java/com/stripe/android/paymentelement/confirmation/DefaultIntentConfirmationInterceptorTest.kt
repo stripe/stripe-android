@@ -1781,6 +1781,7 @@ class DefaultIntentConfirmationInterceptorTest {
         assertThat(confirmParams?.radarOptions()?.hCaptchaToken).isNull()
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun <T : ConfirmStripeIntentParams> IntentConfirmationInterceptor.NextStep.asConfirmParams(): T? {
         val confirmNextStep = this as? IntentConfirmationInterceptor.NextStep.Confirm
         return confirmNextStep?.confirmParams as? T
