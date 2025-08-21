@@ -162,11 +162,15 @@ data class ElementsSession(
                 @Parcelize
                 data class Enabled(
                     val isPaymentMethodSaveEnabled: Boolean,
-                    val isPaymentMethodRemoveEnabled: Boolean,
+                    val paymentMethodRemove: PaymentMethodRemoveFeature,
                     val canRemoveLastPaymentMethod: Boolean,
                     val allowRedisplayOverride: PaymentMethod.AllowRedisplay?,
                     val isPaymentMethodSetAsDefaultEnabled: Boolean,
-                ) : MobilePaymentElement
+                ) : MobilePaymentElement {
+                    val isPaymentMethodRemoveEnabled: Boolean
+                        get() = paymentMethodRemove == PaymentMethodRemoveFeature.Enabled ||
+                            paymentMethodRemove == PaymentMethodRemoveFeature.Partial
+                }
             }
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -178,10 +182,21 @@ data class ElementsSession(
                 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 @Parcelize
                 data class Enabled(
-                    val isPaymentMethodRemoveEnabled: Boolean,
+                    val paymentMethodRemove: PaymentMethodRemoveFeature,
                     val canRemoveLastPaymentMethod: Boolean,
                     val isPaymentMethodSyncDefaultEnabled: Boolean,
-                ) : CustomerSheet
+                ) : CustomerSheet {
+                    val isPaymentMethodRemoveEnabled: Boolean
+                        get() = paymentMethodRemove == PaymentMethodRemoveFeature.Enabled ||
+                            paymentMethodRemove == PaymentMethodRemoveFeature.Partial
+                }
+            }
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            enum class PaymentMethodRemoveFeature {
+                Enabled,
+                Partial,
+                Disabled,
             }
         }
     }

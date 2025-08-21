@@ -27,7 +27,8 @@ class CustomerSessionInitializationDataSourceTest {
                 intent = intent,
                 paymentMethods = paymentMethods,
                 customerSheetComponent = createEnabledCustomerSheetComponent(
-                    isPaymentMethodRemoveEnabled = true,
+                    paymentMethodRemoveFeature =
+                    ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
                     canRemoveLastPaymentMethod = true,
                     isPaymentMethodSyncDefaultEnabled = false,
                 ),
@@ -63,7 +64,8 @@ class CustomerSessionInitializationDataSourceTest {
         val dataSource = createInitializationDataSource(
             elementsSessionManager = FakeCustomerSessionElementsSessionManager(
                 customerSheetComponent = createEnabledCustomerSheetComponent(
-                    isPaymentMethodRemoveEnabled = false,
+                    paymentMethodRemoveFeature =
+                    ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled,
                     canRemoveLastPaymentMethod = false,
                 ),
             ),
@@ -236,7 +238,8 @@ class CustomerSessionInitializationDataSourceTest {
                     ElementsSession.Customer.Components.CustomerSheet.Disabled
                 } else {
                     createEnabledCustomerSheetComponent(
-                        isPaymentMethodRemoveEnabled = true,
+                        paymentMethodRemoveFeature =
+                        ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
                         canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
                     )
                 },
@@ -277,12 +280,13 @@ class CustomerSessionInitializationDataSourceTest {
     }
 
     private fun createEnabledCustomerSheetComponent(
-        isPaymentMethodRemoveEnabled: Boolean = true,
+        paymentMethodRemoveFeature: ElementsSession.Customer.Components.PaymentMethodRemoveFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
         canRemoveLastPaymentMethod: Boolean = true,
         isPaymentMethodSyncDefaultEnabled: Boolean = false,
     ): ElementsSession.Customer.Components.CustomerSheet.Enabled {
         return ElementsSession.Customer.Components.CustomerSheet.Enabled(
-            isPaymentMethodRemoveEnabled = isPaymentMethodRemoveEnabled,
+            paymentMethodRemove = paymentMethodRemoveFeature,
             canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
             isPaymentMethodSyncDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
         )
