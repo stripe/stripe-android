@@ -30,18 +30,23 @@ import kotlinx.parcelize.Parcelize
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.camera.R as CameraR
 
+@Deprecated("This is deprecated and will be removed in a future release.")
 sealed interface CancellationReason : Parcelable {
 
     @Parcelize
+    @Deprecated("This is deprecated and will be removed in a future release.")
     data object Closed : CancellationReason
 
     @Parcelize
+    @Deprecated("This is deprecated and will be removed in a future release.")
     data object Back : CancellationReason
 
     @Parcelize
+    @Deprecated("This is deprecated and will be removed in a future release.")
     data object UserCannotScan : CancellationReason
 
     @Parcelize
+    @Deprecated("This is deprecated and will be removed in a future release.")
     data object CameraPermissionDenied : CancellationReason
 }
 
