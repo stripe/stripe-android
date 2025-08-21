@@ -66,10 +66,6 @@ class LauncherActivity : AppCompatActivity() {
                 GooglePayPaymentMethodLauncherIntegrationActivity::class.java
             ),
             Item(
-                activity.getString(R.string.googlepaypaymentmethodcomposelauncherwithfilter_example),
-                GooglePayPaymentMethodLauncherComposeWithFilterActivity::class.java
-            ),
-            Item(
                 activity.getString(R.string.googlepaypaymentmethodcomposelauncher_example),
                 GooglePayPaymentMethodLauncherComposeActivity::class.java
             ),

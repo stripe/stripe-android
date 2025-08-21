@@ -16,7 +16,6 @@
     <string name="googlepaycomposelauncher_example">Confirm payment in Compose with GooglePayLauncher</string>
     <string name="googlepayplayground_example">Test GooglePayLauncher Configurations</string>
     <string name="googlepaypaymentmethodlauncher_example">Create payment method with GooglePayPaymentMethodLauncher</string>
-    <string name="googlepaypaymentmethodcomposelauncherwithfilter_example">Create payment in Compose method with GooglePayPaymentMethodLauncher filtering Visa</string>
     <string name="googlepaypaymentmethodcomposelauncher_example">Create payment method in Compose with GooglePayPaymentMethodLauncher</string>
     <string name="launch_payment_session">Payment Session</string>
     <string name="launch_payment_session_from_fragment">Fragment Examples</string>
@@ -42,6 +41,7 @@
     <string name="crypto_example">Crypto</string>
     <string name="swish_example">Swish</string>
     <string name="mobilepay_example">MobilePay</string>
+    <string name="allow_only_visa">Allow only visa</string>
     <string name="card_brands">Card Brands</string>
     <string name="card_brands_hint">Card number</string>
     <string name="possible_card_brands">Possible Card Brands</string>
