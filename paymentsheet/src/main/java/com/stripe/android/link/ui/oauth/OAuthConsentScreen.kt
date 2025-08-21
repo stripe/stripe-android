@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.oauth
 
+import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -352,7 +353,8 @@ private enum class ActionButtonType {
 
 @PreviewLightDark
 @Composable
-private fun OAuthConsentScreenPreview() {
+@VisibleForTesting
+internal fun OAuthConsentScreenPreview() {
     DefaultLinkTheme {
         Surface(
             modifier = Modifier.fillMaxWidth(),
