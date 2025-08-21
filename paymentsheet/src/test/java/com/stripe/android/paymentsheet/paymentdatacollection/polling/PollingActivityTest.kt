@@ -192,13 +192,10 @@ internal class PollingActivityTest {
         )
 
         scenario.onActivity {
-            // Verify QR code is displayed initially
             assertQrCodeWebViewIsDisplayed()
 
-            // Simulate configuration change
             scenario.recreate()
 
-            // Verify QR code is still displayed after configuration change
             assertQrCodeWebViewIsDisplayed()
         }
     }
