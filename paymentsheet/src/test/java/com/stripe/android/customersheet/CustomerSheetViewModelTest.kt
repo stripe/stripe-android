@@ -3258,6 +3258,7 @@ class CustomerSheetViewModelTest {
                     paymentMethod = CARD_PAYMENT_METHOD,
                     shippingValues = null,
                     paymentMethodOptionsParams = null,
+                    hCaptchaToken = null,
                 )
             )
 

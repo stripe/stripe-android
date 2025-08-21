@@ -32,6 +32,7 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
                 paymentMethodOptionsParams = confirmationOption.optionsParams,
                 paymentMethodExtraParams = null,
                 shippingValues = shippingDetails?.toConfirmPaymentIntentShipping(),
+                hCaptchaToken = confirmationOption.hCaptchaToken
             )
         }
     }
