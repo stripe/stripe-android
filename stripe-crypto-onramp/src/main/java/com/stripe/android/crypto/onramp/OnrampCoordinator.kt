@@ -92,7 +92,7 @@ class OnrampCoordinator @Inject internal constructor(
      * Creates a crypto payment token for the payment method currently selected on the coordinator.
      * Call after a successful [Presenter.collectPaymentMethod].
      *
-     * @return The crypto payment token ID.
+     * @return A [OnrampCreateCryptoPaymentTokenResult] containing the crypto payment token ID.
      */
     suspend fun createCryptoPaymentToken(): OnrampCreateCryptoPaymentTokenResult {
         return interactor.createCryptoPaymentToken()
