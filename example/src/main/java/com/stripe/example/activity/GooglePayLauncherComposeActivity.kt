@@ -5,41 +5,41 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.material.Checkbox
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
+import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayLauncher
 import com.stripe.android.googlepaylauncher.rememberGooglePayLauncher
+import com.stripe.android.model.CardBrand
+import com.stripe.example.R
 import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parcelize
 
 class GooglePayLauncherComposeActivity : StripeIntentActivity() {
-    private val googlePayConfig = GooglePayLauncher.Config(
-        environment = GooglePayEnvironment.Test,
-        merchantCountryCode = COUNTRY_CODE,
-        merchantName = "Widget Store",
-        billingAddressConfig = GooglePayLauncher.BillingAddressConfig(
-            isRequired = true,
-            format = GooglePayLauncher.BillingAddressConfig.Format.Full,
-            isPhoneNumberRequired = false
-        ),
-        existingPaymentMethodRequired = false
-    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +57,22 @@ class GooglePayLauncherComposeActivity : StripeIntentActivity() {
         var clientSecret by rememberSaveable { mutableStateOf("") }
         var googlePayReady by rememberSaveable { mutableStateOf<Boolean?>(null) }
         var completed by rememberSaveable { mutableStateOf(false) }
+        var checked by remember { mutableStateOf(false) }
+
+
+        val googlePayConfig = GooglePayLauncher.Config(
+            environment = GooglePayEnvironment.Test,
+            merchantCountryCode = COUNTRY_CODE,
+            merchantName = "Widget Store",
+            billingAddressConfig = GooglePayLauncher.BillingAddressConfig(
+                isRequired = true,
+                format = GooglePayLauncher.BillingAddressConfig.Format.Full,
+                isPhoneNumberRequired = false
+            ),
+            existingPaymentMethodRequired = false,
+            cardBrandFilter = if(checked) GooglePayLauncherAcceptableBrandsFilter(CardBrand.Visa) else DefaultCardBrandFilter
+
+        )
 
         LaunchedEffect(Unit) {
             if (clientSecret.isBlank()) {
@@ -120,6 +136,8 @@ class GooglePayLauncherComposeActivity : StripeIntentActivity() {
             clientSecret = clientSecret,
             googlePayReady = googlePayReady,
             completed = completed,
+            checked = checked,
+            onChecked = { checked = it },
             onLaunchGooglePay = { googlePayLauncher.presentForPaymentIntent(it) }
         )
     }
@@ -131,7 +149,9 @@ class GooglePayLauncherComposeActivity : StripeIntentActivity() {
         clientSecret: String,
         googlePayReady: Boolean?,
         completed: Boolean,
-        onLaunchGooglePay: (String) -> Unit
+        onLaunchGooglePay: (String) -> Unit,
+        checked: Boolean,
+        onChecked: (Boolean) -> Unit
     ) {
         Scaffold(scaffoldState = scaffoldState) {
             Column(Modifier.fillMaxWidth()) {
@@ -159,11 +179,33 @@ class GooglePayLauncherComposeActivity : StripeIntentActivity() {
                             }
                         )
                 )
+
+                Row {
+                    Checkbox(
+                        checked = checked,
+                        onCheckedChange = onChecked
+                    )
+                    Text(
+                        modifier = Modifier.padding(start = 8.dp, top = 16.dp),
+                        text = stringResource(R.string.allow_only_visa)
+                    )
+                }
             }
         }
     }
 
     private companion object {
         private const val COUNTRY_CODE = "US"
+    }
+}
+
+@Parcelize
+class GooglePayLauncherAcceptableBrandsFilter(
+    private val cardBrands: Set<CardBrand>
+) : CardBrandFilter {
+    constructor(vararg cardBrands: CardBrand) : this(cardBrands.toSet())
+
+    override fun isAccepted(cardBrand: CardBrand): Boolean {
+        return cardBrand in cardBrands
     }
 }
