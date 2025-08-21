@@ -131,6 +131,8 @@ class GooglePayLauncher internal constructor(
                     context = context,
                     productUsage = setOf(PRODUCT_USAGE)
                 ),
+                cardBrandFilter = config.cardBrandFilter
+                ),
                 additionalEnabledNetworks = config.additionalEnabledNetworks
             )
         },
