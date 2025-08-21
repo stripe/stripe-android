@@ -11,7 +11,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onIdle
+import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.Espresso.pressBack
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.matcher.ViewMatchers.withContentDescription
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.StripeIntentResult
@@ -53,12 +56,7 @@ internal class PollingActivityTest {
         )
 
         scenario.onActivity {
-            composeTestRule.waitUntil(timeoutMillis = 5_000) {
-                composeTestRule
-                    .onAllNodesWithTag(QR_CODE_WEB_VIEW_TEST_TAG)
-                    .fetchSemanticsNodes()
-                    .isNotEmpty()
-            }
+            assertQrCodeWebViewIsDisplayed()
         }
     }
 
@@ -187,6 +185,44 @@ internal class PollingActivityTest {
         }
     }
 
+    @Test
+    fun `Preserves QR code display state across configuration change`() {
+        val scenario = pollingScenario(
+            args = defaultArgs.copy(qrCodeUrl = "test_qr_url")
+        )
+
+        scenario.onActivity {
+            // Verify QR code is displayed initially
+            assertQrCodeWebViewIsDisplayed()
+
+            // Simulate configuration change
+            scenario.recreate()
+
+            // Verify QR code is still displayed after configuration change
+            assertQrCodeWebViewIsDisplayed()
+        }
+    }
+
+    @Test
+    fun `Doesn't re-display QR code after configuration change`() {
+        val scenario = pollingScenario(
+            args = defaultArgs.copy(qrCodeUrl = "test_qr_url")
+        )
+
+        scenario.onActivity {
+            assertQrCodeWebViewIsDisplayed()
+
+            // Close the QR code web view.
+            onView(withContentDescription("Close")).perform(click())
+
+            assertQrCodeWebViewIsNotDisplayed()
+
+            scenario.recreate()
+
+            assertQrCodeWebViewIsNotDisplayed()
+        }
+    }
+
     private fun pollingScenario(
         args: PollingContract.Args = defaultArgs,
         poller: IntentStatusPoller = FakeIntentStatusPoller(),
@@ -237,6 +273,24 @@ internal class PollingActivityTest {
     private fun waitForActivityFinish() {
         onIdle()
         composeTestRule.waitForIdle()
+    }
+
+    private fun assertQrCodeWebViewIsDisplayed() {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            composeTestRule
+                .onAllNodesWithTag(QR_CODE_WEB_VIEW_TEST_TAG)
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+    }
+
+    private fun assertQrCodeWebViewIsNotDisplayed() {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            composeTestRule
+                .onAllNodesWithTag(QR_CODE_WEB_VIEW_TEST_TAG)
+                .fetchSemanticsNodes()
+                .isEmpty()
+        }
     }
 
     private companion object {

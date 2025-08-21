@@ -34,6 +34,9 @@ internal fun QrCodeWebView(
                 com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_close
             )
             localBinding.toolbar.setNavigationOnClickListener { onClose() }
+            localBinding.toolbar.setNavigationContentDescription(
+                com.stripe.android.paymentsheet.R.string.stripe_paymentsheet_close
+            )
 
             val webViewClient = PaymentAuthWebViewClient(
                 logger = Logger.getInstance(BuildConfig.DEBUG),
