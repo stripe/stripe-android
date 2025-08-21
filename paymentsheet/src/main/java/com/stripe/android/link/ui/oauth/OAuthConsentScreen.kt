@@ -5,7 +5,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -31,7 +30,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.res.painterResource
@@ -154,12 +152,7 @@ private fun MerchantLogo(
         .size(56.dp)
         .background(LinkTheme.colors.surfaceSecondary)
     if (merchantLogoUrl == null) {
-        Image(
-            modifier = modifier.padding(18.dp),
-            painter = painterResource(com.stripe.android.uicore.R.drawable.stripe_ic_business),
-            contentDescription = null,
-            colorFilter = ColorFilter.tint(LinkTheme.colors.iconPrimary)
-        )
+        DefaultMerchantLogo(modifier)
     } else {
         StripeImage(
             modifier = modifier,
@@ -168,10 +161,20 @@ private fun MerchantLogo(
             imageLoader = imageLoader,
             contentDescription = null,
             errorContent = {
-                Box(modifier.background(Color.Red)) // TODO.
+                DefaultMerchantLogo(modifier)
             }
         )
     }
+}
+
+@Composable
+private fun DefaultMerchantLogo(modifier: Modifier) {
+    Image(
+        modifier = modifier.padding(18.dp),
+        painter = painterResource(com.stripe.android.uicore.R.drawable.stripe_ic_business),
+        contentDescription = null,
+        colorFilter = ColorFilter.tint(LinkTheme.colors.iconPrimary)
+    )
 }
 
 @Composable
@@ -244,7 +247,6 @@ private fun ScopeItem(
             .size(32.dp)
             .background(LinkTheme.colors.surfaceSecondary)
             .padding(10.dp)
-        // TODO: Center align with top row.
         StripeImage(
             modifier = modifier,
             url = iconUrl,
@@ -254,7 +256,7 @@ private fun ScopeItem(
             disableAnimations = true,
             colorFilter = ColorFilter.tint(LinkTheme.colors.iconPrimary),
             errorContent = {
-                Box(modifier) // TODO.
+                DefaultScopeIcon(modifier)
             }
         )
         Column(
@@ -276,6 +278,15 @@ private fun ScopeItem(
             )
         }
     }
+}
+
+@Composable
+private fun DefaultScopeIcon(modifier: Modifier) {
+    Image(
+        modifier = modifier,
+        painter = painterResource(com.stripe.android.ui.core.R.drawable.stripe_ic_lock),
+        contentDescription = null,
+    )
 }
 
 @Composable
