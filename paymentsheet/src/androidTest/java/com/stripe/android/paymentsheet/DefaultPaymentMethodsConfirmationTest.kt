@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import androidx.test.espresso.intent.Intents
-import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.paymentsheet.utils.ConfirmationType
@@ -19,6 +18,7 @@ import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.paymentelementtestpages.FormPage
 import com.stripe.paymentelementtestpages.VerticalModePage
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -28,9 +28,7 @@ import org.junit.runner.RunWith
 internal class DefaultPaymentMethodsConfirmationTest {
 
     @get:Rule
-    val testRules: TestRules = TestRules.create {
-        around(IntentsRule())
-    }
+    val testRules: TestRules = TestRules.create()
 
     private val composeTestRule = testRules.compose
     private val networkRule = testRules.networkRule
@@ -50,6 +48,11 @@ internal class DefaultPaymentMethodsConfirmationTest {
     @Before
     fun initIntents() {
         Intents.init()
+    }
+
+    @After
+    fun releaseIntents() {
+        Intents.release()
     }
 
     @Test
