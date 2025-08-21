@@ -7,6 +7,7 @@ import com.stripe.android.common.analytics.toAnalyticsMap
 import com.stripe.android.common.analytics.toAnalyticsValue
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
+import com.stripe.android.core.utils.mapOfDurationInSeconds
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
@@ -729,7 +730,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_cardscan_success"
         override val additionalParams: Map<String, Any?> =
-            duration.durationInSecondsFromStart() +
+            duration.mapOfDurationInSeconds() +
                 mapOf(
                     "implementation" to implementation
                 )
@@ -746,7 +747,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_cardscan_failed"
         override val additionalParams: Map<String, Any?> =
-            duration.durationInSecondsFromStart() +
+            duration.mapOfDurationInSeconds() +
                 mapOf(
                     "implementation" to implementation,
                     FIELD_ERROR_MESSAGE to error?.javaClass?.simpleName
@@ -763,7 +764,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_cardscan_cancel"
         override val additionalParams: Map<String, Any?> =
-            duration.durationInSecondsFromStart() +
+            duration.mapOfDurationInSeconds() +
                 mapOf(
                     "implementation" to implementation
                 )
@@ -934,9 +935,3 @@ internal fun PaymentSelection.linkContext(): String? {
 
 @Suppress("DEPRECATION")
 internal fun PaymentSheet.Configuration.primaryButtonColorUsage(): Boolean = primaryButtonColor != null
-
-private fun Duration?.durationInSecondsFromStart(): Map<String, Float> {
-    return this?.let {
-        mapOf("duration" to it.toDouble(DurationUnit.SECONDS).toFloat())
-    } ?: emptyMap()
-}

@@ -42,3 +42,6 @@ interface CardScanEventsReporter {
 val LocalCardScanEventsReporter = compositionLocalOf<CardScanEventsReporter> {
     error("CardScanEventsReporter not provided")
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface CardScanEvent
