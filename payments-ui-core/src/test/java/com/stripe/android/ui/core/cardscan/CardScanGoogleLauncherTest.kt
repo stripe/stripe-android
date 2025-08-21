@@ -142,10 +142,13 @@ class CardScanGoogleLauncherTest {
     ) {
         assertThat(launcher.isAvailable.value).isFalse()
         launcher.launch(ApplicationProvider.getApplicationContext())
-        // No launch call should be made since fetchIntent failed
 
         val apiCheckFailedCall = fakeEventsReporter.apiCheckFailedCalls.awaitItem()
         assertThat(apiCheckFailedCall.error?.message).isEqualTo("Failed to fetch intent")
+
+        val scanFailedCall = fakeEventsReporter.scanFailedCalls.awaitItem()
+        assertThat(scanFailedCall.implementation).isEqualTo("google_pay")
+        assertThat(scanFailedCall.error).isInstanceOf(Exception::class.java)
     }
 
     private class FakeActivityLauncher<I> : ActivityResultLauncher<I>() {
@@ -196,5 +199,6 @@ class CardScanGoogleLauncherTest {
         scenario.block()
 
         activityLauncher.validate()
+        fakeEventsReporter.validate()
     }
 }
