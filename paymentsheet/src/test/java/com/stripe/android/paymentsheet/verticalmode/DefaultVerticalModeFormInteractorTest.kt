@@ -279,6 +279,7 @@ internal class DefaultVerticalModeFormInteractorTest {
             validationRequested = validationRequested,
             coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
             paymentMethodIncentive = stateFlowOf(null),
+            uiContext = UnconfinedTestDispatcher(),
         )
 
         TestParams(

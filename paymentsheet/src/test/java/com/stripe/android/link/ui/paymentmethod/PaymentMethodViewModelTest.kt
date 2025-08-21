@@ -27,7 +27,6 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.FakeLogger
-import com.stripe.android.testing.ShampooRule
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
@@ -39,14 +38,10 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
 class PaymentMethodViewModelTest {
-    @get:Rule
-    val shampooRule = ShampooRule(1000)
-
     private val dispatcher = UnconfinedTestDispatcher()
 
     @Before

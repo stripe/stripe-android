@@ -502,6 +502,7 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
         if (uiState?.canClickWhileDisabled == true && uiState?.enabled != true) {
             Box(
                 Modifier
+                    .testTag(PAYMENT_SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG)
                     .matchParentSize()
                     .pointerInput(Unit) {
                         detectTapGestures { uiState?.onDisabledClick?.invoke() }
@@ -531,6 +532,7 @@ internal fun PaymentSheetViewState.convert(): PrimaryButton.State {
     }
 }
 
+const val PAYMENT_SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG = "PRIMARY_BUTTON_DISABLED_OVERLAY"
 const val PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG = "PRIMARY_BUTTON"
 const val PAYMENT_SHEET_ERROR_TEXT_TEST_TAG = "PAYMENT_SHEET_ERROR"
 

@@ -21,6 +21,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 internal interface AddPaymentMethodInteractor {
     val isLiveMode: Boolean
@@ -73,6 +75,7 @@ internal class DefaultAddPaymentMethodInteractor(
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
     private val createUSBankAccountFormArguments: (PaymentMethodCode) -> USBankAccountFormArguments,
     private val coroutineScope: CoroutineScope,
+    private val uiContext: CoroutineContext,
     override val isLiveMode: Boolean,
 ) : AddPaymentMethodInteractor {
 
@@ -111,6 +114,7 @@ internal class DefaultAddPaymentMethodInteractor(
                 },
                 coroutineScope = coroutineScope,
                 validationRequested = viewModel.validationRequested,
+                uiContext = Dispatchers.Main,
                 isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             )
         }
@@ -181,9 +185,11 @@ internal class DefaultAddPaymentMethodInteractor(
 
         coroutineScope.launch {
             validationRequested.collect {
-                _state.value = _state.value.copy(
-                    validating = true
-                )
+                withContext(uiContext) {
+                    _state.value = _state.value.copy(
+                        validating = true
+                    )
+                }
             }
         }
     }

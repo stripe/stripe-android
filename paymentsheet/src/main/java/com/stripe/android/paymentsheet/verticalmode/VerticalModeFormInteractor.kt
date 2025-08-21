@@ -20,6 +20,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 internal interface VerticalModeFormInteractor {
     val isLiveMode: Boolean
@@ -63,6 +65,7 @@ internal class DefaultVerticalModeFormInteractor(
     validationRequested: SharedFlow<Unit>,
     paymentMethodIncentive: StateFlow<PaymentMethodIncentive?>,
     private val coroutineScope: CoroutineScope,
+    private val uiContext: CoroutineContext,
 ) : VerticalModeFormInteractor {
     private val isValidating = MutableStateFlow(false)
 
@@ -87,7 +90,9 @@ internal class DefaultVerticalModeFormInteractor(
     init {
         coroutineScope.launch {
             validationRequested.collect {
-                isValidating.value = true
+                withContext(uiContext) {
+                    isValidating.value = true
+                }
             }
         }
     }
@@ -144,6 +149,7 @@ internal class DefaultVerticalModeFormInteractor(
                 reportFieldInteraction = viewModel.analyticsListener::reportFieldInteraction,
                 validationRequested = viewModel.validationRequested,
                 coroutineScope = coroutineScope,
+                uiContext = Dispatchers.Main,
             )
         }
     }

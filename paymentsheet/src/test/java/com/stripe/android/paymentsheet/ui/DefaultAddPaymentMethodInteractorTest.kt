@@ -307,6 +307,7 @@ class DefaultAddPaymentMethodInteractorTest {
             coroutineScope = CoroutineScope(dispatcher),
             validationRequested = validationRequestedSource,
             isLiveMode = true,
+            uiContext = dispatcher,
         )
 
         TestParams(
