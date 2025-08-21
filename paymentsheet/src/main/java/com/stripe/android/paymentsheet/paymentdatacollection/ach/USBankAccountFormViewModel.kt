@@ -190,13 +190,13 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         shippingValuesMap = args.formArgs.shippingDetails?.toIdentifierMap(args.formArgs.billingDetails),
     )
 
-    // AddressElement generates a default address if the initial value is null, so we can't rely
-    // on the value produced by the controller in that case.
-    val address: StateFlow<Address?> = if (defaultAddress == null) {
-        MutableStateFlow(null)
-    } else {
-        addressElement.getFormFieldValueFlow().mapAsStateFlow { formFieldValues ->
-            val rawMap = formFieldValues.associate { it.first to it.second.value }
+    val address: StateFlow<Address?> = addressElement.getFormFieldValueFlow().mapAsStateFlow { formFieldValues ->
+        formFieldValues.takeIf {
+            it.all { value ->
+                value.second.isComplete
+            }
+        }?.let { values ->
+            val rawMap = values.associate { it.first to it.second.value }
             Address.fromFormFieldValues(rawMap)
         }
     }
