@@ -58,6 +58,9 @@ internal sealed interface LinkLaunchMode : Parcelable {
         val existingOnly: Boolean = false,
     ) : LinkLaunchMode
 
+    /**
+     * Link is launched with the intent to authorize a LinkAuthIntent.
+     */
     @Parcelize
     data class Authorization(
         val linkAuthIntentId: String,
