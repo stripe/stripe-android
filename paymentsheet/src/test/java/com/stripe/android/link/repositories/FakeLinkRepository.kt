@@ -17,6 +17,7 @@ import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.StripeIntent
 
 internal open class FakeLinkRepository : LinkRepository {
@@ -156,10 +157,11 @@ internal open class FakeLinkRepository : LinkRepository {
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
         expectedPaymentMethodType: String,
-        cvc: String?,
         billingPhone: String?,
+        cvc: String?,
         allowRedisplay: String?,
-    ) = sharePaymentDetails
+        apiKey: String?
+    ): Result<SharePaymentDetails> = sharePaymentDetails
 
     override suspend fun createPaymentMethod(
         consumerSessionClientSecret: String,
