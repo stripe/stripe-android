@@ -118,6 +118,14 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
+    private fun handleAuthorizeResult(result: LinkController.AuthorizeResult) {
+        coroutineScope.launch {
+            onrampCallbacks.authorizeCallback.onResult(
+                interactor.handleAuthorizeResult(result)
+            )
+        }
+    }
+
     private fun handleIdentityVerificationResult(result: IdentityVerificationSheet.VerificationFlowResult) {
         coroutineScope.launch {
             onrampCallbacks.identityVerificationCallback.onResult(
@@ -132,16 +140,6 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 interactor.handleSelectPaymentResult(result, activity)
             )
         }
-    }
-
-    private fun handleAuthorizeResult(result: LinkController.AuthorizeResult) {
-        val onrampResult = when (result) {
-            is LinkController.AuthorizeResult.Consented -> OnrampAuthorizeResult.Consented
-            is LinkController.AuthorizeResult.Denied -> OnrampAuthorizeResult.Denied
-            is LinkController.AuthorizeResult.Canceled -> OnrampAuthorizeResult.Canceled
-            is LinkController.AuthorizeResult.Failed -> OnrampAuthorizeResult.Failed(result.error)
-        }
-        onrampCallbacks.authorizeCallback.onResult(onrampResult)
     }
 
     private fun createIdentityVerificationSheet(merchantLogoUrl: String?): IdentityVerificationSheet {

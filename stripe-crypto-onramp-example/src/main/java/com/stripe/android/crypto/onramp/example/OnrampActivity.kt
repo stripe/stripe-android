@@ -747,12 +747,6 @@ private fun LinkAuthIntentSection(
     var linkAuthIntentId by remember { mutableStateOf("") }
 
     Column {
-        Text(
-            text = "Authorize LinkAuthIntent",
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
         OutlinedTextField(
             value = linkAuthIntentId,
             onValueChange = { linkAuthIntentId = it },

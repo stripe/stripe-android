@@ -55,7 +55,6 @@ internal class OnrampViewModel(
     val message: StateFlow<String?> = _message.asStateFlow()
 
     init {
-
         viewModelScope.launch {
             @Suppress("MagicNumber", "MaxLineLength")
             val configuration = OnrampConfiguration(
@@ -200,6 +199,12 @@ internal class OnrampViewModel(
         when (result) {
             is OnrampAuthorizeResult.Consented -> {
                 _message.value = "Authorization successful! User consented to scopes."
+                _uiState.update {
+                    it.copy(
+                        screen = Screen.AuthenticatedOperations,
+                        customerId = result.customerId
+                    )
+                }
             }
             is OnrampAuthorizeResult.Denied -> {
                 _message.value = "Authorization denied by user."

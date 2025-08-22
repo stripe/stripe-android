@@ -14,21 +14,24 @@ fun interface OnrampAuthorizeCallback {
 sealed interface OnrampAuthorizeResult {
     /**
      * The user granted consent to the scopes requested by the LinkAuthIntent.
+     * @param customerId The crypto customer id that matches the authenticated account.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data object Consented : OnrampAuthorizeResult
+    class Consented(
+        val customerId: String
+    ) : OnrampAuthorizeResult
 
     /**
      * The user denied consent to the scopes requested by the LinkAuthIntent.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data object Denied : OnrampAuthorizeResult
+    class Denied internal constructor() : OnrampAuthorizeResult
 
     /**
      * The user canceled the authorization.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data object Canceled : OnrampAuthorizeResult
+    class Canceled internal constructor() : OnrampAuthorizeResult
 
     /**
      * Authorization failed.
