@@ -33,20 +33,20 @@ data class OnrampSessionResponse(
     val sourceTotalAmount: String,
     val status: String,
     @SerialName("transaction_details")
-    val transactionDetails: OnrampTransactionDetails,
+    val transactionDetails: CheckoutTransactionDetails,
     @SerialName("ui_mode")
     val uiMode: String
 )
 
 @Serializable
-data class OnrampTransactionDetails(
+data class CheckoutTransactionDetails(
     @SerialName("destination_currency")
     val destinationCurrency: String? = null,
     @SerialName("destination_exchange_amount")
     val destinationExchangeAmount: String? = null,
     @SerialName("destination_network")
     val destinationNetwork: String? = null,
-    val fees: OnrampFees,
+    val fees: CheckoutFees,
     @SerialName("last_error")
     val lastError: String? = null,
     @SerialName("lock_wallet_address")
@@ -70,7 +70,7 @@ data class OnrampTransactionDetails(
 )
 
 @Serializable
-data class OnrampFees(
+data class CheckoutFees(
     @SerialName("network_fee_amount")
     val networkFeeAmount: String,
     @SerialName("transaction_fee_amount")
