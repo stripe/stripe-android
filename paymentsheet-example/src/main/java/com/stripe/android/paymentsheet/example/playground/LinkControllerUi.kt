@@ -232,17 +232,6 @@ internal fun LinkControllerUi(
             selectedPaymentMethodType = paymentMethodFilter,
             onSelectionChange = { paymentMethodFilter = it }
         )
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = linkAuthIntentId,
-            label = { Text(text = "LinkAuthIntent ID") },
-            onValueChange = { linkAuthIntentId = it }
-        )
-        AuthorizeButton(
-            modifier = Modifier.fillMaxWidth(),
-            linkAuthIntentId = linkAuthIntentId,
-            onClick = { onAuthorizeClick(linkAuthIntentId) },
-        )
         Divider(Modifier.padding(top = 10.dp, bottom = 20.dp))
 
         PaymentMethodButton(
