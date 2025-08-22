@@ -3,6 +3,7 @@ package com.stripe.android.crypto.onramp.example
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -35,6 +36,7 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -96,6 +98,10 @@ internal class OnrampActivity : ComponentActivity() {
                         )
                     },
                 ) { innerPadding ->
+                    val state by viewModel.uiState.collectAsState()
+                    BackHandler(enabled = state.screen != Screen.EmailInput) {
+                        viewModel.onBackToEmailInput()
+                    }
                     OnrampScreen(
                         modifier = Modifier.padding(innerPadding),
                         viewModel = viewModel,
@@ -103,14 +109,17 @@ internal class OnrampActivity : ComponentActivity() {
                             if (oauthScopes.isNullOrBlank()) {
                                 onrampPresenter.presentForVerification()
                             } else {
+                                // Not the cleanest approach, but good enough for an example.
                                 lifecycleScope.launch {
                                     val linkAuthIntentId = viewModel.createLinkAuthIntent(oauthScopes)
                                         ?: return@launch
+                                    viewModel.onAuthorize(linkAuthIntentId)
                                     onrampPresenter.authorize(linkAuthIntentId)
                                 }
                             }
                         },
                         onAuthorize = { linkAuthIntentId ->
+                            viewModel.onAuthorize(linkAuthIntentId)
                             onrampPresenter.authorize(linkAuthIntentId)
                         },
                         onRegisterWalletAddress = { address, network ->
@@ -207,8 +216,10 @@ internal fun OnrampScreen(
                 AuthenticatedOperationsScreen(
                     email = uiState.email,
                     customerId = uiState.customerId ?: "",
+                    consentedLinkAuthIntentIds = uiState.consentedLinkAuthIntentIds,
                     onrampSessionResponse = uiState.onrampSession,
                     selectedPaymentData = uiState.selectedPaymentData,
+                    onAuthenticate = onAuthenticateUser,
                     onRegisterWalletAddress = onRegisterWalletAddress,
                     onCollectKYC = { kycInfo -> viewModel.collectKycInfo(kycInfo) },
                     onStartVerification = onStartVerification,
@@ -387,7 +398,6 @@ private fun AuthenticationScreen(
     onAuthenticate: (oauthScopes: String?) -> Unit,
     onBack: () -> Unit
 ) {
-    var oauthScopes by remember { mutableStateOf("") }
     Column {
         Text(
             text = "Authenticate Link User",
@@ -405,24 +415,7 @@ private fun AuthenticationScreen(
                 .padding(bottom = 24.dp)
         )
 
-        OutlinedTextField(
-            value = oauthScopes,
-            onValueChange = { oauthScopes = it },
-            label = { Text("Request OAuth scopes (optional)") },
-            placeholder = { Text("userinfo:read,kyc:share") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
-        )
-
-        Button(
-            onClick = { onAuthenticate(oauthScopes) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 24.dp)
-        ) {
-            Text("Authenticate")
-        }
+        AuthenticateSection(onAuthenticate = onAuthenticate)
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -436,12 +429,39 @@ private fun AuthenticationScreen(
 }
 
 @Composable
+fun AuthenticateSection(
+    onAuthenticate: (oauthScopes: String?) -> Unit,
+) {
+    var oauthScopes by remember { mutableStateOf("") }
+    OutlinedTextField(
+        value = oauthScopes,
+        onValueChange = { oauthScopes = it },
+        label = { Text("Request OAuth scopes (optional)") },
+        placeholder = { Text("userinfo:read,kyc:share") },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp)
+    )
+
+    Button(
+        onClick = { onAuthenticate(oauthScopes) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 24.dp)
+    ) {
+        Text("Authenticate")
+    }
+}
+
+@Composable
 @Suppress("LongMethod")
 private fun AuthenticatedOperationsScreen(
     email: String,
     customerId: String,
+    consentedLinkAuthIntentIds: List<String>,
     onrampSessionResponse: OnrampSessionResponse?,
     selectedPaymentData: PaymentOptionDisplayData?,
+    onAuthenticate: (oauthScopes: String?) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onCollectKYC: (KycInfo) -> Unit,
     onStartVerification: () -> Unit,
@@ -475,6 +495,11 @@ private fun AuthenticatedOperationsScreen(
 
         Text(
             text = "Customer ID: $customerId",
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        Text(
+            text = "Consented LAIs:\n${consentedLinkAuthIntentIds.joinToString("\n")}",
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
@@ -537,6 +562,17 @@ private fun AuthenticatedOperationsScreen(
                 modifier = Modifier.padding(bottom = 24.dp)
             )
         }
+
+        Text(
+            text = "Request scopes",
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        AuthenticateSection(
+            onAuthenticate = onAuthenticate
+        )
+
 
         Text(
             text = "Register Wallet Address",

@@ -1,6 +1,7 @@
 package com.stripe.android.crypto.onramp.example
 
 import android.app.Application
+import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
@@ -175,6 +176,10 @@ internal class OnrampViewModel(
         }
     }
 
+    fun onAuthorize(linkAuthIntentId: String) {
+        _uiState.update { it.copy(linkAuthIntentId = linkAuthIntentId) }
+    }
+
     fun onAuthorizeResult(result: OnrampAuthorizeResult) {
         when (result) {
             is OnrampAuthorizeResult.Consented -> {
@@ -182,7 +187,9 @@ internal class OnrampViewModel(
                 _uiState.update {
                     it.copy(
                         screen = Screen.AuthenticatedOperations,
-                        customerId = result.customerId
+                        customerId = result.customerId,
+                        linkAuthIntentId = null,
+                        consentedLinkAuthIntentIds = it.consentedLinkAuthIntentIds + it.linkAuthIntentId!!
                     )
                 }
             }
@@ -362,9 +369,7 @@ internal class OnrampViewModel(
 
     suspend fun createLinkAuthIntent(oauthScopes: String): String? {
         val currentState = _uiState.value
-        val email = currentState.email.takeIf { currentState.screen == Screen.Authentication }
-            ?: return null
-
+        val email = currentState.email
         return createAuthIntentForUser(
             email = email,
             oauthScopes = oauthScopes
@@ -402,6 +407,8 @@ internal class OnrampViewModel(
 data class OnrampUiState(
     val screen: Screen = Screen.Loading,
     val email: String = "",
+    val linkAuthIntentId: String? = null,
+    val consentedLinkAuthIntentIds: List<String> = emptyList(),
     val customerId: String? = null,
     val selectedPaymentData: PaymentOptionDisplayData? = null,
     val cryptoPaymentToken: String? = null,
