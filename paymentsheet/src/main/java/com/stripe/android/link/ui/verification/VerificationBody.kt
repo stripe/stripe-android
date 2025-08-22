@@ -60,6 +60,7 @@ import kotlinx.coroutines.delay
  * Common verification body content used in [VerificationScreen] and [VerificationDialog].
  */
 @Composable
+@Suppress("LongMethod")
 internal fun VerificationBody(
     state: VerificationViewState,
     otpElement: OTPElement,

@@ -215,7 +215,7 @@ private fun ScopesSection(section: ConsentUi.ConsentPane.ScopesSection) {
     Spacer(Modifier.height(16.dp))
     Column(
         modifier = Modifier
-            .border((0.5).dp, LinkTheme.colors.outline, RoundedCornerShape(12.dp))
+            .border(1.dp, LinkTheme.colors.outline, RoundedCornerShape(12.dp))
             .padding(16.dp)
             .fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp),
