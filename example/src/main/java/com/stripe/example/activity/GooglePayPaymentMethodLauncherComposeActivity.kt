@@ -61,7 +61,7 @@ class GooglePayPaymentMethodLauncherComposeActivity : AppCompatActivity() {
                 isPhoneNumberRequired = false
             ),
             existingPaymentMethodRequired = false,
-            cardBrandFilter = if(checked) GooglePayPaymentMethodLauncherAcceptableBrandsFilter(CardBrand.Visa) else DefaultCardBrandFilter
+            cardBrandFilter = if (checked) GooglePayPaymentMethodLauncherAcceptableBrandsFilter(CardBrand.Visa) else DefaultCardBrandFilter
         )
 
         val googlePayLauncher = rememberGooglePayPaymentMethodLauncher(

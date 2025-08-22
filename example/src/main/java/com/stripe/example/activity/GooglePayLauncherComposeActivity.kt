@@ -59,7 +59,6 @@ class GooglePayLauncherComposeActivity : StripeIntentActivity() {
         var completed by rememberSaveable { mutableStateOf(false) }
         var checked by remember { mutableStateOf(false) }
 
-
         val googlePayConfig = GooglePayLauncher.Config(
             environment = GooglePayEnvironment.Test,
             merchantCountryCode = COUNTRY_CODE,
@@ -71,7 +70,6 @@ class GooglePayLauncherComposeActivity : StripeIntentActivity() {
             ),
             existingPaymentMethodRequired = false,
             cardBrandFilter = if(checked) GooglePayLauncherAcceptableBrandsFilter(CardBrand.Visa) else DefaultCardBrandFilter
-
         )
 
         LaunchedEffect(Unit) {
