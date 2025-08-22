@@ -56,8 +56,6 @@ internal sealed class CardNumberController : TextFieldController {
 
     abstract val selectedCardBrandFlow: StateFlow<CardBrand>
 
-    abstract val cardScanEnabled: Boolean
-
     @OptIn(ExperimentalComposeUiApi::class)
     override val autofillType: AutofillType = AutofillType.CreditCardNumber
 
@@ -168,8 +166,6 @@ internal class DefaultCardNumberController(
     } else {
         impliedCardBrand
     }
-
-    override val cardScanEnabled = true
 
     @VisibleForTesting
     val accountRangeService = CardAccountRangeService(
