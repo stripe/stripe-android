@@ -73,7 +73,8 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
     private fun confirmationArgs(): ConfirmationHandler.Args? {
         val confirmationOption = selectionHolder.selection.value?.toConfirmationOption(
             configuration = configuration.asCommonConfiguration(),
-            linkConfiguration = paymentMethodMetadata.linkState?.configuration
+            linkConfiguration = paymentMethodMetadata.linkState?.configuration,
+            passiveCaptchaParams = paymentMethodMetadata.passiveCaptchaParams
         ) ?: return null
         return ConfirmationHandler.Args(
             intent = paymentMethodMetadata.stripeIntent,
