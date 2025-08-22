@@ -1015,10 +1015,10 @@
 |    |              \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 2.1.10 (*)
 |    +--- com.google.android.material:material:1.12.0 (*)
 |    +--- androidx.compose.ui:ui-tooling-preview:1.7.8 (*)
-|    +--- dev.drewhamilton.poko:poko-annotations:0.18.2
-|    |    \--- dev.drewhamilton.poko:poko-annotations-jvm:0.18.2
-|    |         \--- org.jetbrains.kotlin:kotlin-stdlib:2.1.0 -> 2.1.10 (*)
-|    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.1.10 (*)
+|    +--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.1.10 (*)
+|    \--- dev.drewhamilton.poko:poko-annotations:0.18.2
+|         \--- dev.drewhamilton.poko:poko-annotations-jvm:0.18.2
+|              \--- org.jetbrains.kotlin:kotlin-stdlib:2.1.0 -> 2.1.10 (*)
 +--- project :stripe-ui-core (*)
 +--- project :payments-ui-core (*)
 +--- project :identity
@@ -1244,5 +1244,5 @@
 +--- com.google.android.material:material:1.12.0 (*)
 +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0 (*)
 +--- com.google.dagger:dagger:2.55 (*)
-+--- dev.drewhamilton.poko:poko-annotations:0.18.2 (*)
-\--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.1.10 (*)
++--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.1.10 (*)
+\--- dev.drewhamilton.poko:poko-annotations:0.18.2 (*)

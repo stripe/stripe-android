@@ -1070,10 +1070,10 @@
 |    |    |              \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.24 -> 2.1.10 (*)
 |    |    +--- com.google.android.material:material:1.12.0 (*)
 |    |    +--- androidx.compose.ui:ui-tooling-preview:1.7.8 (*)
-|    |    +--- dev.drewhamilton.poko:poko-annotations:0.18.2
-|    |    |    \--- dev.drewhamilton.poko:poko-annotations-jvm:0.18.2
-|    |    |         \--- org.jetbrains.kotlin:kotlin-stdlib:2.1.0 -> 2.1.10 (*)
-|    |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.1.10 (*)
+|    |    +--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.1.10 (*)
+|    |    \--- dev.drewhamilton.poko:poko-annotations:0.18.2
+|    |         \--- dev.drewhamilton.poko:poko-annotations-jvm:0.18.2
+|    |              \--- org.jetbrains.kotlin:kotlin-stdlib:2.1.0 -> 2.1.10 (*)
 |    \--- org.jetbrains.kotlin:kotlin-stdlib:2.1.10 (*)
 +--- project :stripecardscan
 |    +--- project :stripe-core (*)
@@ -1413,17 +1413,17 @@
 |    +--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.3 -> 1.8.0 (*)
 |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.23 -> 2.1.10 (*)
 +--- com.google.zxing:core:3.5.2
-+--- io.sentry:sentry-android:8.9.0
-|    +--- io.sentry:sentry-android-core:8.9.0
-|    |    +--- androidx.lifecycle:lifecycle-process:2.2.0 -> 2.8.7 (*)
-|    |    +--- androidx.lifecycle:lifecycle-common-java8:2.2.0 -> 2.8.7 (*)
-|    |    +--- androidx.core:core:1.3.2 -> 1.13.1 (*)
-|    |    \--- io.sentry:sentry:8.9.0
-|    +--- io.sentry:sentry-android-ndk:8.9.0
-|    |    +--- io.sentry:sentry-native-ndk:0.8.3
-|    |    +--- io.sentry:sentry:8.9.0
-|    |    \--- io.sentry:sentry-android-core:8.9.0 (*)
-|    \--- io.sentry:sentry-android-replay:8.9.0
-|         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.24 (*)
-|         \--- io.sentry:sentry:8.9.0
-\--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.1.10 (*)
++--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.1.10 (*)
+\--- io.sentry:sentry-android:8.9.0
+     +--- io.sentry:sentry-android-core:8.9.0
+     |    +--- androidx.lifecycle:lifecycle-process:2.2.0 -> 2.8.7 (*)
+     |    +--- androidx.lifecycle:lifecycle-common-java8:2.2.0 -> 2.8.7 (*)
+     |    +--- androidx.core:core:1.3.2 -> 1.13.1 (*)
+     |    \--- io.sentry:sentry:8.9.0
+     +--- io.sentry:sentry-android-ndk:8.9.0
+     |    +--- io.sentry:sentry-native-ndk:0.8.3
+     |    +--- io.sentry:sentry:8.9.0
+     |    \--- io.sentry:sentry-android-core:8.9.0 (*)
+     \--- io.sentry:sentry-android-replay:8.9.0
+          +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.24 (*)
+          \--- io.sentry:sentry:8.9.0
