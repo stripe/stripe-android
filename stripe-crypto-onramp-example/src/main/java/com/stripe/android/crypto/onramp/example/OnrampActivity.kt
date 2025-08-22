@@ -87,11 +87,15 @@ internal class OnrampActivity : ComponentActivity() {
         onrampPresenter = viewModel.onrampCoordinator
             .createPresenter(this, callbacks)
 
-        // Observe checkout event to trigger checkout when session is created
+        // ViewModel notifies UI to launch checkout flow.
+        // Note checkout requires an Activity context since it might launch UI to handle next actions (e.g. 3DS2).
         lifecycleScope.launch {
             viewModel.checkoutEvent.collect { event ->
                 event?.let {
-                    performCheckout(it)
+                    onrampPresenter.performCheckout(
+                        onrampSessionId = event.sessionId,
+                        checkoutHandler = { viewModel.checkoutWithBackend(event.sessionId) }
+                    )
                     viewModel.clearCheckoutEvent()
                 }
             }
@@ -129,13 +133,6 @@ internal class OnrampActivity : ComponentActivity() {
                 }
             }
         }
-    }
-
-    private fun performCheckout(event: CheckoutEvent) {
-        onrampPresenter.performCheckout(
-            onrampSessionId = event.sessionId,
-            checkoutHandler = { viewModel.checkoutWithBackend(event.sessionId) }
-        )
     }
 }
 
