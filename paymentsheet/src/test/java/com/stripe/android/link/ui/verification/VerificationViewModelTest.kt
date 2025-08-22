@@ -379,5 +379,4 @@ internal class VerificationViewModelTest {
             dismissWithResult = dismissWithResult
         )
     }
-
 }
