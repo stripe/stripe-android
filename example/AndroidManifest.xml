@@ -47,7 +47,6 @@
         <activity android:name=".activity.GooglePayLauncherPlaygroundActivity" />
         <activity android:name=".activity.GooglePayLauncherComposeActivity" />
         <activity android:name=".activity.GooglePayPaymentMethodLauncherIntegrationActivity" />
-        <activity android:name=".activity.GooglePayPaymentMethodLauncherComposeWithFilterActivity" />
         <activity android:name=".activity.GooglePayPaymentMethodLauncherComposeActivity" />
         <activity android:name=".activity.PaymentAuthActivity" />
         <activity android:name=".activity.CardBrandChoiceExampleActivity" />
