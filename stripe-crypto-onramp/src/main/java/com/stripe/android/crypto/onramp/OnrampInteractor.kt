@@ -122,30 +122,24 @@ internal class OnrampInteractor @Inject constructor(
 
     suspend fun collectKycInfo(kycInfo: KycInfo): OnrampKYCResult {
         val secret = consumerSessionClientSecret()
+            ?: return OnrampKYCResult.Failed(MissingConsumerSecretException())
 
-        secret?.let {
-            return cryptoApiRepository.collectKycData(kycInfo, secret)
-                .fold(
-                    onSuccess = { OnrampKYCResult.Completed },
-                    onFailure = { OnrampKYCResult.Failed(it) }
-                )
-        } ?: run {
-            return OnrampKYCResult.Failed(MissingConsumerSecretException())
-        }
+        return cryptoApiRepository.collectKycData(kycInfo, secret)
+            .fold(
+                onSuccess = { OnrampKYCResult.Completed },
+                onFailure = { OnrampKYCResult.Failed(it) }
+            )
     }
 
     suspend fun startIdentityVerification(): OnrampStartVerificationResult {
         val secret = consumerSessionClientSecret()
+            ?: return OnrampStartVerificationResult.Failed(MissingConsumerSecretException())
 
-        secret?.let {
-            return cryptoApiRepository.startIdentityVerification(secret)
-                .fold(
-                    onSuccess = { OnrampStartVerificationResult.Completed(it) },
-                    onFailure = { OnrampStartVerificationResult.Failed(it) }
-                )
-        } ?: run {
-            return OnrampStartVerificationResult.Failed(MissingConsumerSecretException())
-        }
+        return cryptoApiRepository.startIdentityVerification(secret)
+            .fold(
+                onSuccess = { OnrampStartVerificationResult.Completed(it) },
+                onFailure = { OnrampStartVerificationResult.Failed(it) }
+            )
     }
 
     suspend fun createCryptoPaymentToken(): OnrampCreateCryptoPaymentTokenResult {

@@ -111,7 +111,7 @@ internal class OnrampViewModel(
     }
 
     fun onBackToEmailInput() {
-        _uiState.update { OnrampUiState() }
+        _uiState.update { OnrampUiState(screen = Screen.EmailInput) }
     }
 
     fun clearMessage() {
@@ -211,7 +211,12 @@ internal class OnrampViewModel(
             when (result) {
                 is OnrampRegisterUserResult.Completed -> {
                     _message.value = "Registration successful"
-                    _uiState.update { it.copy(screen = Screen.EmailInput) }
+                    _uiState.update {
+                        it.copy(
+                            screen = Screen.Authentication,
+                            email = userInfo.email
+                        )
+                    }
                 }
                 is OnrampRegisterUserResult.Failed -> {
                     _message.value = "Registration failed: ${result.error.message}"
