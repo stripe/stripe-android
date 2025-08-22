@@ -20,6 +20,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.DisplayablePaymentDetails
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
@@ -267,7 +268,8 @@ class DefaultWalletButtonsInteractorTest {
                 state.value = ConfirmationHandler.State.Confirming(
                     LinkConfirmationOption(
                         linkExpressMode = LinkExpressMode.DISABLED,
-                        configuration = mock()
+                        configuration = mock(),
+                        passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
                     )
                 )
             }
@@ -463,7 +465,8 @@ class DefaultWalletButtonsInteractorTest {
                         customLabel = "This is a purchase!",
                         billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                         cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance)
-                    )
+                    ),
+                    passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
                 )
             )
         }
@@ -759,7 +762,8 @@ class DefaultWalletButtonsInteractorTest {
                 state.value = ConfirmationHandler.State.Confirming(
                     LinkConfirmationOption(
                         linkExpressMode = LinkExpressMode.DISABLED,
-                        configuration = mock()
+                        configuration = mock(),
+                        passiveCaptchaParams = null
                     )
                 )
             }

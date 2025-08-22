@@ -285,7 +285,8 @@ internal class DefaultFlowController @Inject internal constructor(
                     linkExpressMode = LinkExpressMode.ENABLED,
                     launchMode = LinkLaunchMode.PaymentMethodSelection(
                         selectedPayment = (paymentSelection as? Link)?.selectedPayment?.details
-                    )
+                    ),
+                    passiveCaptchaParams = state.paymentSheetState.paymentMethodMetadata.passiveCaptchaParams
                 )
             } else {
                 showPaymentOptionList(state, paymentSelection)
@@ -537,6 +538,7 @@ internal class DefaultFlowController @Inject internal constructor(
             val confirmationOption = paymentSelection?.toConfirmationOption(
                 configuration = state.config,
                 linkConfiguration = state.linkConfiguration,
+                passiveCaptchaParams = state.paymentMethodMetadata.passiveCaptchaParams
             )
 
             confirmationOption?.let { option ->

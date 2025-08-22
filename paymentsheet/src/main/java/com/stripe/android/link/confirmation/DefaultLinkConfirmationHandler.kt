@@ -10,6 +10,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
@@ -28,6 +29,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
     private val configuration: LinkConfiguration,
     private val logger: Logger,
     private val confirmationHandler: ConfirmationHandler,
+    private val passiveCaptchaParams: PassiveCaptchaParams?
 ) : LinkConfirmationHandler {
 
     override suspend fun confirm(
@@ -154,7 +156,8 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                 ),
                 extraParams = null,
                 optionsParams = null,
-                shouldSave = false
+                shouldSave = false,
+                passiveCaptchaParams = passiveCaptchaParams
             )
         }
 
@@ -203,7 +206,8 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                     cvc = cvc?.takeIf {
                         configuration.passthroughModeEnabled.not()
                     }
-                )
+                ),
+                passiveCaptchaParams = passiveCaptchaParams
             ),
             appearance = PaymentSheet.Appearance(),
             initializationMode = configuration.initializationMode,
@@ -213,6 +217,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
 
     class Factory @Inject constructor(
         private val configuration: LinkConfiguration,
+        private val passiveCaptchaParams: PassiveCaptchaParams?,
         private val logger: Logger,
     ) : LinkConfirmationHandler.Factory {
         override fun create(confirmationHandler: ConfirmationHandler): LinkConfirmationHandler {
@@ -220,6 +225,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                 confirmationHandler = confirmationHandler,
                 logger = logger,
                 configuration = configuration,
+                passiveCaptchaParams = passiveCaptchaParams
             )
         }
     }

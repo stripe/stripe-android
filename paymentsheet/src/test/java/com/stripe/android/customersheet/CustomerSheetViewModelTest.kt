@@ -24,6 +24,7 @@ import com.stripe.android.customersheet.utils.FakeCustomerSheetLoader
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
@@ -32,6 +33,8 @@ import com.stripe.android.model.PaymentMethodFixtures.US_BANK_ACCOUNT_VERIFIED
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.networking.PaymentAnalyticsEvent
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
@@ -63,7 +66,9 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -3237,6 +3242,64 @@ class CustomerSheetViewModelTest {
         viewModel.handleViewAction(CustomerSheetViewAction.OnDisallowedCardBrandEntered(CardBrand.AmericanExpress))
 
         verify(eventReporter).onDisallowedCardBrandEntered(CardBrand.AmericanExpress)
+    }
+
+    @Test
+    fun `When starting confirmation, should pass passiveCaptchaParams when available`() = runTest(testDispatcher) {
+        val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+
+        val mockConfirmationHandler = mock<ConfirmationHandler>()
+        val confirmationHandlerFactory = ConfirmationHandler.Factory { mockConfirmationHandler }
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            customerPaymentMethods = listOf(),
+            isGooglePayAvailable = false,
+            confirmationHandlerFactory = confirmationHandlerFactory,
+            customerSheetLoader = FakeCustomerSheetLoader(
+                customerPaymentMethods = emptyList(),
+                isGooglePayAvailable = false,
+                passiveCaptchaParams = passiveCaptchaParams
+            ),
+            intentDataSource = FakeCustomerSheetIntentDataSource(
+                canCreateSetupIntents = true,
+                onRetrieveSetupIntentClientSecret = {
+                    CustomerSheetDataResult.success("seti_123")
+                }
+            ),
+            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
+                onAttachPaymentMethod = {
+                    CustomerSheetDataResult.success(CARD_PAYMENT_METHOD)
+                }
+            ),
+            stripeRepository = FakeStripeRepository(
+                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
+                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
+            ),
+        ).apply {
+            handleViewAction(
+                CustomerSheetViewAction.OnFormFieldValuesCompleted(
+                    formFieldValues = TEST_FORM_VALUES,
+                )
+            )
+        }
+
+        viewModel.viewState.test {
+            assertThat(awaitItem()).isInstanceOf<AddPaymentMethod>()
+        }
+
+        viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+        verify(mockConfirmationHandler).start(any())
+
+        val captor = argumentCaptor<ConfirmationHandler.Args>()
+        verify(mockConfirmationHandler).start(captor.capture())
+
+        val capturedArgs = captor.firstValue
+        assertThat(capturedArgs.confirmationOption).isInstanceOf<PaymentMethodConfirmationOption.Saved>()
+
+        val savedOption = capturedArgs.confirmationOption as PaymentMethodConfirmationOption.Saved
+        assertThat(savedOption.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
     }
 
     @Test

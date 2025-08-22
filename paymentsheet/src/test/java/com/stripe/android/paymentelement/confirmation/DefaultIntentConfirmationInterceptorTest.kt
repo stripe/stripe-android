@@ -139,7 +139,8 @@ class DefaultIntentConfirmationInterceptorTest {
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                     optionsParams = PaymentMethodOptionsParams.Card(
                         setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
-                    )
+                    ),
+                    passiveCaptchaParams = null
                 ),
                 intent = PaymentIntentFactory.create(),
                 initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
@@ -1269,6 +1270,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     ),
                     extraParams = null,
                     shouldSave = false,
+                    passiveCaptchaParams = null
                 ),
                 intent = PaymentIntentFactory.create(),
                 initializationMode = InitializationMode.DeferredIntent(
@@ -1339,6 +1341,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     optionsParams = PaymentMethodOptionsParams.Card(),
                     extraParams = null,
                     shouldSave = false,
+                    passiveCaptchaParams = null
                 ),
                 intent = PaymentIntentFactory.create(),
                 initializationMode = InitializationMode.DeferredIntent(
@@ -1420,7 +1423,8 @@ class DefaultIntentConfirmationInterceptorTest {
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 optionsParams = null,
                 extraParams = null,
-                shouldSave = false
+                shouldSave = false,
+                passiveCaptchaParams = null
             ),
             intent = PaymentIntentFactory.create(),
             initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
@@ -1474,7 +1478,8 @@ class DefaultIntentConfirmationInterceptorTest {
             confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
-                hCaptchaToken = hCaptchaToken
+                hCaptchaToken = hCaptchaToken,
+                passiveCaptchaParams = null
             ),
             intent = SetupIntentFactory.create(),
             initializationMode = InitializationMode.SetupIntent("seti_1234_secret_4321"),
@@ -1720,7 +1725,8 @@ class DefaultIntentConfirmationInterceptorTest {
             confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
-                hCaptchaToken = hCaptchaToken
+                hCaptchaToken = hCaptchaToken,
+                passiveCaptchaParams = null
             ),
             intent = PaymentIntentFactory.create(),
             initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
