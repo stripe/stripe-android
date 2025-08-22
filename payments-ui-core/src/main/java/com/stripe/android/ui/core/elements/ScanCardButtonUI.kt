@@ -42,10 +42,9 @@ internal fun ScanCardButtonUI(
     if (controller.isCardScanEnabled &&
         (controller.isStripeCardScanAvailable() || FeatureFlags.cardScanGooglePayMigration.isEnabled)
     ) {
-        val cardScanLauncher =
-            rememberLauncherForActivityResult(CardScanContract()) {
-                controller.cardDetailsElement.controller.numberElement.controller.onCardScanResult(it)
-            }
+        val cardScanLauncher = rememberLauncherForActivityResult(CardScanContract()) {
+            controller.cardDetailsElement.controller.numberElement.controller.onCardScanResult(it)
+        }
 
         val context = LocalContext.current
         val cardScanGoogleLauncher = if (FeatureFlags.cardScanGooglePayMigration.isEnabled) {

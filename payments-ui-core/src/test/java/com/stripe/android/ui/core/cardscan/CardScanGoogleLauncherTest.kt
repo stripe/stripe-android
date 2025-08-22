@@ -3,16 +3,12 @@ package com.stripe.android.ui.core.cardscan
 import android.app.Activity
 import android.content.Intent
 import androidx.activity.result.ActivityResult
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
-import androidx.activity.result.contract.ActivityResultContract
-import androidx.core.app.ActivityOptionsCompat
 import androidx.test.core.app.ApplicationProvider
-import app.cash.turbine.ReceiveTurbine
-import app.cash.turbine.Turbine
 import com.google.android.gms.wallet.CreditCardExpirationDate
 import com.google.android.gms.wallet.PaymentCardRecognitionResult
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.utils.FakeActivityLauncher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -149,25 +145,6 @@ class CardScanGoogleLauncherTest {
         val scanFailedCall = fakeEventsReporter.scanFailedCalls.awaitItem()
         assertThat(scanFailedCall.implementation).isEqualTo("google_pay")
         assertThat(scanFailedCall.error).isInstanceOf(Exception::class.java)
-    }
-
-    private class FakeActivityLauncher<I> : ActivityResultLauncher<I>() {
-        private val _launchCall = Turbine<Unit>()
-        val launchCall: ReceiveTurbine<Unit> = _launchCall
-        override val contract: ActivityResultContract<I, *>
-            get() = throw NotImplementedError("Not implemented!")
-
-        override fun launch(input: I, options: ActivityOptionsCompat?) {
-            _launchCall.add(Unit)
-        }
-
-        override fun unregister() {
-            throw NotImplementedError("Not implemented!")
-        }
-
-        fun validate() {
-            _launchCall.ensureAllEventsConsumed()
-        }
     }
 
     private class Scenario(
