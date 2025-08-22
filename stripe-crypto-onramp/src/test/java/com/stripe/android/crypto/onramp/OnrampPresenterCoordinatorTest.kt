@@ -4,14 +4,11 @@ import androidx.activity.ComponentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.crypto.onramp.model.GetOnrampSessionResponse
-import com.stripe.android.crypto.onramp.model.GetPlatformSettingsResponse
+import com.stripe.android.crypto.onramp.CheckoutState.Status
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutCallback
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
-import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.link.LinkController
-import com.stripe.android.model.StripeIntent.Status.Succeeded
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -29,54 +26,31 @@ import org.robolectric.RobolectricTestRunner
 class OnrampPresenterCoordinatorTest {
     private val linkController: LinkController = mock()
     private val interactor: OnrampInteractor = mock()
-    private val cryptoApiRepository: CryptoApiRepository = mock()
+
     private val lifecycleOwner = TestLifecycleOwner()
     private val activity = Robolectric.buildActivity(ComponentActivity::class.java).create().get()
     private val testScope = TestScope()
     private val checkoutCallback = mock<OnrampCheckoutCallback>()
-
-    private fun createFakeLinkState(): LinkController.State {
-        return LinkController.State(
-            internalLinkAccount = null,
-            merchantLogoUrl = null,
-            selectedPaymentMethodPreview = null,
-            createdPaymentMethod = null
-        )
-    }
 
     @Test
     fun performCheckout_successfulPayment_callsCallbackWithCompleted() = runTest {
         // Given
         val onrampSessionId = "cos_test_session_id"
         val sessionClientSecret = "cos_test_secret"
-        val platformApiKey = "pk_test_platform_key"
-        val paymentIntentClientSecret = "pi_test_secret"
-
-        val platformSettings = GetPlatformSettingsResponse(publishableKey = platformApiKey)
-        val onrampSession = GetOnrampSessionResponse(
-            id = onrampSessionId,
-            clientSecret = sessionClientSecret,
-            paymentIntentClientSecret = paymentIntentClientSecret
-        )
-        val succeededPaymentIntent = paymentIntent(
-            status = Succeeded
-        )
-
-        whenever(cryptoApiRepository.getPlatformSettings())
-            .thenReturn(Result.success(platformSettings))
-
-        whenever(cryptoApiRepository.getOnrampSession(onrampSessionId, sessionClientSecret))
-            .thenReturn(Result.success(onrampSession))
-
-        whenever(cryptoApiRepository.retrievePaymentIntent(paymentIntentClientSecret, platformApiKey))
-            .thenReturn(Result.success(succeededPaymentIntent))
-
         val onrampSessionClientSecretProvider: suspend () -> String = { sessionClientSecret }
 
-        // When
-        val coordinator = createCoordinator()
-        coordinator.performCheckout(onrampSessionId, onrampSessionClientSecretProvider)
+        val checkoutStateFlow = MutableStateFlow(CheckoutState())
+        val coordinator = createCoordinator(checkoutStateFlow)
 
+        // When
+        coordinator.performCheckout(onrampSessionId, onrampSessionClientSecretProvider)
+        testScope.testScheduler.advanceUntilIdle()
+
+        // Verify startCheckout was called
+        verify(interactor).startCheckout(onrampSessionId, onrampSessionClientSecretProvider)
+
+        // Simulate the interactor emitting a completed checkout state (this will trigger the observer)
+        checkoutStateFlow.value = CheckoutState(status = Status.Completed(OnrampCheckoutResult.Completed))
         testScope.testScheduler.advanceUntilIdle()
 
         // Then
@@ -87,7 +61,9 @@ class OnrampPresenterCoordinatorTest {
             .isEqualTo(OnrampCheckoutResult.Completed)
     }
 
-    private fun createCoordinator(): OnrampPresenterCoordinator {
+    private fun createCoordinator(
+        checkoutStateFlow: MutableStateFlow<CheckoutState> = MutableStateFlow(CheckoutState())
+    ): OnrampPresenterCoordinator {
         lifecycleOwner.currentState = Lifecycle.State.STARTED
 
         val linkState = createFakeLinkState()
@@ -108,12 +84,13 @@ class OnrampPresenterCoordinatorTest {
                 authorizeCallback = any()
             )
         ).thenReturn(linkPresenter)
+
         whenever(interactor.state).thenReturn(onrampStateFlow)
+        whenever(interactor.checkoutState).thenReturn(checkoutStateFlow)
 
         return OnrampPresenterCoordinator(
             linkController = linkController,
             interactor = interactor,
-            cryptoApiRepository = cryptoApiRepository,
             lifecycleOwner = lifecycleOwner,
             activity = activity,
             onrampCallbacks = OnrampCallbacks(
@@ -123,6 +100,15 @@ class OnrampPresenterCoordinatorTest {
                 selectPaymentCallback = {}
             ),
             coroutineScope = testScope
+        )
+    }
+
+    private fun createFakeLinkState(): LinkController.State {
+        return LinkController.State(
+            internalLinkAccount = null,
+            merchantLogoUrl = null,
+            selectedPaymentMethodPreview = null,
+            createdPaymentMethod = null
         )
     }
 }

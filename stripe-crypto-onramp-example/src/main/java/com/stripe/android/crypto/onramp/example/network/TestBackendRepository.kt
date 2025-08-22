@@ -22,15 +22,12 @@ class TestBackendRepository {
     private val baseUrl = "https://crypto-onramp-example.stripedemos.com"
 
     private val manager = FuelManager()
+        .addRequestInterceptor(LogRequestInterceptor)
+        .addResponseInterceptor(LogResponseInterceptor)
+        .addRequestInterceptor(LogRequestAsCurlInterceptor)
 
     private val json = Json {
         ignoreUnknownKeys = true
-    }
-
-    init {
-        manager.addRequestInterceptor(LogRequestInterceptor)
-        manager.addResponseInterceptor(LogResponseInterceptor)
-        manager.addRequestInterceptor(LogRequestAsCurlInterceptor)
     }
 
     suspend fun createAuthIntent(

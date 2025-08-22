@@ -15,12 +15,10 @@ import com.stripe.android.crypto.onramp.model.OnrampIdentityVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
-import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import kotlinx.coroutines.CoroutineScope
@@ -32,7 +30,6 @@ import javax.inject.Inject
 internal class OnrampPresenterCoordinator @Inject constructor(
     private val linkController: LinkController,
     private val interactor: OnrampInteractor,
-    private val cryptoApiRepository: CryptoApiRepository,
     lifecycleOwner: LifecycleOwner,
     private val activity: ComponentActivity,
     private val onrampCallbacks: OnrampCallbacks,
@@ -49,7 +46,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     private var identityVerificationSheet: IdentityVerificationSheet? = null
 
-    private var currentCheckoutParams: CheckoutParams? = null
+    // No longer need to store checkout session - interactor manages it now
 
     private val paymentLauncher: PaymentLauncher by lazy {
         PaymentLauncher.create(
@@ -75,6 +72,13 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         lifecycleOwner.lifecycleScope.launch {
             linkControllerState.distinctUntilChangedBy { it.merchantLogoUrl }.collect { state ->
                 identityVerificationSheet = createIdentityVerificationSheet(state.merchantLogoUrl)
+            }
+        }
+
+        // Observe checkout state changes and react accordingly
+        lifecycleOwner.lifecycleScope.launch {
+            interactor.checkoutState.collect { checkoutState ->
+                handleCheckoutStateChange(checkoutState)
             }
         }
     }
@@ -125,102 +129,39 @@ internal class OnrampPresenterCoordinator @Inject constructor(
      * Performs the checkout flow for a crypto onramp session, handling any required authentication steps.
      *
      * @param onrampSessionId The onramp session identifier.
-     * @param onrampSessionClientSecretProvider An async closure that calls your backend to perform a checkout.
+     * @param checkoutHandler An async closure that calls your backend to perform a checkout.
      *     Your backend should call Stripe's `/v1/crypto/onramp_sessions/:id/checkout` endpoint with the session ID.
      *     The closure should return the onramp session client secret on success, or throw an Error on failure.
      *     This closure may be called twice: once initially, and once more after handling any required authentication.
      */
     fun performCheckout(
         onrampSessionId: String,
-        onrampSessionClientSecretProvider: suspend () -> String
+        checkoutHandler: suspend () -> String
     ) {
         coroutineScope.launch {
-            runCatching {
-                val platformApiKey = cryptoApiRepository.getPlatformSettings().getOrThrow().publishableKey
-
-                // Store checkout parameters for potential recursive calls
-                currentCheckoutParams = CheckoutParams(
-                    platformApiKey = platformApiKey,
-                    onrampSessionId = onrampSessionId,
-                    onrampSessionClientSecretProvider = onrampSessionClientSecretProvider
-                )
-
-                performCheckoutRecursively()
-            }.onFailure {
-                currentCheckoutParams = null // Clear parameters on error
-                onrampCallbacks.checkoutCallback.onResult(OnrampCheckoutResult.Failed(it))
-            }
+            interactor.startCheckout(onrampSessionId, checkoutHandler)
         }
     }
 
     /**
-     * Recursively performs the checkout flow, handling next actions as needed.
+     * Handles checkout state changes from the interactor.
      */
-    private suspend fun performCheckoutRecursively() {
-        val params = currentCheckoutParams
-            ?: return onrampCallbacks.checkoutCallback.onResult(OnrampCheckoutResult.Failed(PaymentFailedException()))
-
-        runCatching {
-            // Perform checkout and get PaymentIntent
-            val paymentIntent = performCheckoutAndRetrievePaymentIntent(
-                onrampSessionId = params.onrampSessionId,
-                onrampSessionClientSecretProvider = params.onrampSessionClientSecretProvider,
-                platformApiKey = params.platformApiKey
-            )
-
-            // Check if the intent is already complete
-            mapIntentToCheckoutResult(paymentIntent)?.let { result ->
-                currentCheckoutParams = null // Clear parameters
-                onrampCallbacks.checkoutCallback.onResult(result)
-                return
+    private fun handleCheckoutStateChange(checkoutState: CheckoutState) {
+        when (checkoutState.status) {
+            CheckoutState.Status.Idle -> {
+                // Nothing to do
             }
-
-            // Handle any required next action (e.g., 3DS authentication)
-            // The PaymentLauncher callback will handle the recursion
-            handleNextAction(paymentIntent)
-        }.onFailure {
-            currentCheckoutParams = null
-            onrampCallbacks.checkoutCallback.onResult(OnrampCheckoutResult.Failed(it))
-        }
-    }
-
-    /**
-     * Performs checkout and retrieves the resulting PaymentIntent.
-     *
-     * @param onrampSessionId The onramp session identifier.
-     * @param onrampSessionClientSecretProvider A suspend function that calls your backend to perform a checkout.
-     * @return The PaymentIntent after checkout.
-     */
-    private suspend fun performCheckoutAndRetrievePaymentIntent(
-        onrampSessionId: String,
-        onrampSessionClientSecretProvider: suspend () -> String,
-        platformApiKey: String
-    ): PaymentIntent {
-        // Call the backend to perform checkout
-        val onrampSessionClientSecret = onrampSessionClientSecretProvider()
-
-        // Get the onramp session to extract the payment_intent_client_secret
-        val onrampSession = cryptoApiRepository.getOnrampSession(
-            sessionId = onrampSessionId,
-            sessionClientSecret = onrampSessionClientSecret
-        ).getOrThrow()
-
-        // Retrieve and return the PaymentIntent using the special publishable key
-        return cryptoApiRepository.retrievePaymentIntent(
-            clientSecret = onrampSession.paymentIntentClientSecret,
-            publishableKey = platformApiKey
-        ).getOrThrow()
-    }
-
-    /**
-     * Maps a PaymentIntent status to a CheckoutResult, or returns null if more handling is needed.
-     */
-    private fun mapIntentToCheckoutResult(intent: PaymentIntent): OnrampCheckoutResult? {
-        return when (intent.status) {
-            StripeIntent.Status.Succeeded -> OnrampCheckoutResult.Completed
-            StripeIntent.Status.RequiresPaymentMethod -> OnrampCheckoutResult.Failed(PaymentFailedException())
-            StripeIntent.Status.RequiresAction -> null // More handling needed
-            else -> OnrampCheckoutResult.Failed(PaymentFailedException())
+            CheckoutState.Status.Processing -> {
+                // Nothing to do - let the interactor work
+            }
+            is CheckoutState.Status.RequiresNextAction -> {
+                // Launch PaymentLauncher for next action
+                handleNextAction(checkoutState.status.paymentIntent)
+            }
+            is CheckoutState.Status.Completed -> {
+                // Checkout finished - notify callback
+                onrampCallbacks.checkoutCallback.onResult(checkoutState.status.result)
+            }
         }
     }
 
@@ -231,7 +172,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     private fun handleNextAction(intent: PaymentIntent) {
         val clientSecret = intent.clientSecret
         if (clientSecret == null) {
-            currentCheckoutParams = null // Clear parameters
+            // No client secret - notify failure immediately
             onrampCallbacks.checkoutCallback.onResult(OnrampCheckoutResult.Failed(PaymentFailedException()))
             return
         }
@@ -241,24 +182,22 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     }
 
     /**
-     * Handles PaymentLauncher results and continues the checkout flow recursively if needed.
+     * Handles PaymentLauncher results and continues the checkout flow via the interactor.
      */
     private fun handlePaymentLauncherResult(paymentResult: PaymentResult) {
         when (paymentResult) {
             is PaymentResult.Completed -> {
-                // Next action completed successfully, recursively call checkout to complete payment
+                // Next action completed successfully, tell interactor to continue
                 coroutineScope.launch {
-                    performCheckoutRecursively()
+                    interactor.continueCheckout()
                 }
             }
             is PaymentResult.Canceled -> {
                 // User canceled the next action
-                currentCheckoutParams = null // Clear parameters
                 onrampCallbacks.checkoutCallback.onResult(OnrampCheckoutResult.Canceled)
             }
             is PaymentResult.Failed -> {
                 // Next action failed
-                currentCheckoutParams = null // Clear parameters
                 onrampCallbacks.checkoutCallback.onResult(OnrampCheckoutResult.Failed(paymentResult.throwable))
             }
         }
@@ -314,9 +253,3 @@ private fun PaymentMethodType.toLinkType(): LinkController.PaymentMethodType =
         PaymentMethodType.Card -> LinkController.PaymentMethodType.Card
         PaymentMethodType.BankAccount -> LinkController.PaymentMethodType.BankAccount
     }
-
-private data class CheckoutParams(
-    val platformApiKey: String,
-    val onrampSessionId: String,
-    val onrampSessionClientSecretProvider: suspend () -> String
-)

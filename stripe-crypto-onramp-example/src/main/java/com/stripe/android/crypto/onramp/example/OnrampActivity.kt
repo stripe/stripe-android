@@ -134,10 +134,7 @@ internal class OnrampActivity : ComponentActivity() {
     private fun performCheckout(event: CheckoutEvent) {
         onrampPresenter.performCheckout(
             onrampSessionId = event.sessionId,
-            onrampSessionClientSecretProvider = {
-                // Call the test backend backend checkout method
-                viewModel.checkoutWithBackend(event.sessionId)
-            }
+            checkoutHandler = { viewModel.checkoutWithBackend(event.sessionId) }
         )
     }
 }
