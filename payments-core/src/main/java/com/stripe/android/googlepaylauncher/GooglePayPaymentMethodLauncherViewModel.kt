@@ -64,7 +64,11 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
             merchantInfo = GooglePayJsonFactory.MerchantInfo(
                 merchantName = args.config.merchantName,
                 softwareInfo = GooglePayJsonFactory.SoftwareInfo(
-                    id = GooglePayJsonFactory.SoftwareInfo.SoftwareId.Elements
+                    id = if (args.isElements) {
+                        GooglePayJsonFactory.SoftwareInfo.SoftwareId.Elements
+                    } else {
+                        GooglePayJsonFactory.SoftwareInfo.SoftwareId.Launcher
+                    }
                 )
             ),
             billingAddressParameters = args.config.billingAddressConfig.convert(),
