@@ -28,7 +28,6 @@ class CardDetailsSectionController(
         cardBrandFilter
     )
 
-    internal val isCardScanEnabled = cardDetailsElement.isCardScanEnabled
     internal val isStripeCardScanAvailable = DefaultIsStripeCardScanAvailable()
 
     override val error = cardDetailsElement.controller.error

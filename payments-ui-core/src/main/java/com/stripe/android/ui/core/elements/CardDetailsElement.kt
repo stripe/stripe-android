@@ -36,7 +36,6 @@ internal class CardDetailsElement(
         cardBrandFilter = cardBrandFilter,
     )
 ) : SectionMultiFieldElement(identifier) {
-    val isCardScanEnabled = controller.numberElement.controller.cardScanEnabled
 
     override val allowsUserInteraction: Boolean = true
     override val mandateText: ResolvableString? = null

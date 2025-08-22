@@ -44,9 +44,7 @@ fun CardDetailsSectionElementUI(
                         heading()
                     }
             )
-            if (controller.isCardScanEnabled &&
-                (controller.isStripeCardScanAvailable() || FeatureFlags.cardScanGooglePayMigration.isEnabled)
-            ) {
+            if (controller.isStripeCardScanAvailable() || FeatureFlags.cardScanGooglePayMigration.isEnabled) {
                 ScanCardButtonUI(
                     enabled = enabled,
                     elementsSessionId = controller.elementsSessionId,
