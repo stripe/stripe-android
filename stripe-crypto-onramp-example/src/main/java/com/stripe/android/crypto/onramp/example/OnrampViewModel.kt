@@ -9,8 +9,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.github.kittinunf.result.Result
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.crypto.onramp.OnrampCoordinator
+import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
+import com.stripe.android.crypto.onramp.example.network.TestBackendRepository
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
@@ -31,12 +34,18 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+@Suppress("TooManyFunctions")
 internal class OnrampViewModel(
     application: Application,
     savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
 
-    val onrampCoordinator: OnrampCoordinator
+    val onrampCoordinator: OnrampCoordinator =
+        OnrampCoordinator
+            .Builder()
+            .build(application, savedStateHandle)
+
+    private val testBackendRepository = TestBackendRepository()
 
     private val _uiState = MutableStateFlow(OnrampUiState())
     val uiState: StateFlow<OnrampUiState> = _uiState.asStateFlow()
@@ -45,8 +54,6 @@ internal class OnrampViewModel(
     val message: StateFlow<String?> = _message.asStateFlow()
 
     init {
-        onrampCoordinator = OnrampCoordinator.Builder()
-            .build(application, savedStateHandle)
 
         viewModelScope.launch {
             @Suppress("MagicNumber", "MaxLineLength")
@@ -85,6 +92,10 @@ internal class OnrampViewModel(
         val result = onrampCoordinator.lookupLinkUser(currentEmail)
         when (result) {
             is OnrampLinkLookupResult.Completed -> {
+                // Temporarily create an auth intent for the user after checking if they exist
+                // TODO(carlosmuvi): use OAuth flow using the LAI to authenticate user.
+                createAuthIntentForUser(currentEmail)
+
                 if (result.isLinkUser) {
                     _message.value = "User exists in Link. Please authenticate:"
                     _uiState.update { it.copy(screen = Screen.Authentication) }
@@ -96,6 +107,22 @@ internal class OnrampViewModel(
             is OnrampLinkLookupResult.Failed -> {
                 _message.value = "Lookup failed: ${result.error.message}"
                 _uiState.update { it.copy(screen = Screen.EmailInput) }
+            }
+        }
+    }
+
+    private fun createAuthIntentForUser(email: String) {
+        viewModelScope.launch {
+            val result = testBackendRepository.createAuthIntent(email)
+            when (result) {
+                is Result.Success -> {
+                    val response = result.value
+                    _uiState.update { it.copy(authToken = response.token) }
+                    _message.value = "Auth intent created successfully"
+                }
+                is Result.Failure -> {
+                    _message.value = "Failed to create auth intent: ${result.error.message}"
+                }
             }
         }
     }
@@ -194,7 +221,13 @@ internal class OnrampViewModel(
             when (result) {
                 is OnrampSetWalletAddressResult.Completed -> {
                     _message.value = "Wallet address registered successfully!"
-                    _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
+                    _uiState.update {
+                        it.copy(
+                            screen = Screen.AuthenticatedOperations,
+                            walletAddress = walletAddress.trim(),
+                            network = network
+                        )
+                    }
                 }
                 is OnrampSetWalletAddressResult.Failed -> {
                     _message.value = "Failed to register wallet address: ${result.error.message}"
@@ -247,6 +280,81 @@ internal class OnrampViewModel(
         }
     }
 
+    fun createOnrampSession() {
+        val currentState = _uiState.value
+        val paymentToken = currentState.cryptoPaymentToken
+        val walletAddress = currentState.walletAddress
+        val customerId = currentState.customerId
+        val network = currentState.network
+        val authToken = currentState.authToken
+
+        // Check what's missing and provide helpful guidance
+        val validParams = validateOnrampSessionParams(
+            customerId = customerId,
+            walletAddress = walletAddress,
+            currentState = currentState,
+            paymentToken = paymentToken,
+            authToken = authToken
+        )
+        if (validParams.not()) return
+
+        _uiState.update { it.copy(screen = Screen.Loading) }
+
+        viewModelScope.launch {
+            val destinationNetwork = network?.value ?: "ethereum"
+
+            val result = testBackendRepository.createOnrampSession(
+                paymentToken = paymentToken!!,
+                walletAddress = walletAddress!!,
+                cryptoCustomerId = customerId!!,
+                authToken = authToken!!,
+                destinationNetwork = destinationNetwork
+            )
+
+            when (result) {
+                is Result.Success -> {
+                    val response = result.value
+                    _message.value = "Onramp session created successfully! Session ID: ${response.id}"
+                    _uiState.update {
+                        it.copy(
+                            screen = Screen.AuthenticatedOperations,
+                            onrampSession = response
+                        )
+                    }
+                }
+                is Result.Failure -> {
+                    _message.value = "Failed to create onramp session: ${result.error.message}"
+                    _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
+                }
+            }
+        }
+    }
+
+    private fun validateOnrampSessionParams(
+        customerId: String?,
+        walletAddress: String?,
+        currentState: OnrampUiState,
+        paymentToken: String?,
+        authToken: String?
+    ): Boolean {
+        val missingItems = mutableListOf<String>()
+        if (customerId.isNullOrBlank()) missingItems.add("customer authentication")
+        if (walletAddress.isNullOrBlank()) missingItems.add("wallet address registration")
+        if (currentState.selectedPaymentData == null) missingItems.add("payment method selection")
+        if (paymentToken.isNullOrBlank()) missingItems.add("crypto payment token creation")
+        if (authToken.isNullOrBlank()) missingItems.add("authentication token")
+        if (missingItems.isNotEmpty()) {
+            val message = when (missingItems.size) {
+                1 -> "Please complete ${missingItems[0]} first"
+                2 -> "Please complete ${missingItems[0]} and ${missingItems[1]} first"
+                else -> "Please complete the following steps first: ${missingItems.joinToString(", ")}"
+            }
+            _message.value = message
+            return false
+        }
+        return true
+    }
+
     class Factory : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(
@@ -265,6 +373,10 @@ data class OnrampUiState(
     val customerId: String? = null,
     val selectedPaymentData: PaymentOptionDisplayData? = null,
     val cryptoPaymentToken: String? = null,
+    val walletAddress: String? = null,
+    val network: CryptoNetwork? = null,
+    val authToken: String? = null,
+    val onrampSession: OnrampSessionResponse? = null,
 )
 
 enum class Screen {

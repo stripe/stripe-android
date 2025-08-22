@@ -32,6 +32,10 @@ dependencies {
     implementation libs.compose.ui
     implementation libs.compose.viewModels
     implementation libs.material
+    
+    implementation libs.fuel
+    implementation libs.fuelCoroutines
+    implementation libs.kotlin.serialization
 
     testImplementation testLibs.junit
 
