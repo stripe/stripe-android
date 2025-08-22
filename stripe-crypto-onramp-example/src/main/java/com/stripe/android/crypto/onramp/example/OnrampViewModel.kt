@@ -99,10 +99,10 @@ internal class OnrampViewModel(
                 createAuthIntentForUser(currentEmail)
 
                 if (result.isLinkUser) {
-                    _message.value = "User exists in Link. Please authenticate:"
+                    _message.value = "User exists in Link. Please authenticate"
                     _uiState.update { it.copy(screen = Screen.Authentication) }
                 } else {
-                    _message.value = "User does not exist in Link. Please register:"
+                    _message.value = "User does not exist in Link. Please register"
                     _uiState.update { it.copy(screen = Screen.Registration) }
                 }
             }
