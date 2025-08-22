@@ -24,6 +24,7 @@ dependencies {
 
     testImplementation testLibs.androidx.core
     testImplementation testLibs.androidx.junit
+    testImplementation testLibs.androidx.lifecycle
     testImplementation testLibs.androidx.testRunner
     testImplementation testLibs.kotlin.coroutines
     testImplementation testLibs.mockito.kotlin
