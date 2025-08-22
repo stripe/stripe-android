@@ -17,6 +17,7 @@ import com.stripe.android.crypto.onramp.example.network.TestBackendRepository
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
+import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
@@ -191,6 +192,23 @@ internal class OnrampViewModel(
             is OnrampCollectPaymentResult.Failed -> {
                 _message.value = "Payment selection failed: ${result.error.message}"
                 _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
+            }
+        }
+    }
+
+    fun onAuthorizeResult(result: OnrampAuthorizeResult) {
+        when (result) {
+            is OnrampAuthorizeResult.Consented -> {
+                _message.value = "Authorization successful! User consented to scopes."
+            }
+            is OnrampAuthorizeResult.Denied -> {
+                _message.value = "Authorization denied by user."
+            }
+            is OnrampAuthorizeResult.Canceled -> {
+                _message.value = "Authorization cancelled by user."
+            }
+            is OnrampAuthorizeResult.Failed -> {
+                _message.value = "Authorization failed: ${result.error.message}"
             }
         }
     }

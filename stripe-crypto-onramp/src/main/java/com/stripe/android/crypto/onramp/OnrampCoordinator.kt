@@ -152,6 +152,15 @@ class OnrampCoordinator @Inject internal constructor(
         fun collectPaymentMethod(type: PaymentMethodType) {
             coordinator.collectPaymentMethod(type)
         }
+
+        /**
+         * Authorize a LinkAuthIntent.
+         *
+         * @param linkAuthIntentId The LinkAuthIntent ID to authorize.
+         */
+        fun authorize(linkAuthIntentId: String) {
+            coordinator.authorize(linkAuthIntentId)
+        }
     }
 
     /**

@@ -8,6 +8,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
+import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampIdentityVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
@@ -36,7 +37,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         activity = activity,
         presentPaymentMethodsCallback = ::handleSelectPaymentResult,
         authenticationCallback = ::handleAuthenticationResult,
-        authorizeCallback = {}
+        authorizeCallback = ::handleAuthorizeResult
     )
 
     private var identityVerificationSheet: IdentityVerificationSheet? = null
@@ -102,6 +103,10 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         )
     }
 
+    fun authorize(linkAuthIntentId: String) {
+        linkPresenter.authorize(linkAuthIntentId)
+    }
+
     private fun clientEmail(): String? =
         interactor.state.value.linkControllerState?.internalLinkAccount?.email
 
@@ -127,6 +132,16 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 interactor.handleSelectPaymentResult(result, activity)
             )
         }
+    }
+
+    private fun handleAuthorizeResult(result: LinkController.AuthorizeResult) {
+        val onrampResult = when (result) {
+            is LinkController.AuthorizeResult.Consented -> OnrampAuthorizeResult.Consented
+            is LinkController.AuthorizeResult.Denied -> OnrampAuthorizeResult.Denied
+            is LinkController.AuthorizeResult.Canceled -> OnrampAuthorizeResult.Canceled
+            is LinkController.AuthorizeResult.Failed -> OnrampAuthorizeResult.Failed(result.error)
+        }
+        onrampCallbacks.authorizeCallback.onResult(onrampResult)
     }
 
     private fun createIdentityVerificationSheet(merchantLogoUrl: String?): IdentityVerificationSheet {
