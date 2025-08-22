@@ -100,6 +100,9 @@ internal class OnrampActivity : ComponentActivity() {
                         onAuthenticateUser = {
                             onrampPresenter.presentForVerification()
                         },
+                        onAuthorize = { linkAuthIntentId ->
+                            onrampPresenter.authorize(linkAuthIntentId)
+                        },
                         onRegisterWalletAddress = { address, network ->
                             viewModel.registerWalletAddress(address, network)
                         },
@@ -128,6 +131,7 @@ internal fun OnrampScreen(
     viewModel: OnrampViewModel,
     modifier: Modifier = Modifier,
     onAuthenticateUser: () -> Unit,
+    onAuthorize: (String) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onStartVerification: () -> Unit,
     onCollectPayment: (type: PaymentMethodType) -> Unit,
@@ -156,7 +160,8 @@ internal fun OnrampScreen(
                 EmailInputScreen(
                     onCheckUser = { email ->
                         viewModel.checkIfLinkUser(email)
-                    }
+                    },
+                    onAuthorize = onAuthorize
                 )
             }
             Screen.Loading -> {
@@ -183,6 +188,7 @@ internal fun OnrampScreen(
                 AuthenticationScreen(
                     email = uiState.email,
                     onAuthenticate = onAuthenticateUser,
+                    onAuthorize = onAuthorize,
                     onBack = {
                         viewModel.onBackToEmailInput()
                     }
@@ -211,7 +217,8 @@ internal fun OnrampScreen(
 
 @Composable
 private fun EmailInputScreen(
-    onCheckUser: (String) -> Unit
+    onCheckUser: (String) -> Unit,
+    onAuthorize: (String) -> Unit
 ) {
     var email by remember { mutableStateOf("") }
 
@@ -231,6 +238,10 @@ private fun EmailInputScreen(
         ) {
             Text("Check if Link User Exists")
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        LinkAuthIntentSection(onAuthorize = onAuthorize)
     }
 }
 
@@ -365,6 +376,7 @@ private fun RegistrationButtons(
 private fun AuthenticationScreen(
     email: String,
     onAuthenticate: () -> Unit,
+    onAuthorize: (String) -> Unit,
     onBack: () -> Unit
 ) {
     Column {
@@ -392,6 +404,10 @@ private fun AuthenticationScreen(
         ) {
             Text("Authenticate")
         }
+
+        LinkAuthIntentSection(onAuthorize = onAuthorize)
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         TextButton(
             onClick = onBack,
@@ -720,6 +736,39 @@ private fun StartVerificationScreen(
                 .padding(bottom = 24.dp)
         ) {
             Text("Start Identity Verification")
+        }
+    }
+}
+
+@Composable
+private fun LinkAuthIntentSection(
+    onAuthorize: (String) -> Unit
+) {
+    var linkAuthIntentId by remember { mutableStateOf("") }
+
+    Column {
+        Text(
+            text = "Authorize LinkAuthIntent",
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        OutlinedTextField(
+            value = linkAuthIntentId,
+            onValueChange = { linkAuthIntentId = it },
+            label = { Text("LinkAuthIntent ID") },
+            placeholder = { Text("lai_...") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
+        )
+
+        Button(
+            onClick = { onAuthorize(linkAuthIntentId) },
+            enabled = linkAuthIntentId.isNotBlank(),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Authorize")
         }
     }
 }
