@@ -57,15 +57,6 @@ internal class CryptoApiRepository @Inject constructor(
         sdkVersion = sdkVersion
     )
 
-    private val json by lazy {
-        Json {
-            ignoreUnknownKeys = true
-            isLenient = true
-            encodeDefaults = true
-            explicitNulls = false
-        }
-    }
-
     /**
      * Grants the provided session merchant permissions.
      *

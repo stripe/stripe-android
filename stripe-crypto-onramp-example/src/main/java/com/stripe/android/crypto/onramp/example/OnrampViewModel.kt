@@ -329,7 +329,7 @@ internal class OnrampViewModel(
         }
     }
 
-    fun checkout() {
+    fun createSession() {
         val currentState = _uiState.value
         val paymentToken = currentState.cryptoPaymentToken
         val walletAddress = currentState.walletAddress
@@ -365,26 +365,43 @@ internal class OnrampViewModel(
                     val response = result.value
                     _message.value = "Onramp session created successfully! Session ID: ${response.id}"
 
-                    // Update loading message for checkout phase
                     _uiState.update {
                         it.copy(
                             onrampSession = response,
-                            loadingMessage = "Performing checkout..."
+                            screen = Screen.AuthenticatedOperations,
+                            loadingMessage = null
                         )
                     }
-
-                    _checkoutEvent.value = CheckoutEvent(
-                        cryptoPaymentToken = currentState.cryptoPaymentToken,
-                        sessionId = response.id,
-                        sessionClientSecret = response.clientSecret
-                    )
                 }
                 is Result.Failure -> {
                     _message.value = "Failed to create onramp session: ${result.error.message}"
-                    _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
+                    _uiState.update { it.copy(screen = Screen.AuthenticatedOperations, loadingMessage = null) }
                 }
             }
         }
+    }
+
+    fun performCheckout() {
+        val currentState = _uiState.value
+        val onrampSession = currentState.onrampSession
+            ?: run {
+                _message.value = "No onramp session available. Please create a session first."
+                return
+            }
+
+        val cryptoPaymentToken = currentState.cryptoPaymentToken
+            ?: run {
+                _message.value = "No crypto payment token available. Please create a payment token first."
+                return
+            }
+
+        _uiState.update { it.copy(screen = Screen.Loading, loadingMessage = "Performing checkout...") }
+
+        _checkoutEvent.value = CheckoutEvent(
+            cryptoPaymentToken = cryptoPaymentToken,
+            sessionId = onrampSession.id,
+            sessionClientSecret = onrampSession.clientSecret
+        )
     }
 
     private fun validateOnrampSessionParams(

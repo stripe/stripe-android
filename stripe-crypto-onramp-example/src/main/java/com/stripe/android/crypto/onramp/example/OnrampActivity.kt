@@ -123,9 +123,6 @@ internal class OnrampActivity : ComponentActivity() {
                         },
                         onCreatePaymentToken = {
                             viewModel.createCryptoPaymentToken()
-                        },
-                        onCheckout = {
-                            viewModel.checkout()
                         }
                     )
                 }
@@ -137,7 +134,7 @@ internal class OnrampActivity : ComponentActivity() {
         onrampPresenter.performCheckout(
             onrampSessionId = event.sessionId,
             onrampSessionClientSecretProvider = {
-                // Call the ViewModel's backend checkout method
+                // Call the test backend backend checkout method
                 viewModel.checkoutWithBackend(event.sessionId)
             }
         )
@@ -154,7 +151,6 @@ internal fun OnrampScreen(
     onStartVerification: () -> Unit,
     onCollectPayment: (type: PaymentMethodType) -> Unit,
     onCreatePaymentToken: () -> Unit,
-    onCheckout: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
@@ -221,7 +217,8 @@ internal fun OnrampScreen(
                     onStartVerification = onStartVerification,
                     onCollectPayment = onCollectPayment,
                     onCreatePaymentToken = onCreatePaymentToken,
-                    onCheckout = onCheckout,
+                    onCreateSession = { viewModel.createSession() },
+                    onPerformCheckout = { viewModel.performCheckout() },
                     onBack = {
                         viewModel.onBackToEmailInput()
                     }
@@ -436,7 +433,8 @@ private fun AuthenticatedOperationsScreen(
     onStartVerification: () -> Unit,
     onCollectPayment: (type: PaymentMethodType) -> Unit,
     onCreatePaymentToken: () -> Unit,
-    onCheckout: () -> Unit,
+    onCreateSession: () -> Unit,
+    onPerformCheckout: () -> Unit,
     onBack: () -> Unit
 ) {
     // hardcoded sample ETH wallet
@@ -635,12 +633,28 @@ private fun AuthenticatedOperationsScreen(
         }
 
         Button(
-            onClick = onCheckout,
+            onClick = onCreateSession,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
         ) {
-            Text("🚀 Checkout")
+            Text("📋 Create Session")
+        }
+
+        Button(
+            onClick = onPerformCheckout,
+            enabled = onrampSessionResponse != null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
+        ) {
+            Text(
+                if (onrampSessionResponse != null) {
+                    "🚀 Checkout"
+                } else {
+                    "🚀 Checkout (Create session first)"
+                }
+            )
         }
 
         TextButton(

@@ -27,9 +27,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.coroutines.Continuation
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 @OnrampPresenterScope
 internal class OnrampPresenterCoordinator @Inject constructor(
@@ -52,8 +49,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     private var identityVerificationSheet: IdentityVerificationSheet? = null
 
-    // Current continuation for PaymentLauncher operations
-    private var paymentLauncherContinuation: Continuation<OnrampCheckoutResult>? = null
+    private var currentCheckoutParams: CheckoutParams? = null
 
     private val paymentLauncher: PaymentLauncher by lazy {
         PaymentLauncher.create(
@@ -141,55 +137,50 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         coroutineScope.launch {
             runCatching {
                 val platformApiKey = cryptoApiRepository.getPlatformSettings().getOrThrow().publishableKey
-                // First, attempt to check out and get the PaymentIntent
-                val paymentIntent = performCheckoutAndRetrievePaymentIntent(
+
+                // Store checkout parameters for potential recursive calls
+                currentCheckoutParams = CheckoutParams(
                     platformApiKey = platformApiKey,
                     onrampSessionId = onrampSessionId,
                     onrampSessionClientSecretProvider = onrampSessionClientSecretProvider
                 )
 
-                // Check if the intent is already complete
-                mapIntentToCheckoutResult(paymentIntent)?.let { result ->
-                    onrampCallbacks.checkoutCallback.onResult(result)
-                    return@launch
-                }
-
-                // Handle any required next action (e.g., 3DS authentication)
-                when (val handledIntentResult = handleNextAction(paymentIntent)) {
-                    is OnrampCheckoutResult.Completed -> {
-                        if (paymentIntent.status == StripeIntent.Status.Succeeded ||
-                            paymentIntent.status == StripeIntent.Status.RequiresCapture
-                        ) {
-                            // After successful next_action handling, attempt checkout again to complete the payment
-                            val finalPaymentIntent = performCheckoutAndRetrievePaymentIntent(
-                                platformApiKey = platformApiKey,
-                                onrampSessionId = onrampSessionId,
-                                onrampSessionClientSecretProvider = onrampSessionClientSecretProvider,
-                            )
-
-                            // Map the final PaymentIntent status to a checkout result
-                            mapIntentToCheckoutResult(finalPaymentIntent)?.let { checkoutResult ->
-                                onrampCallbacks.checkoutCallback.onResult(checkoutResult)
-                            } ?: run {
-                                onrampCallbacks.checkoutCallback
-                                    .onResult(OnrampCheckoutResult.Failed(PaymentFailedException()))
-                            }
-                        } else {
-                            onrampCallbacks.checkoutCallback
-                                .onResult(OnrampCheckoutResult.Failed(PaymentFailedException()))
-                        }
-                    }
-                    OnrampCheckoutResult.Canceled -> {
-                        onrampCallbacks.checkoutCallback.onResult(handledIntentResult)
-                    }
-                    is OnrampCheckoutResult.Failed -> {
-                        onrampCallbacks.checkoutCallback
-                            .onResult(handledIntentResult)
-                    }
-                }
+                performCheckoutRecursively()
             }.onFailure {
+                currentCheckoutParams = null // Clear parameters on error
                 onrampCallbacks.checkoutCallback.onResult(OnrampCheckoutResult.Failed(it))
             }
+        }
+    }
+
+    /**
+     * Recursively performs the checkout flow, handling next actions as needed.
+     */
+    private suspend fun performCheckoutRecursively() {
+        val params = currentCheckoutParams
+            ?: return onrampCallbacks.checkoutCallback.onResult(OnrampCheckoutResult.Failed(PaymentFailedException()))
+
+        runCatching {
+            // Perform checkout and get PaymentIntent
+            val paymentIntent = performCheckoutAndRetrievePaymentIntent(
+                onrampSessionId = params.onrampSessionId,
+                onrampSessionClientSecretProvider = params.onrampSessionClientSecretProvider,
+                platformApiKey = params.platformApiKey
+            )
+
+            // Check if the intent is already complete
+            mapIntentToCheckoutResult(paymentIntent)?.let { result ->
+                currentCheckoutParams = null // Clear parameters
+                onrampCallbacks.checkoutCallback.onResult(result)
+                return
+            }
+
+            // Handle any required next action (e.g., 3DS authentication)
+            // The PaymentLauncher callback will handle the recursion
+            handleNextAction(paymentIntent)
+        }.onFailure {
+            currentCheckoutParams = null
+            onrampCallbacks.checkoutCallback.onResult(OnrampCheckoutResult.Failed(it))
         }
     }
 
@@ -235,31 +226,41 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     /**
      * Handles the next action for a PaymentIntent using PaymentLauncher.
+     * The result will be handled by the PaymentLauncher callback.
      */
-    private suspend fun handleNextAction(intent: PaymentIntent): OnrampCheckoutResult {
+    private fun handleNextAction(intent: PaymentIntent) {
         val clientSecret = intent.clientSecret
-            ?: return OnrampCheckoutResult.Failed(PaymentFailedException())
-
-        return suspendCoroutine { continuation ->
-            // Store the continuation so the callback can resume it
-            paymentLauncherContinuation = continuation
-            paymentLauncher.handleNextActionForPaymentIntent(clientSecret)
+        if (clientSecret == null) {
+            currentCheckoutParams = null // Clear parameters
+            onrampCallbacks.checkoutCallback.onResult(OnrampCheckoutResult.Failed(PaymentFailedException()))
+            return
         }
+
+        // Launch the next action - result will be handled by handlePaymentLauncherResult
+        paymentLauncher.handleNextActionForPaymentIntent(clientSecret)
     }
 
     /**
-     * Handles PaymentLauncher results and resumes the appropriate continuation.
+     * Handles PaymentLauncher results and continues the checkout flow recursively if needed.
      */
     private fun handlePaymentLauncherResult(paymentResult: PaymentResult) {
-        val continuation = paymentLauncherContinuation
-        if (continuation != null) {
-            paymentLauncherContinuation = null // Clear the continuation
-            val onrampCheckoutResult = when (paymentResult) {
-                is PaymentResult.Completed -> OnrampCheckoutResult.Completed
-                is PaymentResult.Canceled -> OnrampCheckoutResult.Canceled
-                is PaymentResult.Failed -> OnrampCheckoutResult.Failed(paymentResult.throwable)
+        when (paymentResult) {
+            is PaymentResult.Completed -> {
+                // Next action completed successfully, recursively call checkout to complete payment
+                coroutineScope.launch {
+                    performCheckoutRecursively()
+                }
             }
-            continuation.resume(onrampCheckoutResult)
+            is PaymentResult.Canceled -> {
+                // User canceled the next action
+                currentCheckoutParams = null // Clear parameters
+                onrampCallbacks.checkoutCallback.onResult(OnrampCheckoutResult.Canceled)
+            }
+            is PaymentResult.Failed -> {
+                // Next action failed
+                currentCheckoutParams = null // Clear parameters
+                onrampCallbacks.checkoutCallback.onResult(OnrampCheckoutResult.Failed(paymentResult.throwable))
+            }
         }
     }
 
@@ -313,3 +314,9 @@ private fun PaymentMethodType.toLinkType(): LinkController.PaymentMethodType =
         PaymentMethodType.Card -> LinkController.PaymentMethodType.Card
         PaymentMethodType.BankAccount -> LinkController.PaymentMethodType.BankAccount
     }
+
+private data class CheckoutParams(
+    val platformApiKey: String,
+    val onrampSessionId: String,
+    val onrampSessionClientSecretProvider: suspend () -> String
+)
