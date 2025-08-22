@@ -39,9 +39,7 @@ internal fun ScanCardButtonUI(
     enabled: Boolean,
     controller: CardDetailsSectionController
 ) {
-    if (controller.isCardScanEnabled &&
-        (controller.isStripeCardScanAvailable() || FeatureFlags.cardScanGooglePayMigration.isEnabled)
-    ) {
+    if (controller.isStripeCardScanAvailable() || FeatureFlags.cardScanGooglePayMigration.isEnabled) {
         val cardScanLauncher = rememberLauncherForActivityResult(CardScanContract()) {
             controller.cardDetailsElement.controller.numberElement.controller.onCardScanResult(it)
         }
@@ -69,7 +67,7 @@ internal fun ScanCardButtonUI(
 
 @Composable
 @Suppress("LongMethod") // Should be removed along with feature flag when ready
-internal fun ScanCardButtonContent(
+private fun ScanCardButtonContent(
     enabled: Boolean,
     elementsSessionId: String?,
     cardScanLauncher: ManagedActivityResultLauncher<CardScanContract.Args, CardScanSheetResult>,

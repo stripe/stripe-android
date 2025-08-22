@@ -85,8 +85,6 @@ internal class ScanCardButtonUITest {
         val mockNumberElement = mock<CardNumberElement>()
         val mockNumberElementController = mock<CardNumberController>()
 
-        whenever(controller.isCardScanEnabled).thenReturn(true)
-
         whenever(controller.isStripeCardScanAvailable).thenReturn(mockIsStripeCardScanAvailable)
         whenever(mockIsStripeCardScanAvailable.invoke()).thenReturn(isStripeCardScanAvailable)
 
