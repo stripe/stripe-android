@@ -281,8 +281,12 @@ private fun UpdatePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
     PrimaryButton(
         label = stringResource(id = PaymentSheetR.string.stripe_paymentsheet_save),
         isLoading = isLoading,
-        isEnabled = state.isSaveButtonEnabled,
+        isEnabled = isEnabled,
+        canClickWhileDisabled = true,
         onButtonClick = { interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed) },
+        onDisabledButtonClick = {
+            interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.DisabledSaveButtonPressed)
+        },
         modifier = Modifier
             .testTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG)
             .testMetadata("isLoading=$isLoading")

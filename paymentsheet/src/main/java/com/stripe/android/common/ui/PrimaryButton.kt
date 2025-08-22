@@ -1,7 +1,9 @@
 package com.stripe.android.common.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,6 +22,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -37,8 +40,10 @@ internal fun PrimaryButton(
     isEnabled: Boolean,
     onButtonClick: () -> Unit,
     modifier: Modifier = Modifier,
+    canClickWhileDisabled: Boolean = false,
     isLoading: Boolean = false,
     displayLockIcon: Boolean = false,
+    onDisabledButtonClick: () -> Unit = {},
 ) {
     // We need to use PaymentsTheme.primaryButtonStyle instead of MaterialTheme
     // because of the rules API for primary button.
@@ -85,6 +90,12 @@ internal fun PrimaryButton(
                     displayLockIcon = displayLockIcon,
                 )
             }
+
+            DisabledButton(
+                enabled = isEnabled,
+                allowedDisabledClicks = canClickWhileDisabled,
+                onDisabledButtonClick = onDisabledButtonClick,
+            )
         }
     }
 }
@@ -141,5 +152,22 @@ private fun PrimaryButtonContent(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun BoxScope.DisabledButton(
+    enabled: Boolean,
+    allowedDisabledClicks: Boolean,
+    onDisabledButtonClick: () -> Unit,
+) {
+    if (allowedDisabledClicks && !enabled) {
+        Box(
+            Modifier
+                .matchParentSize()
+                .pointerInput(Unit) {
+                    detectTapGestures { onDisabledButtonClick.invoke() }
+                }
+        )
     }
 }

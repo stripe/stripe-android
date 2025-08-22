@@ -15,6 +15,7 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 internal data class ExpiryDateState(
     val text: String,
     val enabled: Boolean,
+    val validating: Boolean,
     private val dateConfig: DateConfig = DateConfig()
 ) {
 
@@ -49,20 +50,23 @@ internal data class ExpiryDateState(
         )
 
     fun shouldShowError(): Boolean {
-        return textFieldState.shouldShowError(hasFocus = true)
+        return textFieldState.shouldShowError(hasFocus = true, isValidating = validating)
     }
 
     @SuppressWarnings("SpreadOperator")
     fun sectionError(): ResolvableString? {
-        val hasError = textFieldState.shouldShowError(hasFocus = true)
         return textFieldState.getError()?.takeIf {
-            hasError && enabled
+            shouldShowError() && enabled
         }?.let { error ->
             resolvableString(
                 id = error.errorMessage,
                 formatArgs = error.formatArgs.orEmpty()
             )
         }
+    }
+
+    fun validate(): ExpiryDateState {
+        return copy(validating = true)
     }
 
     fun onDateChanged(proposedValue: String): ExpiryDateState {
@@ -96,6 +100,7 @@ internal data class ExpiryDateState(
             )
             return ExpiryDateState(
                 text = text,
+                validating = false,
                 enabled = enabled
             )
         }
