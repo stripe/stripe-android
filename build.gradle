@@ -129,12 +129,13 @@ subprojects {
                             "See https://github.com/cashapp/paparazzi/issues/906.")
                 }
             }
-
-            // Auto-add kotlin-parcelize-runtime when parcelize plugin is applied
-            if(project.plugins.hasPlugin('org.jetbrains.kotlin.plugin.parcelize')) {
-                project.dependencies {
-                    implementation libs.kotlin.parcelizeRuntimePlugin
-                }
+        }
+    }
+    // Auto-add kotlin-parcelize-runtime when parcelize plugin is applied
+    plugins.withId("org.jetbrains.kotlin.plugin.parcelize") {
+        afterEvaluate {
+            dependencies {
+                implementation libs.kotlin.parcelizeRuntimePlugin
             }
         }
     }
