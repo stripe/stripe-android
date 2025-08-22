@@ -1,17 +1,19 @@
 package com.stripe.android.crypto.onramp.example.network
 
-import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.Deserializable
 import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.core.awaitResult
 import com.github.kittinunf.fuel.core.extensions.jsonBody
+import com.github.kittinunf.fuel.core.interceptors.LogRequestAsCurlInterceptor
+import com.github.kittinunf.fuel.core.interceptors.LogRequestInterceptor
+import com.github.kittinunf.fuel.core.interceptors.LogResponseInterceptor
 import com.github.kittinunf.fuel.core.requests.suspendable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.DeserializationStrategy
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import com.github.kittinunf.result.Result as ApiResult
 
@@ -19,18 +21,46 @@ class TestBackendRepository {
 
     private val baseUrl = "https://crypto-onramp-example.stripedemos.com"
 
+    private val manager = FuelManager()
+
     private val json = Json {
         ignoreUnknownKeys = true
     }
 
+    init {
+        manager.addRequestInterceptor(LogRequestInterceptor)
+        manager.addResponseInterceptor(LogResponseInterceptor)
+        manager.addRequestInterceptor(LogRequestAsCurlInterceptor)
+    }
+
     suspend fun createAuthIntent(
-        email: String
+        email: String,
+        oauthScopes: String = listOf(
+            "userinfo:read",
+            "userinfo.addresses:read",
+            "kyc.status:read",
+            "kyc:write",
+            "kyc:read",
+            "kyc:share",
+            "auth.persist_login:read",
+            "payment_methods:read",
+            "payment_methods.bank_accounts:read",
+            "read_email",
+            "read_phone",
+            "share_full_name",
+            "share_full_name",
+            "share_email",
+            "share_address"
+        ).joinToString(",")
     ): ApiResult<CreateAuthIntentResponse, FuelError> {
         return withContext(Dispatchers.IO) {
-            val request = CreateAuthIntentRequest(email = email)
+            val request = CreateAuthIntentRequest(
+                email = email,
+                oauthScopes = oauthScopes
+            )
             val requestBody = json.encodeToString(CreateAuthIntentRequest.serializer(), request)
 
-            Fuel.post("$baseUrl/auth_intent/create")
+            manager.post("$baseUrl/auth_intent/create")
                 .jsonBody(requestBody)
                 .suspendable()
                 .awaitModel(CreateAuthIntentResponse.serializer(), json)
@@ -63,7 +93,7 @@ class TestBackendRepository {
 
             val requestBody = json.encodeToString(CreateOnrampSessionRequest.serializer(), request)
 
-            Fuel.post("$baseUrl/create_onramp_session")
+            manager.post("$baseUrl/create_onramp_session")
                 .timeout(SESSION_CREATION_TIMEOUT)
                 .timeoutRead(SESSION_CREATION_TIMEOUT)
                 .header("Authorization", "Bearer $authToken")
@@ -82,7 +112,7 @@ class TestBackendRepository {
             val request = CheckoutRequest(cosId = cosId)
             val requestBody = json.encodeToString(CheckoutRequest.serializer(), request)
 
-            Fuel.post("$baseUrl/checkout")
+            manager.post("$baseUrl/checkout")
                 .timeout(SESSION_CREATION_TIMEOUT)
                 .timeoutRead(SESSION_CREATION_TIMEOUT)
                 .header("Authorization", "Bearer $authToken")

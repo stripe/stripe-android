@@ -1,6 +1,7 @@
 package com.stripe.android.crypto.onramp.example
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -160,6 +161,7 @@ internal fun OnrampScreen(
     LaunchedEffect(message) {
         message?.let {
             Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            Log.d("OnrampExample", it)
             viewModel.clearMessage()
         }
     }
