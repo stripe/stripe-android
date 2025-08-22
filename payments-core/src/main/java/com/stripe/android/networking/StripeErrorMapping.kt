@@ -5,37 +5,42 @@ import com.stripe.android.R
 import com.stripe.android.core.StripeError
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
-import java.util.Locale
 import com.stripe.android.uicore.R as UiCoreR
 
 internal fun StripeError.withLocalizedMessage(context: Context): StripeError {
-    val newMessage = if (shouldFallBackToLocalizedError) {
-        context.mapErrorCodeToLocalizedMessage(code)
-    } else {
-        message ?: context.mapErrorCodeToLocalizedMessage(code)
-    }
-
-    return copy(message = newMessage)
+    return copy(
+        message = getErrorMessage(
+            originalMessage = message,
+            code = code,
+            declineCode = declineCode,
+            context = context,
+            isCardError = this.type == "card_error",
+        )
+    )
 }
 
 internal fun PaymentIntent.Error.withLocalizedMessage(context: Context): PaymentIntent.Error {
-    val newMessage = if (shouldFallBackToLocalizedError) {
-        context.mapErrorCodeToLocalizedMessage(code)
-    } else {
-        message ?: context.mapErrorCodeToLocalizedMessage(code)
-    }
-
-    return copy(message = newMessage)
+    return copy(
+        message = getErrorMessage(
+            originalMessage = message,
+            code = code,
+            declineCode = declineCode,
+            context = context,
+            isCardError = this.type == PaymentIntent.Error.Type.CardError,
+        )
+    )
 }
 
 internal fun SetupIntent.Error.withLocalizedMessage(context: Context): SetupIntent.Error {
-    val newMessage = if (shouldFallBackToLocalizedError) {
-        context.mapErrorCodeToLocalizedMessage(code)
-    } else {
-        message ?: context.mapErrorCodeToLocalizedMessage(code)
-    }
-
-    return copy(message = newMessage)
+    return copy(
+        message = getErrorMessage(
+            originalMessage = message,
+            code = code,
+            declineCode = declineCode,
+            context = context,
+            isCardError = this.type == SetupIntent.Error.Type.CardError
+        )
+    )
 }
 
 internal fun Context.mapErrorCodeToLocalizedMessage(code: String?): String? {
@@ -57,13 +62,20 @@ internal fun Context.mapErrorCodeToLocalizedMessage(code: String?): String? {
     return messageResourceId?.let { getString(it) }
 }
 
-/**
- * For some language tags, our backend is unable to provide translated error messages. For these
- * languages, we fall back to local error messages. As of right now, the only languages for which we
- * are aware of this issue are Spanish languages outside of Spain, such as in Argentina or Chile.
- */
-private val shouldFallBackToLocalizedError: Boolean
-    get() {
-        val locale = Locale.getDefault()
-        return locale.language.lowercase() == "es" && locale.country.lowercase() != "es"
-    }
+private fun getErrorMessage(
+    originalMessage: String?,
+    code: String?,
+    declineCode: String?,
+    context: Context,
+    isCardError: Boolean,
+): String {
+    // https://docs.stripe.com/api/errors#errors-message
+    // A human-readable message providing more details about the error.
+    // For card errors, these messages can be shown to your users.
+    return originalMessage.takeIf { isCardError }
+        // https://docs.stripe.com/error-codes
+        ?: context.mapErrorCodeToLocalizedMessage(code)
+        // https://docs.stripe.com/declines/codes
+        ?: context.mapErrorCodeToLocalizedMessage(declineCode)
+        ?: "There was an unexpected error -- try again in a few seconds"
+}
