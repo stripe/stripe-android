@@ -9,6 +9,7 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import com.google.android.gms.wallet.PaymentCardRecognitionResult
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,8 +19,7 @@ import kotlinx.coroutines.flow.asStateFlow
 internal class CardScanGoogleLauncher @VisibleForTesting constructor(
     context: Context,
     private val eventsReporter: CardScanEventsReporter,
-    private val paymentCardRecognitionClient: PaymentCardRecognitionClient =
-        DefaultPaymentCardRecognitionClient()
+    private val paymentCardRecognitionClient: PaymentCardRecognitionClient
 ) {
     private val implementation = "google_pay"
     private val _isAvailable = MutableStateFlow(false)
@@ -99,7 +99,14 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
             eventsReporter: CardScanEventsReporter,
             onResult: (CardScanResult) -> Unit
         ): CardScanGoogleLauncher {
-            val launcher = remember(context) { CardScanGoogleLauncher(context, eventsReporter) }
+            val paymentCardRecognitionClient = LocalPaymentCardRecognitionClient.current
+            val launcher = remember(context, eventsReporter, paymentCardRecognitionClient) {
+                CardScanGoogleLauncher(
+                    context,
+                    eventsReporter,
+                    paymentCardRecognitionClient
+                )
+            }
             val activityLauncher = rememberLauncherForActivityResult(
                 ActivityResultContracts.StartIntentSenderForResult(),
             ) { result ->
@@ -110,6 +117,11 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
             }
         }
     }
+}
+
+@VisibleForTesting
+internal val LocalPaymentCardRecognitionClient = compositionLocalOf<PaymentCardRecognitionClient> {
+    DefaultPaymentCardRecognitionClient()
 }
 
 internal sealed interface CardScanResult {
