@@ -86,7 +86,7 @@ internal class LinkInlineSignupConfirmationDefinition(
         val userInput = linkInlineSignupConfirmationOption.sanitizedUserInput
 
         return when (linkConfigurationCoordinator.getAccountStatusFlow(configuration).first()) {
-            AccountStatus.Verified -> createOptionAfterAttachingToLink(linkInlineSignupConfirmationOption, userInput)
+            is AccountStatus.Verified -> createOptionAfterAttachingToLink(linkInlineSignupConfirmationOption, userInput)
             AccountStatus.VerificationStarted,
             AccountStatus.NeedsVerification -> {
                 linkAnalyticsHelper.onLinkPopupSkipped()

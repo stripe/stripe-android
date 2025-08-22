@@ -974,6 +974,105 @@ class LinkControllerInteractorTest {
         interactor.configure(createControllerConfig())
     }
 
+    @Test
+    fun `authorize() launches Link with correct arguments`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+
+        val linkAuthIntentId = "lai_test123"
+        val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
+        interactor.authorize(launcher, linkAuthIntentId)
+
+        val args = launcher.calls.awaitItem().input
+        assertThat(args.linkExpressMode).isEqualTo(LinkExpressMode.ENABLED)
+        assertThat(args.linkAccountInfo.account).isNull()
+        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authorization(linkAuthIntentId = linkAuthIntentId))
+    }
+
+    @Test
+    fun `authorize() fails when configuration is not set`() = runTest {
+        val interactor = createInteractor()
+
+        interactor.authorizeResultFlow.test {
+            interactor.authorize(mock(), "lai_test123")
+            val result = awaitItem() as LinkController.AuthorizeResult.Failed
+            assertThat(result.error).isInstanceOf(MissingConfigurationException::class.java)
+        }
+    }
+
+    @Suppress("LongMethod")
+    @Test
+    fun `onLinkActivityResult() with Authorization results`() = runTest {
+        data class AuthorizationTestCase(
+            val name: String,
+            val linkActivityResult: LinkActivityResult,
+            val expectedAuthorizeResult: LinkController.AuthorizeResult
+        )
+
+        val error = Exception("Authorization error")
+        val testCases = listOf(
+            AuthorizationTestCase(
+                name = "Canceled",
+                linkActivityResult = LinkActivityResult.Canceled(
+                    reason = LinkActivityResult.Canceled.Reason.BackPressed,
+                    linkAccountUpdate = LinkAccountUpdate.Value(null)
+                ),
+                expectedAuthorizeResult = LinkController.AuthorizeResult.Canceled
+            ),
+            AuthorizationTestCase(
+                name = "Completed - Consented",
+                linkActivityResult = LinkActivityResult.Completed(
+                    linkAccountUpdate = LinkAccountUpdate.Value(null),
+                    selectedPayment = null,
+                    shippingAddress = null,
+                    authorizationConsentGranted = true
+                ),
+                expectedAuthorizeResult = LinkController.AuthorizeResult.Consented
+            ),
+            AuthorizationTestCase(
+                name = "Completed - Denied",
+                linkActivityResult = LinkActivityResult.Completed(
+                    linkAccountUpdate = LinkAccountUpdate.Value(null),
+                    selectedPayment = null,
+                    shippingAddress = null,
+                    authorizationConsentGranted = false
+                ),
+                expectedAuthorizeResult = LinkController.AuthorizeResult.Denied
+            ),
+            AuthorizationTestCase(
+                name = "Completed - null consent (fallback to Canceled)",
+                linkActivityResult = LinkActivityResult.Completed(
+                    linkAccountUpdate = LinkAccountUpdate.Value(null),
+                    selectedPayment = null,
+                    shippingAddress = null,
+                    authorizationConsentGranted = null
+                ),
+                expectedAuthorizeResult = LinkController.AuthorizeResult.Canceled
+            ),
+            AuthorizationTestCase(
+                name = "Failed",
+                linkActivityResult = LinkActivityResult.Failed(
+                    error = error,
+                    linkAccountUpdate = LinkAccountUpdate.Value(null)
+                ),
+                expectedAuthorizeResult = LinkController.AuthorizeResult.Failed(error)
+            )
+        )
+
+        testCases.forEach { testCase ->
+            val interactor = createInteractor()
+            configure(interactor)
+
+            // Set up the launch mode
+            interactor.authorize(FakeActivityResultLauncher(), "lai_test123")
+
+            interactor.authorizeResultFlow.test {
+                interactor.onLinkActivityResult(testCase.linkActivityResult)
+                assertThat(awaitItem()).isEqualTo(testCase.expectedAuthorizeResult)
+            }
+        }
+    }
+
     private data class ConsumerRegistrationParams(
         val email: String = "test@example.com",
         val phone: String = "1234567890",

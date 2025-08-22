@@ -2,17 +2,17 @@ package com.stripe.android.link.model
 
 import com.stripe.android.paymentsheet.state.LinkState
 
-internal enum class AccountStatus {
-    Verified, // Customer is signed in
-    NeedsVerification, // Customer needs to authenticate
-    VerificationStarted, // Customer has started OTP verification
-    SignedOut, // Customer is signed out
-    Error // Account status could not be determined
+internal sealed interface AccountStatus {
+    data class Verified(val consentPresentation: ConsentPresentation?) : AccountStatus // Customer is signed in
+    data object NeedsVerification : AccountStatus // Customer needs to authenticate
+    data object VerificationStarted : AccountStatus // Customer has started OTP verification
+    data object SignedOut : AccountStatus // Customer is signed out
+    data object Error : AccountStatus // Account status could not be determined
 }
 
 internal fun AccountStatus.toLoginState(): LinkState.LoginState {
     return when (this) {
-        AccountStatus.Verified ->
+        is AccountStatus.Verified ->
             LinkState.LoginState.LoggedIn
         AccountStatus.NeedsVerification,
         AccountStatus.VerificationStarted ->

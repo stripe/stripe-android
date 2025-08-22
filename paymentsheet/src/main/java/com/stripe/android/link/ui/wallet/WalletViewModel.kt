@@ -102,6 +102,7 @@ internal class WalletViewModel(
             is LinkLaunchMode.Confirmation -> null
             is LinkLaunchMode.PaymentMethodSelection -> selectedPayment?.id
             is LinkLaunchMode.Authentication -> null
+            is LinkLaunchMode.Authorization -> null
         }
 
     private val paymentMethodFilter
@@ -682,6 +683,8 @@ private fun StripeIntent.secondaryButtonLabel(linkLaunchMode: LinkLaunchMode): R
                 null
             }
         }
-        is LinkLaunchMode.Authentication -> null
+        is LinkLaunchMode.Authentication,
+        is LinkLaunchMode.Authorization ->
+            R.string.stripe_wallet_continue_another_way.resolvableString
     }
 }

@@ -22,6 +22,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.LoggedOut
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.account.linkAccountUpdate
 import com.stripe.android.link.attestation.FakeLinkAttestationCheck
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
@@ -29,6 +30,8 @@ import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.confirmation.Result
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.ConsentPresentation
+import com.stripe.android.link.model.LinkAuthIntentInfo
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.wallet.AddPaymentMethodOptions
 import com.stripe.android.link.utils.TestNavigationManager
@@ -294,7 +297,7 @@ internal class LinkActivityViewModelTest {
         val linkAccountManager = FakeLinkAccountManager()
 
         val vm = createViewModel(linkAccountManager = linkAccountManager)
-        linkAccountManager.setAccountStatus(AccountStatus.Verified)
+        linkAccountManager.setAccountStatus(AccountStatus.Verified(null))
 
         vm.onCreate(mock())
 
@@ -532,7 +535,7 @@ internal class LinkActivityViewModelTest {
     }
 
     @Test
-    fun `onCreate should dismiss 2fa on when succeeded`() = runTest {
+    fun `onCreate should dismiss 2fa on when succeeded`() = runTest(dispatcher) {
         val linkAccountManager = FakeLinkAccountManager()
         linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
 
@@ -542,17 +545,15 @@ internal class LinkActivityViewModelTest {
         )
         linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
 
-        vm.onCreate(mock())
+        vm.linkScreenState.test {
+            assertThat(awaitItem()).isEqualTo(ScreenState.Loading)
+            vm.onCreate(mock())
+            assertThat(awaitItem()).isEqualTo(ScreenState.VerificationDialog(TestFactory.LINK_ACCOUNT))
 
-        advanceUntilIdle()
-
-        assertThat(vm.linkScreenState.value).isEqualTo(ScreenState.VerificationDialog(TestFactory.LINK_ACCOUNT))
-
-        vm.onVerificationSucceeded()
-
-        advanceUntilIdle()
-
-        assertThat(vm.linkScreenState.value).isInstanceOf(ScreenState.FullScreen::class.java)
+            linkAccountManager.setAccountStatus(AccountStatus.Verified(null))
+            vm.onVerificationSucceeded()
+            assertThat(awaitItem()).isInstanceOf(ScreenState.FullScreen::class.java)
+        }
     }
 
     @Test
@@ -731,6 +732,69 @@ internal class LinkActivityViewModelTest {
                 )
             )
         }
+    }
+
+    @Test
+    fun `moveToWeb with Authorization launch mode should fail`() = runTest {
+        val vm = createViewModel(
+            linkLaunchMode = LinkLaunchMode.Authorization(linkAuthIntentId = "lai_123")
+        )
+
+        vm.result.test {
+            vm.moveToWeb(RuntimeException("test error"))
+
+            val result = awaitItem()
+            assertThat(result).isInstanceOf(LinkActivityResult.Failed::class.java)
+        }
+    }
+
+    @Test
+    fun `onCreate with Authorization mode and Verified status with Inline consent should complete immediately`() =
+        runTest {
+            val linkAccountManager = FakeLinkAccountManager()
+            val inlineConsentPresentation = mock<ConsentPresentation.Inline>()
+
+            val linkAuthIntentInfo = LinkAuthIntentInfo(
+                linkAuthIntentId = "lai_123",
+                consentPresentation = inlineConsentPresentation
+            )
+            val linkAccount = TestFactory.LINK_ACCOUNT.copy(
+                linkAuthIntentInfo = linkAuthIntentInfo
+            )
+            linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(linkAccount))
+
+            val vm = createViewModel(
+                linkAccountManager = linkAccountManager,
+                linkLaunchMode = LinkLaunchMode.Authorization(linkAuthIntentId = "lai_123")
+            )
+            linkAccountManager.setAccountStatus(AccountStatus.Verified(inlineConsentPresentation))
+
+            vm.result.test {
+                vm.onCreate(mock())
+                advanceUntilIdle()
+
+                val result = awaitItem() as LinkActivityResult.Completed
+                assertThat(result.linkAccountUpdate).isEqualTo(linkAccountManager.linkAccountUpdate)
+            }
+        }
+
+    @Test
+    fun `buildFullScreenState with Authorization mode should navigate to OAuthConsent when Verified`() = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+        val linkAccount = TestFactory.LINK_ACCOUNT
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(linkAccount))
+
+        val vm = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkLaunchMode = LinkLaunchMode.Authorization(linkAuthIntentId = "lai_123")
+        )
+        linkAccountManager.setAccountStatus(AccountStatus.Verified(null))
+
+        vm.onCreate(mock())
+        advanceUntilIdle()
+
+        val state = vm.linkScreenState.value as ScreenState.FullScreen
+        assertEquals(state.initialDestination, LinkScreen.OAuthConsent)
     }
 
     private fun testAttestationCheckError(

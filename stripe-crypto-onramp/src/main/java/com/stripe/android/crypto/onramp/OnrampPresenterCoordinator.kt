@@ -35,7 +35,8 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     private val linkPresenter = linkController.createPresenter(
         activity = activity,
         presentPaymentMethodsCallback = ::handleSelectPaymentResult,
-        authenticationCallback = ::handleAuthenticationResult
+        authenticationCallback = ::handleAuthenticationResult,
+        authorizeCallback = {}
     )
 
     private var identityVerificationSheet: IdentityVerificationSheet? = null

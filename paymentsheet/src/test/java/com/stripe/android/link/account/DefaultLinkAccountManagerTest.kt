@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.TestFactory
@@ -81,7 +82,7 @@ class DefaultLinkAccountManagerTest {
                 TestFactory.EMAIL,
                 linkRepository = linkRepository
             ).accountStatus.first()
-        ).isEqualTo(AccountStatus.Verified)
+        ).isEqualTo(AccountStatus.Verified(null))
 
         assertThat(linkRepository.callCount).isEqualTo(1)
     }
@@ -444,7 +445,7 @@ class DefaultLinkAccountManagerTest {
         assertThat(result.exceptionOrNull()).isEqualTo(
             AlreadyLoggedInLinkException(
                 email = TestFactory.EMAIL,
-                accountStatus = AccountStatus.Verified
+                accountStatus = AccountStatus.Verified(null)
             )
         )
     }
@@ -1098,7 +1099,7 @@ class DefaultLinkAccountManagerTest {
         accountStatusFlowTest(
             customerEmail = TestFactory.CUSTOMER_EMAIL,
             allowUserEmailEdits = true,
-            expectedStatus = AccountStatus.Verified,
+            expectedStatus = AccountStatus.Verified(null),
             expectedLookupEmail = TestFactory.CUSTOMER_EMAIL
         )
 
@@ -1107,7 +1108,7 @@ class DefaultLinkAccountManagerTest {
         accountStatusFlowTest(
             customerEmail = TestFactory.CUSTOMER_EMAIL,
             allowUserEmailEdits = false,
-            expectedStatus = AccountStatus.Verified,
+            expectedStatus = AccountStatus.Verified(null),
             expectedLookupEmail = TestFactory.CUSTOMER_EMAIL
         )
 
@@ -1160,7 +1161,8 @@ class DefaultLinkAccountManagerTest {
             ),
             linkRepository = linkRepository,
             linkEventsReporter = linkEventsReporter,
-            errorReporter = FakeErrorReporter()
+            errorReporter = FakeErrorReporter(),
+            linkLaunchMode = LinkLaunchMode.Full
         )
     }
 
