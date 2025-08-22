@@ -44,14 +44,8 @@ class GooglePayPaymentMethodLauncherComposeActivity : AppCompatActivity() {
         }
     }
 
-    @Composable
-    private fun GooglePayPaymentMethodLauncherScreen() {
-        val scaffoldState = rememberScaffoldState()
-        val scope = rememberCoroutineScope()
-        var enabled by remember { mutableStateOf(false) }
-        var checked by remember { mutableStateOf(false) }
-
-        val googlePayConfig = GooglePayPaymentMethodLauncher.Config(
+    private fun createGooglePayConfig(filterBrand: Boolean): GooglePayPaymentMethodLauncher.Config {
+        return GooglePayPaymentMethodLauncher.Config(
             environment = GooglePayEnvironment.Test,
             merchantCountryCode = "US",
             merchantName = "Widget Store",
@@ -61,8 +55,22 @@ class GooglePayPaymentMethodLauncherComposeActivity : AppCompatActivity() {
                 isPhoneNumberRequired = false
             ),
             existingPaymentMethodRequired = false,
-            cardBrandFilter = if (checked) GooglePayPaymentMethodLauncherAcceptableBrandsFilter(CardBrand.Visa) else DefaultCardBrandFilter
+            cardBrandFilter = if (filterBrand) {
+                GooglePayPaymentMethodLauncherAcceptableBrandsFilter(
+                    CardBrand.Visa
+                )
+            } else { DefaultCardBrandFilter }
         )
+    }
+
+    @Composable
+    private fun GooglePayPaymentMethodLauncherScreen() {
+        val scaffoldState = rememberScaffoldState()
+        val scope = rememberCoroutineScope()
+        var enabled by remember { mutableStateOf(false) }
+        var filterBrandCheck by remember { mutableStateOf(false) }
+
+        val googlePayConfig = createGooglePayConfig(filterBrand = filterBrandCheck)
 
         val googlePayLauncher = rememberGooglePayPaymentMethodLauncher(
             config = googlePayConfig,
@@ -94,7 +102,7 @@ class GooglePayPaymentMethodLauncherComposeActivity : AppCompatActivity() {
             }
         )
 
-        GooglePayPaymentMethodLauncherScreen(
+        GooglePayPaymentMethodLauncherView(
             scaffoldState = scaffoldState,
             enabled = enabled,
             onLaunchGooglePay = {
@@ -103,19 +111,19 @@ class GooglePayPaymentMethodLauncherComposeActivity : AppCompatActivity() {
                     amount = 2500L,
                 )
             },
-            checked,
-            onChecked = { checked = it }
+            filterBrandCheck,
+            onFilterBrandChecked = { filterBrandCheck = it }
         )
     }
 
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     @Composable
-    private fun GooglePayPaymentMethodLauncherScreen(
+    private fun GooglePayPaymentMethodLauncherView(
         scaffoldState: ScaffoldState,
         enabled: Boolean,
         onLaunchGooglePay: () -> Unit,
-        checked: Boolean,
-        onChecked: (Boolean) -> Unit
+        filterBrandChecked: Boolean,
+        onFilterBrandChecked: (Boolean) -> Unit
     ) {
         Scaffold(scaffoldState = scaffoldState) {
             Column {
@@ -132,8 +140,8 @@ class GooglePayPaymentMethodLauncherComposeActivity : AppCompatActivity() {
                 )
                 Row {
                     Checkbox(
-                        checked = checked,
-                        onCheckedChange = onChecked
+                        checked = filterBrandChecked,
+                        onCheckedChange = onFilterBrandChecked
                     )
                     Text(
                         modifier = Modifier.padding(start = 8.dp, top = 16.dp),

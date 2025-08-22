@@ -69,7 +69,11 @@ class GooglePayLauncherComposeActivity : StripeIntentActivity() {
                 isPhoneNumberRequired = false
             ),
             existingPaymentMethodRequired = false,
-            cardBrandFilter = if(checked) GooglePayLauncherAcceptableBrandsFilter(CardBrand.Visa) else DefaultCardBrandFilter
+            cardBrandFilter = if (checked) {
+                GooglePayLauncherAcceptableBrandsFilter(
+                    CardBrand.Visa
+                )
+            } else { DefaultCardBrandFilter }
         )
 
         LaunchedEffect(Unit) {
