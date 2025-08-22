@@ -94,10 +94,6 @@ internal class OnrampViewModel(
         val result = onrampCoordinator.lookupLinkUser(currentEmail)
         when (result) {
             is OnrampLinkLookupResult.Completed -> {
-                // Temporarily create an auth intent for the user after checking if they exist
-                // TODO(carlosmuvi): use OAuth flow using the LAI to authenticate user.
-                createAuthIntentForUser(currentEmail)
-
                 if (result.isLinkUser) {
                     _message.value = "User exists in Link. Please authenticate"
                     _uiState.update { it.copy(screen = Screen.Authentication) }
@@ -113,24 +109,8 @@ internal class OnrampViewModel(
         }
     }
 
-    private fun createAuthIntentForUser(email: String) {
-        viewModelScope.launch {
-            val result = testBackendRepository.createAuthIntent(email)
-            when (result) {
-                is Result.Success -> {
-                    val response = result.value
-                    _uiState.update { it.copy(authToken = response.token) }
-                    _message.value = "Auth intent created successfully"
-                }
-                is Result.Failure -> {
-                    _message.value = "Failed to create auth intent: ${result.error.message}"
-                }
-            }
-        }
-    }
-
     fun onBackToEmailInput() {
-        _uiState.update { it.copy(screen = Screen.EmailInput) }
+        _uiState.update { OnrampUiState() }
     }
 
     fun clearMessage() {
@@ -378,6 +358,33 @@ internal class OnrampViewModel(
             return false
         }
         return true
+    }
+
+    suspend fun createLinkAuthIntent(oauthScopes: String): String? {
+        val currentState = _uiState.value
+        val email = currentState.email.takeIf { currentState.screen == Screen.Authentication }
+            ?: return null
+
+        return createAuthIntentForUser(
+            email = email,
+            oauthScopes = oauthScopes
+        )
+    }
+
+    private suspend fun createAuthIntentForUser(email: String, oauthScopes: String): String? {
+        val result = testBackendRepository.createAuthIntent(email = email, oauthScopes = oauthScopes)
+        when (result) {
+            is Result.Success -> {
+                val response = result.value
+                _uiState.update { it.copy(authToken = response.token) }
+                _message.value = "Auth intent created successfully"
+                return response.data.id
+            }
+            is Result.Failure -> {
+                _message.value = "Failed to create auth intent: ${result.error.message}"
+                return null
+            }
+        }
     }
 
     class Factory : ViewModelProvider.Factory {

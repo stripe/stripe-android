@@ -46,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
@@ -59,6 +60,7 @@ import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.model.PaymentOptionDisplayData
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.image.rememberDrawablePainter
+import kotlinx.coroutines.launch
 
 internal class OnrampActivity : ComponentActivity() {
 
@@ -97,8 +99,16 @@ internal class OnrampActivity : ComponentActivity() {
                     OnrampScreen(
                         modifier = Modifier.padding(innerPadding),
                         viewModel = viewModel,
-                        onAuthenticateUser = {
-                            onrampPresenter.presentForVerification()
+                        onAuthenticateUser = { oauthScopes ->
+                            if (oauthScopes.isNullOrBlank()) {
+                                onrampPresenter.presentForVerification()
+                            } else {
+                                lifecycleScope.launch {
+                                    val linkAuthIntentId = viewModel.createLinkAuthIntent(oauthScopes)
+                                        ?: return@launch
+                                    onrampPresenter.authorize(linkAuthIntentId)
+                                }
+                            }
                         },
                         onAuthorize = { linkAuthIntentId ->
                             onrampPresenter.authorize(linkAuthIntentId)
@@ -130,8 +140,8 @@ internal class OnrampActivity : ComponentActivity() {
 internal fun OnrampScreen(
     viewModel: OnrampViewModel,
     modifier: Modifier = Modifier,
-    onAuthenticateUser: () -> Unit,
-    onAuthorize: (String) -> Unit,
+    onAuthenticateUser: (oauthScopes: String?) -> Unit,
+    onAuthorize: (linkAuthIntentId: String) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onStartVerification: () -> Unit,
     onCollectPayment: (type: PaymentMethodType) -> Unit,
@@ -188,7 +198,6 @@ internal fun OnrampScreen(
                 AuthenticationScreen(
                     email = uiState.email,
                     onAuthenticate = onAuthenticateUser,
-                    onAuthorize = onAuthorize,
                     onBack = {
                         viewModel.onBackToEmailInput()
                     }
@@ -241,7 +250,7 @@ private fun EmailInputScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        LinkAuthIntentSection(onAuthorize = onAuthorize)
+        AuthorizeSection(onAuthorize = onAuthorize)
     }
 }
 
@@ -375,10 +384,10 @@ private fun RegistrationButtons(
 @Composable
 private fun AuthenticationScreen(
     email: String,
-    onAuthenticate: () -> Unit,
-    onAuthorize: (String) -> Unit,
+    onAuthenticate: (oauthScopes: String?) -> Unit,
     onBack: () -> Unit
 ) {
+    var oauthScopes by remember { mutableStateOf("") }
     Column {
         Text(
             text = "Authenticate Link User",
@@ -396,16 +405,24 @@ private fun AuthenticationScreen(
                 .padding(bottom = 24.dp)
         )
 
+        OutlinedTextField(
+            value = oauthScopes,
+            onValueChange = { oauthScopes = it },
+            label = { Text("Request OAuth scopes (optional)") },
+            placeholder = { Text("userinfo:read,kyc:share") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
+        )
+
         Button(
-            onClick = onAuthenticate,
+            onClick = { onAuthenticate(oauthScopes) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 24.dp)
         ) {
             Text("Authenticate")
         }
-
-        LinkAuthIntentSection(onAuthorize = onAuthorize)
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -741,7 +758,7 @@ private fun StartVerificationScreen(
 }
 
 @Composable
-private fun LinkAuthIntentSection(
+private fun AuthorizeSection(
     onAuthorize: (String) -> Unit
 ) {
     var linkAuthIntentId by remember { mutableStateOf("") }
