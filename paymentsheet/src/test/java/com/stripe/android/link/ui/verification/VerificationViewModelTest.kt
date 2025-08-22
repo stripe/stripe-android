@@ -11,7 +11,10 @@ import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.model.ConsentPresentation
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.model.LinkAuthIntentInfo
+import com.stripe.android.model.ConsentUi
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
@@ -21,6 +24,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -200,7 +204,159 @@ internal class VerificationViewModelTest {
         }
     }
 
+    @Test
+    fun `LinkAccount consent presentation affects viewState consentSection`() = runTest(dispatcher) {
+        val consentSection = ConsentUi.ConsentSection("Hello")
+        run {
+            val vm = createViewModel(linkAccount = linkAccountWithInlineConsent(consentSection))
+            assertThat(vm.viewState.value.consentSection).isEqualTo(consentSection)
+        }
+
+        run {
+            val vm = createViewModel(linkAccount = linkAccountWithFullscreenConsent())
+            assertThat(vm.viewState.value.consentSection).isNull()
+        }
+    }
+
+    @Test
+    fun `onConsentShown allows consent to be granted in verification`() = runTest(dispatcher) {
+        val linkAccountManager = object : FakeLinkAccountManager() {
+            var consentGrantedValue: Boolean? = null
+            override suspend fun confirmVerification(code: String, consentGranted: Boolean?): Result<LinkAccount> {
+                consentGrantedValue = consentGranted
+                return Result.success(TestFactory.LINK_ACCOUNT)
+            }
+        }
+        val viewModel = createViewModel(linkAccountManager = linkAccountManager)
+
+        // First verify without consent shown
+        viewModel.onVerificationCodeEntered("123456")
+        assertThat(linkAccountManager.consentGrantedValue).isNull()
+
+        // Reset and test with consent shown
+        linkAccountManager.consentGrantedValue = null
+        viewModel.onConsentShown()
+        viewModel.onVerificationCodeEntered("123456")
+        assertThat(linkAccountManager.consentGrantedValue).isTrue()
+    }
+
+    @Test
+    fun `confirmVerification success behavior varies by launch mode`() = runTest(dispatcher) {
+        // Authentication mode should dismiss with result
+        run {
+            var resultCaptured: LinkActivityResult? = null
+            val dismissWithResult = { result: LinkActivityResult -> resultCaptured = result }
+            val viewModel = createViewModel(
+                linkLaunchMode = LinkLaunchMode.Authentication(),
+                dismissWithResult = dismissWithResult
+            )
+            viewModel.onVerificationCodeEntered("123456")
+            assertThat(resultCaptured).isInstanceOf(LinkActivityResult.Completed::class.java)
+        }
+
+        // Authorization mode with inline consent should dismiss with consent granted
+        run {
+            var result: LinkActivityResult? = null
+            val linkAccountManager = object : FakeLinkAccountManager() {
+                override suspend fun confirmVerification(code: String, consentGranted: Boolean?): Result<LinkAccount> {
+                    return Result.success(linkAccountWithInlineConsent())
+                }
+            }
+            val viewModel = createViewModel(
+                linkAccountManager = linkAccountManager,
+                linkLaunchMode = LinkLaunchMode.Authorization("auth_123"),
+                dismissWithResult = { result = it }
+            )
+            viewModel.onVerificationCodeEntered("123456")
+            val completedResult = result as? LinkActivityResult.Completed
+            assertThat(completedResult?.authorizationConsentGranted).isTrue()
+        }
+
+        // PaymentMethodSelection mode should call onVerificationSucceeded
+        run {
+            var onVerificationSucceededCalls = 0
+            var result: LinkActivityResult? = null
+            val viewModel = createViewModel(
+                linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(null),
+                onVerificationSucceeded = { onVerificationSucceededCalls += 1 },
+                dismissWithResult = { result = it }
+            )
+            viewModel.onVerificationCodeEntered("123456")
+            assertThat(onVerificationSucceededCalls).isEqualTo(1)
+            assertThat(result).isNull()
+        }
+    }
+
+    @Test
+    fun `Authorization mode with inline consent and onConsentShown works end to end`() = runTest(dispatcher) {
+        val linkAccountManager = object : FakeLinkAccountManager() {
+            var consentGrantedValue: Boolean? = null
+            override suspend fun confirmVerification(code: String, consentGranted: Boolean?): Result<LinkAccount> {
+                consentGrantedValue = consentGranted
+                return Result.success(linkAccountWithInlineConsent(mock()))
+            }
+        }
+
+        var result: LinkActivityResult? = null
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkLaunchMode = LinkLaunchMode.Authorization("auth_123"),
+            dismissWithResult = { result = it }
+        )
+
+        viewModel.onConsentShown()
+        viewModel.onVerificationCodeEntered("123456")
+
+        // Verify consent was passed correctly
+        assertThat(linkAccountManager.consentGrantedValue).isTrue()
+
+        // Verify correct result
+        val completedResult = result as? LinkActivityResult.Completed
+        assertThat(completedResult?.authorizationConsentGranted).isTrue()
+    }
+
+    @Test
+    fun `When confirmVerification succeeds then consentGranted parameter is passed correctly`() = runTest(dispatcher) {
+        val linkAccountManager = object : FakeLinkAccountManager() {
+            var consentGrantedValue: Boolean? = null
+            override suspend fun confirmVerification(code: String, consentGranted: Boolean?): Result<LinkAccount> {
+                consentGrantedValue = consentGranted
+                return Result.success(TestFactory.LINK_ACCOUNT)
+            }
+        }
+        var onVerificationSucceededCalls = 0
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            onVerificationSucceeded = { onVerificationSucceededCalls += 1 },
+        )
+
+        // Test without consent shown
+        viewModel.onVerificationCodeEntered("123456")
+        assertThat(linkAccountManager.consentGrantedValue).isNull()
+        assertThat(onVerificationSucceededCalls).isEqualTo(1)
+
+        // Reset and test with consent shown
+        linkAccountManager.consentGrantedValue = null
+        onVerificationSucceededCalls = 0
+        viewModel.onConsentShown()
+        viewModel.onVerificationCodeEntered("654321")
+        assertThat(linkAccountManager.consentGrantedValue).isTrue()
+        assertThat(onVerificationSucceededCalls).isEqualTo(1)
+    }
+
+    // Utility functions for test setup
+    private fun linkAccountWithInlineConsent(consentSection: ConsentUi.ConsentSection = mock()) =
+        TestFactory.LINK_ACCOUNT.copy(
+            linkAuthIntentInfo = LinkAuthIntentInfo("auth_123", ConsentPresentation.Inline(consentSection))
+        )
+
+    private fun linkAccountWithFullscreenConsent() =
+        TestFactory.LINK_ACCOUNT.copy(
+            linkAuthIntentInfo = LinkAuthIntentInfo("auth_123", ConsentPresentation.FullScreen(mock()))
+        )
+
     private fun createViewModel(
+        linkAccount: LinkAccount = TestFactory.LINK_ACCOUNT,
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
         linkEventsReporter: LinkEventsReporter = FakeLinkEventsReporter(),
         logger: Logger = FakeLogger(),
@@ -211,7 +367,7 @@ internal class VerificationViewModelTest {
         dismissWithResult: (LinkActivityResult) -> Unit = { },
     ): VerificationViewModel {
         return VerificationViewModel(
-            linkAccount = TestFactory.LINK_ACCOUNT,
+            linkAccount = linkAccount,
             linkAccountManager = linkAccountManager,
             linkEventsReporter = linkEventsReporter,
             logger = logger,
@@ -223,4 +379,5 @@ internal class VerificationViewModelTest {
             dismissWithResult = dismissWithResult
         )
     }
+
 }
