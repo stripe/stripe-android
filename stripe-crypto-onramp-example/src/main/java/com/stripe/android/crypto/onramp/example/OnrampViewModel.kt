@@ -1,7 +1,6 @@
 package com.stripe.android.crypto.onramp.example
 
 import android.app.Application
-import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle

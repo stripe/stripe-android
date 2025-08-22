@@ -36,7 +36,6 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -72,6 +71,7 @@ internal class OnrampActivity : ComponentActivity() {
         OnrampViewModel.Factory()
     }
 
+    @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
@@ -98,10 +98,6 @@ internal class OnrampActivity : ComponentActivity() {
                         )
                     },
                 ) { innerPadding ->
-                    val state by viewModel.uiState.collectAsState()
-                    BackHandler(enabled = state.screen != Screen.EmailInput) {
-                        viewModel.onBackToEmailInput()
-                    }
                     OnrampScreen(
                         modifier = Modifier.padding(innerPadding),
                         viewModel = viewModel,
@@ -160,6 +156,10 @@ internal fun OnrampScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
     val context = LocalContext.current
+
+    BackHandler(enabled = uiState.screen != Screen.EmailInput) {
+        viewModel.onBackToEmailInput()
+    }
 
     // Show toast messages
     LaunchedEffect(message) {
@@ -572,7 +572,6 @@ private fun AuthenticatedOperationsScreen(
         AuthenticateSection(
             onAuthenticate = onAuthenticate
         )
-
 
         Text(
             text = "Register Wallet Address",
