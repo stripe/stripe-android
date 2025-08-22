@@ -59,7 +59,7 @@ internal fun ScanCardButtonUI(
             null
         }
 
-        ScanCardButton(
+        ScanCardButtonContent(
             enabled = enabled,
             elementsSessionId = controller.elementsSessionId,
             cardScanLauncher = cardScanLauncher,
@@ -70,7 +70,7 @@ internal fun ScanCardButtonUI(
 
 @Composable
 @Suppress("LongMethod") // Should be removed along with feature flag when ready
-internal fun ScanCardButton(
+internal fun ScanCardButtonContent(
     enabled: Boolean,
     elementsSessionId: String?,
     cardScanLauncher: ManagedActivityResultLauncher<CardScanContract.Args, CardScanSheetResult>,

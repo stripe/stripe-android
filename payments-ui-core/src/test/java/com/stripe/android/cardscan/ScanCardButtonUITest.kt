@@ -17,7 +17,7 @@ import com.stripe.android.ui.core.cardscan.LocalTestCardScanGoogleLauncher
 import com.stripe.android.ui.core.elements.CardDetailsController
 import com.stripe.android.ui.core.elements.CardDetailsElement
 import com.stripe.android.ui.core.elements.CardDetailsSectionController
-import com.stripe.android.ui.core.elements.ScanCardButton
+import com.stripe.android.ui.core.elements.ScanCardButtonContent
 import com.stripe.android.ui.core.elements.ScanCardButtonUI
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -130,7 +130,7 @@ internal class ScanCardButtonUITest {
     }
 
     @Test
-    fun `ScanCardButton click behavior with Google launcher`() = runTest {
+    fun `ScanCardButtonContent click behavior with Google launcher`() = runTest {
         val mockCardScanLauncher = mock<ManagedActivityResultLauncher<CardScanContract.Args, CardScanSheetResult>>()
         val mockCardScanGoogleLauncher = mock<CardScanGoogleLauncher>()
         
@@ -144,7 +144,7 @@ internal class ScanCardButtonUITest {
             CompositionLocalProvider(
                 LocalCardScanEventsReporter provides fakeEventsReporter
             ) {
-                ScanCardButton(
+                ScanCardButtonContent(
                     enabled = true,
                     elementsSessionId = "test_session",
                     cardScanLauncher = mockCardScanLauncher,
@@ -160,7 +160,7 @@ internal class ScanCardButtonUITest {
     }
 
     @Test
-    fun `ScanCardButton click behavior with legacy launcher`() = runTest {
+    fun `ScanCardButtonContent click behavior with legacy launcher`() = runTest {
         val mockCardScanLauncher = mock<ManagedActivityResultLauncher<CardScanContract.Args, CardScanSheetResult>>()
         
         FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
@@ -169,7 +169,7 @@ internal class ScanCardButtonUITest {
             CompositionLocalProvider(
                 LocalCardScanEventsReporter provides fakeEventsReporter
             ) {
-                ScanCardButton(
+                ScanCardButtonContent(
                     enabled = true,
                     elementsSessionId = "test_session",
                     cardScanLauncher = mockCardScanLauncher,
