@@ -42,12 +42,6 @@ class TestBackendRepository {
             "auth.persist_login:read",
             "payment_methods:read",
             "payment_methods.bank_accounts:read",
-            "read_email",
-            "read_phone",
-            "share_full_name",
-            "share_full_name",
-            "share_email",
-            "share_address"
         ).joinToString(",")
     ): ApiResult<CreateAuthIntentResponse, FuelError> {
         return withContext(Dispatchers.IO) {
