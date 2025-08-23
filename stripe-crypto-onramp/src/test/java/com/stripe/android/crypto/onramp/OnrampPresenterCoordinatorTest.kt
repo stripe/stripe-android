@@ -99,7 +99,9 @@ class OnrampPresenterCoordinatorTest {
                 authenticationCallback = {},
                 selectPaymentCallback = {}
             ),
-            coroutineScope = testScope
+            coroutineScope = testScope,
+            accountIdProvider = { null },
+            publishableKeyProvider = { "pk_test_123" }
         )
     }
 

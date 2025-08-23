@@ -189,9 +189,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         when (paymentResult) {
             is PaymentResult.Completed -> {
                 // Next action completed successfully, tell interactor to continue
-                coroutineScope.launch {
-                    interactor.continueCheckout()
-                }
+                coroutineScope.launch { interactor.continueCheckout() }
             }
             is PaymentResult.Canceled -> {
                 // User canceled the next action

@@ -307,37 +307,36 @@ internal class OnrampInteractor @Inject constructor(
     private suspend fun performCheckoutInternal(
         onrampSessionId: String,
         checkoutHandler: suspend () -> String
-    ) {
-        runCatching {
-            val platformApiKey = cryptoApiRepository.getPlatformSettings().getOrThrow().publishableKey
+    ) = runCatching {
+        val platformApiKey = cryptoApiRepository.getPlatformSettings().getOrThrow().publishableKey
 
-            val paymentIntent = performCheckoutAndRetrievePaymentIntent(
-                onrampSessionId = onrampSessionId,
-                onrampSessionClientSecretProvider = checkoutHandler,
-                platformApiKey = platformApiKey
-            )
+        val paymentIntent = retrievePaymentIntent(
+            onrampSessionId = onrampSessionId,
+            onrampSessionClientSecret = checkoutHandler(),
+            platformApiKey = platformApiKey
+        )
 
-            // Check if the intent is already complete
-            mapIntentToCheckoutResult(paymentIntent)?.let { result ->
-                // Checkout is complete - clear session info and emit result
-                _checkoutState.update {
-                    it.copy(status = Status.Completed(result))
-                }
-            } ?: run {
-                // Requires next action - keep session info and update status
-                _checkoutState.update {
-                    it.copy(
-                        onrampSessionId = onrampSessionId,
-                        checkoutHandler = checkoutHandler,
-                        status = Status.RequiresNextAction(paymentIntent)
-                    )
-                }
-            }
-        }.getOrElse { error ->
-            // Error occurred - clear session info and emit failure
+        // Check if the intent is already complete
+        val checkoutResult = paymentIntent.toCheckoutResult()
+        if (checkoutResult == null) {
+            // Requires next action - trigger PaymentLauncher to handle next actions (UI)
             _checkoutState.update {
-                it.copy(status = Status.Completed(OnrampCheckoutResult.Failed(error)))
+                it.copy(
+                    onrampSessionId = onrampSessionId,
+                    checkoutHandler = checkoutHandler,
+                    status = Status.RequiresNextAction(paymentIntent)
+                )
             }
+        } else {
+            // Checkout is complete - clear session info and emit result
+            _checkoutState.update {
+                it.copy(status = Status.Completed(checkoutResult))
+            }
+        }
+    }.getOrElse { error ->
+        // Error occurred - clear session info and emit failure
+        _checkoutState.update {
+            it.copy(status = Status.Completed(OnrampCheckoutResult.Failed(error)))
         }
     }
 
@@ -345,18 +344,15 @@ internal class OnrampInteractor @Inject constructor(
      * Performs checkout and retrieves the resulting PaymentIntent.
      *
      * @param onrampSessionId The onramp session identifier.
-     * @param onrampSessionClientSecretProvider A suspend function that calls your backend to perform a checkout.
+     * @param onrampSessionClientSecret The onramp session client secret.
      * @param platformApiKey The platform API key.
      * @return The PaymentIntent after checkout.
      */
-    private suspend fun performCheckoutAndRetrievePaymentIntent(
+    private suspend fun retrievePaymentIntent(
         onrampSessionId: String,
-        onrampSessionClientSecretProvider: suspend () -> String,
+        onrampSessionClientSecret: String,
         platformApiKey: String
     ): PaymentIntent {
-        // Call the backend to perform checkout
-        val onrampSessionClientSecret = onrampSessionClientSecretProvider()
-
         // Get the onramp session to extract the payment_intent_client_secret
         val onrampSession = cryptoApiRepository.getOnrampSession(
             sessionId = onrampSessionId,
@@ -373,8 +369,8 @@ internal class OnrampInteractor @Inject constructor(
     /**
      * Maps a PaymentIntent status to a CheckoutResult, or returns null if more handling is needed.
      */
-    private fun mapIntentToCheckoutResult(intent: PaymentIntent): OnrampCheckoutResult? {
-        return when (intent.status) {
+    private fun PaymentIntent.toCheckoutResult(): OnrampCheckoutResult? {
+        return when (status) {
             StripeIntent.Status.Succeeded -> OnrampCheckoutResult.Completed
             StripeIntent.Status.RequiresPaymentMethod -> OnrampCheckoutResult.Failed(PaymentFailedException())
             StripeIntent.Status.RequiresAction -> null // More handling needed
