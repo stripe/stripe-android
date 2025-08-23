@@ -1407,6 +1407,12 @@ internal class PaymentSheetViewModelTest {
                     PaymentMethod.Type.Sofort.code,
                 ),
             ),
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                config = PaymentSheet.Configuration(
+                    merchantDisplayName = "Example, Inc.",
+                    allowsDelayedPaymentMethods = false
+                )
+            ),
         )
 
         assertThat(
