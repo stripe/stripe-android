@@ -7,6 +7,8 @@ import androidx.core.net.toUri
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
@@ -25,11 +27,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 
 @OnrampPresenterScope
 internal class OnrampPresenterCoordinator @Inject constructor(
-    private val linkController: LinkController,
     private val interactor: OnrampInteractor,
+    @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+    @Named(STRIPE_ACCOUNT_ID) accountIdProvider: () -> String?,
+    linkController: LinkController,
     lifecycleOwner: LifecycleOwner,
     private val activity: ComponentActivity,
     private val onrampCallbacks: OnrampCallbacks,
@@ -46,16 +51,12 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     private var identityVerificationSheet: IdentityVerificationSheet? = null
 
-    // No longer need to store checkout session - interactor manages it now
-
-    private val paymentLauncher: PaymentLauncher by lazy {
-        PaymentLauncher.create(
-            activity = activity,
-            publishableKey = interactor.state.value.configuration?.publishableKey ?: "",
-            stripeAccountId = interactor.state.value.configuration?.stripeAccountId,
-            callback = ::handlePaymentLauncherResult
-        )
-    }
+    private val paymentLauncher: PaymentLauncher = PaymentLauncher.create(
+        activity = activity,
+        publishableKey = publishableKeyProvider(),
+        stripeAccountId = accountIdProvider(),
+        callback = ::handlePaymentLauncherResult
+    )
 
     private val currentLinkAccount: LinkController.LinkAccount?
         get() = interactor.state.value.linkControllerState?.internalLinkAccount

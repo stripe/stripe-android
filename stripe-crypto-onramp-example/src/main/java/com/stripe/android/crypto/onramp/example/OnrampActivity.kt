@@ -114,21 +114,11 @@ internal class OnrampActivity : ComponentActivity() {
                     OnrampScreen(
                         modifier = Modifier.padding(innerPadding),
                         viewModel = viewModel,
-                        onAuthenticateUser = {
-                            onrampPresenter.presentForVerification()
-                        },
-                        onRegisterWalletAddress = { address, network ->
-                            viewModel.registerWalletAddress(address, network)
-                        },
-                        onStartVerification = {
-                            onrampPresenter.promptForIdentityVerification()
-                        },
-                        onCollectPayment = { type ->
-                            onrampPresenter.collectPaymentMethod(type)
-                        },
-                        onCreatePaymentToken = {
-                            viewModel.createCryptoPaymentToken()
-                        }
+                        onAuthenticateUser = onrampPresenter::presentForVerification,
+                        onRegisterWalletAddress = viewModel::registerWalletAddress,
+                        onStartVerification = onrampPresenter::promptForIdentityVerification,
+                        onCollectPayment = onrampPresenter::collectPaymentMethod,
+                        onCreatePaymentToken = viewModel::createCryptoPaymentToken
                     )
                 }
             }
