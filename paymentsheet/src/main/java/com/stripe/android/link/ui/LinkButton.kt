@@ -95,7 +95,7 @@ private val LinkButtonTheme.logoRes: Int
     @Composable
     @DrawableRes
     get() = when (this) {
-        LinkButtonTheme.WHITE -> R.drawable.stripe_link_logo
+        LinkButtonTheme.WHITE -> R.drawable.stripe_link_logo_light
         LinkButtonTheme.DEFAULT -> com.stripe.android.uicore.R.drawable.stripe_link_logo_bw
     }
 
