@@ -123,6 +123,7 @@ class LinkFormElementTest {
             initialLinkUserInput = initialLinkUserInput,
             linkConfigurationCoordinator = createLinkConfigurationCoordinator(),
             onLinkInlineSignupStateChanged = {},
+            previousLinkSignupCheckboxSelection = null,
         )
     }
 
@@ -239,6 +240,7 @@ class LinkFormElementTest {
                 linkEventsReporter = FakeLinkInlineSignupEventsReporter,
                 logger = Logger.noop(),
                 lookupDelay = 0L,
+                previousLinkSignupCheckboxSelection = previousLinkSignupCheckboxSelection,
             )
         }
     }
