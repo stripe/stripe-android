@@ -78,7 +78,6 @@ internal class InlineSignupViewModel(
         initialEmail = initialEmail,
         initialPhone = initialPhone,
         isExpanded = if (config.linkSignUpOptInFeatureEnabled) {
-            // Use inferred checkbox state if available, otherwise use config default
             previousLinkSignupCheckboxSelection ?: config.linkSignUpOptInInitialValue
         } else {
             hasInitialUserInput
