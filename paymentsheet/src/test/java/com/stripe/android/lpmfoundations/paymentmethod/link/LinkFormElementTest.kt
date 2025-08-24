@@ -226,7 +226,11 @@ class LinkFormElementTest {
         private val linkAccountManager: LinkAccountManager,
         private val configuration: LinkConfiguration,
     ) : LinkInlineSignupAssistedViewModelFactory {
-        override fun create(signupMode: LinkSignupMode, initialUserInput: UserInput?): InlineSignupViewModel {
+        override fun create(
+            signupMode: LinkSignupMode,
+            initialUserInput: UserInput?,
+            previousLinkSignupCheckboxSelection: Boolean?
+        ): InlineSignupViewModel {
             return InlineSignupViewModel(
                 signupMode = signupMode,
                 config = configuration,

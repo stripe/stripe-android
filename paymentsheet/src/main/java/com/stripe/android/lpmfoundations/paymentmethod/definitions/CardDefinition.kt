@@ -126,6 +126,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                         linkConfigurationCoordinator = arguments.linkConfigurationCoordinator,
                         initialLinkUserInput = arguments.initialLinkUserInput,
                         onLinkInlineSignupStateChanged = arguments.onLinkInlineSignupStateChanged,
+                        previousLinkSignupCheckboxSelection = arguments.previousLinkSignupCheckboxSelection,
                     )
                 )
 
