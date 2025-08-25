@@ -567,6 +567,24 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
+    override suspend fun updatePhoneNumber(phoneNumber: String): Result<ConsumerSession> {
+        val linkAccount = linkAccountHolder.linkAccountInfo.value.account
+            ?: return Result.failure(NoLinkAccountFoundException())
+        return linkRepository.updatePhoneNumber(
+            consumerSessionClientSecret = linkAccount.clientSecret,
+            phoneNumber = phoneNumber,
+            consumerPublishableKey = linkAccount.consumerPublishableKey
+        ).map { consumerSession ->
+            setAccount(
+                consumerSession = consumerSession,
+                publishableKey = null,
+                displayablePaymentDetails = null,
+                linkAuthIntentInfo = linkAccount.linkAuthIntentInfo,
+            )
+            consumerSession
+        }
+    }
+
     private suspend fun getAccountStatus(
         linkAccount: LinkAccount?,
         canLookupCustomerEmail: Boolean
