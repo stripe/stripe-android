@@ -133,6 +133,12 @@ interface ConsumersApiService {
         requestSurface: String,
         requestOptions: ApiRequest.Options
     ): Result<LinkAccountSession>
+
+    suspend fun updatePhoneNumber(
+        consumerSessionClientSecret: String,
+        phoneNumber: String,
+        requestOptions: ApiRequest.Options
+    ): Result<ConsumerSession>
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -471,6 +477,28 @@ class ConsumersApiServiceImpl(
         )
     }
 
+    override suspend fun updatePhoneNumber(
+        consumerSessionClientSecret: String,
+        phoneNumber: String,
+        requestOptions: ApiRequest.Options
+    ): Result<ConsumerSession> {
+        return executeRequestWithResultParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createPost(
+                url = updatePhoneNumberUrl,
+                options = requestOptions,
+                params = mapOf(
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    ),
+                    "phone_number" to phoneNumber,
+                ),
+            ),
+            responseJsonParser = ConsumerSessionJsonParser(),
+        )
+    }
+
     internal companion object {
 
         /**
@@ -539,6 +567,11 @@ class ConsumersApiServiceImpl(
          * @return `https://api.stripe.com/v1/consumers/sessions/consent_update`
          */
         internal val consentUpdateUrl: String = getApiUrl("consumers/sessions/consent_update")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/accounts/update_phone`
+         */
+        internal val updatePhoneNumberUrl: String = getApiUrl("consumers/accounts/update_phone")
 
         private fun getApiUrl(path: String): String {
             return "${ApiRequest.API_HOST}/v1/$path"
