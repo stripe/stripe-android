@@ -371,6 +371,14 @@ class LinkController @Inject internal constructor(
             )
         }
 
+        /**
+         * [CRYPTO ONRAMP ONLY] Authorize a LinkAuthIntent.
+         *
+         * This will launch the Link activity where users can authenticate with their Link account and
+         * submit consent for scopes associated with the LinkAuthIntent.
+         *
+         * The result will be communicated through the [AuthorizeCallback] provided during controller creation.
+         */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun authorize(linkAuthIntentId: String) {
             interactor.authorize(
@@ -529,18 +537,33 @@ class LinkController @Inject internal constructor(
         class Failed internal constructor(val error: Throwable) : RegisterConsumerResult
     }
 
+    /**
+     * [CRYPTO ONRAMP ONLY] Result of authorizing a LinkAuthIntent.
+     */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed interface AuthorizeResult {
 
+        /**
+         * The user granted consent to the scopes requested by the LinkAuthIntent.
+         */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data object Consented : AuthorizeResult
 
+        /**
+         * The user denied consent to the scopes requested by the LinkAuthIntent.
+         */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data object Denied : AuthorizeResult
 
+        /**
+         * The user canceled the authorization.
+         */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data object Canceled : AuthorizeResult
 
+        /**
+         * An error occurred while authorizing the LinkAuthIntent.
+         */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Poko
         class Failed internal constructor(val error: Throwable) : AuthorizeResult
@@ -563,6 +586,9 @@ class LinkController @Inject internal constructor(
         fun onAuthenticationResult(result: AuthenticationResult)
     }
 
+    /**
+     * [CRYPTO ONRAMP ONLY] Callback for receiving results from [Presenter.authorize].
+     */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun interface AuthorizeCallback {
         fun onAuthorizeResult(result: AuthorizeResult)

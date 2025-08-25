@@ -130,11 +130,12 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     }
 
     private fun createIdentityVerificationSheet(merchantLogoUrl: String?): IdentityVerificationSheet {
+        check(R.drawable.stripe_ic_business_with_bg != 0)
         val fallbackMerchantLogoUri: Uri = Uri.Builder()
             .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
             .authority(activity.packageName)
             .appendPath("drawable")
-            .appendPath("stripe_ic_business")
+            .appendPath("stripe_ic_business_with_bg")
             .build()
 
         val logoUri = merchantLogoUrl?.toUri() ?: fallbackMerchantLogoUri
