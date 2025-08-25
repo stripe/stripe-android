@@ -33,5 +33,11 @@ internal data class CheckoutState(
          * Checkout completed with a final result.
          */
         data class Completed(val result: OnrampCheckoutResult) : Status
+
+        val inProgress: Boolean
+            get() = when (this) {
+                is Processing, is RequiresNextAction -> true
+                is Completed -> false
+            }
     }
 }

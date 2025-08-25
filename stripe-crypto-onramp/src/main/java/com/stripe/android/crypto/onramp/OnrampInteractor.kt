@@ -282,6 +282,10 @@ internal class OnrampInteractor @Inject constructor(
         onrampSessionId: String,
         checkoutHandler: suspend () -> String
     ) {
+        if (_state.value.checkoutState?.status?.inProgress == true) {
+            // Checkout is already in progress - ignore duplicate calls
+            return
+        }
         cryptoApiRepository.getPlatformSettings()
             .onSuccess { settings ->
                 // Start processing with session info
