@@ -4,6 +4,8 @@
 
 ## 21.24.1 - 2025-08-25
 
+Bug fixes and improvements.
+
 ## 21.24.0 - 2025-08-25
 
 ### CardScan
