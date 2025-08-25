@@ -42,6 +42,7 @@ internal data class LinkConfiguration(
     val linkAppearance: LinkAppearance?,
     val linkSignUpOptInFeatureEnabled: Boolean,
     val linkSignUpOptInInitialValue: Boolean,
+    val linkMobileDisableLinkOnAttestationFailure: Boolean,
     private val customerId: String?,
     val saveConsentBehavior: PaymentMethodSaveConsentBehavior,
     val forceSetupFutureUseBehaviorAndNewMandate: Boolean,
