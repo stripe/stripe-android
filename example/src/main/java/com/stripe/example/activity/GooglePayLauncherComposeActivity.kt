@@ -138,8 +138,8 @@ class GooglePayLauncherComposeActivity : StripeIntentActivity() {
             clientSecret = clientSecret,
             googlePayReady = googlePayReady,
             completed = completed,
-            checked = checked,
-            onChecked = { checked = it },
+            cardBrandFilterChecked = checked,
+            onCardBrandFilterChecked = { checked = it },
             onLaunchGooglePay = { googlePayLauncher.presentForPaymentIntent(it) }
         )
     }
@@ -152,8 +152,8 @@ class GooglePayLauncherComposeActivity : StripeIntentActivity() {
         googlePayReady: Boolean?,
         completed: Boolean,
         onLaunchGooglePay: (String) -> Unit,
-        checked: Boolean,
-        onChecked: (Boolean) -> Unit
+        cardBrandFilterChecked: Boolean,
+        onCardBrandFilterChecked: (Boolean) -> Unit
     ) {
         Scaffold(scaffoldState = scaffoldState) {
             Column(Modifier.fillMaxWidth()) {
@@ -184,8 +184,8 @@ class GooglePayLauncherComposeActivity : StripeIntentActivity() {
 
                 Row {
                     Checkbox(
-                        checked = checked,
-                        onCheckedChange = onChecked
+                        checked = cardBrandFilterChecked,
+                        onCheckedChange = onCardBrandFilterChecked
                     )
                     Text(
                         modifier = Modifier.padding(start = 8.dp, top = 16.dp),
@@ -202,7 +202,7 @@ class GooglePayLauncherComposeActivity : StripeIntentActivity() {
 }
 
 @Parcelize
-class GooglePayLauncherAcceptableBrandsFilter(
+private class GooglePayLauncherAcceptableBrandsFilter(
     private val cardBrands: Set<CardBrand>
 ) : CardBrandFilter {
     constructor(vararg cardBrands: CardBrand) : this(cardBrands.toSet())
