@@ -75,18 +75,18 @@ internal fun PaymentMethodBody(
         }
 
         LinkAppearanceTheme(appearance = appearance) {
-        	PrimaryButton(
-        	    modifier = Modifier.padding(vertical = 16.dp),
-        	    label = state.primaryButtonLabel.resolve(),
-        	    state = state.primaryButtonState,
-        	    allowedDisabledClicks = true,
-        	    onDisabledButtonClick = onDisabledPayClicked,
-        	    onButtonClick = {
-        	        focusManager.clearFocus()
-        	        onPayClicked()
-        	    },
-        	    iconEnd = PaymentsUiCoreR.drawable.stripe_ic_lock
-        	)
+            PrimaryButton(
+                modifier = Modifier.padding(vertical = 16.dp),
+                label = state.primaryButtonLabel.resolve(),
+                state = state.primaryButtonState,
+                allowedDisabledClicks = true,
+                onDisabledButtonClick = onDisabledPayClicked,
+                onButtonClick = {
+                    focusManager.clearFocus()
+                    onPayClicked()
+                },
+                iconEnd = PaymentsUiCoreR.drawable.stripe_ic_lock
+            )
         }
     }
 }
