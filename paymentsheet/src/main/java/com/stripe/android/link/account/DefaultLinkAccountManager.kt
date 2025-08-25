@@ -567,7 +567,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
-    override suspend fun updatePhoneNumber(phoneNumber: String): Result<ConsumerSession> {
+    override suspend fun updatePhoneNumber(phoneNumber: String): Result<LinkAccount> {
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
             ?: return Result.failure(NoLinkAccountFoundException())
         return linkRepository.updatePhoneNumber(
@@ -581,7 +581,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 displayablePaymentDetails = null,
                 linkAuthIntentInfo = linkAccount.linkAuthIntentInfo,
             )
-            consumerSession
         }
     }
 

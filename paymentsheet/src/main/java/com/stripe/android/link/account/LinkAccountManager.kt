@@ -203,7 +203,7 @@ internal interface LinkAccountManager {
     /**
      * Update the phone number for the signed in consumer.
      */
-    suspend fun updatePhoneNumber(phoneNumber: String): Result<ConsumerSession>
+    suspend fun updatePhoneNumber(phoneNumber: String): Result<LinkAccount>
 }
 
 internal val LinkAccountManager.consumerPublishableKey: String?

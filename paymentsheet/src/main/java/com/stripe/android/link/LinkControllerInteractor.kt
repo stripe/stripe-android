@@ -411,6 +411,23 @@ internal class LinkControllerInteractor @Inject constructor(
             )
     }
 
+    suspend fun updatePhoneNumber(phoneNumber: String): LinkController.UpdatePhoneNumberResult {
+        return requireLinkComponent()
+            .flatMapCatching { component ->
+                component.linkAccountManager.updatePhoneNumber(phoneNumber)
+            }
+            .fold(
+                onSuccess = { linkAccount ->
+                    // Update the account with the new phone number info
+                    updateStateOnAccountUpdate(LinkAccountUpdate.Value(linkAccount))
+                    LinkController.UpdatePhoneNumberResult.Success
+                },
+                onFailure = {
+                    LinkController.UpdatePhoneNumberResult.Failed(it)
+                }
+            )
+    }
+
     fun authorize(
         launcher: ActivityResultLauncher<LinkActivityContract.Args>,
         linkAuthIntentId: String
