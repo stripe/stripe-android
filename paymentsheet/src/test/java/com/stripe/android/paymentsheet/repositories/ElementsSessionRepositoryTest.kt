@@ -577,24 +577,14 @@ internal class ElementsSessionRepositoryTest {
 
     @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
     @Test
-    fun `Verify PMO SFU params are passed to 'StripeRepository'` () = runTest {
-        whenever(
-            stripeRepository.retrieveElementsSession(any(), any())
-        ).thenReturn(
+    fun `Verify PMO SFU params are passed to 'StripeRepository'`() = runTest {
+        whenever(stripeRepository.retrieveElementsSession(any(), any())).thenReturn(
             Result.success(
                 ElementsSession.createFromFallback(
                     stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
                     sessionsError = null,
                 )
             )
-        )
-
-        val repository = RealElementsSessionRepository(
-            stripeRepository,
-            { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
-            testDispatcher,
-            { MOBILE_SESSION_ID },
-            appId = APP_ID
         )
 
         val paymentMethodOptions = PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
@@ -606,7 +596,7 @@ internal class ElementsSessionRepositoryTest {
             )
         )
 
-        repository.get(
+        createRepository().get(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
