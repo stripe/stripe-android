@@ -125,6 +125,7 @@ internal class LinkActivity : ComponentActivity() {
                     lastUpdateReason = null
                 ),
                 launchMode = LinkLaunchMode.Full,
+                passiveCaptchaParams = null,
             )
         )
     }

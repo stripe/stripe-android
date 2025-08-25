@@ -35,6 +35,7 @@ import com.stripe.android.link.model.LinkAuthIntentInfo
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.wallet.AddPaymentMethodOptions
 import com.stripe.android.link.utils.TestNavigationManager
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
@@ -151,6 +152,7 @@ internal class LinkActivityViewModelTest {
             ),
             paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
             launchMode = LinkLaunchMode.Full,
+            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
         )
         val savedStateHandle = SavedStateHandle()
         val factory = LinkActivityViewModel.factory(savedStateHandle)

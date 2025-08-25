@@ -8,6 +8,7 @@ import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.analytics.FakeLinkAnalyticsHelper
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
 import com.stripe.android.link.injection.LinkAnalyticsComponent
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.testing.CoroutineTestRule
@@ -91,7 +92,8 @@ internal class LinkPaymentLauncherTest {
                 configuration = TestFactory.LINK_CONFIGURATION,
                 linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                 linkExpressMode = LinkExpressMode.ENABLED,
-                launchMode = LinkLaunchMode.Full
+                launchMode = LinkLaunchMode.Full,
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
 
             val launchCall = awaitLaunchCall()
@@ -103,6 +105,7 @@ internal class LinkPaymentLauncherTest {
                         linkExpressMode = LinkExpressMode.ENABLED,
                         linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                         launchMode = LinkLaunchMode.Full,
+                        passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
                     )
                 )
 
@@ -124,7 +127,8 @@ internal class LinkPaymentLauncherTest {
                 configuration = TestFactory.LINK_CONFIGURATION,
                 linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                 linkExpressMode = LinkExpressMode.DISABLED,
-                launchMode = LinkLaunchMode.Full
+                launchMode = LinkLaunchMode.Full,
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
 
             val launchCall = awaitLaunchCall() as? LinkActivityContract.Args
@@ -233,7 +237,8 @@ internal class LinkPaymentLauncherTest {
                 configuration = TestFactory.LINK_CONFIGURATION,
                 linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                 linkExpressMode = LinkExpressMode.ENABLED,
-                launchMode = LinkLaunchMode.Full
+                launchMode = LinkLaunchMode.Full,
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
 
             verifyActivityResultCallback(
@@ -265,7 +270,8 @@ internal class LinkPaymentLauncherTest {
                     configuration = TestFactory.LINK_CONFIGURATION,
                     linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                     linkExpressMode = LinkExpressMode.ENABLED,
-                    launchMode = LinkLaunchMode.Full
+                    launchMode = LinkLaunchMode.Full,
+                    passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
                 )
 
                 val registerCall = awaitRegisterCall()

@@ -30,7 +30,8 @@ internal class NativeLinkActivityContract @Inject constructor(
                 linkExpressMode = input.linkExpressMode,
                 launchMode = input.launchMode,
                 paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
-                linkAccountInfo = input.linkAccountInfo
+                linkAccountInfo = input.linkAccountInfo,
+                passiveCaptchaParams = input.passiveCaptchaParams
             )
         )
     }

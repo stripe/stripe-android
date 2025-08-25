@@ -7,6 +7,7 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator.Parameters
@@ -122,6 +123,7 @@ class LinkConfirmationFlowTest {
                     paymentMethod = PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = true,
+                    passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
                 ),
                 parameters = CONFIRMATION_PARAMETERS,
             )
@@ -153,6 +155,7 @@ class LinkConfirmationFlowTest {
         private val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(
             configuration = TestFactory.LINK_CONFIGURATION,
             linkExpressMode = LinkExpressMode.ENABLED,
+            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
         )
     }
 }

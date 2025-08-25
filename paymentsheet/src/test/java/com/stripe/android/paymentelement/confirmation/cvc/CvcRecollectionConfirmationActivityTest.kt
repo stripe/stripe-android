@@ -13,6 +13,7 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.intent.rule.IntentsRule
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ExtendedPaymentElementConfirmationTestActivity
@@ -77,6 +78,7 @@ internal class CvcRecollectionConfirmationActivityTest {
                     PaymentMethodConfirmationOption.Saved(
                         paymentMethod = PAYMENT_METHOD,
                         optionsParams = PaymentMethodOptionsParams.Card(cvc = "444"),
+                        passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
                     )
                 )
 
@@ -109,6 +111,7 @@ internal class CvcRecollectionConfirmationActivityTest {
                     PaymentMethodConfirmationOption.Saved(
                         paymentMethod = PAYMENT_METHOD,
                         optionsParams = null,
+                        passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
                     )
                 )
 
@@ -187,6 +190,7 @@ internal class CvcRecollectionConfirmationActivityTest {
         val CONFIRMATION_OPTION = PaymentMethodConfirmationOption.Saved(
             paymentMethod = PAYMENT_METHOD,
             optionsParams = null,
+            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
         )
 
         val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(

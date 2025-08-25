@@ -435,6 +435,7 @@ internal class LinkActivityViewModel @Inject constructor(
                 DaggerNativeLinkComponent
                     .builder()
                     .configuration(args.configuration)
+                    .passiveCaptchaParams(args.passiveCaptchaParams)
                     .requestSurface(args.requestSurface)
                     .publishableKeyProvider { args.publishableKey }
                     .stripeAccountIdProvider { args.stripeAccountId }

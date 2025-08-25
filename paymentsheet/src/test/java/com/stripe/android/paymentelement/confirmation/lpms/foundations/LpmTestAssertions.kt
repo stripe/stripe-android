@@ -36,6 +36,7 @@ internal suspend fun assertIntentConfirmed(
         optionsParams = params.optionsParams,
         extraParams = params.extraParams,
         shouldSave = params.customerRequestedSave,
+        passiveCaptchaParams = null
     )
 
     activity.confirmationHandler.state.test {

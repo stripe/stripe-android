@@ -30,6 +30,7 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -239,7 +240,8 @@ internal class PaymentOptionsViewModelTest {
             configuration = any(),
             linkAccountInfo = eq(LinkAccountUpdate.Value(unverifiedAccount)),
             launchMode = eq(LinkLaunchMode.PaymentMethodSelection(selectedPayment = null)),
-            linkExpressMode = eq(LinkExpressMode.ENABLED)
+            linkExpressMode = eq(LinkExpressMode.ENABLED),
+            passiveCaptchaParams = eq(PassiveCaptchaParamsFactory.passiveCaptchaParams())
         )
     }
 
@@ -277,7 +279,8 @@ internal class PaymentOptionsViewModelTest {
             configuration = any(),
             linkAccountInfo = any(),
             launchMode = any(),
-            linkExpressMode = any()
+            linkExpressMode = any(),
+            passiveCaptchaParams = any()
         )
     }
 

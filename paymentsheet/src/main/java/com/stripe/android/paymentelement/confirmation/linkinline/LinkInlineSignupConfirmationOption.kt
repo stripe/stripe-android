@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation.linkinline
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -17,6 +18,7 @@ internal data class LinkInlineSignupConfirmationOption(
     val saveOption: PaymentMethodSaveOption,
     val linkConfiguration: LinkConfiguration,
     private val userInput: UserInput,
+    val passiveCaptchaParams: PassiveCaptchaParams?
 ) : ConfirmationHandler.Option {
     enum class PaymentMethodSaveOption(val setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?) {
         RequestedReuse(ConfirmPaymentIntentParams.SetupFutureUsage.OffSession),
