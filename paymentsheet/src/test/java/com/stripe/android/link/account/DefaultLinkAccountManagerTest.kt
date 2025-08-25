@@ -111,7 +111,6 @@ class DefaultLinkAccountManagerTest {
 
         accountManager.lookupConsumer(
             email = "email",
-            linkAuthIntentId = null,
             startSession = true,
             customerId = null
         )
@@ -128,7 +127,6 @@ class DefaultLinkAccountManagerTest {
 
         accountManager.lookupConsumer(
             email = "email",
-            linkAuthIntentId = null,
             startSession = true,
             customerId = null
         )
@@ -182,7 +180,6 @@ class DefaultLinkAccountManagerTest {
         accountManager(linkRepository = linkRepository, linkEventsReporter = linkEventsReporter)
             .lookupConsumer(
                 email = TestFactory.EMAIL,
-                linkAuthIntentId = null,
                 startSession = false,
                 customerId = null
             )
@@ -621,7 +618,6 @@ class DefaultLinkAccountManagerTest {
 
         accountManager.lookupConsumer(
             email = TestFactory.EMAIL,
-            linkAuthIntentId = null,
             startSession = false,
             customerId = null
         )
@@ -884,7 +880,6 @@ class DefaultLinkAccountManagerTest {
         val result = accountManager.mobileLookupConsumer(
             email = TestFactory.CUSTOMER_EMAIL,
             emailSource = TestFactory.EMAIL_SOURCE,
-            linkAuthIntentId = null,
             verificationToken = TestFactory.VERIFICATION_TOKEN,
             appId = TestFactory.APP_ID,
             startSession = false,
@@ -915,7 +910,6 @@ class DefaultLinkAccountManagerTest {
         val result = accountManager.mobileLookupConsumer(
             email = TestFactory.CUSTOMER_EMAIL,
             emailSource = TestFactory.EMAIL_SOURCE,
-            linkAuthIntentId = null,
             verificationToken = TestFactory.VERIFICATION_TOKEN,
             appId = TestFactory.APP_ID,
             startSession = true,
@@ -946,7 +940,6 @@ class DefaultLinkAccountManagerTest {
         val result = accountManager.mobileLookupConsumer(
             email = TestFactory.CUSTOMER_EMAIL,
             emailSource = TestFactory.EMAIL_SOURCE,
-            linkAuthIntentId = null,
             verificationToken = TestFactory.VERIFICATION_TOKEN,
             appId = TestFactory.APP_ID,
             startSession = true,

@@ -43,14 +43,12 @@ class InlineSignupViewModelTest {
 
                 override suspend fun lookupConsumer(
                     email: String?,
-                    linkAuthIntentId: String?,
                     startSession: Boolean,
                     customerId: String?
                 ): Result<LinkAccount?> {
                     counter += 1
                     return super.lookupConsumer(
                         email = email,
-                        linkAuthIntentId = linkAuthIntentId,
                         startSession = startSession,
                         customerId = customerId
                     )

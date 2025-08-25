@@ -48,6 +48,8 @@ internal open class FakeLinkAccountManager(
 
     var lookupConsumerResult: Result<LinkAccount?> = Result.success(null)
     var mobileLookupConsumerResult: Result<LinkAccount?> = Result.success(TestFactory.LINK_ACCOUNT)
+    var lookupConsumerByAuthIntentResult: Result<LinkAccount?> = Result.success(TestFactory.LINK_ACCOUNT)
+    var mobileLookupConsumerByAuthIntentResult: Result<LinkAccount?> = Result.success(TestFactory.LINK_ACCOUNT)
     var startVerificationResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
     var confirmVerificationResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
     var postConsentUpdateResult: Result<Unit> = Result.success(Unit)
@@ -88,6 +90,8 @@ internal open class FakeLinkAccountManager(
 
     private val lookupTurbine = Turbine<LookupCall>()
     private val mobileLookupTurbine = Turbine<MobileLookupCall>()
+    private val lookupByAuthIntentTurbine = Turbine<LookupCallByAuthIntent>()
+    private val mobileLookupByAuthIntentTurbine = Turbine<MobileLookupCallByAuthIntent>()
 
     private val signupTurbine = Turbine<SignUpCall>()
     private val mobileSignUpTurbine = Turbine<MobileSignUpCall>()
@@ -114,14 +118,13 @@ internal open class FakeLinkAccountManager(
 
     override suspend fun lookupConsumer(
         email: String?,
-        linkAuthIntentId: String?,
         startSession: Boolean,
         customerId: String?
     ): Result<LinkAccount?> {
         lookupTurbine.add(
             item = LookupCall(
                 email = email,
-                linkAuthIntentId = linkAuthIntentId,
+                linkAuthIntentId = null,
                 startSession = startSession
             )
         )
@@ -131,7 +134,6 @@ internal open class FakeLinkAccountManager(
     override suspend fun mobileLookupConsumer(
         email: String?,
         emailSource: EmailSource?,
-        linkAuthIntentId: String?,
         verificationToken: String,
         appId: String,
         startSession: Boolean,
@@ -141,13 +143,40 @@ internal open class FakeLinkAccountManager(
             item = MobileLookupCall(
                 email = email,
                 emailSource = emailSource,
-                linkAuthIntentId = linkAuthIntentId,
                 verificationToken = verificationToken,
                 appId = appId,
                 startSession = startSession
             )
         )
         return mobileLookupConsumerResult
+    }
+
+    override suspend fun lookupConsumerByAuthIntent(
+        linkAuthIntentId: String?,
+        customerId: String?
+    ): Result<LinkAccount?> {
+        lookupByAuthIntentTurbine.add(
+            item = LookupCallByAuthIntent(
+                linkAuthIntentId = linkAuthIntentId
+            )
+        )
+        return lookupConsumerByAuthIntentResult
+    }
+
+    override suspend fun mobileLookupConsumerByAuthIntent(
+        linkAuthIntentId: String?,
+        verificationToken: String,
+        appId: String,
+        customerId: String?
+    ): Result<LinkAccount?> {
+        mobileLookupByAuthIntentTurbine.add(
+            item = MobileLookupCallByAuthIntent(
+                linkAuthIntentId = linkAuthIntentId,
+                verificationToken = verificationToken,
+                appId = appId
+            )
+        )
+        return mobileLookupConsumerByAuthIntentResult
     }
 
     override suspend fun signUp(
@@ -298,6 +327,14 @@ internal open class FakeLinkAccountManager(
         return lookupTurbine.awaitItem()
     }
 
+    suspend fun awaitLookupByAuthIntentCall(): LookupCallByAuthIntent {
+        return lookupByAuthIntentTurbine.awaitItem()
+    }
+
+    suspend fun awaitMobileLookupByAuthIntentCall(): MobileLookupCallByAuthIntent {
+        return mobileLookupByAuthIntentTurbine.awaitItem()
+    }
+
     suspend fun awaitStartVerificationCall() {
         return startVerificationTurbine.awaitItem()
     }
@@ -313,6 +350,8 @@ internal open class FakeLinkAccountManager(
     fun ensureAllEventsConsumed() {
         lookupTurbine.ensureAllEventsConsumed()
         mobileLookupTurbine.ensureAllEventsConsumed()
+        lookupByAuthIntentTurbine.ensureAllEventsConsumed()
+        mobileLookupByAuthIntentTurbine.ensureAllEventsConsumed()
         signupTurbine.ensureAllEventsConsumed()
         mobileSignUpTurbine.ensureAllEventsConsumed()
     }
@@ -335,10 +374,19 @@ internal open class FakeLinkAccountManager(
     data class MobileLookupCall(
         val email: String?,
         val emailSource: EmailSource?,
-        val linkAuthIntentId: String?,
         val verificationToken: String,
         val appId: String,
         val startSession: Boolean
+    )
+
+    data class LookupCallByAuthIntent(
+        val linkAuthIntentId: String?,
+    )
+
+    data class MobileLookupCallByAuthIntent(
+        val linkAuthIntentId: String?,
+        val verificationToken: String,
+        val appId: String,
     )
 
     data class SignUpCall(
