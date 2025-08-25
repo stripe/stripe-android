@@ -6,6 +6,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.isInstanceOf
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -659,6 +660,26 @@ class DefaultUpdatePaymentMethodInteractorTest {
             assertThat(configuration?.address).isEqualTo(AddressCollectionMode.Never)
             assertThat(configuration?.allowedBillingCountries).isEqualTo(setOf("US", "CA"))
             assertThat(configuration?.attachDefaultsToPaymentMethod).isFalse()
+        }
+    }
+
+    @Test
+    fun editCardDetailsInteractor_calledWhenDisabledSaveButtonIsPressed() {
+        runScenario(
+            displayableSavedPaymentMethod = PaymentMethodFixtures.displayableLinkPaymentMethod(),
+            addressCollectionMode = AddressCollectionMode.Full,
+            allowedBillingCountries = setOf("us", "CA"),
+            editCardDetailsInteractorFactory = FakeEditCardDetailsInteractorFactory()
+        ) {
+            assertThat(interactor.editCardDetailsInteractor).isInstanceOf<FakeEditCardDetailsInteractor>()
+
+            val editCardDetailsInteractor = interactor.editCardDetailsInteractor as FakeEditCardDetailsInteractor
+
+            interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.DisabledSaveButtonPressed)
+
+            editCardDetailsInteractor.viewActionRecorder.consume(
+                EditCardDetailsInteractor.ViewAction.Validate
+            )
         }
     }
 

@@ -407,6 +407,55 @@ class UpdateCardScreenViewModelTest {
             }
         }
 
+    @Test
+    fun `on disabled button clicked, should display errors`() =
+        runTest(dispatcher) {
+            val card = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+                expiryYear = 2012,
+                expiryMonth = 12,
+                billingAddress = null,
+            )
+
+            val viewModel = createViewModel(
+                linkAccountManager = FakeLinkAccountManager().apply {
+                    setConsumerPaymentDetails(ConsumerPaymentDetails(listOf(card)))
+                },
+                configuration = TestFactory.LINK_CONFIGURATION.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        allowedCountries = setOf("US", "CA")
+                    ),
+                ),
+                paymentDetailsId = card.id,
+                billingDetailsUpdateFlow = BillingDetailsUpdateFlow()
+            )
+
+            viewModel.interactor.test {
+                val nullableInteractor = awaitItem()
+
+                assertThat(nullableInteractor).isNotNull()
+
+                val interactor = requireNotNull(nullableInteractor)
+
+                viewModel.onDisabledUpdateClicked()
+
+                interactor.state.test {
+                    val state = awaitItem()
+
+                    assertThat(state.cardDetailsState?.expiryDateState).isNotNull()
+                    assertThat(state.billingDetailsForm).isNotNull()
+
+                    val expiryDateState = requireNotNull(state.cardDetailsState?.expiryDateState)
+
+                    assertThat(expiryDateState.shouldShowError()).isTrue()
+                    assertThat(expiryDateState.sectionError()).isNotNull()
+
+                    requireNotNull(state.billingDetailsForm).addressSectionElement.controller.error.test {
+                        assertThat(awaitItem()).isNotNull()
+                    }
+                }
+            }
+        }
+
     private fun createViewModel(
         linkAccountManager: FakeLinkAccountManager = FakeLinkAccountManager(),
         navigationManager: NavigationManager = TestNavigationManager(),
