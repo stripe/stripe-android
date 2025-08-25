@@ -12,6 +12,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
@@ -82,7 +84,8 @@ class GooglePayLauncher internal constructor(
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
                     productUsage = setOf(PRODUCT_USAGE),
-                )
+                ),
+                cardBrandFilter = config.cardBrandFilter
             )
         },
         PaymentAnalyticsRequestFactory(
@@ -129,7 +132,8 @@ class GooglePayLauncher internal constructor(
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
                     productUsage = setOf(PRODUCT_USAGE)
-                )
+                ),
+                cardBrandFilter = config.cardBrandFilter
             )
         },
         paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
@@ -257,7 +261,13 @@ class GooglePayLauncher internal constructor(
          *
          * Default: The credit card class is supported for the card networks specified.
          */
-        var allowCreditCards: Boolean = true
+        var allowCreditCards: Boolean = true,
+
+        /**
+         * Allows to select the acceptable card brands
+         * Default: Accepts all brands
+         */
+        var cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
     ) : Parcelable {
 
         internal val isJcbEnabled: Boolean
