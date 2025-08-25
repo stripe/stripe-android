@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.model.ElementsSession
@@ -16,22 +17,34 @@ internal data class CustomerMetadata(
 
     @Parcelize
     internal data class Permissions(
-        val canRemovePaymentMethods: Boolean,
+        val removePaymentMethod: PaymentMethodRemovePermission,
         val canRemoveLastPaymentMethod: Boolean,
         val canRemoveDuplicates: Boolean,
         val canUpdateFullPaymentMethodDetails: Boolean,
     ) : Parcelable {
+        val canRemovePaymentMethods: Boolean
+            get() = removePaymentMethod == PaymentMethodRemovePermission.Full ||
+                removePaymentMethod == PaymentMethodRemovePermission.Partial
+
         companion object {
             internal fun createForPaymentSheetCustomerSession(
                 configuration: CommonConfiguration,
                 customer: ElementsSession.Customer,
             ): Permissions {
                 val mobilePaymentElementComponent = customer.session.components.mobilePaymentElement
-                val canRemovePaymentMethods = when (mobilePaymentElementComponent) {
+                val removePaymentMethod = when (mobilePaymentElementComponent) {
                     is ElementsSession.Customer.Components.MobilePaymentElement.Enabled -> {
-                        mobilePaymentElementComponent.isPaymentMethodRemoveEnabled
+                        when (mobilePaymentElementComponent.paymentMethodRemove) {
+                            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled ->
+                                PaymentMethodRemovePermission.Full
+                            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Partial ->
+                                PaymentMethodRemovePermission.Partial
+                            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled ->
+                                PaymentMethodRemovePermission.None
+                        }
                     }
-                    is ElementsSession.Customer.Components.MobilePaymentElement.Disabled -> false
+                    is ElementsSession.Customer.Components.MobilePaymentElement.Disabled ->
+                        PaymentMethodRemovePermission.None
                 }
 
                 val canRemoveLastPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod &&
@@ -39,7 +52,7 @@ internal data class CustomerMetadata(
                     mobilePaymentElementComponent.canRemoveLastPaymentMethod
 
                 return Permissions(
-                    canRemovePaymentMethods = canRemovePaymentMethods,
+                    removePaymentMethod = removePaymentMethod,
                     canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
                     // Should always remove duplicates when using `customer_session`
                     canRemoveDuplicates = true,
@@ -56,7 +69,7 @@ internal data class CustomerMetadata(
                      * Un-scoped legacy ephemeral keys have full permissions to remove/save/modify. This should
                      * always be set to true.
                      */
-                    canRemovePaymentMethods = true,
+                    removePaymentMethod = PaymentMethodRemovePermission.Full,
                     /*
                      * Un-scoped legacy ephemeral keys normally have full permissions to remove the last payment
                      * method, however we do have client-side configuration option to configure this ability. This
@@ -78,7 +91,7 @@ internal data class CustomerMetadata(
                 customerSheetSession: CustomerSheetSession,
             ): Permissions {
                 return Permissions(
-                    canRemovePaymentMethods = customerSheetSession.permissions.canRemovePaymentMethods,
+                    removePaymentMethod = customerSheetSession.permissions.removePaymentMethod,
                     canRemoveLastPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
                     canRemoveDuplicates = true,
                     canUpdateFullPaymentMethodDetails =
@@ -89,7 +102,7 @@ internal data class CustomerMetadata(
             // Native link uses PaymentMethodMetadata for DefaultFormHelper and doesn't use CustomerMetadata at all
             internal fun createForNativeLink(): Permissions {
                 return Permissions(
-                    canRemovePaymentMethods = false,
+                    removePaymentMethod = PaymentMethodRemovePermission.None,
                     canRemoveLastPaymentMethod = false,
                     canRemoveDuplicates = false,
                     canUpdateFullPaymentMethodDetails = false
