@@ -360,7 +360,6 @@ internal class OnrampInteractor @Inject constructor(
         checkoutHandler: suspend () -> String,
         platformApiKey: String
     ) = runCatching {
-
         val paymentIntent = retrievePaymentIntent(
             onrampSessionId = onrampSessionId,
             onrampSessionClientSecret = checkoutHandler(),
