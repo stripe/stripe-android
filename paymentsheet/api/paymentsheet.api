@@ -572,7 +572,6 @@ public final class com/stripe/android/link/ui/inline/ComposableSingletons$LinkIn
 	public final fun getLambda-3$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-4$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-5$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-6$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/link/ui/inline/ComposableSingletons$LinkOptionalInlineSignupKt {

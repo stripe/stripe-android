@@ -34,11 +34,16 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.onFocusEvent
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -61,6 +66,8 @@ import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
+import com.stripe.android.uicore.text.EmbeddableImage
+import com.stripe.android.uicore.text.Html
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
 import com.stripe.android.uicore.R as StripeUiCoreR
@@ -169,6 +176,7 @@ internal fun LinkInlineSignup(
                 enabled = enabled,
                 contentAlpha = contentAlpha,
                 simplifiedCheckbox = simplifiedCheckbox,
+                useLinkLogoInCheckboxText = linkSignUpOptInFeatureEnabled,
                 toggleExpanded = toggleExpanded
             )
 
@@ -226,6 +234,7 @@ private fun LinkCheckbox(
     contentAlpha: Float,
     simplifiedCheckbox: Boolean,
     toggleExpanded: () -> Unit,
+    useLinkLogoInCheckboxText: Boolean,
 ) {
     val label = if (simplifiedCheckbox) {
         stringResource(id = R.string.stripe_inline_sign_up_header_default_opt_in)
@@ -252,11 +261,19 @@ private fun LinkCheckbox(
             enabled = enabled
         )
         Column {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colors.onSurface.copy(alpha = contentAlpha)
-            )
+            if (useLinkLogoInCheckboxText) {
+                TextWithLinkLogo(
+                    label = label,
+                    style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colors.onSurface.copy(alpha = contentAlpha),
+                )
+            } else {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colors.onSurface.copy(alpha = contentAlpha)
+                )
+            }
             if (sublabel != null) {
                 Text(
                     text = sublabel,
@@ -269,6 +286,30 @@ private fun LinkCheckbox(
             }
         }
     }
+}
+
+@Composable
+private fun TextWithLinkLogo(
+    label: String,
+    style: TextStyle,
+    color: Color
+) {
+    Html(
+        html = label.replace(
+            " Link",
+            " <img src=\"link_logo\">"
+        ),
+        style = style,
+        color = color,
+        imageAlign = PlaceholderVerticalAlign.TextCenter,
+        imageLoader = mapOf(
+            "link_logo" to EmbeddableImage.Drawable(
+                id = R.drawable.stripe_link_logo_knockout,
+                contentDescription = com.stripe.android.R.string.stripe_link,
+                colorFilter = ColorFilter.tint(color, blendMode = BlendMode.SrcIn)
+            )
+        ),
+    )
 }
 
 @Composable
@@ -444,24 +485,22 @@ private fun PreviewDOI() {
 @Composable
 private fun PreviewSignInFeature() {
     DefaultLinkTheme {
-        Surface {
-            LinkInlineSignup(
-                merchantName = "Example, Inc.",
-                sectionController = SectionController(null, emptyList()),
-                emailController = EmailConfig.createController(""),
-                phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
-                nameController = NameConfig.createController("My Name"),
-                signUpState = InputtingRemainingFields,
-                enabled = true,
-                expanded = true,
-                requiresNameCollection = false,
-                allowsDefaultOptIn = false,
-                linkSignUpOptInFeatureEnabled = true,
-                didAskToChangeSignupDetails = false,
-                errorMessage = null,
-                toggleExpanded = {},
-                changeSignupDetails = {},
-            )
-        }
+        LinkInlineSignup(
+            merchantName = "Example, Inc.",
+            sectionController = SectionController(null, emptyList()),
+            emailController = EmailConfig.createController(""),
+            phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
+            nameController = NameConfig.createController("My Name"),
+            signUpState = InputtingRemainingFields,
+            enabled = true,
+            expanded = true,
+            requiresNameCollection = false,
+            allowsDefaultOptIn = false,
+            linkSignUpOptInFeatureEnabled = true,
+            didAskToChangeSignupDetails = false,
+            errorMessage = null,
+            toggleExpanded = {},
+            changeSignupDetails = {},
+        )
     }
 }
