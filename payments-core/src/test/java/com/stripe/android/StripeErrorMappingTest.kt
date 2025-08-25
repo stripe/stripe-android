@@ -8,6 +8,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.withLocalizedMessage
+import com.stripe.android.testing.LocaleTestRule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -17,6 +18,7 @@ import java.util.Locale
 class StripeErrorMappingTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
+    private val localeTestRule = LocaleTestRule()
 
     private val backendMessage = "The backend message"
 
@@ -42,6 +44,20 @@ class StripeErrorMappingTest {
         }
     }
 
+    @Test
+    fun `Uses localized client error for error code, Locale is not US`() {
+        localeTestRule.setTemporarily(Locale.FRANCE)
+
+        runStripeErrorMappingTest(
+            message = null,
+            code = "generic_decline",
+            context = context,
+        ) { actualMessage ->
+            assertThat(actualMessage).isEqualTo("Votre moyen de paiement a été refusé.")
+        }
+    }
+
+    @Test
     fun `Uses localized client error for valid decline code`() {
         runStripeErrorMappingTest(
             code = null,
@@ -49,6 +65,18 @@ class StripeErrorMappingTest {
             context = context,
         ) { actualMessage ->
             assertThat(actualMessage).isEqualTo("Your payment method was declined.")
+        }
+    }
+
+    @Test
+    fun `Uses localized client error for valid decline code, Locale is not US`() {
+        localeTestRule.setTemporarily(Locale.FRANCE)
+        runStripeErrorMappingTest(
+            code = null,
+            declineCode = "generic_decline",
+            context = context,
+        ) { actualMessage ->
+            assertThat(actualMessage).isEqualTo("Votre moyen de paiement a été refusé.")
         }
     }
 
@@ -125,20 +153,12 @@ class StripeErrorMappingTest {
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )
 
-        withLocale(Locale.US) {
-            block(stripeError.withLocalizedMessage(context).message)
+        val localizedContext = localeTestRule.contextForLocale(context)
 
-            block(paymentIntentError.withLocalizedMessage(context).message)
+        block(stripeError.withLocalizedMessage(localizedContext).message)
 
-            block(setupIntentError.withLocalizedMessage(context).message)
-        }
-    }
+        block(paymentIntentError.withLocalizedMessage(localizedContext).message)
 
-    private inline fun <T> withLocale(locale: Locale, block: () -> T): T {
-        val original = Locale.getDefault()
-        Locale.setDefault(locale)
-        val result = block()
-        Locale.setDefault(original)
-        return result
+        block(setupIntentError.withLocalizedMessage(localizedContext).message)
     }
 }
