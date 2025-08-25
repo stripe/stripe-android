@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
@@ -14,11 +15,13 @@ import com.stripe.android.R as StripeR
 @Composable
 internal fun RemovePaymentMethodDialogUI(
     paymentMethod: DisplayableSavedPaymentMethod,
+    removeMessage: ResolvableString?,
     onConfirmListener: () -> Unit,
     onDismissListener: () -> Unit,
 ) {
     val removeTitle = paymentMethod.getRemoveDialogTitle().resolve()
-    val messageText = paymentMethod.getRemoveDialogDescription().resolve()
+    val messageText = removeMessage?.resolve()
+        ?: paymentMethod.getRemoveDialogDescription().resolve()
 
     SimpleDialogElementUI(
         titleText = removeTitle,

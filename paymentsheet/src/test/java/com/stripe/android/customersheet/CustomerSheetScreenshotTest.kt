@@ -375,6 +375,7 @@ internal class CustomerSheetScreenshotTest {
                 shouldShowSetAsDefaultCheckbox = false,
                 isDefaultPaymentMethod = false,
                 allowedBillingCountries = emptySet(),
+                removeMessage = null,
                 onUpdateSuccess = {},
             ),
             isLiveMode = true,

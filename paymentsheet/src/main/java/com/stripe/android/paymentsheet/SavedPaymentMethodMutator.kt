@@ -376,6 +376,7 @@ internal class SavedPaymentMethodMutator(
         ) {
             if (displayableSavedPaymentMethod.savedPaymentMethod != SavedPaymentMethod.Unexpected) {
                 val isLiveMode = requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode
+                val paymentMethodMetadata = viewModel.paymentMethodMetadata.value
                 viewModel.navigationHandler.transitionTo(
                     PaymentSheetScreen.UpdatePaymentMethod(
                         DefaultUpdatePaymentMethodInteractor(
@@ -402,9 +403,7 @@ internal class SavedPaymentMethodMutator(
                                 )
                             },
                             shouldShowSetAsDefaultCheckbox = (
-                                viewModel
-                                    .paymentMethodMetadata
-                                    .value?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true
+                                paymentMethodMetadata?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true
                                 ),
                             isDefaultPaymentMethod = (
                                 displayableSavedPaymentMethod.isDefaultPaymentMethod(
@@ -412,6 +411,8 @@ internal class SavedPaymentMethodMutator(
                                     viewModel.customerStateHolder.customer.value?.defaultPaymentMethodId
                                 )
                                 ),
+                            removeMessage = paymentMethodMetadata?.customerMetadata?.permissions?.removePaymentMethod
+                                ?.removeMessage(paymentMethodMetadata.merchantName),
                             onUpdateSuccess = viewModel.navigationHandler::pop,
                         )
                     )

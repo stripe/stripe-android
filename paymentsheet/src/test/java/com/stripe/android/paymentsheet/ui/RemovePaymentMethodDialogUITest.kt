@@ -6,6 +6,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.testing.createComposeCleanupRule
@@ -35,6 +36,7 @@ class RemovePaymentMethodDialogUITest {
         composeRule.setContent {
             RemovePaymentMethodDialogUI(
                 paymentMethod = paymentMethod,
+                removeMessage = null,
                 onConfirmListener = {},
                 onDismissListener = {}
             )
@@ -42,6 +44,27 @@ class RemovePaymentMethodDialogUITest {
 
         composeRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG).onChildren().assertAny(
             hasText("Cartes Bancaires ····4242")
+        )
+    }
+
+    @Test
+    fun removeDescription_usesMessageIfAvailable() {
+        val removeMessage = "This payment method will be removed but will remain " +
+            "available for Merchant, Inc. subscriptions."
+
+        composeRule.setContent {
+            RemovePaymentMethodDialogUI(
+                paymentMethod = PaymentMethodFixtures
+                    .CARD_WITH_NETWORKS_PAYMENT_METHOD
+                    .toDisplayableSavedPaymentMethod(),
+                removeMessage = resolvableString(removeMessage),
+                onConfirmListener = {},
+                onDismissListener = {}
+            )
+        }
+
+        composeRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG).onChildren().assertAny(
+            hasText(removeMessage)
         )
     }
 }
