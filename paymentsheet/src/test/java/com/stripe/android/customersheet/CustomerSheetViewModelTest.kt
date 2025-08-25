@@ -6,6 +6,7 @@ import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
@@ -541,7 +542,7 @@ class CustomerSheetViewModelTest {
             ),
             customerPaymentMethods = listOf(CARD_PAYMENT_METHOD, CARD_PAYMENT_METHOD.copy(id = "pm_543")),
             customerPermissions = CustomerPermissions(
-                canRemovePaymentMethods = true,
+                removePaymentMethod = PaymentMethodRemovePermission.Full,
                 canRemoveLastPaymentMethod = false,
                 canUpdateFullPaymentMethodDetails = false,
             )
@@ -581,7 +582,7 @@ class CustomerSheetViewModelTest {
             workContext = testDispatcher,
             customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
             customerPermissions = CustomerPermissions(
-                canRemovePaymentMethods = false,
+                removePaymentMethod = PaymentMethodRemovePermission.None,
                 canRemoveLastPaymentMethod = false,
                 canUpdateFullPaymentMethodDetails = true,
             )
@@ -604,7 +605,7 @@ class CustomerSheetViewModelTest {
             workContext = testDispatcher,
             customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
             customerPermissions = CustomerPermissions(
-                canRemovePaymentMethods = false,
+                removePaymentMethod = PaymentMethodRemovePermission.None,
                 canRemoveLastPaymentMethod = false,
                 canUpdateFullPaymentMethodDetails = false,
             )
@@ -627,7 +628,7 @@ class CustomerSheetViewModelTest {
                 workContext = testDispatcher,
                 customerPaymentMethods = listOf(CARD_WITH_NETWORKS_PAYMENT_METHOD),
                 customerPermissions = CustomerPermissions(
-                    canRemovePaymentMethods = false,
+                    removePaymentMethod = PaymentMethodRemovePermission.None,
                     canRemoveLastPaymentMethod = false,
                     canUpdateFullPaymentMethodDetails = false,
                 ),
@@ -3104,7 +3105,7 @@ class CustomerSheetViewModelTest {
                 originalSelection = PaymentSelection.Saved(paymentMethodToRemove),
                 paymentMethodToRemove = paymentMethodToRemove,
                 permissions = CustomerPermissions(
-                    canRemovePaymentMethods = true,
+                    removePaymentMethod = PaymentMethodRemovePermission.Full,
                     canRemoveLastPaymentMethod = false,
                     canUpdateFullPaymentMethodDetails = false,
                 )
@@ -3291,7 +3292,7 @@ class CustomerSheetViewModelTest {
             workContext = testDispatcher,
             customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
             customerPermissions = CustomerPermissions(
-                canRemovePaymentMethods = true,
+                removePaymentMethod = PaymentMethodRemovePermission.Full,
                 canRemoveLastPaymentMethod = true,
                 canUpdateFullPaymentMethodDetails = true,
             ),
@@ -3310,7 +3311,7 @@ class CustomerSheetViewModelTest {
             workContext = testDispatcher,
             customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
             customerPermissions = CustomerPermissions(
-                canRemovePaymentMethods = false,
+                removePaymentMethod = PaymentMethodRemovePermission.None,
                 canRemoveLastPaymentMethod = false,
                 canUpdateFullPaymentMethodDetails = false
             ),
@@ -3324,6 +3325,25 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
+    fun `If has partial remove permissions, can remove should be true in state`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
+            customerPermissions = CustomerPermissions(
+                removePaymentMethod = PaymentMethodRemovePermission.Partial,
+                canRemoveLastPaymentMethod = true,
+                canUpdateFullPaymentMethodDetails = true,
+            ),
+        )
+
+        val selectState = viewModel.viewState.value.asSelectState()
+
+        assertThat(selectState.canRemovePaymentMethods).isTrue()
+        assertThat(selectState.canEdit).isTrue()
+        assertThat(selectState.topBarState {}.showEditMenu).isTrue()
+    }
+
+    @Test
     fun `If has no remove permissions but is CBC eligible, can remove is false but can edit is true`() =
         runTest(testDispatcher) {
             val viewModel = createViewModel(
@@ -3333,7 +3353,7 @@ class CustomerSheetViewModelTest {
                     preferredNetworks = listOf(CardBrand.CartesBancaires),
                 ),
                 customerPermissions = CustomerPermissions(
-                    canRemovePaymentMethods = false,
+                    removePaymentMethod = PaymentMethodRemovePermission.None,
                     canRemoveLastPaymentMethod = false,
                     canUpdateFullPaymentMethodDetails = true,
                 ),
@@ -3353,7 +3373,7 @@ class CustomerSheetViewModelTest {
                 workContext = testDispatcher,
                 customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
                 customerPermissions = CustomerPermissions(
-                    canRemovePaymentMethods = true,
+                    removePaymentMethod = PaymentMethodRemovePermission.Full,
                     canRemoveLastPaymentMethod = false,
                     canUpdateFullPaymentMethodDetails = false,
                 ),
@@ -3376,7 +3396,7 @@ class CustomerSheetViewModelTest {
                     preferredNetworks = listOf(CardBrand.CartesBancaires),
                 ),
                 customerPermissions = CustomerPermissions(
-                    canRemovePaymentMethods = true,
+                    removePaymentMethod = PaymentMethodRemovePermission.Full,
                     canRemoveLastPaymentMethod = false,
                     canUpdateFullPaymentMethodDetails = true,
                 ),
@@ -3621,7 +3641,7 @@ class CustomerSheetViewModelTest {
         originalSelection: PaymentSelection.Saved,
         paymentMethodToRemove: PaymentMethod,
         permissions: CustomerPermissions = CustomerPermissions(
-            canRemovePaymentMethods = true,
+            removePaymentMethod = PaymentMethodRemovePermission.Full,
             canRemoveLastPaymentMethod = true,
             canUpdateFullPaymentMethodDetails = true,
         )

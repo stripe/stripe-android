@@ -1,7 +1,13 @@
 # CHANGELOG
 
 ## XX.XX.XX - 20XX-XX-XX
+
+### CardScan
 * [DEPRECATED][11419](https://github.com/stripe/stripe-android/pull/11419) Deprecated stripecardscan Module Public APIs.
+
+### PaymentSheet
+* [ADDED][11398](https://github.com/stripe/stripe-android/pull/11398) Added form validation when adding payment methods in PaymentSheet & Link
+* [ADDED][11437](https://github.com/stripe/stripe-android/pull/11437) Added form validation when updating payment methods in PaymentSheet & Link
 
 ## 21.23.1 - 2025-08-18
 

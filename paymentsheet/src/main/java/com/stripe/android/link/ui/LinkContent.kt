@@ -23,6 +23,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.ui.oauth.OAuthConsentScreen
+import com.stripe.android.link.ui.oauth.OAuthConsentViewModel
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodScreen
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodViewModel
 import com.stripe.android.link.ui.signup.SignUpScreen
@@ -299,12 +300,20 @@ private fun WalletRoute(
 }
 
 @Composable
-@Suppress("UNUSED_PARAMETER")
 private fun OAuthConsentRoute(
     linkAccount: LinkAccount,
     dismissWithResult: (LinkActivityResult) -> Unit,
 ) {
-    OAuthConsentScreen()
+    val viewModel: OAuthConsentViewModel = linkViewModel { parentComponent ->
+        OAuthConsentViewModel.factory(
+            parentComponent = parentComponent,
+            linkAccount = linkAccount,
+            dismissWithResult = dismissWithResult,
+        )
+    }
+    OAuthConsentScreen(
+        viewModel = viewModel,
+    )
 }
 
 private fun noLinkAccountResult(): LinkActivityResult {

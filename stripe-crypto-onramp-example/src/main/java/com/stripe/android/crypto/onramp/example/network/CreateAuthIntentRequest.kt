@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CreateAuthIntentRequest(
     val email: String,
+
     @SerialName("oauth_scopes")
     val oauthScopes: String
 )

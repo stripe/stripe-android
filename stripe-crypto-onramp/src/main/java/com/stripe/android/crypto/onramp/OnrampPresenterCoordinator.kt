@@ -46,7 +46,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         activity = activity,
         presentPaymentMethodsCallback = ::handleSelectPaymentResult,
         authenticationCallback = ::handleAuthenticationResult,
-        authorizeCallback = {}
+        authorizeCallback = ::handleAuthorizeResult
     )
 
     private var identityVerificationSheet: IdentityVerificationSheet? = null
@@ -124,6 +124,10 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             email = clientEmail(),
             paymentMethodType = type.toLinkType()
         )
+    }
+
+    fun authorize(linkAuthIntentId: String) {
+        linkPresenter.authorize(linkAuthIntentId)
     }
 
     /**
@@ -210,6 +214,14 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
+    private fun handleAuthorizeResult(result: LinkController.AuthorizeResult) {
+        coroutineScope.launch {
+            onrampCallbacks.authorizeCallback.onResult(
+                interactor.handleAuthorizeResult(result)
+            )
+        }
+    }
+
     private fun handleIdentityVerificationResult(result: IdentityVerificationSheet.VerificationFlowResult) {
         coroutineScope.launch {
             onrampCallbacks.identityVerificationCallback.onResult(
@@ -227,11 +239,12 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     }
 
     private fun createIdentityVerificationSheet(merchantLogoUrl: String?): IdentityVerificationSheet {
+        check(R.drawable.stripe_ic_business_with_bg != 0)
         val fallbackMerchantLogoUri: Uri = Uri.Builder()
             .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
             .authority(activity.packageName)
             .appendPath("drawable")
-            .appendPath("stripe_ic_business")
+            .appendPath("stripe_ic_business_with_bg")
             .build()
 
         val logoUri = merchantLogoUrl?.toUri() ?: fallbackMerchantLogoUri

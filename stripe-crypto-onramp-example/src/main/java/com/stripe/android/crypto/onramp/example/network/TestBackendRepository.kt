@@ -32,22 +32,12 @@ class TestBackendRepository {
 
     suspend fun createAuthIntent(
         email: String,
-        oauthScopes: String = listOf(
-            "userinfo:read",
-            "userinfo.addresses:read",
-            "kyc.status:read",
-            "kyc:write",
-            "kyc:read",
-            "kyc:share",
-            "auth.persist_login:read",
-            "payment_methods:read",
-            "payment_methods.bank_accounts:read",
-        ).joinToString(",")
+        oauthScopes: String,
     ): ApiResult<CreateAuthIntentResponse, FuelError> {
         return withContext(Dispatchers.IO) {
             val request = CreateAuthIntentRequest(
                 email = email,
-                oauthScopes = oauthScopes
+                oauthScopes = oauthScopes,
             )
             val requestBody = json.encodeToString(CreateAuthIntentRequest.serializer(), request)
 

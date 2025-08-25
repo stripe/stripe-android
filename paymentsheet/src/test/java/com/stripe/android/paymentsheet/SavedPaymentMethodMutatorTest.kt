@@ -5,6 +5,7 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -55,7 +56,7 @@ class SavedPaymentMethodMutatorTest {
     fun `canEdit is correct when user has permissions to remove last PM`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             customerMetadataPermissions = CustomerMetadata.Permissions(
-                canRemovePaymentMethods = true,
+                removePaymentMethod = PaymentMethodRemovePermission.Full,
                 canRemoveLastPaymentMethod = true,
                 canRemoveDuplicates = false,
                 canUpdateFullPaymentMethodDetails = false,
@@ -78,7 +79,7 @@ class SavedPaymentMethodMutatorTest {
     fun `canEdit is correct when when user does not have permissions to remove last PM`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             customerMetadataPermissions = CustomerMetadata.Permissions(
-                canRemovePaymentMethods = true,
+                removePaymentMethod = PaymentMethodRemovePermission.Full,
                 canRemoveLastPaymentMethod = false,
                 canRemoveDuplicates = false,
                 canUpdateFullPaymentMethodDetails = false,
@@ -197,7 +198,7 @@ class SavedPaymentMethodMutatorTest {
     fun `Sets editing to false when removing the last payment method while editing`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             customerMetadataPermissions = CustomerMetadata.Permissions(
-                canRemovePaymentMethods = true,
+                removePaymentMethod = PaymentMethodRemovePermission.Full,
                 canRemoveLastPaymentMethod = true,
                 canRemoveDuplicates = false,
                 canUpdateFullPaymentMethodDetails = false,
@@ -227,7 +228,7 @@ class SavedPaymentMethodMutatorTest {
         PaymentMethodMetadataFactory.create(
             customerMetadataPermissions = CustomerMetadata.Permissions(
                 canRemoveDuplicates = true,
-                canRemovePaymentMethods = true,
+                removePaymentMethod = PaymentMethodRemovePermission.Full,
                 canRemoveLastPaymentMethod = true,
                 canUpdateFullPaymentMethodDetails = true,
             )
@@ -254,7 +255,7 @@ class SavedPaymentMethodMutatorTest {
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             customerMetadataPermissions = CustomerMetadata.Permissions(
                 canRemoveDuplicates = true,
-                canRemovePaymentMethods = true,
+                removePaymentMethod = PaymentMethodRemovePermission.Full,
                 canRemoveLastPaymentMethod = false,
                 canUpdateFullPaymentMethodDetails = true,
             )
@@ -848,7 +849,7 @@ class SavedPaymentMethodMutatorTest {
             customerRepository = repository,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 customerMetadataPermissions = CustomerMetadata.Permissions(
-                    canRemovePaymentMethods = true,
+                    removePaymentMethod = PaymentMethodRemovePermission.Full,
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = shouldRemoveDuplicates,
                     canUpdateFullPaymentMethodDetails = false,

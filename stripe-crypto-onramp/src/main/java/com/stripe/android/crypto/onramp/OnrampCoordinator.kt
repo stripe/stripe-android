@@ -154,6 +154,15 @@ class OnrampCoordinator @Inject internal constructor(
         }
 
         /**
+         * Authorize a LinkAuthIntent.
+         *
+         * @param linkAuthIntentId The LinkAuthIntent ID to authorize.
+         */
+        fun authorize(linkAuthIntentId: String) {
+            coordinator.authorize(linkAuthIntentId)
+        }
+
+        /**
          * Performs the checkout flow for a crypto onramp session, handling any required authentication steps.
          * The result will be delivered through the checkoutCallback provided in OnrampCallbacks.
          *

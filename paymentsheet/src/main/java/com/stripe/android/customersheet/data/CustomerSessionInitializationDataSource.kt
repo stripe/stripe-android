@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet.data
 
+import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
@@ -52,10 +53,19 @@ internal class CustomerSessionInitializationDataSource @Inject constructor(
                     permissions = CustomerPermissions(
                         canRemoveLastPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod &&
                             canRemoveLastPaymentMethodFromCustomerSession,
-                        canRemovePaymentMethods = when (val component = customer.session.components.customerSheet) {
-                            is ElementsSession.Customer.Components.CustomerSheet.Enabled ->
-                                component.isPaymentMethodRemoveEnabled
-                            is ElementsSession.Customer.Components.CustomerSheet.Disabled -> false
+                        removePaymentMethod = when (val component = customer.session.components.customerSheet) {
+                            is ElementsSession.Customer.Components.CustomerSheet.Enabled -> {
+                                when (component.paymentMethodRemove) {
+                                    ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled ->
+                                        PaymentMethodRemovePermission.Full
+                                    ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Partial ->
+                                        PaymentMethodRemovePermission.Partial
+                                    ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled ->
+                                        PaymentMethodRemovePermission.None
+                                }
+                            }
+                            is ElementsSession.Customer.Components.CustomerSheet.Disabled ->
+                                PaymentMethodRemovePermission.None
                         },
                         // Should always be enabled when using `customer_session`
                         canUpdateFullPaymentMethodDetails = true

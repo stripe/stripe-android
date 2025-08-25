@@ -51,12 +51,14 @@ internal data class LinkColors(
     val textWhite: Color,
     val textBrand: Color,
     val textCritical: Color,
+    val textOnButtonPrimary: Color,
     val iconPrimary: Color,
     val iconSecondary: Color,
     val iconTertiary: Color,
     val iconWhite: Color,
     val iconBrand: Color,
     val iconCritical: Color,
+    val outline: Color,
 )
 
 internal object LinkThemeConfig {
@@ -81,13 +83,15 @@ internal object LinkThemeConfig {
         textTertiary = Neutral500,
         textWhite = Neutral0,
         textBrand = Brand600,
+        textOnButtonPrimary = Neutral0,
         textCritical = Critical600,
         iconPrimary = Neutral900,
         iconSecondary = Neutral700,
         iconTertiary = Neutral500,
         iconWhite = Neutral0,
         iconBrand = Brand200,
-        iconCritical = Critical500
+        iconCritical = Critical500,
+        outline = Color(0f, 0f, 0f, .2f),
     )
 
     private val colorsDark = LinkColors(
@@ -108,12 +112,14 @@ internal object LinkThemeConfig {
         textWhite = Neutral0,
         textBrand = Brand200,
         textCritical = Critical400,
+        textOnButtonPrimary = Neutral900,
         iconPrimary = Neutral100,
         iconSecondary = Neutral500,
         iconTertiary = Neutral500,
         iconWhite = Neutral0,
         iconBrand = Brand200,
-        iconCritical = Critical500
+        iconCritical = Critical500,
+        outline = Color(1f, 1f, 1f, .2f),
     )
 
     /**

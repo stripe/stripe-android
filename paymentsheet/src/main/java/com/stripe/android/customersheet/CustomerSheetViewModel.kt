@@ -12,6 +12,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
@@ -179,7 +180,7 @@ internal class CustomerSheetViewModel(
             configuration = configuration,
             currentSelection = originalPaymentSelection,
             permissions = CustomerPermissions(
-                canRemovePaymentMethods = false,
+                removePaymentMethod = PaymentMethodRemovePermission.None,
                 canRemoveLastPaymentMethod = false,
                 canUpdateFullPaymentMethodDetails = false,
             ),

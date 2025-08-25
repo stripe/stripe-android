@@ -10,6 +10,7 @@ import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
+import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
@@ -128,30 +129,24 @@ internal class OnrampInteractor @Inject constructor(
 
     suspend fun collectKycInfo(kycInfo: KycInfo): OnrampKYCResult {
         val secret = consumerSessionClientSecret()
+            ?: return OnrampKYCResult.Failed(MissingConsumerSecretException())
 
-        secret?.let {
-            return cryptoApiRepository.collectKycData(kycInfo, secret)
-                .fold(
-                    onSuccess = { OnrampKYCResult.Completed },
-                    onFailure = { OnrampKYCResult.Failed(it) }
-                )
-        } ?: run {
-            return OnrampKYCResult.Failed(MissingConsumerSecretException())
-        }
+        return cryptoApiRepository.collectKycData(kycInfo, secret)
+            .fold(
+                onSuccess = { OnrampKYCResult.Completed },
+                onFailure = { OnrampKYCResult.Failed(it) }
+            )
     }
 
     suspend fun startIdentityVerification(): OnrampStartVerificationResult {
         val secret = consumerSessionClientSecret()
+            ?: return OnrampStartVerificationResult.Failed(MissingConsumerSecretException())
 
-        secret?.let {
-            return cryptoApiRepository.startIdentityVerification(secret)
-                .fold(
-                    onSuccess = { OnrampStartVerificationResult.Completed(it) },
-                    onFailure = { OnrampStartVerificationResult.Failed(it) }
-                )
-        } ?: run {
-            return OnrampStartVerificationResult.Failed(MissingConsumerSecretException())
-        }
+        return cryptoApiRepository.startIdentityVerification(secret)
+            .fold(
+                onSuccess = { OnrampStartVerificationResult.Completed(it) },
+                onFailure = { OnrampStartVerificationResult.Failed(it) }
+            )
     }
 
     suspend fun createCryptoPaymentToken(): OnrampCreateCryptoPaymentTokenResult {
@@ -183,9 +178,9 @@ internal class OnrampInteractor @Inject constructor(
     }
 
     suspend fun handleAuthenticationResult(
-        result: AuthenticationResult
+        result: LinkController.AuthenticationResult
     ): OnrampVerificationResult = when (result) {
-        is AuthenticationResult.Success -> {
+        is LinkController.AuthenticationResult.Success -> {
             val secret = consumerSessionClientSecret()
             secret?.let {
                 val permissionsResult = cryptoApiRepository
@@ -202,8 +197,36 @@ internal class OnrampInteractor @Inject constructor(
                 MissingConsumerSecretException()
             )
         }
-        is AuthenticationResult.Failed -> OnrampVerificationResult.Failed(result.error)
-        is AuthenticationResult.Canceled -> OnrampVerificationResult.Cancelled()
+        is LinkController.AuthenticationResult.Failed -> OnrampVerificationResult.Failed(result.error)
+        is LinkController.AuthenticationResult.Canceled -> OnrampVerificationResult.Cancelled()
+    }
+
+    suspend fun handleAuthorizeResult(
+        result: LinkController.AuthorizeResult
+    ): OnrampAuthorizeResult = when (result) {
+        is LinkController.AuthorizeResult.Consented -> {
+            val secret = consumerSessionClientSecret()
+            secret?.let {
+                val permissionsResult = cryptoApiRepository
+                    .grantPartnerMerchantPermissions(it)
+                permissionsResult.fold(
+                    onSuccess = { result ->
+                        OnrampAuthorizeResult.Consented(result.id)
+                    },
+                    onFailure = { error ->
+                        OnrampAuthorizeResult.Failed(error)
+                    }
+                )
+            } ?: OnrampAuthorizeResult.Failed(
+                MissingConsumerSecretException()
+            )
+        }
+        is LinkController.AuthorizeResult.Denied ->
+            OnrampAuthorizeResult.Denied()
+        is LinkController.AuthorizeResult.Canceled ->
+            OnrampAuthorizeResult.Canceled()
+        is LinkController.AuthorizeResult.Failed ->
+            OnrampAuthorizeResult.Failed(result.error)
     }
 
     fun handleIdentityVerificationResult(

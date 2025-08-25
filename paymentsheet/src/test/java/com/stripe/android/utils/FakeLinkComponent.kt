@@ -27,7 +27,8 @@ internal class FakeLinkComponent(
         LinkInlineSignupAssistedViewModelFactory {
         override fun create(
             signupMode: LinkSignupMode,
-            initialUserInput: UserInput?
+            initialUserInput: UserInput?,
+            previousLinkSignupCheckboxSelection: Boolean?
         ): InlineSignupViewModel = mock<InlineSignupViewModel>()
     }
 ) : LinkComponent() {

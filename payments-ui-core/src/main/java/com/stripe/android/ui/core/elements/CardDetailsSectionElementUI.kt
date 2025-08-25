@@ -13,7 +13,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.H6Text
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -44,15 +43,10 @@ fun CardDetailsSectionElementUI(
                         heading()
                     }
             )
-            if (controller.isStripeCardScanAvailable() || FeatureFlags.cardScanGooglePayMigration.isEnabled) {
-                ScanCardButtonUI(
-                    enabled = enabled,
-                    elementsSessionId = controller.elementsSessionId,
-                    onGoogleCardScanResult = controller.cardDetailsElement.controller.onCardScanResult
-                ) {
-                    controller.cardDetailsElement.controller.numberElement.controller.onCardScanResult(it)
-                }
-            }
+            ScanCardButtonUI(
+                enabled = enabled,
+                controller = controller
+            )
         }
         SectionElementUI(
             modifier = Modifier.padding(top = 8.dp),

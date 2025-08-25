@@ -166,11 +166,7 @@ data class ElementsSession(
                     val canRemoveLastPaymentMethod: Boolean,
                     val allowRedisplayOverride: PaymentMethod.AllowRedisplay?,
                     val isPaymentMethodSetAsDefaultEnabled: Boolean,
-                ) : MobilePaymentElement {
-                    val isPaymentMethodRemoveEnabled: Boolean
-                        get() = paymentMethodRemove == PaymentMethodRemoveFeature.Enabled ||
-                            paymentMethodRemove == PaymentMethodRemoveFeature.Partial
-                }
+                ) : MobilePaymentElement
             }
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -185,11 +181,7 @@ data class ElementsSession(
                     val paymentMethodRemove: PaymentMethodRemoveFeature,
                     val canRemoveLastPaymentMethod: Boolean,
                     val isPaymentMethodSyncDefaultEnabled: Boolean,
-                ) : CustomerSheet {
-                    val isPaymentMethodRemoveEnabled: Boolean
-                        get() = paymentMethodRemove == PaymentMethodRemoveFeature.Enabled ||
-                            paymentMethodRemove == PaymentMethodRemoveFeature.Partial
-                }
+                ) : CustomerSheet
             }
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

@@ -65,6 +65,7 @@ constructor(
             initialEmail: String? = null,
             initialPhone: String? = null,
             isExpanded: Boolean = false,
+            userHasInteracted: Boolean = false,
         ): InlineSignupViewState {
             val isAlternativeFlow = signupMode == LinkSignupMode.AlongsideSaveForFutureUse
             val customer = config.customerInfo
@@ -118,6 +119,7 @@ constructor(
                 allowsDefaultOptIn = allowsDefaultOptIn(config, signupMode),
                 linkSignUpOptInFeatureEnabled = linkSignupOptInFeatureEnabled(config, signupMode),
                 signUpState = signupState,
+                userHasInteracted = userHasInteracted,
             )
         }
 

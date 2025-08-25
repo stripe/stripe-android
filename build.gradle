@@ -131,4 +131,12 @@ subprojects {
             }
         }
     }
+    // Auto-add kotlin-parcelize-runtime when parcelize plugin is applied
+    plugins.withId("org.jetbrains.kotlin.plugin.parcelize") {
+        afterEvaluate {
+            dependencies {
+                implementation libs.kotlin.parcelizeRuntimePlugin
+            }
+        }
+    }
 }

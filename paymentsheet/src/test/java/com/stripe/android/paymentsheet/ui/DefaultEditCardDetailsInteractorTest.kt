@@ -12,6 +12,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
@@ -584,6 +585,45 @@ internal class DefaultEditCardDetailsInteractorTest {
         }
     }
 
+    @Test
+    fun whenValidateIsCalled_shouldSetAllFieldsToValidationState() = runTest {
+        val handler = handler(
+            billingDetails = null,
+            nameCollection = CollectionMode.Always,
+            addressCollectionMode = AddressCollectionMode.Full
+        )
+
+        handler.handleViewAction(EditCardDetailsInteractor.ViewAction.DateChanged(""))
+
+        handler.state.test {
+            val initialState = awaitItem()
+
+            val initialCardState = requireNotNull(initialState.cardDetailsState)
+            val initialBillingForm = requireNotNull(initialState.billingDetailsForm)
+
+            assertThat(initialCardState.expiryDateState.shouldShowError()).isFalse()
+            assertThat(initialCardState.expiryDateState.sectionError()).isNull()
+
+            assertThat(initialBillingForm.nameElement).isNotNull()
+            assertThat(initialBillingForm.nameElement?.controller?.error?.value).isNull()
+            assertThat(initialBillingForm.addressSectionElement.controller.error.value).isNull()
+
+            handler.handleViewAction(EditCardDetailsInteractor.ViewAction.Validate)
+
+            val validatingState = awaitItem()
+
+            val validatingCardState = requireNotNull(validatingState.cardDetailsState)
+            val validatingBillingForm = requireNotNull(validatingState.billingDetailsForm)
+
+            assertThat(validatingCardState.expiryDateState.shouldShowError()).isTrue()
+            assertThat(validatingCardState.expiryDateState.sectionError()).isNotNull()
+
+            assertThat(validatingBillingForm.nameElement).isNotNull()
+            assertThat(validatingBillingForm.nameElement?.controller?.error?.value).isNotNull()
+            assertThat(validatingBillingForm.addressSectionElement.controller.error.value).isNotNull()
+        }
+    }
+
     private val EditCardDetailsInteractor.uiState
         get() = this.state.value
 
@@ -596,6 +636,7 @@ internal class DefaultEditCardDetailsInteractorTest {
         isCbcModifiable: Boolean = true,
         areExpiryDateAndAddressModificationSupported: Boolean = true,
         addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Automatic,
+        nameCollection: CollectionMode = CollectionMode.Automatic,
         allowedCountries: Set<String> = emptySet(),
         billingDetails: PaymentMethod.BillingDetails? = PaymentMethodFixtures.BILLING_DETAILS,
         requiresModification: Boolean = true,
@@ -613,6 +654,7 @@ internal class DefaultEditCardDetailsInteractorTest {
             payload = EditCardPayload.create(card, billingDetails),
             billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                 address = addressCollectionMode,
+                name = nameCollection,
                 allowedCountries = allowedCountries,
             ),
             onBrandChoiceChanged = onBrandChoiceChanged,

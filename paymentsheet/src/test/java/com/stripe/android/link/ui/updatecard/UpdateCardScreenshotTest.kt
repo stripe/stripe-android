@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.ui.CardEditConfiguration
 import com.stripe.android.paymentsheet.ui.DefaultEditCardDetailsInteractor
+import com.stripe.android.paymentsheet.ui.EditCardDetailsInteractor
 import com.stripe.android.paymentsheet.ui.EditCardPayload
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -50,9 +51,14 @@ internal class UpdateCardScreenshotTest(
                         billingDetailsCollectionConfiguration = testCase.billingDetailsCollectionConfiguration,
                         onBrandChoiceChanged = {},
                         onCardUpdateParamsChanged = {},
-                    ),
+                    ).apply {
+                        if (testCase.validate) {
+                            handleViewAction(EditCardDetailsInteractor.ViewAction.Validate)
+                        }
+                    },
                     state = testCase.state,
                     onUpdateClicked = {},
+                    onDisabledButtonClicked = {},
                 )
             }
         }
@@ -159,6 +165,23 @@ internal class UpdateCardScreenshotTest(
                         name = CollectionMode.Always,
                     )
                 ),
+                TestCase(
+                    name = "Card validation",
+                    state = state(),
+                    payment = card().copy(
+                        expiryMonth = 12,
+                        expiryYear = 2012,
+                        billingAddress = null,
+                    ),
+                    cardEditConfiguration = cardEditConfiguration(),
+                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                        address = AddressCollectionMode.Full,
+                        email = CollectionMode.Always,
+                        phone = CollectionMode.Always,
+                        name = CollectionMode.Always,
+                    ),
+                    validate = true,
+                ),
             )
         }
 
@@ -242,7 +265,8 @@ internal class UpdateCardScreenshotTest(
         val state: UpdateCardScreenState,
         val payment: ConsumerPaymentDetails.PaymentDetails,
         val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
-        val cardEditConfiguration: CardEditConfiguration?
+        val cardEditConfiguration: CardEditConfiguration?,
+        val validate: Boolean = false,
     ) {
         override fun toString(): String = name
     }

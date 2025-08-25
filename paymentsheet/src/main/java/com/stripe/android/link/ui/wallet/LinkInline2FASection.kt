@@ -191,7 +191,7 @@ private fun OTPSection(
             LinkSpinner(
                 modifier = Modifier.size(20.dp),
                 strokeWidth = 4.dp,
-                filledColor = LinkTheme.colors.buttonPrimary
+                filledColor = LinkTheme.colors.textPrimary
             )
         }
     }

@@ -12,5 +12,6 @@ class OnrampCallbacks(
     val authenticationCallback: OnrampVerificationCallback,
     val identityVerificationCallback: OnrampIdentityVerificationCallback,
     val selectPaymentCallback: OnrampCollectPaymentCallback,
+    val authorizeCallback: OnrampAuthorizeCallback,
     val checkoutCallback: OnrampCheckoutCallback
 )

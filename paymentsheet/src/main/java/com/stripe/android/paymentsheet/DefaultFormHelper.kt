@@ -162,6 +162,11 @@ internal class DefaultFormHelper(
                     is PaymentSelection.New.LinkInline -> selection.input
                     else -> null
                 },
+                previousLinkSignupCheckboxSelection = when (currentSelection?.paymentSelection) {
+                    is PaymentSelection.New.LinkInline -> true // User entered a card and opted-in to Link
+                    is PaymentSelection.New.Card -> false // User entered a card and did not opt-in to Link
+                    else -> null // Not a card, so no previous choice
+                },
                 setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
                 autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
                 isLinkUI = isLinkUI,
