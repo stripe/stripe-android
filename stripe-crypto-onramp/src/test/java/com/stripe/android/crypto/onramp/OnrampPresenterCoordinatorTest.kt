@@ -95,11 +95,10 @@ class OnrampPresenterCoordinatorTest {
                 checkoutCallback = checkoutCallback,
                 identityVerificationCallback = { },
                 authenticationCallback = {},
-                selectPaymentCallback = {}
+                selectPaymentCallback = {},
+                authorizeCallback = {}
             ),
-            coroutineScope = testScope,
-            accountIdProvider = { null },
-            publishableKeyProvider = { "pk_test_123" }
+            coroutineScope = testScope
         )
     }
 

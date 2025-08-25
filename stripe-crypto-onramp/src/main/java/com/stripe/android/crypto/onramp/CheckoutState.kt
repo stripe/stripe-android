@@ -15,7 +15,8 @@ internal data class CheckoutState(
          */
         data class Processing(
             val onrampSessionId: String,
-            val checkoutHandler: suspend () -> String
+            val checkoutHandler: suspend () -> String,
+            val platformKey: String,
         ) : Status
 
         /**
@@ -24,7 +25,8 @@ internal data class CheckoutState(
         data class RequiresNextAction(
             val onrampSessionId: String,
             val checkoutHandler: suspend () -> String,
-            val paymentIntent: PaymentIntent
+            val paymentIntent: PaymentIntent,
+            val platformKey: String
         ) : Status
 
         /**

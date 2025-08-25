@@ -7,8 +7,6 @@ import androidx.core.net.toUri
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.exception.APIException
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
@@ -21,19 +19,16 @@ import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.payments.paymentlauncher.PaymentLauncher
-import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
+import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Named
 
 @OnrampPresenterScope
 internal class OnrampPresenterCoordinator @Inject constructor(
     private val interactor: OnrampInteractor,
-    @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-    @Named(STRIPE_ACCOUNT_ID) accountIdProvider: () -> String?,
     linkController: LinkController,
     lifecycleOwner: LifecycleOwner,
     private val activity: ComponentActivity,
@@ -51,10 +46,8 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     private var identityVerificationSheet: IdentityVerificationSheet? = null
 
-    private val paymentLauncher: PaymentLauncher = PaymentLauncher.create(
+    private val factory: PaymentLauncherFactory = PaymentLauncherFactory(
         activity = activity,
-        publishableKey = publishableKeyProvider(),
-        stripeAccountId = accountIdProvider(),
         callback = ::handlePaymentLauncherResult
     )
 
@@ -158,10 +151,10 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             }
             is CheckoutState.Status.RequiresNextAction -> {
                 // Launch PaymentLauncher for next action
-                handleNextAction(status.paymentIntent)
+                handleNextAction(status.paymentIntent, status.platformKey)
             }
             is CheckoutState.Status.Completed -> {
-                // Checkout finished - notify callback and clear state
+                // Checkout finished - notify callback
                 onrampCallbacks.checkoutCallback.onResult(status.result)
             }
         }
@@ -171,7 +164,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
      * Handles the next action for a PaymentIntent using PaymentLauncher.
      * The result will be handled by the PaymentLauncher callback.
      */
-    private fun handleNextAction(intent: PaymentIntent) {
+    private fun handleNextAction(intent: PaymentIntent, platformKey: String) {
         val clientSecret = intent.clientSecret
         if (clientSecret == null) {
             // No client secret - notify failure immediately
@@ -180,25 +173,29 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
 
         // Launch the next action - result will be handled by handlePaymentLauncherResult
-        paymentLauncher.handleNextActionForPaymentIntent(clientSecret)
+        factory.create(publishableKey = platformKey).handleNextActionForPaymentIntent(clientSecret)
     }
 
     /**
      * Handles PaymentLauncher results and continues the checkout flow via the interactor.
      */
-    private fun handlePaymentLauncherResult(paymentResult: PaymentResult) {
+    private fun handlePaymentLauncherResult(paymentResult: InternalPaymentResult) {
         when (paymentResult) {
-            is PaymentResult.Completed -> {
+            is InternalPaymentResult.Completed -> {
                 // Next action completed successfully, tell interactor to continue
                 coroutineScope.launch { interactor.continueCheckout() }
             }
-            is PaymentResult.Canceled -> {
+            is InternalPaymentResult.Canceled -> {
                 // User canceled the next action
-                onrampCallbacks.checkoutCallback.onResult(OnrampCheckoutResult.Canceled())
+                onrampCallbacks.checkoutCallback.onResult(
+                    OnrampCheckoutResult.Canceled()
+                )
             }
-            is PaymentResult.Failed -> {
+            is InternalPaymentResult.Failed -> {
                 // Next action failed
-                onrampCallbacks.checkoutCallback.onResult(OnrampCheckoutResult.Failed(paymentResult.throwable))
+                onrampCallbacks.checkoutCallback.onResult(
+                    OnrampCheckoutResult.Failed(paymentResult.throwable)
+                )
             }
         }
     }

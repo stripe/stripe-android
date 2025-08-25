@@ -145,9 +145,6 @@ internal class OnrampActivity : ComponentActivity() {
                         },
                         onCreatePaymentToken = {
                             viewModel.createCryptoPaymentToken()
-                        },
-                        onCreateOnrampSession = {
-                            viewModel.createOnrampSession()
                         }
                     )
                 }
@@ -652,12 +649,15 @@ private fun AuthenticatedOperationsScreen(
 
         var firstName by remember { mutableStateOf("") }
         var lastName by remember { mutableStateOf("") }
+        var ssn by remember { mutableStateOf("000000000") }
 
         KYCScreen(
             firstName = firstName,
             onFirstNameChange = { firstName = it },
             lastName = lastName,
             onLastNameChange = { lastName = it },
+            ssn = ssn,
+            onSsnChange = { ssn = it },
             onCollectKYC = { kycInfo -> onCollectKYC(kycInfo) }
         )
 
@@ -740,6 +740,8 @@ private fun KYCScreen(
     onFirstNameChange: (String) -> Unit,
     lastName: String,
     onLastNameChange: (String) -> Unit,
+    ssn: String,
+    onSsnChange: (String) -> Unit,
     onCollectKYC: (KycInfo) -> Unit
 ) {
     Column {
@@ -751,6 +753,7 @@ private fun KYCScreen(
 
         KYCTextField(firstName, "First Name", onFirstNameChange)
         KYCTextField(lastName, "Last Name", onLastNameChange)
+        KYCTextField(ssn, "SSN", onSsnChange)
 
         Button(
             onClick = {
@@ -758,7 +761,7 @@ private fun KYCScreen(
                     KycInfo(
                         firstName = firstName,
                         lastName = lastName,
-                        idNumber = "123456789",
+                        idNumber = ssn,
                         idType = IdType.SOCIAL_SECURITY_NUMBER,
                         dateOfBirth = DateOfBirth(1, month = 1, year = 1990),
                         address = PaymentSheet.Address(
@@ -766,7 +769,7 @@ private fun KYCScreen(
                             country = "US",
                             line1 = "1234 Fake Street",
                             postalCode = "10108",
-                            state = "New York"
+                            state = "NY"
                         ),
                         nationalities = null,
                         birthCountry = "US",

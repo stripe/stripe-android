@@ -203,9 +203,10 @@ internal class CryptoApiRepository @Inject constructor(
     ): Result<PaymentIntent> {
         return stripeRepository.retrievePaymentIntent(
             clientSecret = clientSecret,
+            expandFields = listOf("payment_method"),
             options = ApiRequest.Options(
                 apiKey = publishableKey,
-                stripeAccount = stripeAccountIdProvider()
+                stripeAccount = stripeAccountIdProvider(),
             )
         )
     }

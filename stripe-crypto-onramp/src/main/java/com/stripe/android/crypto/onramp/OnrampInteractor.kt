@@ -26,7 +26,6 @@ import com.stripe.android.crypto.onramp.model.PaymentOptionDisplayData
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
-import com.stripe.android.link.LinkController.AuthenticationResult
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -283,20 +282,35 @@ internal class OnrampInteractor @Inject constructor(
         onrampSessionId: String,
         checkoutHandler: suspend () -> String
     ) {
-        // Start processing with session info
-        _state.update {
-            it.copy(
-                checkoutState = CheckoutState(
-                    status = Status.Processing(
-                        onrampSessionId = onrampSessionId,
-                        checkoutHandler = checkoutHandler
+        cryptoApiRepository.getPlatformSettings()
+            .onSuccess { settings ->
+                // Start processing with session info
+                _state.update {
+                    it.copy(
+                        checkoutState = CheckoutState(
+                            status = Status.Processing(
+                                onrampSessionId = onrampSessionId,
+                                checkoutHandler = checkoutHandler,
+                                platformKey = settings.publishableKey
+                            )
+                        )
                     )
-                )
-            )
-        }
+                }
 
-        // Perform the actual checkout
-        performCheckoutInternal(onrampSessionId, checkoutHandler)
+                performCheckoutInternal(
+                    onrampSessionId = onrampSessionId,
+                    checkoutHandler = checkoutHandler,
+                    platformApiKey = settings.publishableKey
+                )
+            }.onFailure { error ->
+                _state.update {
+                    it.copy(
+                        checkoutState = CheckoutState(
+                            status = Status.Completed(OnrampCheckoutResult.Failed(error))
+                        )
+                    )
+                }
+            }
     }
 
     /**
@@ -312,13 +326,18 @@ internal class OnrampInteractor @Inject constructor(
                     it.copy(
                         checkoutState = CheckoutState(
                             status = Status.Processing(
+                                platformKey = status.platformKey,
                                 onrampSessionId = status.onrampSessionId,
                                 checkoutHandler = status.checkoutHandler
                             )
                         )
                     )
                 }
-                performCheckoutInternal(status.onrampSessionId, status.checkoutHandler)
+                performCheckoutInternal(
+                    onrampSessionId = status.onrampSessionId,
+                    checkoutHandler = status.checkoutHandler,
+                    platformApiKey = status.platformKey
+                )
             }
             else -> {
                 // No valid session to continue - this shouldn't happen
@@ -338,9 +357,9 @@ internal class OnrampInteractor @Inject constructor(
      */
     private suspend fun performCheckoutInternal(
         onrampSessionId: String,
-        checkoutHandler: suspend () -> String
+        checkoutHandler: suspend () -> String,
+        platformApiKey: String
     ) = runCatching {
-        val platformApiKey = cryptoApiRepository.getPlatformSettings().getOrThrow().publishableKey
 
         val paymentIntent = retrievePaymentIntent(
             onrampSessionId = onrampSessionId,
@@ -356,6 +375,7 @@ internal class OnrampInteractor @Inject constructor(
                 it.copy(
                     checkoutState = CheckoutState(
                         status = Status.RequiresNextAction(
+                            platformKey = platformApiKey,
                             onrampSessionId = onrampSessionId,
                             checkoutHandler = checkoutHandler,
                             paymentIntent = paymentIntent

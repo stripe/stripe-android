@@ -17,8 +17,8 @@ import com.stripe.android.crypto.onramp.example.network.TestBackendRepository
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
-import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
+import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
@@ -311,7 +311,7 @@ internal class OnrampViewModel(
             when (result) {
                 is OnrampKYCResult.Completed -> {
                     _message.value = "KYC Collection successful"
-                    _uiState.update { it.copy(screen = Screen.EmailInput) }
+                    _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
                 }
                 is OnrampKYCResult.Failed -> {
                     _message.value = "KYC Collection failed: ${result.error.message}"
