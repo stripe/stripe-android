@@ -166,7 +166,6 @@ internal class OnrampInteractor @Inject constructor(
         val secret = consumerSessionClientSecret()
             ?: return OnrampCreateCryptoPaymentTokenResult.Failed(MissingConsumerSecretException())
 
-        // Get or fetch platform publishable key
         val platformPublishableKey = getOrFetchPlatformKey()
             ?: return OnrampCreateCryptoPaymentTokenResult.Failed(MissingPlatformSettingsException())
 
@@ -365,7 +364,6 @@ internal class OnrampInteractor @Inject constructor(
         onrampSessionId: String,
         checkoutHandler: suspend () -> String
     ) = runCatching {
-        // Get or fetch platform publishable key
         val platformApiKey = getOrFetchPlatformKey()
         if (platformApiKey == null) {
             _state.update {
