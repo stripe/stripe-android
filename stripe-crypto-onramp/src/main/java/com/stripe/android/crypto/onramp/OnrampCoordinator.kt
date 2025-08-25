@@ -12,6 +12,7 @@ import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
+import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
 import com.stripe.android.crypto.onramp.model.OnrampKYCResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
@@ -40,8 +41,8 @@ class OnrampCoordinator @Inject internal constructor(
      */
     suspend fun configure(
         configuration: OnrampConfiguration,
-    ) {
-        interactor.configure(configuration)
+    ): OnrampConfigurationResult {
+        return interactor.configure(configuration)
     }
 
     /**
