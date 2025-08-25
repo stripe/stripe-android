@@ -45,9 +45,6 @@ internal class OnrampInteractor @Inject constructor(
     private val _state = MutableStateFlow(OnrampState())
     val state: StateFlow<OnrampState> = _state.asStateFlow()
 
-    private val _checkoutState = MutableStateFlow(CheckoutState())
-    val checkoutState: StateFlow<CheckoutState> = _checkoutState.asStateFlow()
-
     suspend fun configure(configuration: OnrampConfiguration) {
         _state.value = _state.value.copy(configuration = configuration)
 
@@ -264,11 +261,14 @@ internal class OnrampInteractor @Inject constructor(
         checkoutHandler: suspend () -> String
     ) {
         // Start processing with session info
-        _checkoutState.update {
+        _state.update {
             it.copy(
-                onrampSessionId = onrampSessionId,
-                checkoutHandler = checkoutHandler,
-                status = Status.Processing
+                checkoutState = CheckoutState(
+                    status = Status.Processing(
+                        onrampSessionId = onrampSessionId,
+                        checkoutHandler = checkoutHandler
+                    )
+                )
             )
         }
 
@@ -281,22 +281,31 @@ internal class OnrampInteractor @Inject constructor(
      * This should be called by the coordinator when PaymentLauncher finishes successfully.
      */
     suspend fun continueCheckout() {
-        val currentCheckoutState = _checkoutState.value
-        val sessionId = currentCheckoutState.onrampSessionId
-        val sessionProvider = currentCheckoutState.checkoutHandler
-
-        if (sessionId != null && sessionProvider != null) {
-            // Continue processing with the existing session info
-            _checkoutState.update {
-                it.copy(status = Status.Processing)
+        val currentCheckoutState = _state.value.checkoutState
+        when (val status = currentCheckoutState?.status) {
+            is Status.RequiresNextAction -> {
+                // Continue processing with the existing session info
+                _state.update {
+                    it.copy(
+                        checkoutState = CheckoutState(
+                            status = Status.Processing(
+                                onrampSessionId = status.onrampSessionId,
+                                checkoutHandler = status.checkoutHandler
+                            )
+                        )
+                    )
+                }
+                performCheckoutInternal(status.onrampSessionId, status.checkoutHandler)
             }
-            performCheckoutInternal(sessionId, sessionProvider)
-        } else {
-            // No session to continue - this shouldn't happen
-            _checkoutState.update {
-                it.copy(
-                    status = Status.Completed(OnrampCheckoutResult.Failed(PaymentFailedException()))
-                )
+            else -> {
+                // No valid session to continue - this shouldn't happen
+                _state.update {
+                    it.copy(
+                        checkoutState = CheckoutState(
+                            status = Status.Completed(OnrampCheckoutResult.Failed(PaymentFailedException()))
+                        )
+                    )
+                }
             }
         }
     }
@@ -320,23 +329,35 @@ internal class OnrampInteractor @Inject constructor(
         val checkoutResult = paymentIntent.toCheckoutResult()
         if (checkoutResult == null) {
             // Requires next action - trigger PaymentLauncher to handle next actions (UI)
-            _checkoutState.update {
+            _state.update {
                 it.copy(
-                    onrampSessionId = onrampSessionId,
-                    checkoutHandler = checkoutHandler,
-                    status = Status.RequiresNextAction(paymentIntent)
+                    checkoutState = CheckoutState(
+                        status = Status.RequiresNextAction(
+                            onrampSessionId = onrampSessionId,
+                            checkoutHandler = checkoutHandler,
+                            paymentIntent = paymentIntent
+                        )
+                    )
                 )
             }
         } else {
-            // Checkout is complete - clear session info and emit result
-            _checkoutState.update {
-                it.copy(status = Status.Completed(checkoutResult))
+            // Checkout is complete - emit result
+            _state.update {
+                it.copy(
+                    checkoutState = CheckoutState(
+                        status = Status.Completed(checkoutResult)
+                    )
+                )
             }
         }
     }.getOrElse { error ->
-        // Error occurred - clear session info and emit failure
-        _checkoutState.update {
-            it.copy(status = Status.Completed(OnrampCheckoutResult.Failed(error)))
+        // Error occurred - emit failure
+        _state.update {
+            it.copy(
+                checkoutState = CheckoutState(
+                    status = Status.Completed(OnrampCheckoutResult.Failed(error))
+                )
+            )
         }
     }
 
@@ -371,7 +392,7 @@ internal class OnrampInteractor @Inject constructor(
      */
     private fun PaymentIntent.toCheckoutResult(): OnrampCheckoutResult? {
         return when (status) {
-            StripeIntent.Status.Succeeded -> OnrampCheckoutResult.Completed
+            StripeIntent.Status.Succeeded -> OnrampCheckoutResult.Completed()
             StripeIntent.Status.RequiresPaymentMethod -> OnrampCheckoutResult.Failed(PaymentFailedException())
             StripeIntent.Status.RequiresAction -> null // More handling needed
             else -> OnrampCheckoutResult.Failed(PaymentFailedException())
@@ -382,4 +403,5 @@ internal class OnrampInteractor @Inject constructor(
 internal data class OnrampState(
     val configuration: OnrampConfiguration? = null,
     val linkControllerState: LinkController.State? = null,
+    val checkoutState: CheckoutState? = null,
 )

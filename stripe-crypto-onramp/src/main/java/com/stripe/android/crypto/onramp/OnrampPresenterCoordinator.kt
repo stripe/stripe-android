@@ -78,9 +78,9 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
         // Observe checkout state changes and react accordingly
         lifecycleOwner.lifecycleScope.launch {
-            interactor.checkoutState.collect { checkoutState ->
-                handleCheckoutStateChange(checkoutState)
-            }
+            interactor.state
+                .distinctUntilChangedBy { it.checkoutState }
+                .collect { it.checkoutState?.let(::handleCheckoutStateChange) }
         }
     }
 
@@ -148,20 +148,17 @@ internal class OnrampPresenterCoordinator @Inject constructor(
      * Handles checkout state changes from the interactor.
      */
     private fun handleCheckoutStateChange(checkoutState: CheckoutState) {
-        when (checkoutState.status) {
-            CheckoutState.Status.Idle -> {
-                // Nothing to do
-            }
-            CheckoutState.Status.Processing -> {
+        when (val status = checkoutState.status) {
+            is CheckoutState.Status.Processing -> {
                 // Nothing to do - let the interactor work
             }
             is CheckoutState.Status.RequiresNextAction -> {
                 // Launch PaymentLauncher for next action
-                handleNextAction(checkoutState.status.paymentIntent)
+                handleNextAction(status.paymentIntent)
             }
             is CheckoutState.Status.Completed -> {
-                // Checkout finished - notify callback
-                onrampCallbacks.checkoutCallback.onResult(checkoutState.status.result)
+                // Checkout finished - notify callback and clear state
+                onrampCallbacks.checkoutCallback.onResult(status.result)
             }
         }
     }
@@ -193,7 +190,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             }
             is PaymentResult.Canceled -> {
                 // User canceled the next action
-                onrampCallbacks.checkoutCallback.onResult(OnrampCheckoutResult.Canceled)
+                onrampCallbacks.checkoutCallback.onResult(OnrampCheckoutResult.Canceled())
             }
             is PaymentResult.Failed -> {
                 // Next action failed

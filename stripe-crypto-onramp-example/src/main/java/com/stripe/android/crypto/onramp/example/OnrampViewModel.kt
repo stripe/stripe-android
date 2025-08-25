@@ -199,12 +199,12 @@ internal class OnrampViewModel(
 
     fun onCheckoutResult(result: OnrampCheckoutResult) {
         when (result) {
-            OnrampCheckoutResult.Completed -> {
+            is OnrampCheckoutResult.Completed -> {
                 _message.value = "Checkout completed successfully!"
                 _uiState.update { it.copy(screen = Screen.AuthenticatedOperations, loadingMessage = null) }
                 // The session will be automatically updated with the latest status from the backend
             }
-            OnrampCheckoutResult.Canceled -> {
+            is OnrampCheckoutResult.Canceled -> {
                 _message.value = "Checkout was canceled by the user"
                 _uiState.update { it.copy(screen = Screen.AuthenticatedOperations, loadingMessage = null) }
             }

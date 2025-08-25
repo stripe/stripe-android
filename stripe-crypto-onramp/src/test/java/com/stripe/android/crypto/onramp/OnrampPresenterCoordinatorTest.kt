@@ -39,8 +39,8 @@ class OnrampPresenterCoordinatorTest {
         val sessionClientSecret = "cos_test_secret"
         val onrampSessionClientSecretProvider: suspend () -> String = { sessionClientSecret }
 
-        val checkoutStateFlow = MutableStateFlow(CheckoutState())
-        val coordinator = createCoordinator(checkoutStateFlow)
+        val onrampStateFlow = MutableStateFlow(OnrampState())
+        val coordinator = createCoordinator(onrampStateFlow)
 
         // When
         coordinator.performCheckout(onrampSessionId, onrampSessionClientSecretProvider)
@@ -50,7 +50,11 @@ class OnrampPresenterCoordinatorTest {
         verify(interactor).startCheckout(onrampSessionId, onrampSessionClientSecretProvider)
 
         // Simulate the interactor emitting a completed checkout state (this will trigger the observer)
-        checkoutStateFlow.value = CheckoutState(status = Status.Completed(OnrampCheckoutResult.Completed))
+        onrampStateFlow.value = OnrampState(
+            checkoutState = CheckoutState(
+                status = Status.Completed(OnrampCheckoutResult.Completed())
+            )
+        )
         testScope.testScheduler.advanceUntilIdle()
 
         // Then
@@ -58,21 +62,16 @@ class OnrampPresenterCoordinatorTest {
         verify(checkoutCallback).onResult(callbackCaptor.capture())
 
         assertThat(callbackCaptor.firstValue)
-            .isEqualTo(OnrampCheckoutResult.Completed)
+            .isInstanceOf(OnrampCheckoutResult.Completed::class.java)
     }
 
     private fun createCoordinator(
-        checkoutStateFlow: MutableStateFlow<CheckoutState> = MutableStateFlow(CheckoutState())
+        onrampStateFlow: MutableStateFlow<OnrampState> = MutableStateFlow(OnrampState())
     ): OnrampPresenterCoordinator {
         lifecycleOwner.currentState = Lifecycle.State.STARTED
 
         val linkState = createFakeLinkState()
         val linkStateFlow = MutableStateFlow(linkState)
-        val onrampState = OnrampState(
-            configuration = null,
-            linkControllerState = null
-        )
-        val onrampStateFlow = MutableStateFlow(onrampState)
         val linkPresenter = mock<LinkController.Presenter>()
 
         whenever(linkController.state(any())).thenReturn(linkStateFlow)
@@ -86,7 +85,6 @@ class OnrampPresenterCoordinatorTest {
         ).thenReturn(linkPresenter)
 
         whenever(interactor.state).thenReturn(onrampStateFlow)
-        whenever(interactor.checkoutState).thenReturn(checkoutStateFlow)
 
         return OnrampPresenterCoordinator(
             linkController = linkController,

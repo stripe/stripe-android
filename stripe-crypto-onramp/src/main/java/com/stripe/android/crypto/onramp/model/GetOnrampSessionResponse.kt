@@ -1,6 +1,5 @@
 package com.stripe.android.crypto.onramp.model
 
-import androidx.annotation.RestrictTo
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
