@@ -51,12 +51,6 @@ internal class OnrampInteractor @Inject constructor(
     suspend fun configure(configuration: OnrampConfiguration): OnrampConfigurationResult {
         _state.value = _state.value.copy(configuration = configuration)
 
-        // Fetch and cache platform publishable key
-        val platformPublishableKey = getOrFetchPlatformKey()
-        if (platformPublishableKey == null) {
-            return OnrampConfigurationResult.Failed(MissingPlatformSettingsException())
-        }
-
         // We are *not* calling `PaymentConfiguration.init()` here because we're relying on
         // `LinkController.configure()` to do it.
         val linkResult: ConfigureResult = linkController.configure(
