@@ -1,6 +1,9 @@
-package com.stripe.android.financialconnections.utils
+package com.stripe.android.core.networking
 
-internal object MarkdownParser {
+import androidx.annotation.RestrictTo
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+object MarkdownParser {
 
     private const val REGEX_BOLD_ASTERISKS = "\\*\\*(.*?)\\*\\*"
     private const val REGEX_BOLD_UNDERSCORES = "__([^_]+)__"
@@ -16,7 +19,8 @@ internal object MarkdownParser {
         REGEX_LINK.toRegex() to { "<a href=\"${it.groupValues[2]}\">${it.groupValues[1]}</a>" }
     )
 
-    internal fun toHtml(string: String): String {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    fun toHtml(string: String): String {
         var newText = string
         markDownToHtmlRegex.forEach { (regex, replacement) ->
             newText = regex.replace(newText, replacement)

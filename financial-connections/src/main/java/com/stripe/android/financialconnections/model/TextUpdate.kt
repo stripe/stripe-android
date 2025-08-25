@@ -3,7 +3,7 @@ package com.stripe.android.financialconnections.model
 import FinancialConnectionsGenericInfoScreen
 import android.os.Parcelable
 import com.stripe.android.financialconnections.model.serializer.EntrySerializer
-import com.stripe.android.financialconnections.model.serializer.MarkdownToHtmlSerializer
+import com.stripe.android.core.networking.MarkdownToHtmlSerializer
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
