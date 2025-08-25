@@ -17,6 +17,8 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.link.LinkController
 import com.stripe.android.networking.RequestSurface
+import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -54,13 +56,22 @@ internal class OnrampModule {
         { PaymentConfiguration.getInstance(context).stripeAccountId }
 
     @Provides
+    fun provideRequestSurface(): RequestSurface = RequestSurface.CryptoOnramp
+
+    @Provides
+    @Named(PRODUCT_USAGE)
+    fun provideProductUsageTokens(): Set<String> = setOf("CryptoOnramp")
+
+    @Provides
     fun provideCryptoApiRepository(
         stripeNetworkClient: StripeNetworkClient,
+        stripeRepository: StripeRepository,
         @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
         @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?,
     ): CryptoApiRepository {
         return CryptoApiRepository(
             stripeNetworkClient = stripeNetworkClient,
+            stripeRepository = stripeRepository,
             publishableKeyProvider = publishableKeyProvider,
             stripeAccountIdProvider = stripeAccountIdProvider,
             apiVersion = ApiVersion.get().code,

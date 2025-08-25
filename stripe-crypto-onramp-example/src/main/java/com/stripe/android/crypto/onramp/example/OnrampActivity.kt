@@ -1,6 +1,7 @@
 package com.stripe.android.crypto.onramp.example
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -81,12 +82,27 @@ internal class OnrampActivity : ComponentActivity() {
         val callbacks = OnrampCallbacks(
             authenticationCallback = viewModel::onAuthenticationResult,
             identityVerificationCallback = viewModel::onIdentityVerificationResult,
+            checkoutCallback = viewModel::onCheckoutResult,
             selectPaymentCallback = viewModel::onSelectPaymentResult,
             authorizeCallback = viewModel::onAuthorizeResult
         )
 
         onrampPresenter = viewModel.onrampCoordinator
             .createPresenter(this, callbacks)
+
+        // ViewModel notifies UI to launch checkout flow.
+        // Note checkout requires an Activity context since it might launch UI to handle next actions (e.g. 3DS2).
+        lifecycleScope.launch {
+            viewModel.checkoutEvent.collect { event ->
+                event?.let {
+                    onrampPresenter.performCheckout(
+                        onrampSessionId = event.sessionId,
+                        checkoutHandler = { viewModel.checkoutWithBackend(event.sessionId) }
+                    )
+                    viewModel.clearCheckoutEvent()
+                }
+            }
+        }
 
         setContent {
             OnrampExampleTheme {
@@ -151,7 +167,6 @@ internal fun OnrampScreen(
     onStartVerification: () -> Unit,
     onCollectPayment: (type: PaymentMethodType) -> Unit,
     onCreatePaymentToken: () -> Unit,
-    onCreateOnrampSession: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
@@ -165,6 +180,7 @@ internal fun OnrampScreen(
     LaunchedEffect(message) {
         message?.let {
             Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            Log.d("OnrampExample", it)
             viewModel.clearMessage()
         }
     }
@@ -184,7 +200,7 @@ internal fun OnrampScreen(
                 )
             }
             Screen.Loading -> {
-                LoadingScreen()
+                LoadingScreen(message = uiState.loadingMessage ?: "Loading...")
             }
             Screen.Registration -> {
                 RegistrationScreen(
@@ -225,7 +241,8 @@ internal fun OnrampScreen(
                     onStartVerification = onStartVerification,
                     onCollectPayment = onCollectPayment,
                     onCreatePaymentToken = onCreatePaymentToken,
-                    onCreateOnrampSession = onCreateOnrampSession,
+                    onCreateSession = { viewModel.createSession() },
+                    onPerformCheckout = { viewModel.performCheckout() },
                     onBack = {
                         viewModel.onBackToEmailInput()
                     }
@@ -266,7 +283,7 @@ private fun EmailInputScreen(
 }
 
 @Composable
-private fun LoadingScreen() {
+private fun LoadingScreen(message: String = "Loading...") {
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
@@ -276,7 +293,7 @@ private fun LoadingScreen() {
         ) {
             CircularProgressIndicator()
             Spacer(modifier = Modifier.height(16.dp))
-            Text("Loading...")
+            Text(message)
         }
     }
 }
@@ -467,7 +484,8 @@ private fun AuthenticatedOperationsScreen(
     onStartVerification: () -> Unit,
     onCollectPayment: (type: PaymentMethodType) -> Unit,
     onCreatePaymentToken: () -> Unit,
-    onCreateOnrampSession: () -> Unit,
+    onCreateSession: () -> Unit,
+    onPerformCheckout: () -> Unit,
     onBack: () -> Unit
 ) {
     // hardcoded sample ETH wallet
@@ -681,12 +699,28 @@ private fun AuthenticatedOperationsScreen(
         }
 
         Button(
-            onClick = onCreateOnrampSession,
+            onClick = onCreateSession,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
         ) {
-            Text("🚀 Checkout - Create Onramp Session")
+            Text("📋 Create Session")
+        }
+
+        Button(
+            onClick = onPerformCheckout,
+            enabled = onrampSessionResponse != null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
+        ) {
+            Text(
+                if (onrampSessionResponse != null) {
+                    "🚀 Checkout"
+                } else {
+                    "🚀 Checkout (Create session first)"
+                }
+            )
         }
 
         TextButton(

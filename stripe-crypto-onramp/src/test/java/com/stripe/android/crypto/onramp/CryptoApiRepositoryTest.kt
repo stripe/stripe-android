@@ -10,6 +10,7 @@ import com.stripe.android.crypto.onramp.model.DateOfBirth
 import com.stripe.android.crypto.onramp.model.IdType
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -26,8 +27,11 @@ import org.robolectric.RobolectricTestRunner
 class CryptoApiRepositoryTest {
     private val stripeNetworkClient: StripeNetworkClient = mock()
 
+    private val stripeRepository = mock<StripeRepository>()
+
     private val cryptoApiRepository = CryptoApiRepository(
         stripeNetworkClient = stripeNetworkClient,
+        stripeRepository = stripeRepository,
         publishableKeyProvider = { "pk_test_vOo1umqsYxSrP5UXfOeL3ecm" },
         stripeAccountIdProvider = { "TestAccountId" },
         apiVersion = ApiVersion(betas = emptySet()).code,
