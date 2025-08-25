@@ -41,12 +41,7 @@ internal fun SetupIntent.Error.withLocalizedMessage(context: Context): SetupInte
 }
 
 internal fun Context.mapErrorCodeToLocalizedMessage(code: String?): String? {
-    val messageResourceId = getErrorCodeStringId(code)
-    return messageResourceId?.let { getString(it) }
-}
-
-private fun getErrorCodeStringId(code: String?): Int? {
-    return when (code) {
+    val messageResourceId = when (code) {
         "incorrect_number" -> R.string.stripe_invalid_card_number
         "invalid_number" -> R.string.stripe_invalid_card_number
         "invalid_expiry_month" -> UiCoreR.string.stripe_invalid_expiry_month
@@ -61,6 +56,7 @@ private fun getErrorCodeStringId(code: String?): Int? {
         "generic_decline" -> R.string.stripe_generic_decline
         else -> null
     }
+    return messageResourceId?.let { getString(it) }
 }
 
 private fun getErrorMessage(
