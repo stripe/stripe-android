@@ -1114,6 +1114,53 @@ class DefaultLinkAccountManagerTest {
         )
 
     @Test
+    fun `lookupConsumerByAuthIntent returns success when repository call succeeds`() = runSuspendTest {
+        val linkAuthIntentId = "lai_123"
+        val linkRepository = FakeLinkRepository()
+        val accountManager = accountManager(linkRepository = linkRepository)
+
+        val result = accountManager.lookupConsumerByAuthIntent(
+            linkAuthIntentId = linkAuthIntentId,
+            customerId = null
+        )
+
+        val call = linkRepository.awaitLookup()
+        assertThat(call.linkAuthIntentId).isEqualTo(linkAuthIntentId)
+        assertThat(call.email).isNull()
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()?.email).isEqualTo(TestFactory.LINK_ACCOUNT.email)
+
+        linkRepository.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `mobileLookupConsumerByAuthIntent returns success when repository call succeeds`() = runSuspendTest {
+        val linkAuthIntentId = "lai_123"
+        val linkRepository = FakeLinkRepository()
+        val accountManager = accountManager(linkRepository = linkRepository)
+
+        val result = accountManager.mobileLookupConsumerByAuthIntent(
+            linkAuthIntentId = linkAuthIntentId,
+            verificationToken = TestFactory.VERIFICATION_TOKEN,
+            appId = TestFactory.APP_ID,
+            customerId = null
+        )
+
+        val call = linkRepository.awaitMobileLookup()
+        assertThat(call.linkAuthIntentId).isEqualTo(linkAuthIntentId)
+        assertThat(call.email).isNull()
+        assertThat(call.emailSource).isNull()
+        assertThat(call.verificationToken).isEqualTo(TestFactory.VERIFICATION_TOKEN)
+        assertThat(call.appId).isEqualTo(TestFactory.APP_ID)
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()?.email).isEqualTo(TestFactory.LINK_ACCOUNT.email)
+
+        linkRepository.ensureAllEventsConsumed()
+    }
+
+    @Test
     fun `allowUserEmailEdits configuration is properly passed to LinkConfiguration`() = runSuspendTest {
         val accountManagerWithEditsAllowed = accountManager(
             allowUserEmailEdits = true
