@@ -310,7 +310,7 @@ private fun DeletePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
     if (openDialogValue.value) {
         RemovePaymentMethodDialogUI(
             paymentMethod = interactor.displayableSavedPaymentMethod,
-            removeMessage = interactor.removeMessage,
+            removeMessage = interactor.removeMessage?.resolve(),
             onConfirmListener = {
                 openDialogValue.value = false
                 interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.RemovePaymentMethod)

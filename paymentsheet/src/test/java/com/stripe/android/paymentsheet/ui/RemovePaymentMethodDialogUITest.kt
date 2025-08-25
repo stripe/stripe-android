@@ -6,7 +6,6 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.testing.createComposeCleanupRule
@@ -57,7 +56,7 @@ class RemovePaymentMethodDialogUITest {
                 paymentMethod = PaymentMethodFixtures
                     .CARD_WITH_NETWORKS_PAYMENT_METHOD
                     .toDisplayableSavedPaymentMethod(),
-                removeMessage = resolvableString(removeMessage),
+                removeMessage = removeMessage,
                 onConfirmListener = {},
                 onDismissListener = {}
             )
