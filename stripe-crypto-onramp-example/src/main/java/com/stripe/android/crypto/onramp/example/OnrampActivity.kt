@@ -48,12 +48,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.crypto.onramp.OnrampCoordinator
+import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.DateOfBirth
 import com.stripe.android.crypto.onramp.model.IdType
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
+import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.model.PaymentOptionDisplayData
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.image.rememberDrawablePainter
@@ -103,10 +105,15 @@ internal class OnrampActivity : ComponentActivity() {
                         onStartVerification = {
                             onrampPresenter.promptForIdentityVerification()
                         },
-                        onCollectPayment = {
-                            onrampPresenter.collectPaymentMethod()
+                        onCollectPayment = { type ->
+                            onrampPresenter.collectPaymentMethod(type)
+                        },
+                        onCreatePaymentToken = {
+                            viewModel.createCryptoPaymentToken()
+                        },
+                        onCreateOnrampSession = {
+                            viewModel.createOnrampSession()
                         }
-						
                     )
                 }
             }
@@ -122,7 +129,9 @@ internal fun OnrampScreen(
     onAuthenticateUser: () -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onStartVerification: () -> Unit,
-    onCollectPayment: () -> Unit
+    onCollectPayment: (type: PaymentMethodType) -> Unit,
+    onCreatePaymentToken: () -> Unit,
+    onCreateOnrampSession: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
@@ -141,20 +150,20 @@ internal fun OnrampScreen(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        when (val currentState = uiState) {
-            is OnrampUiState.EmailInput -> {
+        when (uiState.screen) {
+            Screen.EmailInput -> {
                 EmailInputScreen(
                     onCheckUser = { email ->
                         viewModel.checkIfLinkUser(email)
                     }
                 )
             }
-            is OnrampUiState.Loading -> {
+            Screen.Loading -> {
                 LoadingScreen()
             }
-            is OnrampUiState.Registration -> {
+            Screen.Registration -> {
                 RegistrationScreen(
-                    initialEmail = currentState.email,
+                    initialEmail = uiState.email,
                     onRegister = { email, phone, country, fullName ->
                         val userInfo = LinkUserInfo(
                             email = email.trim(),
@@ -169,24 +178,27 @@ internal fun OnrampScreen(
                     }
                 )
             }
-            is OnrampUiState.Authentication -> {
+            Screen.Authentication -> {
                 AuthenticationScreen(
-                    email = currentState.email,
+                    email = uiState.email,
                     onAuthenticate = onAuthenticateUser,
                     onBack = {
                         viewModel.onBackToEmailInput()
                     }
                 )
             }
-            is OnrampUiState.AuthenticatedOperations -> {
+            Screen.AuthenticatedOperations -> {
                 AuthenticatedOperationsScreen(
-                    email = currentState.email,
-                    customerId = currentState.customerId,
-                    selectedPaymentData = currentState.selectedPaymentData,
+                    email = uiState.email,
+                    customerId = uiState.customerId ?: "",
+                    onrampSessionResponse = uiState.onrampSession,
+                    selectedPaymentData = uiState.selectedPaymentData,
                     onRegisterWalletAddress = onRegisterWalletAddress,
                     onCollectKYC = { kycInfo -> viewModel.collectKycInfo(kycInfo) },
                     onStartVerification = onStartVerification,
-                    onCollectPayment = { onCollectPayment() },
+                    onCollectPayment = onCollectPayment,
+                    onCreatePaymentToken = onCreatePaymentToken,
+                    onCreateOnrampSession = onCreateOnrampSession,
                     onBack = {
                         viewModel.onBackToEmailInput()
                     }
@@ -394,14 +406,18 @@ private fun AuthenticationScreen(
 private fun AuthenticatedOperationsScreen(
     email: String,
     customerId: String,
+    onrampSessionResponse: OnrampSessionResponse?,
     selectedPaymentData: PaymentOptionDisplayData?,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onCollectKYC: (KycInfo) -> Unit,
     onStartVerification: () -> Unit,
-    onCollectPayment: () -> Unit,
+    onCollectPayment: (type: PaymentMethodType) -> Unit,
+    onCreatePaymentToken: () -> Unit,
+    onCreateOnrampSession: () -> Unit,
     onBack: () -> Unit
 ) {
-    var walletAddress by remember { mutableStateOf("") }
+    // hardcoded sample ETH wallet
+    var walletAddressInput by remember { mutableStateOf("0x742d35Cc6634C0532925a3b844Bc454e4438f44e") }
     var selectedNetwork by remember { mutableStateOf(CryptoNetwork.Ethereum) }
     var isDropdownExpanded by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
@@ -425,8 +441,48 @@ private fun AuthenticatedOperationsScreen(
 
         Text(
             text = "Customer ID: $customerId",
-            modifier = Modifier.padding(bottom = 24.dp)
+            modifier = Modifier.padding(bottom = 8.dp)
         )
+
+        onrampSessionResponse?.let { response ->
+            Text(
+                text = "Onramp Session ID: ${response.id}",
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
+            Text(
+                text = "Session Status: ${response.status}",
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Text(
+                text = "Total Amount: ${response.sourceTotalAmount}",
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Text(
+                text = "Payment Method: ${response.paymentMethod}",
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            response.transactionDetails.let { details ->
+                Text(
+                    text = buildString {
+                        append("Exchange Amount: ${details.sourceExchangeAmount}")
+                        append(" ${details.sourceCurrency} → ${details.destinationExchangeAmount}")
+                        append(" ${details.destinationCurrency}")
+                    },
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                Text(
+                    text = "Network Fee: ${details.fees.networkFeeAmount}",
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                Text(
+                    text = "Transaction Fee: ${details.fees.transactionFeeAmount}",
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+            }
+        } ?: run {
+            Spacer(modifier = Modifier.height(16.dp))
+        }
 
         selectedPaymentData?.let {
             Image(
@@ -475,7 +531,7 @@ private fun AuthenticatedOperationsScreen(
                 expanded = isDropdownExpanded,
                 onDismissRequest = { isDropdownExpanded = false }
             ) {
-                CryptoNetwork.values().forEach { network ->
+                CryptoNetwork.entries.forEach { network ->
                     DropdownMenuItem(
                         onClick = {
                             selectedNetwork = network
@@ -489,8 +545,8 @@ private fun AuthenticatedOperationsScreen(
         }
 
         OutlinedTextField(
-            value = walletAddress,
-            onValueChange = { walletAddress = it },
+            value = walletAddressInput,
+            onValueChange = { walletAddressInput = it },
             label = { Text("Wallet Address") },
             placeholder = { Text("0x1234567890abcdef...") },
             modifier = Modifier
@@ -499,7 +555,7 @@ private fun AuthenticatedOperationsScreen(
         )
 
         Button(
-            onClick = { onRegisterWalletAddress(walletAddress, selectedNetwork) },
+            onClick = { onRegisterWalletAddress(walletAddressInput, selectedNetwork) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 24.dp)
@@ -529,12 +585,39 @@ private fun AuthenticatedOperationsScreen(
         )
 
         Button(
-            onClick = { onCollectPayment() },
+            onClick = { onCollectPayment(PaymentMethodType.Card) },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 24.dp)
+                .padding(bottom = 8.dp)
         ) {
-            Text("Collect Payment Method")
+            Text("Collect Card")
+        }
+
+        Button(
+            onClick = { onCollectPayment(PaymentMethodType.BankAccount) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
+        ) {
+            Text("Collect Bank Account")
+        }
+
+        Button(
+            onClick = onCreatePaymentToken,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
+        ) {
+            Text("Create Crypto Payment Token")
+        }
+
+        Button(
+            onClick = onCreateOnrampSession,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
+        ) {
+            Text("🚀 Checkout - Create Onramp Session")
         }
 
         TextButton(
@@ -543,6 +626,8 @@ private fun AuthenticatedOperationsScreen(
         ) {
             Text("Back to Email Input")
         }
+
+        Spacer(Modifier.height(24.dp))
     }
 }
 

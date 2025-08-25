@@ -115,6 +115,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Al continuar, aceptas guardar tu información para futuras compras con %s y <link>Link</link>. También aceptas las <terms>Condiciones</terms> y la <privacy>Política de privacidad</privacy> de Link.]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Al continuar, aceptas guardar tu información para futuras compras con %s y <link>Link</link> (consulta <terms>Condiciones</terms> y <privacy>Privacidad</privacy>).]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Al continuar, aceptas guardar tu información para futuras compras con %s y <link>Link</link> de acuerdo con las <terms>Condiciones</terms> y <privacy>privacidad</privacy> de Link.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">No se actualizó la tarjeta. Vuelve a intentarlo.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -266,6 +268,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">Ver más</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Al continuar, aceptas autorizar pagos conforme a estas <terms>condiciones</terms>.]]></string>
+  <!-- Text providing link to terms for bank payments -->
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Al enviarle tu pedido a %s, aceptas autorizar pagos conforme a <terms>estas Condiciones</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Pago</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->

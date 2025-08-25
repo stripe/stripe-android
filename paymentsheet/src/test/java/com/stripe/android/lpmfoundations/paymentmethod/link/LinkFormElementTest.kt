@@ -130,6 +130,7 @@ class LinkFormElementTest {
         return LinkConfiguration(
             stripeIntent = PaymentIntentFactory.create(),
             merchantName = "Merchant, Inc.",
+            sellerBusinessName = null,
             merchantCountryCode = "CA",
             merchantLogoUrl = null,
             customerInfo = LinkConfiguration.CustomerInfo(
@@ -164,6 +165,7 @@ class LinkFormElementTest {
             linkSignUpOptInInitialValue = false,
             customerId = null,
             saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+            forceSetupFutureUseBehaviorAndNewMandate = false,
         )
     }
 

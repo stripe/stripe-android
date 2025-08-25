@@ -15,6 +15,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPayme
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.LinkCardBrandDefinition
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -53,6 +54,7 @@ internal data class PaymentMethodMetadata(
     val paymentMethodOrder: List<String>,
     val cbcEligibility: CardBrandChoiceEligibility,
     val merchantName: String,
+    val sellerBusinessName: String?,
     val defaultBillingDetails: PaymentSheet.BillingDetails?,
     val shippingDetails: AddressDetails?,
     val sharedDataSpecs: List<SharedDataSpec>,
@@ -70,14 +72,8 @@ internal data class PaymentMethodMetadata(
     val elementsSessionId: String,
     val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
     val termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay>,
+    val forceSetupFutureUseBehaviorAndNewMandate: Boolean,
 ) : Parcelable {
-
-    val alwaysSaveForFutureUse: Boolean
-        get() {
-            // When this (now poorly named) feature flag is enabled for a merchant, we always show the reuse mandate,
-            // since the merchant will save the payment method for future use.
-            return linkState?.configuration?.linkSignUpOptInFeatureEnabled == true
-        }
 
     fun hasIntentToSetup(code: PaymentMethodCode): Boolean {
         return when (stripeIntent) {
@@ -295,7 +291,7 @@ internal data class PaymentMethodMetadata(
         customerRequestedSave: PaymentSelection.CustomerRequestedSave,
         code: PaymentMethodCode
     ): PaymentMethod.AllowRedisplay {
-        val isSettingUp = hasIntentToSetup(code) || alwaysSaveForFutureUse
+        val isSettingUp = hasIntentToSetup(code) || forceSetupFutureUseBehaviorAndNewMandate
         return paymentMethodSaveConsentBehavior.allowRedisplay(
             isSetupIntent = isSettingUp,
             customerRequestedSave = customerRequestedSave,
@@ -311,6 +307,7 @@ internal data class PaymentMethodMetadata(
             isGooglePayReady: Boolean,
             linkState: LinkState?,
             customerMetadata: CustomerMetadata,
+            sellerBusinessName: String? = null,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
             return PaymentMethodMetadata(
@@ -332,6 +329,7 @@ internal data class PaymentMethodMetadata(
                     preferredNetworks = configuration.preferredNetworks,
                 ),
                 merchantName = configuration.merchantDisplayName,
+                sellerBusinessName = sellerBusinessName,
                 defaultBillingDetails = configuration.defaultBillingDetails,
                 shippingDetails = configuration.shippingDetails,
                 customerMetadata = customerMetadata,
@@ -349,6 +347,8 @@ internal data class PaymentMethodMetadata(
                 elementsSessionId = elementsSession.elementsSessionId,
                 shopPayConfiguration = configuration.shopPayConfiguration,
                 termsDisplay = configuration.termsDisplay,
+                forceSetupFutureUseBehaviorAndNewMandate = elementsSession
+                    .flags[ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT] == true,
             )
         }
 
@@ -378,6 +378,7 @@ internal data class PaymentMethodMetadata(
                     preferredNetworks = configuration.preferredNetworks,
                 ),
                 merchantName = configuration.merchantDisplayName,
+                sellerBusinessName = null,
                 defaultBillingDetails = configuration.defaultBillingDetails,
                 shippingDetails = null,
                 customerMetadata = customerMetadata,
@@ -395,6 +396,8 @@ internal data class PaymentMethodMetadata(
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession),
                 shopPayConfiguration = null,
                 termsDisplay = emptyMap(),
+                forceSetupFutureUseBehaviorAndNewMandate = elementsSession
+                    .flags[ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT] == true,
             )
         }
 
@@ -417,6 +420,7 @@ internal data class PaymentMethodMetadata(
                     }.orEmpty(),
                 ),
                 merchantName = configuration.merchantName,
+                sellerBusinessName = configuration.sellerBusinessName,
                 // Use effective billing details to prefill billing details in new card flows
                 defaultBillingDetails = effectiveBillingDetails(
                     configuration = configuration,
@@ -446,6 +450,7 @@ internal data class PaymentMethodMetadata(
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),
                 shopPayConfiguration = null,
                 termsDisplay = emptyMap(),
+                forceSetupFutureUseBehaviorAndNewMandate = configuration.forceSetupFutureUseBehaviorAndNewMandate
             )
         }
     }

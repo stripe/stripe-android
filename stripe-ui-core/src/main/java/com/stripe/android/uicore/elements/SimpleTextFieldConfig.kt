@@ -21,9 +21,11 @@ open class SimpleTextFieldConfig(
     override val loading: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     override fun determineState(input: String): TextFieldState = object : TextFieldState {
-        override fun shouldShowError(hasFocus: Boolean) = false
+        override fun shouldShowError(hasFocus: Boolean, isValidating: Boolean) = getError() != null && isValidating
 
-        override fun isValid(): Boolean = optional && input.isEmpty() || input.isNotBlank()
+        override fun isValid(): Boolean {
+            return optional && input.isEmpty() || input.isNotBlank()
+        }
 
         override fun getError(): FieldError? = if (isValid()) {
             null

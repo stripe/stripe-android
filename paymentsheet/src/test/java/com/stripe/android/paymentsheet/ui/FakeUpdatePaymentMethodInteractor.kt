@@ -26,6 +26,7 @@ internal class FakeUpdatePaymentMethodInteractor(
     override val shouldShowSaveButton: Boolean = false,
     override val addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Automatic,
     override val allowedBillingCountries: Set<String> = setOf("US", "CA"),
+    private val useDefaultBillingDetails: Boolean = true,
     val viewActionRecorder: ViewActionRecorder<UpdatePaymentMethodInteractor.ViewAction>? = ViewActionRecorder(),
     initialState: UpdatePaymentMethodInteractor.State = UpdatePaymentMethodInteractor.State(
         error = null,
@@ -55,7 +56,7 @@ internal class FakeUpdatePaymentMethodInteractor(
             requiresModification = true,
             payload = EditCardPayload.create(
                 card = displayableSavedPaymentMethod.paymentMethod.card!!,
-                billingDetails = PaymentMethodFixtures.BILLING_DETAILS,
+                billingDetails = PaymentMethodFixtures.BILLING_DETAILS.takeIf { useDefaultBillingDetails },
             ),
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                 address = addressCollectionMode

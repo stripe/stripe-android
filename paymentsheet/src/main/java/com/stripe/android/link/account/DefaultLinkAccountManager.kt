@@ -1,5 +1,6 @@
 package com.stripe.android.link.account
 
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
@@ -7,12 +8,15 @@ import com.stripe.android.link.ConsumerState
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.model.LinkAuthIntentInfo
+import com.stripe.android.link.model.toPresentation
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
@@ -50,6 +54,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
     private val linkRepository: LinkRepository,
     private val linkEventsReporter: LinkEventsReporter,
     private val errorReporter: ErrorReporter,
+    private val linkLaunchMode: LinkLaunchMode?,
 ) : LinkAccountManager {
 
     override val linkAccountInfo: StateFlow<LinkAccountUpdate.Value>
@@ -75,12 +80,14 @@ internal class DefaultLinkAccountManager @Inject constructor(
             }
 
     override suspend fun lookupConsumer(
-        email: String,
+        email: String?,
+        linkAuthIntentId: String?,
         startSession: Boolean,
         customerId: String?
     ): Result<LinkAccount?> =
         linkRepository.lookupConsumer(
             email = email,
+            linkAuthIntentId = linkAuthIntentId,
             sessionId = config.elementsSessionId,
             customerId = customerId
         )
@@ -90,12 +97,14 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 setLinkAccountFromLookupResult(
                     lookup = consumerSessionLookup,
                     startSession = startSession,
+                    linkAuthIntentId = linkAuthIntentId,
                 )
             }
 
     override suspend fun mobileLookupConsumer(
-        email: String,
-        emailSource: EmailSource,
+        email: String?,
+        emailSource: EmailSource?,
+        linkAuthIntentId: String?,
         verificationToken: String,
         appId: String,
         startSession: Boolean,
@@ -105,6 +114,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             verificationToken = verificationToken,
             appId = appId,
             email = email,
+            linkAuthIntentId = linkAuthIntentId,
             sessionId = config.elementsSessionId,
             emailSource = emailSource,
             customerId = customerId
@@ -113,7 +123,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }.map { consumerSessionLookup ->
             setLinkAccountFromLookupResult(
                 lookup = consumerSessionLookup,
-                startSession = startSession
+                startSession = startSession,
+                linkAuthIntentId = linkAuthIntentId,
             )
         }
     }
@@ -136,6 +147,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         when (userInput) {
             is UserInput.SignIn -> lookupConsumer(
                 email = userInput.email,
+                linkAuthIntentId = null,
                 startSession = true,
                 customerId = config.customerIdForEceDefaultValues
             ).mapCatching {
@@ -144,6 +156,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             is UserInput.SignUp -> signUpIfValidSessionState(
                 email = userInput.email,
                 country = userInput.country,
+                countryInferringMethod = userInput.countryInferringMethod,
                 phone = userInput.phone,
                 name = userInput.name,
                 consentAction = userInput.consentAction,
@@ -179,6 +192,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         email: String,
         phone: String?,
         country: String?,
+        countryInferringMethod: String,
         name: String?,
         consentAction: SignUpConsentAction
     ): Result<LinkAccount> {
@@ -186,7 +200,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         val currentEmail = currentAccount?.email ?: config.customerInfo.email
 
         return when (val status = getAccountStatus(currentAccount, canLookupCustomerEmail = true)) {
-            AccountStatus.Verified -> {
+            is AccountStatus.Verified -> {
                 linkEventsReporter.onInvalidSessionState(LinkEventsReporter.SessionState.Verified)
 
                 Result.failure(
@@ -213,6 +227,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     email = email,
                     phone = phone,
                     country = country,
+                    countryInferringMethod = countryInferringMethod,
                     name = name,
                     consentAction = consentAction
                 ).onSuccess {
@@ -228,22 +243,31 @@ internal class DefaultLinkAccountManager @Inject constructor(
         email: String,
         phone: String?,
         country: String?,
+        countryInferringMethod: String,
         name: String?,
         consentAction: SignUpConsentAction
     ): Result<LinkAccount> =
-        linkRepository.consumerSignUp(email, phone, country, name, consentAction.consumerAction)
-            .map { consumerSessionSignup ->
-                setAccount(
-                    consumerSession = consumerSessionSignup.consumerSession,
-                    publishableKey = consumerSessionSignup.publishableKey,
-                    displayablePaymentDetails = null
-                )
-            }
+        linkRepository.consumerSignUp(
+            email = email,
+            phone = phone,
+            country = country,
+            countryInferringMethod = countryInferringMethod,
+            name = name,
+            consentAction = consentAction.consumerAction
+        ).map { consumerSessionSignup ->
+            setAccount(
+                consumerSession = consumerSessionSignup.consumerSession,
+                publishableKey = consumerSessionSignup.publishableKey,
+                displayablePaymentDetails = null,
+                linkAuthIntentInfo = null,
+            )
+        }
 
     override suspend fun mobileSignUp(
         email: String,
         phone: String,
         country: String,
+        countryInferringMethod: String,
         name: String?,
         verificationToken: String,
         appId: String,
@@ -254,6 +278,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             email = email,
             phoneNumber = phone,
             country = country,
+            countryInferringMethod = countryInferringMethod,
             consentAction = consentAction.consumerAction,
             verificationToken = verificationToken,
             appId = appId,
@@ -264,7 +289,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
             setAccount(
                 consumerSession = consumerSessionSignUp.consumerSession,
                 publishableKey = consumerSessionSignUp.publishableKey,
-                displayablePaymentDetails = null
+                displayablePaymentDetails = null,
+                linkAuthIntentInfo = null,
             )
         }
     }
@@ -344,6 +370,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         billingPhone: String?,
         cvc: String?,
         allowRedisplay: String?,
+        apiKey: String?
     ): Result<SharePaymentDetails> {
         return runCatching {
             requireNotNull(linkAccountHolder.linkAccountInfo.value.account)
@@ -355,6 +382,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 billingPhone = billingPhone,
                 cvc = cvc,
                 allowRedisplay = allowRedisplay,
+                apiKey = apiKey,
             ).getOrThrow()
         }
     }
@@ -363,6 +391,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         consumerSession: ConsumerSession,
         publishableKey: String?,
         displayablePaymentDetails: DisplayablePaymentDetails?,
+        linkAuthIntentInfo: LinkAuthIntentInfo?,
     ): LinkAccount {
         val currentAccount = linkAccountHolder.linkAccountInfo.value.account
         val newConsumerPublishableKey = publishableKey
@@ -371,11 +400,15 @@ internal class DefaultLinkAccountManager @Inject constructor(
         val newPaymentDetails = displayablePaymentDetails
             ?: currentAccount?.displayablePaymentDetails
                 ?.takeIf { currentAccount.email == consumerSession.emailAddress }
+        val newLaiInfo = linkAuthIntentInfo
+            ?: currentAccount?.linkAuthIntentInfo
+                ?.takeIf { currentAccount.email == consumerSession.emailAddress }
 
         val newAccount = LinkAccount(
             consumerSession = consumerSession,
             consumerPublishableKey = newConsumerPublishableKey,
-            displayablePaymentDetails = newPaymentDetails
+            displayablePaymentDetails = newPaymentDetails,
+            linkAuthIntentInfo = newLaiInfo
         )
         withContext(Dispatchers.Main.immediate) {
             linkAccountHolder.set(LinkAccountUpdate.Value(newAccount))
@@ -383,22 +416,32 @@ internal class DefaultLinkAccountManager @Inject constructor(
         return newAccount
     }
 
-    override suspend fun setLinkAccountFromLookupResult(
+    @VisibleForTesting
+    internal suspend fun setLinkAccountFromLookupResult(
         lookup: ConsumerSessionLookup,
         startSession: Boolean,
+        linkAuthIntentId: String?,
     ): LinkAccount? {
+        val linkAuthIntentInfo = linkAuthIntentId?.let {
+            LinkAuthIntentInfo(
+                linkAuthIntentId = it,
+                consentPresentation = lookup.consentUi?.toPresentation(),
+            )
+        }
         return lookup.consumerSession?.let { consumerSession ->
             if (startSession) {
                 setAccount(
                     consumerSession = consumerSession,
                     publishableKey = lookup.publishableKey,
                     displayablePaymentDetails = lookup.displayablePaymentDetails,
+                    linkAuthIntentInfo = linkAuthIntentInfo,
                 )
             } else {
                 LinkAccount(
                     consumerSession = consumerSession,
                     consumerPublishableKey = lookup.publishableKey,
-                    displayablePaymentDetails = lookup.displayablePaymentDetails
+                    displayablePaymentDetails = lookup.displayablePaymentDetails,
+                    linkAuthIntentInfo = linkAuthIntentInfo,
                 )
             }
         }
@@ -418,18 +461,23 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 setAccount(
                     consumerSession = consumerSession,
                     publishableKey = null,
-                    displayablePaymentDetails = null
+                    displayablePaymentDetails = null,
+                    linkAuthIntentInfo = linkAccount.linkAuthIntentInfo, // Keep LAI info.
                 )
             }
     }
 
-    override suspend fun confirmVerification(code: String): Result<LinkAccount> {
+    override suspend fun confirmVerification(
+        code: String,
+        consentGranted: Boolean?
+    ): Result<LinkAccount> {
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
             ?: return Result.failure(NoLinkAccountFoundException())
         return linkRepository.confirmVerification(
             verificationCode = code,
             consumerSessionClientSecret = linkAccount.clientSecret,
-            consumerPublishableKey = linkAccount.consumerPublishableKey
+            consumerPublishableKey = linkAccount.consumerPublishableKey,
+            consentGranted = consentGranted,
         )
             .onSuccess {
                 linkEventsReporter.on2FAComplete()
@@ -439,9 +487,21 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 setAccount(
                     consumerSession = consumerSession,
                     publishableKey = null,
-                    displayablePaymentDetails = null
+                    displayablePaymentDetails = null,
+                    linkAuthIntentInfo = linkAccount.linkAuthIntentInfo, // Keep LAI info.
                 )
             }
+    }
+
+    override suspend fun consentUpdate(consentGranted: Boolean): Result<Unit> {
+        val linkAccount = linkAccountHolder.linkAccountInfo.value.account
+            ?: return Result.failure(NoLinkAccountFoundException())
+
+        return linkRepository.consentUpdate(
+            consumerSessionClientSecret = linkAccount.clientSecret,
+            consentGranted = consentGranted,
+            consumerPublishableKey = linkAccount.consumerPublishableKey
+        )
     }
 
     override suspend fun listPaymentDetails(paymentMethodTypes: Set<String>): Result<ConsumerPaymentDetails> {
@@ -501,22 +561,52 @@ internal class DefaultLinkAccountManager @Inject constructor(
         linkAccount: LinkAccount?,
         canLookupCustomerEmail: Boolean
     ): AccountStatus {
-        // If we already have an account, return its status.
-        if (linkAccount != null) {
-            return linkAccount.accountStatus
-        }
-        // Look up the customer email if possible.
-        return config.customerInfo.email?.takeIf { canLookupCustomerEmail }
-            ?.let { customerEmail ->
-                lookupConsumer(
-                    email = customerEmail,
-                    startSession = true,
-                    customerId = config.customerIdForEceDefaultValues
-                )
-                    .map { it?.accountStatus }
-                    .getOrElse { AccountStatus.Error }
+        val result =
+            when (val linkLaunchMode = this.linkLaunchMode) {
+                null,
+                is LinkLaunchMode.Authentication,
+                is LinkLaunchMode.Confirmation,
+                LinkLaunchMode.Full,
+                is LinkLaunchMode.PaymentMethodSelection -> {
+                    linkAccount
+                        // If we already have an account, return it.
+                        ?.let { Result.success(it) }
+                        ?: run {
+                            val email = config.customerInfo.email?.takeIf { canLookupCustomerEmail }
+                            email?.let { lookupConsumerByEmail(it) }
+                        }
+                }
+                is LinkLaunchMode.Authorization -> {
+                    val linkAuthIntentId = linkLaunchMode.linkAuthIntentId
+                    linkAccount
+                        // If we already have an account for the LAI, return it.
+                        ?.takeIf { it.linkAuthIntentInfo?.linkAuthIntentId == linkAuthIntentId }
+                        ?.let { Result.success(it) }
+                        ?: lookupConsumerByAuthIntent(linkAuthIntentId)
+                }
             }
+        return result
+            ?.map { it?.accountStatus }
+            ?.getOrElse { AccountStatus.Error }
             ?: AccountStatus.SignedOut
+    }
+
+    private suspend fun lookupConsumerByEmail(email: String): Result<LinkAccount?> {
+        return lookupConsumer(
+            email = email,
+            linkAuthIntentId = null,
+            startSession = true,
+            customerId = config.customerIdForEceDefaultValues
+        )
+    }
+
+    private suspend fun lookupConsumerByAuthIntent(linkAuthIntentId: String?): Result<LinkAccount?> {
+        return lookupConsumer(
+            email = null,
+            linkAuthIntentId = linkAuthIntentId,
+            startSession = true,
+            customerId = config.customerIdForEceDefaultValues
+        )
     }
 
     private val SignUpConsentAction.consumerAction: ConsumerSignUpConsentAction

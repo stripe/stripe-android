@@ -31,10 +31,12 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.toPaymentSheetSaveConsentBehavior
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.confirmation.utils.sellerBusinessName
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -217,6 +219,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 customerInfo = customerInfo,
                 isGooglePayReady = isGooglePayReady,
                 linkState = linkState.await(),
+                initializationMode = initializationMode,
             )
         }
 
@@ -325,6 +328,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         customerInfo: CustomerInfo?,
         linkState: LinkState?,
         isGooglePayReady: Boolean,
+        initializationMode: PaymentElementLoader.InitializationMode,
     ): PaymentMethodMetadata {
         val sharedDataSpecsResult = lpmRepository.getSharedDataSpecs(
             stripeIntent = elementsSession.stripeIntent,
@@ -358,6 +362,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 elementsSession = elementsSession,
                 customerInfo = customerInfo,
             ),
+            sellerBusinessName = initializationMode.sellerBusinessName
         )
     }
 
@@ -619,6 +624,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val linkConfiguration = LinkConfiguration(
             stripeIntent = elementsSession.stripeIntent,
             merchantName = configuration.merchantDisplayName,
+            sellerBusinessName = initializationMode.sellerBusinessName,
             merchantCountryCode = elementsSession.merchantCountry,
             merchantLogoUrl = elementsSession.merchantLogoUrl,
             customerInfo = customerInfo,
@@ -648,6 +654,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             customerId = elementsSession.customer?.session?.customerId,
             linkAppearance = linkAppearance,
             saveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
+            forceSetupFutureUseBehaviorAndNewMandate = elementsSession
+                .flags[ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT] == true,
         )
 
         // CBF isn't currently supported in the web flow.

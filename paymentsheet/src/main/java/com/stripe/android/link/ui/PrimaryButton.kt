@@ -1,8 +1,10 @@
 package com.stripe.android.link.ui
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
@@ -46,6 +49,8 @@ internal fun PrimaryButton(
     label: String,
     state: PrimaryButtonState,
     onButtonClick: () -> Unit,
+    allowedDisabledClicks: Boolean = false,
+    onDisabledButtonClick: () -> Unit = {},
     @DrawableRes iconStart: Int? = null,
     @DrawableRes iconEnd: Int? = null
 ) {
@@ -68,43 +73,78 @@ internal fun PrimaryButton(
                     disabledBackgroundColor = LinkTheme.colors.buttonBrand,
                 )
             ) {
-                when (state) {
-                    PrimaryButtonState.Processing -> LinkSpinner(
-                        modifier = Modifier
-                            .size(20.dp)
-                            .semantics { testTag = ProgressIndicatorTestTag },
-                        backgroundColor = LinkTheme.colors.surfaceBackdrop.copy(alpha = 0.1f),
-                        strokeWidth = 4.dp,
-                        filledColor = LinkTheme.colors.contentOnPrimaryButton,
-                    )
-                    PrimaryButtonState.Completed -> Icon(
-                        painter = painterResource(id = R.drawable.stripe_link_complete),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(24.dp)
-                            .semantics {
-                                testTag = CompletedIconTestTag
-                            },
-                        tint = LinkTheme.colors.contentOnPrimaryButton
-                    )
-                    else -> Row(
-                        Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        PrimaryButtonIcon(iconStart)
-                        Text(
-                            text = label,
-                            modifier = Modifier.weight(1f),
-                            color = LinkTheme.colors.contentOnPrimaryButton
-                                .copy(alpha = LocalContentAlpha.current),
-                            textAlign = TextAlign.Center,
-                            style = LinkTheme.typography.bodyEmphasized,
-                        )
-                        PrimaryButtonIcon(iconEnd)
-                    }
-                }
+                PrimaryContent(
+                    state = state,
+                    label = label,
+                    iconStart = iconStart,
+                    iconEnd = iconEnd,
+                )
             }
+
+            DisabledButton(
+                state = state,
+                allowedDisabledClicks = allowedDisabledClicks,
+                onDisabledButtonClick = onDisabledButtonClick,
+            )
         }
+    }
+}
+
+@Composable
+private fun PrimaryContent(
+    state: PrimaryButtonState,
+    label: String,
+    @DrawableRes iconStart: Int? = null,
+    @DrawableRes iconEnd: Int? = null
+) {
+    when (state) {
+        PrimaryButtonState.Processing -> LinkSpinner(
+            modifier = Modifier
+                .size(20.dp)
+                .semantics { testTag = ProgressIndicatorTestTag },
+            backgroundColor = LinkTheme.colors.surfaceBackdrop.copy(alpha = 0.1f),
+            strokeWidth = 4.dp,
+            filledColor = LinkTheme.colors.contentOnPrimaryButton,
+        )
+        PrimaryButtonState.Completed -> Icon(
+            painter = painterResource(id = R.drawable.stripe_link_complete),
+            contentDescription = null,
+            modifier = Modifier
+                .size(24.dp)
+                .semantics {
+                    testTag = CompletedIconTestTag
+                },
+            tint = LinkTheme.colors.contentOnPrimaryButton
+        )
+        else -> Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            PrimaryButtonIcon(iconStart)
+            Text(
+                text = label,
+                modifier = Modifier.weight(1f),
+                color = LinkTheme.colors.contentOnPrimaryButton
+                    .copy(alpha = LocalContentAlpha.current),
+                textAlign = TextAlign.Center,
+                style = LinkTheme.typography.bodyEmphasized,
+            )
+            PrimaryButtonIcon(iconEnd)
+        }
+    }
+}
+
+@Composable
+private fun BoxScope.DisabledButton(
+    state: PrimaryButtonState,
+    allowedDisabledClicks: Boolean,
+    onDisabledButtonClick: () -> Unit,
+) {
+    if (state == PrimaryButtonState.Disabled && allowedDisabledClicks) {
+        Box(
+            Modifier
+                .matchParentSize()
+                .pointerInput(Unit) {
+                    detectTapGestures { onDisabledButtonClick.invoke() }
+                }
+        )
     }
 }
 
@@ -161,7 +201,8 @@ internal fun completePaymentButtonLabel(
         }
     }
     is LinkLaunchMode.PaymentMethodSelection,
-    is LinkLaunchMode.Authentication -> uiCoreR.string.stripe_continue_button_label.resolvableString
+    is LinkLaunchMode.Authentication,
+    is LinkLaunchMode.Authorization -> uiCoreR.string.stripe_continue_button_label.resolvableString
 }
 
 private val PrimaryButtonIconWidth = 13.dp

@@ -14,6 +14,7 @@ object PaymentSheetNextActionHandlers {
         return mapOf(
             StripeIntent.NextActionData.UpiAwaitNotification::class.java to PollingNextActionHandler(),
             StripeIntent.NextActionData.BlikAuthorize::class.java to PollingNextActionHandler(),
+            StripeIntent.NextActionData.DisplayPayNowDetails::class.java to PollingNextActionHandler(),
         )
     }
 }

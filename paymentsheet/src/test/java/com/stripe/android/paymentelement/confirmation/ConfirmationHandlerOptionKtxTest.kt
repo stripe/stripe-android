@@ -592,6 +592,7 @@ class ConfirmationHandlerOptionKtxTest {
         val LINK_CONFIGURATION = LinkConfiguration(
             stripeIntent = PaymentIntentFactory.create(),
             merchantName = "Merchant, Inc.",
+            sellerBusinessName = null,
             merchantCountryCode = "CA",
             merchantLogoUrl = null,
             customerInfo = LinkConfiguration.CustomerInfo(
@@ -626,6 +627,7 @@ class ConfirmationHandlerOptionKtxTest {
             linkSignUpOptInInitialValue = false,
             customerId = null,
             saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+            forceSetupFutureUseBehaviorAndNewMandate = false,
         )
     }
 }

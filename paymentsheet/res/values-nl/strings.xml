@@ -115,6 +115,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Door verder te gaan, ga je ermee akkoord jouw informatie op te slaan voor toekomstige aankopen bij %s en <link>Link</link>Je gaat ook akkoord met Link\'s <terms>Voorwaarden</terms> en <privacy>Privacy</privacy>.]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Door verder te gaan, ga je ermee akkoord dat jouw informatie wordt opgeslagen voor toekomstige aankopen bij %s en <link>Link</link> (zie <terms>Voorwaarden</terms> en <privacy>Privacy</privacy>).]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Door verder te gaan, ga je ermee akkoord dat jouw informatie wordt opgeslagen voor toekomstige aankopen bij %s en <link>Link</link> volgens Link <terms>voorwaarden</terms> en <privacy>privacy</privacy>.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">De betaalkaart is niet bijgewerkt. Probeer het opnieuw.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -266,6 +268,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">Meer weergeven</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Als je doorgaat, stem je in dat betalingen worden geautoriseerd in overeenstemming met deze <terms>voorwaarden</terms>.]]></string>
+  <!-- Text providing link to terms for bank payments -->
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Door je bestelling te plaatsen bij %s, autoriseer je betalingen in overeenstemming met <terms>deze voorwaarden</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Betaling</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->

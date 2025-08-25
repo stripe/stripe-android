@@ -115,6 +115,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Turpinot, jūs piekrītat saglabāt savu informāciju turpmākiem pirkumiem ar %s un <link>Saite</link>. Jūs arī piekrītat saites <terms>Noteikumiem</terms> un <privacy>Konfidencialitātei</privacy>.]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Turpinot jūs piekrītat saglabāt savu informāciju turpmākiem pirkumiem ar %s un <link>Saite</link> (skatīt <terms>Noteikumi</terms> un <privacy>konfidencialitāte</privacy>).]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Turpinot jūs piekrītat saglabāt savu informāciju turpmākiem pirkumiem ar %s un <link>Saite</link> saskaņā ar saites <terms>noteikumiem</terms> un <privacy>privātumu</privacy>.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Karte netika atjaunināta. Lūdzu, mēģiniet vēlreiz.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -266,6 +268,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">Skatīt vairāk</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Turpinot, jūs piekrītat autorizēt maksājumus saskaņā ar šiem<terms>noteikumiem</terms>.]]></string>
+  <!-- Text providing link to terms for bank payments -->
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Iesniedzot savu pasūtījumu %s, jūs piekrītat autorizēt maksājumus saskaņā ar <terms>šiem noteikumiem</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Maksājums</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->

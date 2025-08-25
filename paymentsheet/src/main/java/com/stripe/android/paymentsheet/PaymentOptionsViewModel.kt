@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
@@ -50,6 +51,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -91,6 +93,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             }
             onUserSelection()
         },
+        onDisabledClick = ::onDisabledClick,
     )
 
     private val _paymentOptionsActivityResult = MutableSharedFlow<PaymentOptionsActivityResult>(replay = 1)
@@ -105,8 +108,13 @@ internal class PaymentOptionsViewModel @Inject constructor(
         linkHandler.isLinkEnabled,
         linkHandler.linkConfigurationCoordinator.emailFlow,
         buttonsEnabled,
-    ) { isLinkAvailable, linkEmail, buttonsEnabled ->
+        selection,
+        linkAccountHolder.linkAccountInfo
+
+    ) { isLinkAvailable, linkEmail, buttonsEnabled, currentSelection, linkAccountInfo ->
         val paymentMethodMetadata = args.state.paymentMethodMetadata
+        val linkConfiguration = paymentMethodMetadata.linkState?.configuration
+        val hasLinkWithSelectedPayment = currentSelection is Link && currentSelection.selectedPayment != null
         WalletsState.create(
             isLinkAvailable = isLinkAvailable == true &&
                 args.walletsToShow.contains(WalletType.Link),
@@ -125,8 +133,24 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 updateSelection(PaymentSelection.Link())
                 onUserSelection()
             },
-            isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent
+            isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent,
+            walletsAllowedInHeader = walletsAllowedInHeader(paymentMethodMetadata),
+            paymentDetails = linkAccountInfo.account?.displayablePaymentDetails,
+            enableDefaultValues = linkConfiguration?.enableDisplayableDefaultValuesInEce == true &&
+                hasLinkWithSelectedPayment.not()
         )
+    }
+
+    private fun walletsAllowedInHeader(paymentMethodMetadata: PaymentMethodMetadata): List<WalletType> {
+        val showsDirectForm = paymentMethodMetadata.supportedPaymentMethodTypes().size == 1 &&
+            customerStateHolder.paymentMethods.value.isEmpty()
+        return if (showsDirectForm) {
+            // Direct to form: show wallets in header
+            WalletType.entries
+        } else {
+            // Regular FlowController payment options list: show Link wallet in header.
+            listOf(WalletType.Link)
+        }
     }
 
     // Only used to determine if we should skip the list and go to the add card view and how to populate that view.
@@ -273,6 +297,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     )
                 )
             }
+        }
+    }
+
+    private fun onDisabledClick() {
+        viewModelScope.launch {
+            validationRequested.emit(Unit)
         }
     }
 

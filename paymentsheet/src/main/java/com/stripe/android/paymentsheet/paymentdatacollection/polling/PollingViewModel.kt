@@ -14,6 +14,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.paymentdatacollection.polling.di.DaggerPollingComponent
 import com.stripe.android.polling.IntentStatusPoller
+import com.stripe.android.polling.IntentStatusPoller.PollingStrategy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -80,6 +81,7 @@ internal data class PollingUiState(
     val durationRemaining: Duration,
     @StringRes val ctaText: Int,
     val pollingState: PollingState = PollingState.Active,
+    val shouldShowQrCode: Boolean,
 )
 
 internal class PollingViewModel @Inject constructor(
@@ -89,7 +91,13 @@ internal class PollingViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(PollingUiState(durationRemaining = args.timeLimit, ctaText = args.ctaText))
+    private val _uiState = MutableStateFlow(
+        PollingUiState(
+            durationRemaining = args.timeLimit,
+            ctaText = args.ctaText,
+            shouldShowQrCode = args.qrCodeUrl != null,
+        )
+    )
     val uiState: StateFlow<PollingUiState> = _uiState
 
     init {
@@ -165,9 +173,18 @@ internal class PollingViewModel @Inject constructor(
 
     fun handleCancel() {
         _uiState.update {
-            it.copy(pollingState = PollingState.Canceled)
+            it.copy(
+                pollingState = PollingState.Canceled,
+                shouldShowQrCode = false,
+            )
         }
         poller.stopPolling()
+    }
+
+    fun hideQrCode() {
+        _uiState.update {
+            it.copy(shouldShowQrCode = false)
+        }
     }
 
     private suspend fun observeCountdown(timeLimit: Duration) {
@@ -193,7 +210,10 @@ internal class PollingViewModel @Inject constructor(
 
     private fun updatePollingState(pollingState: PollingState) {
         _uiState.update {
-            it.copy(pollingState = pollingState)
+            it.copy(
+                pollingState = pollingState,
+                shouldShowQrCode = it.shouldShowQrCode && pollingState == PollingState.Active,
+            )
         }
     }
 
@@ -206,7 +226,7 @@ internal class PollingViewModel @Inject constructor(
 
             val config = IntentStatusPoller.Config(
                 clientSecret = args.clientSecret,
-                maxAttempts = args.maxAttempts,
+                pollingStrategy = args.pollingStrategy,
             )
 
             return DaggerPollingComponent
@@ -227,9 +247,10 @@ internal class PollingViewModel @Inject constructor(
         val clientSecret: String,
         val timeLimit: Duration,
         val initialDelay: Duration,
-        val maxAttempts: Int,
+        val pollingStrategy: PollingStrategy,
         @StringRes val ctaText: Int,
         val stripeAccountId: String?,
+        val qrCodeUrl: String?,
     )
 }
 

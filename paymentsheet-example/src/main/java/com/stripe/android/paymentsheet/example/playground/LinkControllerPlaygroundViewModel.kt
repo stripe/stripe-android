@@ -28,6 +28,7 @@ internal class LinkControllerPlaygroundViewModel(
             activity = activity,
             presentPaymentMethodsCallback = this::onLinkControllerPresentPaymentMethod,
             authenticationCallback = this::onLinkControllerAuthentication,
+            authorizeCallback = this::onLinkControllerAuthorization,
         )
         activity.lifecycleScope.launch {
             linkController.state(activity).collect { controllerState ->
@@ -81,10 +82,11 @@ internal class LinkControllerPlaygroundViewModel(
         }
     }
 
-    fun onPaymentMethodClick(email: String) {
-        linkControllerPresenter?.paymentSelectionHint =
-            "Lorem ipsum dolor sit amet consectetur adipiscing elit."
-        linkControllerPresenter?.presentPaymentMethods(email = email.takeIf { it.isNotBlank() })
+    fun onPaymentMethodClick(email: String, paymentMethodType: LinkController.PaymentMethodType?) {
+        linkControllerPresenter?.presentPaymentMethods(
+            email = email.takeIf { it.isNotBlank() },
+            paymentMethodType = paymentMethodType,
+        )
     }
 
     fun onAuthenticateClick(email: String, existingOnly: Boolean) {
@@ -96,7 +98,17 @@ internal class LinkControllerPlaygroundViewModel(
         }
     }
 
+    fun onAuthorizeClick(linkAuthIntentId: String) {
+        linkControllerPresenter?.authorize(
+            linkAuthIntentId = linkAuthIntentId
+        )
+    }
+
     private fun onLinkControllerAuthentication(result: LinkController.AuthenticationResult) {
         state.update { it.copy(authenticationResult = result) }
+    }
+
+    private fun onLinkControllerAuthorization(result: LinkController.AuthorizeResult) {
+        state.update { it.copy(authorizeResult = result) }
     }
 }

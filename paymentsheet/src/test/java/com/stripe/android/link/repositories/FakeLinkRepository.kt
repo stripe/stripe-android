@@ -6,6 +6,7 @@ import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.TestFactory
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
+import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerShippingAddresses
@@ -16,6 +17,7 @@ import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.StripeIntent
 
 internal open class FakeLinkRepository : LinkRepository {
@@ -33,6 +35,7 @@ internal open class FakeLinkRepository : LinkRepository {
     var logOutResult = Result.success(TestFactory.CONSUMER_SESSION)
     var startVerificationResult = Result.success(TestFactory.CONSUMER_SESSION)
     var confirmVerificationResult = Result.success(TestFactory.CONSUMER_SESSION)
+    var consentUpdateResult = Result.success(Unit)
     var listPaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
     var listShippingAddressesResult = Result.success(TestFactory.CONSUMER_SHIPPING_ADDRESSES)
     var updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
@@ -44,13 +47,15 @@ internal open class FakeLinkRepository : LinkRepository {
     private val mobileSignUpCalls = Turbine<MobileSignUpCall>()
 
     override suspend fun lookupConsumer(
-        email: String,
+        email: String?,
+        linkAuthIntentId: String?,
         sessionId: String,
         customerId: String?
     ): Result<ConsumerSessionLookup> {
         lookupConsumerCalls.add(
             item = LookupCall(
-                email = email
+                email = email,
+                linkAuthIntentId = linkAuthIntentId,
             )
         )
         return lookupConsumerResult
@@ -62,15 +67,17 @@ internal open class FakeLinkRepository : LinkRepository {
     ): Result<ConsumerSessionLookup> {
         lookupConsumerWithoutBackendLoggingCalls.add(
             item = LookupCall(
-                email = email
+                email = email,
+                linkAuthIntentId = null
             )
         )
         return lookupConsumerWithoutBackendLoggingResult
     }
 
     override suspend fun mobileLookupConsumer(
-        email: String,
-        emailSource: EmailSource,
+        email: String?,
+        emailSource: EmailSource?,
+        linkAuthIntentId: String?,
         verificationToken: String,
         appId: String,
         sessionId: String,
@@ -80,6 +87,7 @@ internal open class FakeLinkRepository : LinkRepository {
             item = MobileLookupCall(
                 email = email,
                 emailSource = emailSource,
+                linkAuthIntentId = linkAuthIntentId,
                 verificationToken = verificationToken,
                 appId = appId,
                 sessionId = sessionId
@@ -92,6 +100,7 @@ internal open class FakeLinkRepository : LinkRepository {
         email: String,
         phone: String?,
         country: String?,
+        countryInferringMethod: String,
         name: String?,
         consentAction: ConsumerSignUpConsentAction
     ) = consumerSignUpResult
@@ -101,6 +110,7 @@ internal open class FakeLinkRepository : LinkRepository {
         email: String,
         phoneNumber: String,
         country: String,
+        countryInferringMethod: String,
         consentAction: ConsumerSignUpConsentAction,
         amount: Long?,
         currency: String?,
@@ -149,10 +159,11 @@ internal open class FakeLinkRepository : LinkRepository {
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
         expectedPaymentMethodType: String,
-        cvc: String?,
         billingPhone: String?,
+        cvc: String?,
         allowRedisplay: String?,
-    ) = sharePaymentDetails
+        apiKey: String?
+    ): Result<SharePaymentDetails> = sharePaymentDetails
 
     override suspend fun createPaymentMethod(
         consumerSessionClientSecret: String,
@@ -172,8 +183,15 @@ internal open class FakeLinkRepository : LinkRepository {
     override suspend fun confirmVerification(
         verificationCode: String,
         consumerSessionClientSecret: String,
+        consumerPublishableKey: String?,
+        consentGranted: Boolean?
+    ): Result<ConsumerSession> = confirmVerificationResult
+
+    override suspend fun consentUpdate(
+        consumerSessionClientSecret: String,
+        consentGranted: Boolean,
         consumerPublishableKey: String?
-    ) = confirmVerificationResult
+    ): Result<Unit> = consentUpdateResult
 
     override suspend fun listPaymentDetails(
         paymentMethodTypes: Set<String>,
@@ -227,12 +245,14 @@ internal open class FakeLinkRepository : LinkRepository {
     }
 
     data class LookupCall(
-        val email: String
+        val email: String?,
+        val linkAuthIntentId: String?,
     )
 
     data class MobileLookupCall(
-        val email: String,
-        val emailSource: EmailSource,
+        val email: String?,
+        val emailSource: EmailSource?,
+        val linkAuthIntentId: String?,
         val verificationToken: String,
         val appId: String,
         val sessionId: String

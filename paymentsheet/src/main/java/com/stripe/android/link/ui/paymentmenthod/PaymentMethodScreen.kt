@@ -35,6 +35,7 @@ internal fun PaymentMethodScreen(
         appearance = appearance,
         onFormFieldValuesChanged = viewModel::formValuesChanged,
         onPayClicked = viewModel::onPayClicked,
+        onDisabledPayClicked = viewModel::onDisabledPayClicked,
     )
 }
 
@@ -44,6 +45,7 @@ internal fun PaymentMethodBody(
     appearance: LinkAppearance?,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
     onPayClicked: () -> Unit,
+    onDisabledPayClicked: () -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
     val uuid = rememberSaveable { UUID.randomUUID().toString() }
@@ -55,7 +57,7 @@ internal fun PaymentMethodBody(
                 args = state.formArguments,
                 enabled = true,
                 onFormFieldValuesChanged = onFormFieldValuesChanged,
-                formElements = state.formElements,
+                formElements = state.formUiElements,
             )
         }
 
@@ -73,16 +75,18 @@ internal fun PaymentMethodBody(
         }
 
         LinkAppearanceTheme(appearance = appearance) {
-            PrimaryButton(
-                modifier = Modifier.padding(vertical = 16.dp),
-                label = state.primaryButtonLabel.resolve(),
-                state = state.primaryButtonState,
-                onButtonClick = {
-                    focusManager.clearFocus()
-                    onPayClicked()
-                },
-                iconEnd = PaymentsUiCoreR.drawable.stripe_ic_lock
-            )
+        	PrimaryButton(
+        	    modifier = Modifier.padding(vertical = 16.dp),
+        	    label = state.primaryButtonLabel.resolve(),
+        	    state = state.primaryButtonState,
+        	    allowedDisabledClicks = true,
+        	    onDisabledButtonClick = onDisabledPayClicked,
+        	    onButtonClick = {
+        	        focusManager.clearFocus()
+        	        onPayClicked()
+        	    },
+        	    iconEnd = PaymentsUiCoreR.drawable.stripe_ic_lock
+        	)
         }
     }
 }

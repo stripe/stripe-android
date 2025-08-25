@@ -17,7 +17,9 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
+import com.stripe.android.link.LinkPaymentMethodFilter
 import com.stripe.android.link.LinkScreen
+import com.stripe.android.link.NoPaymentMethodOptionsAvailable
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
@@ -92,6 +94,7 @@ class WalletViewModelTest {
                 addPaymentMethodOptions = listOf(AddPaymentMethodOption.Card),
                 isSettingUp = false,
                 merchantName = "merchantName",
+                sellerBusinessName = null,
                 collectMissingBillingDetailsForExistingPaymentMethods = true,
                 signupToggleEnabled = false,
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
@@ -941,21 +944,17 @@ class WalletViewModelTest {
 
     @Test
     fun `paymentSelectionHint is present based on enablePaymentSelectionHint`() = runTest(dispatcher) {
-        val hint = "Select your payment method"
         listOf(
             false to null,
-            true to hint,
+            true to resolvableString(R.string.stripe_wallet_prefer_debit_card_hint),
         ).forEach { (enableHint, expectedHint) ->
             val configuration = TestFactory.LINK_CONFIGURATION.copy(
-                flags = mapOf("link_mobile_enable_payment_selection_hint" to enableHint)
+                flags = mapOf("link_show_prefer_debit_card_hint" to enableHint)
             )
 
             val viewModel = createViewModel(
                 configuration = configuration,
-                linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(
-                    selectedPayment = null,
-                    hint = hint
-                )
+                linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment = null)
             )
 
             assertThat(viewModel.uiState.value.paymentSelectionHint)
@@ -1031,6 +1030,157 @@ class WalletViewModelTest {
         }
     }
 
+    @Test
+    fun `filters payment methods`() = runTest(dispatcher) {
+        val (cardPayment, _, linkAccountManager) = createPaymentMethodFilterTestData()
+
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkLaunchMode = createPaymentMethodSelectionMode(
+                paymentMethodFilter = LinkPaymentMethodFilter.Card
+            )
+        )
+
+        advanceUntilIdle()
+
+        assertThat(viewModel.uiState.value.paymentDetailsList).containsExactly(cardPayment)
+    }
+
+    @Test
+    fun `shows all payment methods when no filter applied`() = runTest(dispatcher) {
+        val (cardPayment, bankPayment, linkAccountManager) = createPaymentMethodFilterTestData()
+
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkLaunchMode = createPaymentMethodSelectionMode(paymentMethodFilter = null)
+        )
+
+        advanceUntilIdle()
+
+        assertThat(viewModel.uiState.value.paymentDetailsList).containsExactly(cardPayment, bankPayment)
+    }
+
+    @Test
+    fun `navigates to PaymentMethod when Card filter results in empty list`() = runTest(dispatcher) {
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT))
+        )
+
+        var navigatedScreen: LinkScreen? = null
+
+        createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkLaunchMode = createPaymentMethodSelectionMode(
+                paymentMethodFilter = LinkPaymentMethodFilter.Card
+            ),
+            navigateAndClearStack = { screen -> navigatedScreen = screen }
+        )
+
+        advanceUntilIdle()
+
+        assertThat(navigatedScreen).isEqualTo(LinkScreen.PaymentMethod)
+    }
+
+    @Test
+    fun `presents AddBankAccount when BankAccount filter results in empty list`() = runTest(dispatcher) {
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD))
+        )
+
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                linkFundingSources = listOf(ConsumerPaymentDetails.BankAccount.TYPE)
+            )
+        )
+
+        val vm = createViewModel(
+            linkAccount = TestFactory.LINK_ACCOUNT_WITH_PK,
+            configuration = configuration,
+            linkAccountManager = linkAccountManager,
+            linkLaunchMode = createPaymentMethodSelectionMode(
+                paymentMethodFilter = LinkPaymentMethodFilter.BankAccount
+            ),
+            navigateAndClearStack = {}
+        )
+
+        assertThat(vm.uiState.value.addBankAccountState)
+            .isInstanceOf(AddBankAccountState.Processing::class.java)
+    }
+
+    @Test
+    fun `dismisses with error when no payment method options available`() = runTest(dispatcher) {
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD))
+        )
+
+        var dismissResult: LinkActivityResult? = null
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(linkFundingSources = emptyList()),
+            financialConnectionsAvailability = null
+        )
+
+        createViewModel(
+            configuration = configuration,
+            linkAccountManager = linkAccountManager,
+            linkLaunchMode = createPaymentMethodSelectionMode(
+                paymentMethodFilter = LinkPaymentMethodFilter.BankAccount
+            ),
+            dismissWithResult = { result -> dismissResult = result }
+        )
+
+        advanceUntilIdle()
+
+        assertThat(dismissResult).isInstanceOf(LinkActivityResult.Failed::class.java)
+        val failedResult = dismissResult as LinkActivityResult.Failed
+        assertThat(failedResult.error).isInstanceOf(NoPaymentMethodOptionsAvailable::class.java)
+    }
+
+    @Test
+    fun `dismisses with Canceled when financial connections canceled with empty payment list`() = runTest(dispatcher) {
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = emptyList())
+        )
+
+        var dismissResult: LinkActivityResult? = null
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            dismissWithResult = { result -> dismissResult = result }
+        )
+
+        advanceUntilIdle()
+        viewModel.onFinancialConnectionsResult(FinancialConnectionsSheetResult.Canceled)
+
+        assertThat(dismissResult).isInstanceOf(LinkActivityResult.Canceled::class.java)
+    }
+
+    private data class PaymentMethodFilterTestData(
+        val cardPayment: ConsumerPaymentDetails.Card,
+        val bankPayment: ConsumerPaymentDetails.BankAccount,
+        val linkAccountManager: WalletLinkAccountManager
+    )
+
+    private fun createPaymentMethodFilterTestData(): PaymentMethodFilterTestData {
+        val cardPayment = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
+        val bankPayment = CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(cardPayment, bankPayment))
+        )
+        return PaymentMethodFilterTestData(cardPayment, bankPayment, linkAccountManager)
+    }
+
+    private fun createPaymentMethodSelectionMode(
+        selectedPayment: ConsumerPaymentDetails.PaymentDetails? = null,
+        paymentMethodFilter: LinkPaymentMethodFilter? = null
+    ) = LinkLaunchMode.PaymentMethodSelection(
+        selectedPayment = selectedPayment,
+        paymentMethodFilter = paymentMethodFilter
+    )
+
     private fun createViewModel(
         linkAccount: LinkAccount = TestFactory.LINK_ACCOUNT,
         linkAccountManager: WalletLinkAccountManager = WalletLinkAccountManager(),
@@ -1058,7 +1208,12 @@ class WalletViewModelTest {
                 dismissalCoordinator = dismissalCoordinator,
                 linkLaunchMode = linkLaunchMode
             ),
-            linkLaunchMode = linkLaunchMode
+            linkLaunchMode = linkLaunchMode,
+            addPaymentMethodOptions = AddPaymentMethodOptions(
+                linkAccount = linkAccount,
+                configuration = configuration,
+                linkLaunchMode = linkLaunchMode
+            )
         )
     }
 

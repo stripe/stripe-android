@@ -80,13 +80,13 @@ class ElementsSessionTest {
             experimentsData = null,
             customer = null,
             merchantCountry = null,
+            merchantLogoUrl = null,
             cardBrandChoice = null,
             isGooglePayEnabled = false,
             sessionsError = null,
             customPaymentMethods = emptyList(),
             elementsSessionId = "elements_session_test",
             passiveCaptcha = passiveCaptcha,
-            merchantLogoUrl = null
         )
     }
 }

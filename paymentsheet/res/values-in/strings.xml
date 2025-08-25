@@ -115,6 +115,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Dengan melanjutkan, Anda setuju untuk menyimpan informasi Anda untuk pembelian di masa mendatang dengan %s dan <link>Link</link>. Anda juga menyetujui <terms>Ketentuan</terms> dan <privacy>Privasi</privacy> Link.]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Dengan melanjutkan, Anda menyetujui informasi Anda disimpan untuk pembelian di masa mendatang dengan %s dan <link>Tautan</link> (lihat <terms>Ketentuan</terms> dan <privacy>Privasi</privacy>).]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Dengan melanjutkan, Anda menyetujui informasi Anda disimpan untuk pembelian di masa mendatang dengan %s dan <link>Link</link> sesuai dengan <terms>ketentuan</terms> dan <privacy>privasi</privacy> Link.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Kartu tidak diperbarui. Cobalah lagi.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -266,6 +268,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">Lihat selengkapnya</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Dengan melanjutkan, berarti Anda setuju untuk mengotorisasi pembayaran sesuai dengan <terms>ketentuan</terms> ini.]]></string>
+  <!-- Text providing link to terms for bank payments -->
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Dengan mengirimkan pesanan Anda ke %s, Anda setuju untuk mengotorisasi pembayaran sesuai dengan <terms>ketentuan ini</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Pembayaran</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->

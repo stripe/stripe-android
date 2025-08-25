@@ -35,6 +35,7 @@ internal class DefaultLinkAuthTest {
             email = TestFactory.CUSTOMER_EMAIL,
             phoneNumber = TestFactory.CUSTOMER_PHONE,
             country = TestFactory.COUNTRY,
+            countryInferringMethod = TestFactory.COUNTRY_INFERRING_METHOD,
             name = TestFactory.CUSTOMER_NAME,
             consentAction = SignUpConsentAction.Implied
         )
@@ -79,6 +80,7 @@ internal class DefaultLinkAuthTest {
             email = TestFactory.CUSTOMER_EMAIL,
             phoneNumber = TestFactory.CUSTOMER_PHONE,
             country = TestFactory.COUNTRY,
+            countryInferringMethod = TestFactory.COUNTRY_INFERRING_METHOD,
             name = TestFactory.CUSTOMER_NAME,
             consentAction = SignUpConsentAction.Implied
         )
@@ -120,6 +122,7 @@ internal class DefaultLinkAuthTest {
             email = TestFactory.CUSTOMER_EMAIL,
             phoneNumber = TestFactory.CUSTOMER_PHONE,
             country = TestFactory.COUNTRY,
+            countryInferringMethod = TestFactory.COUNTRY_INFERRING_METHOD,
             name = TestFactory.CUSTOMER_NAME,
             consentAction = SignUpConsentAction.Implied
         )
@@ -155,6 +158,7 @@ internal class DefaultLinkAuthTest {
             email = TestFactory.CUSTOMER_EMAIL,
             phoneNumber = TestFactory.CUSTOMER_PHONE,
             country = TestFactory.COUNTRY,
+            countryInferringMethod = TestFactory.COUNTRY_INFERRING_METHOD,
             name = TestFactory.CUSTOMER_NAME,
             consentAction = SignUpConsentAction.Implied
         )
@@ -182,6 +186,7 @@ internal class DefaultLinkAuthTest {
             email = TestFactory.CUSTOMER_EMAIL,
             phoneNumber = TestFactory.CUSTOMER_PHONE,
             country = TestFactory.COUNTRY,
+            countryInferringMethod = TestFactory.COUNTRY_INFERRING_METHOD,
             name = TestFactory.CUSTOMER_NAME,
             consentAction = SignUpConsentAction.Implied
         )
@@ -218,6 +223,7 @@ internal class DefaultLinkAuthTest {
             email = TestFactory.CUSTOMER_EMAIL,
             phoneNumber = TestFactory.CUSTOMER_PHONE,
             country = TestFactory.COUNTRY,
+            countryInferringMethod = TestFactory.COUNTRY_INFERRING_METHOD,
             name = TestFactory.CUSTOMER_NAME,
             consentAction = SignUpConsentAction.Implied
         )

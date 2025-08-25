@@ -49,6 +49,7 @@ internal object PaymentMethodMetadataFactory {
             PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS,
         shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = SHOP_PAY_CONFIGURATION,
         termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay> = emptyMap(),
+        forceSetupFutureUseBehaviorAndNewMandate: Boolean = false,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -60,6 +61,7 @@ internal object PaymentMethodMetadataFactory {
             paymentMethodOrder = paymentMethodOrder,
             cbcEligibility = cbcEligibility,
             merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
+            sellerBusinessName = null,
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = shippingDetails,
             customerMetadata = CustomerMetadata(
@@ -81,6 +83,7 @@ internal object PaymentMethodMetadataFactory {
             financialConnectionsAvailability = financialConnectionsAvailability,
             shopPayConfiguration = shopPayConfiguration,
             termsDisplay = termsDisplay,
+            forceSetupFutureUseBehaviorAndNewMandate = forceSetupFutureUseBehaviorAndNewMandate,
         )
     }
 

@@ -51,6 +51,7 @@ internal fun UpdateCardScreen(
             state = state,
             appearance = appearance,
             onUpdateClicked = viewModel::onUpdateClicked,
+            onDisabledButtonClicked = viewModel::onDisabledUpdateClicked,
         )
     }
 }
@@ -61,6 +62,7 @@ internal fun UpdateCardScreenBody(
     state: UpdateCardScreenState,
     appearance: LinkAppearance?,
     onUpdateClicked: () -> Unit,
+    onDisabledButtonClicked: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -90,15 +92,19 @@ internal fun UpdateCardScreenBody(
         }
 
         LinkAppearanceTheme(appearance = appearance) {
-            PrimaryButton(
-                modifier = Modifier.padding(vertical = 16.dp),
-                label = state.primaryButtonLabel.resolve(),
-                state = state.primaryButtonState,
-                onButtonClick = {
-                    focusManager.clearFocus()
-                    onUpdateClicked()
-                }
-            )
+        	PrimaryButton(
+        	    modifier = Modifier.padding(vertical = 16.dp),
+        	    label = state.primaryButtonLabel.resolve(),
+        	    state = state.primaryButtonState,
+        	    allowedDisabledClicks = true,
+        	    onButtonClick = {
+        	        focusManager.clearFocus()
+        	        onUpdateClicked()
+        	    },
+        	    onDisabledButtonClick = {
+        	        onDisabledButtonClicked()
+        	    }
+        	)
         }
     }
 }
@@ -158,6 +164,7 @@ internal fun UpdateCardScreenBodyPreview() {
                     processing = false,
                 ),
                 onUpdateClicked = {},
+                onDisabledButtonClicked = {},
                 appearance = null,
             )
         }

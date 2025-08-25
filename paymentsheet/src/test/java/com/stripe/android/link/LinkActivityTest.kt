@@ -34,6 +34,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
@@ -159,6 +160,7 @@ internal class LinkActivityTest {
                 linkLaunchMode = LinkLaunchMode.Full,
                 linkConfirmationHandlerFactory = { FakeLinkConfirmationHandler() },
                 autocompleteLauncher = TestAutocompleteLauncher.noOp(),
+                addPaymentMethodOptionsFactory = mock(),
             )
         }
     }

@@ -32,4 +32,5 @@ interface FormElement {
     fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>>
     fun getTextFieldIdentifiers(): StateFlow<List<IdentifierSpec>> =
         stateFlowOf(emptyList())
+    fun onValidationStateChanged(isValidating: Boolean) {}
 }

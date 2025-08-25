@@ -11,7 +11,6 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
-import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.LinkAccountSession
@@ -48,7 +47,8 @@ internal interface LinkAccountManager {
      *                   retrieval of displayable payment details.
      */
     suspend fun lookupConsumer(
-        email: String,
+        email: String?,
+        linkAuthIntentId: String?,
         startSession: Boolean = true,
         customerId: String?
     ): Result<LinkAccount?>
@@ -63,8 +63,9 @@ internal interface LinkAccountManager {
      *                   retrieval of displayable payment details.
      */
     suspend fun mobileLookupConsumer(
-        email: String,
-        emailSource: EmailSource,
+        email: String?,
+        emailSource: EmailSource?,
+        linkAuthIntentId: String?,
         verificationToken: String,
         appId: String,
         startSession: Boolean,
@@ -78,6 +79,7 @@ internal interface LinkAccountManager {
         email: String,
         phone: String?,
         country: String?,
+        countryInferringMethod: String,
         name: String?,
         consentAction: SignUpConsentAction
     ): Result<LinkAccount>
@@ -89,6 +91,7 @@ internal interface LinkAccountManager {
         email: String,
         phone: String,
         country: String,
+        countryInferringMethod: String,
         name: String?,
         verificationToken: String,
         appId: String,
@@ -127,12 +130,8 @@ internal interface LinkAccountManager {
         billingPhone: String?,
         cvc: String?,
         allowRedisplay: String? = null,
+        apiKey: String? = null,
     ): Result<SharePaymentDetails>
-
-    suspend fun setLinkAccountFromLookupResult(
-        lookup: ConsumerSessionLookup,
-        startSession: Boolean,
-    ): LinkAccount?
 
     suspend fun createLinkAccountSession(): Result<LinkAccountSession>
 
@@ -144,7 +143,12 @@ internal interface LinkAccountManager {
     /**
      * Confirms a verification code sent to the user.
      */
-    suspend fun confirmVerification(code: String): Result<LinkAccount>
+    suspend fun confirmVerification(code: String, consentGranted: Boolean?): Result<LinkAccount>
+
+    /**
+     * Update consent status for the current Link account.
+     */
+    suspend fun consentUpdate(consentGranted: Boolean): Result<Unit>
 
     /**
      * Fetch all saved payment methods for the signed in consumer.

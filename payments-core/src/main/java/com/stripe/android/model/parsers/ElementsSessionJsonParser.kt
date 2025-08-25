@@ -340,8 +340,11 @@ internal class ElementsSessionJsonParser(
 
             ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                 isPaymentMethodSaveEnabled = paymentMethodSaveFeature == VALUE_ENABLED,
-                isPaymentMethodRemoveEnabled = paymentMethodRemoveFeature == VALUE_ENABLED ||
-                    paymentMethodRemoveFeature == VALUE_PARTIAL,
+                paymentMethodRemove = when (paymentMethodRemoveFeature) {
+                    VALUE_ENABLED -> ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled
+                    VALUE_PARTIAL -> ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Partial
+                    else -> ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled
+                },
                 canRemoveLastPaymentMethod = paymentMethodRemoveLastFeature == VALUE_ENABLED,
                 isPaymentMethodSetAsDefaultEnabled = paymentMethodSetAsDefaultFeature == VALUE_ENABLED,
                 allowRedisplayOverride = allowRedisplayOverride,
@@ -367,8 +370,11 @@ internal class ElementsSessionJsonParser(
             val paymentMethodSyncDefaultFeature = customerSheetFeatures.optString(FIELD_PAYMENT_METHOD_SYNC_DEFAULT)
 
             ElementsSession.Customer.Components.CustomerSheet.Enabled(
-                isPaymentMethodRemoveEnabled = paymentMethodRemoveFeature == VALUE_ENABLED ||
-                    paymentMethodRemoveFeature == VALUE_PARTIAL,
+                paymentMethodRemove = when (paymentMethodRemoveFeature) {
+                    VALUE_ENABLED -> ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled
+                    VALUE_PARTIAL -> ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Partial
+                    else -> ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled
+                },
                 canRemoveLastPaymentMethod = paymentMethodRemoveLastFeature == VALUE_ENABLED,
                 isPaymentMethodSyncDefaultEnabled = paymentMethodSyncDefaultFeature == VALUE_ENABLED,
             )

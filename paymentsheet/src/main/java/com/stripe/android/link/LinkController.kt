@@ -63,6 +63,11 @@ class LinkController @Inject internal constructor(
         return interactor.createPaymentMethod()
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun createPaymentMethodForOnramp(apiKey: String): CreatePaymentMethodResult {
+        return interactor.createPaymentMethod(apiKey)
+    }
+
     /**
      * Look up whether the provided email address is associated with an existing Link consumer account.
      *
@@ -87,6 +92,7 @@ class LinkController @Inject internal constructor(
         activity: ComponentActivity,
         presentPaymentMethodsCallback: PresentPaymentMethodsCallback,
         authenticationCallback: AuthenticationCallback,
+        authorizeCallback: AuthorizeCallback,
     ): Presenter {
         return presenterComponentFactory
             .build(
@@ -95,6 +101,7 @@ class LinkController @Inject internal constructor(
                 activityResultRegistryOwner = activity,
                 presentPaymentMethodsCallback = presentPaymentMethodsCallback,
                 authenticationCallback = authenticationCallback,
+                authorizeCallback = authorizeCallback,
             )
             .presenter
     }
@@ -302,12 +309,16 @@ class LinkController @Inject internal constructor(
          * @param email The email address to use for Link account lookup. If provided and the email
          * matches an existing Link account, the account's payment methods will be available for selection.
          * If null, the user will need to sign in or create a Link account.
+         * @param paymentMethodType Optional filter for the type of payment methods to present.
          */
-        fun presentPaymentMethods(email: String?) {
+        fun presentPaymentMethods(
+            email: String?,
+            paymentMethodType: PaymentMethodType? = null
+        ) {
             interactor.presentPaymentMethods(
                 launcher = coordinator.linkActivityResultLauncher,
                 email = email,
-                hint = paymentSelectionHint,
+                paymentMethodType = paymentMethodType,
             )
         }
 
@@ -357,6 +368,14 @@ class LinkController @Inject internal constructor(
             interactor.authenticateExistingConsumer(
                 launcher = coordinator.linkActivityResultLauncher,
                 email = email
+            )
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun authorize(linkAuthIntentId: String) {
+            interactor.authorize(
+                launcher = coordinator.linkActivityResultLauncher,
+                linkAuthIntentId = linkAuthIntentId
             )
         }
     }
@@ -447,7 +466,8 @@ class LinkController @Inject internal constructor(
          * The payment method was created successfully.
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data object Success : CreatePaymentMethodResult
+        @Poko
+        class Success internal constructor(val paymentMethod: PaymentMethod) : CreatePaymentMethodResult
 
         /**
          * An error occurred while creating the payment method.
@@ -509,6 +529,23 @@ class LinkController @Inject internal constructor(
         class Failed internal constructor(val error: Throwable) : RegisterConsumerResult
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    sealed interface AuthorizeResult {
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data object Consented : AuthorizeResult
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data object Denied : AuthorizeResult
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data object Canceled : AuthorizeResult
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Poko
+        class Failed internal constructor(val error: Throwable) : AuthorizeResult
+    }
+
     /**
      * Callback for receiving results from [Presenter.presentPaymentMethods].
      */
@@ -524,6 +561,11 @@ class LinkController @Inject internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun interface AuthenticationCallback {
         fun onAuthenticationResult(result: AuthenticationResult)
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun interface AuthorizeCallback {
+        fun onAuthorizeResult(result: AuthorizeResult)
     }
 
     /**
@@ -557,6 +599,15 @@ class LinkController @Inject internal constructor(
 
         /** The user is fully logged in and verified. */
         LoggedIn,
+    }
+
+    /**
+     * The type of payment method to present for selection.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class PaymentMethodType {
+        Card,
+        BankAccount
     }
 
     /**

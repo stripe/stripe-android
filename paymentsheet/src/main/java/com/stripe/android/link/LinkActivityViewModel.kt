@@ -23,11 +23,16 @@ import com.stripe.android.link.account.linkAccountUpdate
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.injection.DaggerNativeLinkComponent
+import com.stripe.android.link.injection.LINK_EXPRESS_MODE
 import com.stripe.android.link.injection.NativeLinkComponent
+import com.stripe.android.link.injection.NativeLinkScope
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.ConsentPresentation
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.link.ui.signup.SignUpViewModel
+import com.stripe.android.link.ui.wallet.AddPaymentMethodOption
+import com.stripe.android.link.ui.wallet.AddPaymentMethodOptions
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.addresselement.AutocompleteActivityLauncher
@@ -48,9 +53,11 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
 @SuppressWarnings("TooManyFunctions")
+@NativeLinkScope
 internal class LinkActivityViewModel @Inject constructor(
     val activityRetainedComponent: NativeLinkComponent,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
@@ -61,10 +68,11 @@ internal class LinkActivityViewModel @Inject constructor(
     val linkConfiguration: LinkConfiguration,
     private val linkAttestationCheck: LinkAttestationCheck,
     val savedStateHandle: SavedStateHandle,
-    private val linkExpressMode: LinkExpressMode,
+    @Named(LINK_EXPRESS_MODE) private val linkExpressMode: LinkExpressMode,
     private val navigationManager: NavigationManager,
     val linkLaunchMode: LinkLaunchMode,
     private val autocompleteLauncher: AutocompleteActivityLauncher,
+    private val addPaymentMethodOptionsFactory: AddPaymentMethodOptions.Factory,
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
     val linkConfirmationHandler = linkConfirmationHandlerFactory.create(confirmationHandler)
@@ -99,7 +107,7 @@ internal class LinkActivityViewModel @Inject constructor(
 
     fun onVerificationSucceeded() {
         viewModelScope.launch {
-            _linkScreenState.value = buildFullScreenState()
+            updateScreenState(withAnimationDelay = false)
         }
     }
 
@@ -163,6 +171,12 @@ internal class LinkActivityViewModel @Inject constructor(
             is LinkLaunchMode.Authentication -> dismissWithResult(
                 LinkActivityResult.Failed(
                     error = error,
+                    linkAccountUpdate = LinkAccountUpdate.None
+                )
+            )
+            is LinkLaunchMode.Authorization -> dismissWithResult(
+                LinkActivityResult.Failed(
+                    error = IllegalStateException("Authorization mode is not supported in web"),
                     linkAccountUpdate = LinkAccountUpdate.None
                 )
             )
@@ -238,8 +252,11 @@ internal class LinkActivityViewModel @Inject constructor(
             when (linkLaunchMode) {
                 is LinkLaunchMode.Full,
                 is LinkLaunchMode.PaymentMethodSelection,
-                is LinkLaunchMode.Authentication -> loadLink()
-                is LinkLaunchMode.Confirmation -> confirmLinkPayment(linkLaunchMode.selectedPayment)
+                is LinkLaunchMode.Authentication,
+                is LinkLaunchMode.Authorization ->
+                    loadLink()
+                is LinkLaunchMode.Confirmation ->
+                    confirmLinkPayment(linkLaunchMode.selectedPayment)
             }
         }
     }
@@ -251,11 +268,11 @@ internal class LinkActivityViewModel @Inject constructor(
                 when (linkExpressMode) {
                     LinkExpressMode.DISABLED,
                     LinkExpressMode.ENABLED -> moveToWeb(attestationCheckResult.error)
-                    LinkExpressMode.ENABLED_NO_WEB_FALLBACK -> updateScreenState()
+                    LinkExpressMode.ENABLED_NO_WEB_FALLBACK -> updateScreenState(withAnimationDelay = true)
                 }
             }
             LinkAttestationCheck.Result.Successful -> {
-                updateScreenState()
+                updateScreenState(withAnimationDelay = true)
             }
             is LinkAttestationCheck.Result.Error,
             is LinkAttestationCheck.Result.AccountError -> {
@@ -309,13 +326,18 @@ internal class LinkActivityViewModel @Inject constructor(
         )
     }
 
-    private suspend fun updateScreenState() {
+    private suspend fun updateScreenState(withAnimationDelay: Boolean) {
         val accountStatus = linkAccountManager.accountStatus.first()
 
+        // Get linkAccount after getting `accountStatus` because account may be updated.
+        val linkAccount = this.linkAccount
+
         val authenticatingExistingAccount = (linkLaunchMode as? LinkLaunchMode.Authentication)?.existingOnly == true
+        val authorizingAuthIntent = linkLaunchMode is LinkLaunchMode.Authorization
         val cannotChangeEmails = !linkConfiguration.allowUserEmailEdits
         val accountNotFound = accountStatus == AccountStatus.SignedOut || accountStatus == AccountStatus.Error
-        if (accountNotFound && (authenticatingExistingAccount || cannotChangeEmails)) {
+        val accountRequired = authorizingAuthIntent || authenticatingExistingAccount || cannotChangeEmails
+        if (accountNotFound && accountRequired) {
             dismissWithResult(
                 LinkActivityResult.Failed(
                     error = NoLinkAccountFoundException(),
@@ -325,47 +347,67 @@ internal class LinkActivityViewModel @Inject constructor(
             return
         }
 
-        val linkAccount = linkAccountManager.linkAccountInfo.value.account
+        if (authorizingAuthIntent &&
+            accountStatus is AccountStatus.Verified &&
+            accountStatus.consentPresentation is ConsentPresentation.Inline
+        ) {
+            // Already completed verification with inline consent.
+            dismissWithResult(LinkActivityResult.Completed(linkAccountManager.linkAccountUpdate))
+            return
+        }
+
         when (accountStatus) {
-            AccountStatus.Verified,
+            is AccountStatus.Verified,
             AccountStatus.SignedOut,
             AccountStatus.Error -> {
-                _linkScreenState.value = buildFullScreenState()
+                _linkScreenState.value = buildFullScreenState(withAnimationDelay)
             }
             AccountStatus.NeedsVerification,
             AccountStatus.VerificationStarted -> {
                 if (linkAccount != null && linkExpressMode != LinkExpressMode.DISABLED) {
                     _linkScreenState.value = ScreenState.VerificationDialog(linkAccount)
                 } else {
-                    _linkScreenState.value = buildFullScreenState()
+                    _linkScreenState.value = buildFullScreenState(withAnimationDelay)
                 }
             }
         }
     }
 
-    private suspend fun buildFullScreenState(): ScreenState.FullScreen {
+    private suspend fun buildFullScreenState(withAnimationDelay: Boolean): ScreenState.FullScreen {
         val accountStatus = linkAccountManager.accountStatus.first()
 
         // We add a tiny delay, which gives the loading screen a chance to fully inflate.
         // Otherwise, we get a weird scaling animation when we display the first non-loading screen.
-        delay(LINK_DEFAULT_ANIMATION_DELAY_MILLIS)
+        if (withAnimationDelay) {
+            delay(LINK_DEFAULT_ANIMATION_DELAY_MILLIS)
+        }
+
+        val linkAccount = this.linkAccount
 
         return ScreenState.FullScreen(
             initialDestination = when (accountStatus) {
-                AccountStatus.Verified -> {
-                    if (linkAccount?.completedSignup == true && linkLaunchMode.selectedPayment() == null) {
+                is AccountStatus.Verified -> {
+                    if (linkLaunchMode is LinkLaunchMode.Authorization) {
+                        LinkScreen.OAuthConsent
+                    } else if (linkAccount?.completedSignup == true && linkLaunchMode.selectedPayment() == null) {
                         // We just completed signup, but haven't added a payment method yet.
-                        LinkScreen.PaymentMethod
+                        when (addPaymentMethodOptionsFactory.create(linkAccount).default) {
+                            is AddPaymentMethodOption.Bank -> LinkScreen.Wallet
+                            // Default to previous behavior, even though this could be better.
+                            else -> LinkScreen.PaymentMethod
+                        }
                     } else {
                         // We have a verified account, or we're relaunching after signing up and adding a payment,
                         // then show the wallet.
                         LinkScreen.Wallet
                     }
                 }
-                AccountStatus.NeedsVerification, AccountStatus.VerificationStarted -> {
+                AccountStatus.NeedsVerification,
+                AccountStatus.VerificationStarted -> {
                     LinkScreen.Verification
                 }
-                AccountStatus.SignedOut, AccountStatus.Error -> {
+                AccountStatus.SignedOut,
+                AccountStatus.Error -> {
                     LinkScreen.SignUp
                 }
             }
@@ -375,7 +417,7 @@ internal class LinkActivityViewModel @Inject constructor(
     private suspend fun handleAccountError() {
         linkAccountManager.logOut()
         linkAccountHolder.set(LinkAccountUpdate.Value(account = null, lastUpdateReason = LoggedOut))
-        updateScreenState()
+        updateScreenState(withAnimationDelay = true)
     }
 
     private fun dismissWithResult(result: LinkActivityResult) {

@@ -220,7 +220,8 @@ class AddressFormControllerTest {
                     IdentifierSpec.State to FormFieldEntry(value = "CA", isComplete = true),
                     IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
                     IdentifierSpec.PostalCode to FormFieldEntry(value = "94111", isComplete = true),
-                    IdentifierSpec.Phone to FormFieldEntry(value = "+17893424625", isComplete = true)
+                    IdentifierSpec.Phone to FormFieldEntry(value = "+17893424625", isComplete = true),
+                    IdentifierSpec.PhoneNumberCountry to FormFieldEntry(value = "US", isComplete = true),
                 )
             )
         }

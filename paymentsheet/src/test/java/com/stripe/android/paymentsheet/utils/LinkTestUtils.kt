@@ -75,6 +75,7 @@ internal object LinkTestUtils {
             customerInfo = LinkConfiguration.CustomerInfo(null, null, null, null),
             flags = mapOf(),
             merchantName = "Test merchant inc.",
+            sellerBusinessName = null,
             merchantCountryCode = "US",
             merchantLogoUrl = null,
             passthroughModeEnabled = false,
@@ -100,6 +101,7 @@ internal object LinkTestUtils {
             skipWalletInFlowController = false,
             customerId = null,
             saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+            forceSetupFutureUseBehaviorAndNewMandate = false,
         )
     }
 }

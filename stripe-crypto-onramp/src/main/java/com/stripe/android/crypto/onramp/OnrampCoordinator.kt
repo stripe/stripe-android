@@ -12,10 +12,12 @@ import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
+import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
 import com.stripe.android.crypto.onramp.model.OnrampKYCResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
 import com.stripe.android.crypto.onramp.model.OnrampSetWalletAddressResult
+import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import javax.inject.Inject
 
 /**
@@ -87,6 +89,16 @@ class OnrampCoordinator @Inject internal constructor(
     }
 
     /**
+     * Creates a crypto payment token for the payment method currently selected on the coordinator.
+     * Call after a successful [Presenter.collectPaymentMethod].
+     *
+     * @return A [OnrampCreateCryptoPaymentTokenResult] containing the crypto payment token ID.
+     */
+    suspend fun createCryptoPaymentToken(): OnrampCreateCryptoPaymentTokenResult {
+        return interactor.createCryptoPaymentToken()
+    }
+
+    /**
      * Create a presenter for handling Link UI interactions.
      *
      * @param activity The activity that will host the Link flows.
@@ -134,9 +146,11 @@ class OnrampCoordinator @Inject internal constructor(
 
         /**
          * Presents a payment selection UI to the user.
+         *
+         * @param type The payment method type to collect.
          */
-        fun collectPaymentMethod() {
-            coordinator.collectPaymentMethod()
+        fun collectPaymentMethod(type: PaymentMethodType) {
+            coordinator.collectPaymentMethod(type)
         }
     }
 

@@ -85,6 +85,8 @@ internal class CustomerSheetScreenshotTest {
         setAsDefaultMatchesSaveForFutureUse = false,
         autocompleteAddressInteractorFactory = null,
         termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        sellerBusinessName = null,
+        linkSignUpOptInFeatureEnabled = false,
     )
 
     private val selectPaymentMethodViewState = CustomerSheetViewState.SelectPaymentMethod(

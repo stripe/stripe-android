@@ -49,6 +49,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSaved
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.paymentsheet.state.WalletLocation
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
@@ -855,8 +856,8 @@ internal class PaymentOptionsViewModelTest {
 
         viewModel.walletsState.test {
             val state = awaitItem()
-            assertThat(state?.link).isEqualTo(WalletsState.Link(state = LinkButtonState.Default))
-            assertThat(state?.googlePay).isNull()
+            assertThat(state?.link(WalletLocation.HEADER)).isEqualTo(WalletsState.Link(state = LinkButtonState.Default))
+            assertThat(state?.googlePay(WalletLocation.HEADER)).isNull()
         }
     }
 
@@ -945,8 +946,8 @@ internal class PaymentOptionsViewModelTest {
         viewModel.walletsState.test {
             val item = awaitItem()
 
-            assertThat(item?.googlePay).isNull()
-            assertThat(item?.link).isNotNull()
+            assertThat(item?.googlePay(WalletLocation.HEADER)).isNull()
+            assertThat(item?.link(WalletLocation.HEADER)).isNotNull()
         }
     }
 
@@ -968,8 +969,8 @@ internal class PaymentOptionsViewModelTest {
         viewModel.walletsState.test {
             val item = awaitItem()
 
-            assertThat(item?.googlePay).isNotNull()
-            assertThat(item?.link).isNull()
+            assertThat(item?.googlePay(WalletLocation.HEADER)).isNotNull()
+            assertThat(item?.link(WalletLocation.HEADER)).isNull()
         }
     }
 
@@ -984,15 +985,15 @@ internal class PaymentOptionsViewModelTest {
                 ),
                 isGooglePayReady = true,
             ).copy(
-                walletsToShow = listOf(WalletType.GooglePay, WalletType.Link)
+                walletsToShow = WalletType.entries
             )
         )
 
         viewModel.walletsState.test {
             val item = awaitItem()
 
-            assertThat(item?.googlePay).isNotNull()
-            assertThat(item?.link).isNotNull()
+            assertThat(item?.googlePay(WalletLocation.HEADER)).isNotNull()
+            assertThat(item?.link(WalletLocation.HEADER)).isNotNull()
         }
     }
 
@@ -1010,7 +1011,7 @@ internal class PaymentOptionsViewModelTest {
                     ),
                     isGooglePayReady = true,
                 ).copy(
-                    walletsToShow = listOf(WalletType.GooglePay, WalletType.Link)
+                    walletsToShow = WalletType.entries
                 )
             )
 
@@ -1031,6 +1032,29 @@ internal class PaymentOptionsViewModelTest {
             verify(linkPaymentLauncher).unregister()
         }
     }
+
+    @Test
+    fun `On disabled click, should request validation`() =
+        runTest {
+            val viewModel = createViewModel(
+                args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                    paymentSelection = null,
+                    paymentMethods = emptyList(),
+                    isGooglePayReady = false,
+                    linkState = null
+                )
+            )
+
+            val primaryButtonUiState = viewModel.primaryButtonUiState.value
+
+            viewModel.validationRequested.test {
+                expectNoEvents()
+
+                primaryButtonUiState?.onDisabledClick?.invoke()
+
+                assertThat(awaitItem()).isNotNull()
+            }
+        }
 
     /**
      * Helper function to test user cancellation scenarios
@@ -1128,7 +1152,7 @@ internal class PaymentOptionsViewModelTest {
     private fun createLinkViewModel(): PaymentOptionsViewModel {
         val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
             attachNewCardToAccountResult = Result.success(LinkTestUtils.LINK_SAVED_PAYMENT_DETAILS),
-            accountStatus = AccountStatus.Verified,
+            accountStatus = AccountStatus.Verified(null),
         )
 
         return createViewModel(

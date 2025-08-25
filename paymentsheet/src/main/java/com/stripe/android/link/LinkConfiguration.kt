@@ -15,6 +15,7 @@ import kotlinx.parcelize.Parcelize
 internal data class LinkConfiguration(
     val stripeIntent: StripeIntent,
     val merchantName: String,
+    val sellerBusinessName: String?,
     val merchantCountryCode: String?,
     val merchantLogoUrl: String?,
     val customerInfo: CustomerInfo,
@@ -43,20 +44,14 @@ internal data class LinkConfiguration(
     val linkSignUpOptInInitialValue: Boolean,
     private val customerId: String?,
     val saveConsentBehavior: PaymentMethodSaveConsentBehavior,
+    val forceSetupFutureUseBehaviorAndNewMandate: Boolean,
 ) : Parcelable {
-
-    val alwaysSaveForFutureUse: Boolean
-        get() {
-            // When this (now poorly named) feature flag is enabled for a merchant, we always show the reuse mandate,
-            // since the merchant will save the payment method for future use.
-            return linkSignUpOptInFeatureEnabled
-        }
 
     val customerIdForEceDefaultValues: String?
         get() = if (enableDisplayableDefaultValuesInEce) customerId else null
 
     val enableLinkPaymentSelectionHint: Boolean
-        get() = flags["link_mobile_enable_payment_selection_hint"] == true
+        get() = flags["link_show_prefer_debit_card_hint"] == true
 
     @Parcelize
     data class CustomerInfo(

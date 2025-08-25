@@ -1112,6 +1112,7 @@ internal class PaymentMethodMetadataTest {
                 )
             ),
             merchantName = "Merchant Inc.",
+            sellerBusinessName = null,
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = shippingDetails,
             sharedDataSpecs = sharedDataSpecs,
@@ -1150,6 +1151,7 @@ internal class PaymentMethodMetadataTest {
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             shopPayConfiguration = null,
             termsDisplay = emptyMap(),
+            forceSetupFutureUseBehaviorAndNewMandate = false,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1205,6 +1207,7 @@ internal class PaymentMethodMetadataTest {
                 preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa)
             ),
             merchantName = "Merchant Inc.",
+            sellerBusinessName = null,
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = null,
             sharedDataSpecs = listOf(SharedDataSpec("card")),
@@ -1224,6 +1227,7 @@ internal class PaymentMethodMetadataTest {
             elementsSessionId = "session_1234",
             shopPayConfiguration = null,
             termsDisplay = emptyMap(),
+            forceSetupFutureUseBehaviorAndNewMandate = false,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -1233,7 +1237,7 @@ internal class PaymentMethodMetadataTest {
         val metadata = createPaymentMethodMetadataForPaymentSheet(
             mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                 isPaymentMethodSaveEnabled = true,
-                isPaymentMethodRemoveEnabled = true,
+                paymentMethodRemove = ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
                 canRemoveLastPaymentMethod = true,
                 allowRedisplayOverride = null,
                 isPaymentMethodSetAsDefaultEnabled = false,
@@ -1248,7 +1252,7 @@ internal class PaymentMethodMetadataTest {
         val metadata = createPaymentMethodMetadataForPaymentSheet(
             mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                 isPaymentMethodSaveEnabled = false,
-                isPaymentMethodRemoveEnabled = true,
+                paymentMethodRemove = ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
                 canRemoveLastPaymentMethod = true,
                 allowRedisplayOverride = null,
                 isPaymentMethodSetAsDefaultEnabled = false,
@@ -2059,6 +2063,7 @@ internal class PaymentMethodMetadataTest {
                 phone = "1234567890"
             ),
             merchantName = "Merchant Inc.",
+            sellerBusinessName = null,
             merchantCountryCode = "CA",
             merchantLogoUrl = null,
             shippingDetails = null,
@@ -2088,6 +2093,7 @@ internal class PaymentMethodMetadataTest {
             linkSignUpOptInInitialValue = false,
             customerId = null,
             saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+            forceSetupFutureUseBehaviorAndNewMandate = false,
         )
     }
 

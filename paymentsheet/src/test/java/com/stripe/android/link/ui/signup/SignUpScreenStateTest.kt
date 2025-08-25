@@ -83,6 +83,7 @@ class SignUpScreenStateTest {
         return LinkConfiguration(
             stripeIntent = PaymentIntentFactory.create(),
             merchantName = "Merchant, Inc.",
+            sellerBusinessName = null,
             merchantCountryCode = "US",
             merchantLogoUrl = null,
             customerInfo = customerInfo,
@@ -110,6 +111,7 @@ class SignUpScreenStateTest {
             skipWalletInFlowController = false,
             customerId = null,
             saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+            forceSetupFutureUseBehaviorAndNewMandate = false,
         )
     }
 

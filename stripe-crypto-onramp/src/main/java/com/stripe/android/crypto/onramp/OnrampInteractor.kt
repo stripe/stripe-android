@@ -2,11 +2,15 @@ package com.stripe.android.crypto.onramp
 
 import android.app.Application
 import android.content.Context
+import com.stripe.android.core.utils.flatMapCatching
+import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
+import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
+import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
 import com.stripe.android.crypto.onramp.model.OnrampIdentityVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampKYCResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
@@ -25,6 +29,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
+@Suppress("TooManyFunctions")
 @Singleton
 internal class OnrampInteractor @Inject constructor(
     private val application: Application,
@@ -84,9 +89,7 @@ internal class OnrampInteractor @Inject constructor(
                         }
                     )
                 } ?: run {
-                    return OnrampRegisterUserResult.Failed(
-                        IllegalStateException("Missing consumer session client secret")
-                    )
+                    return OnrampRegisterUserResult.Failed(MissingConsumerSecretException())
                 }
             }
             is LinkController.RegisterConsumerResult.Failed -> {
@@ -113,9 +116,7 @@ internal class OnrampInteractor @Inject constructor(
                 }
             )
         } else {
-            OnrampSetWalletAddressResult.Failed(
-                IllegalStateException("Missing consumer session client secret")
-            )
+            OnrampSetWalletAddressResult.Failed(MissingConsumerSecretException())
         }
     }
 
@@ -129,7 +130,7 @@ internal class OnrampInteractor @Inject constructor(
                     onFailure = { OnrampKYCResult.Failed(it) }
                 )
         } ?: run {
-            return OnrampKYCResult.Failed(IllegalStateException("Missing consumer secret"))
+            return OnrampKYCResult.Failed(MissingConsumerSecretException())
         }
     }
 
@@ -143,8 +144,36 @@ internal class OnrampInteractor @Inject constructor(
                     onFailure = { OnrampStartVerificationResult.Failed(it) }
                 )
         } ?: run {
-            return OnrampStartVerificationResult.Failed(IllegalStateException("Missing consumer secret"))
+            return OnrampStartVerificationResult.Failed(MissingConsumerSecretException())
         }
+    }
+
+    suspend fun createCryptoPaymentToken(): OnrampCreateCryptoPaymentTokenResult {
+        val secret = consumerSessionClientSecret()
+            ?: return OnrampCreateCryptoPaymentTokenResult.Failed(MissingConsumerSecretException())
+        return cryptoApiRepository.getPlatformSettings()
+            .map { it.publishableKey }
+            .mapCatching { apiKey ->
+                when (val result = linkController.createPaymentMethodForOnramp(apiKey = apiKey)) {
+                    is LinkController.CreatePaymentMethodResult.Success -> {
+                        result.paymentMethod
+                    }
+                    is LinkController.CreatePaymentMethodResult.Failed -> {
+                        throw result.error
+                    }
+                }
+            }
+            .flatMapCatching { paymentMethod ->
+                cryptoApiRepository.createPaymentToken(
+                    consumerSessionClientSecret = secret,
+                    paymentMethod = paymentMethod.id!!,
+                )
+            }
+            .map { cryptoPayment -> cryptoPayment.id }
+            .fold(
+                onSuccess = { OnrampCreateCryptoPaymentTokenResult.Completed(it) },
+                onFailure = { OnrampCreateCryptoPaymentTokenResult.Failed(it) }
+            )
     }
 
     suspend fun handleAuthenticationResult(
@@ -164,7 +193,7 @@ internal class OnrampInteractor @Inject constructor(
                     }
                 )
             } ?: OnrampVerificationResult.Failed(
-                IllegalStateException("Missing consumer secret")
+                MissingConsumerSecretException()
             )
         }
         is AuthenticationResult.Failed -> OnrampVerificationResult.Failed(result.error)
@@ -197,7 +226,7 @@ internal class OnrampInteractor @Inject constructor(
                     )
                 )
             } ?: run {
-                OnrampCollectPaymentResult.Failed(IllegalStateException("Missing selected payment preview"))
+                OnrampCollectPaymentResult.Failed(MissingPaymentMethodException())
             }
         }
         is LinkController.PresentPaymentMethodsResult.Failed ->

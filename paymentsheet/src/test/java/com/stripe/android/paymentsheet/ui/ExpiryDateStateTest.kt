@@ -52,42 +52,42 @@ internal class ExpiryDateStateTest {
 
     @Test
     fun `shouldShowError should return false for valid expiry date`() {
-        val state = ExpiryDateState(text = VALID_EXPIRY_TEXT, enabled = true)
+        val state = ExpiryDateState(text = VALID_EXPIRY_TEXT, enabled = true, validating = false)
 
         assertThat(state.shouldShowError()).isFalse()
     }
 
     @Test
     fun `shouldShowError should return true for expired date`() {
-        val state = ExpiryDateState(text = EXPIRED_EXPIRY_TEXT, enabled = true)
+        val state = ExpiryDateState(text = EXPIRED_EXPIRY_TEXT, enabled = true, validating = false)
 
         assertThat(state.shouldShowError()).isTrue()
     }
 
     @Test
     fun `section should return non-null message for expired date`() {
-        val state = ExpiryDateState(text = EXPIRED_EXPIRY_TEXT, enabled = true)
+        val state = ExpiryDateState(text = EXPIRED_EXPIRY_TEXT, enabled = true, validating = false)
 
         assertThat(state.sectionError()).isNotNull()
     }
 
     @Test
     fun `sectionError should return null for valid date`() {
-        val state = ExpiryDateState(text = VALID_EXPIRY_TEXT, enabled = true)
+        val state = ExpiryDateState(text = VALID_EXPIRY_TEXT, enabled = true, validating = false)
 
         assertThat(state.sectionError()).isNull()
     }
 
     @Test
     fun `sectionError should return null when not enabled even if invalid`() {
-        val state = ExpiryDateState(text = INVALID_FORMAT_EXPIRY_TEXT, enabled = false)
+        val state = ExpiryDateState(text = INVALID_FORMAT_EXPIRY_TEXT, enabled = false, validating = false)
 
         assertThat(state.sectionError()).isNull()
     }
 
     @Test
     fun `onDateChanged should accept valid input`() {
-        val state = ExpiryDateState(text = "12", enabled = true)
+        val state = ExpiryDateState(text = "12", enabled = true, validating = false)
         val newState = state.onDateChanged("1223")
 
         assertThat(newState.text).isEqualTo("1223")
@@ -95,7 +95,7 @@ internal class ExpiryDateStateTest {
 
     @Test
     fun `onDateChanged should not accept input when field is full`() {
-        val state = ExpiryDateState(text = VALID_EXPIRY_TEXT, enabled = true)
+        val state = ExpiryDateState(text = VALID_EXPIRY_TEXT, enabled = true, validating = false)
         val newState = state.onDateChanged("12235") // Trying to add an extra digit
 
         // Should not change the text since it's already full (4 digits)
@@ -104,7 +104,7 @@ internal class ExpiryDateStateTest {
 
     @Test
     fun `onDateChanged should accept input when deleting characters`() {
-        val state = ExpiryDateState(text = VALID_EXPIRY_TEXT, enabled = true)
+        val state = ExpiryDateState(text = VALID_EXPIRY_TEXT, enabled = true, validating = false)
         val newState = state.onDateChanged("122") // Deleting last digit
 
         assertThat(newState.text).isEqualTo("122")
@@ -112,30 +112,39 @@ internal class ExpiryDateStateTest {
 
     @Test
     fun `expiryMonth should return null for invalid text`() {
-        val state = ExpiryDateState(text = CARD_EDIT_UI_FALLBACK_EXPIRY_DATE, enabled = false)
+        val state = ExpiryDateState(text = CARD_EDIT_UI_FALLBACK_EXPIRY_DATE, enabled = false, validating = false)
 
         assertThat(state.expiryMonth).isNull()
     }
 
     @Test
     fun `expiryYear should return null for invalid text`() {
-        val state = ExpiryDateState(text = CARD_EDIT_UI_FALLBACK_EXPIRY_DATE, enabled = false)
+        val state = ExpiryDateState(text = CARD_EDIT_UI_FALLBACK_EXPIRY_DATE, enabled = false, validating = false)
 
         assertThat(state.expiryYear).isNull()
     }
 
     @Test
     fun `expiryMonth should extract month correctly from valid text`() {
-        val state = ExpiryDateState(text = "0550", enabled = true)
+        val state = ExpiryDateState(text = "0550", enabled = true, validating = false)
 
         assertThat(state.expiryMonth).isEqualTo(5)
     }
 
     @Test
     fun `expiryYear should extract year correctly from valid text`() {
-        val state = ExpiryDateState(text = "0550", enabled = true)
+        val state = ExpiryDateState(text = "0550", enabled = true, validating = false)
 
         assertThat(state.expiryYear).isEqualTo(2050)
+    }
+
+    @Test
+    fun `on validate, should set state to validating`() {
+        val state = ExpiryDateState(text = "", enabled = true, validating = false).validate()
+
+        assertThat(state.validating).isTrue()
+        assertThat(state.shouldShowError()).isTrue()
+        assertThat(state.sectionError()).isNotNull()
     }
 
     private fun createCard(expiryMonth: Int?, expiryYear: Int?): EditCardPayload {

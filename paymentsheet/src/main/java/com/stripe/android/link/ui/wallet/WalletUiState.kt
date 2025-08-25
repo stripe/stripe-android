@@ -8,7 +8,6 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.ConsumerPaymentDetails
-import com.stripe.android.model.ConsumerPaymentDetails.Card
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -22,6 +21,7 @@ internal data class WalletUiState(
     val isProcessing: Boolean,
     val isSettingUp: Boolean,
     val merchantName: String,
+    val sellerBusinessName: String?,
     val primaryButtonLabel: ResolvableString,
     val secondaryButtonLabel: ResolvableString?,
     val hasCompleted: Boolean,
@@ -34,7 +34,7 @@ internal data class WalletUiState(
     val cvcInput: FormFieldEntry = FormFieldEntry(null),
     val addBankAccountState: AddBankAccountState = AddBankAccountState.Idle,
     val alertMessage: ResolvableString? = null,
-    val paymentSelectionHint: String? = null,
+    val paymentSelectionHint: ResolvableString? = null,
     val isAutoSelecting: Boolean = false,
     val hasAttemptedAutoSelection: Boolean = false,
     val signupToggleEnabled: Boolean,
@@ -48,13 +48,14 @@ internal data class WalletUiState(
             paymentDetailsList.firstOrNull()
         }
 
-    val selectedCard: Card?
-        get() = selectedItem as? Card
+    val selectedCard: ConsumerPaymentDetails.Card?
+        get() = selectedItem as? ConsumerPaymentDetails.Card
 
     val mandate: ResolvableString?
         get() = selectedItem?.makeMandateText(
             isSettingUp = isSettingUp,
             merchantName = merchantName,
+            sellerBusinessName = sellerBusinessName,
             signupToggleEnabled = signupToggleEnabled
         )
 
@@ -66,7 +67,7 @@ internal data class WalletUiState(
 
     val primaryButtonState: PrimaryButtonState
         get() {
-            val card = selectedItem as? Card
+            val card = selectedItem as? ConsumerPaymentDetails.Card
             val isExpired = card?.isExpired == true
             val requiresCvcRecollection = card?.cvcCheck?.requiresRecollection ?: false
 
@@ -102,7 +103,7 @@ internal data class WalletUiState(
 
     fun isItemAvailable(item: ConsumerPaymentDetails.PaymentDetails): Boolean {
         return (
-            item !is Card || cardBrandFilter.isAccepted(item.brand)
+            item !is ConsumerPaymentDetails.Card || cardBrandFilter.isAccepted(item.brand)
             ) && item.isSupportedWithBillingConfig(billingDetailsCollectionConfiguration)
     }
 
@@ -120,13 +121,18 @@ internal data class WalletUiState(
 private fun ConsumerPaymentDetails.PaymentDetails.makeMandateText(
     isSettingUp: Boolean,
     merchantName: String,
+    sellerBusinessName: String?,
     signupToggleEnabled: Boolean
 ): ResolvableString? {
     return when (this) {
-        is ConsumerPaymentDetails.BankAccount -> {
-            resolvableString(R.string.stripe_wallet_bank_account_terms)
+        is ConsumerPaymentDetails.BankAccount -> when {
+            signupToggleEnabled && sellerBusinessName != null -> resolvableString(
+                R.string.stripe_wallet_bank_account_terms_seller,
+                sellerBusinessName
+            )
+            else -> resolvableString(R.string.stripe_wallet_bank_account_terms)
         }
-        is Card,
+        is ConsumerPaymentDetails.Card,
         is ConsumerPaymentDetails.Passthrough -> when {
             signupToggleEnabled -> resolvableString(
                 id = R.string.stripe_paymentsheet_card_mandate_signup_toggle_off,

@@ -746,7 +746,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Considers Link logged in if the account is verified`() = runTest {
-        val loader = createPaymentElementLoader(linkAccountState = AccountStatus.Verified)
+        val loader = createPaymentElementLoader(linkAccountState = AccountStatus.Verified(null))
 
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
@@ -1095,7 +1095,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `Disables Link inline signup if user already has an verified account`() = runTest {
         val loader = createPaymentElementLoader(
-            linkAccountState = AccountStatus.Verified,
+            linkAccountState = AccountStatus.Verified(null),
         )
 
         val result = loader.load(
@@ -2085,7 +2085,8 @@ internal class DefaultPaymentElementLoaderTest {
                     paymentMethods = PaymentMethodFactory.cards(4),
                     session = createElementsSessionCustomerSession(
                         createEnabledMobilePaymentElement(
-                            isPaymentMethodRemoveEnabled = true,
+                            paymentMethodRemove =
+                            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
                             canRemoveLastPaymentMethod = true,
                             isPaymentMethodSaveEnabled = false,
                             allowRedisplayOverride = null,
@@ -2130,7 +2131,8 @@ internal class DefaultPaymentElementLoaderTest {
                     paymentMethods = PaymentMethodFactory.cards(4),
                     session = createElementsSessionCustomerSession(
                         createEnabledMobilePaymentElement(
-                            isPaymentMethodRemoveEnabled = false,
+                            paymentMethodRemove =
+                            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled,
                             isPaymentMethodSaveEnabled = false,
                             canRemoveLastPaymentMethod = true,
                             allowRedisplayOverride = null,
@@ -2175,7 +2177,8 @@ internal class DefaultPaymentElementLoaderTest {
                     paymentMethods = PaymentMethodFactory.cards(4),
                     session = createElementsSessionCustomerSession(
                         createEnabledMobilePaymentElement(
-                            isPaymentMethodRemoveEnabled = false,
+                            paymentMethodRemove =
+                            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled,
                             isPaymentMethodSaveEnabled = false,
                             canRemoveLastPaymentMethod = true,
                             allowRedisplayOverride = null,
@@ -2220,7 +2223,8 @@ internal class DefaultPaymentElementLoaderTest {
                     paymentMethods = PaymentMethodFactory.cards(4),
                     session = createElementsSessionCustomerSession(
                         createEnabledMobilePaymentElement(
-                            isPaymentMethodRemoveEnabled = false,
+                            paymentMethodRemove =
+                            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled,
                             isPaymentMethodSaveEnabled = false,
                             canRemoveLastPaymentMethod = true,
                             allowRedisplayOverride = null,
@@ -3420,7 +3424,8 @@ internal class DefaultPaymentElementLoaderTest {
                         ElementsSession.Customer.Components.MobilePaymentElement.Disabled
                     } else {
                         createEnabledMobilePaymentElement(
-                            isPaymentMethodRemoveEnabled = false,
+                            paymentMethodRemove =
+                            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled,
                             isPaymentMethodSaveEnabled = false,
                             canRemoveLastPaymentMethod = canRemoveLastPaymentMethodFromServer,
                             allowRedisplayOverride = null,
@@ -3643,7 +3648,7 @@ internal class DefaultPaymentElementLoaderTest {
             isPaymentMethodSaveEnabled?.let {
                 createEnabledMobilePaymentElement(
                     isPaymentMethodSaveEnabled = it,
-                    isPaymentMethodRemoveEnabled = true,
+                    paymentMethodRemove = ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
                     canRemoveLastPaymentMethod = true,
                     allowRedisplayOverride = null,
                     isPaymentMethodSetAsDefaultEnabled = false,
@@ -3710,7 +3715,7 @@ internal class DefaultPaymentElementLoaderTest {
         isGooglePayReady: Boolean = true,
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         customerRepo: CustomerRepository = customerRepository,
-        linkAccountState: AccountStatus = AccountStatus.Verified,
+        linkAccountState: AccountStatus = AccountStatus.Verified(null),
         error: Throwable? = null,
         linkSettings: ElementsSession.LinkSettings? = null,
         linkGate: LinkGate = FakeLinkGate(),
@@ -3838,7 +3843,7 @@ internal class DefaultPaymentElementLoaderTest {
                     mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                         isPaymentMethodSetAsDefaultEnabled = true,
                         isPaymentMethodSaveEnabled = true,
-                        isPaymentMethodRemoveEnabled = true,
+                        paymentMethodRemove = ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
                         canRemoveLastPaymentMethod = true,
                         allowRedisplayOverride = null,
                     ),
@@ -3865,14 +3870,15 @@ internal class DefaultPaymentElementLoaderTest {
 
     private fun createEnabledMobilePaymentElement(
         isPaymentMethodSaveEnabled: Boolean = true,
-        isPaymentMethodRemoveEnabled: Boolean = false,
+        paymentMethodRemove: ElementsSession.Customer.Components.PaymentMethodRemoveFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled,
         canRemoveLastPaymentMethod: Boolean = false,
         allowRedisplayOverride: PaymentMethod.AllowRedisplay? = null,
         isPaymentMethodSetAsDefaultEnabled: Boolean = false,
     ): ElementsSession.Customer.Components.MobilePaymentElement {
         return ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
             isPaymentMethodSaveEnabled = isPaymentMethodSaveEnabled,
-            isPaymentMethodRemoveEnabled = isPaymentMethodRemoveEnabled,
+            paymentMethodRemove = paymentMethodRemove,
             canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
             allowRedisplayOverride = allowRedisplayOverride,
             isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,

@@ -31,14 +31,17 @@ internal class LinkControllerCoordinatorTest {
 
     private val presentPaymentMethodsResultFlow = MutableSharedFlow<LinkController.PresentPaymentMethodsResult>()
     private val authenticationResultFlow = MutableSharedFlow<LinkController.AuthenticationResult>()
+    private val authorizeResultFlow = MutableSharedFlow<LinkController.AuthorizeResult>()
 
     private val viewModel: LinkControllerInteractor = mock {
         on { presentPaymentMethodsResultFlow } doReturn presentPaymentMethodsResultFlow
         on { authenticationResultFlow } doReturn authenticationResultFlow
+        on { authorizeResultFlow } doReturn authorizeResultFlow
     }
 
     private val presentPaymentMethodsResults = mutableListOf<LinkController.PresentPaymentMethodsResult>()
     private val authenticationResults = mutableListOf<LinkController.AuthenticationResult>()
+    private val authorizeResults = mutableListOf<LinkController.AuthorizeResult>()
 
     private val lifecycleOwner = TestLifecycleOwner(initialState = Lifecycle.State.INITIALIZED)
 
@@ -57,6 +60,7 @@ internal class LinkControllerCoordinatorTest {
             linkActivityContract = linkActivityContract,
             selectedPaymentMethodCallback = { presentPaymentMethodsResults.add(it) },
             authenticationCallback = { authenticationResults.add(it) },
+            authorizeCallback = { authorizeResults.add(it) },
         )
     }
 
@@ -86,8 +90,12 @@ internal class LinkControllerCoordinatorTest {
         val authResult = LinkController.AuthenticationResult.Success
         authenticationResultFlow.emit(authResult)
 
+        val authorizeResult = LinkController.AuthorizeResult.Denied
+        authorizeResultFlow.emit(authorizeResult)
+
         assertThat(presentPaymentMethodsResults).containsExactly(presentResult)
         assertThat(authenticationResults).containsExactly(authResult)
+        assertThat(authorizeResults).containsExactly(authorizeResult)
     }
 
     @Test
@@ -99,9 +107,11 @@ internal class LinkControllerCoordinatorTest {
             LinkController.PresentPaymentMethodsResult.Success
         )
         authenticationResultFlow.emit(LinkController.AuthenticationResult.Success)
+        authorizeResultFlow.emit(LinkController.AuthorizeResult.Denied)
 
         assertThat(presentPaymentMethodsResults).isEmpty()
         assertThat(authenticationResults).isEmpty()
+        assertThat(authorizeResults).isEmpty()
     }
 
     @Test

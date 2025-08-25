@@ -162,11 +162,15 @@ data class ElementsSession(
                 @Parcelize
                 data class Enabled(
                     val isPaymentMethodSaveEnabled: Boolean,
-                    val isPaymentMethodRemoveEnabled: Boolean,
+                    val paymentMethodRemove: PaymentMethodRemoveFeature,
                     val canRemoveLastPaymentMethod: Boolean,
                     val allowRedisplayOverride: PaymentMethod.AllowRedisplay?,
                     val isPaymentMethodSetAsDefaultEnabled: Boolean,
-                ) : MobilePaymentElement
+                ) : MobilePaymentElement {
+                    val isPaymentMethodRemoveEnabled: Boolean
+                        get() = paymentMethodRemove == PaymentMethodRemoveFeature.Enabled ||
+                            paymentMethodRemove == PaymentMethodRemoveFeature.Partial
+                }
             }
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -178,10 +182,21 @@ data class ElementsSession(
                 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 @Parcelize
                 data class Enabled(
-                    val isPaymentMethodRemoveEnabled: Boolean,
+                    val paymentMethodRemove: PaymentMethodRemoveFeature,
                     val canRemoveLastPaymentMethod: Boolean,
                     val isPaymentMethodSyncDefaultEnabled: Boolean,
-                ) : CustomerSheet
+                ) : CustomerSheet {
+                    val isPaymentMethodRemoveEnabled: Boolean
+                        get() = paymentMethodRemove == PaymentMethodRemoveFeature.Enabled ||
+                            paymentMethodRemove == PaymentMethodRemoveFeature.Partial
+                }
+            }
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            enum class PaymentMethodRemoveFeature {
+                Enabled,
+                Partial,
+                Disabled,
             }
         }
     }
@@ -195,7 +210,10 @@ data class ElementsSession(
         ELEMENTS_PREFER_FC_LITE("elements_prefer_fc_lite"),
         ELEMENTS_DISABLE_LINK_GLOBAL_HOLDBACK_LOOKUP("elements_disable_link_global_holdback_lookup"),
         ELEMENTS_ENABLE_LINK_SPM("elements_enable_link_spm"),
-        ELEMENTS_ENABLE_PASSIVE_CAPTCHA("elements_enable_passive_captcha")
+        ELEMENTS_ENABLE_PASSIVE_CAPTCHA("elements_enable_passive_captcha"),
+        ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT(
+            "elements_mobile_force_setup_future_use_behavior_and_new_mandate_text"
+        )
     }
 
     /**

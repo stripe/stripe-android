@@ -66,6 +66,7 @@ class ConsumersApiServiceImplTest {
                 email = email,
                 phoneNumber = "+15555555568",
                 country = "US",
+                countryInferringMethod = "PHONE_NUMBER",
                 name = null,
                 locale = Locale.US,
                 amount = 1234,
@@ -103,6 +104,7 @@ class ConsumersApiServiceImplTest {
 
         val lookup = consumersApiService.lookupConsumerSession(
             email = email,
+            linkAuthIntentId = null,
             requestSurface = requestSurface,
             sessionId = DEFAULT_SESSION_ID,
             requestOptions = DEFAULT_OPTIONS,
@@ -135,6 +137,7 @@ class ConsumersApiServiceImplTest {
         assertFailsWith<APIException> {
             consumersApiService.lookupConsumerSession(
                 email = email,
+                linkAuthIntentId = null,
                 requestSurface = requestSurface,
                 sessionId = DEFAULT_SESSION_ID,
                 doNotLogConsumerFunnelEvent = false,
@@ -204,6 +207,7 @@ class ConsumersApiServiceImplTest {
             verificationCode = verificationCode,
             requestSurface = "android_payment_element",
             type = VerificationType.SMS,
+            consentGranted = null,
             requestOptions = DEFAULT_OPTIONS
         )
 

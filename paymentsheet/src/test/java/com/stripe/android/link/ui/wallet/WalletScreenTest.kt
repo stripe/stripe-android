@@ -774,6 +774,7 @@ internal class WalletScreenTest {
                 isProcessing = false,
                 isSettingUp = false,
                 merchantName = "Example Inc.",
+                sellerBusinessName = null,
                 primaryButtonLabel = "Buy".resolvableString,
                 secondaryButtonLabel = "Pay another way".resolvableString,
                 hasCompleted = false,
@@ -822,6 +823,11 @@ internal class WalletScreenTest {
                 linkConfirmationHandler = linkConfirmationHandler,
                 linkAccountManager = linkAccountManager,
                 dismissalCoordinator = dismissalCoordinator,
+                linkLaunchMode = linkLaunchMode
+            ),
+            addPaymentMethodOptions = AddPaymentMethodOptions(
+                linkAccount = TestFactory.LINK_ACCOUNT,
+                configuration = TestFactory.LINK_CONFIGURATION,
                 linkLaunchMode = linkLaunchMode
             )
         )

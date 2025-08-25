@@ -9,6 +9,7 @@ import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.cardscan.CardScanResult
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -97,6 +98,20 @@ internal class CardDetailsController(
         )
     )
 
+    val onCardScanResult: (CardScanResult) -> Unit = { result ->
+        (result as? CardScanResult.Completed)?.scannedCard?.let { scannedCard ->
+            numberElement.controller.onRawValueChange(
+                scannedCard.pan
+            )
+            if (scannedCard.expirationMonth != null && scannedCard.expirationYear != null) {
+                @Suppress("MagicNumber")
+                expirationDateElement.controller.onRawValueChange(
+                    "${scannedCard.expirationMonth}/${scannedCard.expirationYear % 100}"
+                )
+            }
+        }
+    }
+
     private val rowFields = listOf(expirationDateElement, cvcElement)
     val fields = listOfNotNull(
         nameElement,
@@ -119,6 +134,12 @@ internal class CardDetailsController(
             .map { it.error }
     ) {
         it.filterNotNull().firstOrNull()
+    }
+
+    override fun onValidationStateChanged(isValidating: Boolean) {
+        fields.forEach {
+            it.onValidationStateChanged(isValidating)
+        }
     }
 
     @Composable

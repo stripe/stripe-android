@@ -268,6 +268,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">Xem thêm</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Bằng việc tiếp tục, quý vị đồng ý xác thực thanh toán tuân theo các <terms>điều khoản</terms> sau.]]></string>
+  <!-- Text providing link to terms for bank payments -->
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Bằng cách gửi đơn hàng của bạn đến %s, bạn đồng ý ủy quyền thanh toán theo <terms>các điều khoản này</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Thanh toán</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->

@@ -9,13 +9,17 @@ import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
+import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.responseJson
 import com.stripe.android.core.networking.toMap
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.crypto.onramp.model.CreatePaymentTokenRequest
+import com.stripe.android.crypto.onramp.model.CreatePaymentTokenResponse
 import com.stripe.android.crypto.onramp.model.CryptoCustomerRequestParams
 import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.CryptoWalletRequestParams
+import com.stripe.android.crypto.onramp.model.GetPlatformSettingsResponse
 import com.stripe.android.crypto.onramp.model.KycCollectionRequest
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationRequest
@@ -120,7 +124,7 @@ internal class CryptoApiRepository @Inject constructor(
             Unit.serializer()
         )
     }
-	
+
     suspend fun startIdentityVerification(
         consumerSessionClientSecret: String
     ): Result<StartIdentityVerificationResponse> {
@@ -137,6 +141,32 @@ internal class CryptoApiRepository @Inject constructor(
         )
     }
 
+    suspend fun getPlatformSettings(): Result<GetPlatformSettingsResponse> {
+        val request = apiRequestFactory.createGet(
+            url = platformSettings,
+            options = buildRequestOptions(),
+        )
+        return execute(
+            request = request,
+            responseSerializer = GetPlatformSettingsResponse.serializer()
+        )
+    }
+
+    suspend fun createPaymentToken(
+        consumerSessionClientSecret: String,
+        paymentMethod: String,
+    ): Result<CreatePaymentTokenResponse> {
+        val params = CreatePaymentTokenRequest(
+            credentials = CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret),
+            paymentMethod = paymentMethod,
+        )
+        return execute(
+            url = paymentToken,
+            paramsJson = Json.encodeToJsonElement(params).jsonObject,
+            responseSerializer = CreatePaymentTokenResponse.serializer()
+        )
+    }
+
     private fun buildRequestOptions(): ApiRequest.Options {
         return ApiRequest.Options(
             apiKey = publishableKeyProvider(),
@@ -144,10 +174,10 @@ internal class CryptoApiRepository @Inject constructor(
         )
     }
 
-    private suspend fun<Response> execute(
+    private suspend fun <Response> execute(
         url: String,
         paramsJson: JsonObject,
-        responseSerializer: KSerializer<Response>
+        responseSerializer: KSerializer<Response>,
     ): Result<Response> {
         val request = apiRequestFactory.createPost(
             url = url,
@@ -155,6 +185,16 @@ internal class CryptoApiRepository @Inject constructor(
             params = paramsJson.toMap(),
         )
 
+        return execute(
+            request = request,
+            responseSerializer = responseSerializer
+        )
+    }
+
+    private suspend fun <Response> execute(
+        request: StripeRequest,
+        responseSerializer: KSerializer<Response>,
+    ): Result<Response> {
         return runCatching {
             stripeNetworkClient.executeRequest(request)
         }.mapCatching { response ->
@@ -187,11 +227,21 @@ internal class CryptoApiRepository @Inject constructor(
          * @return `https://api.stripe.com/v1/crypto/internal/wallet`
          */
         internal val setWalletAddressUrl: String = getApiUrl("crypto/internal/wallet")
-		
+
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/start_identity_verification`
          */
         internal val startIdentityVerificationUrl: String = getApiUrl("crypto/internal/start_identity_verification")
+
+        /**
+         * @return `https://api.stripe.com/v1/crypto/internal/platform_settings`
+         */
+        internal val platformSettings: String = getApiUrl("crypto/internal/platform_settings")
+
+        /**
+         * @return `https://api.stripe.com/v1/crypto/internal/payment_token`
+         */
+        internal val paymentToken: String = getApiUrl("crypto/internal/payment_token")
 
         private fun getApiUrl(path: String): String {
             return "${ApiRequest.API_HOST}/v1/$path"

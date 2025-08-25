@@ -25,6 +25,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkAppearanceTheme
 import com.stripe.android.link.theme.LinkTheme
+import com.stripe.android.link.ui.oauth.OAuthConsentScreen
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodScreen
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodViewModel
 import com.stripe.android.link.ui.signup.SignUpScreen
@@ -108,6 +109,7 @@ internal fun LinkContent(
     }
 }
 
+@SuppressWarnings("LongMethod")
 @Composable
 @Suppress("LongMethod")
 private fun Screens(
@@ -173,6 +175,7 @@ private fun Screens(
 
         composable(LinkScreen.Wallet.route) {
             val linkAccount = getLinkAccount() ?: return@composable dismissWithResult(noLinkAccountResult())
+
             WalletRoute(
                 linkAccount = linkAccount,
                 appearance = appearance,
@@ -189,6 +192,14 @@ private fun Screens(
             PaymentMethodRoute(
                 linkAccount = linkAccount,
                 appearance = appearance,
+                dismissWithResult = dismissWithResult,
+            )
+        }
+
+        composable(LinkScreen.OAuthConsent.route) {
+            val linkAccount = getLinkAccount() ?: return@composable dismissWithResult(noLinkAccountResult())
+            OAuthConsentRoute(
+                linkAccount = linkAccount,
                 dismissWithResult = dismissWithResult,
             )
         }
@@ -303,6 +314,15 @@ private fun WalletRoute(
         hideBottomSheetContent = hideBottomSheetContent,
         onLogoutClicked = onLogoutClicked,
     )
+}
+
+@Composable
+@Suppress("UNUSED_PARAMETER")
+private fun OAuthConsentRoute(
+    linkAccount: LinkAccount,
+    dismissWithResult: (LinkActivityResult) -> Unit,
+) {
+    OAuthConsentScreen()
 }
 
 private fun noLinkAccountResult(): LinkActivityResult {

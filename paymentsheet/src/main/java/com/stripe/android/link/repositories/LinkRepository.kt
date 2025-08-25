@@ -31,7 +31,8 @@ internal interface LinkRepository {
      *                   retrieval of displayable payment details.
      */
     suspend fun lookupConsumer(
-        email: String,
+        email: String?,
+        linkAuthIntentId: String?,
         sessionId: String,
         customerId: String?
     ): Result<ConsumerSessionLookup>
@@ -53,8 +54,9 @@ internal interface LinkRepository {
      *                   retrieval of displayable payment details.
      */
     suspend fun mobileLookupConsumer(
-        email: String,
-        emailSource: EmailSource,
+        email: String?,
+        emailSource: EmailSource?,
+        linkAuthIntentId: String?,
         verificationToken: String,
         appId: String,
         sessionId: String,
@@ -68,6 +70,7 @@ internal interface LinkRepository {
         email: String,
         phone: String?,
         country: String?,
+        countryInferringMethod: String,
         name: String?,
         consentAction: ConsumerSignUpConsentAction
     ): Result<ConsumerSessionSignup>
@@ -77,6 +80,7 @@ internal interface LinkRepository {
         email: String,
         phoneNumber: String,
         country: String,
+        countryInferringMethod: String,
         consentAction: ConsumerSignUpConsentAction,
         amount: Long?,
         currency: String?,
@@ -115,6 +119,7 @@ internal interface LinkRepository {
         billingPhone: String?,
         cvc: String?,
         allowRedisplay: String?,
+        apiKey: String?
     ): Result<SharePaymentDetails>
 
     suspend fun createPaymentMethod(
@@ -142,7 +147,17 @@ internal interface LinkRepository {
         verificationCode: String,
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?,
+        consentGranted: Boolean?,
     ): Result<ConsumerSession>
+
+    /**
+     * Update consent status for the signed in consumer.
+     */
+    suspend fun consentUpdate(
+        consumerSessionClientSecret: String,
+        consentGranted: Boolean,
+        consumerPublishableKey: String?
+    ): Result<Unit>
 
     /**
      * Fetch all saved payment methods for the signed in consumer.

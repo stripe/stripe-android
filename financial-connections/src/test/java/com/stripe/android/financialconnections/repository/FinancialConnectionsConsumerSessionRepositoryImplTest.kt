@@ -277,6 +277,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 verificationCode = eq(verificationCode),
                 requestSurface = eq("android_connections"),
                 type = eq(type),
+                consentGranted = eq(null),
                 requestOptions = eq(apiOptions)
             )
         ).thenReturn(consumerSession)
@@ -295,9 +296,10 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         verify(consumersApiService).confirmConsumerVerification(
             consumerSessionClientSecret = consumerSessionClientSecret,
             verificationCode = verificationCode,
-            "android_connections",
-            type,
-            apiOptions
+            requestSurface = "android_connections",
+            type = type,
+            consentGranted = null,
+            requestOptions = apiOptions
         )
 
         // ensures there's a cached consumer session after the confirm-verification call.

@@ -8,6 +8,7 @@ import androidx.annotation.ColorInt
 import androidx.annotation.StringRes
 import androidx.core.os.bundleOf
 import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.polling.IntentStatusPoller.PollingStrategy
 import kotlinx.parcelize.Parcelize
 
 private const val EXTRA_ARGS = "extra_args"
@@ -30,9 +31,10 @@ internal class PollingContract :
         @ColorInt val statusBarColor: Int?,
         val timeLimitInSeconds: Int,
         val initialDelayInSeconds: Int,
-        val maxAttempts: Int,
+        val pollingStrategy: PollingStrategy,
         @StringRes val ctaText: Int,
         val stripeAccountId: String?,
+        val qrCodeUrl: String?,
     ) : Parcelable {
 
         internal companion object {

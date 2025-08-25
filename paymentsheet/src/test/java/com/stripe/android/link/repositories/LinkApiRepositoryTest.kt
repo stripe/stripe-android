@@ -69,6 +69,7 @@ class LinkApiRepositoryTest {
 
         val result = linkRepository.lookupConsumer(
             email = TestFactory.EMAIL,
+            linkAuthIntentId = null,
             sessionId = SESSION_ID,
             customerId = null,
         )
@@ -88,7 +89,8 @@ class LinkApiRepositoryTest {
         val error = RuntimeException("error")
         val consumersApiService = object : FakeConsumersApiService() {
             override suspend fun lookupConsumerSession(
-                email: String,
+                email: String?,
+                linkAuthIntentId: String?,
                 requestSurface: String,
                 sessionId: String,
                 doNotLogConsumerFunnelEvent: Boolean,
@@ -100,7 +102,12 @@ class LinkApiRepositoryTest {
         }
         val linkRepository = linkRepository(consumersApiService)
 
-        val result = linkRepository.lookupConsumer("email", sessionId = SESSION_ID, customerId = null)
+        val result = linkRepository.lookupConsumer(
+            email = "email",
+            linkAuthIntentId = null,
+            sessionId = SESSION_ID,
+            customerId = null
+        )
 
         assertThat(result).isEqualTo(Result.failure<ConsumerSessionLookup>(error))
     }
@@ -112,6 +119,7 @@ class LinkApiRepositoryTest {
 
         val result = linkRepository.mobileLookupConsumer(
             email = TestFactory.EMAIL,
+            linkAuthIntentId = null,
             verificationToken = TestFactory.VERIFICATION_TOKEN,
             appId = TestFactory.APP_ID,
             sessionId = TestFactory.SESSION_ID,
@@ -137,8 +145,9 @@ class LinkApiRepositoryTest {
         val error = RuntimeException("error")
         val consumersApiService = object : FakeConsumersApiService() {
             override suspend fun mobileLookupConsumerSession(
-                email: String,
-                emailSource: EmailSource,
+                email: String?,
+                emailSource: EmailSource?,
+                linkAuthIntentId: String?,
                 requestSurface: String,
                 verificationToken: String,
                 appId: String,
@@ -153,6 +162,7 @@ class LinkApiRepositoryTest {
 
         val result = linkRepository.mobileLookupConsumer(
             email = TestFactory.EMAIL,
+            linkAuthIntentId = null,
             verificationToken = TestFactory.VERIFICATION_TOKEN,
             appId = TestFactory.APP_ID,
             sessionId = TestFactory.SESSION_ID,
@@ -172,6 +182,7 @@ class LinkApiRepositoryTest {
             email = TestFactory.EMAIL,
             phone = TestFactory.CUSTOMER_PHONE,
             country = TestFactory.COUNTRY,
+            countryInferringMethod = TestFactory.COUNTRY_INFERRING_METHOD,
             name = TestFactory.CUSTOMER_NAME,
             consentAction = TestFactory.CONSENT_ACTION
         )
@@ -201,6 +212,7 @@ class LinkApiRepositoryTest {
             email = TestFactory.EMAIL,
             phone = TestFactory.CUSTOMER_PHONE,
             country = TestFactory.COUNTRY,
+            countryInferringMethod = TestFactory.COUNTRY_INFERRING_METHOD,
             name = TestFactory.CUSTOMER_NAME,
             consentAction = TestFactory.CONSENT_ACTION
         )
@@ -217,6 +229,7 @@ class LinkApiRepositoryTest {
             email = TestFactory.EMAIL,
             phoneNumber = TestFactory.CUSTOMER_PHONE,
             country = TestFactory.COUNTRY,
+            countryInferringMethod = TestFactory.COUNTRY_INFERRING_METHOD,
             name = TestFactory.CUSTOMER_NAME,
             consentAction = TestFactory.CONSENT_ACTION,
             verificationToken = TestFactory.VERIFICATION_TOKEN,
@@ -253,6 +266,7 @@ class LinkApiRepositoryTest {
             email = TestFactory.EMAIL,
             phoneNumber = TestFactory.CUSTOMER_PHONE,
             country = TestFactory.COUNTRY,
+            countryInferringMethod = TestFactory.COUNTRY_INFERRING_METHOD,
             name = TestFactory.CUSTOMER_NAME,
             consentAction = TestFactory.CONSENT_ACTION,
             verificationToken = TestFactory.VERIFICATION_TOKEN,

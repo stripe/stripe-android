@@ -190,13 +190,13 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         shippingValuesMap = args.formArgs.shippingDetails?.toIdentifierMap(args.formArgs.billingDetails),
     )
 
-    // AddressElement generates a default address if the initial value is null, so we can't rely
-    // on the value produced by the controller in that case.
-    val address: StateFlow<Address?> = if (defaultAddress == null) {
-        MutableStateFlow(null)
-    } else {
-        addressElement.getFormFieldValueFlow().mapAsStateFlow { formFieldValues ->
-            val rawMap = formFieldValues.associate { it.first to it.second.value }
+    val address: StateFlow<Address?> = addressElement.getFormFieldValueFlow().mapAsStateFlow { formFieldValues ->
+        formFieldValues.takeIf {
+            it.all { value ->
+                value.second.isComplete
+            }
+        }?.let { values ->
+            val rawMap = values.associate { it.first to it.second.value }
             Address.fromFormFieldValues(rawMap)
         }
     }
@@ -493,9 +493,14 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
     }
 
+    fun validate() {
+        setValidationState(true)
+    }
+
     fun reset(error: ResolvableString? = null) {
         hasLaunched = false
         shouldReset = false
+        setValidationState(false)
         screenStateWithoutSaveForFutureUse.value = args.toInitialState(error = error)
         saveForFutureUseElement.controller.onValueChange(true)
     }
@@ -503,6 +508,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     fun onDestroy() {
         if (shouldReset) {
             reset()
+        } else {
+            setValidationState(false)
         }
         collectBankAccountLauncher?.unregister()
         collectBankAccountLauncher = null
@@ -594,6 +601,13 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             prefillDetails = makePrefillDetails(),
             incentiveEligibilitySession = incentiveEligibilitySession,
         )
+    }
+
+    private fun setValidationState(isValidating: Boolean) {
+        nameController.onValidationStateChanged(isValidating)
+        phoneController.onValidationStateChanged(isValidating)
+        emailController.onValidationStateChanged(isValidating)
+        addressElement.onValidationStateChanged(isValidating)
     }
 
     private fun makeElementsSessionContextBillingDetails(): ElementsSessionContext.BillingDetails {
@@ -755,6 +769,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
         return USBankAccountTextBuilder.buildMandateAndMicrodepositsText(
             merchantName = formattedMerchantName(),
+            sellerBusinessName = args.sellerBusinessName,
+            linkSignUpOptInFeatureEnabled = args.linkSignUpOptInFeatureEnabled,
             isVerifyingMicrodeposits = isVerifyWithMicrodeposits,
             isSaveForFutureUseSelected = isSaveForFutureUseSelected,
             isInstantDebits = args.instantDebits,
@@ -821,6 +837,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val setAsDefaultPaymentMethodEnabled: Boolean,
         val setAsDefaultMatchesSaveForFutureUse: Boolean,
         val termsDisplay: PaymentSheet.TermsDisplay,
+        val sellerBusinessName: String?,
+        val linkSignUpOptInFeatureEnabled: Boolean,
     )
 
     private companion object {

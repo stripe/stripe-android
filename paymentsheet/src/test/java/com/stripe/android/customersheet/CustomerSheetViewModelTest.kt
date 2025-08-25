@@ -11,6 +11,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerSheetViewState.AddPaymentMethod
 import com.stripe.android.customersheet.CustomerSheetViewState.SelectPaymentMethod
+import com.stripe.android.customersheet.analytics.CustomerSheetEvent
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.data.CustomerSheetDataResult
 import com.stripe.android.customersheet.data.FakeCustomerSheetIntentDataSource
@@ -1910,6 +1911,25 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
+    fun `on cardscan event, should call event reporter`() = runTest(testDispatcher) {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            eventReporter = eventReporter,
+            integrationType = CustomerSheetIntegration.Type.CustomerAdapter,
+            configuration = CustomerSheetFixtures.MINIMUM_CONFIG,
+        )
+
+        val cardScanEvent = CustomerSheetEvent.CardScanStarted("google_pay")
+        viewModel.handleViewAction(
+            CustomerSheetViewAction.OnCardScanEvent(cardScanEvent)
+        )
+
+        verify(eventReporter).onCardScanEvent(cardScanEvent)
+    }
+
+    @Test
     fun `Payment method form changes on user selection`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
@@ -3258,6 +3278,7 @@ class CustomerSheetViewModelTest {
                     paymentMethod = CARD_PAYMENT_METHOD,
                     shippingValues = null,
                     paymentMethodOptionsParams = null,
+                    hCaptchaToken = null,
                 )
             )
 

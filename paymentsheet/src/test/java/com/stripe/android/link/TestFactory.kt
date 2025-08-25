@@ -59,6 +59,7 @@ internal object TestFactory {
     const val AMOUNT = 100L
     const val CURRENCY = "USD"
     const val COUNTRY = "US"
+    const val COUNTRY_INFERRING_METHOD = "PHONE_NUMBER"
 
     val VERIFIED_SESSION = ConsumerSession.VerificationSession(
         type = ConsumerSession.VerificationSession.SessionType.Sms,
@@ -206,6 +207,7 @@ internal object TestFactory {
     val LINK_CONFIGURATION = LinkConfiguration(
         stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
         merchantName = MERCHANT_NAME,
+        sellerBusinessName = null,
         merchantCountryCode = "",
         merchantLogoUrl = null,
         customerInfo = LINK_CUSTOMER_INFO,
@@ -233,6 +235,7 @@ internal object TestFactory {
         linkSignUpOptInInitialValue = false,
         customerId = null,
         saveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(null),
+        forceSetupFutureUseBehaviorAndNewMandate = false,
     )
 
     val LINK_WALLET_PRIMARY_BUTTON_LABEL = Amount(

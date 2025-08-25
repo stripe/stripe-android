@@ -201,7 +201,7 @@ private object USIDConfig : SimpleTextFieldConfig(
     override val keyboard = KeyboardType.Number
     override val visualTransformation = Last4SSNTransformation
     override fun determineState(input: String): TextFieldState = object : TextFieldState {
-        override fun shouldShowError(hasFocus: Boolean) = !hasFocus && input.length < 4
+        override fun shouldShowError(hasFocus: Boolean, isValidating: Boolean) = !hasFocus && input.length < 4
 
         override fun isValid(): Boolean = input.isNotBlank()
 
@@ -221,7 +221,7 @@ private object BRIDConfig : SimpleTextFieldConfig(
     override val visualTransformation = BRVisualTransformation
     override val optional: Boolean = false
     override fun determineState(input: String): TextFieldState = object : TextFieldState {
-        override fun shouldShowError(hasFocus: Boolean) = !hasFocus && input.length < 11
+        override fun shouldShowError(hasFocus: Boolean, isValidating: Boolean) = !hasFocus && input.length < 11
 
         override fun isValid(): Boolean = input.isNotBlank()
 
@@ -239,7 +239,7 @@ private object SGIDConfig : SimpleTextFieldConfig(
     override val placeHolder = SINGAPORE_ID_PLACEHOLDER
     override val optional: Boolean = false
     override fun determineState(input: String): TextFieldState = object : TextFieldState {
-        override fun shouldShowError(hasFocus: Boolean) = false
+        override fun shouldShowError(hasFocus: Boolean, isValidating: Boolean) = false
 
         override fun isValid(): Boolean = input.isNotBlank()
 
