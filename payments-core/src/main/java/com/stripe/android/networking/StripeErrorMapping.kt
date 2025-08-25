@@ -14,7 +14,6 @@ internal fun StripeError.withLocalizedMessage(context: Context): StripeError {
             code = code,
             declineCode = declineCode,
             context = context,
-            isCardError = this.type == "card_error",
         )
     )
 }
@@ -26,7 +25,6 @@ internal fun PaymentIntent.Error.withLocalizedMessage(context: Context): Payment
             code = code,
             declineCode = declineCode,
             context = context,
-            isCardError = this.type == PaymentIntent.Error.Type.CardError,
         )
     )
 }
@@ -38,13 +36,17 @@ internal fun SetupIntent.Error.withLocalizedMessage(context: Context): SetupInte
             code = code,
             declineCode = declineCode,
             context = context,
-            isCardError = this.type == SetupIntent.Error.Type.CardError
         )
     )
 }
 
 internal fun Context.mapErrorCodeToLocalizedMessage(code: String?): String? {
-    val messageResourceId = when (code) {
+    val messageResourceId = getErrorCodeStringId(code)
+    return messageResourceId?.let { getString(it) }
+}
+
+private fun getErrorCodeStringId(code: String?): Int? {
+    return when (code) {
         "incorrect_number" -> R.string.stripe_invalid_card_number
         "invalid_number" -> R.string.stripe_invalid_card_number
         "invalid_expiry_month" -> UiCoreR.string.stripe_invalid_expiry_month
@@ -59,7 +61,6 @@ internal fun Context.mapErrorCodeToLocalizedMessage(code: String?): String? {
         "generic_decline" -> R.string.stripe_generic_decline
         else -> null
     }
-    return messageResourceId?.let { getString(it) }
 }
 
 private fun getErrorMessage(
@@ -67,15 +68,18 @@ private fun getErrorMessage(
     code: String?,
     declineCode: String?,
     context: Context,
-    isCardError: Boolean,
 ): String {
-    // https://docs.stripe.com/api/errors#errors-message
-    // A human-readable message providing more details about the error.
-    // For card errors, these messages can be shown to your users.
-    return originalMessage.takeIf { isCardError }
-        // https://docs.stripe.com/error-codes
-        ?: context.mapErrorCodeToLocalizedMessage(code)
+    /**
+     * Defer to the error code first. For the error_codes that we localize:
+     * incorrect_number, invalid_number, invalid_expiry_month, invalid_expiry_year, invalid_cvc,
+     * expired_card, incorrect_cvc, card_declined, processing_error, invalid_owner_name,
+     * invalid_bank_account_iban, generic_decline.
+     * there are no discrepancies between the payserver English translation and the local English translation
+     */
+    // https://docs.stripe.com/error-codes
+    return context.mapErrorCodeToLocalizedMessage(code)
         // https://docs.stripe.com/declines/codes
         ?: context.mapErrorCodeToLocalizedMessage(declineCode)
+        ?: originalMessage
         ?: "There was an unexpected error -- try again in a few seconds"
 }

@@ -23,7 +23,8 @@ class StripeErrorMappingTest {
     @Test
     fun `Uses backend message for card error `() {
         runStripeErrorMappingTest(
-            isCardError = true,
+            code = null,
+            declineCode = null,
             context = context
         ) { actualMessage ->
             assertThat(actualMessage).isEqualTo(backendMessage)
@@ -31,10 +32,9 @@ class StripeErrorMappingTest {
     }
 
     @Test
-    fun `Uses localized client error when no backend message`() {
+    fun `Uses localized client error for error code`() {
         runStripeErrorMappingTest(
             message = null,
-            isCardError = true,
             code = "generic_decline",
             context = context,
         ) { actualMessage ->
@@ -42,21 +42,8 @@ class StripeErrorMappingTest {
         }
     }
 
-    @Test
-    fun `Uses localized client error for non card error with valid error code`() {
+    fun `Uses localized client error for valid decline code`() {
         runStripeErrorMappingTest(
-            isCardError = false,
-            code = "generic_decline",
-            context = context,
-        ) { actualMessage ->
-            assertThat(actualMessage).isEqualTo("Your payment method was declined.")
-        }
-    }
-
-    @Test
-    fun `Uses localized client error for non card error with valid decline code`() {
-        runStripeErrorMappingTest(
-            isCardError = false,
             code = null,
             declineCode = "generic_decline",
             context = context,
@@ -66,9 +53,35 @@ class StripeErrorMappingTest {
     }
 
     @Test
-    fun `Uses unexpected error for StripeError`() {
+    fun `Uses original error message with invalid error codes`() {
         runStripeErrorMappingTest(
-            isCardError = false,
+            message = "Backend message",
+            code = "some_code_ive_never_encountered",
+            declineCode = "some_code_ive_never_encountered",
+            context = context,
+        ) { actualMessage ->
+            assertThat(actualMessage)
+                .isEqualTo("Backend message")
+        }
+    }
+
+    @Test
+    fun `Uses original error message`() {
+        runStripeErrorMappingTest(
+            message = "Backend message",
+            code = null,
+            declineCode = null,
+            context = context,
+        ) { actualMessage ->
+            assertThat(actualMessage)
+                .isEqualTo("Backend message")
+        }
+    }
+
+    @Test
+    fun `Falls back to unexpected error message`() {
+        runStripeErrorMappingTest(
+            message = null,
             code = null,
             declineCode = null,
             context = context,
@@ -80,7 +93,6 @@ class StripeErrorMappingTest {
 
     private fun runStripeErrorMappingTest(
         message: String? = backendMessage,
-        isCardError: Boolean,
         code: String? = null,
         declineCode: String? = null,
         context: Context,
@@ -88,14 +100,13 @@ class StripeErrorMappingTest {
     ) {
         val stripeError = StripeError(
             message = message,
-            type = if (isCardError) "card_error" else "api_error",
             code = code,
             declineCode = declineCode
         )
 
         val paymentIntentError = PaymentIntent.Error(
             message = message,
-            type = if (isCardError) PaymentIntent.Error.Type.CardError else PaymentIntent.Error.Type.ApiError,
+            type = PaymentIntent.Error.Type.CardError,
             code = code,
             declineCode = declineCode,
             charge = null,
@@ -106,7 +117,7 @@ class StripeErrorMappingTest {
 
         val setupIntentError = SetupIntent.Error(
             message = message,
-            type = if (isCardError) SetupIntent.Error.Type.CardError else SetupIntent.Error.Type.ApiError,
+            type = SetupIntent.Error.Type.CardError,
             code = code,
             declineCode = declineCode,
             docUrl = null,
