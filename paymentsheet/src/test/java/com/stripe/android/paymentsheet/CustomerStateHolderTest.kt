@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
 import com.stripe.android.model.CardBrand
@@ -175,7 +176,7 @@ internal class CustomerStateHolderTest {
 
     @Test
     fun `canRemove is correct when no payment methods for customer`() = runScenario(
-        isRemoveEnabled = true,
+        paymentMethodRemovePermission = PaymentMethodRemovePermission.Full,
         canRemoveLastPaymentMethod = true,
     ) {
         customerStateHolder.canRemove.test {
@@ -195,7 +196,7 @@ internal class CustomerStateHolderTest {
     @Test
     fun `canRemove is correct when one payment method & can remove last payment method`() =
         runScenario(
-            isRemoveEnabled = true,
+            paymentMethodRemovePermission = PaymentMethodRemovePermission.Full,
             canRemoveLastPaymentMethod = true,
         ) {
             customerStateHolder.canRemove.test {
@@ -216,7 +217,7 @@ internal class CustomerStateHolderTest {
     @Test
     fun `canRemove is correct when one payment method & cannot remove last payment method`() =
         runScenario(
-            isRemoveEnabled = true,
+            paymentMethodRemovePermission = PaymentMethodRemovePermission.Full,
             canRemoveLastPaymentMethod = false,
         ) {
             customerStateHolder.canRemove.test {
@@ -236,7 +237,7 @@ internal class CustomerStateHolderTest {
     @Test
     fun `canRemove is correct when multiple payment methods & can remove last payment method`() =
         runScenario(
-            isRemoveEnabled = true,
+            paymentMethodRemovePermission = PaymentMethodRemovePermission.Full,
             canRemoveLastPaymentMethod = true,
         ) {
             customerStateHolder.canRemove.test {
@@ -255,7 +256,7 @@ internal class CustomerStateHolderTest {
     @Test
     fun `canRemove is correct when multiple payment methods & cannot remove last payment method`() =
         runScenario(
-            isRemoveEnabled = true,
+            paymentMethodRemovePermission = PaymentMethodRemovePermission.Full,
             canRemoveLastPaymentMethod = false,
         ) {
             customerStateHolder.canRemove.test {
@@ -274,7 +275,7 @@ internal class CustomerStateHolderTest {
     @Test
     fun `canRemove is correct when has remove permissions & can remove last payment method`() =
         runScenario(
-            isRemoveEnabled = true,
+            paymentMethodRemovePermission = PaymentMethodRemovePermission.Full,
             canRemoveLastPaymentMethod = true,
         ) {
             customerStateHolder.canRemove.test {
@@ -293,9 +294,28 @@ internal class CustomerStateHolderTest {
         }
 
     @Test
+    fun `canRemove is correct when has partial remove permission & can remove last payment methods`() =
+        runScenario(
+            paymentMethodRemovePermission = PaymentMethodRemovePermission.Partial,
+            canRemoveLastPaymentMethod = true,
+        ) {
+            customerStateHolder.canRemove.test {
+                assertThat(awaitItem()).isFalse()
+
+                customerStateHolder.setCustomerState(
+                    createCustomerState(
+                        paymentMethods = PaymentMethodFactory.cards(1),
+                    )
+                )
+
+                assertThat(awaitItem()).isTrue()
+            }
+        }
+
+    @Test
     fun `canRemove is correct when has remove permissions & canRemoveLastPaymentMethod is false`() =
         runScenario(
-            isRemoveEnabled = true,
+            paymentMethodRemovePermission = PaymentMethodRemovePermission.Full,
             canRemoveLastPaymentMethod = false,
         ) {
             customerStateHolder.canRemove.test {
@@ -312,9 +332,28 @@ internal class CustomerStateHolderTest {
         }
 
     @Test
+    fun `canRemove is correct when has partial remove permission & canRemoveLastPaymentMethod is false`() =
+        runScenario(
+            paymentMethodRemovePermission = PaymentMethodRemovePermission.Partial,
+            canRemoveLastPaymentMethod = false,
+        ) {
+            customerStateHolder.canRemove.test {
+                assertThat(awaitItem()).isFalse()
+
+                customerStateHolder.setCustomerState(
+                    createCustomerState(
+                        paymentMethods = PaymentMethodFactory.cards(1),
+                    )
+                )
+
+                expectNoEvents()
+            }
+        }
+
+    @Test
     fun `canRemove is correct when does not remove permissions & canRemoveLastPaymentMethod is true`() =
         runScenario(
-            isRemoveEnabled = false,
+            paymentMethodRemovePermission = PaymentMethodRemovePermission.None,
             canRemoveLastPaymentMethod = true,
         ) {
             customerStateHolder.canRemove.test {
@@ -331,7 +370,7 @@ internal class CustomerStateHolderTest {
         }
 
     private fun runScenario(
-        isRemoveEnabled: Boolean = true,
+        paymentMethodRemovePermission: PaymentMethodRemovePermission = PaymentMethodRemovePermission.Full,
         canRemoveLastPaymentMethod: Boolean = true,
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         selection: StateFlow<PaymentSelection?> = stateFlowOf(null),
@@ -340,7 +379,7 @@ internal class CustomerStateHolderTest {
         val customerMetadata: StateFlow<CustomerMetadata> = stateFlowOf(
             DEFAULT_CUSTOMER_METADATA.copy(
                 permissions = CustomerMetadata.Permissions(
-                    canRemovePaymentMethods = isRemoveEnabled,
+                    removePaymentMethod = paymentMethodRemovePermission,
                     canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
                     canRemoveDuplicates = true,
                     canUpdateFullPaymentMethodDetails = false,

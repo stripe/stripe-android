@@ -2,6 +2,7 @@ package com.stripe.android.customersheet
 
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.CardBrand
@@ -119,7 +120,7 @@ internal object CustomerSheetFixtures {
             savedSelection = SavedSelection.None,
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             permissions = CustomerPermissions(
-                canRemovePaymentMethods = true,
+                removePaymentMethod = PaymentMethodRemovePermission.Full,
                 canRemoveLastPaymentMethod = true,
                 canUpdateFullPaymentMethodDetails = true,
             ),

@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet.utils
 
+import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetLoader
@@ -31,7 +32,7 @@ internal class FakeCustomerSheetLoader(
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     private val financialConnectionsAvailability: FinancialConnectionsAvailability = Full,
     private val permissions: CustomerPermissions = CustomerPermissions(
-        canRemovePaymentMethods = true,
+        removePaymentMethod = PaymentMethodRemovePermission.Full,
         canRemoveLastPaymentMethod = true,
         canUpdateFullPaymentMethodDetails = true,
     ),
