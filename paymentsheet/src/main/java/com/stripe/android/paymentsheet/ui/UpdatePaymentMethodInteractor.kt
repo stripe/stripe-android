@@ -29,6 +29,7 @@ internal interface UpdatePaymentMethodInteractor {
     val topBarState: PaymentSheetTopBarState
     val canRemove: Boolean
     val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod
+    val removeMessage: ResolvableString?
     val screenTitle: ResolvableString?
     val cardBrandFilter: CardBrandFilter
     val isExpiredCard: Boolean
@@ -110,6 +111,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     override val addressCollectionMode: AddressCollectionMode,
     override val allowedBillingCountries: Set<String>,
     override val canUpdateFullPaymentMethodDetails: Boolean,
+    override val removeMessage: ResolvableString?,
     val isDefaultPaymentMethod: Boolean,
     override val shouldShowSetAsDefaultCheckbox: Boolean,
     private val removeExecutor: PaymentMethodRemoveOperation,

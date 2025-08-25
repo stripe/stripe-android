@@ -737,6 +737,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
                 onUpdateSuccessTurbine.add(Unit)
             },
             editCardDetailsInteractorFactory = editCardDetailsInteractorFactory,
+            removeMessage = null,
             allowedBillingCountries = allowedBillingCountries,
         )
 

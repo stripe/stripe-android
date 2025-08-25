@@ -26,6 +26,7 @@ internal class FakeUpdatePaymentMethodInteractor(
     override val shouldShowSaveButton: Boolean = false,
     override val addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Automatic,
     override val allowedBillingCountries: Set<String> = setOf("US", "CA"),
+    override val removeMessage: ResolvableString? = null,
     private val useDefaultBillingDetails: Boolean = true,
     val viewActionRecorder: ViewActionRecorder<UpdatePaymentMethodInteractor.ViewAction>? = ViewActionRecorder(),
     initialState: UpdatePaymentMethodInteractor.State = UpdatePaymentMethodInteractor.State(

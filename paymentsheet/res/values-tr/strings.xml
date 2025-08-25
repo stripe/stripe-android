@@ -176,6 +176,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_remove_card">Kartı kaldır</string>
   <!-- Title for confirmation alert to remove a card -->
   <string name="stripe_paymentsheet_remove_card_title">Kart kaldırılsın mı?</string>
+  <!-- Description for a confirmation alert indicating to the customer that their payment method will be removed but still available to the merchant for subscriptions -->
+  <string name="stripe_paymentsheet_remove_partial_description">Bu ödeme yöntemi kaldırılacak ancak %s abonelikleri için kullanılabilir kalacaktır.</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">%s yöntemini kaldırın</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
