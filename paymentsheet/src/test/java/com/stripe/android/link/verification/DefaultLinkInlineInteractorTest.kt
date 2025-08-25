@@ -18,6 +18,8 @@ import com.stripe.android.link.verification.VerificationState.Loading
 import com.stripe.android.link.verification.VerificationState.Render2FA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.PassiveCaptchaParams
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.LinkState.LoginState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils.createLinkConfiguration
@@ -89,6 +91,8 @@ class DefaultLinkInlineInteractorTest {
 
             interactor.setup(paymentMethodMetadata = metadata)
 
+            awaitItem()
+
             assertThat(awaitItem().verificationState).isEqualTo(VerificationState.RenderButton)
         }
     }
@@ -106,6 +110,8 @@ class DefaultLinkInlineInteractorTest {
             assertThat(awaitItem().verificationState).isEqualTo(Loading)
 
             interactor.setup(paymentMethodMetadata = metadata)
+
+            awaitItem()
 
             assertThat(awaitItem().verificationState).isEqualTo(VerificationState.RenderButton)
         }
@@ -128,6 +134,8 @@ class DefaultLinkInlineInteractorTest {
 
             interactor.setup(paymentMethodMetadata = metadata)
 
+            awaitItem()
+
             linkAccountManager.awaitStartVerificationCall()
 
             assertThat(awaitItem().verificationState).isInstanceOf(Render2FA::class.java)
@@ -137,7 +145,6 @@ class DefaultLinkInlineInteractorTest {
     @Test
     fun `when otp complete and confirmation succeeds, keeps status as Render2FA and launches Link`() =
         runTest(testDispatcher) {
-            // Setup
             val mockAccount = createLinkAccount(AccountStatus.NeedsVerification)
             linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(mockAccount))
             linkAccountManager.confirmVerificationResult = Result.success(mockAccount)
@@ -146,7 +153,6 @@ class DefaultLinkInlineInteractorTest {
 
             interactor.setup(createPaymentMethodMetadata())
 
-            // Submit OTP
             val otpController = interactor.otpElement.controller
             for (i in 0 until otpController.otpLength) {
                 otpController.onValueChanged(i, "1")
@@ -161,6 +167,38 @@ class DefaultLinkInlineInteractorTest {
                 launchMode = eq(LinkLaunchMode.PaymentMethodSelection(null)),
                 linkExpressMode = any(),
                 passiveCaptchaParams = any()
+            )
+        }
+
+    @Test
+    fun `when otp complete and confirmation succeeds, passes specific passiveCaptchaParams to linkLauncher`() =
+        runTest(testDispatcher) {
+            // Setup
+            val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            val mockAccount = createLinkAccount(AccountStatus.NeedsVerification)
+            linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(mockAccount))
+            linkAccountManager.confirmVerificationResult = Result.success(mockAccount)
+
+            val interactor = createInteractor()
+
+            interactor.setup(createPaymentMethodMetadata(passiveCaptchaParams = passiveCaptchaParams))
+
+            // Submit OTP
+            val otpController = interactor.otpElement.controller
+            for (i in 0 until otpController.otpLength) {
+                otpController.onValueChanged(i, "1")
+            }
+
+            interactor.state.test {
+                assertThat(awaitItem().verificationState).isInstanceOf(Render2FA::class.java)
+            }
+
+            verify(linkLauncher).present(
+                configuration = any(),
+                linkAccountInfo = any(),
+                launchMode = eq(LinkLaunchMode.PaymentMethodSelection(null)),
+                linkExpressMode = any(),
+                passiveCaptchaParams = eq(passiveCaptchaParams)
             )
         }
 
@@ -424,6 +462,25 @@ class DefaultLinkInlineInteractorTest {
     }
 
     @Test
+    fun `setup should add passiveCaptchaParams to state`() = runTest(testDispatcher) {
+        val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+        val metadata = createPaymentMethodMetadata(
+            linkState = null,
+            passiveCaptchaParams = passiveCaptchaParams
+        )
+        val interactor = createInteractor()
+
+        interactor.state.test {
+            val initialState = awaitItem()
+            assertThat(initialState.passiveCaptchaParams).isNull()
+
+            interactor.setup(paymentMethodMetadata = metadata)
+
+            assertThat(awaitItem().passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
+        }
+    }
+
+    @Test
     fun `resendCode should reset OTP controller even when verification fails`() = runTest(testDispatcher) {
         // Setup
         val mockAccount = createLinkAccount(AccountStatus.NeedsVerification)
@@ -484,10 +541,24 @@ class DefaultLinkInlineInteractorTest {
             loginState = LoginState.NeedsVerification,
             configuration = createLinkConfiguration(),
             signupMode = null
-        ),
+        )
     ): PaymentMethodMetadata {
         return PaymentMethodMetadataFactory.create(
             linkState = linkState
+        )
+    }
+
+    private fun createPaymentMethodMetadata(
+        linkState: LinkState? = LinkState(
+            loginState = LoginState.NeedsVerification,
+            configuration = createLinkConfiguration(),
+            signupMode = null
+        ),
+        passiveCaptchaParams: PassiveCaptchaParams?
+    ): PaymentMethodMetadata {
+        return PaymentMethodMetadataFactory.create(
+            linkState = linkState,
+            passiveCaptchaParams = passiveCaptchaParams
         )
     }
 
