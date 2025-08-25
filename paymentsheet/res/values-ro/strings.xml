@@ -208,6 +208,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_total_amount">Total: %s</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Marca cardului nu a fost actualizată. Vă rugăm să încercați din nou.</string>
+  <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
+  <string name="stripe_paynow_confirm_payment">Confirmați plata în banca dvs. sau în aplicația de plată în termen de %s pentru a finaliza achiziția.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Setează ca metodă de plată implicită</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -285,6 +287,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_passthrough_description">Passthrough</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
   <string name="stripe_wallet_pay_another_way">Folosiți altă metodă de plată</string>
+  <!-- Hint shown when selecting a payment method indicating debit cards are preferred. -->
+  <string name="stripe_wallet_prefer_debit_card_hint">Este cel mai probabil ca cardurile de debit să fie acceptate.</string>
   <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
   <string name="stripe_wallet_recollect_cvc_error">Din motive de securitate, vă rugăm să introduceți din nou codul de securitate al cardului dvs.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->

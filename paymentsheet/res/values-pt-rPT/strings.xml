@@ -208,6 +208,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_total_amount">Total: %s</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">A marca do cartão não foi atualizada. Tente novamente.</string>
+  <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
+  <string name="stripe_paynow_confirm_payment">Confirme o pagamento na sua aplicação bancária ou de pagamento dentro de %s para concluir a compra.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Definir como método de pagamento predefinido</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -285,6 +287,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_passthrough_description">Repasse</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
   <string name="stripe_wallet_pay_another_way">Pagar de outra forma</string>
+  <!-- Hint shown when selecting a payment method indicating debit cards are preferred. -->
+  <string name="stripe_wallet_prefer_debit_card_hint">Os cartões de débito são mais prováveis de serem aceites.</string>
   <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
   <string name="stripe_wallet_recollect_cvc_error">Por motivos de segurança, volte a introduzir o código de segurança do seu cartão.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->

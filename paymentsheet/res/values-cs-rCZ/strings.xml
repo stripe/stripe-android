@@ -208,6 +208,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_total_amount">Celkem: %s</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Značka karty nebyla aktualizována. Zkuste to prosím znovu.</string>
+  <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
+  <string name="stripe_paynow_confirm_payment">Pro dokončení nákupu potvrďte platbu ve své bance nebo platební aplikaci do %.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Nastavit jako výchozí způsob platby</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -285,6 +287,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_passthrough_description">Passthrough</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
   <string name="stripe_wallet_pay_another_way">Zaplatit jiným způsobem</string>
+  <!-- Hint shown when selecting a payment method indicating debit cards are preferred. -->
+  <string name="stripe_wallet_prefer_debit_card_hint">Debetní karty budou s největší pravděpodobností akceptovány.</string>
   <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
   <string name="stripe_wallet_recollect_cvc_error">Z bezpečnostních důvodů zadejte znovu bezpečnostní kód své karty.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->

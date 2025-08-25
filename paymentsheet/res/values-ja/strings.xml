@@ -208,6 +208,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_total_amount">合計: %s</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">カードブランドは更新されていません。もう一度お試しください。</string>
+  <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
+  <string name="stripe_paynow_confirm_payment">%s 以内に銀行または決済アプリで支払いを確定し、購入を完了してください。</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">デフォルトの支払い方法として設定する</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -285,6 +287,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_passthrough_description">パススルー</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
   <string name="stripe_wallet_pay_another_way">別の方法で支払う</string>
+  <!-- Hint shown when selecting a payment method indicating debit cards are preferred. -->
+  <string name="stripe_wallet_prefer_debit_card_hint">受け付けられる可能性が最も高いのはデビットカードです。</string>
   <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
   <string name="stripe_wallet_recollect_cvc_error">セキュリティー保持のため、お客様のクレジットカードのセキュリティーコードをもう一度入力してください。</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->

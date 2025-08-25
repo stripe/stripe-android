@@ -114,7 +114,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Indem Sie fortfahren, stimmen Sie zu, dass Ihre Informationen für zukünftige Einkäufe bei %s und <link>Link</link>gespeichert werden. Sie stimmen außerdem den <terms>Konditionen</terms> und den <privacy>Datenschutzrichtlinien</privacy> von Link zu.]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Indem Sie fortfahren, stimmen Sie zu, dass Ihre Informationen für zukünftige Einkäufe bei %s und <link>Link gespeichert werden</link> (siehe <terms>Konditionen</terms> und<privacy>Datenschutz</privacy>).]]></string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Indem Sie fortfahren, stimmen Sie zu, dass Ihre Informationen für zukünftige Einkäufe bei %s und <link>Link</link> gespeichert werden (siehe <terms>Konditionen</terms> und<privacy>Datenschutz</privacy>).]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Indem Sie fortfahren, stimmen Sie zu, dass Ihre Informationen für zukünftige Einkäufe bei %s und <link>Link</link> gemäß den <terms>Konditionen</terms> und dem <privacy>Datenschutz</privacy> von Link gespeichert werden.]]></string>
   <!-- Error message displayed when updating a card fails. -->
@@ -208,6 +208,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_total_amount">Gesamt: %s</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Die Kartenmarke wurde nicht geändert. Bitte versuchen Sie es erneut.</string>
+  <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
+  <string name="stripe_paynow_confirm_payment">Bestätigen Sie die Zahlung in Ihrer Bank- oder Zahlungs-App innerhalb von %s, um den Kauf abzuschließen.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Als Standard-Zahlungsmethode festlegen</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -285,6 +287,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_passthrough_description">Passthrough</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
   <string name="stripe_wallet_pay_another_way">Andere Zahlungsmethode wählen</string>
+  <!-- Hint shown when selecting a payment method indicating debit cards are preferred. -->
+  <string name="stripe_wallet_prefer_debit_card_hint">Debitkarten werden am ehesten akzeptiert.</string>
   <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
   <string name="stripe_wallet_recollect_cvc_error">Geben Sie aus Sicherheitsgründen bitte den Sicherheitscode Ihrer Karte erneut ein.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->

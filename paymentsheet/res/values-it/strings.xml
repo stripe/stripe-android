@@ -113,6 +113,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Continuando, accetti di salvare le tue informazioni per acquisti futuri con %s.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Continuando, accetti di salvare le tue informazioni per acquisti futuri con %s e <link>Link</link>Accetti inoltre i <terms>Termini</terms> e la <privacy>Privacy</privacy> di Link.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Continuando, accetti di salvare le tue informazioni per acquisti futuri con %s e <link>Link</link> (consulta <terms>Termini</terms> e <privacy>Privacy</privacy>).]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Continuando, accetti di salvare le tue informazioni per acquisti futuri con %s e <link>Link</link> secondo i <terms>Termini</terms> e la <privacy>privacy</privacy> di Link.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">La carta non è stata aggiornata. Riprova.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -204,6 +208,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_total_amount">Totale: %s</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Il circuito della carta non è stato aggiornato. Riprova.</string>
+  <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
+  <string name="stripe_paynow_confirm_payment">Per completare l\'acquisto, conferma il pagamento nell\'app della tua banca o nell\'app per i pagamenti entro il giorno %s</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Imposta come metodo di pagamento predefinito</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -266,6 +272,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">Visualizza altro</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Se continui, accetti di autorizzare i pagamenti conformemente a questi <terms>termini</terms>.]]></string>
+  <!-- Text providing link to terms for bank payments -->
+  <string name="stripe_wallet_bank_account_terms_seller">Inviando l\'ordine a %s, accetti di autorizzare i pagamenti in conformità con i presenti termini.</string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Pagamento</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
@@ -279,6 +287,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_passthrough_description">Pass-through</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
   <string name="stripe_wallet_pay_another_way">Paga in altro modo</string>
+  <!-- Hint shown when selecting a payment method indicating debit cards are preferred. -->
+  <string name="stripe_wallet_prefer_debit_card_hint">È molto probabile che vengano accettate le carte di debito.</string>
   <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
   <string name="stripe_wallet_recollect_cvc_error">Per motivi di sicurezza inserisci di nuovo il codice di sicurezza della tua carta.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->
