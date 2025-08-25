@@ -7,9 +7,8 @@ import kotlinx.serialization.Serializable
 /**
  * Represents a response from the `/v1/crypto/internal/onramp_session` endpoint.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
-data class GetOnrampSessionResponse(
+internal data class GetOnrampSessionResponse(
     /**
      * The onramp session's unique identifier.
      * `cos_XXXXXXXXX`

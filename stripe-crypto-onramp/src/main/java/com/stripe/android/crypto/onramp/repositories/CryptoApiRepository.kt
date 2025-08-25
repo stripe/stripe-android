@@ -289,11 +289,6 @@ internal class CryptoApiRepository @Inject constructor(
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/onramp_session`
          */
-        internal val retrievePaymentIntentFromOnrampSessionUrl: String = getApiUrl("crypto/internal/onramp_session")
-
-        /**
-         * @return `https://api.stripe.com/v1/crypto/internal/onramp_session`
-         */
         internal val getOnrampSessionUrl: String = getApiUrl("crypto/internal/onramp_session")
 
         private fun getApiUrl(path: String): String {
