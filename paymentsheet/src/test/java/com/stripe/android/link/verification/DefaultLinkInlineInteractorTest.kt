@@ -476,7 +476,10 @@ class DefaultLinkInlineInteractorTest {
 
             interactor.setup(paymentMethodMetadata = metadata)
 
-            assertThat(awaitItem().passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
+            val secondState = awaitItem()
+            assertThat(secondState.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
+
+            cancelAndConsumeRemainingEvents()
         }
     }
 
