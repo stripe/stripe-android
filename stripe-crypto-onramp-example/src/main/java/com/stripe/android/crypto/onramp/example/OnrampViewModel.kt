@@ -18,6 +18,7 @@ import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
+import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
@@ -54,6 +55,9 @@ internal class OnrampViewModel(
     private val _message = MutableStateFlow<String?>(null)
     val message: StateFlow<String?> = _message.asStateFlow()
 
+    private val _checkoutEvent = MutableStateFlow<CheckoutEvent?>(null)
+    val checkoutEvent: StateFlow<CheckoutEvent?> = _checkoutEvent.asStateFlow()
+
     init {
         viewModelScope.launch {
             @Suppress("MagicNumber", "MaxLineLength")
@@ -89,7 +93,7 @@ internal class OnrampViewModel(
         }
 
         val currentEmail = email.trim()
-        _uiState.update { it.copy(screen = Screen.Loading, email = currentEmail) }
+        _uiState.update { it.copy(screen = Screen.Loading, email = currentEmail, loadingMessage = "Checking user...") }
 
         val result = onrampCoordinator.lookupLinkUser(currentEmail)
         when (result) {
@@ -204,6 +208,51 @@ internal class OnrampViewModel(
         }
     }
 
+    fun onCheckoutResult(result: OnrampCheckoutResult) {
+        when (result) {
+            is OnrampCheckoutResult.Completed -> {
+                _message.value = "Checkout completed successfully!"
+                _uiState.update { it.copy(screen = Screen.AuthenticatedOperations, loadingMessage = null) }
+                // The session will be automatically updated with the latest status from the backend
+            }
+            is OnrampCheckoutResult.Canceled -> {
+                _message.value = "Checkout was canceled by the user"
+                _uiState.update { it.copy(screen = Screen.AuthenticatedOperations, loadingMessage = null) }
+            }
+            is OnrampCheckoutResult.Failed -> {
+                _message.value = "Checkout failed: ${result.error.message}"
+                _uiState.update { it.copy(screen = Screen.AuthenticatedOperations, loadingMessage = null) }
+            }
+        }
+    }
+
+    suspend fun checkoutWithBackend(sessionId: String): String {
+        _uiState.update { it.copy(loadingMessage = "Calling test backend checkout...") }
+
+        val currentState = _uiState.value
+        val authToken = currentState.authToken
+            ?: throw IllegalStateException("No authentication token available")
+
+        val result = testBackendRepository.checkout(
+            cosId = sessionId,
+            authToken = authToken
+        )
+
+        return when (result) {
+            is Result.Success -> {
+                val checkoutResponse = result.value
+                // Update the UI state with the updated session response
+                _uiState.update {
+                    it.copy(onrampSession = checkoutResponse)
+                }
+                checkoutResponse.clientSecret
+            }
+            is Result.Failure -> {
+                throw IllegalStateException("Backend checkout failed: ${result.error.message}")
+            }
+        }
+    }
+
     fun registerNewLinkUser(userInfo: LinkUserInfo) {
         viewModelScope.launch {
             val result = onrampCoordinator.registerLinkUser(userInfo)
@@ -232,7 +281,7 @@ internal class OnrampViewModel(
                 return@launch
             }
 
-            _uiState.update { it.copy(screen = Screen.Loading) }
+            _uiState.update { it.copy(screen = Screen.Loading, loadingMessage = "Registering wallet address...") }
             val result = onrampCoordinator.registerWalletAddress(walletAddress.trim(), network)
             when (result) {
                 is OnrampSetWalletAddressResult.Completed -> {
@@ -254,7 +303,7 @@ internal class OnrampViewModel(
     }
 
     fun collectKycInfo(kycInfo: KycInfo) {
-        _uiState.update { it.copy(screen = Screen.Loading) }
+        _uiState.update { it.copy(screen = Screen.Loading, loadingMessage = "Collecting KYC info...") }
 
         viewModelScope.launch {
             val result = onrampCoordinator.collectKycInfo(kycInfo)
@@ -262,7 +311,7 @@ internal class OnrampViewModel(
             when (result) {
                 is OnrampKYCResult.Completed -> {
                     _message.value = "KYC Collection successful"
-                    _uiState.update { it.copy(screen = Screen.EmailInput) }
+                    _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
                 }
                 is OnrampKYCResult.Failed -> {
                     _message.value = "KYC Collection failed: ${result.error.message}"
@@ -273,7 +322,7 @@ internal class OnrampViewModel(
     }
 
     fun createCryptoPaymentToken() {
-        _uiState.update { it.copy(screen = Screen.Loading) }
+        _uiState.update { it.copy(screen = Screen.Loading, loadingMessage = "Creating crypto payment token...") }
 
         viewModelScope.launch {
             val result = onrampCoordinator.createCryptoPaymentToken()
@@ -296,7 +345,7 @@ internal class OnrampViewModel(
         }
     }
 
-    fun createOnrampSession() {
+    fun createSession() {
         val currentState = _uiState.value
         val paymentToken = currentState.cryptoPaymentToken
         val walletAddress = currentState.walletAddress
@@ -314,7 +363,7 @@ internal class OnrampViewModel(
         )
         if (validParams.not()) return
 
-        _uiState.update { it.copy(screen = Screen.Loading) }
+        _uiState.update { it.copy(screen = Screen.Loading, loadingMessage = "Creating session...") }
 
         viewModelScope.launch {
             val destinationNetwork = network?.value ?: "ethereum"
@@ -331,19 +380,44 @@ internal class OnrampViewModel(
                 is Result.Success -> {
                     val response = result.value
                     _message.value = "Onramp session created successfully! Session ID: ${response.id}"
+
                     _uiState.update {
                         it.copy(
+                            onrampSession = response,
                             screen = Screen.AuthenticatedOperations,
-                            onrampSession = response
+                            loadingMessage = null
                         )
                     }
                 }
                 is Result.Failure -> {
                     _message.value = "Failed to create onramp session: ${result.error.message}"
-                    _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
+                    _uiState.update { it.copy(screen = Screen.AuthenticatedOperations, loadingMessage = null) }
                 }
             }
         }
+    }
+
+    fun performCheckout() {
+        val currentState = _uiState.value
+        val onrampSession = currentState.onrampSession
+            ?: run {
+                _message.value = "No onramp session available. Please create a session first."
+                return
+            }
+
+        val cryptoPaymentToken = currentState.cryptoPaymentToken
+            ?: run {
+                _message.value = "No crypto payment token available. Please create a payment token first."
+                return
+            }
+
+        _uiState.update { it.copy(screen = Screen.Loading, loadingMessage = "Performing checkout...") }
+
+        _checkoutEvent.value = CheckoutEvent(
+            cryptoPaymentToken = cryptoPaymentToken,
+            sessionId = onrampSession.id,
+            sessionClientSecret = onrampSession.clientSecret
+        )
     }
 
     private fun validateOnrampSessionParams(
@@ -369,6 +443,10 @@ internal class OnrampViewModel(
             return false
         }
         return true
+    }
+
+    fun clearCheckoutEvent() {
+        _checkoutEvent.value = null
     }
 
     suspend fun createLinkAuthIntent(oauthScopes: String): String? {
@@ -420,6 +498,7 @@ data class OnrampUiState(
     val network: CryptoNetwork? = null,
     val authToken: String? = null,
     val onrampSession: OnrampSessionResponse? = null,
+    val loadingMessage: String? = null,
 )
 
 enum class Screen {
@@ -429,3 +508,9 @@ enum class Screen {
     Authentication,
     AuthenticatedOperations,
 }
+
+data class CheckoutEvent(
+    val cryptoPaymentToken: String,
+    val sessionId: String,
+    val sessionClientSecret: String
+)

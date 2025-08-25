@@ -1,12 +1,15 @@
 package com.stripe.android.crypto.onramp.example.network
 
-import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.Deserializable
 import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.core.awaitResult
 import com.github.kittinunf.fuel.core.extensions.jsonBody
+import com.github.kittinunf.fuel.core.interceptors.LogRequestAsCurlInterceptor
+import com.github.kittinunf.fuel.core.interceptors.LogRequestInterceptor
+import com.github.kittinunf.fuel.core.interceptors.LogResponseInterceptor
 import com.github.kittinunf.fuel.core.requests.suspendable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -17,6 +20,11 @@ import com.github.kittinunf.result.Result as ApiResult
 class TestBackendRepository {
 
     private val baseUrl = "https://crypto-onramp-example.stripedemos.com"
+
+    private val manager = FuelManager()
+        .addRequestInterceptor(LogRequestInterceptor)
+        .addResponseInterceptor(LogResponseInterceptor)
+        .addRequestInterceptor(LogRequestAsCurlInterceptor)
 
     private val json = Json {
         ignoreUnknownKeys = true
@@ -33,7 +41,7 @@ class TestBackendRepository {
             )
             val requestBody = json.encodeToString(CreateAuthIntentRequest.serializer(), request)
 
-            Fuel.post("$baseUrl/auth_intent/create")
+            manager.post("$baseUrl/auth_intent/create")
                 .jsonBody(requestBody)
                 .suspendable()
                 .awaitModel(CreateAuthIntentResponse.serializer(), json)
@@ -66,7 +74,7 @@ class TestBackendRepository {
 
             val requestBody = json.encodeToString(CreateOnrampSessionRequest.serializer(), request)
 
-            Fuel.post("$baseUrl/create_onramp_session")
+            manager.post("$baseUrl/create_onramp_session")
                 .timeout(SESSION_CREATION_TIMEOUT)
                 .timeoutRead(SESSION_CREATION_TIMEOUT)
                 .header("Authorization", "Bearer $authToken")
@@ -85,7 +93,9 @@ class TestBackendRepository {
             val request = CheckoutRequest(cosId = cosId)
             val requestBody = json.encodeToString(CheckoutRequest.serializer(), request)
 
-            Fuel.post("$baseUrl/checkout")
+            manager.post("$baseUrl/checkout")
+                .timeout(SESSION_CREATION_TIMEOUT)
+                .timeoutRead(SESSION_CREATION_TIMEOUT)
                 .header("Authorization", "Bearer $authToken")
                 .jsonBody(requestBody)
                 .suspendable()

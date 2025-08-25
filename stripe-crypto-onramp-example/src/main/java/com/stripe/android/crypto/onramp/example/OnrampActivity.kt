@@ -1,6 +1,7 @@
 package com.stripe.android.crypto.onramp.example
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -81,12 +82,27 @@ internal class OnrampActivity : ComponentActivity() {
         val callbacks = OnrampCallbacks(
             authenticationCallback = viewModel::onAuthenticationResult,
             identityVerificationCallback = viewModel::onIdentityVerificationResult,
+            checkoutCallback = viewModel::onCheckoutResult,
             selectPaymentCallback = viewModel::onSelectPaymentResult,
             authorizeCallback = viewModel::onAuthorizeResult
         )
 
         onrampPresenter = viewModel.onrampCoordinator
             .createPresenter(this, callbacks)
+
+        // ViewModel notifies UI to launch checkout flow.
+        // Note checkout requires an Activity context since it might launch UI to handle next actions (e.g. 3DS2).
+        lifecycleScope.launch {
+            viewModel.checkoutEvent.collect { event ->
+                event?.let {
+                    onrampPresenter.performCheckout(
+                        onrampSessionId = event.sessionId,
+                        checkoutHandler = { viewModel.checkoutWithBackend(event.sessionId) }
+                    )
+                    viewModel.clearCheckoutEvent()
+                }
+            }
+        }
 
         setContent {
             OnrampExampleTheme {
@@ -129,9 +145,6 @@ internal class OnrampActivity : ComponentActivity() {
                         },
                         onCreatePaymentToken = {
                             viewModel.createCryptoPaymentToken()
-                        },
-                        onCreateOnrampSession = {
-                            viewModel.createOnrampSession()
                         }
                     )
                 }
@@ -151,7 +164,6 @@ internal fun OnrampScreen(
     onStartVerification: () -> Unit,
     onCollectPayment: (type: PaymentMethodType) -> Unit,
     onCreatePaymentToken: () -> Unit,
-    onCreateOnrampSession: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
@@ -165,6 +177,7 @@ internal fun OnrampScreen(
     LaunchedEffect(message) {
         message?.let {
             Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            Log.d("OnrampExample", it)
             viewModel.clearMessage()
         }
     }
@@ -184,7 +197,7 @@ internal fun OnrampScreen(
                 )
             }
             Screen.Loading -> {
-                LoadingScreen()
+                LoadingScreen(message = uiState.loadingMessage ?: "Loading...")
             }
             Screen.Registration -> {
                 RegistrationScreen(
@@ -225,7 +238,8 @@ internal fun OnrampScreen(
                     onStartVerification = onStartVerification,
                     onCollectPayment = onCollectPayment,
                     onCreatePaymentToken = onCreatePaymentToken,
-                    onCreateOnrampSession = onCreateOnrampSession,
+                    onCreateSession = { viewModel.createSession() },
+                    onPerformCheckout = { viewModel.performCheckout() },
                     onBack = {
                         viewModel.onBackToEmailInput()
                     }
@@ -266,7 +280,7 @@ private fun EmailInputScreen(
 }
 
 @Composable
-private fun LoadingScreen() {
+private fun LoadingScreen(message: String = "Loading...") {
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
@@ -276,7 +290,7 @@ private fun LoadingScreen() {
         ) {
             CircularProgressIndicator()
             Spacer(modifier = Modifier.height(16.dp))
-            Text("Loading...")
+            Text(message)
         }
     }
 }
@@ -467,7 +481,8 @@ private fun AuthenticatedOperationsScreen(
     onStartVerification: () -> Unit,
     onCollectPayment: (type: PaymentMethodType) -> Unit,
     onCreatePaymentToken: () -> Unit,
-    onCreateOnrampSession: () -> Unit,
+    onCreateSession: () -> Unit,
+    onPerformCheckout: () -> Unit,
     onBack: () -> Unit
 ) {
     // hardcoded sample ETH wallet
@@ -634,12 +649,15 @@ private fun AuthenticatedOperationsScreen(
 
         var firstName by remember { mutableStateOf("") }
         var lastName by remember { mutableStateOf("") }
+        var ssn by remember { mutableStateOf("000000000") }
 
         KYCScreen(
             firstName = firstName,
             onFirstNameChange = { firstName = it },
             lastName = lastName,
             onLastNameChange = { lastName = it },
+            ssn = ssn,
+            onSsnChange = { ssn = it },
             onCollectKYC = { kycInfo -> onCollectKYC(kycInfo) }
         )
 
@@ -681,12 +699,28 @@ private fun AuthenticatedOperationsScreen(
         }
 
         Button(
-            onClick = onCreateOnrampSession,
+            onClick = onCreateSession,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
         ) {
-            Text("🚀 Checkout - Create Onramp Session")
+            Text("📋 Create Session")
+        }
+
+        Button(
+            onClick = onPerformCheckout,
+            enabled = onrampSessionResponse != null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
+        ) {
+            Text(
+                if (onrampSessionResponse != null) {
+                    "🚀 Checkout"
+                } else {
+                    "🚀 Checkout (Create session first)"
+                }
+            )
         }
 
         TextButton(
@@ -706,6 +740,8 @@ private fun KYCScreen(
     onFirstNameChange: (String) -> Unit,
     lastName: String,
     onLastNameChange: (String) -> Unit,
+    ssn: String,
+    onSsnChange: (String) -> Unit,
     onCollectKYC: (KycInfo) -> Unit
 ) {
     Column {
@@ -717,6 +753,7 @@ private fun KYCScreen(
 
         KYCTextField(firstName, "First Name", onFirstNameChange)
         KYCTextField(lastName, "Last Name", onLastNameChange)
+        KYCTextField(ssn, "SSN", onSsnChange)
 
         Button(
             onClick = {
@@ -724,7 +761,7 @@ private fun KYCScreen(
                     KycInfo(
                         firstName = firstName,
                         lastName = lastName,
-                        idNumber = "123456789",
+                        idNumber = ssn,
                         idType = IdType.SOCIAL_SECURITY_NUMBER,
                         dateOfBirth = DateOfBirth(1, month = 1, year = 1990),
                         address = PaymentSheet.Address(
@@ -732,7 +769,7 @@ private fun KYCScreen(
                             country = "US",
                             line1 = "1234 Fake Street",
                             postalCode = "10108",
-                            state = "New York"
+                            state = "NY"
                         ),
                         nationalities = null,
                         birthCountry = "US",

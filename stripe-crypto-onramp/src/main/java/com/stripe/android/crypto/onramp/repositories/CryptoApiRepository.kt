@@ -19,11 +19,14 @@ import com.stripe.android.crypto.onramp.model.CryptoCustomerRequestParams
 import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.CryptoWalletRequestParams
+import com.stripe.android.crypto.onramp.model.GetOnrampSessionResponse
 import com.stripe.android.crypto.onramp.model.GetPlatformSettingsResponse
 import com.stripe.android.crypto.onramp.model.KycCollectionRequest
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationRequest
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.networking.StripeRepository
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
@@ -41,6 +44,7 @@ import javax.inject.Singleton
 @Singleton
 internal class CryptoApiRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
+    private val stripeRepository: StripeRepository,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
     apiVersion: String,
@@ -52,15 +56,6 @@ internal class CryptoApiRepository @Inject constructor(
         apiVersion = apiVersion,
         sdkVersion = sdkVersion
     )
-
-    private val json by lazy {
-        Json {
-            ignoreUnknownKeys = true
-            isLenient = true
-            encodeDefaults = true
-            explicitNulls = false
-        }
-    }
 
     /**
      * Grants the provided session merchant permissions.
@@ -167,6 +162,55 @@ internal class CryptoApiRepository @Inject constructor(
         )
     }
 
+    /**
+     * Retrieves an onramp session.
+     *
+     * @param sessionId The onramp session identifier.
+     * @param sessionClientSecret The onramp session client secret.
+     * @return The onramp session details.
+     */
+    suspend fun getOnrampSession(
+        sessionId: String,
+        sessionClientSecret: String
+    ): Result<GetOnrampSessionResponse> {
+        val params = mapOf(
+            "crypto_onramp_session" to sessionId,
+            "client_secret" to sessionClientSecret
+        )
+
+        val request = apiRequestFactory.createGet(
+            url = getOnrampSessionUrl,
+            options = buildRequestOptions(),
+            params = params,
+        )
+
+        return execute(
+            request = request,
+            responseSerializer = GetOnrampSessionResponse.serializer()
+        )
+    }
+
+    /**
+     * Retrieves a PaymentIntent using its client secret.
+     *
+     * @param clientSecret The PaymentIntent client secret.
+     * @param publishableKey The special publishable key from platform settings to use for this request.
+     * @return The PaymentIntent.
+     */
+    suspend fun retrievePaymentIntent(
+        clientSecret: String,
+        publishableKey: String
+    ): Result<PaymentIntent> {
+        return stripeRepository.retrievePaymentIntent(
+            clientSecret = clientSecret,
+            expandFields = listOf("payment_method"),
+            options = ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountIdProvider(),
+            )
+        )
+    }
+
     private fun buildRequestOptions(): ApiRequest.Options {
         return ApiRequest.Options(
             apiKey = publishableKeyProvider(),
@@ -242,6 +286,11 @@ internal class CryptoApiRepository @Inject constructor(
          * @return `https://api.stripe.com/v1/crypto/internal/payment_token`
          */
         internal val paymentToken: String = getApiUrl("crypto/internal/payment_token")
+
+        /**
+         * @return `https://api.stripe.com/v1/crypto/internal/onramp_session`
+         */
+        internal val getOnrampSessionUrl: String = getApiUrl("crypto/internal/onramp_session")
 
         private fun getApiUrl(path: String): String {
             return "${ApiRequest.API_HOST}/v1/$path"

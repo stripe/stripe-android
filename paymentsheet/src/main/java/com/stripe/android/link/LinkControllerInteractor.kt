@@ -80,15 +80,15 @@ internal class LinkControllerInteractor @Inject constructor(
     private val _state = MutableStateFlow(State())
 
     private val _presentPaymentMethodsResultFlow =
-        MutableSharedFlow<LinkController.PresentPaymentMethodsResult>(replay = 1)
+        MutableSharedFlow<LinkController.PresentPaymentMethodsResult>(extraBufferCapacity = 1)
     val presentPaymentMethodsResultFlow = _presentPaymentMethodsResultFlow.asSharedFlow()
 
     private val _authenticationResultFlow =
-        MutableSharedFlow<LinkController.AuthenticationResult>(replay = 1)
+        MutableSharedFlow<LinkController.AuthenticationResult>(extraBufferCapacity = 1)
     val authenticationResultFlow = _authenticationResultFlow.asSharedFlow()
 
     private val _authorizeResultFlow =
-        MutableSharedFlow<LinkController.AuthorizeResult>(replay = 1)
+        MutableSharedFlow<LinkController.AuthorizeResult>(extraBufferCapacity = 1)
     val authorizeResultFlow = _authorizeResultFlow.asSharedFlow()
 
     fun state(context: Context): StateFlow<LinkController.State> {
