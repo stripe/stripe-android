@@ -463,18 +463,32 @@ internal class OnrampInteractor @Inject constructor(
      * Returns null if fetch fails or key is null.
      */
     private suspend fun getOrFetchPlatformKey(): String? {
-        _state.value.platformPublishableKey?.let { return it }
+        val currentConsumerSecret = consumerSessionClientSecret()
+        val cachedKey = _state.value.platformKeyCache
 
-        // Fetch platform settings if not available
-        val platformSettingsResult = cryptoApiRepository.getPlatformSettings()
+        // Check if we have a valid cached key for the current consumer session
+        if (cachedKey != null && cachedKey.consumerSessionClientSecret == currentConsumerSecret) {
+            return cachedKey.publishableKey
+        }
+
+        // Fetch platform settings if not available or consumer session changed
+        val platformSettingsResult = cryptoApiRepository.getPlatformSettings(
+            consumerSessionClientSecret = currentConsumerSecret
+        )
         if (platformSettingsResult.isFailure) {
             return null
         }
 
         val platformPublishableKey = platformSettingsResult.getOrNull()?.publishableKey
         if (platformPublishableKey != null) {
+            // Cache the key with the current consumer session
             _state.update {
-                it.copy(platformPublishableKey = platformPublishableKey)
+                it.copy(
+                    platformKeyCache = PlatformKeyCache(
+                        publishableKey = platformPublishableKey,
+                        consumerSessionClientSecret = currentConsumerSecret
+                    )
+                )
             }
         }
         return platformPublishableKey
@@ -485,5 +499,13 @@ internal data class OnrampState(
     val configuration: OnrampConfiguration? = null,
     val linkControllerState: LinkController.State? = null,
     val checkoutState: CheckoutState? = null,
-    val platformPublishableKey: String? = null,
+    val platformKeyCache: PlatformKeyCache? = null,
+)
+
+/**
+ * Caches the platform publishable key along with the consumer session it was fetched for.
+ */
+internal data class PlatformKeyCache(
+    val publishableKey: String,
+    val consumerSessionClientSecret: String?
 )

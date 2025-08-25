@@ -20,6 +20,7 @@ import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.CryptoWalletRequestParams
 import com.stripe.android.crypto.onramp.model.GetOnrampSessionResponse
+import com.stripe.android.crypto.onramp.model.GetPlatformSettingsRequest
 import com.stripe.android.crypto.onramp.model.GetPlatformSettingsResponse
 import com.stripe.android.crypto.onramp.model.KycCollectionRequest
 import com.stripe.android.crypto.onramp.model.KycInfo
@@ -136,13 +137,20 @@ internal class CryptoApiRepository @Inject constructor(
         )
     }
 
-    suspend fun getPlatformSettings(): Result<GetPlatformSettingsResponse> {
-        val request = apiRequestFactory.createGet(
-            url = platformSettings,
-            options = buildRequestOptions(),
+    suspend fun getPlatformSettings(
+        consumerSessionClientSecret: String? = null,
+        countryHint: String? = null
+    ): Result<GetPlatformSettingsResponse> {
+        val requestParams = GetPlatformSettingsRequest(
+            credentials = consumerSessionClientSecret?.let {
+                GetPlatformSettingsRequest.Credentials(it)
+            },
+            countryHint = countryHint
         )
+
         return execute(
-            request = request,
+            url = platformSettings,
+            paramsJson = Json.encodeToJsonElement(requestParams).jsonObject,
             responseSerializer = GetPlatformSettingsResponse.serializer()
         )
     }
