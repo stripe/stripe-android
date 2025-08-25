@@ -57,6 +57,7 @@ internal class UpdateCardScreenshotTest(
                         }
                     },
                     state = testCase.state,
+                    appearance = null,
                     onUpdateClicked = {},
                     onDisabledButtonClicked = {},
                 )

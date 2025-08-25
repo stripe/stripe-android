@@ -1,6 +1,7 @@
 package com.stripe.android.link.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Surface
@@ -12,6 +13,7 @@ import androidx.navigation.compose.composable
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAction
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.LinkScreen.Companion.EXTRA_PAYMENT_DETAILS
 import com.stripe.android.link.LinkScreen.Companion.billingDetailsUpdateFlow
@@ -21,6 +23,7 @@ import com.stripe.android.link.NoPaymentDetailsFoundException
 import com.stripe.android.link.linkViewModel
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.LinkAppearanceTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.ui.oauth.OAuthConsentScreen
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodScreen
@@ -41,6 +44,7 @@ internal fun LinkContent(
     modifier: Modifier,
     navController: NavHostController,
     appBarState: LinkAppBarState,
+    appearance: LinkAppearance?,
     bottomSheetContent: BottomSheetContent?,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: suspend () -> Unit,
@@ -59,7 +63,7 @@ internal fun LinkContent(
     DefaultLinkTheme {
         Surface(
             modifier = modifier,
-            color = LinkTheme.colors.surfacePrimary,
+            color = appearance?.surfacePrimary(isSystemInDarkTheme()) ?: LinkTheme.colors.surfacePrimary
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 BackHandler {
@@ -72,14 +76,17 @@ internal fun LinkContent(
                     }
                 }
 
-                LinkAppBar(
-                    state = appBarState,
-                    onBackPressed = onBackPressed,
-                )
+                LinkAppearanceTheme(appearance) {
+                    LinkAppBar(
+                        state = appBarState,
+                        onBackPressed = onBackPressed,
+                    )
+                }
 
                 Screens(
                     initialDestination = initialDestination,
                     navController = navController,
+                    appearance = appearance,
                     goBack = goBack,
                     moveToWeb = moveToWeb,
                     navigateAndClearStack = { screen ->
@@ -104,9 +111,11 @@ internal fun LinkContent(
 
 @SuppressWarnings("LongMethod")
 @Composable
+@Suppress("LongMethod")
 private fun Screens(
     navController: NavHostController,
     getLinkAccount: () -> LinkAccount?,
+    appearance: LinkAppearance?,
     goBack: () -> Unit,
     navigateAndClearStack: (route: LinkScreen) -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit,
@@ -143,6 +152,7 @@ private fun Screens(
                 ?: return@composable dismissWithResult(noPaymentDetailsResult())
             UpdateCardRoute(
                 paymentDetailsId = paymentDetailsId,
+                appearance = appearance,
                 billingDetailsUpdateFlow = backStackEntry.billingDetailsUpdateFlow(),
                 dismissWithResult = dismissWithResult
             )
@@ -168,6 +178,7 @@ private fun Screens(
 
             WalletRoute(
                 linkAccount = linkAccount,
+                appearance = appearance,
                 navigateAndClearStack = navigateAndClearStack,
                 showBottomSheetContent = showBottomSheetContent,
                 hideBottomSheetContent = hideBottomSheetContent,
@@ -180,6 +191,7 @@ private fun Screens(
             val linkAccount = getLinkAccount() ?: return@composable dismissWithResult(noLinkAccountResult())
             PaymentMethodRoute(
                 linkAccount = linkAccount,
+                appearance = appearance,
                 dismissWithResult = dismissWithResult,
             )
         }
@@ -240,6 +252,7 @@ private fun VerificationRoute(
 @Composable
 private fun UpdateCardRoute(
     paymentDetailsId: String,
+    appearance: LinkAppearance?,
     billingDetailsUpdateFlow: BillingDetailsUpdateFlow?,
     dismissWithResult: (LinkActivityResult) -> Unit
 ) {
@@ -253,12 +266,14 @@ private fun UpdateCardRoute(
     }
     UpdateCardScreen(
         viewModel = viewModel,
+        appearance = appearance
     )
 }
 
 @Composable
 private fun PaymentMethodRoute(
     linkAccount: LinkAccount,
+    appearance: LinkAppearance?,
     dismissWithResult: (LinkActivityResult) -> Unit,
 ) {
     val viewModel: PaymentMethodViewModel = linkViewModel { parentComponent ->
@@ -269,6 +284,7 @@ private fun PaymentMethodRoute(
         )
     }
     PaymentMethodScreen(
+        appearance = appearance,
         viewModel = viewModel,
     )
 }
@@ -276,6 +292,7 @@ private fun PaymentMethodRoute(
 @Composable
 private fun WalletRoute(
     linkAccount: LinkAccount,
+    appearance: LinkAppearance?,
     navigateAndClearStack: (route: LinkScreen) -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
@@ -292,6 +309,7 @@ private fun WalletRoute(
     }
     WalletScreen(
         viewModel = viewModel,
+        appearance = appearance,
         showBottomSheetContent = showBottomSheetContent,
         hideBottomSheetContent = hideBottomSheetContent,
         onLogoutClicked = onLogoutClicked,

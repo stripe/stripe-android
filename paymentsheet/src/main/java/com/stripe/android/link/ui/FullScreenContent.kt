@@ -13,6 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.link.LinkAction
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
@@ -27,8 +28,10 @@ import com.stripe.android.uicore.navigation.rememberKeyboardController
 import kotlinx.coroutines.flow.SharedFlow
 
 @Composable
+@Suppress("LongMethod")
 internal fun FullScreenContent(
     modifier: Modifier,
+    appearance: LinkAppearance?,
     bottomSheetState: StripeBottomSheetState,
     initialDestination: LinkScreen,
     appBarState: LinkAppBarState,
@@ -78,6 +81,7 @@ internal fun FullScreenContent(
                 modifier = modifier,
                 initialDestination = initialDestination,
                 navController = navController,
+                appearance = appearance,
                 appBarState = appBarState,
                 onBackPressed = onBackPressed,
                 moveToWeb = moveToWeb,

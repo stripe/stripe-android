@@ -85,6 +85,7 @@ internal fun LinkScreenContentBody(
             FullScreenContent(
                 modifier = Modifier
                     .testTag(FULL_SCREEN_CONTENT_TAG),
+                appearance = appearance,
                 bottomSheetState = bottomSheetState,
                 initialDestination = screenState.initialDestination,
                 onBackPressed = onBackPressed,

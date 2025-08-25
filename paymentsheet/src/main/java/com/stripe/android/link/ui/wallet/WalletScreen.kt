@@ -55,7 +55,9 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataContract
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
+import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.theme.HorizontalPadding
+import com.stripe.android.link.theme.LinkAppearanceTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.BottomSheetContent
@@ -90,6 +92,7 @@ import com.stripe.android.uicore.R as StripeUiCoreR
 @Composable
 internal fun WalletScreen(
     viewModel: WalletViewModel,
+    appearance: LinkAppearance?,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: suspend () -> Unit,
     onLogoutClicked: () -> Unit,
@@ -116,28 +119,33 @@ internal fun WalletScreen(
         }
     }
 
-    WalletBody(
-        state = state,
-        expiryDateController = viewModel.expiryDateController,
-        cvcController = viewModel.cvcController,
-        onItemSelected = viewModel::onItemSelected,
-        onExpandedChanged = viewModel::onExpandedChanged,
-        onPrimaryButtonClick = viewModel::onPrimaryButtonClicked,
-        onPayAnotherWayClicked = viewModel::onPayAnotherWayClicked,
-        onRemoveClicked = viewModel::onRemoveClicked,
-        onUpdateClicked = viewModel::onUpdateClicked,
-        onLogoutClicked = onLogoutClicked,
-        onSetDefaultClicked = viewModel::onSetDefaultClicked,
-        showBottomSheetContent = showBottomSheetContent,
-        hideBottomSheetContent = hideBottomSheetContent,
-        onAddPaymentMethodOptionClicked = viewModel::onAddPaymentMethodOptionClicked,
-        onDismissAlert = viewModel::onDismissAlert
-    )
+    LinkAppearanceTheme(appearance) {
+        WalletBody(
+            state = state,
+            appearance = appearance,
+            expiryDateController = viewModel.expiryDateController,
+            cvcController = viewModel.cvcController,
+            onItemSelected = viewModel::onItemSelected,
+            onExpandedChanged = viewModel::onExpandedChanged,
+            onPrimaryButtonClick = viewModel::onPrimaryButtonClicked,
+            onPayAnotherWayClicked = viewModel::onPayAnotherWayClicked,
+            onRemoveClicked = viewModel::onRemoveClicked,
+            onUpdateClicked = viewModel::onUpdateClicked,
+            onLogoutClicked = onLogoutClicked,
+            onSetDefaultClicked = viewModel::onSetDefaultClicked,
+            showBottomSheetContent = showBottomSheetContent,
+            hideBottomSheetContent = hideBottomSheetContent,
+            onAddPaymentMethodOptionClicked = viewModel::onAddPaymentMethodOptionClicked,
+            onDismissAlert = viewModel::onDismissAlert
+        )
+    }
 }
 
 @Composable
+@Suppress("LongMethod")
 internal fun WalletBody(
     state: WalletUiState,
+    appearance: LinkAppearance?,
     expiryDateController: TextFieldController,
     cvcController: CvcController,
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
@@ -179,6 +187,7 @@ internal fun WalletBody(
             ScrollableTopLevelColumn {
                 PaymentDetailsSection(
                     modifier = Modifier,
+                    appearance = appearance,
                     state = state,
                     isExpanded = state.isExpanded,
                     expiryDateController = expiryDateController,
@@ -195,16 +204,18 @@ internal fun WalletBody(
                             onAddPaymentMethodOptionClicked(state.addPaymentMethodOptions[0])
                         } else {
                             showBottomSheetContent {
-                                AddPaymentMethodMenu(
-                                    modifier = Modifier.testTag(WALLET_SCREEN_ADD_PAYMENT_METHOD_MENU),
-                                    options = state.addPaymentMethodOptions,
-                                    onOptionClick = { option ->
-                                        onAddPaymentMethodOptionClicked(option)
-                                        coroutineScope.launch {
-                                            hideBottomSheetContent()
-                                        }
-                                    },
-                                )
+                                LinkAppearanceTheme(appearance) {
+                                    AddPaymentMethodMenu(
+                                        modifier = Modifier.testTag(WALLET_SCREEN_ADD_PAYMENT_METHOD_MENU),
+                                        options = state.addPaymentMethodOptions,
+                                        onOptionClick = { option ->
+                                            onAddPaymentMethodOptionClicked(option)
+                                            coroutineScope.launch {
+                                                hideBottomSheetContent()
+                                            }
+                                        },
+                                    )
+                                }
                             }
                         }
                     },
@@ -226,6 +237,7 @@ internal fun WalletBody(
 @Composable
 private fun PaymentDetailsSection(
     modifier: Modifier,
+    appearance: LinkAppearance?,
     state: WalletUiState,
     isExpanded: Boolean,
     expiryDateController: TextFieldController,
@@ -245,6 +257,7 @@ private fun PaymentDetailsSection(
     ) {
         PaymentMethodSection(
             state = state,
+            appearance = appearance,
             isExpanded = isExpanded,
             onItemSelected = onItemSelected,
             onExpandedChanged = onExpandedChanged,
@@ -274,7 +287,7 @@ private fun PaymentDetailsSection(
         state.selectedCard?.let { selectedCard ->
             if (selectedCard.requiresCardDetailsRecollection) {
                 Spacer(modifier = Modifier.height(16.dp))
-                StripeThemeForLink {
+                StripeThemeForLink(appearance = appearance) {
                     CardDetailsRecollectionForm(
                         paymentDetails = selectedCard,
                         expiryDateController = expiryDateController,
@@ -366,8 +379,10 @@ private fun ActionSection(
 }
 
 @Composable
+@Suppress("LongMethod")
 private fun PaymentMethodSection(
     state: WalletUiState,
+    appearance: LinkAppearance?,
     isExpanded: Boolean,
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onExpandedChanged: (Boolean) -> Unit,
@@ -403,28 +418,30 @@ private fun PaymentMethodSection(
                 onItemSelected = onItemSelected,
                 onMenuButtonClick = {
                     showBottomSheetContent {
-                        WalletPaymentMethodMenu(
-                            modifier = Modifier.testTag(WALLET_SCREEN_MENU_SHEET_TAG),
-                            paymentDetails = it,
-                            onSetDefaultClick = {
-                                coroutineScope.launch {
-                                    hideBottomSheetContent()
-                                    onSetDefaultClicked(it)
+                        LinkAppearanceTheme(appearance) {
+                            WalletPaymentMethodMenu(
+                                modifier = Modifier.testTag(WALLET_SCREEN_MENU_SHEET_TAG),
+                                paymentDetails = it,
+                                onSetDefaultClick = {
+                                    coroutineScope.launch {
+                                        hideBottomSheetContent()
+                                        onSetDefaultClicked(it)
+                                    }
+                                },
+                                onRemoveClick = {
+                                    coroutineScope.launch {
+                                        hideBottomSheetContent()
+                                        onRemoveClicked(it)
+                                    }
+                                },
+                                onUpdateClick = {
+                                    coroutineScope.launch {
+                                        hideBottomSheetContent()
+                                        onUpdateClicked(it)
+                                    }
                                 }
-                            },
-                            onRemoveClick = {
-                                coroutineScope.launch {
-                                    hideBottomSheetContent()
-                                    onRemoveClicked(it)
-                                }
-                            },
-                            onUpdateClick = {
-                                coroutineScope.launch {
-                                    hideBottomSheetContent()
-                                    onUpdateClicked(it)
-                                }
-                            }
-                        )
+                            )
+                        }
                     }
                 },
                 onAddNewPaymentMethodClick = onAddNewPaymentMethodClicked,

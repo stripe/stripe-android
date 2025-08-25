@@ -81,6 +81,7 @@ internal class PaymentMethodScreenScreenshotTest {
                         onFormFieldValuesChanged = {},
                         onPayClicked = {},
                         onDisabledPayClicked = {},
+                        appearance = null,
                     )
                 }
             }

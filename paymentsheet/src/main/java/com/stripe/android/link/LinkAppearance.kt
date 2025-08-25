@@ -43,12 +43,20 @@ class LinkAppearance(
         val primary: Color,
         val borderSelected: Color
     ) : Parcelable {
-        internal companion object {
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        companion object {
             fun default(isDark: Boolean) = Colors(
                 primary = LinkThemeConfig.colors(isDark = isDark).buttonPrimary,
                 borderSelected = LinkThemeConfig.colors(isDark = isDark).borderSelected,
             )
         }
+    }
+
+    fun surfacePrimary(isSystemDark: Boolean): Color {
+        return LinkThemeConfig.colors(
+            isDark = style == Style.ALWAYS_DARK || (style == Style.AUTOMATIC && isSystemDark)
+        ).surfacePrimary
     }
 
     /**
