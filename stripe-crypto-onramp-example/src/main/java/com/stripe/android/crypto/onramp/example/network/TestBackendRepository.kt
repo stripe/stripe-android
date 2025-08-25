@@ -23,10 +23,14 @@ class TestBackendRepository {
     }
 
     suspend fun createAuthIntent(
-        email: String
+        email: String,
+        oauthScopes: String,
     ): ApiResult<CreateAuthIntentResponse, FuelError> {
         return withContext(Dispatchers.IO) {
-            val request = CreateAuthIntentRequest(email = email)
+            val request = CreateAuthIntentRequest(
+                email = email,
+                oauthScopes = oauthScopes,
+            )
             val requestBody = json.encodeToString(CreateAuthIntentRequest.serializer(), request)
 
             Fuel.post("$baseUrl/auth_intent/create")

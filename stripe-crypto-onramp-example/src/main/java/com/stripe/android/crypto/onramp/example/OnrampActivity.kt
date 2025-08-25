@@ -3,6 +3,7 @@ package com.stripe.android.crypto.onramp.example
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -46,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
@@ -59,6 +61,7 @@ import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.model.PaymentOptionDisplayData
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.image.rememberDrawablePainter
+import kotlinx.coroutines.launch
 
 internal class OnrampActivity : ComponentActivity() {
 
@@ -68,6 +71,7 @@ internal class OnrampActivity : ComponentActivity() {
         OnrampViewModel.Factory()
     }
 
+    @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
@@ -77,7 +81,8 @@ internal class OnrampActivity : ComponentActivity() {
         val callbacks = OnrampCallbacks(
             authenticationCallback = viewModel::onAuthenticationResult,
             identityVerificationCallback = viewModel::onIdentityVerificationResult,
-            selectPaymentCallback = viewModel::onSelectPaymentResult
+            selectPaymentCallback = viewModel::onSelectPaymentResult,
+            authorizeCallback = viewModel::onAuthorizeResult
         )
 
         onrampPresenter = viewModel.onrampCoordinator
@@ -96,8 +101,22 @@ internal class OnrampActivity : ComponentActivity() {
                     OnrampScreen(
                         modifier = Modifier.padding(innerPadding),
                         viewModel = viewModel,
-                        onAuthenticateUser = {
-                            onrampPresenter.presentForVerification()
+                        onAuthenticateUser = { oauthScopes ->
+                            if (oauthScopes.isNullOrBlank()) {
+                                onrampPresenter.presentForVerification()
+                            } else {
+                                // Not the cleanest approach, but good enough for an example.
+                                lifecycleScope.launch {
+                                    val linkAuthIntentId = viewModel.createLinkAuthIntent(oauthScopes)
+                                        ?: return@launch
+                                    viewModel.onAuthorize(linkAuthIntentId)
+                                    onrampPresenter.authorize(linkAuthIntentId)
+                                }
+                            }
+                        },
+                        onAuthorize = { linkAuthIntentId ->
+                            viewModel.onAuthorize(linkAuthIntentId)
+                            onrampPresenter.authorize(linkAuthIntentId)
                         },
                         onRegisterWalletAddress = { address, network ->
                             viewModel.registerWalletAddress(address, network)
@@ -126,7 +145,8 @@ internal class OnrampActivity : ComponentActivity() {
 internal fun OnrampScreen(
     viewModel: OnrampViewModel,
     modifier: Modifier = Modifier,
-    onAuthenticateUser: () -> Unit,
+    onAuthenticateUser: (oauthScopes: String?) -> Unit,
+    onAuthorize: (linkAuthIntentId: String) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onStartVerification: () -> Unit,
     onCollectPayment: (type: PaymentMethodType) -> Unit,
@@ -136,6 +156,10 @@ internal fun OnrampScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
     val context = LocalContext.current
+
+    BackHandler(enabled = uiState.screen != Screen.EmailInput) {
+        viewModel.onBackToEmailInput()
+    }
 
     // Show toast messages
     LaunchedEffect(message) {
@@ -155,7 +179,8 @@ internal fun OnrampScreen(
                 EmailInputScreen(
                     onCheckUser = { email ->
                         viewModel.checkIfLinkUser(email)
-                    }
+                    },
+                    onAuthorize = onAuthorize
                 )
             }
             Screen.Loading -> {
@@ -191,8 +216,10 @@ internal fun OnrampScreen(
                 AuthenticatedOperationsScreen(
                     email = uiState.email,
                     customerId = uiState.customerId ?: "",
+                    consentedLinkAuthIntentIds = uiState.consentedLinkAuthIntentIds,
                     onrampSessionResponse = uiState.onrampSession,
                     selectedPaymentData = uiState.selectedPaymentData,
+                    onAuthenticate = onAuthenticateUser,
                     onRegisterWalletAddress = onRegisterWalletAddress,
                     onCollectKYC = { kycInfo -> viewModel.collectKycInfo(kycInfo) },
                     onStartVerification = onStartVerification,
@@ -210,7 +237,8 @@ internal fun OnrampScreen(
 
 @Composable
 private fun EmailInputScreen(
-    onCheckUser: (String) -> Unit
+    onCheckUser: (String) -> Unit,
+    onAuthorize: (String) -> Unit
 ) {
     var email by remember { mutableStateOf("") }
 
@@ -230,6 +258,10 @@ private fun EmailInputScreen(
         ) {
             Text("Check if Link User Exists")
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        AuthorizeSection(onAuthorize = onAuthorize)
     }
 }
 
@@ -363,7 +395,7 @@ private fun RegistrationButtons(
 @Composable
 private fun AuthenticationScreen(
     email: String,
-    onAuthenticate: () -> Unit,
+    onAuthenticate: (oauthScopes: String?) -> Unit,
     onBack: () -> Unit
 ) {
     Column {
@@ -383,14 +415,9 @@ private fun AuthenticationScreen(
                 .padding(bottom = 24.dp)
         )
 
-        Button(
-            onClick = onAuthenticate,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 24.dp)
-        ) {
-            Text("Authenticate")
-        }
+        AuthenticateSection(onAuthenticate = onAuthenticate)
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         TextButton(
             onClick = onBack,
@@ -402,12 +429,39 @@ private fun AuthenticationScreen(
 }
 
 @Composable
+fun AuthenticateSection(
+    onAuthenticate: (oauthScopes: String?) -> Unit,
+) {
+    var oauthScopes by remember { mutableStateOf("") }
+    OutlinedTextField(
+        value = oauthScopes,
+        onValueChange = { oauthScopes = it },
+        label = { Text("Request OAuth scopes (optional)") },
+        placeholder = { Text("userinfo:read,kyc:share") },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp)
+    )
+
+    Button(
+        onClick = { onAuthenticate(oauthScopes) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 24.dp)
+    ) {
+        Text("Authenticate")
+    }
+}
+
+@Composable
 @Suppress("LongMethod")
 private fun AuthenticatedOperationsScreen(
     email: String,
     customerId: String,
+    consentedLinkAuthIntentIds: List<String>,
     onrampSessionResponse: OnrampSessionResponse?,
     selectedPaymentData: PaymentOptionDisplayData?,
+    onAuthenticate: (oauthScopes: String?) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onCollectKYC: (KycInfo) -> Unit,
     onStartVerification: () -> Unit,
@@ -441,6 +495,11 @@ private fun AuthenticatedOperationsScreen(
 
         Text(
             text = "Customer ID: $customerId",
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        Text(
+            text = "Consented LAIs:\n${consentedLinkAuthIntentIds.joinToString("\n")}",
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
@@ -503,6 +562,16 @@ private fun AuthenticatedOperationsScreen(
                 modifier = Modifier.padding(bottom = 24.dp)
             )
         }
+
+        Text(
+            text = "Request scopes",
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        AuthenticateSection(
+            onAuthenticate = onAuthenticate
+        )
 
         Text(
             text = "Register Wallet Address",
@@ -719,6 +788,33 @@ private fun StartVerificationScreen(
                 .padding(bottom = 24.dp)
         ) {
             Text("Start Identity Verification")
+        }
+    }
+}
+
+@Composable
+private fun AuthorizeSection(
+    onAuthorize: (String) -> Unit
+) {
+    var linkAuthIntentId by remember { mutableStateOf("") }
+
+    Column {
+        OutlinedTextField(
+            value = linkAuthIntentId,
+            onValueChange = { linkAuthIntentId = it },
+            label = { Text("LinkAuthIntent ID") },
+            placeholder = { Text("lai_...") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
+        )
+
+        Button(
+            onClick = { onAuthorize(linkAuthIntentId) },
+            enabled = linkAuthIntentId.isNotBlank(),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Authorize")
         }
     }
 }

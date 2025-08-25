@@ -36,7 +36,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         activity = activity,
         presentPaymentMethodsCallback = ::handleSelectPaymentResult,
         authenticationCallback = ::handleAuthenticationResult,
-        authorizeCallback = {}
+        authorizeCallback = ::handleAuthorizeResult
     )
 
     private var identityVerificationSheet: IdentityVerificationSheet? = null
@@ -102,6 +102,10 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         )
     }
 
+    fun authorize(linkAuthIntentId: String) {
+        linkPresenter.authorize(linkAuthIntentId)
+    }
+
     private fun clientEmail(): String? =
         interactor.state.value.linkControllerState?.internalLinkAccount?.email
 
@@ -109,6 +113,14 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         coroutineScope.launch {
             onrampCallbacks.authenticationCallback.onResult(
                 interactor.handleAuthenticationResult(result)
+            )
+        }
+    }
+
+    private fun handleAuthorizeResult(result: LinkController.AuthorizeResult) {
+        coroutineScope.launch {
+            onrampCallbacks.authorizeCallback.onResult(
+                interactor.handleAuthorizeResult(result)
             )
         }
     }

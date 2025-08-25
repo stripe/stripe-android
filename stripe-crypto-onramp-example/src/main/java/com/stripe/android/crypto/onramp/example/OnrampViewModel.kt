@@ -17,6 +17,7 @@ import com.stripe.android.crypto.onramp.example.network.TestBackendRepository
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
+import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
@@ -54,7 +55,6 @@ internal class OnrampViewModel(
     val message: StateFlow<String?> = _message.asStateFlow()
 
     init {
-
         viewModelScope.launch {
             @Suppress("MagicNumber", "MaxLineLength")
             val configuration = OnrampConfiguration(
@@ -94,15 +94,11 @@ internal class OnrampViewModel(
         val result = onrampCoordinator.lookupLinkUser(currentEmail)
         when (result) {
             is OnrampLinkLookupResult.Completed -> {
-                // Temporarily create an auth intent for the user after checking if they exist
-                // TODO(carlosmuvi): use OAuth flow using the LAI to authenticate user.
-                createAuthIntentForUser(currentEmail)
-
                 if (result.isLinkUser) {
-                    _message.value = "User exists in Link. Please authenticate:"
+                    _message.value = "User exists in Link. Please authenticate"
                     _uiState.update { it.copy(screen = Screen.Authentication) }
                 } else {
-                    _message.value = "User does not exist in Link. Please register:"
+                    _message.value = "User does not exist in Link. Please register"
                     _uiState.update { it.copy(screen = Screen.Registration) }
                 }
             }
@@ -113,24 +109,8 @@ internal class OnrampViewModel(
         }
     }
 
-    private fun createAuthIntentForUser(email: String) {
-        viewModelScope.launch {
-            val result = testBackendRepository.createAuthIntent(email)
-            when (result) {
-                is Result.Success -> {
-                    val response = result.value
-                    _uiState.update { it.copy(authToken = response.token) }
-                    _message.value = "Auth intent created successfully"
-                }
-                is Result.Failure -> {
-                    _message.value = "Failed to create auth intent: ${result.error.message}"
-                }
-            }
-        }
-    }
-
     fun onBackToEmailInput() {
-        _uiState.update { it.copy(screen = Screen.EmailInput) }
+        _uiState.update { OnrampUiState(screen = Screen.EmailInput) }
     }
 
     fun clearMessage() {
@@ -195,13 +175,47 @@ internal class OnrampViewModel(
         }
     }
 
+    fun onAuthorize(linkAuthIntentId: String) {
+        _uiState.update { it.copy(linkAuthIntentId = linkAuthIntentId) }
+    }
+
+    fun onAuthorizeResult(result: OnrampAuthorizeResult) {
+        when (result) {
+            is OnrampAuthorizeResult.Consented -> {
+                _message.value = "Authorization successful! User consented to scopes."
+                _uiState.update {
+                    it.copy(
+                        screen = Screen.AuthenticatedOperations,
+                        customerId = result.customerId,
+                        linkAuthIntentId = null,
+                        consentedLinkAuthIntentIds = it.consentedLinkAuthIntentIds + it.linkAuthIntentId!!
+                    )
+                }
+            }
+            is OnrampAuthorizeResult.Denied -> {
+                _message.value = "Authorization denied by user."
+            }
+            is OnrampAuthorizeResult.Canceled -> {
+                _message.value = "Authorization cancelled by user."
+            }
+            is OnrampAuthorizeResult.Failed -> {
+                _message.value = "Authorization failed: ${result.error.message}"
+            }
+        }
+    }
+
     fun registerNewLinkUser(userInfo: LinkUserInfo) {
         viewModelScope.launch {
             val result = onrampCoordinator.registerLinkUser(userInfo)
             when (result) {
                 is OnrampRegisterUserResult.Completed -> {
                     _message.value = "Registration successful"
-                    _uiState.update { it.copy(screen = Screen.EmailInput) }
+                    _uiState.update {
+                        it.copy(
+                            screen = Screen.Authentication,
+                            email = userInfo.email
+                        )
+                    }
                 }
                 is OnrampRegisterUserResult.Failed -> {
                     _message.value = "Registration failed: ${result.error.message}"
@@ -357,6 +371,31 @@ internal class OnrampViewModel(
         return true
     }
 
+    suspend fun createLinkAuthIntent(oauthScopes: String): String? {
+        val currentState = _uiState.value
+        val email = currentState.email
+        return createAuthIntentForUser(
+            email = email,
+            oauthScopes = oauthScopes
+        )
+    }
+
+    private suspend fun createAuthIntentForUser(email: String, oauthScopes: String): String? {
+        val result = testBackendRepository.createAuthIntent(email = email, oauthScopes = oauthScopes)
+        when (result) {
+            is Result.Success -> {
+                val response = result.value
+                _uiState.update { it.copy(authToken = response.token) }
+                _message.value = "Auth intent created successfully"
+                return response.data.id
+            }
+            is Result.Failure -> {
+                _message.value = "Failed to create auth intent: ${result.error.message}"
+                return null
+            }
+        }
+    }
+
     class Factory : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(
@@ -372,6 +411,8 @@ internal class OnrampViewModel(
 data class OnrampUiState(
     val screen: Screen = Screen.Loading,
     val email: String = "",
+    val linkAuthIntentId: String? = null,
+    val consentedLinkAuthIntentIds: List<String> = emptyList(),
     val customerId: String? = null,
     val selectedPaymentData: PaymentOptionDisplayData? = null,
     val cryptoPaymentToken: String? = null,
