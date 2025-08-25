@@ -43,6 +43,7 @@ internal sealed interface UiDefinitionFactory {
         val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
         val linkInlineHandler: LinkInlineHandler?,
         val isLinkUI: Boolean = false,
+        val previousLinkSignupCheckboxSelection: Boolean? = null,
     ) {
         interface Factory {
             fun create(
@@ -63,6 +64,7 @@ internal sealed interface UiDefinitionFactory {
                     FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
                 private val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
                 private val isLinkUI: Boolean = false,
+                private val previousLinkSignupCheckboxSelection: Boolean? = null,
             ) : Factory {
                 override fun create(
                     metadata: PaymentMethodMetadata,
@@ -89,6 +91,7 @@ internal sealed interface UiDefinitionFactory {
                         autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
                         linkInlineHandler = linkInlineHandler,
                         isLinkUI = isLinkUI,
+                        previousLinkSignupCheckboxSelection = previousLinkSignupCheckboxSelection,
                     )
                 }
 

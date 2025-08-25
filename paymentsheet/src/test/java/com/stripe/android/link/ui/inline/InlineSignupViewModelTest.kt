@@ -63,6 +63,7 @@ class InlineSignupViewModelTest {
                 linkEventsReporter = linkEventsReporter,
                 logger = Logger.noop(),
                 initialUserInput = null,
+                previousLinkSignupCheckboxSelection = null,
             )
 
             linkAccountManager.lookupConsumerResult = Result.success(null)
@@ -548,6 +549,7 @@ class InlineSignupViewModelTest {
         linkEventsReporter = linkEventsReporter,
         logger = Logger.noop(),
         initialUserInput = initialUserInput,
+        previousLinkSignupCheckboxSelection = null,
     )
 
     private fun mockConsumerSessionWithVerificationSession(

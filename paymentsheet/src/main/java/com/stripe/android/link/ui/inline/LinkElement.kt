@@ -22,6 +22,7 @@ internal fun LinkElement(
     enabled: Boolean,
     onLinkSignupStateChanged: (InlineSignupViewState) -> Unit,
     modifier: Modifier = Modifier,
+    previousLinkSignupCheckboxSelection: Boolean?,
 ) {
     val component = remember(linkConfigurationCoordinator, configuration) {
         linkConfigurationCoordinator.getComponent(configuration)
@@ -36,6 +37,7 @@ internal fun LinkElement(
         factory = InlineSignupViewModel.Factory(
             initialUserInput = initialUserInput,
             signupMode = linkSignupMode,
+            previousLinkSignupCheckboxSelection = previousLinkSignupCheckboxSelection,
             linkComponent = component,
         )
     )
