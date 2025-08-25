@@ -607,5 +607,4 @@ class GooglePayJsonFactoryTest {
         // Only Visa should be present
         assertThat(allowedCardNetworks).containsExactly("VISA")
     }
-
 }
