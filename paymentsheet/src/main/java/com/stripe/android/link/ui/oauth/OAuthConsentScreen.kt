@@ -419,7 +419,8 @@ internal val consentPanePreview = run {
                 ConsentUi.ConsentPane.ScopesSection.Scope(
                     icon = scopeIcon,
                     header = "Identity",
-                    description = "View your identity information (date of birth, address, <a href=''>ID documents</a>)",
+                    description = "View your identity information (date of birth, address, " +
+                        "<a href=''>ID documents</a>)",
                 ),
             ),
         ),
