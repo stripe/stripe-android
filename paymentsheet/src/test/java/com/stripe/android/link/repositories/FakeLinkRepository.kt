@@ -35,7 +35,7 @@ internal open class FakeLinkRepository : LinkRepository {
     var logOutResult = Result.success(TestFactory.CONSUMER_SESSION)
     var startVerificationResult = Result.success(TestFactory.CONSUMER_SESSION)
     var confirmVerificationResult = Result.success(TestFactory.CONSUMER_SESSION)
-    var consentUpdateResult = Result.success(Unit)
+    var postConsentUpdateResult = Result.success(Unit)
     var listPaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
     var listShippingAddressesResult = Result.success(TestFactory.CONSUMER_SHIPPING_ADDRESSES)
     var updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
@@ -187,11 +187,11 @@ internal open class FakeLinkRepository : LinkRepository {
         consentGranted: Boolean?
     ): Result<ConsumerSession> = confirmVerificationResult
 
-    override suspend fun consentUpdate(
+    override suspend fun postConsentUpdate(
         consumerSessionClientSecret: String,
         consentGranted: Boolean,
         consumerPublishableKey: String?
-    ): Result<Unit> = consentUpdateResult
+    ): Result<Unit> = postConsentUpdateResult
 
     override suspend fun listPaymentDetails(
         paymentMethodTypes: Set<String>,

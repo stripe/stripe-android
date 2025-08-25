@@ -87,7 +87,7 @@ interface ConsumersApiService {
         requestOptions: ApiRequest.Options
     ): ConsumerSession
 
-    suspend fun consentUpdate(
+    suspend fun postConsentUpdate(
         consumerSessionClientSecret: String,
         consentGranted: Boolean,
         requestSurface: String,
@@ -318,7 +318,7 @@ class ConsumersApiServiceImpl(
         responseJsonParser = ConsumerSessionJsonParser()
     )
 
-    override suspend fun consentUpdate(
+    override suspend fun postConsentUpdate(
         consumerSessionClientSecret: String,
         consentGranted: Boolean,
         requestSurface: String,

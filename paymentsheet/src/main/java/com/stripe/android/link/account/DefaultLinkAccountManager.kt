@@ -81,13 +81,12 @@ internal class DefaultLinkAccountManager @Inject constructor(
 
     override suspend fun lookupConsumer(
         email: String?,
-        linkAuthIntentId: String?,
         startSession: Boolean,
         customerId: String?
     ): Result<LinkAccount?> =
         linkRepository.lookupConsumer(
             email = email,
-            linkAuthIntentId = linkAuthIntentId,
+            linkAuthIntentId = null,
             sessionId = config.elementsSessionId,
             customerId = customerId
         )
@@ -97,14 +96,13 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 setLinkAccountFromLookupResult(
                     lookup = consumerSessionLookup,
                     startSession = startSession,
-                    linkAuthIntentId = linkAuthIntentId,
+                    linkAuthIntentId = null,
                 )
             }
 
     override suspend fun mobileLookupConsumer(
         email: String?,
         emailSource: EmailSource?,
-        linkAuthIntentId: String?,
         verificationToken: String,
         appId: String,
         startSession: Boolean,
@@ -114,7 +112,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             verificationToken = verificationToken,
             appId = appId,
             email = email,
-            linkAuthIntentId = linkAuthIntentId,
+            linkAuthIntentId = null,
             sessionId = config.elementsSessionId,
             emailSource = emailSource,
             customerId = customerId
@@ -124,6 +122,51 @@ internal class DefaultLinkAccountManager @Inject constructor(
             setLinkAccountFromLookupResult(
                 lookup = consumerSessionLookup,
                 startSession = startSession,
+                linkAuthIntentId = null,
+            )
+        }
+    }
+
+    override suspend fun lookupConsumerByAuthIntent(
+        linkAuthIntentId: String?,
+        customerId: String?
+    ): Result<LinkAccount?> =
+        linkRepository.lookupConsumer(
+            email = null,
+            linkAuthIntentId = linkAuthIntentId,
+            sessionId = config.elementsSessionId,
+            customerId = customerId
+        )
+            .onFailure { error ->
+                linkEventsReporter.onAccountLookupFailure(error)
+            }.map { consumerSessionLookup ->
+                setLinkAccountFromLookupResult(
+                    lookup = consumerSessionLookup,
+                    startSession = true,
+                    linkAuthIntentId = linkAuthIntentId,
+                )
+            }
+
+    override suspend fun mobileLookupConsumerByAuthIntent(
+        linkAuthIntentId: String?,
+        verificationToken: String,
+        appId: String,
+        customerId: String?
+    ): Result<LinkAccount?> {
+        return linkRepository.mobileLookupConsumer(
+            verificationToken = verificationToken,
+            appId = appId,
+            email = null,
+            linkAuthIntentId = linkAuthIntentId,
+            sessionId = config.elementsSessionId,
+            emailSource = null,
+            customerId = customerId
+        ).onFailure { error ->
+            linkEventsReporter.onAccountLookupFailure(error)
+        }.map { consumerSessionLookup ->
+            setLinkAccountFromLookupResult(
+                lookup = consumerSessionLookup,
+                startSession = true,
                 linkAuthIntentId = linkAuthIntentId,
             )
         }
@@ -147,7 +190,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
         when (userInput) {
             is UserInput.SignIn -> lookupConsumer(
                 email = userInput.email,
-                linkAuthIntentId = null,
                 startSession = true,
                 customerId = config.customerIdForEceDefaultValues
             ).mapCatching {
@@ -493,11 +535,11 @@ internal class DefaultLinkAccountManager @Inject constructor(
             }
     }
 
-    override suspend fun consentUpdate(consentGranted: Boolean): Result<Unit> {
+    override suspend fun postConsentUpdate(consentGranted: Boolean): Result<Unit> {
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
             ?: return Result.failure(NoLinkAccountFoundException())
 
-        return linkRepository.consentUpdate(
+        return linkRepository.postConsentUpdate(
             consumerSessionClientSecret = linkAccount.clientSecret,
             consentGranted = consentGranted,
             consumerPublishableKey = linkAccount.consumerPublishableKey
@@ -594,17 +636,14 @@ internal class DefaultLinkAccountManager @Inject constructor(
     private suspend fun lookupConsumerByEmail(email: String): Result<LinkAccount?> {
         return lookupConsumer(
             email = email,
-            linkAuthIntentId = null,
             startSession = true,
             customerId = config.customerIdForEceDefaultValues
         )
     }
 
     private suspend fun lookupConsumerByAuthIntent(linkAuthIntentId: String?): Result<LinkAccount?> {
-        return lookupConsumer(
-            email = null,
+        return lookupConsumerByAuthIntent(
             linkAuthIntentId = linkAuthIntentId,
-            startSession = true,
             customerId = config.customerIdForEceDefaultValues
         )
     }

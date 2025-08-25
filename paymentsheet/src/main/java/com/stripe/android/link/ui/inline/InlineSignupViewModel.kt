@@ -273,7 +273,6 @@ internal class InlineSignupViewModel(
         clearError()
         linkAccountManager.lookupConsumer(
             email = email,
-            linkAuthIntentId = null,
             startSession = false,
             customerId = null
         ).fold(

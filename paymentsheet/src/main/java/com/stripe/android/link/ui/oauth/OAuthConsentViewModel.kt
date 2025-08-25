@@ -58,7 +58,7 @@ internal class OAuthConsentViewModel @Inject constructor(
     private fun onConsentSubmitted(consentGranted: Boolean) {
         viewModelScope.launch {
             updateViewState { it.copy(errorMessage = null) }
-            linkAccountManager.consentUpdate(consentGranted).fold(
+            linkAccountManager.postConsentUpdate(consentGranted).fold(
                 onSuccess = {
                     dismissWithResult(
                         LinkActivityResult.Completed(

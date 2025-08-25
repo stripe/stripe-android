@@ -50,7 +50,7 @@ internal open class FakeLinkAccountManager(
     var mobileLookupConsumerResult: Result<LinkAccount?> = Result.success(TestFactory.LINK_ACCOUNT)
     var startVerificationResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
     var confirmVerificationResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
-    var consentUpdateResult: Result<Unit> = Result.success(Unit)
+    var postConsentUpdateResult: Result<Unit> = Result.success(Unit)
     var signUpResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
     var mobileSignUpResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
     var signInWithUserInputResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
@@ -254,8 +254,8 @@ internal open class FakeLinkAccountManager(
         return confirmVerificationResult
     }
 
-    override suspend fun consentUpdate(consentGranted: Boolean): Result<Unit> {
-        return consentUpdateResult
+    override suspend fun postConsentUpdate(consentGranted: Boolean): Result<Unit> {
+        return postConsentUpdateResult
     }
 
     override suspend fun listPaymentDetails(paymentMethodTypes: Set<String>): Result<ConsumerPaymentDetails> {
