@@ -20,16 +20,15 @@ class StripeErrorMappingTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val localeTestRule = LocaleTestRule()
 
-    private val backendMessage = "The backend message"
-
     @Test
     fun `Uses backend message for card error `() {
         runStripeErrorMappingTest(
+            message = "The backend message",
             code = null,
             declineCode = null,
             context = context
         ) { actualMessage ->
-            assertThat(actualMessage).isEqualTo(backendMessage)
+            assertThat(actualMessage).isEqualTo("The backend message")
         }
     }
 
@@ -120,7 +119,7 @@ class StripeErrorMappingTest {
     }
 
     private fun runStripeErrorMappingTest(
-        message: String? = backendMessage,
+        message: String? = null,
         code: String? = null,
         declineCode: String? = null,
         context: Context,
