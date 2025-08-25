@@ -206,6 +206,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_total_amount">Tổng cộng: %s</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Thương hiệu thẻ chưa được cập nhật. Vui lòng thử lại.</string>
+  <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
+  <string name="stripe_paynow_confirm_payment">Xác nhận thanh toán tại ngân hàng hoặc trong ứng dụng thanh toán của bạn trong vòng %s để hoàn tất giao dịch mua.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Đặt làm phương thức thanh toán mặc định</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -283,6 +285,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_passthrough_description">Passthrough</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
   <string name="stripe_wallet_pay_another_way">Thanh toán theo cách khác</string>
+  <!-- Hint shown when selecting a payment method indicating debit cards are preferred. -->
+  <string name="stripe_wallet_prefer_debit_card_hint">Thẻ ghi nợ có khả năng cao được chấp nhận.</string>
   <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
   <string name="stripe_wallet_recollect_cvc_error">Vì lý do bảo mật, vui lòng nhập lại mã bảo mật của thẻ của bạn.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->

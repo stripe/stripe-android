@@ -206,6 +206,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_total_amount">Total: %s</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">La marca de la targeta no s\'ha actualitzat. Torneu-ho a provar.</string>
+  <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
+  <string name="stripe_paynow_confirm_payment">Per completar la compra, confirmeu el pagament al banc o a l\'aplicació de pagament dins de %.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Configura com a mètode de pagament per defecte</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -268,6 +270,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">Visualitza més</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[En continuar, accepteu autoritzar aquests pagaments segons aquests <terms>termes</terms>.]]></string>
+  <!-- Text providing link to terms for bank payments -->
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[En enviar la comanda a %s, accepteu l\'autorització de pagaments d\'acord amb <terms>aquestes condicions</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Pagament</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
@@ -281,6 +285,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_passthrough_description">Traspàs directe</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
   <string name="stripe_wallet_pay_another_way">Paga d\'una altra manera</string>
+  <!-- Hint shown when selecting a payment method indicating debit cards are preferred. -->
+  <string name="stripe_wallet_prefer_debit_card_hint">És molt probable que s\'acceptin les targetes de dèbit.</string>
   <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
   <string name="stripe_wallet_recollect_cvc_error">Per raons de seguretat, torna a introduir el codi de seguretat de la targeta.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->
