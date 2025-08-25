@@ -23,4 +23,28 @@ class ConsentUiTest {
                 .consentSection
         ).isNotNull()
     }
+
+    @Test
+    fun `decodes Markdown to HTML`() {
+        val consentPane =
+            format.decodeFromString<ConsentUi>(ConsentUiFixtures.HAS_CONSENT_PANE)
+                .consentPane
+
+        assertThat(consentPane?.scopesSection?.scopes?.firstOrNull()?.description)
+            .isEqualTo("Name, email, and <b>profile picture</b>")
+
+        assertThat(consentPane?.disclaimer)
+            .isEqualTo(
+                "By allowing, you agree to <b>Example</b>'s <a href=\"https://www.stripe.com\">Terms of Service</a>."
+            )
+
+        val consentSection =
+            format.decodeFromString<ConsentUi>(ConsentUiFixtures.HAS_CONSENT_SECTION)
+                .consentSection
+
+        assertThat(consentSection?.disclaimer)
+            .isEqualTo(
+                "By allowing, you agree to <b>Example</b>'s <a href=\"https://www.stripe.com\">Terms of Service</a>."
+            )
+    }
 }

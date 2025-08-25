@@ -43,7 +43,7 @@ internal class VerificationScreenshotTest(
             LinkScreenshotSurface {
                 val state = testCase.content.state.copy(
                     consentSection = ConsentUi.ConsentSection(
-                        "By continuing, you’ll be remembered next time on Powdur"
+                        "By continuing, you’ll be remembered next time on <a href=''>Powdur</a>"
                     )
                 )
                 VerificationBody(

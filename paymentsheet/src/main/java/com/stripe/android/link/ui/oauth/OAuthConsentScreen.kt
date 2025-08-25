@@ -46,6 +46,7 @@ import com.stripe.android.model.ConsentUi
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.text.Html
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -271,8 +272,8 @@ private fun ScopeItem(
                     color = LinkTheme.colors.textPrimary,
                 )
             }
-            Text(
-                text = description,
+            Html(
+                html = description,
                 style = LinkTheme.typography.detail,
                 color = LinkTheme.colors.textTertiary,
             )
@@ -291,11 +292,10 @@ private fun DefaultScopeIcon(modifier: Modifier) {
 
 @Composable
 internal fun Disclaimer(disclaimer: String) {
-    Text(
-        text = disclaimer,
-        style = LinkTheme.typography.caption,
+    Html(
+        html = disclaimer,
         color = LinkTheme.colors.textTertiary,
-        textAlign = TextAlign.Center,
+        style = LinkTheme.typography.caption.copy(textAlign = TextAlign.Center),
     )
 }
 
@@ -419,13 +419,13 @@ internal val consentPanePreview = run {
                 ConsentUi.ConsentPane.ScopesSection.Scope(
                     icon = scopeIcon,
                     header = "Identity",
-                    description = "View your identity information (date of birth, address, ID documents)",
+                    description = "View your identity information (date of birth, address, <a href=''>ID documents</a>)",
                 ),
             ),
         ),
         denyButtonLabel = "Cancel",
         allowButtonLabel = "Continue",
-        disclaimer = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " +
+        disclaimer = "Lorem ipsum <a href=''>dolor</a> sit amet, consectetur adipiscing elit. " +
             "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
     )
 }

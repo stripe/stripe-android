@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
+import com.stripe.android.core.networking.MarkdownToHtmlSerializer
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -25,6 +26,7 @@ data class ConsentUi(
         @SerialName("scopes_section")
         val scopesSection: ScopesSection,
         @SerialName("disclaimer")
+        @Serializable(with = MarkdownToHtmlSerializer::class)
         val disclaimer: String?,
         @SerialName("deny_button_label")
         val denyButtonLabel: String?,
@@ -51,6 +53,7 @@ data class ConsentUi(
                 @SerialName("header")
                 val header: String?,
                 @SerialName("description")
+                @Serializable(with = MarkdownToHtmlSerializer::class)
                 val description: String,
             ) : StripeModel
         }
@@ -61,6 +64,7 @@ data class ConsentUi(
     @Serializable
     data class ConsentSection(
         @SerialName("disclaimer")
+        @Serializable(with = MarkdownToHtmlSerializer::class)
         val disclaimer: String,
     ) : StripeModel
 

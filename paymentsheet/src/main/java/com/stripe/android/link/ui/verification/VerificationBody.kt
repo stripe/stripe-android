@@ -54,6 +54,7 @@ import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.elements.OTPElementColors
 import com.stripe.android.uicore.elements.OTPElementUI
+import com.stripe.android.uicore.text.Html
 import kotlinx.coroutines.delay
 
 /**
@@ -367,12 +368,11 @@ internal fun ResendCodeButton(
 private fun ConsentSection(
     consentSection: ConsentUi.ConsentSection,
 ) {
-    Text(
+    Html(
         modifier = Modifier.padding(top = 8.dp),
-        text = consentSection.disclaimer,
-        style = LinkTheme.typography.caption,
+        html = consentSection.disclaimer,
+        style = LinkTheme.typography.caption.copy(textAlign = TextAlign.Center),
         color = LinkTheme.colors.textTertiary,
-        textAlign = TextAlign.Center,
     )
 }
 

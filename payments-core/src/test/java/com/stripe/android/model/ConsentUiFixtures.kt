@@ -14,11 +14,11 @@ object ConsentUiFixtures {
                     "default": "https://asset.stripe.com/account_scope.png"
                   },
                   "header": "Account info",
-                  "description": "Name, email, and profile picture"
+                  "description": "Name, email, and **profile picture**"
                 }
               ]
             },
-            "disclaimer": "By allowing, you agree...",
+            "disclaimer": "By allowing, you agree to **Example**'s [Terms of Service](https://www.stripe.com).",
             "deny_button_label": "Cancel",
             "allow_button_label": "Allow"
           }
@@ -29,7 +29,7 @@ object ConsentUiFixtures {
         """
         {
           "consent_section": {
-            "disclaimer": "By continuing you'll share your name, email, and phone with Example"
+            "disclaimer": "By allowing, you agree to **Example**'s [Terms of Service](https://www.stripe.com)."
           }
         }
         """
