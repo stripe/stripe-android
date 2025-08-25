@@ -13,6 +13,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -36,6 +37,7 @@ internal suspend fun assertIntentConfirmed(
         optionsParams = params.optionsParams,
         extraParams = params.extraParams,
         shouldSave = params.customerRequestedSave,
+        passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
     )
 
     activity.confirmationHandler.state.test {

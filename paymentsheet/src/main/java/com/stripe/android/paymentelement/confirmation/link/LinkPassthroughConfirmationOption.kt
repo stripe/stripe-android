@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.link
 
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import kotlinx.parcelize.Parcelize
@@ -11,4 +12,5 @@ internal data class LinkPassthroughConfirmationOption(
     val cvc: String?,
     val billingPhone: String?,
     val allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+    val passiveCaptchaParams: PassiveCaptchaParams? = null,
 ) : ConfirmationHandler.Option

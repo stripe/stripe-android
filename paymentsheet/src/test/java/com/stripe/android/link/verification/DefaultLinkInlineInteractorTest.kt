@@ -159,7 +159,8 @@ class DefaultLinkInlineInteractorTest {
                 configuration = any(),
                 linkAccountInfo = any(),
                 launchMode = eq(LinkLaunchMode.PaymentMethodSelection(null)),
-                linkExpressMode = any()
+                linkExpressMode = any(),
+                passiveCaptchaParams = any()
             )
         }
 

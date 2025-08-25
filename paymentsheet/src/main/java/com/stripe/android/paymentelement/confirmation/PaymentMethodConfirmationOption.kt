@@ -14,7 +14,7 @@ internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.
         val paymentMethod: com.stripe.android.model.PaymentMethod,
         val optionsParams: PaymentMethodOptionsParams?,
         val originatedFromWallet: Boolean = false,
-        override val passiveCaptchaParams: PassiveCaptchaParams? = null,
+        override val passiveCaptchaParams: PassiveCaptchaParams?,
         val hCaptchaToken: String? = null,
     ) : PaymentMethodConfirmationOption
 
@@ -24,6 +24,6 @@ internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.
         val optionsParams: PaymentMethodOptionsParams?,
         val extraParams: PaymentMethodExtraParams?,
         val shouldSave: Boolean,
-        override val passiveCaptchaParams: PassiveCaptchaParams? = null,
+        override val passiveCaptchaParams: PassiveCaptchaParams?,
     ) : PaymentMethodConfirmationOption
 }

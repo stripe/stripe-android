@@ -1036,6 +1036,7 @@ internal class CustomerSheetViewModel(
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
                     paymentMethod = paymentMethod,
                     optionsParams = null,
+                    passiveCaptchaParams = null
                 ),
                 intent = stripeIntent,
                 initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
