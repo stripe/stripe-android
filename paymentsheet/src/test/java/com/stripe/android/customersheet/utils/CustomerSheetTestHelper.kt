@@ -31,6 +31,7 @@ import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.createTestConfirmationHandlerFactory
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -99,6 +100,7 @@ internal object CustomerSheetTestHelper {
             permissions = customerPermissions,
         ),
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        confirmationHandlerFactory: ConfirmationHandler.Factory? = null,
     ): CustomerSheetViewModel {
         return CustomerSheetViewModel(
             application = application,
@@ -114,7 +116,7 @@ internal object CustomerSheetTestHelper {
             isLiveModeProvider = { isLiveMode },
             logger = Logger.noop(),
             productUsage = emptySet(),
-            confirmationHandlerFactory = createTestConfirmationHandlerFactory(
+            confirmationHandlerFactory = confirmationHandlerFactory ?: createTestConfirmationHandlerFactory(
                 paymentElementCallbackIdentifier = "CustomerSheetTestIdentifier",
                 intentConfirmationInterceptor = intentConfirmationInterceptor,
                 paymentConfiguration = paymentConfiguration,

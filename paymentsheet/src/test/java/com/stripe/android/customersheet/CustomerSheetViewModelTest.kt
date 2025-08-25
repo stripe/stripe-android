@@ -24,6 +24,7 @@ import com.stripe.android.customersheet.utils.FakeCustomerSheetLoader
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
@@ -32,6 +33,8 @@ import com.stripe.android.model.PaymentMethodFixtures.US_BANK_ACCOUNT_VERIFIED
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.networking.PaymentAnalyticsEvent
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
@@ -3238,6 +3241,35 @@ class CustomerSheetViewModelTest {
 
         verify(eventReporter).onDisallowedCardBrandEntered(CardBrand.AmericanExpress)
     }
+
+    @Test
+    fun `When starting confirmation, should pass passiveCaptchaParams when available`() =
+        runTest(testDispatcher) {
+            val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+
+            val mockConfirmationHandler = mock<ConfirmationHandler>()
+            val confirmationHandlerFactory = ConfirmationHandler.Factory { mockConfirmationHandler }
+
+            val viewModel = createViewModel(
+                workContext = testDispatcher,
+                confirmationHandlerFactory = confirmationHandlerFactory,
+            )
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnFormFieldValuesCompleted(
+                    formFieldValues = TEST_FORM_VALUES,
+                )
+            )
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+            verify(mockConfirmationHandler).start(
+                argThat { args ->
+                    args.confirmationOption is PaymentMethodConfirmationOption.Saved &&
+                        args.confirmationOption.passiveCaptchaParams == passiveCaptchaParams
+                }
+            )
+        }
 
     @Test
     fun `When setting up with intent, should call 'IntentConfirmationInterceptor' with expected params`() =

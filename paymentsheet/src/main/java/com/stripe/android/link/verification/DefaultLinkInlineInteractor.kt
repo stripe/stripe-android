@@ -41,7 +41,8 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
     override val state: StateFlow<LinkInlineState> = savedStateHandle.getStateFlow(
         key = LINK_EMBEDDED_STATE_KEY,
         initialValue = LinkInlineState(
-            verificationState = VerificationState.Loading
+            verificationState = VerificationState.Loading,
+            passiveCaptchaParams = null
         )
     )
 

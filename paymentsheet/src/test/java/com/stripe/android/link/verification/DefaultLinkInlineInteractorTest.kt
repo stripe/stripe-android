@@ -211,7 +211,8 @@ class DefaultLinkInlineInteractorTest {
 
         // Setup state as RenderButton
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(
-            verificationState = VerificationState.RenderButton
+            verificationState = VerificationState.RenderButton,
+            passiveCaptchaParams = null
         )
 
         interactor.setup(createPaymentMethodMetadata())
@@ -258,7 +259,8 @@ class DefaultLinkInlineInteractorTest {
         )
 
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(
-            verificationState = verificationState
+            verificationState = verificationState,
+            passiveCaptchaParams = null
         )
 
         // Submit OTP
@@ -296,7 +298,8 @@ class DefaultLinkInlineInteractorTest {
         )
 
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(
-            verificationState = verificationState
+            verificationState = verificationState,
+            passiveCaptchaParams = null
         )
 
         // Execute
@@ -343,7 +346,8 @@ class DefaultLinkInlineInteractorTest {
         )
 
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(
-            verificationState = verificationState
+            verificationState = verificationState,
+            passiveCaptchaParams = null
         )
 
         // Fill OTP with some values
@@ -399,7 +403,8 @@ class DefaultLinkInlineInteractorTest {
         )
 
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(
-            verificationState = verificationState
+            verificationState = verificationState,
+            passiveCaptchaParams = null
         )
 
         // Execute
@@ -445,7 +450,8 @@ class DefaultLinkInlineInteractorTest {
         )
 
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(
-            verificationState = verificationState
+            verificationState = verificationState,
+            passiveCaptchaParams = null
         )
 
         // Execute
@@ -512,7 +518,8 @@ class DefaultLinkInlineInteractorTest {
         )
 
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(
-            verificationState = verificationState
+            verificationState = verificationState,
+            passiveCaptchaParams = null
         )
 
         // Fill OTP with some values
