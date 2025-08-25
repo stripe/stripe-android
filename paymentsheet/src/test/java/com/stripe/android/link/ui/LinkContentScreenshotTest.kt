@@ -64,6 +64,7 @@ internal class LinkContentScreenshotTest {
                         moveToWeb = {},
                         goBack = {},
                         changeEmail = {},
+                        appearance = null,
                     )
                 }
             }

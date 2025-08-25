@@ -133,6 +133,7 @@ internal class PaymentMethodScreenTest {
                 DefaultLinkTheme {
                     PaymentMethodScreen(
                         viewModel = viewModel,
+                        appearance = null,
                     )
                 }
             }
