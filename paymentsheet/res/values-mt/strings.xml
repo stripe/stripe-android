@@ -206,6 +206,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_total_amount">Total: %s</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Id-ditta tal-karti ma nbidlitx. Jekk jogħġbok erġa\' pprova.</string>
+  <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
+  <string name="stripe_paynow_confirm_payment">Ikkonferma l-pagament fil-bank jew fl-app tal-pagament tiegħek fi żmien %s biex tlesti x-xiri.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Qiegħed bħala l-metodu tal-pagament standard</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -283,6 +285,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_passthrough_description">Passthrough</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
   <string name="stripe_wallet_pay_another_way">Ħallas mod ieħor</string>
+  <!-- Hint shown when selecting a payment method indicating debit cards are preferred. -->
+  <string name="stripe_wallet_prefer_debit_card_hint">Il-karti tad-debitu huma l-aktar probabbli li jiġu aċċettati.</string>
   <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
   <string name="stripe_wallet_recollect_cvc_error">Għal raġunijiet ta\' sigurtà, jekk jogħġbok erġa\' daħħal il-kodiċi tas-sigurtà tal-karta tiegħek.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->
