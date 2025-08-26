@@ -70,10 +70,10 @@ internal fun PrimaryButton(
                 elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
                 shape = LinkTheme.shapes.primaryButton,
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = LinkTheme.colors.buttonPrimary,
-                    contentColor = LinkTheme.colors.onButtonPrimary,
-                    disabledBackgroundColor = LinkTheme.colors.buttonPrimary,
-                    disabledContentColor = LinkTheme.colors.onButtonPrimary.copy(alpha = ContentAlpha.disabled),
+                    backgroundColor = LinkTheme.colors.buttonBrand,
+                    contentColor = LinkTheme.colors.onButtonBrand,
+                    disabledBackgroundColor = LinkTheme.colors.buttonBrand,
+                    disabledContentColor = LinkTheme.colors.onButtonBrand.copy(alpha = ContentAlpha.disabled),
                 )
             ) {
                 PrimaryContent(
@@ -107,7 +107,7 @@ private fun PrimaryContent(
                 .semantics { testTag = ProgressIndicatorTestTag },
             backgroundColor = LinkTheme.colors.surfaceBackdrop.copy(alpha = 0.1f),
             strokeWidth = 4.dp,
-            filledColor = LinkTheme.colors.onButtonPrimary,
+            filledColor = LinkTheme.colors.onButtonBrand,
         )
         PrimaryButtonState.Completed -> Icon(
             painter = painterResource(id = R.drawable.stripe_link_complete),
@@ -117,14 +117,14 @@ private fun PrimaryContent(
                 .semantics {
                     testTag = CompletedIconTestTag
                 },
-            tint = LinkTheme.colors.onButtonPrimary
+            tint = LinkTheme.colors.onButtonBrand
         )
         else -> Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             PrimaryButtonIcon(iconStart)
             Text(
                 text = label,
                 modifier = Modifier.weight(1f),
-                color = LinkTheme.colors.onButtonPrimary
+                color = LinkTheme.colors.onButtonBrand
                     .copy(alpha = LocalContentAlpha.current),
                 textAlign = TextAlign.Center,
                 style = LinkTheme.typography.bodyEmphasized,
@@ -231,7 +231,7 @@ private fun PrimaryButtonPreview() {
                 style = LinkAppearance.Style.ALWAYS_DARK,
                 primaryButton = LinkAppearance.PrimaryButton(
                     cornerRadiusDp = 0f,
-                    heightDp = 200f,
+                    heightDp = 64f,
                 )
             )
         ).forEach { appearance ->

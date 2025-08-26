@@ -61,7 +61,10 @@ internal data class LinkColors(
     val iconBrand: Color,
     val iconCritical: Color,
     val outline: Color,
-)
+) {
+    val buttonLinkBrand: Color get() = Brand200
+    val onButtonLinkBrand: Color get() = Neutral900
+}
 
 internal object LinkThemeConfig {
     fun colors(isDark: Boolean): LinkColors {
@@ -77,7 +80,7 @@ internal object LinkThemeConfig {
         borderDefault = Neutral300,
         borderSelected = Neutral900,
         borderCritical = Critical500,
-        buttonPrimary = Brand200,
+        buttonPrimary = Neutral900,
         buttonTertiary = Neutral0,
         buttonBrand = Brand200,
         buttonCritical = Critical500,
@@ -86,7 +89,7 @@ internal object LinkThemeConfig {
         textTertiary = Neutral500,
         textWhite = Neutral0,
         textBrand = Brand600,
-        onButtonPrimary = Neutral900,
+        onButtonPrimary = Neutral0,
         onButtonBrand = Neutral900,
         textCritical = Critical600,
         iconPrimary = Neutral900,
@@ -107,7 +110,7 @@ internal object LinkThemeConfig {
         borderDefault = Neutral900,
         borderSelected = Brand200,
         borderCritical = Critical500,
-        buttonPrimary = Brand200,
+        buttonPrimary = Neutral0,
         buttonTertiary = Neutral800,
         buttonBrand = Brand200,
         buttonCritical = Critical600,
@@ -153,7 +156,7 @@ internal object LinkThemeConfig {
         get() = run {
             val unselectedColor = if (isDark) Neutral700 else LinkTheme.colors.borderDefault
             RadioButtonDefaults.colors(
-                selectedColor = LinkTheme.colors.buttonPrimary,
+                selectedColor = LinkTheme.colors.buttonBrand,
                 unselectedColor = unselectedColor,
                 disabledColor = unselectedColor.copy(alpha = ContentAlpha.disabled)
             )

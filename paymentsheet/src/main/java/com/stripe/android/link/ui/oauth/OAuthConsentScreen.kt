@@ -344,7 +344,7 @@ private fun ActionButton(
     }
     TextButton(
         modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
+            .clip(LinkTheme.shapes.default)
             .background(backgroundColor),
         contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp),
         onClick = onClick,

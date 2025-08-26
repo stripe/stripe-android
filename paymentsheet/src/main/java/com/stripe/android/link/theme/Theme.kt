@@ -58,8 +58,8 @@ internal fun DefaultLinkTheme(
             val overrides = if (isDark) it.darkColors else it.lightColors
             defaultColors.copy(
                 textBrand = overrides.primary,
-                onButtonPrimary = overrides.contentOnPrimary,
-                buttonPrimary = overrides.primary,
+                onButtonBrand = overrides.contentOnPrimary,
+                buttonBrand = overrides.primary,
                 borderSelected = overrides.borderSelected
             )
         }
