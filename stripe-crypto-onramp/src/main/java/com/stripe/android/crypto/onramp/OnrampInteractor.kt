@@ -21,7 +21,7 @@ import com.stripe.android.crypto.onramp.model.OnrampIdentityVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
-import com.stripe.android.crypto.onramp.model.OnrampSetWalletAddressResult
+import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthenticationResult
 import com.stripe.android.crypto.onramp.model.PaymentOptionDisplayData
@@ -117,20 +117,20 @@ internal class OnrampInteractor @Inject constructor(
     suspend fun registerWalletAddress(
         walletAddress: String,
         network: CryptoNetwork
-    ): OnrampSetWalletAddressResult {
+    ): OnrampRegisterWalletAddressResult {
         val secret = consumerSessionClientSecret()
         return if (secret != null) {
             val result = cryptoApiRepository.setWalletAddress(walletAddress, network, secret)
             result.fold(
                 onSuccess = {
-                    OnrampSetWalletAddressResult.Completed()
+                    OnrampRegisterWalletAddressResult.Completed()
                 },
                 onFailure = { error ->
-                    OnrampSetWalletAddressResult.Failed(error)
+                    OnrampRegisterWalletAddressResult.Failed(error)
                 }
             )
         } else {
-            OnrampSetWalletAddressResult.Failed(MissingConsumerSecretException())
+            OnrampRegisterWalletAddressResult.Failed(MissingConsumerSecretException())
         }
     }
 

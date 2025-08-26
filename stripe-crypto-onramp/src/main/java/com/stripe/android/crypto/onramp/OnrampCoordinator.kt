@@ -17,7 +17,7 @@ import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResu
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
-import com.stripe.android.crypto.onramp.model.OnrampSetWalletAddressResult
+import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import javax.inject.Inject
 
@@ -66,16 +66,17 @@ class OnrampCoordinator @Inject internal constructor(
     }
 
     /**
-     * Registers a wallet address for the user.
+     * Registers the given crypto wallet address to the current Link account.
+     * Requires an authenticated Link user.
      *
-     * @param walletAddress The wallet address to register.
+     * @param walletAddress The crypto wallet address to register.
      * @param network The crypto network for the wallet address.
      * @return OnrampSetWalletAddressResult indicating the result of setting the wallet address.
      */
     suspend fun registerWalletAddress(
         walletAddress: String,
         network: CryptoNetwork
-    ): OnrampSetWalletAddressResult {
+    ): OnrampRegisterWalletAddressResult {
         return interactor.registerWalletAddress(walletAddress, network)
     }
 

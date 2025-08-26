@@ -26,7 +26,7 @@ import com.stripe.android.crypto.onramp.model.OnrampIdentityVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
-import com.stripe.android.crypto.onramp.model.OnrampSetWalletAddressResult
+import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthenticationResult
 import com.stripe.android.crypto.onramp.model.PaymentOptionDisplayData
 import com.stripe.android.link.LinkAppearance
@@ -284,7 +284,7 @@ internal class OnrampViewModel(
             _uiState.update { it.copy(screen = Screen.Loading, loadingMessage = "Registering wallet address...") }
             val result = onrampCoordinator.registerWalletAddress(walletAddress.trim(), network)
             when (result) {
-                is OnrampSetWalletAddressResult.Completed -> {
+                is OnrampRegisterWalletAddressResult.Completed -> {
                     _message.value = "Wallet address registered successfully!"
                     _uiState.update {
                         it.copy(
@@ -294,7 +294,7 @@ internal class OnrampViewModel(
                         )
                     }
                 }
-                is OnrampSetWalletAddressResult.Failed -> {
+                is OnrampRegisterWalletAddressResult.Failed -> {
                     _message.value = "Failed to register wallet address: ${result.error.message}"
                     _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
                 }
