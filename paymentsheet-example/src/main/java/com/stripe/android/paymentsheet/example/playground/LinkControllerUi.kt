@@ -208,7 +208,6 @@ internal fun LinkControllerUi(
                     Text("Update Phone Number")
                 }
                 Divider(Modifier.padding(top = 10.dp, bottom = 10.dp))
-
             }
         }
         Divider(Modifier.padding(bottom = 10.dp))
