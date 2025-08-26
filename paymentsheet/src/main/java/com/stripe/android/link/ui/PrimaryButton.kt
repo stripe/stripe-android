@@ -37,7 +37,6 @@ import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.LinkThemeConfig.contentOnPrimaryButton
-import com.stripe.android.link.theme.PrimaryButtonHeight
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -64,12 +63,12 @@ internal fun PrimaryButton(
             Button(
                 onClick = onButtonClick,
                 modifier = Modifier
-                    .height(PrimaryButtonHeight)
+                    .height(LinkTheme.shapes.primaryButtonHeight)
                     .fillMaxWidth()
                     .testTag(PrimaryButtonTag),
                 enabled = state == PrimaryButtonState.Enabled,
                 elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
-                shape = LinkTheme.shapes.default,
+                shape = LinkTheme.shapes.primaryButton,
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = LinkTheme.colors.buttonPrimary,
                     contentColor = LinkTheme.colors.onButtonPrimary,
@@ -229,7 +228,11 @@ private fun PrimaryButtonPreview() {
                     contentOnPrimary = Color.DarkGray,
                     borderSelected = Color.Yellow,
                 ),
-                style = LinkAppearance.Style.ALWAYS_DARK
+                style = LinkAppearance.Style.ALWAYS_DARK,
+                primaryButton = LinkAppearance.PrimaryButton(
+                    cornerRadiusDp = 0f,
+                    heightDp = 200f,
+                )
             )
         ).forEach { appearance ->
             DefaultLinkTheme(appearance = appearance) {

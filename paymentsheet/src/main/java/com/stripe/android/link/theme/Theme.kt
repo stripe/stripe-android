@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -34,7 +35,6 @@ internal val LocalLinkShapes = staticCompositionLocalOf<LinkShapes> {
 }
 
 internal val MinimumTouchTargetSize = 48.dp
-internal val PrimaryButtonHeight = 56.dp
 internal val AppBarHeight = 70.dp
 internal val HorizontalPadding = 20.dp
 
@@ -50,10 +50,12 @@ internal fun DefaultLinkTheme(
         LinkAppearance.Style.ALWAYS_DARK -> true
         LinkAppearance.Style.AUTOMATIC, null -> isSystemInDarkTheme()
     }
+
+    // Colors
     val defaultColors = LinkThemeConfig.colors(isDark)
     val resolvedColors = appearance
         ?.let {
-            val overrides = if (isDark) appearance.darkColors else appearance.lightColors
+            val overrides = if (isDark) it.darkColors else it.lightColors
             defaultColors.copy(
                 textBrand = overrides.primary,
                 onButtonPrimary = overrides.contentOnPrimary,
@@ -63,6 +65,21 @@ internal fun DefaultLinkTheme(
         }
         ?: defaultColors
 
+    // Shapes
+    val defaultLinkShapes = LinkShapes()
+    val linkShapes = appearance
+        ?.let {
+            defaultLinkShapes.copy(
+                primaryButton = it.primaryButton.cornerRadiusDp
+                    ?.let { radius -> RoundedCornerShape(radius.dp) }
+                    ?: defaultLinkShapes.primaryButton,
+                primaryButtonHeight = it.primaryButton.heightDp?.dp
+                    ?: defaultLinkShapes.primaryButtonHeight,
+            )
+        }
+        ?: defaultLinkShapes
+
+    // Set context configuration so the correct resources are loaded.
     val baseContext = LocalContext.current
     val inspectionMode = LocalInspectionMode.current
     val styleContext = remember(baseContext, isDark, inspectionMode) {
@@ -79,7 +96,7 @@ internal fun DefaultLinkTheme(
         LocalContext provides styleContext,
         LocalLinkColors provides resolvedColors,
         LocalLinkTypography provides linkTypography,
-        LocalLinkShapes provides LinkShapes,
+        LocalLinkShapes provides linkShapes,
         LocalStripeImageLoader provides stripeImageLoader,
     ) {
         MaterialTheme(
