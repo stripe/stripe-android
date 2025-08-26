@@ -13,9 +13,12 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.paymentmethodoptions.setupfutureusage.toJsonObjectString
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -564,6 +567,70 @@ internal class ElementsSessionRepositoryTest {
                     externalPaymentMethods = emptyList(),
                     customPaymentMethods = listOf("cpmt_123", "cpmt_456", "cpmt_789"),
                     savedPaymentMethodSelectionId = "pm_123",
+                    mobileSessionId = MOBILE_SESSION_ID,
+                    appId = APP_ID
+                )
+            ),
+            options = any()
+        )
+    }
+
+    @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
+    @Test
+    fun `Verify PMO SFU params are passed to 'StripeRepository'`() = runTest {
+        whenever(stripeRepository.retrieveElementsSession(any(), any())).thenReturn(
+            Result.success(
+                ElementsSession.createFromFallback(
+                    stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
+                    sessionsError = null,
+                )
+            )
+        )
+
+        val paymentMethodOptions = PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
+            setupFutureUsageValues = mapOf(
+                PaymentMethod.Type.Card to PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession,
+                PaymentMethod.Type.Affirm to PaymentSheet.IntentConfiguration.SetupFutureUse.None,
+                PaymentMethod.Type.AmazonPay
+                    to PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
+            )
+        )
+
+        createRepository().get(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1000,
+                        currency = "usd",
+                        setupFutureUse = null,
+                        paymentMethodOptions = paymentMethodOptions
+                    ),
+                )
+            ),
+            customer = null,
+            customPaymentMethods = listOf(),
+            externalPaymentMethods = listOf(),
+            savedPaymentMethodSelectionId = null,
+        )
+
+        verify(stripeRepository).retrieveElementsSession(
+            params = eq(
+                ElementsSessionParams.DeferredIntentType(
+                    deferredIntentParams = DeferredIntentParams(
+                        mode = DeferredIntentParams.Mode.Payment(
+                            amount = 1000,
+                            currency = "usd",
+                            setupFutureUsage = null,
+                            captureMethod = PaymentIntent.CaptureMethod.Automatic,
+                            paymentMethodOptionsJsonString = paymentMethodOptions.toJsonObjectString()
+                        ),
+                        paymentMethodTypes = listOf(),
+                        paymentMethodConfigurationId = null,
+                        onBehalfOf = null
+                    ),
+                    externalPaymentMethods = emptyList(),
+                    customPaymentMethods = listOf(),
+                    savedPaymentMethodSelectionId = null,
                     mobileSessionId = MOBILE_SESSION_ID,
                     appId = APP_ID
                 )
