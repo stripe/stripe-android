@@ -467,7 +467,8 @@ internal class OnrampInteractor @Inject constructor(
 
         // Fetch platform settings if not available or consumer session changed
         val platformSettingsResult = cryptoApiRepository.getPlatformSettings(
-            consumerSessionClientSecret = currentConsumerSecret
+            consumerSessionClientSecret = currentConsumerSecret,
+            countryHint = null
         )
         if (platformSettingsResult.isFailure) {
             return null
