@@ -6,12 +6,12 @@ import androidx.annotation.RestrictTo
  * Result of KYC attachment in Onramp.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed interface OnrampAttachKycResult {
+sealed interface OnrampAttachKycInfoResult {
     /**
      * KYC submission completed successfully.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data object Completed : OnrampAttachKycResult
+    data object Completed : OnrampAttachKycInfoResult
 
     /**
      * KYC submission failed due to an error.
@@ -20,5 +20,5 @@ sealed interface OnrampAttachKycResult {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Failed internal constructor(
         val error: Throwable
-    ) : OnrampAttachKycResult
+    ) : OnrampAttachKycInfoResult
 }

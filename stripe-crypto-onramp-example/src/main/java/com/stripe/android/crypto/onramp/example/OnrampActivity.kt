@@ -58,8 +58,8 @@ import com.stripe.android.crypto.onramp.model.IdType
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
-import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
+import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import kotlinx.coroutines.launch
@@ -80,8 +80,8 @@ internal class OnrampActivity : ComponentActivity() {
         FeatureFlags.nativeLinkEnabled.setEnabled(true)
 
         val callbacks = OnrampCallbacks(
-            authenticationCallback = viewModel::onAuthenticationResult,
-            identityVerificationCallback = viewModel::onIdentityVerificationResult,
+            authenticateUserCallback = viewModel::onAuthenticationResult,
+            verifyIdentityCallback = viewModel::onIdentityVerificationResult,
             checkoutCallback = viewModel::onCheckoutResult,
             collectPaymentCallback = viewModel::onSelectPaymentResult,
             authorizeCallback = viewModel::onAuthorizeResult

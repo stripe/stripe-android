@@ -10,13 +10,13 @@ import com.stripe.android.crypto.onramp.di.OnrampPresenterComponent
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
+import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
-import com.stripe.android.crypto.onramp.model.OnrampAttachKycResult
-import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
-import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
+import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
+import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import javax.inject.Inject
@@ -51,7 +51,7 @@ class OnrampCoordinator @Inject internal constructor(
      * @param email The email address to look up.
      * @return OnrampLinkLookupResult indicating whether the user exists.
      */
-    suspend fun hasLinkAccount(email: String): OnrampLinkLookupResult {
+    suspend fun hasLinkAccount(email: String): OnrampHasLinkAccountResult {
         return interactor.hasLinkAccount(email)
     }
 
@@ -61,7 +61,7 @@ class OnrampCoordinator @Inject internal constructor(
      * @param info The [LinkUserInfo] for the new user.
      * @return OnrampRegisterUserResult indicating the result of registration.
      */
-    suspend fun registerLinkUser(info: LinkUserInfo): OnrampRegisterUserResult {
+    suspend fun registerLinkUser(info: LinkUserInfo): OnrampRegisterLinkUserResult {
         return interactor.registerLinkUser(info)
     }
 
@@ -84,9 +84,9 @@ class OnrampCoordinator @Inject internal constructor(
      * Attaches the specific KYC info to the current Link user. Requires an authenticated Link user.
      *
      * @param info The KYC info to attach to the Link user.
-     * @return [OnrampAttachKycResult] indicating the result.
+     * @return [OnrampAttachKycInfoResult] indicating the result.
      */
-    suspend fun attachKycInfo(info: KycInfo): OnrampAttachKycResult {
+    suspend fun attachKycInfo(info: KycInfo): OnrampAttachKycInfoResult {
         return interactor.attachKycInfo(info)
     }
 

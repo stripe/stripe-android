@@ -11,19 +11,19 @@ import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
+import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
+import com.stripe.android.crypto.onramp.model.OnrampAuthenticateResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
-import com.stripe.android.crypto.onramp.model.OnrampIdentityVerificationResult
-import com.stripe.android.crypto.onramp.model.OnrampAttachKycResult
-import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
-import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
+import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
+import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
-import com.stripe.android.crypto.onramp.model.OnrampAuthenticationResult
+import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.identity.IdentityVerificationSheet
@@ -68,18 +68,18 @@ internal class OnrampInteractor @Inject constructor(
         }
     }
 
-    suspend fun hasLinkAccount(email: String): OnrampLinkLookupResult {
+    suspend fun hasLinkAccount(email: String): OnrampHasLinkAccountResult {
         return when (val result = linkController.lookupConsumer(email)) {
-            is LinkController.LookupConsumerResult.Success -> OnrampLinkLookupResult.Completed(
+            is LinkController.LookupConsumerResult.Success -> OnrampHasLinkAccountResult.Completed(
                 hasLinkAccount = result.isConsumer
             )
-            is LinkController.LookupConsumerResult.Failed -> OnrampLinkLookupResult.Failed(
+            is LinkController.LookupConsumerResult.Failed -> OnrampHasLinkAccountResult.Failed(
                 error = result.error
             )
         }
     }
 
-    suspend fun registerLinkUser(info: LinkUserInfo): OnrampRegisterUserResult {
+    suspend fun registerLinkUser(info: LinkUserInfo): OnrampRegisterLinkUserResult {
         val result = linkController.registerConsumer(
             email = info.email,
             phone = info.phone,
@@ -96,18 +96,18 @@ internal class OnrampInteractor @Inject constructor(
 
                     permissionsResult.fold(
                         onSuccess = { result ->
-                            OnrampRegisterUserResult.Completed(result.id)
+                            OnrampRegisterLinkUserResult.Completed(result.id)
                         },
                         onFailure = { error ->
-                            OnrampRegisterUserResult.Failed(error)
+                            OnrampRegisterLinkUserResult.Failed(error)
                         }
                     )
                 } ?: run {
-                    return OnrampRegisterUserResult.Failed(MissingConsumerSecretException())
+                    return OnrampRegisterLinkUserResult.Failed(MissingConsumerSecretException())
                 }
             }
             is LinkController.RegisterConsumerResult.Failed -> {
-                OnrampRegisterUserResult.Failed(
+                OnrampRegisterLinkUserResult.Failed(
                     error = result.error
                 )
             }
@@ -134,14 +134,14 @@ internal class OnrampInteractor @Inject constructor(
         }
     }
 
-    suspend fun attachKycInfo(kycInfo: KycInfo): OnrampAttachKycResult {
+    suspend fun attachKycInfo(kycInfo: KycInfo): OnrampAttachKycInfoResult {
         val secret = consumerSessionClientSecret()
-            ?: return OnrampAttachKycResult.Failed(MissingConsumerSecretException())
+            ?: return OnrampAttachKycInfoResult.Failed(MissingConsumerSecretException())
 
         return cryptoApiRepository.collectKycData(kycInfo, secret)
             .fold(
-                onSuccess = { OnrampAttachKycResult.Completed },
-                onFailure = { OnrampAttachKycResult.Failed(it) }
+                onSuccess = { OnrampAttachKycInfoResult.Completed },
+                onFailure = { OnrampAttachKycInfoResult.Failed(it) }
             )
     }
 
@@ -189,7 +189,7 @@ internal class OnrampInteractor @Inject constructor(
 
     suspend fun handleAuthenticationResult(
         result: LinkController.AuthenticationResult
-    ): OnrampAuthenticationResult = when (result) {
+    ): OnrampAuthenticateResult = when (result) {
         is LinkController.AuthenticationResult.Success -> {
             val secret = consumerSessionClientSecret()
             secret?.let {
@@ -197,18 +197,18 @@ internal class OnrampInteractor @Inject constructor(
                     .grantPartnerMerchantPermissions(it)
                 permissionsResult.fold(
                     onSuccess = { result ->
-                        OnrampAuthenticationResult.Completed(result.id)
+                        OnrampAuthenticateResult.Completed(result.id)
                     },
                     onFailure = { error ->
-                        OnrampAuthenticationResult.Failed(error)
+                        OnrampAuthenticateResult.Failed(error)
                     }
                 )
-            } ?: OnrampAuthenticationResult.Failed(
+            } ?: OnrampAuthenticateResult.Failed(
                 MissingConsumerSecretException()
             )
         }
-        is LinkController.AuthenticationResult.Failed -> OnrampAuthenticationResult.Failed(result.error)
-        is LinkController.AuthenticationResult.Canceled -> OnrampAuthenticationResult.Cancelled()
+        is LinkController.AuthenticationResult.Failed -> OnrampAuthenticateResult.Failed(result.error)
+        is LinkController.AuthenticationResult.Canceled -> OnrampAuthenticateResult.Cancelled()
     }
 
     suspend fun handleAuthorizeResult(
@@ -241,14 +241,14 @@ internal class OnrampInteractor @Inject constructor(
 
     fun handleIdentityVerificationResult(
         result: IdentityVerificationSheet.VerificationFlowResult
-    ): OnrampIdentityVerificationResult = when (result) {
+    ): OnrampVerifyIdentityResult = when (result) {
         is IdentityVerificationSheet.VerificationFlowResult.Completed -> {
-            OnrampIdentityVerificationResult.Completed()
+            OnrampVerifyIdentityResult.Completed()
         }
         is IdentityVerificationSheet.VerificationFlowResult.Failed ->
-            OnrampIdentityVerificationResult.Failed(result.throwable)
+            OnrampVerifyIdentityResult.Failed(result.throwable)
         is IdentityVerificationSheet.VerificationFlowResult.Canceled ->
-            OnrampIdentityVerificationResult.Cancelled()
+            OnrampVerifyIdentityResult.Cancelled()
     }
 
     fun handleSelectPaymentResult(

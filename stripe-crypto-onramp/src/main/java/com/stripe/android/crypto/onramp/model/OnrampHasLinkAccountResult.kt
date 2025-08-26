@@ -3,25 +3,25 @@ package com.stripe.android.crypto.onramp.model
 import androidx.annotation.RestrictTo
 
 /**
- * Result of an Onramp Link register user operation.
+ * Result of an Onramp Link user lookup operation.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed interface OnrampRegisterUserResult {
+sealed interface OnrampHasLinkAccountResult {
     /**
-     * User registration was successful.
-     * @param customerId The crypto customer ID.
+     * Link user lookup was successful.
+     * @param hasLinkAccount Whether the email is associated with an existing Link consumer, or `false` otherwise.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Completed internal constructor(
-        val customerId: String
-    ) : OnrampRegisterUserResult
+        val hasLinkAccount: Boolean
+    ) : OnrampHasLinkAccountResult
 
     /**
-     * User registration failed.
+     * Link user lookup failed.
      * @param error The error that caused the failure
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Failed internal constructor(
         val error: Throwable
-    ) : OnrampRegisterUserResult
+    ) : OnrampHasLinkAccountResult
 }

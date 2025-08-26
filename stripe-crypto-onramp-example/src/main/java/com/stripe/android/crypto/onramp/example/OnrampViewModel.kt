@@ -17,17 +17,17 @@ import com.stripe.android.crypto.onramp.example.network.TestBackendRepository
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
+import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
+import com.stripe.android.crypto.onramp.model.OnrampAuthenticateResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
-import com.stripe.android.crypto.onramp.model.OnrampIdentityVerificationResult
-import com.stripe.android.crypto.onramp.model.OnrampAttachKycResult
-import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
-import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
+import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
+import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
-import com.stripe.android.crypto.onramp.model.OnrampAuthenticationResult
+import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.link.LinkAppearance
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -97,7 +97,7 @@ internal class OnrampViewModel(
 
         val result = onrampCoordinator.hasLinkAccount(currentEmail)
         when (result) {
-            is OnrampLinkLookupResult.Completed -> {
+            is OnrampHasLinkAccountResult.Completed -> {
                 if (result.hasLinkAccount) {
                     _message.value = "User exists in Link. Please authenticate"
                     _uiState.update { it.copy(screen = Screen.Authentication) }
@@ -106,7 +106,7 @@ internal class OnrampViewModel(
                     _uiState.update { it.copy(screen = Screen.Registration) }
                 }
             }
-            is OnrampLinkLookupResult.Failed -> {
+            is OnrampHasLinkAccountResult.Failed -> {
                 _message.value = "Lookup failed: ${result.error.message}"
                 _uiState.update { it.copy(screen = Screen.EmailInput) }
             }
@@ -121,9 +121,9 @@ internal class OnrampViewModel(
         _message.value = null
     }
 
-    fun onAuthenticationResult(result: OnrampAuthenticationResult) {
+    fun onAuthenticationResult(result: OnrampAuthenticateResult) {
         when (result) {
-            is OnrampAuthenticationResult.Completed -> {
+            is OnrampAuthenticateResult.Completed -> {
                 _message.value = "Authentication successful! You can now perform authenticated operations."
                 _uiState.update {
                     it.copy(
@@ -132,26 +132,26 @@ internal class OnrampViewModel(
                     )
                 }
             }
-            is OnrampAuthenticationResult.Cancelled -> {
+            is OnrampAuthenticateResult.Cancelled -> {
                 _message.value = "Authentication cancelled, please try again"
             }
-            is OnrampAuthenticationResult.Failed -> {
+            is OnrampAuthenticateResult.Failed -> {
                 _message.value = "Authentication failed: ${result.error.message}"
                 _uiState.update { it.copy(screen = Screen.EmailInput) }
             }
         }
     }
 
-    fun onIdentityVerificationResult(result: OnrampIdentityVerificationResult) {
+    fun onIdentityVerificationResult(result: OnrampVerifyIdentityResult) {
         when (result) {
-            is OnrampIdentityVerificationResult.Completed -> {
+            is OnrampVerifyIdentityResult.Completed -> {
                 _message.value = "Identity Verification completed"
                 _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
             }
-            is OnrampIdentityVerificationResult.Cancelled -> {
+            is OnrampVerifyIdentityResult.Cancelled -> {
                 _message.value = "Identity Verification cancelled, please try again"
             }
-            is OnrampIdentityVerificationResult.Failed -> {
+            is OnrampVerifyIdentityResult.Failed -> {
                 _message.value = "Identity Verification failed: ${result.error.message}"
                 _uiState.update { it.copy(screen = Screen.EmailInput) }
             }
@@ -257,7 +257,7 @@ internal class OnrampViewModel(
         viewModelScope.launch {
             val result = onrampCoordinator.registerLinkUser(userInfo)
             when (result) {
-                is OnrampRegisterUserResult.Completed -> {
+                is OnrampRegisterLinkUserResult.Completed -> {
                     _message.value = "Registration successful"
                     _uiState.update {
                         it.copy(
@@ -266,7 +266,7 @@ internal class OnrampViewModel(
                         )
                     }
                 }
-                is OnrampRegisterUserResult.Failed -> {
+                is OnrampRegisterLinkUserResult.Failed -> {
                     _message.value = "Registration failed: ${result.error.message}"
                     _uiState.update { it.copy(screen = Screen.EmailInput) }
                 }
@@ -309,11 +309,11 @@ internal class OnrampViewModel(
             val result = onrampCoordinator.attachKycInfo(kycInfo)
 
             when (result) {
-                is OnrampAttachKycResult.Completed -> {
+                is OnrampAttachKycInfoResult.Completed -> {
                     _message.value = "KYC Collection successful"
                     _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
                 }
-                is OnrampAttachKycResult.Failed -> {
+                is OnrampAttachKycInfoResult.Failed -> {
                     _message.value = "KYC Collection failed: ${result.error.message}"
                     _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
                 }
