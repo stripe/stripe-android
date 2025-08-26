@@ -5,6 +5,7 @@ package com.stripe.android.link.ui.inline
 import androidx.annotation.RestrictTo
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -12,10 +13,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -41,9 +45,13 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -66,8 +74,6 @@ import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
-import com.stripe.android.uicore.text.EmbeddableImage
-import com.stripe.android.uicore.text.Html
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
 import com.stripe.android.uicore.R as StripeUiCoreR
@@ -292,24 +298,47 @@ private fun LinkCheckbox(
 private fun TextWithLinkLogo(
     label: String,
     style: TextStyle,
-    color: Color
+    color: Color,
 ) {
-    Html(
-        html = label.replace(
-            " Link",
-            " <img src=\"link_logo\">"
-        ),
+    val painter = painterResource(R.drawable.stripe_link_logo_knockout)
+    val logoHeight = style.fontSize
+    val logoWidth = logoHeight * (painter.intrinsicSize.width / painter.intrinsicSize.height)
+    Text(
+        text = label.buildLinkLogoAnnotatedString(),
         style = style,
         color = color,
-        imageAlign = PlaceholderVerticalAlign.TextCenter,
-        imageLoader = mapOf(
-            "link_logo" to EmbeddableImage.Drawable(
-                id = R.drawable.stripe_link_logo_knockout,
-                contentDescription = com.stripe.android.R.string.stripe_link,
-                colorFilter = ColorFilter.tint(color, blendMode = BlendMode.SrcIn)
-            )
-        ),
+        inlineContent = mapOf(
+            "link_logo" to InlineTextContent(
+                placeholder = Placeholder(
+                    width = logoWidth,
+                    height = logoHeight,
+                    placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter
+                )
+            ) {
+                Image(
+                    painter = painter,
+                    contentDescription = stringResource(com.stripe.android.R.string.stripe_link),
+                    colorFilter = ColorFilter.tint(color, BlendMode.SrcIn),
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        )
     )
+}
+
+@Composable
+private fun String.buildLinkLogoAnnotatedString(): AnnotatedString = buildAnnotatedString {
+    val parts = split("Link")
+    val preLinkText = parts.getOrNull(0)
+    val postLinkText = parts.getOrNull(1)
+    if (preLinkText == null || postLinkText == null) {
+        // "Link" not found, just show the label as-is
+        append(this@buildLinkLogoAnnotatedString)
+    } else {
+        append(preLinkText)
+        appendInlineContent(id = "link_logo")
+        append(postLinkText)
+    }
 }
 
 @Composable
