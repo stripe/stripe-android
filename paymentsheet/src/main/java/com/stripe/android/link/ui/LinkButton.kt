@@ -114,7 +114,9 @@ private fun LinkButtonTheme.buttonColors(): ButtonColors = when (this) {
     )
     LinkButtonTheme.DEFAULT -> ButtonDefaults.buttonColors(
         backgroundColor = LinkTheme.colors.buttonBrand,
+        contentColor = LinkTheme.colors.onButtonBrand,
         disabledBackgroundColor = LinkTheme.colors.buttonBrand,
+        disabledContentColor = LinkTheme.colors.onButtonBrand.copy(alpha = ContentAlpha.disabled)
     )
 }
 

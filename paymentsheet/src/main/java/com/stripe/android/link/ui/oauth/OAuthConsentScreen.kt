@@ -340,7 +340,7 @@ private fun ActionButton(
     }
     val textColor = when (type) {
         ActionButtonType.Secondary -> LinkTheme.colors.textSecondary
-        ActionButtonType.Primary -> LinkTheme.colors.textOnButtonPrimary
+        ActionButtonType.Primary -> LinkTheme.colors.onButtonPrimary
     }
     TextButton(
         modifier = modifier
