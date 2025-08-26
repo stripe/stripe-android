@@ -103,7 +103,7 @@ internal fun UpdateCardScreenBody(
 @Preview
 @Composable
 internal fun UpdateCardScreenBodyPreview() {
-    DefaultLinkTheme(darkTheme = false) {
+    DefaultLinkTheme {
         Surface(
             color = LinkTheme.colors.surfacePrimary
         ) {

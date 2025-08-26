@@ -202,7 +202,6 @@ internal class VerificationScreenTest {
                     onConsentShown = viewModel::onConsentShown,
                     onFocusRequested = viewModel::onFocusRequested,
                     didShowCodeSentNotification = viewModel::didShowCodeSentNotification,
-                    linkAppearance = null
                 )
             }
         }
@@ -245,7 +244,6 @@ internal class VerificationScreenTest {
                     onConsentShown = viewModel::onConsentShown,
                     onFocusRequested = viewModel::onFocusRequested,
                     didShowCodeSentNotification = viewModel::didShowCodeSentNotification,
-                    linkAppearance = null
                 )
             }
         }

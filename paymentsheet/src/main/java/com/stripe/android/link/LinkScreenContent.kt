@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.theme.LocalLinkAppearance
 import com.stripe.android.link.ui.FullScreenContent
 import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.link.ui.LinkContentScrollHandler
@@ -34,9 +35,12 @@ internal fun LinkScreenContent(
         LinkContentScrollHandler(onCanScrollBackwardChanged = viewModel::onContentCanScrollBackwardChanged)
     }
 
+    val linkAppearance = viewModel.linkConfiguration.linkAppearance
+
     CompositionLocalProvider(
         LocalLinkContentScrollHandler provides linkContentScrollHandler,
         LocalStripeImageLoader provides StripeImageLoader(LocalContext.current),
+        LocalLinkAppearance provides linkAppearance,
     ) {
         LinkScreenContentBody(
             bottomSheetState = bottomSheetState,
@@ -58,7 +62,6 @@ internal fun LinkScreenContent(
             changeEmail = viewModel::changeEmail,
             onNavBackStackEntryChanged = viewModel::onNavEntryChanged,
             navigationChannel = viewModel.navigationFlow,
-            appearance = viewModel.linkConfiguration.linkAppearance
         )
     }
 }
@@ -69,7 +72,6 @@ internal fun LinkScreenContentBody(
     screenState: ScreenState,
     appBarState: LinkAppBarState,
     eventReporter: EventReporter,
-    appearance: LinkAppearance?,
     navigationChannel: SharedFlow<NavigationIntent>,
     onNavBackStackEntryChanged: (NavBackStackEntryUpdate) -> Unit,
     onVerificationSucceeded: () -> Unit,
@@ -116,7 +118,6 @@ internal fun LinkScreenContentBody(
                 changeEmail = changeEmail,
                 onDismissClicked = onDismissClicked,
                 dismissWithResult = dismissWithResult,
-                linkAppearance = appearance
             )
         }
     }

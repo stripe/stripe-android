@@ -347,11 +347,11 @@ private fun ActionButton(
     }
     val textColor = when (type) {
         ActionButtonType.Secondary -> LinkTheme.colors.textSecondary
-        ActionButtonType.Primary -> LinkTheme.colors.textOnButtonPrimary
+        ActionButtonType.Primary -> LinkTheme.colors.onButtonPrimary
     }
     TextButton(
         modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
+            .clip(LinkTheme.shapes.default)
             .background(backgroundColor),
         contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp),
         onClick = onClick,
