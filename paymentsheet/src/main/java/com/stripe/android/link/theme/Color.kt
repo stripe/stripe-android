@@ -1,6 +1,6 @@
 package com.stripe.android.link.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -150,10 +150,14 @@ internal object LinkThemeConfig {
      */
     internal val LinkColors.radioButtonColors
         @Composable
-        get() = RadioButtonDefaults.colors(
-            selectedColor = LinkTheme.colors.buttonBrand,
-            unselectedColor = if (isSystemInDarkTheme()) Neutral700 else LinkTheme.colors.borderDefault
-        )
+        get() = run {
+            val unselectedColor = if (isDark) Neutral700 else LinkTheme.colors.borderDefault
+            RadioButtonDefaults.colors(
+                selectedColor = LinkTheme.colors.buttonPrimary,
+                unselectedColor = unselectedColor,
+                disabledColor = unselectedColor.copy(alpha = ContentAlpha.disabled)
+            )
+        }
 }
 
 @Composable
