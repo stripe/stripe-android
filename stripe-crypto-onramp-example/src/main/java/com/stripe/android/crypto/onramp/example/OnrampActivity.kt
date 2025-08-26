@@ -80,10 +80,10 @@ internal class OnrampActivity : ComponentActivity() {
         FeatureFlags.nativeLinkEnabled.setEnabled(true)
 
         val callbacks = OnrampCallbacks(
-            authenticateUserCallback = viewModel::onAuthenticationResult,
-            verifyIdentityCallback = viewModel::onIdentityVerificationResult,
+            authenticateUserCallback = viewModel::onAuthenticateUserResult,
+            verifyIdentityCallback = viewModel::onVerifyIdentityResult,
             checkoutCallback = viewModel::onCheckoutResult,
-            collectPaymentCallback = viewModel::onSelectPaymentResult,
+            collectPaymentCallback = viewModel::onCollectPaymentResult,
             authorizeCallback = viewModel::onAuthorizeResult
         )
 

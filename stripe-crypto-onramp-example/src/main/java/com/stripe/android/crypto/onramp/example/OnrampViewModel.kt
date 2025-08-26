@@ -121,7 +121,7 @@ internal class OnrampViewModel(
         _message.value = null
     }
 
-    fun onAuthenticationResult(result: OnrampAuthenticateResult) {
+    fun onAuthenticateUserResult(result: OnrampAuthenticateResult) {
         when (result) {
             is OnrampAuthenticateResult.Completed -> {
                 _message.value = "Authentication successful! You can now perform authenticated operations."
@@ -142,7 +142,7 @@ internal class OnrampViewModel(
         }
     }
 
-    fun onIdentityVerificationResult(result: OnrampVerifyIdentityResult) {
+    fun onVerifyIdentityResult(result: OnrampVerifyIdentityResult) {
         when (result) {
             is OnrampVerifyIdentityResult.Completed -> {
                 _message.value = "Identity Verification completed"
@@ -158,7 +158,7 @@ internal class OnrampViewModel(
         }
     }
 
-    fun onSelectPaymentResult(result: OnrampCollectPaymentMethodResult) {
+    fun onCollectPaymentResult(result: OnrampCollectPaymentMethodResult) {
         when (result) {
             is OnrampCollectPaymentMethodResult.Completed -> {
                 _message.value = "Payment selection completed"
