@@ -27,6 +27,7 @@ import com.stripe.android.crypto.onramp.model.StartIdentityVerificationRequest
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.utils.filterNotNullValues
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
@@ -136,11 +137,19 @@ internal class CryptoApiRepository @Inject constructor(
         )
     }
 
-    suspend fun getPlatformSettings(): Result<GetPlatformSettingsResponse> {
+    suspend fun getPlatformSettings(
+        consumerSessionClientSecret: String?,
+        countryHint: String?
+    ): Result<GetPlatformSettingsResponse> {
         val request = apiRequestFactory.createGet(
             url = platformSettings,
             options = buildRequestOptions(),
+            params = mapOf(
+                "credentials[consumer_session_client_secret]" to consumerSessionClientSecret,
+                "country_hint" to countryHint
+            ).filterNotNullValues()
         )
+
         return execute(
             request = request,
             responseSerializer = GetPlatformSettingsResponse.serializer()

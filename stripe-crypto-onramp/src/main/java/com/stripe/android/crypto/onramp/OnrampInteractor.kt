@@ -6,6 +6,7 @@ import com.stripe.android.core.utils.flatMapCatching
 import com.stripe.android.crypto.onramp.CheckoutState.Status
 import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
 import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
+import com.stripe.android.crypto.onramp.exception.MissingPlatformSettingsException
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
@@ -14,6 +15,7 @@ import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
+import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
 import com.stripe.android.crypto.onramp.model.OnrampIdentityVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampKYCResult
@@ -26,6 +28,7 @@ import com.stripe.android.crypto.onramp.model.PaymentOptionDisplayData
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
+import com.stripe.android.link.LinkController.ConfigureResult
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,12 +48,12 @@ internal class OnrampInteractor @Inject constructor(
     private val _state = MutableStateFlow(OnrampState())
     val state: StateFlow<OnrampState> = _state.asStateFlow()
 
-    suspend fun configure(configuration: OnrampConfiguration) {
+    suspend fun configure(configuration: OnrampConfiguration): OnrampConfigurationResult {
         _state.value = _state.value.copy(configuration = configuration)
 
         // We are *not* calling `PaymentConfiguration.init()` here because we're relying on
         // `LinkController.configure()` to do it.
-        linkController.configure(
+        val linkResult: ConfigureResult = linkController.configure(
             LinkController.Configuration.Builder(
                 merchantDisplayName = configuration.merchantDisplayName,
                 publishableKey = configuration.publishableKey,
@@ -58,6 +61,11 @@ internal class OnrampInteractor @Inject constructor(
                 .appearance(configuration.appearance)
                 .build()
         )
+
+        return when (linkResult) {
+            is ConfigureResult.Success -> OnrampConfigurationResult.Completed(success = true)
+            is ConfigureResult.Failed -> OnrampConfigurationResult.Failed(linkResult.error)
+        }
     }
 
     suspend fun lookupLinkUser(email: String): OnrampLinkLookupResult {
@@ -151,18 +159,21 @@ internal class OnrampInteractor @Inject constructor(
     suspend fun createCryptoPaymentToken(): OnrampCreateCryptoPaymentTokenResult {
         val secret = consumerSessionClientSecret()
             ?: return OnrampCreateCryptoPaymentTokenResult.Failed(MissingConsumerSecretException())
-        return cryptoApiRepository.getPlatformSettings()
-            .map { it.publishableKey }
-            .mapCatching { apiKey ->
-                when (val result = linkController.createPaymentMethodForOnramp(apiKey = apiKey)) {
-                    is LinkController.CreatePaymentMethodResult.Success -> {
-                        result.paymentMethod
-                    }
-                    is LinkController.CreatePaymentMethodResult.Failed -> {
-                        throw result.error
-                    }
+
+        val platformPublishableKey = getOrFetchPlatformKey()
+            ?: return OnrampCreateCryptoPaymentTokenResult.Failed(MissingPlatformSettingsException())
+
+        return runCatching {
+            val apiKey = platformPublishableKey
+            when (val result = linkController.createPaymentMethodForOnramp(apiKey = apiKey)) {
+                is LinkController.CreatePaymentMethodResult.Success -> {
+                    result.paymentMethod
+                }
+                is LinkController.CreatePaymentMethodResult.Failed -> {
+                    throw result.error
                 }
             }
+        }
             .flatMapCatching { paymentMethod ->
                 cryptoApiRepository.createPaymentToken(
                     consumerSessionClientSecret = secret,
@@ -286,35 +297,21 @@ internal class OnrampInteractor @Inject constructor(
             // Checkout is already in progress - ignore duplicate calls
             return
         }
-        cryptoApiRepository.getPlatformSettings()
-            .onSuccess { settings ->
-                // Start processing with session info
-                _state.update {
-                    it.copy(
-                        checkoutState = CheckoutState(
-                            status = Status.Processing(
-                                onrampSessionId = onrampSessionId,
-                                checkoutHandler = checkoutHandler,
-                                platformKey = settings.publishableKey
-                            )
-                        )
+        _state.update {
+            it.copy(
+                checkoutState = CheckoutState(
+                    status = Status.Processing(
+                        onrampSessionId = onrampSessionId,
+                        checkoutHandler = checkoutHandler
                     )
-                }
-
-                performCheckoutInternal(
-                    onrampSessionId = onrampSessionId,
-                    checkoutHandler = checkoutHandler,
-                    platformApiKey = settings.publishableKey
                 )
-            }.onFailure { error ->
-                _state.update {
-                    it.copy(
-                        checkoutState = CheckoutState(
-                            status = Status.Completed(OnrampCheckoutResult.Failed(error))
-                        )
-                    )
-                }
-            }
+            )
+        }
+
+        performCheckoutInternal(
+            onrampSessionId = onrampSessionId,
+            checkoutHandler = checkoutHandler
+        )
     }
 
     /**
@@ -330,7 +327,6 @@ internal class OnrampInteractor @Inject constructor(
                     it.copy(
                         checkoutState = CheckoutState(
                             status = Status.Processing(
-                                platformKey = status.platformKey,
                                 onrampSessionId = status.onrampSessionId,
                                 checkoutHandler = status.checkoutHandler
                             )
@@ -339,8 +335,7 @@ internal class OnrampInteractor @Inject constructor(
                 }
                 performCheckoutInternal(
                     onrampSessionId = status.onrampSessionId,
-                    checkoutHandler = status.checkoutHandler,
-                    platformApiKey = status.platformKey
+                    checkoutHandler = status.checkoutHandler
                 )
             }
             else -> {
@@ -361,9 +356,21 @@ internal class OnrampInteractor @Inject constructor(
      */
     private suspend fun performCheckoutInternal(
         onrampSessionId: String,
-        checkoutHandler: suspend () -> String,
-        platformApiKey: String
+        checkoutHandler: suspend () -> String
     ) = runCatching {
+        val platformApiKey = getOrFetchPlatformKey()
+        if (platformApiKey == null) {
+            _state.update {
+                it.copy(
+                    checkoutState = CheckoutState(
+                        status = Status.Completed(
+                            OnrampCheckoutResult.Failed(MissingPlatformSettingsException())
+                        )
+                    )
+                )
+            }
+            return
+        }
         val paymentIntent = retrievePaymentIntent(
             onrampSessionId = onrampSessionId,
             onrampSessionClientSecret = checkoutHandler(),
@@ -444,10 +451,56 @@ internal class OnrampInteractor @Inject constructor(
             else -> OnrampCheckoutResult.Failed(PaymentFailedException())
         }
     }
+
+    /**
+     * Gets the platform publishable key from state, or fetches it if not available.
+     * Returns null if fetch fails or key is null.
+     */
+    private suspend fun getOrFetchPlatformKey(): String? {
+        val currentConsumerSecret = consumerSessionClientSecret()
+        val cachedKey = _state.value.platformKeyCache
+
+        // Check if we have a valid cached key for the current consumer session
+        if (cachedKey != null && cachedKey.consumerSessionClientSecret == currentConsumerSecret) {
+            return cachedKey.publishableKey
+        }
+
+        // Fetch platform settings if not available or consumer session changed
+        val platformSettingsResult = cryptoApiRepository.getPlatformSettings(
+            consumerSessionClientSecret = currentConsumerSecret,
+            countryHint = null
+        )
+        if (platformSettingsResult.isFailure) {
+            return null
+        }
+
+        val platformPublishableKey = platformSettingsResult.getOrNull()?.publishableKey
+        if (platformPublishableKey != null) {
+            // Cache the key with the current consumer session
+            _state.update {
+                it.copy(
+                    platformKeyCache = PlatformKeyCache(
+                        publishableKey = platformPublishableKey,
+                        consumerSessionClientSecret = currentConsumerSecret
+                    )
+                )
+            }
+        }
+        return platformPublishableKey
+    }
 }
 
 internal data class OnrampState(
     val configuration: OnrampConfiguration? = null,
     val linkControllerState: LinkController.State? = null,
     val checkoutState: CheckoutState? = null,
+    val platformKeyCache: PlatformKeyCache? = null,
+)
+
+/**
+ * Caches the platform publishable key along with the consumer session it was fetched for.
+ */
+internal data class PlatformKeyCache(
+    val publishableKey: String,
+    val consumerSessionClientSecret: String?
 )

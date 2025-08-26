@@ -16,7 +16,6 @@ internal data class CheckoutState(
         data class Processing(
             val onrampSessionId: String,
             val checkoutHandler: suspend () -> String,
-            val platformKey: String,
         ) : Status
 
         /**
