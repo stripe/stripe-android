@@ -75,6 +75,13 @@ internal class LinkControllerPlaygroundViewModel(
         }
     }
 
+    fun onUpdatePhoneNumberClick(phoneNumber: String) {
+        viewModelScope.launch {
+            val result = linkController.updatePhoneNumber(phoneNumber)
+            state.update { it.copy(updatePhoneNumberResult = result) }
+        }
+    }
+
     fun onCreatePaymentMethodClick() {
         viewModelScope.launch {
             val result = linkController.createPaymentMethod()

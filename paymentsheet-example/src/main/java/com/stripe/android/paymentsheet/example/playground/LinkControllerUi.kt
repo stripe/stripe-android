@@ -73,6 +73,7 @@ internal fun LinkControllerUi(
     onAuthenticationClick: (email: String, existingOnly: Boolean) -> Unit,
     onAuthorizeClick: (linkAuthIntentId: String) -> Unit,
     onRegisterConsumerClick: (email: String, phone: String, country: String, name: String?) -> Unit,
+    onUpdatePhoneNumberClick: (phoneNumber: String) -> Unit,
     onErrorMessage: (message: String) -> Unit,
 ) {
     var email by rememberSaveable { mutableStateOf("") }
@@ -82,6 +83,7 @@ internal fun LinkControllerUi(
     var registrationPhone by rememberSaveable { mutableStateOf("") }
     var registrationCountry by rememberSaveable { mutableStateOf("US") }
     var registrationName by rememberSaveable { mutableStateOf("") }
+    var updatePhoneNumber by rememberSaveable { mutableStateOf("") }
     var paymentMethodFilter by remember { mutableStateOf<LinkController.PaymentMethodType?>(null) }
     val errorToPresent = playgroundState.linkControllerError()
 
@@ -190,6 +192,23 @@ internal fun LinkControllerUi(
                 ) {
                     Text("Register")
                 }
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = updatePhoneNumber,
+                    label = { Text(text = "New phone number") },
+                    onValueChange = { updatePhoneNumber = it }
+                )
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        onUpdatePhoneNumberClick(updatePhoneNumber.trim())
+                    },
+                    enabled = updatePhoneNumber.isNotBlank()
+                ) {
+                    Text("Update Phone Number")
+                }
+                Divider(Modifier.padding(top = 10.dp, bottom = 10.dp))
+
             }
         }
         Divider(Modifier.padding(bottom = 10.dp))
@@ -274,6 +293,7 @@ private fun StatusBox(
         add("Authentication result" to (playgroundState.authenticationResult?.toString() ?: ""))
         add("Authorize result" to (playgroundState.authorizeResult?.toString() ?: ""))
         add("Register result" to (playgroundState.registerConsumerResult?.toString() ?: ""))
+        add("Update phone result" to (playgroundState.updatePhoneNumberResult?.toString() ?: ""))
     }
 
     if (statusItems.isNotEmpty()) {
@@ -322,7 +342,7 @@ private fun LinkControllerPlaygroundState.linkControllerError(): Throwable? = li
 ).firstOrNull { it != null }
 
 @Composable
-@Preview(showBackground = true)
+@Preview(showBackground = true, heightDp = 1_200)
 private fun LinkControllerUiPreview() {
     PaymentSheetExampleTheme {
         LinkControllerUi(
@@ -335,6 +355,7 @@ private fun LinkControllerUiPreview() {
             onAuthenticationClick = { _, _ -> },
             onAuthorizeClick = {},
             onRegisterConsumerClick = { _, _, _, _ -> },
+            onUpdatePhoneNumberClick = {},
             onErrorMessage = {},
         )
     }
