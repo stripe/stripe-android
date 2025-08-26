@@ -154,7 +154,7 @@ class GooglePayPaymentMethodLauncherComposeActivity : AppCompatActivity() {
 }
 
 @Parcelize
-class GooglePayPaymentMethodLauncherAcceptableBrandsFilter(
+private class GooglePayPaymentMethodLauncherAcceptableBrandsFilter(
     private val cardBrands: Set<CardBrand>
 ) : CardBrandFilter {
     constructor(vararg cardBrands: CardBrand) : this(cardBrands.toSet())
