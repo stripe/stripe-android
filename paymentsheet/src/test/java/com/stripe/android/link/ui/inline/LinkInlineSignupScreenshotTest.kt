@@ -244,4 +244,40 @@ class LinkInlineSignupScreenshotTest {
             )
         }
     }
+
+    @Test
+    fun testLinkInlineSignupCheckbox() {
+        val emailController = EmailConfig.createController("email@email.com", showOptionalLabel = true)
+        val phoneNumberController = PhoneNumberController.createPhoneNumberController()
+        val nameController = NameConfig.createController(initialValue = null)
+
+        val sectionController = SectionController(
+            label = null,
+            sectionFieldErrorControllers = listOf(
+                emailController,
+                phoneNumberController,
+                nameController,
+            )
+        )
+
+        paparazziRule.snapshot {
+            LinkInlineSignup(
+                merchantName = "Merchant, Inc.",
+                sectionController = sectionController,
+                emailController = emailController,
+                phoneNumberController = phoneNumberController,
+                nameController = nameController,
+                signUpState = SignUpState.InputtingPrimaryField,
+                enabled = true,
+                expanded = false,
+                requiresNameCollection = true,
+                allowsDefaultOptIn = false,
+                linkSignUpOptInFeatureEnabled = true,
+                didAskToChangeSignupDetails = false,
+                errorMessage = null,
+                toggleExpanded = {},
+                changeSignupDetails = {},
+            )
+        }
+    }
 }
