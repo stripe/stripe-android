@@ -24,4 +24,6 @@
   <string name="stripe_address_label_state">Država</string>
   <!-- Label for input requesting zip code, used for US based addreses -->
   <string name="stripe_address_label_zip_code">ZIP broj</string>
+  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
+  <string name="stripe_unexpected_error_try_again">Došlo je do neočekivane pogreške -- pokušajte ponovno za nekoliko sekundi</string>
 </resources>

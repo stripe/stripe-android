@@ -5,6 +5,7 @@ import com.stripe.android.R
 import com.stripe.android.core.StripeError
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.core.R as stripeCoreR
 import com.stripe.android.uicore.R as UiCoreR
 
 internal fun StripeError.withLocalizedMessage(context: Context): StripeError {
@@ -77,5 +78,5 @@ private fun getErrorMessage(
         // https://docs.stripe.com/declines/codes
         ?: context.mapErrorCodeToLocalizedMessage(declineCode)
         ?: originalMessage
-        ?: "There was an unexpected error -- try again in a few seconds"
+        ?: context.getString(stripeCoreR.string.stripe_unexpected_error_try_again)
 }

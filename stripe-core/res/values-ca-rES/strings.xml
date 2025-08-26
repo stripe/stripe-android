@@ -24,4 +24,6 @@
   <string name="stripe_address_label_state">País</string>
   <!-- Label for input requesting zip code, used for US based addreses -->
   <string name="stripe_address_label_zip_code">Codi ZIP</string>
+  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
+  <string name="stripe_unexpected_error_try_again">Hi ha hagut un error inesperat - torna-ho a intentar en uns segons</string>
 </resources>
