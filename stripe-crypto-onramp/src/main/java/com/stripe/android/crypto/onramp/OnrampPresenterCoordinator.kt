@@ -88,7 +88,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         linkPresenter.authenticateExistingConsumer(email)
     }
 
-    fun promptForIdentityVerification() {
+    fun verifyIdentity() {
         coroutineScope.launch {
             when (val verification = interactor.startIdentityVerification()) {
                 is OnrampStartVerificationResult.Completed -> {

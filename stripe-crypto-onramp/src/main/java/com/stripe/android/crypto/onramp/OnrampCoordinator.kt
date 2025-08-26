@@ -137,12 +137,11 @@ class OnrampCoordinator @Inject internal constructor(
         }
 
         /**
-         * Creates an identity verification session and launches the verification flow.
-         *
-         * Requires successful lookup or registration of the user first.
+         * Creates an identity verification session and launches the document verification flow.
+         * Requires an authenticated Link user.
          */
-        fun promptForIdentityVerification() {
-            coordinator.promptForIdentityVerification()
+        fun verifyIdentity() {
+            coordinator.verifyIdentity()
         }
 
         /**

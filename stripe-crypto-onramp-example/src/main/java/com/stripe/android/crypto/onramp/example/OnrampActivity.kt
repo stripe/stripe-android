@@ -138,7 +138,7 @@ internal class OnrampActivity : ComponentActivity() {
                             viewModel.registerWalletAddress(address, network)
                         },
                         onStartVerification = {
-                            onrampPresenter.promptForIdentityVerification()
+                            onrampPresenter.verifyIdentity()
                         },
                         onCollectPayment = { type ->
                             onrampPresenter.collectPaymentMethod(type)
