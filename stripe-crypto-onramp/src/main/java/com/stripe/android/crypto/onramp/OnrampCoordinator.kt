@@ -154,7 +154,7 @@ class OnrampCoordinator @Inject internal constructor(
         }
 
         /**
-         * Authorize a LinkAuthIntent.
+         * Authorizes a Link auth intent and authenticates the user if necessary.
          *
          * @param linkAuthIntentId The LinkAuthIntent ID to authorize.
          */
