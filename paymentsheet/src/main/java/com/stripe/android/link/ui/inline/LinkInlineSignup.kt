@@ -79,6 +79,7 @@ import kotlinx.coroutines.launch
 import com.stripe.android.uicore.R as StripeUiCoreR
 
 internal const val ProgressIndicatorTestTag = "CircularProgressIndicator"
+private const val LINK_LOGO_SCALE = 0.9f
 
 @Composable
 internal fun LinkInlineSignup(
@@ -255,7 +256,7 @@ private fun LinkCheckbox(
     }
 
     Row(
-        verticalAlignment = Alignment.Top,
+        verticalAlignment = if (simplifiedCheckbox) Alignment.CenterVertically else Alignment.Top,
         modifier = Modifier
             .clickable(enabled = enabled) { toggleExpanded() }
             .padding(if (simplifiedCheckbox) 0.dp else 16.dp)
@@ -269,7 +270,7 @@ private fun LinkCheckbox(
         Column {
             if (useLinkLogoInCheckboxText) {
                 TextWithLinkLogo(
-                    style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Medium),
                     color = MaterialTheme.colors.onSurface.copy(alpha = contentAlpha),
                 )
             } else {
@@ -300,7 +301,8 @@ private fun TextWithLinkLogo(
 ) {
     val label = stringResource(R.string.stripe_inline_sign_up_toggle)
     val painter = painterResource(R.drawable.stripe_link_logo_knockout)
-    val logoHeight = style.fontSize
+    // Slightly smaller Link logo for better visual balance
+    val logoHeight = style.fontSize * LINK_LOGO_SCALE
     val logoWidth = logoHeight * (painter.intrinsicSize.width / painter.intrinsicSize.height)
     Text(
         text = label.buildLinkLogoAnnotatedString(),
@@ -311,7 +313,7 @@ private fun TextWithLinkLogo(
                 placeholder = Placeholder(
                     width = logoWidth,
                     height = logoHeight,
-                    placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter
+                    placeholderVerticalAlign = PlaceholderVerticalAlign.Center
                 )
             ) {
                 Image(
