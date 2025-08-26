@@ -18,6 +18,11 @@ import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResu
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
+import com.stripe.android.crypto.onramp.model.OnrampKYCResult
+import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
+import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
+import com.stripe.android.crypto.onramp.model.OnrampSetWalletAddressResult
+import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import javax.inject.Inject
 
@@ -67,6 +72,17 @@ class OnrampCoordinator @Inject internal constructor(
 
     /**
      * Registers the given crypto wallet address to the current Link account.
+     * Updates the phone number for the current Link user.
+     *
+     * @param phoneNumber The new phone number to set.
+     * @return OnrampUpdatePhoneNumberResult indicating the result of the update.
+     */
+    suspend fun updatePhoneNumber(phoneNumber: String): OnrampUpdatePhoneNumberResult {
+        return interactor.updatePhoneNumber(phoneNumber)
+    }
+
+    /**
+     * Registers a wallet address for the user.
      * Requires an authenticated Link user.
      *
      * @param walletAddress The crypto wallet address to register.

@@ -23,6 +23,7 @@ import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
+import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
@@ -111,6 +112,15 @@ internal class OnrampInteractor @Inject constructor(
                     error = result.error
                 )
             }
+        }
+    }
+
+    suspend fun updatePhoneNumber(phoneNumber: String): OnrampUpdatePhoneNumberResult {
+        return when (val result = linkController.updatePhoneNumber(phoneNumber)) {
+            is LinkController.UpdatePhoneNumberResult.Success -> OnrampUpdatePhoneNumberResult.Completed
+            is LinkController.UpdatePhoneNumberResult.Failed -> OnrampUpdatePhoneNumberResult.Failed(
+                error = result.error
+            )
         }
     }
 
