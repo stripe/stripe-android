@@ -27,7 +27,7 @@ import com.stripe.android.crypto.onramp.model.OnrampKYCResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
 import com.stripe.android.crypto.onramp.model.OnrampSetWalletAddressResult
-import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
+import com.stripe.android.crypto.onramp.model.OnrampAuthenticationResult
 import com.stripe.android.crypto.onramp.model.PaymentOptionDisplayData
 import com.stripe.android.link.LinkAppearance
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -121,9 +121,9 @@ internal class OnrampViewModel(
         _message.value = null
     }
 
-    fun onAuthenticationResult(result: OnrampVerificationResult) {
+    fun onAuthenticationResult(result: OnrampAuthenticationResult) {
         when (result) {
-            is OnrampVerificationResult.Completed -> {
+            is OnrampAuthenticationResult.Completed -> {
                 _message.value = "Authentication successful! You can now perform authenticated operations."
                 _uiState.update {
                     it.copy(
@@ -132,10 +132,10 @@ internal class OnrampViewModel(
                     )
                 }
             }
-            is OnrampVerificationResult.Cancelled -> {
+            is OnrampAuthenticationResult.Cancelled -> {
                 _message.value = "Authentication cancelled, please try again"
             }
-            is OnrampVerificationResult.Failed -> {
+            is OnrampAuthenticationResult.Failed -> {
                 _message.value = "Authentication failed: ${result.error.message}"
                 _uiState.update { it.copy(screen = Screen.EmailInput) }
             }

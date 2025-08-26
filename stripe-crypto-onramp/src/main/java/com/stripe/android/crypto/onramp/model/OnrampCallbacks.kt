@@ -9,7 +9,7 @@ import dev.drewhamilton.poko.Poko
 @Poko
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class OnrampCallbacks(
-    val authenticationCallback: OnrampVerificationCallback,
+    val authenticationCallback: OnrampAuthenticationCallback,
     val identityVerificationCallback: OnrampIdentityVerificationCallback,
     val selectPaymentCallback: OnrampCollectPaymentCallback,
     val authorizeCallback: OnrampAuthorizeCallback,

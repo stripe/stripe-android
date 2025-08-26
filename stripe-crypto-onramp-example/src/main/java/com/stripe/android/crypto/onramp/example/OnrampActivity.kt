@@ -119,7 +119,7 @@ internal class OnrampActivity : ComponentActivity() {
                         viewModel = viewModel,
                         onAuthenticateUser = { oauthScopes ->
                             if (oauthScopes.isNullOrBlank()) {
-                                onrampPresenter.presentForVerification()
+                                onrampPresenter.authenticateUser()
                             } else {
                                 // Not the cleanest approach, but good enough for an example.
                                 lifecycleScope.launch {

@@ -13,7 +13,7 @@ import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampIdentityVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
-import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
+import com.stripe.android.crypto.onramp.model.OnrampAuthenticationResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
@@ -77,11 +77,11 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
-    fun presentForVerification() {
+    fun authenticateUser() {
         val email = currentLinkAccount?.email
         if (email == null) {
             onrampCallbacks.authenticationCallback.onResult(
-                OnrampVerificationResult.Failed(NoLinkAccountFoundException())
+                OnrampAuthenticationResult.Failed(NoLinkAccountFoundException())
             )
             return
         }

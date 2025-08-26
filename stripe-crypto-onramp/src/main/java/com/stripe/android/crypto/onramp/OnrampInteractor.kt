@@ -23,7 +23,7 @@ import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
 import com.stripe.android.crypto.onramp.model.OnrampSetWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
-import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
+import com.stripe.android.crypto.onramp.model.OnrampAuthenticationResult
 import com.stripe.android.crypto.onramp.model.PaymentOptionDisplayData
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.identity.IdentityVerificationSheet
@@ -189,7 +189,7 @@ internal class OnrampInteractor @Inject constructor(
 
     suspend fun handleAuthenticationResult(
         result: LinkController.AuthenticationResult
-    ): OnrampVerificationResult = when (result) {
+    ): OnrampAuthenticationResult = when (result) {
         is LinkController.AuthenticationResult.Success -> {
             val secret = consumerSessionClientSecret()
             secret?.let {
@@ -197,18 +197,18 @@ internal class OnrampInteractor @Inject constructor(
                     .grantPartnerMerchantPermissions(it)
                 permissionsResult.fold(
                     onSuccess = { result ->
-                        OnrampVerificationResult.Completed(result.id)
+                        OnrampAuthenticationResult.Completed(result.id)
                     },
                     onFailure = { error ->
-                        OnrampVerificationResult.Failed(error)
+                        OnrampAuthenticationResult.Failed(error)
                     }
                 )
-            } ?: OnrampVerificationResult.Failed(
+            } ?: OnrampAuthenticationResult.Failed(
                 MissingConsumerSecretException()
             )
         }
-        is LinkController.AuthenticationResult.Failed -> OnrampVerificationResult.Failed(result.error)
-        is LinkController.AuthenticationResult.Canceled -> OnrampVerificationResult.Cancelled()
+        is LinkController.AuthenticationResult.Failed -> OnrampAuthenticationResult.Failed(result.error)
+        is LinkController.AuthenticationResult.Canceled -> OnrampAuthenticationResult.Cancelled()
     }
 
     suspend fun handleAuthorizeResult(
