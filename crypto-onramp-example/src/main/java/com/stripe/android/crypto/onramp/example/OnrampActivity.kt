@@ -220,6 +220,9 @@ internal fun OnrampScreen(
                 AuthenticationScreen(
                     email = uiState.email,
                     onAuthenticate = onAuthenticateUser,
+                    onUpdatePhoneNumber = { phoneNumber ->
+                        viewModel.updatePhoneNumber(phoneNumber)
+                    },
                     onBack = {
                         viewModel.onBackToEmailInput()
                     }
@@ -410,6 +413,7 @@ private fun RegistrationButtons(
 private fun AuthenticationScreen(
     email: String,
     onAuthenticate: (oauthScopes: String?) -> Unit,
+    onUpdatePhoneNumber: (String) -> Unit,
     onBack: () -> Unit
 ) {
     Column {
@@ -430,6 +434,10 @@ private fun AuthenticationScreen(
         )
 
         AuthenticateSection(onAuthenticate = onAuthenticate)
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        UpdatePhoneNumberSection(onUpdatePhoneNumber = onUpdatePhoneNumber)
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -852,6 +860,39 @@ private fun AuthorizeSection(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Authorize")
+        }
+    }
+}
+
+@Composable
+private fun UpdatePhoneNumberSection(
+    onUpdatePhoneNumber: (String) -> Unit
+) {
+    var phoneNumber by remember { mutableStateOf("") }
+
+    Column {
+        Text(
+            text = "Update Phone Number",
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        OutlinedTextField(
+            value = phoneNumber,
+            onValueChange = { phoneNumber = it },
+            label = { Text("Phone Number (E.164 format)") },
+            placeholder = { Text("+1234567890") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
+        )
+
+        Button(
+            onClick = { onUpdatePhoneNumber(phoneNumber) },
+            enabled = phoneNumber.isNotBlank(),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Update Phone Number")
         }
     }
 }
