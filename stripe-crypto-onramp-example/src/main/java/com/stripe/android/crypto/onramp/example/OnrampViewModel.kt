@@ -72,7 +72,7 @@ internal class OnrampViewModel(
                     ),
                     darkColors = LinkAppearance.Colors(
                         primary = Color(0xFF9886E6),
-                        contentOnPrimary = Color.White,
+                        contentOnPrimary = Color(0xFF222222),
                         borderSelected = Color.White
                     ),
                     style = LinkAppearance.Style.ALWAYS_DARK,

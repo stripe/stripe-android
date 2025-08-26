@@ -16,6 +16,8 @@ import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.ui.image.LocalStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 
+internal val LocalLinkAppearance = staticCompositionLocalOf<LinkAppearance?> { null }
+
 internal val LocalLinkTypography = staticCompositionLocalOf<LinkTypography> {
     error("No Typography provided")
 }
@@ -35,7 +37,7 @@ internal val HorizontalPadding = 20.dp
 
 @Composable
 internal fun DefaultLinkTheme(
-    appearance: LinkAppearance? = null,
+    appearance: LinkAppearance? = LocalLinkAppearance.current,
     content: @Composable () -> Unit
 ) {
     val stripeImageLoader = runCatching { LocalStripeImageLoader.current }

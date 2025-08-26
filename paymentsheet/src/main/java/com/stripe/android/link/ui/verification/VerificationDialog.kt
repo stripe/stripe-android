@@ -17,7 +17,6 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkActivityResult
-import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.linkViewModel
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
@@ -30,7 +29,6 @@ import com.stripe.android.uicore.utils.collectAsState
 internal fun VerificationDialog(
     modifier: Modifier,
     linkAccount: LinkAccount,
-    linkAppearance: LinkAppearance?,
     onVerificationSucceeded: () -> Unit,
     changeEmail: () -> Unit,
     onDismissClicked: () -> Unit,
@@ -54,7 +52,6 @@ internal fun VerificationDialog(
         modifier = modifier,
         state = state,
         otpElement = viewModel.otpElement,
-        linkAppearance = linkAppearance,
         onBack = viewModel::onBack,
         onChangeEmailClick = viewModel::onChangeEmailButtonClicked,
         onResendCodeClick = viewModel::resendCode,
@@ -69,7 +66,6 @@ internal fun VerificationDialogBody(
     modifier: Modifier = Modifier,
     state: VerificationViewState,
     otpElement: OTPElement,
-    linkAppearance: LinkAppearance?,
     onBack: () -> Unit,
     onFocusRequested: () -> Unit,
     didShowCodeSentNotification: () -> Unit,
@@ -91,7 +87,7 @@ internal fun VerificationDialogBody(
             val dim = if (isSystemInDarkTheme()) DIM_DARK_THEME else DIM_LIGHT_THEME
             (LocalView.current.parent as? DialogWindowProvider)?.window?.setDimAmount(dim)
 
-            DefaultLinkTheme(appearance = linkAppearance) {
+            DefaultLinkTheme {
                 Surface(
                     modifier = Modifier.width(360.dp),
                     shape = RoundedCornerShape(24.dp),
@@ -137,7 +133,6 @@ fun VerificationDialogPreview() {
                     isDialog = true,
                     allowLogout = true,
                 ),
-                linkAppearance = null,
                 otpElement = OTPSpec.transform(),
                 onBack = {},
                 onChangeEmailClick = {},
