@@ -1,6 +1,7 @@
 package com.stripe.android.link.theme
 
 import android.content.res.Configuration
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
@@ -67,7 +68,9 @@ internal fun DefaultLinkTheme(
                     Configuration.UI_MODE_NIGHT_NO
                 }
         }
-        baseContext.createConfigurationContext(config)
+        ContextThemeWrapper(baseContext, baseContext.theme).apply {
+            applyOverrideConfiguration(config)
+        }
     }
 
     CompositionLocalProvider(
