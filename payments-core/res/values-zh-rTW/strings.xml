@@ -182,8 +182,6 @@
   <string name="stripe_title_update_card">更新卡</string>
   <!-- Title for a button that when tapped, updates a card brand. -->
   <string name="stripe_update">更新</string>
-  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
-  <string name="stripe_unexpected_error_try_again">發生了意外錯誤 -- 請等待幾秒後再試一次</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">驗證您的付款</string>
 </resources>

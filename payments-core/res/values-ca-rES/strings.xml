@@ -178,8 +178,6 @@
   <string name="stripe_title_payment_method">Mètode de pagament</string>
   <!-- Screen title telling users they should select a shipping address -->
   <string name="stripe_title_select_shipping_method">Seleccionar Mètode d\'Enviament</string>
-  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
-  <string name="stripe_unexpected_error_try_again">Hi ha hagut un error inesperat - torna-ho a intentar en uns segons</string>
   <!-- Title of screen to update a card -->
   <string name="stripe_title_update_card">Actualitzar la targeta</string>
   <!-- Title for a button that when tapped, updates a card brand. -->

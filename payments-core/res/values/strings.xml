@@ -180,8 +180,6 @@
   <string name="stripe_title_select_shipping_method">Select Shipping Method</string>
   <!-- Title of screen to update a card -->
   <string name="stripe_title_update_card">Update card</string>
-  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
-  <string name="stripe_unexpected_error_try_again">There was an unexpected error -- try again in a few seconds</string>
   <!-- Title for a button that when tapped, updates a card brand. -->
   <string name="stripe_update">Update</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
