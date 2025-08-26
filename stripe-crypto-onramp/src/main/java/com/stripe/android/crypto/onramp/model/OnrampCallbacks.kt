@@ -11,7 +11,7 @@ import dev.drewhamilton.poko.Poko
 class OnrampCallbacks(
     val authenticationCallback: OnrampAuthenticationCallback,
     val identityVerificationCallback: OnrampIdentityVerificationCallback,
-    val selectPaymentCallback: OnrampCollectPaymentCallback,
+    val collectPaymentCallback: OnrampCollectPaymentMethodCallback,
     val authorizeCallback: OnrampAuthorizeCallback,
     val checkoutCallback: OnrampCheckoutCallback
 )

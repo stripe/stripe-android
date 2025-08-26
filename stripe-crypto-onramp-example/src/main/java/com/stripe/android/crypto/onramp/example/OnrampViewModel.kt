@@ -19,7 +19,7 @@ import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
-import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentResult
+import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
 import com.stripe.android.crypto.onramp.model.OnrampIdentityVerificationResult
@@ -28,7 +28,7 @@ import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthenticationResult
-import com.stripe.android.crypto.onramp.model.PaymentOptionDisplayData
+import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.link.LinkAppearance
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -158,9 +158,9 @@ internal class OnrampViewModel(
         }
     }
 
-    fun onSelectPaymentResult(result: OnrampCollectPaymentResult) {
+    fun onSelectPaymentResult(result: OnrampCollectPaymentMethodResult) {
         when (result) {
-            is OnrampCollectPaymentResult.Completed -> {
+            is OnrampCollectPaymentMethodResult.Completed -> {
                 _message.value = "Payment selection completed"
                 _uiState.update {
                     it.copy(
@@ -169,10 +169,10 @@ internal class OnrampViewModel(
                     )
                 }
             }
-            is OnrampCollectPaymentResult.Cancelled -> {
+            is OnrampCollectPaymentMethodResult.Cancelled -> {
                 _message.value = "Payment selection cancelled, please try again"
             }
-            is OnrampCollectPaymentResult.Failed -> {
+            is OnrampCollectPaymentMethodResult.Failed -> {
                 _message.value = "Payment selection failed: ${result.error.message}"
                 _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
             }
@@ -492,7 +492,7 @@ data class OnrampUiState(
     val linkAuthIntentId: String? = null,
     val consentedLinkAuthIntentIds: List<String> = emptyList(),
     val customerId: String? = null,
-    val selectedPaymentData: PaymentOptionDisplayData? = null,
+    val selectedPaymentData: PaymentMethodDisplayData? = null,
     val cryptoPaymentToken: String? = null,
     val walletAddress: String? = null,
     val network: CryptoNetwork? = null,

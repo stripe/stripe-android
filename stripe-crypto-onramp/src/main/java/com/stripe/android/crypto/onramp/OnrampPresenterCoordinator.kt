@@ -229,7 +229,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     private fun handleSelectPaymentResult(result: LinkController.PresentPaymentMethodsResult) {
         coroutineScope.launch {
-            onrampCallbacks.selectPaymentCallback.onResult(
+            onrampCallbacks.collectPaymentCallback.onResult(
                 interactor.handleSelectPaymentResult(result, activity)
             )
         }

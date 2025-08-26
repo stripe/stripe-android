@@ -59,7 +59,7 @@ import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
-import com.stripe.android.crypto.onramp.model.PaymentOptionDisplayData
+import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import kotlinx.coroutines.launch
@@ -83,7 +83,7 @@ internal class OnrampActivity : ComponentActivity() {
             authenticationCallback = viewModel::onAuthenticationResult,
             identityVerificationCallback = viewModel::onIdentityVerificationResult,
             checkoutCallback = viewModel::onCheckoutResult,
-            selectPaymentCallback = viewModel::onSelectPaymentResult,
+            collectPaymentCallback = viewModel::onSelectPaymentResult,
             authorizeCallback = viewModel::onAuthorizeResult
         )
 
@@ -474,7 +474,7 @@ private fun AuthenticatedOperationsScreen(
     customerId: String,
     consentedLinkAuthIntentIds: List<String>,
     onrampSessionResponse: OnrampSessionResponse?,
-    selectedPaymentData: PaymentOptionDisplayData?,
+    selectedPaymentData: PaymentMethodDisplayData?,
     onAuthenticate: (oauthScopes: String?) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onCollectKYC: (KycInfo) -> Unit,

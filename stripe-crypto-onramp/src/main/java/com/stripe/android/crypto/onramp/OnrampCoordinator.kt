@@ -145,7 +145,7 @@ class OnrampCoordinator @Inject internal constructor(
         }
 
         /**
-         * Presents a payment selection UI to the user.
+         * Presents UI to collect/select a payment method of the given type.
          *
          * @param type The payment method type to collect.
          */

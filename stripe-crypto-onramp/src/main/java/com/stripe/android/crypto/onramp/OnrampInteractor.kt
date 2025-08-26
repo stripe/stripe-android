@@ -13,7 +13,7 @@ import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
-import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentResult
+import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
@@ -24,7 +24,7 @@ import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthenticationResult
-import com.stripe.android.crypto.onramp.model.PaymentOptionDisplayData
+import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
@@ -254,24 +254,24 @@ internal class OnrampInteractor @Inject constructor(
     fun handleSelectPaymentResult(
         result: LinkController.PresentPaymentMethodsResult,
         context: Context,
-    ): OnrampCollectPaymentResult = when (result) {
+    ): OnrampCollectPaymentMethodResult = when (result) {
         is LinkController.PresentPaymentMethodsResult.Success -> {
             linkController.state(context).value.selectedPaymentMethodPreview?.let {
-                OnrampCollectPaymentResult.Completed(
-                    displayData = PaymentOptionDisplayData(
+                OnrampCollectPaymentMethodResult.Completed(
+                    displayData = PaymentMethodDisplayData(
                         icon = it.icon,
                         label = it.label,
                         sublabel = it.sublabel
                     )
                 )
             } ?: run {
-                OnrampCollectPaymentResult.Failed(MissingPaymentMethodException())
+                OnrampCollectPaymentMethodResult.Failed(MissingPaymentMethodException())
             }
         }
         is LinkController.PresentPaymentMethodsResult.Failed ->
-            OnrampCollectPaymentResult.Failed(result.error)
+            OnrampCollectPaymentMethodResult.Failed(result.error)
         is LinkController.PresentPaymentMethodsResult.Canceled ->
-            OnrampCollectPaymentResult.Cancelled()
+            OnrampCollectPaymentMethodResult.Cancelled()
     }
 
     private fun consumerSessionClientSecret(): String? =
