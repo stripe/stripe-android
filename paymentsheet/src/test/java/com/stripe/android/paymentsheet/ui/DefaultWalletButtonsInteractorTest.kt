@@ -466,7 +466,7 @@ class DefaultWalletButtonsInteractorTest {
                         billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                         cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance)
                     ),
-                    passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                    passiveCaptchaParams = null
                 )
             )
         }

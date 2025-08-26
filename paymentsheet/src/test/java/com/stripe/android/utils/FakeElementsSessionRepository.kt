@@ -2,7 +2,6 @@ package com.stripe.android.utils
 
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PassiveCaptchaParams
-import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
@@ -18,7 +17,7 @@ internal class FakeElementsSessionRepository(
     private val customPaymentMethods: List<ElementsSession.CustomPaymentMethod> = emptyList(),
     private val cardBrandChoice: ElementsSession.CardBrandChoice? = null,
     private val externalPaymentMethodData: String? = null,
-    private val passiveCaptchaParams: PassiveCaptchaParams? = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+    private val passiveCaptchaParams: PassiveCaptchaParams? = null
 ) : ElementsSessionRepository {
     data class Params(
         val initializationMode: PaymentElementLoader.InitializationMode,

@@ -37,6 +37,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -91,8 +92,6 @@ class DefaultLinkInlineInteractorTest {
 
             interactor.setup(paymentMethodMetadata = metadata)
 
-            awaitItem()
-
             assertThat(awaitItem().verificationState).isEqualTo(VerificationState.RenderButton)
         }
     }
@@ -110,8 +109,6 @@ class DefaultLinkInlineInteractorTest {
             assertThat(awaitItem().verificationState).isEqualTo(Loading)
 
             interactor.setup(paymentMethodMetadata = metadata)
-
-            awaitItem()
 
             assertThat(awaitItem().verificationState).isEqualTo(VerificationState.RenderButton)
         }
@@ -133,8 +130,6 @@ class DefaultLinkInlineInteractorTest {
             assertThat(awaitItem().verificationState).isEqualTo(Loading)
 
             interactor.setup(paymentMethodMetadata = metadata)
-
-            awaitItem()
 
             linkAccountManager.awaitStartVerificationCall()
 
@@ -166,7 +161,7 @@ class DefaultLinkInlineInteractorTest {
                 linkAccountInfo = any(),
                 launchMode = eq(LinkLaunchMode.PaymentMethodSelection(null)),
                 linkExpressMode = any(),
-                passiveCaptchaParams = any()
+                passiveCaptchaParams = anyOrNull()
             )
         }
 

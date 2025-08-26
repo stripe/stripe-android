@@ -5,7 +5,6 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PassiveCaptchaParams
-import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -52,7 +51,7 @@ internal object PaymentMethodMetadataFactory {
         shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = SHOP_PAY_CONFIGURATION,
         termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay> = emptyMap(),
         forceSetupFutureUseBehaviorAndNewMandate: Boolean = false,
-        passiveCaptchaParams: PassiveCaptchaParams? = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+        passiveCaptchaParams: PassiveCaptchaParams? = null
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,

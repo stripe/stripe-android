@@ -20,6 +20,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkExpressMode
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.attestation.FakeLinkAttestationCheck
 import com.stripe.android.link.attestation.LinkAttestationCheck
@@ -34,6 +35,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilt
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -440,7 +442,7 @@ internal class PaymentSheetViewModelTest {
                 paymentMethod = CARD_PAYMENT_METHOD,
                 optionsParams = optionsParams,
                 originatedFromWallet = false,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
         assertThat(arguments.intent).isEqualTo(stripeIntent)
@@ -515,7 +517,7 @@ internal class PaymentSheetViewModelTest {
                 paymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT,
                 optionsParams = optionsParams,
                 originatedFromWallet = false,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
         assertThat(arguments.intent).isEqualTo(stripeIntent)
@@ -543,7 +545,7 @@ internal class PaymentSheetViewModelTest {
                     paymentMethod = SEPA_DEBIT_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false,
-                    passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                    passiveCaptchaParams = null
                 )
             )
             assertThat(arguments.intent).isEqualTo(stripeIntent)
@@ -578,7 +580,7 @@ internal class PaymentSheetViewModelTest {
                 ),
                 extraParams = null,
                 shouldSave = true,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
         assertThat(arguments.intent).isEqualTo(stripeIntent)
@@ -624,7 +626,7 @@ internal class PaymentSheetViewModelTest {
                 optionsParams = optionsParams,
                 extraParams = null,
                 shouldSave = true,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
         assertThat(arguments.intent).isEqualTo(stripeIntent)
@@ -977,7 +979,7 @@ internal class PaymentSheetViewModelTest {
                 LinkConfirmationOption(
                     linkExpressMode = LinkExpressMode.DISABLED,
                     configuration = TestFactory.LINK_CONFIGURATION,
-                    passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                    passiveCaptchaParams = null
                 )
             )
 
@@ -1014,7 +1016,7 @@ internal class PaymentSheetViewModelTest {
             PaymentMethodConfirmationOption.Saved(
                 paymentMethod = CARD_PAYMENT_METHOD,
                 optionsParams = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
 
@@ -1084,7 +1086,7 @@ internal class PaymentSheetViewModelTest {
                 optionsParams = null,
                 extraParams = null,
                 shouldSave = true,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
 
@@ -1144,7 +1146,7 @@ internal class PaymentSheetViewModelTest {
             PaymentMethodConfirmationOption.Saved(
                 paymentMethod = CARD_PAYMENT_METHOD,
                 optionsParams = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
 
@@ -1625,7 +1627,7 @@ internal class PaymentSheetViewModelTest {
                 LinkConfirmationOption(
                     configuration = TestFactory.LINK_CONFIGURATION,
                     linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
-                    passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                    passiveCaptchaParams = null
                 )
             )
 
@@ -2128,7 +2130,7 @@ internal class PaymentSheetViewModelTest {
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false,
-                    passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                    passiveCaptchaParams = null
                 )
             )
 
@@ -2167,7 +2169,7 @@ internal class PaymentSheetViewModelTest {
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false,
-                    passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                    passiveCaptchaParams = null
                 )
             )
 
@@ -2266,7 +2268,7 @@ internal class PaymentSheetViewModelTest {
             PaymentMethodConfirmationOption.Saved(
                 paymentMethod = paymentMethod,
                 optionsParams = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
 
@@ -2301,7 +2303,7 @@ internal class PaymentSheetViewModelTest {
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false,
-                    passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                    passiveCaptchaParams = null
                 )
             )
 
@@ -2336,7 +2338,7 @@ internal class PaymentSheetViewModelTest {
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false,
-                    passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                    passiveCaptchaParams = null
                 )
             )
 
@@ -2371,7 +2373,7 @@ internal class PaymentSheetViewModelTest {
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false,
-                    passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                    passiveCaptchaParams = null
                 )
             )
 
@@ -2525,7 +2527,7 @@ internal class PaymentSheetViewModelTest {
             BacsConfirmationOption(
                 createParams = bacsPaymentSelection.paymentMethodCreateParams,
                 optionsParams = bacsPaymentSelection.paymentMethodOptionsParams,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
     }
@@ -2696,7 +2698,7 @@ internal class PaymentSheetViewModelTest {
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
                 ),
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
 
@@ -2740,7 +2742,7 @@ internal class PaymentSheetViewModelTest {
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
                 ),
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
 
@@ -2778,7 +2780,7 @@ internal class PaymentSheetViewModelTest {
             LinkConfirmationOption(
                 linkExpressMode = LinkExpressMode.DISABLED,
                 configuration = LINK_CONFIG,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
 
@@ -2816,7 +2818,7 @@ internal class PaymentSheetViewModelTest {
             LinkConfirmationOption(
                 linkExpressMode = LinkExpressMode.DISABLED,
                 configuration = LINK_CONFIG,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
 
@@ -2855,7 +2857,7 @@ internal class PaymentSheetViewModelTest {
             LinkConfirmationOption(
                 linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
                 configuration = LINK_CONFIG,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
 
@@ -2893,7 +2895,7 @@ internal class PaymentSheetViewModelTest {
             LinkConfirmationOption(
                 linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
                 configuration = LINK_CONFIG,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
 
@@ -3229,7 +3231,125 @@ internal class PaymentSheetViewModelTest {
                 paymentMethod = CARD_PAYMENT_METHOD,
                 optionsParams = null,
                 originatedFromWallet = false,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
+            )
+        )
+    }
+
+    @Test
+    fun `confirmation with saved card pm should include passive captcha params when available`() = confirmationTest {
+        val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+        val optionsParams = PaymentMethodOptionsParams.Card(
+            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+        )
+
+        testPassiveCaptchaParams(
+            paymentSelection = PaymentSelection.Saved(
+                paymentMethod = CARD_PAYMENT_METHOD,
+            ),
+            optionsParams = optionsParams,
+            expectedConfirmationOption = PaymentMethodConfirmationOption.Saved(
+                paymentMethod = CARD_PAYMENT_METHOD,
+                optionsParams = optionsParams,
+                originatedFromWallet = false,
+                passiveCaptchaParams = passiveCaptchaParams
+            )
+        )
+    }
+
+    @Test
+    fun `confirmation with USBankAccount pm should include passive captcha params when available`() = confirmationTest {
+        val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+        val optionsParams = PaymentMethodOptionsParams.USBankAccount(
+            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+        )
+
+        testPassiveCaptchaParams(
+            paymentSelection = PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION,
+            optionsParams = optionsParams,
+            expectedConfirmationOption = PaymentMethodConfirmationOption.New(
+                createParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT,
+                optionsParams = optionsParams,
+                extraParams = null,
+                shouldSave = false,
+                passiveCaptchaParams = passiveCaptchaParams
+            )
+        )
+    }
+
+    @Test
+    fun `confirmation with LinkInline pm should include passive captcha params when available`() = confirmationTest {
+        val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+
+        testPassiveCaptchaParams(
+            paymentSelection = PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION,
+            expectedConfirmationOption = LinkInlineSignupConfirmationOption(
+                createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                optionsParams = null,
+                extraParams = null,
+                saveOption = LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.NoRequest,
+                linkConfiguration = LINK_CONFIG,
+                userInput = PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION.input,
+                passiveCaptchaParams = passiveCaptchaParams
+            ),
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+            paymentElementLoader = FakePaymentElementLoader(
+                stripeIntent = PAYMENT_INTENT,
+                linkState = LinkState(
+                    configuration = LINK_CONFIG,
+                    loginState = LinkState.LoginState.LoggedOut,
+                    signupMode = null,
+                ),
+                passiveCaptchaParams = passiveCaptchaParams
+            )
+        )
+    }
+
+    @Test
+    fun `confirmation with New pm should include passive captcha params when available`() = confirmationTest {
+        val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+        val optionsParams = PaymentMethodOptionsParams.Card(
+            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+        )
+
+        testPassiveCaptchaParams(
+            paymentSelection = PaymentSelection.New.Card(
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                brand = CardBrand.Visa,
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+            ),
+            optionsParams = optionsParams,
+            expectedConfirmationOption = PaymentMethodConfirmationOption.New(
+                createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                optionsParams = optionsParams,
+                extraParams = null,
+                shouldSave = false,
+                passiveCaptchaParams = passiveCaptchaParams
+            )
+        )
+    }
+
+    @Test
+    fun `confirmation with Link pm should include passive captcha params when available`() = confirmationTest {
+        val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+
+        testPassiveCaptchaParams(
+            paymentSelection = PaymentSelection.Link(),
+            expectedConfirmationOption = LinkConfirmationOption(
+                configuration = LINK_CONFIG,
+                linkExpressMode = LinkExpressMode.DISABLED,
+                linkLaunchMode = LinkLaunchMode.Full,
+                passiveCaptchaParams = passiveCaptchaParams
+            ),
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+            paymentElementLoader = FakePaymentElementLoader(
+                stripeIntent = PAYMENT_INTENT,
+                linkState = LinkState(
+                    configuration = LINK_CONFIG,
+                    loginState = LinkState.LoginState.LoggedOut,
+                    signupMode = null,
+                ),
+                passiveCaptchaParams = passiveCaptchaParams
             )
         )
     }
@@ -3558,7 +3678,7 @@ internal class PaymentSheetViewModelTest {
                 createParams = createParams,
                 optionsParams = null,
                 extraParams = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
 
@@ -3612,6 +3732,7 @@ internal class PaymentSheetViewModelTest {
             customer?.paymentMethods?.firstOrNull()?.let { PaymentSelection.Saved(it) },
         validationError: PaymentSheetLoadingException? = null,
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
+        passiveCaptchaParams: PassiveCaptchaParams? = null,
         paymentElementLoader: PaymentElementLoader = FakePaymentElementLoader(
             stripeIntent = stripeIntent,
             shouldFail = shouldFailLoad,
@@ -3621,6 +3742,7 @@ internal class PaymentSheetViewModelTest {
             isGooglePayAvailable = isGooglePayReady,
             paymentSelection = initialPaymentSelection,
             validationError = validationError,
+            passiveCaptchaParams = passiveCaptchaParams
         ),
         errorReporter: ErrorReporter = FakeErrorReporter(),
         eventReporter: EventReporter = this@PaymentSheetViewModelTest.eventReporter,
@@ -3840,6 +3962,44 @@ internal class PaymentSheetViewModelTest {
 
             block(this@runTest)
         }
+    }
+
+    private suspend fun FakeConfirmationHandler.Scenario.testPassiveCaptchaParams(
+        paymentSelection: PaymentSelection,
+        optionsParams: PaymentMethodOptionsParams? = null,
+        expectedConfirmationOption: ConfirmationHandler.Option,
+        linkConfigurationCoordinator: LinkConfigurationCoordinator =
+            this@PaymentSheetViewModelTest.linkConfigurationCoordinator,
+        paymentElementLoader: PaymentElementLoader? = null
+    ) {
+        val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+        val stripeIntent = PAYMENT_INTENT
+        val viewModel = createViewModel(
+            stripeIntent = stripeIntent,
+            linkConfigurationCoordinator = linkConfigurationCoordinator,
+            paymentElementLoader = paymentElementLoader ?: FakePaymentElementLoader(
+                stripeIntent = stripeIntent,
+                passiveCaptchaParams = passiveCaptchaParams
+            )
+        )
+
+        val finalPaymentSelection = if (optionsParams != null) {
+            when (paymentSelection) {
+                is PaymentSelection.Saved -> paymentSelection.copy(paymentMethodOptionsParams = optionsParams)
+                is PaymentSelection.New.USBankAccount ->
+                    paymentSelection.copy(paymentMethodOptionsParams = optionsParams)
+                is PaymentSelection.New.Card -> paymentSelection.copy(paymentMethodOptionsParams = optionsParams)
+                else -> paymentSelection
+            }
+        } else {
+            paymentSelection
+        }
+
+        viewModel.updateSelection(finalPaymentSelection)
+        viewModel.checkout()
+
+        val arguments = startTurbine.awaitItem()
+        assertThat(arguments.confirmationOption).isEqualTo(expectedConfirmationOption)
     }
 
     private fun getPaymentMethodOptionJsonStringWithCvcRecollectionValue(enabled: Boolean): String {

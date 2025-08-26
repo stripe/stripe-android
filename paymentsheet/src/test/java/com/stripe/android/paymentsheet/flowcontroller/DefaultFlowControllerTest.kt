@@ -36,6 +36,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilt
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -52,6 +53,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.asOption
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
@@ -305,7 +307,7 @@ internal class DefaultFlowControllerTest {
                     extraParams = selection.paymentMethodExtraParams,
                     shouldSave = selection.customerRequestedSave == PaymentSelection
                         .CustomerRequestedSave.RequestReuse,
-                    passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                    passiveCaptchaParams = null
                 )
             )
 
@@ -353,7 +355,7 @@ internal class DefaultFlowControllerTest {
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
                 ),
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
 
@@ -524,7 +526,7 @@ internal class DefaultFlowControllerTest {
             linkAccountInfo = anyOrNull(),
             launchMode = any(),
             linkExpressMode = any(),
-            passiveCaptchaParams = any()
+            passiveCaptchaParams = anyOrNull()
         )
 
         verify(paymentOptionActivityLauncher, never()).launch(any(), anyOrNull())
@@ -565,7 +567,7 @@ internal class DefaultFlowControllerTest {
             linkAccountInfo = anyOrNull(),
             launchMode = any(),
             linkExpressMode = any(),
-            passiveCaptchaParams = any()
+            passiveCaptchaParams = anyOrNull()
         )
 
         // Simulate user dismissing 2FA with back press
@@ -1026,7 +1028,7 @@ internal class DefaultFlowControllerTest {
             LinkConfirmationOption(
                 linkExpressMode = LinkExpressMode.DISABLED,
                 configuration = TestFactory.LINK_CONFIGURATION,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
     }
@@ -1076,7 +1078,7 @@ internal class DefaultFlowControllerTest {
                     saveOption = LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.NoRequest,
                     linkConfiguration = TestFactory.LINK_CONFIGURATION,
                     userInput = paymentSelection.input,
-                    passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                    passiveCaptchaParams = null
                 )
             )
 
@@ -1135,7 +1137,7 @@ internal class DefaultFlowControllerTest {
                     userInput = paymentSelection.input,
                     linkConfiguration = linkConfiguration,
                     saveOption = LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.NoRequest,
-                    passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                    passiveCaptchaParams = null
                 )
             )
             assertThat(arguments.intent).isEqualTo(intent)
@@ -1190,7 +1192,7 @@ internal class DefaultFlowControllerTest {
                     saveOption = LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.NoRequest,
                     linkConfiguration = linkConfig,
                     userInput = paymentSelection.input,
-                    passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                    passiveCaptchaParams = null
                 )
             )
             assertThat(arguments.intent).isEqualTo(intent)
@@ -1225,7 +1227,7 @@ internal class DefaultFlowControllerTest {
             PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
                 optionsParams = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
     }
@@ -1287,7 +1289,7 @@ internal class DefaultFlowControllerTest {
             PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
                 optionsParams = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
     }
@@ -1305,7 +1307,7 @@ internal class DefaultFlowControllerTest {
                 optionsParams = expectedPaymentMethodOptions,
                 extraParams = null,
                 shouldSave = false,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
         assertThat(arguments.intent).isEqualTo(intent)
@@ -1343,7 +1345,7 @@ internal class DefaultFlowControllerTest {
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
                 ),
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
     }
@@ -1404,7 +1406,7 @@ internal class DefaultFlowControllerTest {
                 extraParams = GENERIC_PAYMENT_SELECTION.paymentMethodExtraParams,
                 shouldSave = GENERIC_PAYMENT_SELECTION.customerRequestedSave ==
                     PaymentSelection.CustomerRequestedSave.RequestReuse,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
 
@@ -1446,7 +1448,7 @@ internal class DefaultFlowControllerTest {
             LinkConfirmationOption(
                 linkExpressMode = LinkExpressMode.DISABLED,
                 configuration = TestFactory.LINK_CONFIGURATION,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
     }
@@ -1751,7 +1753,7 @@ internal class DefaultFlowControllerTest {
             PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
         assertThat(arguments.initializationMode)
@@ -2085,7 +2087,7 @@ internal class DefaultFlowControllerTest {
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
                 ),
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
     }
@@ -2124,7 +2126,7 @@ internal class DefaultFlowControllerTest {
             BacsConfirmationOption(
                 createParams = selection.paymentMethodCreateParams,
                 optionsParams = selection.paymentMethodOptionsParams,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
         assertThat(arguments.appearance).isEqualTo(appearance)
@@ -2410,7 +2412,7 @@ internal class DefaultFlowControllerTest {
                     cvc = "505"
                 ),
                 originatedFromWallet = false,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
         assertThat(arguments.shippingDetails).isEqualTo(shippingDetails)
@@ -2459,7 +2461,7 @@ internal class DefaultFlowControllerTest {
                 optionsParams = null,
                 extraParams = null,
                 shouldSave = true,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
         assertThat(arguments.shippingDetails).isNull()
@@ -2501,7 +2503,7 @@ internal class DefaultFlowControllerTest {
                 createParams = createParams,
                 optionsParams = null,
                 extraParams = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             )
         )
 
@@ -2534,6 +2536,62 @@ internal class DefaultFlowControllerTest {
                     isLinkAvailable = true
                 )
             ).isEqualTo(SavedSelection.None)
+        }
+    }
+
+    private suspend fun FakeConfirmationHandler.Scenario.testPassiveCaptchaParams(
+        paymentSelection: PaymentSelection,
+        linkState: LinkState? = null,
+        paymentMethodTypes: List<String> = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.paymentMethodTypes,
+        assertionBlock: (ConfirmationHandler.Args, PassiveCaptchaParams) -> Unit
+    ) {
+        val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+        val flowController = createFlowController(
+            paymentSelection = paymentSelection,
+            linkState = linkState,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = paymentMethodTypes
+            ),
+            passiveCaptchaParams = passiveCaptchaParams,
+        )
+
+        flowController.configureExpectingSuccess(
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+        )
+
+        flowController.confirm()
+
+        val arguments = startTurbine.awaitItem()
+
+        assertionBlock(arguments, passiveCaptchaParams)
+    }
+
+    @Test
+    fun `confirm Link should pass passive captcha params when available in PaymentMethodMetadata`() = confirmationTest {
+        testPassiveCaptchaParams(
+            paymentSelection = PaymentSelection.Link(),
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
+            paymentMethodTypes = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.paymentMethodTypes.plus("link")
+        ) { arguments, passiveCaptchaParams ->
+            assertThat(arguments.confirmationOption.asOption<LinkConfirmationOption>().passiveCaptchaParams)
+                .isEqualTo(passiveCaptchaParams)
+        }
+    }
+
+    @Test
+    fun `confirm should pass passive captcha params when available in PaymentMethodMetadata`() = confirmationTest {
+        testPassiveCaptchaParams(
+            paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
+        ) { arguments, passiveCaptchaParams ->
+            assertThat(
+                arguments.confirmationOption
+                    .asOption<PaymentMethodConfirmationOption.New>()
+                    .passiveCaptchaParams
+            ).isEqualTo(passiveCaptchaParams)
         }
     }
 
@@ -2583,6 +2641,7 @@ internal class DefaultFlowControllerTest {
         viewModel: FlowControllerViewModel = createViewModel(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
         eventReporter: EventReporter = this@DefaultFlowControllerTest.eventReporter,
+        passiveCaptchaParams: PassiveCaptchaParams? = null,
     ): DefaultFlowController {
         return createFlowController(
             FakePaymentElementLoader(
@@ -2590,6 +2649,7 @@ internal class DefaultFlowControllerTest {
                 stripeIntent = stripeIntent,
                 paymentSelection = paymentSelection,
                 linkState = linkState,
+                passiveCaptchaParams = passiveCaptchaParams,
             ),
             viewModel,
             errorReporter,
@@ -2617,6 +2677,7 @@ internal class DefaultFlowControllerTest {
         eventReporter: EventReporter = this.eventReporter,
         confirmationHandler: ConfirmationHandler? = null,
         linkHandler: LinkHandler? = null,
+        passiveCaptchaParams: PassiveCaptchaParams? = null
     ): DefaultFlowController {
         return createFlowController(
             FakePaymentElementLoader(
@@ -2624,6 +2685,7 @@ internal class DefaultFlowControllerTest {
                 stripeIntent = stripeIntent,
                 paymentSelection = paymentSelection,
                 linkState = linkState,
+                passiveCaptchaParams = passiveCaptchaParams
             ),
             viewModel,
             errorReporter,

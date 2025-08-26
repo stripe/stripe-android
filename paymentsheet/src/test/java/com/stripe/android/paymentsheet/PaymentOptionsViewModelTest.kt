@@ -30,7 +30,6 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -72,6 +71,7 @@ import org.junit.After
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -241,7 +241,7 @@ internal class PaymentOptionsViewModelTest {
             linkAccountInfo = eq(LinkAccountUpdate.Value(unverifiedAccount)),
             launchMode = eq(LinkLaunchMode.PaymentMethodSelection(selectedPayment = null)),
             linkExpressMode = eq(LinkExpressMode.ENABLED),
-            passiveCaptchaParams = eq(PassiveCaptchaParamsFactory.passiveCaptchaParams())
+            passiveCaptchaParams = anyOrNull()
         )
     }
 
