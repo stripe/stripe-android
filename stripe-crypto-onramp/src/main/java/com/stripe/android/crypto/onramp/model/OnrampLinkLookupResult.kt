@@ -3,17 +3,17 @@ package com.stripe.android.crypto.onramp.model
 import androidx.annotation.RestrictTo
 
 /**
- * Result of an OnRamp Link user lookup operation.
+ * Result of an Onramp Link user lookup operation.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed interface OnrampLinkLookupResult {
     /**
      * Link user lookup was successful.
-     * @param isLinkUser Whether the email belongs to an existing Link user
+     * @param hasLinkAccount Whether the email is associated with an existing Link consumer, or `false` otherwise.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Completed internal constructor(
-        val isLinkUser: Boolean
+        val hasLinkAccount: Boolean
     ) : OnrampLinkLookupResult
 
     /**

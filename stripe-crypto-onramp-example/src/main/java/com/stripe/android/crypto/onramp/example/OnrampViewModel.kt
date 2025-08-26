@@ -95,10 +95,10 @@ internal class OnrampViewModel(
         val currentEmail = email.trim()
         _uiState.update { it.copy(screen = Screen.Loading, email = currentEmail, loadingMessage = "Checking user...") }
 
-        val result = onrampCoordinator.lookupLinkUser(currentEmail)
+        val result = onrampCoordinator.hasLinkAccount(currentEmail)
         when (result) {
             is OnrampLinkLookupResult.Completed -> {
-                if (result.isLinkUser) {
+                if (result.hasLinkAccount) {
                     _message.value = "User exists in Link. Please authenticate"
                     _uiState.update { it.copy(screen = Screen.Authentication) }
                 } else {

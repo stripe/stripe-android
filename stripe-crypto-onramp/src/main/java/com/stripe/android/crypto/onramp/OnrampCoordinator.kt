@@ -46,13 +46,13 @@ class OnrampCoordinator @Inject internal constructor(
     }
 
     /**
-     * Looks up whether the provided email is associated with an existing Link user.
+     * Whether or not the provided email is associated with an existing Link consumer.
      *
      * @param email The email address to look up.
      * @return OnrampLinkLookupResult indicating whether the user exists.
      */
-    suspend fun lookupLinkUser(email: String): OnrampLinkLookupResult {
-        return interactor.lookupLinkUser(email)
+    suspend fun hasLinkAccount(email: String): OnrampLinkLookupResult {
+        return interactor.hasLinkAccount(email)
     }
 
     /**
