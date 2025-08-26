@@ -17,18 +17,18 @@ import com.stripe.android.crypto.onramp.example.network.TestBackendRepository
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
+import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
+import com.stripe.android.crypto.onramp.model.OnrampAuthenticateResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
-import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentResult
+import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
-import com.stripe.android.crypto.onramp.model.OnrampIdentityVerificationResult
-import com.stripe.android.crypto.onramp.model.OnrampKYCResult
-import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
-import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
-import com.stripe.android.crypto.onramp.model.OnrampSetWalletAddressResult
-import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
-import com.stripe.android.crypto.onramp.model.PaymentOptionDisplayData
+import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
+import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
+import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
+import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
+import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.link.LinkAppearance
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -95,10 +95,10 @@ internal class OnrampViewModel(
         val currentEmail = email.trim()
         _uiState.update { it.copy(screen = Screen.Loading, email = currentEmail, loadingMessage = "Checking user...") }
 
-        val result = onrampCoordinator.lookupLinkUser(currentEmail)
+        val result = onrampCoordinator.hasLinkAccount(currentEmail)
         when (result) {
-            is OnrampLinkLookupResult.Completed -> {
-                if (result.isLinkUser) {
+            is OnrampHasLinkAccountResult.Completed -> {
+                if (result.hasLinkAccount) {
                     _message.value = "User exists in Link. Please authenticate"
                     _uiState.update { it.copy(screen = Screen.Authentication) }
                 } else {
@@ -106,7 +106,7 @@ internal class OnrampViewModel(
                     _uiState.update { it.copy(screen = Screen.Registration) }
                 }
             }
-            is OnrampLinkLookupResult.Failed -> {
+            is OnrampHasLinkAccountResult.Failed -> {
                 _message.value = "Lookup failed: ${result.error.message}"
                 _uiState.update { it.copy(screen = Screen.EmailInput) }
             }
@@ -121,9 +121,9 @@ internal class OnrampViewModel(
         _message.value = null
     }
 
-    fun onAuthenticationResult(result: OnrampVerificationResult) {
+    fun onAuthenticateUserResult(result: OnrampAuthenticateResult) {
         when (result) {
-            is OnrampVerificationResult.Completed -> {
+            is OnrampAuthenticateResult.Completed -> {
                 _message.value = "Authentication successful! You can now perform authenticated operations."
                 _uiState.update {
                     it.copy(
@@ -132,35 +132,35 @@ internal class OnrampViewModel(
                     )
                 }
             }
-            is OnrampVerificationResult.Cancelled -> {
+            is OnrampAuthenticateResult.Cancelled -> {
                 _message.value = "Authentication cancelled, please try again"
             }
-            is OnrampVerificationResult.Failed -> {
+            is OnrampAuthenticateResult.Failed -> {
                 _message.value = "Authentication failed: ${result.error.message}"
                 _uiState.update { it.copy(screen = Screen.EmailInput) }
             }
         }
     }
 
-    fun onIdentityVerificationResult(result: OnrampIdentityVerificationResult) {
+    fun onVerifyIdentityResult(result: OnrampVerifyIdentityResult) {
         when (result) {
-            is OnrampIdentityVerificationResult.Completed -> {
+            is OnrampVerifyIdentityResult.Completed -> {
                 _message.value = "Identity Verification completed"
                 _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
             }
-            is OnrampIdentityVerificationResult.Cancelled -> {
+            is OnrampVerifyIdentityResult.Cancelled -> {
                 _message.value = "Identity Verification cancelled, please try again"
             }
-            is OnrampIdentityVerificationResult.Failed -> {
+            is OnrampVerifyIdentityResult.Failed -> {
                 _message.value = "Identity Verification failed: ${result.error.message}"
                 _uiState.update { it.copy(screen = Screen.EmailInput) }
             }
         }
     }
 
-    fun onSelectPaymentResult(result: OnrampCollectPaymentResult) {
+    fun onCollectPaymentResult(result: OnrampCollectPaymentMethodResult) {
         when (result) {
-            is OnrampCollectPaymentResult.Completed -> {
+            is OnrampCollectPaymentMethodResult.Completed -> {
                 _message.value = "Payment selection completed"
                 _uiState.update {
                     it.copy(
@@ -169,10 +169,10 @@ internal class OnrampViewModel(
                     )
                 }
             }
-            is OnrampCollectPaymentResult.Cancelled -> {
+            is OnrampCollectPaymentMethodResult.Cancelled -> {
                 _message.value = "Payment selection cancelled, please try again"
             }
-            is OnrampCollectPaymentResult.Failed -> {
+            is OnrampCollectPaymentMethodResult.Failed -> {
                 _message.value = "Payment selection failed: ${result.error.message}"
                 _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
             }
@@ -257,7 +257,7 @@ internal class OnrampViewModel(
         viewModelScope.launch {
             val result = onrampCoordinator.registerLinkUser(userInfo)
             when (result) {
-                is OnrampRegisterUserResult.Completed -> {
+                is OnrampRegisterLinkUserResult.Completed -> {
                     _message.value = "Registration successful"
                     _uiState.update {
                         it.copy(
@@ -266,7 +266,7 @@ internal class OnrampViewModel(
                         )
                     }
                 }
-                is OnrampRegisterUserResult.Failed -> {
+                is OnrampRegisterLinkUserResult.Failed -> {
                     _message.value = "Registration failed: ${result.error.message}"
                     _uiState.update { it.copy(screen = Screen.EmailInput) }
                 }
@@ -284,7 +284,7 @@ internal class OnrampViewModel(
             _uiState.update { it.copy(screen = Screen.Loading, loadingMessage = "Registering wallet address...") }
             val result = onrampCoordinator.registerWalletAddress(walletAddress.trim(), network)
             when (result) {
-                is OnrampSetWalletAddressResult.Completed -> {
+                is OnrampRegisterWalletAddressResult.Completed -> {
                     _message.value = "Wallet address registered successfully!"
                     _uiState.update {
                         it.copy(
@@ -294,7 +294,7 @@ internal class OnrampViewModel(
                         )
                     }
                 }
-                is OnrampSetWalletAddressResult.Failed -> {
+                is OnrampRegisterWalletAddressResult.Failed -> {
                     _message.value = "Failed to register wallet address: ${result.error.message}"
                     _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
                 }
@@ -306,14 +306,14 @@ internal class OnrampViewModel(
         _uiState.update { it.copy(screen = Screen.Loading, loadingMessage = "Collecting KYC info...") }
 
         viewModelScope.launch {
-            val result = onrampCoordinator.collectKycInfo(kycInfo)
+            val result = onrampCoordinator.attachKycInfo(kycInfo)
 
             when (result) {
-                is OnrampKYCResult.Completed -> {
+                is OnrampAttachKycInfoResult.Completed -> {
                     _message.value = "KYC Collection successful"
                     _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
                 }
-                is OnrampKYCResult.Failed -> {
+                is OnrampAttachKycInfoResult.Failed -> {
                     _message.value = "KYC Collection failed: ${result.error.message}"
                     _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
                 }
@@ -492,7 +492,7 @@ data class OnrampUiState(
     val linkAuthIntentId: String? = null,
     val consentedLinkAuthIntentIds: List<String> = emptyList(),
     val customerId: String? = null,
-    val selectedPaymentData: PaymentOptionDisplayData? = null,
+    val selectedPaymentData: PaymentMethodDisplayData? = null,
     val cryptoPaymentToken: String? = null,
     val walletAddress: String? = null,
     val network: CryptoNetwork? = null,

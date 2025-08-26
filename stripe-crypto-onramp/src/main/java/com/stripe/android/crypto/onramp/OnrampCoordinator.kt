@@ -10,14 +10,14 @@ import com.stripe.android.crypto.onramp.di.OnrampPresenterComponent
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
+import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
-import com.stripe.android.crypto.onramp.model.OnrampKYCResult
-import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
-import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
-import com.stripe.android.crypto.onramp.model.OnrampSetWalletAddressResult
+import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
+import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
+import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import javax.inject.Inject
 
@@ -46,47 +46,48 @@ class OnrampCoordinator @Inject internal constructor(
     }
 
     /**
-     * Looks up whether the provided email is associated with an existing Link user.
+     * Whether or not the provided email is associated with an existing Link consumer.
      *
      * @param email The email address to look up.
      * @return OnrampLinkLookupResult indicating whether the user exists.
      */
-    suspend fun lookupLinkUser(email: String): OnrampLinkLookupResult {
-        return interactor.lookupLinkUser(email)
+    suspend fun hasLinkAccount(email: String): OnrampHasLinkAccountResult {
+        return interactor.hasLinkAccount(email)
     }
 
     /**
-     * Given the required information, registers a new Link user.
+     * Registers a new Link user with the provided details.
      *
-     * @param info The LinkInfo for the new user.
+     * @param info The [LinkUserInfo] for the new user.
      * @return OnrampRegisterUserResult indicating the result of registration.
      */
-    suspend fun registerLinkUser(info: LinkUserInfo): OnrampRegisterUserResult {
-        return interactor.registerNewLinkUser(info)
+    suspend fun registerLinkUser(info: LinkUserInfo): OnrampRegisterLinkUserResult {
+        return interactor.registerLinkUser(info)
     }
 
     /**
-     * Registers a wallet address for the user.
+     * Registers the given crypto wallet address to the current Link account.
+     * Requires an authenticated Link user.
      *
-     * @param walletAddress The wallet address to register.
+     * @param walletAddress The crypto wallet address to register.
      * @param network The crypto network for the wallet address.
      * @return OnrampSetWalletAddressResult indicating the result of setting the wallet address.
      */
     suspend fun registerWalletAddress(
         walletAddress: String,
         network: CryptoNetwork
-    ): OnrampSetWalletAddressResult {
+    ): OnrampRegisterWalletAddressResult {
         return interactor.registerWalletAddress(walletAddress, network)
     }
 
     /**
-     * Given the required information, collects KYC information.
+     * Attaches the specific KYC info to the current Link user. Requires an authenticated Link user.
      *
-     * @param info The KycInfo for the user.
-     * @return OnrampKYCResult indicating the result of data collection.
+     * @param info The KYC info to attach to the Link user.
+     * @return [OnrampAttachKycInfoResult] indicating the result.
      */
-    suspend fun collectKycInfo(info: KycInfo): OnrampKYCResult {
-        return interactor.collectKycInfo(info)
+    suspend fun attachKycInfo(info: KycInfo): OnrampAttachKycInfoResult {
+        return interactor.attachKycInfo(info)
     }
 
     /**
@@ -128,25 +129,23 @@ class OnrampCoordinator @Inject internal constructor(
         private val coordinator: OnrampPresenterCoordinator,
     ) {
         /**
-         * Presents the Link verification flow for an existing user.
-         *
+         * Presents Link UI to authenticate an existing Link user.
          * Requires successful lookup or registration of the user first.
          */
-        fun presentForVerification() {
-            coordinator.presentForVerification()
+        fun authenticateUser() {
+            coordinator.authenticateUser()
         }
 
         /**
-         * Creates an identity verification session and launches the verification flow.
-         *
-         * Requires successful lookup or registration of the user first.
+         * Creates an identity verification session and launches the document verification flow.
+         * Requires an authenticated Link user.
          */
-        fun promptForIdentityVerification() {
-            coordinator.promptForIdentityVerification()
+        fun verifyIdentity() {
+            coordinator.verifyIdentity()
         }
 
         /**
-         * Presents a payment selection UI to the user.
+         * Presents UI to collect/select a payment method of the given type.
          *
          * @param type The payment method type to collect.
          */
@@ -155,7 +154,7 @@ class OnrampCoordinator @Inject internal constructor(
         }
 
         /**
-         * Authorize a LinkAuthIntent.
+         * Authorizes a Link auth intent and authenticates the user if necessary.
          *
          * @param linkAuthIntentId The LinkAuthIntent ID to authorize.
          */

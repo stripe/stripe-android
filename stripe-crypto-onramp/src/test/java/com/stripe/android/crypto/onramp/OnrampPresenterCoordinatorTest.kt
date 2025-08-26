@@ -93,9 +93,9 @@ class OnrampPresenterCoordinatorTest {
             activity = activity,
             onrampCallbacks = OnrampCallbacks(
                 checkoutCallback = checkoutCallback,
-                identityVerificationCallback = { },
-                authenticationCallback = {},
-                selectPaymentCallback = {},
+                verifyIdentityCallback = {},
+                authenticateUserCallback = {},
+                collectPaymentCallback = {},
                 authorizeCallback = {}
             ),
             coroutineScope = testScope
