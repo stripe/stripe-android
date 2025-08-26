@@ -1,6 +1,8 @@
 package com.stripe.android.link.theme
 
+import android.content.Context
 import android.content.res.Configuration
+import android.content.res.Resources
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.Colors
@@ -11,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.ui.image.LocalStripeImageLoader
@@ -61,18 +64,15 @@ internal fun DefaultLinkTheme(
         ?: defaultColors
 
     val baseContext = LocalContext.current
-    val styleContext = remember(baseContext, isDark) {
-        val config = Configuration(baseContext.resources.configuration).apply {
-            uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or
-                if (isDark) {
-                    Configuration.UI_MODE_NIGHT_YES
-                } else {
-                    Configuration.UI_MODE_NIGHT_NO
-                }
-        }
-        ContextThemeWrapper(baseContext, baseContext.theme).apply {
-            applyOverrideConfiguration(config)
-        }
+    val inspectionMode = LocalInspectionMode.current
+    val styleContext = remember(baseContext, isDark, inspectionMode) {
+        val uiMode =
+            if (isDark) {
+                Configuration.UI_MODE_NIGHT_YES
+            } else {
+                Configuration.UI_MODE_NIGHT_NO
+            }
+        baseContext.withUiMode(uiMode, inspectionMode)
     }
 
     CompositionLocalProvider(
@@ -86,6 +86,32 @@ internal fun DefaultLinkTheme(
             colors = debugColors(),
             content = content
         )
+    }
+}
+
+private fun Context.withUiMode(uiMode: Int, inspectionMode: Boolean): Context {
+    if (uiMode == this.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
+        return this
+    }
+    val config = Configuration(resources.configuration).apply {
+        this.uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or uiMode
+    }
+    return object : ContextThemeWrapper(this, theme) {
+        override fun getResources(): Resources? {
+            @Suppress("DEPRECATION")
+            if (inspectionMode) {
+                // Workaround NPE thrown in BridgeContext#createConfigurationContext() when getting resources.
+                val baseResources = this@withUiMode.resources
+                return Resources(
+                    baseResources.assets,
+                    baseResources.displayMetrics,
+                    config
+                )
+            }
+            return super.getResources()
+        }
+    }.apply {
+        applyOverrideConfiguration(config)
     }
 }
 
