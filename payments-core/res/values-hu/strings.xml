@@ -182,6 +182,8 @@
   <string name="stripe_title_update_card">Kártya módosítása</string>
   <!-- Title for a button that when tapped, updates a card brand. -->
   <string name="stripe_update">Frissítés</string>
+  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
+  <string name="stripe_unexpected_error_try_again">Váratlan hiba lépett fel, próbálja újra néhány másodperc múlva</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Igazolja fizetését</string>
 </resources>

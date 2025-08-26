@@ -77,5 +77,5 @@ private fun getErrorMessage(
         // https://docs.stripe.com/declines/codes
         ?: context.mapErrorCodeToLocalizedMessage(declineCode)
         ?: originalMessage
-        ?: "There was an unexpected error -- try again in a few seconds"
+        ?: context.getString(R.string.stripe_unexpected_error_try_again)
 }
