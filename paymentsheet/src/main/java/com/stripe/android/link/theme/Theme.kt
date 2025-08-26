@@ -34,22 +34,52 @@ internal val HorizontalPadding = 20.dp
 
 @Composable
 internal fun DefaultLinkTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    appearance: LinkAppearance? = null,
     content: @Composable () -> Unit
 ) {
     val stripeImageLoader = runCatching { LocalStripeImageLoader.current }
         .getOrElse { StripeImageLoader(LocalContext.current) }
+    val isDark = when (appearance?.style) {
+        LinkAppearance.Style.ALWAYS_LIGHT -> false
+        LinkAppearance.Style.ALWAYS_DARK -> true
+        LinkAppearance.Style.AUTOMATIC, null -> isSystemInDarkTheme()
+    }
+    val defaultColors = LinkThemeConfig.colors(isDark)
+    val resolvedColors = appearance
+        ?.let {
+            val overrides = if (isDark) appearance.darkColors else appearance.lightColors
+            defaultColors.copy(
+                textBrand = overrides.primary,
+                textOnButtonPrimary = overrides.contentOnPrimary,
+                borderSelected = overrides.borderSelected
+            )
+        }
+        ?: defaultColors
+
+    val baseContext = LocalContext.current
+    val styleContext = remember(baseContext, isDark) {
+        val config = Configuration(baseContext.resources.configuration).apply {
+            uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or
+                if (isDark) {
+                    Configuration.UI_MODE_NIGHT_YES
+                } else {
+                    Configuration.UI_MODE_NIGHT_NO
+                }
+        }
+        baseContext.createConfigurationContext(config)
+    }
+
     CompositionLocalProvider(
+        LocalContext provides styleContext,
+        LocalLinkColors provides resolvedColors,
         LocalLinkTypography provides linkTypography,
-        LocalLinkColors provides LinkThemeConfig.colors(darkTheme),
         LocalLinkShapes provides LinkShapes,
         LocalStripeImageLoader provides stripeImageLoader,
     ) {
         MaterialTheme(
             colors = debugColors(),
-        ) {
-            content()
-        }
+            content = content
+        )
     }
 }
 
@@ -74,91 +104,3 @@ private fun debugColors(
     onError = debugColor,
     isLight = true
 )
-
-@Composable
-internal fun LinkAppearanceTheme(
-    appearance: LinkAppearance? = null,
-    content: @Composable () -> Unit
-) {
-    appearance?.let {
-        val isDark: Boolean = when (appearance.style) {
-            LinkAppearance.Style.ALWAYS_LIGHT -> false
-            LinkAppearance.Style.ALWAYS_DARK -> true
-            LinkAppearance.Style.AUTOMATIC -> isSystemInDarkTheme()
-        }
-
-        val defaultColors = LinkThemeConfig.colors(isDark)
-        val overrides = if (isDark) appearance.darkColors else appearance.lightColors
-        val resolvedColors = defaultColors.copy(
-            textBrand = overrides.primary,
-            textOnButtonPrimary = overrides.contentOnPrimary,
-            borderSelected = overrides.borderSelected
-        )
-
-        val baseContext = LocalContext.current
-
-        val styleContext = remember(baseContext, isDark) {
-            val config = Configuration(baseContext.resources.configuration).apply {
-                uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or
-                    if (isDark) {
-                        Configuration.UI_MODE_NIGHT_YES
-                    } else {
-                        Configuration.UI_MODE_NIGHT_NO
-                    }
-            }
-            baseContext.createConfigurationContext(config)
-        }
-
-        CompositionLocalProvider(
-            LocalLinkColors provides resolvedColors,
-            LocalLinkTypography provides linkTypography,
-            LocalLinkShapes provides LinkShapes,
-            LocalContext provides styleContext
-        ) {
-            MaterialTheme(
-                colors = resolvedColors.toMaterialColors(!isDark),
-                content = content
-            )
-        }
-    } ?: run {
-        DefaultLinkTheme(
-            content = content
-        )
-    }
-}
-
-private fun LinkColors.toMaterialColors(isLight: Boolean): Colors {
-    return if (isLight) {
-        Colors(
-            primary = buttonPrimary,
-            primaryVariant = buttonPrimary,
-            secondary = buttonTertiary,
-            secondaryVariant = buttonTertiary,
-            background = surfaceBackdrop,
-            surface = surfacePrimary,
-            error = buttonCritical,
-            onPrimary = textOnButtonPrimary,
-            onSecondary = textPrimary,
-            onBackground = textPrimary,
-            onSurface = textPrimary,
-            onError = textWhite,
-            isLight = true
-        )
-    } else {
-        Colors(
-            primary = buttonPrimary,
-            primaryVariant = buttonPrimary,
-            secondary = buttonTertiary,
-            secondaryVariant = buttonTertiary,
-            background = surfaceBackdrop,
-            surface = surfacePrimary,
-            error = buttonCritical,
-            onPrimary = textOnButtonPrimary,
-            onSecondary = textPrimary,
-            onBackground = textPrimary,
-            onSurface = textPrimary,
-            onError = textWhite,
-            isLight = false
-        )
-    }
-}

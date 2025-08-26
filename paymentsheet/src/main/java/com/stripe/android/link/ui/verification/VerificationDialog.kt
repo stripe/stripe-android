@@ -21,7 +21,6 @@ import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.linkViewModel
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
-import com.stripe.android.link.theme.LinkAppearanceTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.uicore.elements.OTPElement
@@ -92,7 +91,7 @@ internal fun VerificationDialogBody(
             val dim = if (isSystemInDarkTheme()) DIM_DARK_THEME else DIM_LIGHT_THEME
             (LocalView.current.parent as? DialogWindowProvider)?.window?.setDimAmount(dim)
 
-            LinkAppearanceTheme(appearance = linkAppearance) {
+            DefaultLinkTheme(appearance = linkAppearance) {
                 Surface(
                     modifier = Modifier.width(360.dp),
                     shape = RoundedCornerShape(24.dp),
