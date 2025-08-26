@@ -39,6 +39,7 @@ internal open class FakeLinkRepository : LinkRepository {
     var listPaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
     var listShippingAddressesResult = Result.success(TestFactory.CONSUMER_SHIPPING_ADDRESSES)
     var updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
+    var updatePhoneNumberResult = Result.success(TestFactory.CONSUMER_SESSION)
     var deletePaymentDetailsResult = Result.success(Unit)
 
     private val lookupConsumerCalls = Turbine<LookupCall>()
@@ -222,6 +223,12 @@ internal open class FakeLinkRepository : LinkRepository {
         linkMode: LinkMode?,
         consumerPublishableKey: String?
     ): Result<LinkAccountSession> = createLinkAccountSessionResult
+
+    override suspend fun updatePhoneNumber(
+        consumerSessionClientSecret: String,
+        phoneNumber: String,
+        consumerPublishableKey: String?
+    ): Result<ConsumerSession> = updatePhoneNumberResult
 
     suspend fun awaitMobileLookup(): MobileLookupCall {
         return mobileLookupCalls.awaitItem()
