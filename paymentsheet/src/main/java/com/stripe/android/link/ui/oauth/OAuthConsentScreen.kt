@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -161,6 +162,9 @@ private fun MerchantLogo(
             debugPainter = ColorPainter(LinkTheme.colors.iconBrand),
             imageLoader = imageLoader,
             contentDescription = null,
+            loadingContent = {
+                Box(modifier)
+            },
             errorContent = {
                 DefaultMerchantLogo(modifier)
             }
@@ -256,6 +260,9 @@ private fun ScopeItem(
             contentDescription = null,
             disableAnimations = true,
             colorFilter = ColorFilter.tint(LinkTheme.colors.iconPrimary),
+            loadingContent = {
+                Box(modifier)
+            },
             errorContent = {
                 DefaultScopeIcon(modifier)
             }
