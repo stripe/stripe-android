@@ -63,7 +63,7 @@ internal class OAuthConsentViewModelTest {
     @Test
     fun `onAllowClick with successful consent update dismisses with granted consent`() = runTest(dispatcher) {
         val linkAccountManager = FakeLinkAccountManager()
-        linkAccountManager.consentUpdateResult = Result.success(Unit)
+        linkAccountManager.postConsentUpdateResult = Result.success(Unit)
 
         val dismissedResults = mutableListOf<LinkActivityResult>()
 
@@ -82,7 +82,7 @@ internal class OAuthConsentViewModelTest {
     @Test
     fun `onDenyClick with successful consent update dismisses with denied consent`() = runTest(dispatcher) {
         val linkAccountManager = FakeLinkAccountManager()
-        linkAccountManager.consentUpdateResult = Result.success(Unit)
+        linkAccountManager.postConsentUpdateResult = Result.success(Unit)
 
         val dismissedResults = mutableListOf<LinkActivityResult>()
 
@@ -102,7 +102,7 @@ internal class OAuthConsentViewModelTest {
     fun `onAllowClick with failed consent update shows error message`() = runTest(dispatcher) {
         val errorMessage = "Consent update failed"
         val linkAccountManager = FakeLinkAccountManager()
-        linkAccountManager.consentUpdateResult = Result.failure(RuntimeException(errorMessage))
+        linkAccountManager.postConsentUpdateResult = Result.failure(RuntimeException(errorMessage))
 
         val dismissedResults = mutableListOf<LinkActivityResult>()
 
@@ -127,7 +127,7 @@ internal class OAuthConsentViewModelTest {
     fun `onDenyClick with failed consent update shows error message`() = runTest(dispatcher) {
         val errorMessage = "Consent update failed"
         val linkAccountManager = FakeLinkAccountManager()
-        linkAccountManager.consentUpdateResult = Result.failure(RuntimeException(errorMessage))
+        linkAccountManager.postConsentUpdateResult = Result.failure(RuntimeException(errorMessage))
 
         val dismissedResults = mutableListOf<LinkActivityResult>()
 
@@ -152,7 +152,7 @@ internal class OAuthConsentViewModelTest {
     fun `consent submission clears previous error messages before processing`() = runTest(dispatcher) {
         val linkAccountManager = FakeLinkAccountManager()
         // First call fails, second succeeds
-        linkAccountManager.consentUpdateResult = Result.failure(RuntimeException("First error"))
+        linkAccountManager.postConsentUpdateResult = Result.failure(RuntimeException("First error"))
 
         val viewModel = createViewModel(linkAccountManager = linkAccountManager)
 
@@ -164,7 +164,7 @@ internal class OAuthConsentViewModelTest {
             assertThat(awaitItem().errorMessage).isNotNull()
 
             // Make second call succeed
-            linkAccountManager.consentUpdateResult = Result.success(Unit)
+            linkAccountManager.postConsentUpdateResult = Result.success(Unit)
             viewModel.onAllowClick()
 
             // Should briefly clear error before succeeding

@@ -401,12 +401,12 @@ internal class LinkApiRepository @Inject constructor(
         }
     }
 
-    override suspend fun consentUpdate(
+    override suspend fun postConsentUpdate(
         consumerSessionClientSecret: String,
         consentGranted: Boolean,
         consumerPublishableKey: String?
     ): Result<Unit> = withContext(workContext) {
-        consumersApiService.consentUpdate(
+        consumersApiService.postConsentUpdate(
             consumerSessionClientSecret = consumerSessionClientSecret,
             consentGranted = consentGranted,
             requestSurface = requestSurface.value,

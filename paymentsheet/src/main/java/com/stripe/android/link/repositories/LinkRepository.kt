@@ -153,7 +153,7 @@ internal interface LinkRepository {
     /**
      * Update consent status for the signed in consumer.
      */
-    suspend fun consentUpdate(
+    suspend fun postConsentUpdate(
         consumerSessionClientSecret: String,
         consentGranted: Boolean,
         consumerPublishableKey: String?
