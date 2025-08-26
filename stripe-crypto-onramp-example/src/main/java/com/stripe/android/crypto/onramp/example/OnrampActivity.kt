@@ -205,9 +205,9 @@ internal fun OnrampScreen(
                     onRegister = { email, phone, country, fullName ->
                         val userInfo = LinkUserInfo(
                             email = email.trim(),
+                            fullName = fullName?.trim()?.takeIf { it.isNotEmpty() },
                             phone = phone.trim(),
                             country = country.trim(),
-                            fullName = fullName?.trim()?.takeIf { it.isNotEmpty() }
                         )
                         viewModel.registerNewLinkUser(userInfo)
                     },

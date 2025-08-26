@@ -3,13 +3,13 @@ package com.stripe.android.crypto.onramp.model
 import androidx.annotation.RestrictTo
 
 /**
- * Result of an OnRamp Link user lookup operation.
+ * Result of an Onramp Link register user operation.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed interface OnrampRegisterUserResult {
     /**
      * User registration was successful.
-     * @param customerId The identifier of the crypto customer that was registered.
+     * @param customerId The crypto customer ID.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Completed internal constructor(

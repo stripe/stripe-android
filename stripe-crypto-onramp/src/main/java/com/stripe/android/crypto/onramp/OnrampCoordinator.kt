@@ -56,13 +56,13 @@ class OnrampCoordinator @Inject internal constructor(
     }
 
     /**
-     * Given the required information, registers a new Link user.
+     * Registers a new Link user with the provided details.
      *
-     * @param info The LinkInfo for the new user.
+     * @param info The [LinkUserInfo] for the new user.
      * @return OnrampRegisterUserResult indicating the result of registration.
      */
     suspend fun registerLinkUser(info: LinkUserInfo): OnrampRegisterUserResult {
-        return interactor.registerNewLinkUser(info)
+        return interactor.registerLinkUser(info)
     }
 
     /**

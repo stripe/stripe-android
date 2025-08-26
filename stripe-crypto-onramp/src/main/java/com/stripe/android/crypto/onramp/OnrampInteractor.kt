@@ -79,7 +79,7 @@ internal class OnrampInteractor @Inject constructor(
         }
     }
 
-    suspend fun registerNewLinkUser(info: LinkUserInfo): OnrampRegisterUserResult {
+    suspend fun registerLinkUser(info: LinkUserInfo): OnrampRegisterUserResult {
         val result = linkController.registerConsumer(
             email = info.email,
             phone = info.phone,
