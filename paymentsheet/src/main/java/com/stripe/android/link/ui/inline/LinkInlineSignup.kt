@@ -79,7 +79,7 @@ import kotlinx.coroutines.launch
 import com.stripe.android.uicore.R as StripeUiCoreR
 
 internal const val ProgressIndicatorTestTag = "CircularProgressIndicator"
-private const val LINK_LOGO_SCALE = 0.9f
+private const val LINK_LOGO_SCALE = 0.95f
 
 @Composable
 internal fun LinkInlineSignup(
