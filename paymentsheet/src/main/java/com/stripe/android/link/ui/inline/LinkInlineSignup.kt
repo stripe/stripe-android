@@ -255,7 +255,7 @@ private fun LinkCheckbox(
     }
 
     Row(
-        verticalAlignment = if (simplifiedCheckbox) Alignment.CenterVertically else Alignment.Top,
+        verticalAlignment = Alignment.Top,
         modifier = Modifier
             .clickable(enabled = enabled) { toggleExpanded() }
             .padding(if (simplifiedCheckbox) 0.dp else 16.dp)
@@ -269,7 +269,6 @@ private fun LinkCheckbox(
         Column {
             if (useLinkLogoInCheckboxText) {
                 TextWithLinkLogo(
-                    label = label,
                     style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colors.onSurface.copy(alpha = contentAlpha),
                 )
@@ -296,10 +295,10 @@ private fun LinkCheckbox(
 
 @Composable
 private fun TextWithLinkLogo(
-    label: String,
     style: TextStyle,
     color: Color,
 ) {
+    val label = stringResource(R.string.stripe_inline_sign_up_toggle)
     val painter = painterResource(R.drawable.stripe_link_logo_knockout)
     val logoHeight = style.fontSize
     val logoWidth = logoHeight * (painter.intrinsicSize.width / painter.intrinsicSize.height)
