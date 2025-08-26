@@ -7,6 +7,7 @@ import androidx.core.net.toUri
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
@@ -47,7 +48,9 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     private var identityVerificationSheet: IdentityVerificationSheet? = null
 
     private val factory: PaymentLauncherFactory = PaymentLauncherFactory(
-        activity = activity,
+        activityResultRegistryOwner = activity,
+        lifecycleOwner = lifecycleOwner,
+        statusBarColor = StatusBarCompat.color(activity),
         callback = ::handlePaymentLauncherResult
     )
 
