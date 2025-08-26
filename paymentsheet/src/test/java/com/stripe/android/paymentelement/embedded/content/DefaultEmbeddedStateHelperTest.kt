@@ -84,6 +84,8 @@ internal class DefaultEmbeddedStateHelperTest {
             customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
         )
 
+        //TODO hasAutomaticallyLaunchedCardScanHolder
+
         assertThat(stateHelper.state).isNotNull()
         assertThat(confirmationStateHolder.state).isNotNull()
         assertThat(customerStateHolder.customer.value).isEqualTo(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)

@@ -143,6 +143,7 @@ internal class DefaultEmbeddedContentHelperTest {
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             embeddedSelectionHolder = selectionHolder,
             savedStateHandle = savedStateHandle,
+            hasAutomaticallyLaunchedCardScan = false,
         )
         val confirmationHandler = FakeConfirmationHandler()
         val eventReporter = FakeEventReporter()

@@ -405,6 +405,7 @@ class CustomerSessionCustomerSheetActivityTest {
                         )
                     ),
                     statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
+                    hasAutomaticallyLaunchedCardScan = false,
                 )
             )
         ).use { scenario ->

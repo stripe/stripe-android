@@ -158,7 +158,12 @@ internal class DefaultEmbeddedConfirmationHelperTest {
         )
         confirmationStateHolder.state = loadedState
         val stateHelper = FakeEmbeddedStateHelper()
-        stateHelper.state = if (loadedState != null) EmbeddedPaymentElement.State(loadedState, null, Bundle()) else null
+        stateHelper.state = if (loadedState != null) EmbeddedPaymentElement.State(
+            confirmationState = loadedState,
+            customer = null,
+            previousNewSelections = Bundle(),
+            hasAutomaticallyLaunchedCardScan = false,
+        ) else null
         val callbackHelper = FakeEmbeddedResultCallbackHelper(
             stateHelper = stateHelper
         )

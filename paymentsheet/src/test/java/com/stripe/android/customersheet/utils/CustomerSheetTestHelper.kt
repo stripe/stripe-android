@@ -36,10 +36,12 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.paymentsheet.FakeIsStripeCardScanAvailable
 import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.ui.core.IsStripeCardScanAvailable
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.CompletableSingle
 import com.stripe.android.utils.DummyActivityResultCaller
@@ -98,6 +100,9 @@ internal object CustomerSheetTestHelper {
             permissions = customerPermissions,
         ),
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
+        hasAutomaticallyLaunchedCardScanInitialValue: Boolean = false,
+        isStripeCardScanAvailable: IsStripeCardScanAvailable = FakeIsStripeCardScanAvailable()
     ): CustomerSheetViewModel {
         return CustomerSheetViewModel(
             application = application,
@@ -142,7 +147,7 @@ internal object CustomerSheetTestHelper {
                     ): GooglePayPaymentMethodLauncher = mock()
                 },
                 statusBarColor = null,
-                savedStateHandle = SavedStateHandle(),
+                savedStateHandle = savedStateHandle,
                 errorReporter = FakeErrorReporter(),
                 linkLauncher = RecordingLinkPaymentLauncher.noOp(),
                 linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
@@ -151,6 +156,9 @@ internal object CustomerSheetTestHelper {
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,
             errorReporter = errorReporter,
+            savedStateHandle = savedStateHandle,
+            hasAutomaticallyLaunchedCardScanInitialValue = hasAutomaticallyLaunchedCardScanInitialValue,
+            isStripeCardScanAvailable = isStripeCardScanAvailable,
         ).apply {
             registerFromActivity(DummyActivityResultCaller.noOp(), TestLifecycleOwner())
         }

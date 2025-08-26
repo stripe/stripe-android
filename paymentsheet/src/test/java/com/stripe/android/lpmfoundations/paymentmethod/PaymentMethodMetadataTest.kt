@@ -1150,6 +1150,7 @@ internal class PaymentMethodMetadataTest {
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             shopPayConfiguration = null,
             termsDisplay = emptyMap(),
+            openCardScanAutomaticallyConfig = false,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1224,6 +1225,7 @@ internal class PaymentMethodMetadataTest {
             elementsSessionId = "session_1234",
             shopPayConfiguration = null,
             termsDisplay = emptyMap(),
+            openCardScanAutomaticallyConfig = false,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }

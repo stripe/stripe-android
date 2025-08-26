@@ -25,6 +25,7 @@ class CustomerSheetConfigurationTest {
         )
         val headerTextForSelectionScreen = "Test"
         val preferredNetworks = listOf(CardBrand.AmericanExpress)
+        val opensCardScannerAutomatically = true
 
         val configuration = CustomerSheet.Configuration.builder(merchantDisplayName)
             .googlePayEnabled(googlePayEnabled)
@@ -33,6 +34,7 @@ class CustomerSheetConfigurationTest {
             .defaultBillingDetails(defaultBillingDetails)
             .headerTextForSelectionScreen(headerTextForSelectionScreen)
             .preferredNetworks(preferredNetworks)
+            .opensCardScannerAutomatically(opensCardScannerAutomatically)
             .build()
 
         assertThat(configuration.googlePayEnabled)
@@ -48,6 +50,7 @@ class CustomerSheetConfigurationTest {
         assertThat(configuration.headerTextForSelectionScreen)
             .isEqualTo(headerTextForSelectionScreen)
         assertThat(configuration.preferredNetworks).isEqualTo(preferredNetworks)
+        assertThat(configuration.opensCardScannerAutomatically).isEqualTo(opensCardScannerAutomatically)
     }
 
     @Test
@@ -84,6 +87,7 @@ class CustomerSheetConfigurationTest {
             "allowsRemovalOfLastSavedPaymentMethod",
             "paymentMethodOrder",
             "cardBrandAcceptance",
+            "opensCardScannerAutomatically",
         )
 
         // Programmatically check for any new method on the builder using reflection

@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
@@ -185,7 +186,10 @@ class CustomerSheetViewModelTest {
         viewModel.result.test {
             assertThat(awaitItem()).isEqualTo(null)
             viewModel.handleViewAction(CustomerSheetViewAction.OnBackPressed)
-            assertThat(awaitItem()).isEqualTo(InternalCustomerSheetResult.Canceled(null))
+            assertThat(awaitItem()).isEqualTo(InternalCustomerSheetResult.Canceled(
+                paymentSelection = null,
+                hasAutomaticallyLaunchedCardScan = false,
+            ))
         }
     }
 
@@ -1324,9 +1328,10 @@ class CustomerSheetViewModelTest {
             assertThat(resultTurbine.awaitItem())
                 .isEqualTo(
                     InternalCustomerSheetResult.Canceled(
-                        PaymentSelection.Saved(
+                        paymentSelection = PaymentSelection.Saved(
                             CARD_PAYMENT_METHOD.copy(id = "pm_2"),
-                        )
+                        ),
+                        hasAutomaticallyLaunchedCardScan = false,
                     )
                 )
 
@@ -2380,7 +2385,10 @@ class CustomerSheetViewModelTest {
 
             assertThat(resultTurbine.awaitItem())
                 .isEqualTo(
-                    InternalCustomerSheetResult.Canceled(null)
+                    InternalCustomerSheetResult.Canceled(
+                        paymentSelection = null,
+                        hasAutomaticallyLaunchedCardScan = false,
+                    )
                 )
 
             resultTurbine.cancel()
@@ -2682,7 +2690,8 @@ class CustomerSheetViewModelTest {
             assertThat(awaitItem())
                 .isEqualTo(
                     InternalCustomerSheetResult.Selected(
-                        PaymentSelection.Saved(US_BANK_ACCOUNT)
+                        paymentSelection = PaymentSelection.Saved(US_BANK_ACCOUNT),
+                        hasAutomaticallyLaunchedCardScan = false,
                     )
                 )
         }
@@ -3508,6 +3517,196 @@ class CustomerSheetViewModelTest {
             }
         }
 
+    @Test
+    fun `AutomaticallyLaunchCardScanFormData created correctly`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Test Merchant",
+                opensCardScannerAutomatically = true
+            ),
+            hasAutomaticallyLaunchedCardScanInitialValue = false,
+        )
+
+        assertThat(viewModel.automaticallyLaunchedCardScanFormData.hasAutomaticallyLaunchedCardScan).isFalse()
+        assertThat(viewModel.automaticallyLaunchedCardScanFormData.shouldLaunchCardScanAutomatically).isTrue()
+    }
+
+    @Test
+    fun `When selected, InternalCustomerSheetResult has correct hasAutomaticallyLaunchedCardScan value`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Test Merchant",
+                opensCardScannerAutomatically = true
+            ),
+            hasAutomaticallyLaunchedCardScanInitialValue = false,
+            customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
+            savedPaymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD),
+        )
+
+        turbineScope {
+            val viewStateTurbine = viewModel.viewState.testIn(backgroundScope)
+            val resultTurbine = viewModel.result.testIn(backgroundScope)
+
+            assertThat(viewStateTurbine.awaitItem()).isInstanceOf<SelectPaymentMethod>()
+            viewStateTurbine.cancelAndIgnoreRemainingEvents()
+            assertThat(resultTurbine.awaitItem()).isNull()
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+            val result = resultTurbine.awaitItem()
+
+            assertThat(result).isInstanceOf<InternalCustomerSheetResult.Selected>()
+            assertThat(result?.hasAutomaticallyLaunchedCardScan).isFalse()
+        }
+    }
+
+    @Test
+    fun `When no payment methods available and opensCardScannerAutomatically enabled, shouldAutomaticallyLaunchCardScan true`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Test Merchant",
+                opensCardScannerAutomatically = true
+            ),
+            hasAutomaticallyLaunchedCardScanInitialValue = false,
+            customerSheetLoader = FakeCustomerSheetLoader(
+                isGooglePayAvailable = false,
+                customerPaymentMethods = listOf()
+            ),
+        )
+        viewModel.viewState.test {
+            val state = awaitItem()
+
+            assertThat(state).isInstanceOf<AddPaymentMethod>()
+
+            val formElements = (state as AddPaymentMethod).formElements
+            assertThat(formElements[0]).isInstanceOf<CardDetailsSectionElement>()
+            assertThat(formElements[0].asCardDetailsSectionElement().controller.shouldAutomaticallyLaunchCardScan())
+                .isTrue()
+        }
+    }
+
+    @Test
+    fun `When OnAddCardPressed,opensCardScannerAutomatically enabled, and not hasAutomaticallyLaunchedCardScanInitialValue, shouldAutomaticallyLaunchCardScan false`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Test Merchant",
+                opensCardScannerAutomatically = true
+            ),
+            hasAutomaticallyLaunchedCardScanInitialValue = false,
+        )
+
+        viewModel.viewState.test {
+            assertThat(awaitItem())
+                .isInstanceOf<SelectPaymentMethod>()
+            viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+
+            val item = awaitItem()
+            assertThat(item).isInstanceOf<AddPaymentMethod>()
+
+            val formElements = item.asAddState().formElements
+
+            assertThat(formElements[0]).isInstanceOf<CardDetailsSectionElement>()
+            assertThat(formElements[0].asCardDetailsSectionElement().controller.shouldAutomaticallyLaunchCardScan())
+                .isTrue()
+        }
+    }
+
+    @Test
+    fun `When OnAddCardPressed,opensCardScannerAutomatically disabled, shouldAutomaticallyLaunchCardScan false`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Test Merchant",
+                opensCardScannerAutomatically = false
+            ),
+        )
+
+        viewModel.viewState.test {
+            assertThat(awaitItem())
+                .isInstanceOf<SelectPaymentMethod>()
+            viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+
+            val item = awaitItem()
+            assertThat(item).isInstanceOf<AddPaymentMethod>()
+
+            val formElements = item.asAddState().formElements
+
+            assertThat(formElements[0]).isInstanceOf<CardDetailsSectionElement>()
+            assertThat(formElements[0].asCardDetailsSectionElement().controller.shouldAutomaticallyLaunchCardScan())
+                .isFalse()
+        }
+    }
+
+    @Test
+    fun `When OnAddCardPressed, opensCardScannerAutomatically enabled, and hasAutomaticallyLaunchedCardScanInitialValue, shouldAutomaticallyLaunchCardScan false`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Test Merchant",
+                opensCardScannerAutomatically = true
+            ),
+            hasAutomaticallyLaunchedCardScanInitialValue = true,
+        )
+
+        viewModel.viewState.test {
+            assertThat(awaitItem())
+                .isInstanceOf<SelectPaymentMethod>()
+            viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+
+            val item = awaitItem()
+            assertThat(item).isInstanceOf<AddPaymentMethod>()
+
+            val formElements = item.asAddState().formElements
+
+            assertThat(formElements[0]).isInstanceOf<CardDetailsSectionElement>()
+            assertThat(formElements[0].asCardDetailsSectionElement().controller.shouldAutomaticallyLaunchCardScan())
+                .isFalse()
+        }
+    }
+
+    @Test
+    fun `When cancelling, InternalCustomerSheetResult has correct hasAutomaticallyLaunchedCardScan value`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            customerPaymentMethods = listOf(
+                CARD_PAYMENT_METHOD.copy(id = "pm_1"),
+            ),
+            savedPaymentSelection = PaymentSelection.Saved(
+                CARD_PAYMENT_METHOD.copy(id = "pm_1"),
+            )
+        )
+
+        turbineScope {
+            val resultTurbine = viewModel.result.testIn(this)
+            val viewStateTurbine = viewModel.viewState.testIn(this)
+
+            assertThat(resultTurbine.awaitItem()).isNull()
+
+            viewModel.automaticallyLaunchedCardScanFormData.hasAutomaticallyLaunchedCardScan = true
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnDismissed
+            )
+
+            assertThat(resultTurbine.awaitItem())
+                .isEqualTo(
+                    InternalCustomerSheetResult.Canceled(
+                        paymentSelection = PaymentSelection.Saved(
+                            CARD_PAYMENT_METHOD.copy(id = "pm_1"),
+                        ),
+                        hasAutomaticallyLaunchedCardScan = true,
+                    )
+                )
+
+            resultTurbine.cancel()
+            viewStateTurbine.cancel()
+        }
+    }
+
     private fun mockUSBankAccountPaymentSelection(): PaymentSelection.New.USBankAccount {
         return PaymentSelection.New.USBankAccount(
             label = "Test",
@@ -3699,6 +3898,10 @@ class CustomerSheetViewModelTest {
 
     private fun FormElement.asSectionElement(): SectionElement {
         return this as SectionElement
+    }
+
+    private fun FormElement.asCardDetailsSectionElement(): CardDetailsSectionElement {
+        return this as CardDetailsSectionElement
     }
 
     @Suppress("UNCHECKED_CAST")

@@ -487,6 +487,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             embeddedSelectionHolder = EmbeddedSelectionHolder(savedStateHandle),
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = savedStateHandle,
+            hasAutomaticallyLaunchedCardScan = false,
         )
         Scenario(
             chooser = DefaultEmbeddedSelectionChooser(

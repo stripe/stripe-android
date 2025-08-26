@@ -47,6 +47,7 @@ internal class CustomerSheetActivityTest {
                 googlePayEnabled = true,
             ),
             statusBarColor = null,
+            hasAutomaticallyLaunchedCardScan = false,
         ),
     )
     private val page = CustomerSheetPage(composeTestRule)
@@ -65,7 +66,10 @@ internal class CustomerSheetActivityTest {
             assertThat(
                 InternalCustomerSheetResult.fromIntent(scenario.getResult().resultData)
             ).isEqualTo(
-                InternalCustomerSheetResult.Canceled(null)
+                InternalCustomerSheetResult.Canceled(
+                    paymentSelection = null,
+                    hasAutomaticallyLaunchedCardScan = false,
+                )
             )
         }
     }
@@ -106,7 +110,8 @@ internal class CustomerSheetActivityTest {
                 InternalCustomerSheetResult.Canceled(
                     paymentSelection = PaymentSelection.Saved(
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD
-                    )
+                    ),
+                    hasAutomaticallyLaunchedCardScan = false,
                 )
             )
         }

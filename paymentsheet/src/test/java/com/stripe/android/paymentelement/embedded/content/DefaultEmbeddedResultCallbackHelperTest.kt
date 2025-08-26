@@ -39,6 +39,7 @@ internal class DefaultEmbeddedResultCallbackHelperTest {
             confirmationState = EmbeddedConfirmationStateFixtures.defaultState(),
             customer = null,
             previousNewSelections = Bundle(),
+            hasAutomaticallyLaunchedCardScan = false,
         )
         val resultCallbackTurbine = Turbine<EmbeddedPaymentElement.Result>()
         val helper = DefaultEmbeddedResultCallbackHelper(

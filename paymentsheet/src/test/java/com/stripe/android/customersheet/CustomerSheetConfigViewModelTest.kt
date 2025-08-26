@@ -47,4 +47,35 @@ class CustomerSheetConfigViewModelTest {
 
         assertThat(recreatedViewModel.configureRequest).isEqualTo(request)
     }
+
+    @Test
+    fun `On set hasAutomaticallyLaunchedCardScan, should be able to retrieve hasAutomaticallyLaunchedCardScan`() {
+        val viewModel = CustomerSheetConfigViewModel(
+            savedStateHandle = SavedStateHandle(),
+        )
+
+        viewModel.hasAutomaticallyLaunchedCardScan = true
+
+        assertThat(viewModel.hasAutomaticallyLaunchedCardScan).isTrue()
+
+        viewModel.hasAutomaticallyLaunchedCardScan = false
+
+        assertThat(viewModel.hasAutomaticallyLaunchedCardScan).isFalse()
+    }
+
+    @Test
+    fun `On init with 'SavedStateHandle', should be able to retrieve hasAutomaticallyLaunchedCardScan`() {
+        val handle = SavedStateHandle()
+        val viewModel = CustomerSheetConfigViewModel(
+            savedStateHandle = handle,
+        )
+
+        viewModel.hasAutomaticallyLaunchedCardScan = true
+
+        val recreatedViewModel = CustomerSheetConfigViewModel(
+            savedStateHandle = handle
+        )
+
+        assertThat(recreatedViewModel.hasAutomaticallyLaunchedCardScan).isTrue()
+    }
 }

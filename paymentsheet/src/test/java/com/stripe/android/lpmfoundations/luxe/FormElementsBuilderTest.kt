@@ -176,6 +176,7 @@ class FormElementsBuilderTest {
             setAsDefaultMatchesSaveForFutureUse = false,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
             linkInlineHandler = null,
+            automaticallyLaunchedCardScanFormData = null,
         )
     }
 }

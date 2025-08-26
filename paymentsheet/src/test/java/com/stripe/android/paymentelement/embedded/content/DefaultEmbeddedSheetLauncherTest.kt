@@ -47,6 +47,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
             statusBarColor = null,
             paymentSelection = null,
+            hasAutomaticallyLaunchedCardScan = false,
         )
 
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
@@ -355,14 +356,201 @@ internal class DefaultEmbeddedSheetLauncherTest {
         assertThat(sheetStateHolder.sheetIsOpen).isTrue()
     }
 
+    @Test
+    fun `launchForm launches activity with hasAutomaticallyLaunchedCardScan false and sets isLaunchingCardFormWithCardScanEnabled true`() {
+        testLaunchFormScenario(
+            code = "card",
+            openCardScanAutomatically = true,
+            hasAutomaticallyLaunchedCardScanInitialValue = false,
+            expectedIsLaunchingCardFormWithCardScanEnabled = true,
+        )
+    }
+
+    @Test
+    fun `launchForm launches activity and isLaunchingCardFormWithCardScanEnabled false when hasAutomaticallyLaunchedCardScan true`() {
+        testLaunchFormScenario(
+            code = "card",
+            openCardScanAutomatically = true,
+            hasAutomaticallyLaunchedCardScanInitialValue = true,
+            expectedIsLaunchingCardFormWithCardScanEnabled = false,
+        )
+    }
+
+    @Test
+    fun `launchForm launches activity and isLaunchingCardFormWithCardScanEnabled false when launching not card`() {
+        testLaunchFormScenario(
+            code = "us_bank_account",
+            openCardScanAutomatically = true,
+            hasAutomaticallyLaunchedCardScanInitialValue = false,
+            expectedIsLaunchingCardFormWithCardScanEnabled = false,
+        )
+    }
+
+    @Test
+    fun `launchForm launches activity and isLaunchingCardFormWithCardScanEnabled false when openCardScanAutomatically disabled`() {
+        testLaunchFormScenario(
+            code = "card",
+            openCardScanAutomatically = false,
+            hasAutomaticallyLaunchedCardScanInitialValue = false,
+            expectedIsLaunchingCardFormWithCardScanEnabled = false,
+        )
+    }
+
+    @Test
+    fun `formActivityLauncher sets hasAutomaticallyLaunchedCardScanHolder on complete result`(){
+        val mySavedStateHandle = SavedStateHandle()
+        val hasAutomaticallyLaunchedCardScanHolder = EmbeddedHasAutomaticallyLaunchedCardScanHolder(mySavedStateHandle)
+        hasAutomaticallyLaunchedCardScanHolder.hasAutomaticallyLaunchedCardScan = false
+        hasAutomaticallyLaunchedCardScanHolder.isLaunchingCardFormWithCardScanEnabled = true
+
+        testScenario(
+            savedStateHandle = mySavedStateHandle,
+            hasAutomaticallyLaunchedCardScanHolder = hasAutomaticallyLaunchedCardScanHolder
+        ) {
+            val result = FormResult.Complete(PaymentMethodFixtures.CARD_PAYMENT_SELECTION, true)
+            val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
+
+            callback.onActivityResult(result)
+            assertThat(hasAutomaticallyLaunchedCardScanHolder.hasAutomaticallyLaunchedCardScan).isTrue()
+            assertThat(hasAutomaticallyLaunchedCardScanHolder.isLaunchingCardFormWithCardScanEnabled).isFalse()
+        }
+    }
+
+    @Test
+    fun `formActivityLauncher does not set hasAutomaticallyLaunchedCardScanHolder on complete result when not isLaunchingCardFormWithCardScanEnabled`(){
+        val mySavedStateHandle = SavedStateHandle()
+        val hasAutomaticallyLaunchedCardScanHolder = EmbeddedHasAutomaticallyLaunchedCardScanHolder(mySavedStateHandle)
+        hasAutomaticallyLaunchedCardScanHolder.hasAutomaticallyLaunchedCardScan = false
+        hasAutomaticallyLaunchedCardScanHolder.isLaunchingCardFormWithCardScanEnabled = false
+
+        testScenario(
+            savedStateHandle = mySavedStateHandle,
+            hasAutomaticallyLaunchedCardScanHolder = hasAutomaticallyLaunchedCardScanHolder
+        ) {
+            val result = FormResult.Complete(PaymentMethodFixtures.CARD_PAYMENT_SELECTION, true)
+            val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
+
+            callback.onActivityResult(result)
+            assertThat(hasAutomaticallyLaunchedCardScanHolder.hasAutomaticallyLaunchedCardScan).isFalse()
+            assertThat(hasAutomaticallyLaunchedCardScanHolder.isLaunchingCardFormWithCardScanEnabled).isFalse()
+        }
+    }
+
+    @Test
+    fun `formActivityLauncher correctly sets hasAutomaticallyLaunchedCardScanHolder when launching card form and getting result`() {
+        testLaunchFormScenario(
+            code = "card",
+            openCardScanAutomatically = true,
+            hasAutomaticallyLaunchedCardScanInitialValue = false,
+            expectedIsLaunchingCardFormWithCardScanEnabled = true,
+            expectedHasAutomaticallyLaunchedCardScanValueAfterResult = true,
+        )
+    }
+
+    @Test
+    fun `formActivityLauncher does not change hasAutomaticallyLaunchedCardScanHolder when hasAutomaticallyLaunchedCardScan already true and getting result`() {
+        testLaunchFormScenario(
+            code = "card",
+            openCardScanAutomatically = true,
+            hasAutomaticallyLaunchedCardScanInitialValue = true,
+            expectedIsLaunchingCardFormWithCardScanEnabled = false,
+            expectedHasAutomaticallyLaunchedCardScanValueAfterResult = true,
+        )
+    }
+
+    @Test
+    fun `formActivityLauncher does not change hasAutomaticallyLaunchedCardScanHolder when openCardScanAutomatically false and getting result`() {
+        testLaunchFormScenario(
+            code = "card",
+            openCardScanAutomatically = false,
+            hasAutomaticallyLaunchedCardScanInitialValue = false,
+            expectedIsLaunchingCardFormWithCardScanEnabled = false,
+            expectedHasAutomaticallyLaunchedCardScanValueAfterResult = false,
+        )
+    }
+
+    private fun testLaunchFormScenario(
+        code: String,
+        openCardScanAutomatically: Boolean,
+        hasAutomaticallyLaunchedCardScanInitialValue: Boolean,
+        expectedIsLaunchingCardFormWithCardScanEnabled: Boolean,
+        expectedHasAutomaticallyLaunchedCardScanValueAfterResult: Boolean? = null,
+    ) {
+        val mySavedStateHandle = SavedStateHandle()
+        val hasAutomaticallyLaunchedCardScanHolder = EmbeddedHasAutomaticallyLaunchedCardScanHolder(mySavedStateHandle)
+        hasAutomaticallyLaunchedCardScanHolder.hasAutomaticallyLaunchedCardScan = hasAutomaticallyLaunchedCardScanInitialValue
+        testScenario(
+            savedStateHandle = mySavedStateHandle,
+            hasAutomaticallyLaunchedCardScanHolder = hasAutomaticallyLaunchedCardScanHolder
+        ) {
+            val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                openCardScanAutomatically = openCardScanAutomatically
+            )
+            val state = EmbeddedConfirmationStateFixtures.defaultState()
+//            selectionHolder.set(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+            sheetLauncher.launchForm(code, paymentMethodMetadata, false, state)
+            val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as FormContract.Args
+            assertThat(launchCall.hasAutomaticallyLaunchedCardScan).isEqualTo(hasAutomaticallyLaunchedCardScanInitialValue)
+            assertThat(hasAutomaticallyLaunchedCardScanHolder.isLaunchingCardFormWithCardScanEnabled)
+                .isEqualTo(expectedIsLaunchingCardFormWithCardScanEnabled)
+
+            expectedHasAutomaticallyLaunchedCardScanValueAfterResult?.let {
+                val result = FormResult.Complete(PaymentMethodFixtures.CARD_PAYMENT_SELECTION, true)
+                val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
+
+                callback.onActivityResult(result)
+                assertThat(hasAutomaticallyLaunchedCardScanHolder.hasAutomaticallyLaunchedCardScan).isEqualTo(it)
+                assertThat(hasAutomaticallyLaunchedCardScanHolder.isLaunchingCardFormWithCardScanEnabled).isFalse()
+            }
+        }
+    }
+
+    private fun testLaunchFormAndResultScenario(
+        code: String,
+        openCardScanAutomatically: Boolean,
+        hasAutomaticallyLaunchedCardScanInitialValue: Boolean,
+        expectedIsLaunchingCardFormWithCardScanEnabled: Boolean,
+        expectedHasAutomaticallyLaunchedCardScanValueAfterResult: Boolean? = null,
+    ) {
+        val mySavedStateHandle = SavedStateHandle()
+        val hasAutomaticallyLaunchedCardScanHolder = EmbeddedHasAutomaticallyLaunchedCardScanHolder(mySavedStateHandle)
+        hasAutomaticallyLaunchedCardScanHolder.hasAutomaticallyLaunchedCardScan = hasAutomaticallyLaunchedCardScanInitialValue
+        testScenario(
+            savedStateHandle = mySavedStateHandle,
+            hasAutomaticallyLaunchedCardScanHolder = hasAutomaticallyLaunchedCardScanHolder
+        ) {
+            val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                openCardScanAutomatically = openCardScanAutomatically
+            )
+            val state = EmbeddedConfirmationStateFixtures.defaultState()
+//            selectionHolder.set(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+            sheetLauncher.launchForm(code, paymentMethodMetadata, false, state)
+            val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as FormContract.Args
+            assertThat(launchCall.hasAutomaticallyLaunchedCardScan).isEqualTo(hasAutomaticallyLaunchedCardScanInitialValue)
+            assertThat(hasAutomaticallyLaunchedCardScanHolder.isLaunchingCardFormWithCardScanEnabled)
+                .isEqualTo(expectedIsLaunchingCardFormWithCardScanEnabled)
+
+            expectedHasAutomaticallyLaunchedCardScanValueAfterResult?.let {
+                val result = FormResult.Complete(PaymentMethodFixtures.CARD_PAYMENT_SELECTION, true)
+                val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
+
+                callback.onActivityResult(result)
+                assertThat(hasAutomaticallyLaunchedCardScanHolder.hasAutomaticallyLaunchedCardScan).isEqualTo(it)
+                assertThat(hasAutomaticallyLaunchedCardScanHolder.isLaunchingCardFormWithCardScanEnabled).isFalse()
+            }
+        }
+    }
+
     @Suppress("LongMethod")
     private fun testScenario(
         shouldRowSelectionBeInvoked: Boolean = false,
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
+        hasAutomaticallyLaunchedCardScanHolder: EmbeddedHasAutomaticallyLaunchedCardScanHolder =
+            EmbeddedHasAutomaticallyLaunchedCardScanHolder(savedStateHandle),
         block: suspend Scenario.() -> Unit
     ) = runTest {
         var rowSelectionCallbackInvoked = false
         val lifecycleOwner = TestLifecycleOwner()
-        val savedStateHandle = SavedStateHandle()
         val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerStateHolder = CustomerStateHolder(
@@ -393,6 +581,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
                 embeddedResultCallbackHelper = callbackHelper,
                 rowSelectionImmediateActionHandler = immediateActionHandler,
+                hasAutomaticallyLaunchedCardScanHolder = hasAutomaticallyLaunchedCardScanHolder,
             )
             val formRegisterCall = awaitRegisterCall()
             val manageRegisterCall = awaitRegisterCall()

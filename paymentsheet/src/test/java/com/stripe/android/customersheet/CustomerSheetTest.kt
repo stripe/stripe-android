@@ -89,7 +89,8 @@ class CustomerSheetTest {
                 CustomerSheetContract.Args(
                     integrationType = CustomerSheetIntegration.Type.CustomerAdapter,
                     configuration = configuration,
-                    statusBarColor = 0
+                    statusBarColor = 0,
+                    hasAutomaticallyLaunchedCardScan = false,
                 )
             )
         )
