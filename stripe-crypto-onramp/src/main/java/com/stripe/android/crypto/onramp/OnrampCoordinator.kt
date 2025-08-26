@@ -14,7 +14,7 @@ import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
-import com.stripe.android.crypto.onramp.model.OnrampKYCResult
+import com.stripe.android.crypto.onramp.model.OnrampAttachKycResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
 import com.stripe.android.crypto.onramp.model.OnrampSetWalletAddressResult
@@ -80,13 +80,13 @@ class OnrampCoordinator @Inject internal constructor(
     }
 
     /**
-     * Given the required information, collects KYC information.
+     * Attaches the specific KYC info to the current Link user. Requires an authenticated Link user.
      *
-     * @param info The KycInfo for the user.
-     * @return OnrampKYCResult indicating the result of data collection.
+     * @param info The KYC info to attach to the Link user.
+     * @return [OnrampAttachKycResult] indicating the result.
      */
-    suspend fun collectKycInfo(info: KycInfo): OnrampKYCResult {
-        return interactor.collectKycInfo(info)
+    suspend fun attachKycInfo(info: KycInfo): OnrampAttachKycResult {
+        return interactor.attachKycInfo(info)
     }
 
     /**

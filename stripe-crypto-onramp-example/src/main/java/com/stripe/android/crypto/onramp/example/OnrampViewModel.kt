@@ -23,7 +23,7 @@ import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
 import com.stripe.android.crypto.onramp.model.OnrampIdentityVerificationResult
-import com.stripe.android.crypto.onramp.model.OnrampKYCResult
+import com.stripe.android.crypto.onramp.model.OnrampAttachKycResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
 import com.stripe.android.crypto.onramp.model.OnrampSetWalletAddressResult
@@ -306,14 +306,14 @@ internal class OnrampViewModel(
         _uiState.update { it.copy(screen = Screen.Loading, loadingMessage = "Collecting KYC info...") }
 
         viewModelScope.launch {
-            val result = onrampCoordinator.collectKycInfo(kycInfo)
+            val result = onrampCoordinator.attachKycInfo(kycInfo)
 
             when (result) {
-                is OnrampKYCResult.Completed -> {
+                is OnrampAttachKycResult.Completed -> {
                     _message.value = "KYC Collection successful"
                     _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
                 }
-                is OnrampKYCResult.Failed -> {
+                is OnrampAttachKycResult.Failed -> {
                     _message.value = "KYC Collection failed: ${result.error.message}"
                     _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
                 }

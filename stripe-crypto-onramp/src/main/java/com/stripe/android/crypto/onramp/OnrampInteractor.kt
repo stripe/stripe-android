@@ -18,7 +18,7 @@ import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
 import com.stripe.android.crypto.onramp.model.OnrampIdentityVerificationResult
-import com.stripe.android.crypto.onramp.model.OnrampKYCResult
+import com.stripe.android.crypto.onramp.model.OnrampAttachKycResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
 import com.stripe.android.crypto.onramp.model.OnrampSetWalletAddressResult
@@ -134,14 +134,14 @@ internal class OnrampInteractor @Inject constructor(
         }
     }
 
-    suspend fun collectKycInfo(kycInfo: KycInfo): OnrampKYCResult {
+    suspend fun attachKycInfo(kycInfo: KycInfo): OnrampAttachKycResult {
         val secret = consumerSessionClientSecret()
-            ?: return OnrampKYCResult.Failed(MissingConsumerSecretException())
+            ?: return OnrampAttachKycResult.Failed(MissingConsumerSecretException())
 
         return cryptoApiRepository.collectKycData(kycInfo, secret)
             .fold(
-                onSuccess = { OnrampKYCResult.Completed },
-                onFailure = { OnrampKYCResult.Failed(it) }
+                onSuccess = { OnrampAttachKycResult.Completed },
+                onFailure = { OnrampAttachKycResult.Failed(it) }
             )
     }
 
