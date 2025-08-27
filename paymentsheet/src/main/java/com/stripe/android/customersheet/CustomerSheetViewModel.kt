@@ -369,7 +369,7 @@ internal class CustomerSheetViewModel(
                 onSuccess = { state ->
                     if (state.validationError != null) {
                         _result.update {
-                            getErrorCustomerSheetResult(state.validationError)
+                            InternalCustomerSheetResult.Error(state.validationError)
                         }
                     } else {
                         supportedPaymentMethods.clear()
@@ -390,25 +390,11 @@ internal class CustomerSheetViewModel(
                 },
                 onFailure = { cause ->
                     _result.update {
-                        getErrorCustomerSheetResult(cause)
+                        InternalCustomerSheetResult.Error(exception = cause)
                     }
                 }
             )
         }
-    }
-
-    private fun getSelectedCustomerSheetResult(
-        paymentSelection: PaymentSelection?
-    ): InternalCustomerSheetResult.Selected {
-        return InternalCustomerSheetResult.Selected(
-            paymentSelection = paymentSelection,
-        )
-    }
-
-    private fun getCancelledCustomerSheetResult(): InternalCustomerSheetResult.Canceled {
-        return InternalCustomerSheetResult.Canceled(
-            paymentSelection = originalPaymentSelection,
-        )
     }
 
     private fun getErrorCustomerSheetResult(cause: Throwable): InternalCustomerSheetResult.Error {
@@ -437,13 +423,15 @@ internal class CustomerSheetViewModel(
     }
 
     private fun onDismissed() {
-        _result.update { getCancelledCustomerSheetResult() }
+        _result.update {
+            InternalCustomerSheetResult.Canceled(originalPaymentSelection)
+        }
     }
 
     private fun onBackPressed() {
         if (backStack.value.size == 1) {
             _result.tryEmit(
-                getCancelledCustomerSheetResult()
+                InternalCustomerSheetResult.Canceled(originalPaymentSelection)
             )
         } else {
             backStack.update {
@@ -803,7 +791,9 @@ internal class CustomerSheetViewModel(
                 .onSuccess { paymentMethod ->
                     if (paymentMethod.isUnverifiedUSBankAccount()) {
                         _result.tryEmit(
-                            getSelectedCustomerSheetResult(paymentSelection = PaymentSelection.Saved(paymentMethod))
+                            InternalCustomerSheetResult.Selected(
+                                paymentSelection = PaymentSelection.Saved(paymentMethod)
+                            )
                         )
                     } else {
                         attachPaymentMethodToCustomer(paymentMethod)
@@ -1257,7 +1247,11 @@ internal class CustomerSheetViewModel(
                 syncDefaultEnabled = syncDefaultEnabled
             )
         }
-        _result.tryEmit(getSelectedCustomerSheetResult(paymentSelection))
+        _result.tryEmit(
+            InternalCustomerSheetResult.Selected(
+                paymentSelection = paymentSelection,
+            )
+        )
     }
 
     private fun confirmPaymentSelectionError(

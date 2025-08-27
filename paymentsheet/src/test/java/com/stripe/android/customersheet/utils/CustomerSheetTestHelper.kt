@@ -80,7 +80,6 @@ internal object CustomerSheetTestHelper {
         configuration: CustomerSheet.Configuration = CustomerSheet.Configuration(
             merchantDisplayName = "Example",
             googlePayEnabled = isGooglePayAvailable,
-            opensCardScannerAutomatically = false,
         ),
         eventReporter: CustomerSheetEventReporter = mock(),
         intentConfirmationInterceptor: IntentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {

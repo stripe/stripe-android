@@ -34,38 +34,6 @@ public final class com/stripe/android/ui/core/cardscan/CardScanContract$Args$Cre
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/ui/core/cardscan/CardScanResult$Canceled : com/stripe/android/ui/core/cardscan/CardScanResult {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/ui/core/cardscan/CardScanResult$Canceled;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/ui/core/cardscan/CardScanResult$Completed : com/stripe/android/ui/core/cardscan/CardScanResult {
-	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/ui/core/cardscan/ScannedCard;)V
-	public final fun component1 ()Lcom/stripe/android/ui/core/cardscan/ScannedCard;
-	public final fun copy (Lcom/stripe/android/ui/core/cardscan/ScannedCard;)Lcom/stripe/android/ui/core/cardscan/CardScanResult$Completed;
-	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/cardscan/CardScanResult$Completed;Lcom/stripe/android/ui/core/cardscan/ScannedCard;ILjava/lang/Object;)Lcom/stripe/android/ui/core/cardscan/CardScanResult$Completed;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getScannedCard ()Lcom/stripe/android/ui/core/cardscan/ScannedCard;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/ui/core/cardscan/CardScanResult$Failed : com/stripe/android/ui/core/cardscan/CardScanResult {
-	public static final field $stable I
-	public fun <init> (Ljava/lang/Throwable;)V
-	public final fun component1 ()Ljava/lang/Throwable;
-	public final fun copy (Ljava/lang/Throwable;)Lcom/stripe/android/ui/core/cardscan/CardScanResult$Failed;
-	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/cardscan/CardScanResult$Failed;Ljava/lang/Throwable;ILjava/lang/Object;)Lcom/stripe/android/ui/core/cardscan/CardScanResult$Failed;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getError ()Ljava/lang/Throwable;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class com/stripe/android/ui/core/cbc/CardBrandChoiceEligibility$Eligible$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/cbc/CardBrandChoiceEligibility$Eligible;
