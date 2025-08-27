@@ -62,6 +62,8 @@ import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
+import com.stripe.android.paymentsheet.ConfirmationTokenCallback
+import com.stripe.android.paymentsheet.ConfirmationTokenResult
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -158,13 +160,12 @@ internal class PaymentSheetPlaygroundActivity :
                 window.isNavigationBarContrastEnforced = false
             }
             val paymentSheet = remember {
-                PaymentSheet.Builder(viewModel::onPaymentSheetResult)
+                PaymentSheet.ConfirmationTokenBuilder(viewModel::onConfirmationTokenResult)
                     .externalPaymentMethodConfirmHandler(this)
                     .confirmCustomPaymentMethodCallback(this)
-                    .createIntentCallback(viewModel::createIntentCallback)
                     .analyticEventCallback(viewModel::analyticCallback)
+                    .build(this@PaymentSheetPlaygroundActivity)
             }
-                .build()
             val flowController = remember {
                 PaymentSheet.FlowController.Builder(
                     viewModel::onPaymentSheetResult,

@@ -19,11 +19,13 @@ import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerEphemeralKey
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
+import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
+import com.stripe.android.paymentsheet.ConfirmationTokenResult
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
@@ -516,6 +518,52 @@ internal class PaymentSheetPlaygroundViewModel(
             shouldSavePaymentMethod = shouldSavePaymentMethod,
             playgroundState = playgroundState,
         )
+    }
+
+    fun onConfirmationTokenResult(confirmationTokenResult: ConfirmationTokenResult) {
+        viewModelScope.launch {
+            when (confirmationTokenResult) {
+                is ConfirmationTokenResult.Completed -> {
+                    // Create PaymentIntent with ConfirmationToken on server
+                    val playgroundState = state.value?.asPaymentState()
+                    if (playgroundState != null) {
+                        val result = createPaymentIntentWithConfirmationToken(
+                            confirmationToken = confirmationTokenResult.confirmationToken,
+                            playgroundState = playgroundState
+                        )
+                        when (result) {
+                            is CreateIntentResult.Success -> {
+                                setPlaygroundState(null)
+                                status.value = StatusMessage(SUCCESS_RESULT)
+                            }
+                            is CreateIntentResult.Failure -> {
+                                status.value = StatusMessage("Payment failed")
+                            }
+                        }
+                    } else {
+                        status.value = StatusMessage("No playground state available")
+                    }
+                }
+                is ConfirmationTokenResult.Canceled -> {
+                    status.value = StatusMessage("Canceled")
+                }
+                is ConfirmationTokenResult.Failed -> {
+                    status.value = StatusMessage("ConfirmationToken creation failed: ${confirmationTokenResult.error.message}")
+                }
+            }
+        }
+    }
+
+    private suspend fun createPaymentIntentWithConfirmationToken(
+        confirmationToken: ConfirmationToken,
+        playgroundState: PlaygroundState.Payment
+    ): CreateIntentResult {
+        // Note: This simulates creating a PaymentIntent server-side with a ConfirmationToken
+        // In a real implementation, you'd call your backend with the ConfirmationToken ID
+        // and it would create/confirm a PaymentIntent using the Stripe API
+        
+        // For now, we'll simulate success since we don't have a real backend endpoint for this
+        return CreateIntentResult.Success("pi_simulation_${confirmationToken.id}")
     }
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
