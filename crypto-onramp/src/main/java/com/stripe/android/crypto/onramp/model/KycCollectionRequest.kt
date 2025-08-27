@@ -21,12 +21,6 @@ internal data class KycCollectionRequest(
     val idType: String?,
     @SerialName("dob")
     val dateOfBirth: DateOfBirth,
-    @SerialName("nationalities")
-    val nationalities: List<String>?,
-    @SerialName("birth_country")
-    val birthCountry: String?,
-    @SerialName("birth_city")
-    val birthCity: String?,
     @SerialName("city")
     val city: String?,
     @SerialName("country")
@@ -54,11 +48,8 @@ internal data class KycCollectionRequest(
                 firstName = kycInfo.firstName,
                 lastName = kycInfo.lastName,
                 idNumber = kycInfo.idNumber,
-                idType = "social_security_number",
+                idType = SOCIAL_SECURITY_NUMBER,
                 dateOfBirth = kycInfo.dateOfBirth,
-                nationalities = null,
-                birthCountry = null,
-                birthCity = null,
                 city = kycInfo.address.city,
                 country = kycInfo.address.country,
                 line1 = kycInfo.address.line1,
@@ -68,5 +59,10 @@ internal data class KycCollectionRequest(
                 credentials = credentials
             )
         }
+
+        /**
+         * Currently, we only support SSN for identity verification in the US.
+         */
+        private const val SOCIAL_SECURITY_NUMBER = "social_security_number"
     }
 }
