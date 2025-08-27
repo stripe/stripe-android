@@ -80,7 +80,7 @@ internal object CustomerSheetTestHelper {
         ),
         configuration: CustomerSheet.Configuration = CustomerSheet.Configuration(
             merchantDisplayName = "Example",
-            googlePayEnabled = isGooglePayAvailable
+            googlePayEnabled = isGooglePayAvailable,
         ),
         eventReporter: CustomerSheetEventReporter = mock(),
         intentConfirmationInterceptor: IntentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
@@ -102,6 +102,7 @@ internal object CustomerSheetTestHelper {
         errorReporter: ErrorReporter = FakeErrorReporter(),
         confirmationHandlerFactory: ConfirmationHandler.Factory? = null,
     ): CustomerSheetViewModel {
+        val savedStateHandle = SavedStateHandle()
         return CustomerSheetViewModel(
             application = application,
             workContext = workContext,
@@ -145,7 +146,7 @@ internal object CustomerSheetTestHelper {
                     ): GooglePayPaymentMethodLauncher = mock()
                 },
                 statusBarColor = null,
-                savedStateHandle = SavedStateHandle(),
+                savedStateHandle = savedStateHandle,
                 errorReporter = FakeErrorReporter(),
                 linkLauncher = RecordingLinkPaymentLauncher.noOp(),
                 linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
@@ -154,6 +155,7 @@ internal object CustomerSheetTestHelper {
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,
             errorReporter = errorReporter,
+            savedStateHandle = savedStateHandle,
         ).apply {
             registerFromActivity(DummyActivityResultCaller.noOp(), TestLifecycleOwner())
         }

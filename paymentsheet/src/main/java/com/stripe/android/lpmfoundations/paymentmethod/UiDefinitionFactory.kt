@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -44,6 +45,7 @@ internal sealed interface UiDefinitionFactory {
         val linkInlineHandler: LinkInlineHandler?,
         val isLinkUI: Boolean = false,
         val previousLinkSignupCheckboxSelection: Boolean? = null,
+        val automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper? = null,
     ) {
         interface Factory {
             fun create(
@@ -65,6 +67,8 @@ internal sealed interface UiDefinitionFactory {
                 private val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
                 private val isLinkUI: Boolean = false,
                 private val previousLinkSignupCheckboxSelection: Boolean? = null,
+                private val automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper? =
+                    null,
             ) : Factory {
                 override fun create(
                     metadata: PaymentMethodMetadata,
@@ -92,6 +96,7 @@ internal sealed interface UiDefinitionFactory {
                         linkInlineHandler = linkInlineHandler,
                         isLinkUI = isLinkUI,
                         previousLinkSignupCheckboxSelection = previousLinkSignupCheckboxSelection,
+                        automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
                     )
                 }
 

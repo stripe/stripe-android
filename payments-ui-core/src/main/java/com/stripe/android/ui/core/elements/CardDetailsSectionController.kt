@@ -5,6 +5,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.ui.core.DefaultIsStripeCardScanAvailable
+import com.stripe.android.ui.core.cardscan.CardScanResult
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionFieldErrorController
@@ -16,7 +17,8 @@ class CardDetailsSectionController(
     collectName: Boolean = false,
     cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
-    val elementsSessionId: String? = null
+    val elementsSessionId: String? = null,
+    private val automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
 ) : SectionFieldErrorController {
 
     internal val cardDetailsElement = CardDetailsElement(
@@ -30,9 +32,23 @@ class CardDetailsSectionController(
 
     internal val isStripeCardScanAvailable = DefaultIsStripeCardScanAvailable()
 
+    fun shouldAutomaticallyLaunchCardScan(): Boolean {
+        return automaticallyLaunchedCardScanFormDataHelper?.shouldLaunchCardScanAutomatically == true
+    }
+
+    fun setHasAutomaticallyLaunchedCardScan() {
+        this.automaticallyLaunchedCardScanFormDataHelper?.let {
+            it.hasAutomaticallyLaunchedCardScan = true
+        }
+    }
+
     override val error = cardDetailsElement.controller.error
 
     override fun onValidationStateChanged(isValidating: Boolean) {
         cardDetailsElement.onValidationStateChanged(isValidating)
+    }
+
+    internal fun onCardScanResult(cardScanResult: CardScanResult) {
+        cardDetailsElement.controller.onCardScanResult.invoke(cardScanResult)
     }
 }

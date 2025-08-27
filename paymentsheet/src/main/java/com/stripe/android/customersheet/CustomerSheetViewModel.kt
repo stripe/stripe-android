@@ -3,6 +3,7 @@ package com.stripe.android.customersheet
 import android.app.Application
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
@@ -74,6 +75,7 @@ import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.ui.core.cardscan.CardScanEvent
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -110,6 +112,7 @@ internal class CustomerSheetViewModel(
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     private val customerSheetLoader: CustomerSheetLoader,
     private val errorReporter: ErrorReporter,
+    private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
     @Inject
@@ -128,6 +131,7 @@ internal class CustomerSheetViewModel(
         confirmationHandlerFactory: ConfirmationHandler.Factory,
         customerSheetLoader: CustomerSheetLoader,
         errorReporter: ErrorReporter,
+        savedStateHandle: SavedStateHandle,
     ) : this(
         application = application,
         originalPaymentSelection = originalPaymentSelection,
@@ -146,6 +150,7 @@ internal class CustomerSheetViewModel(
         confirmationHandlerFactory = confirmationHandlerFactory,
         customerSheetLoader = customerSheetLoader,
         errorReporter = errorReporter,
+        savedStateHandle = savedStateHandle,
     )
 
     private val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
@@ -222,6 +227,11 @@ internal class CustomerSheetViewModel(
 
     private var previouslySelectedPaymentMethod: SupportedPaymentMethod? = null
     private var supportedPaymentMethods = mutableListOf<SupportedPaymentMethod>()
+    private val automaticallyLaunchedCardScanFormDataHelper = AutomaticallyLaunchedCardScanFormDataHelper(
+        openCardScanAutomaticallyConfig = configuration.opensCardScannerAutomatically,
+        hasAutomaticallyLaunchedCardScanInitialValue = false,
+        savedStateHandle = savedStateHandle,
+    )
 
     init {
         configuration.appearance.parseAppearance()
@@ -472,6 +482,7 @@ internal class CustomerSheetViewModel(
                             )
                         },
                         autocompleteAddressInteractorFactory = null,
+                        automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper
                     ),
                 ) ?: listOf(),
                 primaryButtonLabel = if (
@@ -807,6 +818,7 @@ internal class CustomerSheetViewModel(
             ?: requireNotNull(paymentMethodMetadata.supportedPaymentMethodForCode(paymentMethodCode))
 
         val stripeIntent = paymentMethodMetadata.stripeIntent
+        automaticallyLaunchedCardScanFormDataHelper.hasAutomaticallyLaunchedCardScan = false
         val formElements = paymentMethodMetadata.formElementsForCode(
             code = selectedPaymentMethod.code,
             uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
@@ -823,6 +835,7 @@ internal class CustomerSheetViewModel(
                     )
                 },
                 autocompleteAddressInteractorFactory = null,
+                automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
             )
         ) ?: emptyList()
 
