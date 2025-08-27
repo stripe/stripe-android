@@ -10,6 +10,7 @@ import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheetViewState.AddPaymentMethod
 import com.stripe.android.customersheet.CustomerSheetViewState.SelectPaymentMethod
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent
@@ -50,6 +51,7 @@ import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
+import com.stripe.android.ui.core.elements.CardDetailsSectionController
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -122,6 +124,25 @@ class CustomerSheetViewModelTest {
             assertThat(state).isInstanceOf<AddPaymentMethod>()
             assertThat(state.topBarState {}.showEditMenu).isFalse()
         }
+    }
+
+    @Test
+    fun `init throws error when open enabled but GooglePayCardScan not enabled`() {
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
+        assertFailsWith<IllegalArgumentException>(
+            "Given rects do not intersect",
+            fun() {
+                createViewModel(
+                    workContext = testDispatcher,
+                    isGooglePayAvailable = true,
+                    configuration = CustomerSheet.Configuration(
+                        merchantDisplayName = "Example",
+                        googlePayEnabled = true,
+                        opensCardScannerAutomatically = true,
+                    ),
+                )
+            }
+        )
     }
 
     @Test
@@ -3548,6 +3569,225 @@ class CustomerSheetViewModelTest {
                 assertThat(savedSelection.paymentMethod).isEqualTo(updatedPaymentMethod)
             }
         }
+
+    @Test
+    fun `init emits CustomerSheetViewState#AddPaymentMethod shouldAutomaticallyLaunchCardScan true when no payment methods available`() = runTest(testDispatcher) {
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
+                opensCardScannerAutomatically = true,
+            ),
+            customerSheetLoader = FakeCustomerSheetLoader(
+                isGooglePayAvailable = false,
+                customerPaymentMethods = listOf()
+            ),
+        )
+        viewModel.viewState.test {
+            val state = awaitItem()
+
+            assertThat(state).isInstanceOf<AddPaymentMethod>()
+            val formElements = state.asAddState().formElements
+
+            assertThat(formElements[0]).isInstanceOf<CardDetailsSectionElement>()
+
+            val controller = (formElements[0] as CardDetailsSectionElement).controller
+            assertThat(controller.shouldAutomaticallyLaunchCardScan()).isTrue()
+        }
+    }
+
+    @Test
+    fun `When CustomerViewAction#OnAddCardPressed, shouldAutomaticallyLaunchCardScan true`() = runTest(testDispatcher) {
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
+                opensCardScannerAutomatically = true,
+            ),
+        )
+
+        viewModel.viewState.test {
+            assertThat(awaitItem())
+                .isInstanceOf<SelectPaymentMethod>()
+            viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+
+            val item = awaitItem()
+            assertThat(item).isInstanceOf<AddPaymentMethod>()
+
+            val formElements = item.asAddState().formElements
+            assertThat(formElements[0]).isInstanceOf<CardDetailsSectionElement>()
+            val controller = (formElements[0] as CardDetailsSectionElement).controller
+            assertThat(controller.shouldAutomaticallyLaunchCardScan()).isTrue()
+        }
+    }
+
+    @Test
+    fun `When switching payment methods, don't show card scan more than once`() = runTest(testDispatcher) {
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            customerPaymentMethods = listOf(),
+            isGooglePayAvailable = false,
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
+                opensCardScannerAutomatically = true,
+            ),
+        )
+
+        viewModel.viewState.test {
+            var viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.paymentMethodCode)
+                .isEqualTo("card")
+
+            val firstCardFormController = getAddPaymentMethodCardDetailsSectionController(viewState)
+            assertThat(firstCardFormController).isNotNull()
+            assertThat(firstCardFormController!!.shouldAutomaticallyLaunchCardScan()).isTrue()
+            firstCardFormController.setHasAutomaticallyLaunchedCardScan()
+            assertThat(firstCardFormController.shouldAutomaticallyLaunchCardScan()).isFalse()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
+                    LpmRepositoryTestHelpers.usBankAccount
+                )
+            )
+
+            viewState = awaitViewState()
+            assertThat(viewState.paymentMethodCode)
+                .isEqualTo("us_bank_account")
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
+                    LpmRepositoryTestHelpers.card
+                )
+            )
+            viewState = awaitViewState()
+            assertThat(viewState.paymentMethodCode)
+                .isEqualTo("card")
+            val secondCardFormController = getAddPaymentMethodCardDetailsSectionController(viewState)
+            assertThat(secondCardFormController).isNotNull()
+            assertThat(secondCardFormController!!.shouldAutomaticallyLaunchCardScan()).isFalse()
+        }
+    }
+
+    @Test
+    fun `After confirming a card, the card scan should be shown when trying to add another card`() = runTest(testDispatcher) {
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            intentDataSource = FakeCustomerSheetIntentDataSource(
+                canCreateSetupIntents = false,
+            ),
+            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
+                onAttachPaymentMethod = {
+                    CustomerSheetDataResult.success(CARD_PAYMENT_METHOD)
+                }
+            ),
+            stripeRepository = FakeStripeRepository(
+                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
+            ),
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
+                opensCardScannerAutomatically = true,
+            ),
+        )
+
+        viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+
+        viewModel.viewState.test {
+            var viewState = awaitViewState<AddPaymentMethod>()
+
+            val firstCardFormController = getAddPaymentMethodCardDetailsSectionController(viewState)
+            assertThat(firstCardFormController).isNotNull()
+            assertThat(firstCardFormController!!.shouldAutomaticallyLaunchCardScan()).isTrue()
+            firstCardFormController.setHasAutomaticallyLaunchedCardScan()
+            assertThat(firstCardFormController.shouldAutomaticallyLaunchCardScan()).isFalse()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnFormFieldValuesCompleted(
+                    formFieldValues = FormFieldValues(
+                        fieldValuePairs = mapOf(
+                            IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
+                        ),
+                        userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
+                    )
+                )
+            )
+            assertThat(awaitViewState<AddPaymentMethod>().formFieldValues).isNotNull()
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            assertThat(awaitItem()).isInstanceOf<AddPaymentMethod>()
+            assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+
+            val newViewState = awaitViewState<AddPaymentMethod>()
+            assertThat(newViewState.formFieldValues).isNull()
+
+            val secondCardFormController = getAddPaymentMethodCardDetailsSectionController(viewState)
+            assertThat(secondCardFormController).isNotNull()
+            assertThat(secondCardFormController!!.shouldAutomaticallyLaunchCardScan()).isTrue()
+        }
+    }
+
+    @Test
+    fun `After leaving card form, the card scan should be shown when trying to add another card`() = runTest(testDispatcher) {
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            intentDataSource = FakeCustomerSheetIntentDataSource(
+                canCreateSetupIntents = false,
+            ),
+            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
+                onAttachPaymentMethod = {
+                    CustomerSheetDataResult.success(CARD_PAYMENT_METHOD)
+                }
+            ),
+            stripeRepository = FakeStripeRepository(
+                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
+            ),
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
+                opensCardScannerAutomatically = true,
+            ),
+        )
+
+        viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+
+        viewModel.viewState.test {
+            var viewState = awaitViewState<AddPaymentMethod>()
+
+            val firstCardFormController = getAddPaymentMethodCardDetailsSectionController(viewState)
+            assertThat(firstCardFormController).isNotNull()
+            assertThat(firstCardFormController!!.shouldAutomaticallyLaunchCardScan()).isTrue()
+            firstCardFormController.setHasAutomaticallyLaunchedCardScan()
+            assertThat(firstCardFormController.shouldAutomaticallyLaunchCardScan()).isFalse()
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnBackPressed)
+
+            assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+
+            val newViewState = awaitViewState<AddPaymentMethod>()
+            assertThat(newViewState.formFieldValues).isNull()
+
+            val secondCardFormController = getAddPaymentMethodCardDetailsSectionController(viewState)
+            assertThat(secondCardFormController).isNotNull()
+            assertThat(secondCardFormController!!.shouldAutomaticallyLaunchCardScan()).isTrue()
+        }
+    }
+
+    private fun getAddPaymentMethodCardDetailsSectionController(
+        addState: AddPaymentMethod
+    ): CardDetailsSectionController? {
+        return addState.formElements[0].controller as? CardDetailsSectionController
+    }
 
     private fun mockUSBankAccountPaymentSelection(): PaymentSelection.New.USBankAccount {
         return PaymentSelection.New.USBankAccount(
