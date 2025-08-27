@@ -168,7 +168,8 @@ internal class DefaultPaymentElementLoaderTest {
                         canRemoveLastPaymentMethod = true,
                         canUpdateFullPaymentMethodDetails = false,
                     ),
-                    shopPayConfiguration = null
+                    shopPayConfiguration = null,
+                    passiveCaptchaParams = null
                 ),
             )
         )
