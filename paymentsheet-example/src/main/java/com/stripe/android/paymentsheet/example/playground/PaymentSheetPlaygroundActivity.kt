@@ -98,6 +98,7 @@ import kotlinx.coroutines.withContext
 @OptIn(
     ExperimentalCustomPaymentMethodsApi::class,
     WalletButtonsPreview::class,
+    ExperimentalAnalyticEventCallbackApi::class
 )
 internal class PaymentSheetPlaygroundActivity :
     AppCompatActivity(),
@@ -120,6 +121,14 @@ internal class PaymentSheetPlaygroundActivity :
     }
 
     private lateinit var embeddedPaymentElement: EmbeddedPaymentElement
+    
+    private val paymentSheet by lazy {
+        PaymentSheet.ConfirmationTokenBuilder(viewModel::onConfirmationTokenResult)
+            .externalPaymentMethodConfirmHandler(this)
+            .confirmCustomPaymentMethodCallback(this)
+            .analyticEventCallback(viewModel::analyticCallback)
+            .build(this)
+    }
 
     private val sharedPaymentTokenPlaygroundLauncher = registerForActivityResult(
         SharedPaymentTokenPlaygroundContract()
@@ -158,13 +167,6 @@ internal class PaymentSheetPlaygroundActivity :
         setContent {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 window.isNavigationBarContrastEnforced = false
-            }
-            val paymentSheet = remember {
-                PaymentSheet.ConfirmationTokenBuilder(viewModel::onConfirmationTokenResult)
-                    .externalPaymentMethodConfirmHandler(this)
-                    .confirmCustomPaymentMethodCallback(this)
-                    .analyticEventCallback(viewModel::analyticCallback)
-                    .build(this@PaymentSheetPlaygroundActivity)
             }
             val flowController = remember {
                 PaymentSheet.FlowController.Builder(
