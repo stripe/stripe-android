@@ -55,8 +55,11 @@ internal class CardDetailsSectionElementUITest {
     fun `CardDetailsSectionElement automatically launches card scan and gets result`() {
         FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
         runScenario(
-            openCardScanAutomaticallyConfig = true,
-            hasAutomaticallyLaunchedCardScanInitialValue = false,
+            automaticallyLaunchedCardScanFormData = AutomaticallyLaunchedCardScanFormData(
+                openCardScanAutomaticallyConfig = true,
+                hasAutomaticallyLaunchedCardScanInitialValue = false,
+                savedStateHandle = SavedStateHandle()
+            )
         ) {
             composeTestRule.onNodeWithText("4242 4242 4242 4242").assertExists()
 
@@ -79,8 +82,11 @@ internal class CardDetailsSectionElementUITest {
     fun `CardDetailsSectionElement does not launch card scan when openCardScanAutomaticallyConfig false`() {
         FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
         runScenario(
-            openCardScanAutomaticallyConfig = false,
-            hasAutomaticallyLaunchedCardScanInitialValue = false,
+            automaticallyLaunchedCardScanFormData = AutomaticallyLaunchedCardScanFormData(
+                openCardScanAutomaticallyConfig = false,
+                hasAutomaticallyLaunchedCardScanInitialValue = false,
+                savedStateHandle = SavedStateHandle()
+            )
         ) {
             composeTestRule.onNodeWithText("4242 4242 4242 4242").assertDoesNotExist()
             composeTestRule.onNodeWithText("Card number").assertExists()
@@ -97,8 +103,11 @@ internal class CardDetailsSectionElementUITest {
         FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
 
         runScenario(
-            openCardScanAutomaticallyConfig = true,
-            hasAutomaticallyLaunchedCardScanInitialValue = true,
+            automaticallyLaunchedCardScanFormData = AutomaticallyLaunchedCardScanFormData(
+                openCardScanAutomaticallyConfig = true,
+                hasAutomaticallyLaunchedCardScanInitialValue = true,
+                savedStateHandle = SavedStateHandle()
+            )
         ) {
             composeTestRule.onNodeWithText("4242 4242 4242 4242").assertDoesNotExist()
             composeTestRule.onNodeWithText("Card number").assertExists()
@@ -113,8 +122,27 @@ internal class CardDetailsSectionElementUITest {
     fun `CardDetailsSectionElement does not launch card scan when FeatureFlags cardScanGooglePayMigration disabled`() {
         FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
         runScenario(
-            openCardScanAutomaticallyConfig = true,
-            hasAutomaticallyLaunchedCardScanInitialValue = false,
+            automaticallyLaunchedCardScanFormData = AutomaticallyLaunchedCardScanFormData(
+                openCardScanAutomaticallyConfig = true,
+                hasAutomaticallyLaunchedCardScanInitialValue = false,
+                savedStateHandle = SavedStateHandle()
+            )
+        ) {
+            composeTestRule.onNodeWithText("4242 4242 4242 4242").assertDoesNotExist()
+            composeTestRule.onNodeWithText("Card number").assertExists()
+
+            assertThat(controller.shouldAutomaticallyLaunchCardScan()).isFalse()
+            verify(controller, times(0)).onCardScanResult(any())
+            verify(controller, times(0)).setHasAutomaticallyLaunchedCardScan()
+        }
+    }
+
+
+    @Test
+    fun `CardDetailsSectionElement does not launch card scan when no automaticallyLaunchedCardScanFormData provided to controller`() {
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
+        runScenario(
+            automaticallyLaunchedCardScanFormData = null
         ) {
             composeTestRule.onNodeWithText("4242 4242 4242 4242").assertDoesNotExist()
             composeTestRule.onNodeWithText("Card number").assertExists()
@@ -131,7 +159,7 @@ internal class CardDetailsSectionElementUITest {
 
     private fun getController(
         context: Context,
-        automaticallyLaunchedCardScanFormData: AutomaticallyLaunchedCardScanFormData,
+        automaticallyLaunchedCardScanFormData: AutomaticallyLaunchedCardScanFormData?,
     ): CardDetailsSectionController {
         val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context)
 
@@ -148,8 +176,7 @@ internal class CardDetailsSectionElementUITest {
     }
 
     private fun runScenario(
-        openCardScanAutomaticallyConfig: Boolean,
-        hasAutomaticallyLaunchedCardScanInitialValue: Boolean,
+        automaticallyLaunchedCardScanFormData: AutomaticallyLaunchedCardScanFormData?,
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val mockResult = mock<PaymentCardRecognitionResult>()
@@ -181,11 +208,7 @@ internal class CardDetailsSectionElementUITest {
         }
         val controller = getController(
             context = context,
-            automaticallyLaunchedCardScanFormData = AutomaticallyLaunchedCardScanFormData(
-                hasAutomaticallyLaunchedCardScanInitialValue = hasAutomaticallyLaunchedCardScanInitialValue,
-                openCardScanAutomaticallyConfig = openCardScanAutomaticallyConfig,
-                savedStateHandle = SavedStateHandle()
-            ),
+            automaticallyLaunchedCardScanFormData = automaticallyLaunchedCardScanFormData
         )
 
         val cardDetailsSectionControllerSpy = spy(controller)
