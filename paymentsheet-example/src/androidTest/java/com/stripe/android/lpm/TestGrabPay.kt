@@ -27,7 +27,7 @@ internal class TestGrabPay : BasePlaygroundTest() {
         testDriver.confirmNewOrGuestComplete(testParameters)
     }
 
-    @Ignore("https://stripe.slack.com/archives/C02CCKZSB9R/p1756314748007639")
+    @Ignore("shape-together")
     @Test
     fun testGrabPayFailure() {
         testDriver.confirmNewOrGuestComplete(
