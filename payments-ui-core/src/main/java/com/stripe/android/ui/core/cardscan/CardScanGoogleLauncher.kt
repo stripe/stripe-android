@@ -7,6 +7,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
@@ -124,7 +125,8 @@ internal val LocalPaymentCardRecognitionClient = compositionLocalOf<PaymentCardR
     DefaultPaymentCardRecognitionClient()
 }
 
-internal sealed interface CardScanResult {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed interface CardScanResult {
 
     data class Completed(
         val scannedCard: ScannedCard
@@ -138,7 +140,8 @@ internal sealed interface CardScanResult {
 /**
  * Card details from the scanner
  */
-internal data class ScannedCard(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class ScannedCard(
     val pan: String,
     val expirationMonth: Int?,
     val expirationYear: Int?
