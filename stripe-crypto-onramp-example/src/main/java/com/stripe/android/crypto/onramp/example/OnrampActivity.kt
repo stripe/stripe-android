@@ -49,7 +49,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.core.utils.FeatureFlag
 import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.core.utils.FeatureFlags.nativeLinkAttestationEnabled
 import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
@@ -63,6 +65,10 @@ import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import kotlinx.coroutines.launch
+
+internal enum class AttestationMode {
+    ENABLED, DISABLED, NONE
+}
 
 internal class OnrampActivity : ComponentActivity() {
 
@@ -187,6 +193,9 @@ internal fun OnrampScreen(
             .fillMaxSize()
             .padding(16.dp)
     ) {
+        // Configuration Section
+        ConfigSection()
+
         when (uiState.screen) {
             Screen.EmailInput -> {
                 EmailInputScreen(
@@ -244,6 +253,69 @@ internal fun OnrampScreen(
                         viewModel.onBackToEmailInput()
                     }
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ConfigSection() {
+    var attestationMode by remember {
+        mutableStateOf(
+            when (nativeLinkAttestationEnabled.value) {
+                FeatureFlag.Flag.Disabled -> AttestationMode.DISABLED
+                FeatureFlag.Flag.Enabled -> AttestationMode.ENABLED
+                FeatureFlag.Flag.NotSet -> AttestationMode.NONE
+            }
+        )
+    }
+
+    LaunchedEffect(attestationMode) {
+        when (attestationMode) {
+            AttestationMode.ENABLED -> nativeLinkAttestationEnabled.setEnabled(true)
+            AttestationMode.DISABLED -> nativeLinkAttestationEnabled.setEnabled(false)
+            AttestationMode.NONE -> nativeLinkAttestationEnabled.reset()
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 24.dp)
+    ) {
+        Text(
+            text = "Configuration",
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        Text(
+            text = "Force Attestation (restart app after changing)",
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(bottom = 16.dp)
+        ) {
+            AttestationMode.entries.forEach { mode ->
+                val isSelected = attestationMode == mode
+                Button(
+                    onClick = { attestationMode = mode },
+                    modifier = Modifier.weight(1f),
+                    colors = androidx.compose.material.ButtonDefaults.buttonColors(
+                        backgroundColor = if (isSelected) MaterialTheme.colors.primary else MaterialTheme.colors.surface,
+                        contentColor = if (isSelected) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onSurface
+                    )
+                ) {
+                    Text(
+                        text = when (mode) {
+                            AttestationMode.ENABLED -> "Enabled"
+                            AttestationMode.DISABLED -> "Disabled"
+                            AttestationMode.NONE -> "None"
+                        }
+                    )
+                }
             }
         }
     }
