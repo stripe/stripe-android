@@ -29,6 +29,9 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">保存我的信息，用 Link 更快结账</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_toggle">在 Link 创建账户，加快全网结账速度</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s 信用卡</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->

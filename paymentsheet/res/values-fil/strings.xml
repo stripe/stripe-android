@@ -29,6 +29,9 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">I-save ang aking impormasyon para sa mas mabilis na checkout gamit ang Link</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_toggle">Gumawa ng account na may Link para sa mas mabilis na pag-checkout sa web</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s Credit</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->

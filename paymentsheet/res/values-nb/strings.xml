@@ -29,6 +29,9 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">Lagre informasjonen min for raskere betaling med Link</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_toggle">Opprett en konto med Link for raskere betaling på nett</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s -kreditt</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
