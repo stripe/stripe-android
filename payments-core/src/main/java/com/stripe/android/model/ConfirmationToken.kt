@@ -20,7 +20,9 @@ import kotlinx.parcelize.Parcelize
  * Related guides: [Elements](https://stripe.com/docs/payments/elements)
  */
 @Parcelize
-data class ConfirmationToken constructor(
+data class ConfirmationToken
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
     /**
      * Unique identifier for the object.
      */

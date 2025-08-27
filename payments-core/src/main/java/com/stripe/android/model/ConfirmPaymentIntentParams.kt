@@ -457,23 +457,19 @@ constructor(
          * ConfirmationTokens contain payment method information, shipping details, and other
          * checkout state from Elements to simplify server-side confirmation.
          *
-         * @param confirmationTokenId the ID of the ConfirmationToken that contains all payment
+         * @param confirmationToken the ConfirmationToken that contains all payment
          * method and checkout data needed to confirm this PaymentIntent
          * @param clientSecret client secret from the PaymentIntent being confirmed
-         * @param receiptEmail Optional email address that the receipt for the resulting
-         * payment will be sent to
          */
-        @JvmOverloads
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @JvmStatic
         fun createWithConfirmationToken(
-            confirmationTokenId: String,
-            clientSecret: String,
-            receiptEmail: String? = null
+            confirmationToken: ConfirmationToken,
+            clientSecret: String
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
-                confirmationTokenId = confirmationTokenId,
-                receiptEmail = receiptEmail
+                confirmationTokenId = confirmationToken.id
             )
         }
 

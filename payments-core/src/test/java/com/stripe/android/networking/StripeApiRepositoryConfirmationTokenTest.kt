@@ -440,7 +440,6 @@ class StripeApiRepositoryConfirmationTokenTest {
     private fun createExpectedConfirmationToken(): ConfirmationToken {
         return ConfirmationToken(
             id = "ctoken_1HqJTZBKXf6hRPQYeJKTEyul",
-            `object` = "confirmation_token",
             created = 1609459200L,
             liveMode = false,
             returnUrl = "https://example.com/return"

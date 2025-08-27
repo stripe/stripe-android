@@ -255,14 +255,15 @@ constructor(
          * method and checkout data needed to confirm this SetupIntent
          * @param clientSecret client secret from the SetupIntent being confirmed
          */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @JvmStatic
         fun createWithConfirmationToken(
-            confirmationTokenId: String,
+            confirmationToken: ConfirmationToken,
             clientSecret: String
         ): ConfirmSetupIntentParams {
             return ConfirmSetupIntentParams(
                 clientSecret = clientSecret,
-                confirmationTokenId = confirmationTokenId
+                confirmationTokenId = confirmationToken.id
             )
         }
 

@@ -20,7 +20,6 @@ class ConfirmationTokenJsonParserTest {
         
         assertThat(result).isNotNull()
         assertThat(result!!.id).isEqualTo("ctoken_1234567890")
-        assertThat(result.`object`).isEqualTo("confirmation_token")
         assertThat(result.created).isEqualTo(1609459200L)
         assertThat(result.liveMode).isFalse()
         assertThat(result.returnUrl).isEqualTo("https://example.com/return")
