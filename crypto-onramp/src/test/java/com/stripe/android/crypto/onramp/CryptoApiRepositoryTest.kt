@@ -7,7 +7,6 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.crypto.onramp.model.DateOfBirth
-import com.stripe.android.crypto.onramp.model.IdType
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.networking.StripeRepository
@@ -95,12 +94,8 @@ class CryptoApiRepositoryTest {
                     firstName = "Test",
                     lastName = "User",
                     idNumber = "999-88-7777",
-                    idType = IdType.SOCIAL_SECURITY_NUMBER,
                     dateOfBirth = DateOfBirth(day = 1, month = 3, year = 1975),
-                    address = PaymentSheet.Address(city = "Orlando", state = "FL"),
-                    nationalities = listOf("TestNationality"),
-                    birthCountry = "US",
-                    birthCity = "Chicago"
+                    address = PaymentSheet.Address(city = "Orlando", state = "FL")
                 ),
                 consumerSessionClientSecret = "test-secret"
             )
@@ -116,13 +111,13 @@ class CryptoApiRepositoryTest {
             assertThat(params["first_name"]).isEqualTo("Test")
             assertThat(params["last_name"]).isEqualTo("User")
             assertThat(params["id_number"]).isEqualTo("999-88-7777")
-            assertThat(params["id_type"]).isEqualTo("social_security_number")
+            assertThat(params["id_type"]).isEqualTo("social_security_number") // Hardcoded to match iOS
             assertThat(dobValue["day"]).isEqualTo("1")
             assertThat(dobValue["month"]).isEqualTo("3")
             assertThat(dobValue["year"]).isEqualTo("1975")
-            assertThat(params["nationalities"]).isEqualTo(listOf("TestNationality"))
-            assertThat(params["birth_country"]).isEqualTo("US")
-            assertThat(params["birth_city"]).isEqualTo("Chicago")
+            assertThat(params["nationalities"]).isNull()
+            assertThat(params["birth_country"]).isNull()
+            assertThat(params["birth_city"]).isNull()
             assertThat(params["city"]).isEqualTo("Orlando")
             assertThat(params["state"]).isEqualTo("FL")
             assertThat(params["country"]).isNull()
