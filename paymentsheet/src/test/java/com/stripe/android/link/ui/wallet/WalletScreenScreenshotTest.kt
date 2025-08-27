@@ -222,6 +222,7 @@ internal class WalletScreenScreenshotTest {
         return WalletUiState(
             paymentDetailsList = paymentDetailsList,
             email = "email@email.com",
+            allowLogOut = true,
             cardBrandFilter = cardBrandFilter,
             selectedItemId = selectedItem?.id,
             isProcessing = isProcessing,

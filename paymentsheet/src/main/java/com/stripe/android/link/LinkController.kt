@@ -145,6 +145,7 @@ class LinkController @Inject internal constructor(
         internal val defaultBillingDetails: PaymentSheet.BillingDetails?,
         internal val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
         internal val allowUserEmailEdits: Boolean,
+        internal val allowLogOut: Boolean,
         internal val linkAppearance: LinkAppearance? = null
     ) : Parcelable {
 
@@ -170,6 +171,7 @@ class LinkController @Inject internal constructor(
             private var billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
                 ConfigurationDefaults.billingDetailsCollectionConfiguration
             private var allowUserEmailEdits: Boolean = true
+            private var allowLogOut: Boolean = true
 
             /**
              * Configure the appearance of Link UI components.
@@ -228,6 +230,16 @@ class LinkController @Inject internal constructor(
             }
 
             /**
+             * Whether to allow users to log out from Link.
+             *
+             * @param allowLogOut True to allow logout, false to disable it.
+             * @return This builder instance for method chaining.
+             */
+            fun allowLogOut(allowLogOut: Boolean) = apply {
+                this.allowLogOut = allowLogOut
+            }
+
+            /**
              * Build the [Configuration] instance.
              *
              * @return A new [Configuration] with the specified settings.
@@ -240,6 +252,7 @@ class LinkController @Inject internal constructor(
                 defaultBillingDetails = defaultBillingDetails,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                 allowUserEmailEdits = allowUserEmailEdits,
+                allowLogOut = allowLogOut,
                 linkAppearance = appearance
             )
         }

@@ -212,6 +212,7 @@ internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfigu
         display = PaymentSheet.LinkConfiguration.Display.Automatic,
         collectMissingBillingDetailsForExistingPaymentMethods = true,
         allowUserEmailEdits = allowUserEmailEdits,
+        allowLogOut = allowLogOut,
     ),
     shopPayConfiguration = null,
     googlePlacesApiKey = null,

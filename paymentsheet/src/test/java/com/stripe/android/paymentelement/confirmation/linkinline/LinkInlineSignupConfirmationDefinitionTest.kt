@@ -704,6 +704,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 defaultBillingDetails = null,
                 collectMissingBillingDetailsForExistingPaymentMethods = true,
                 allowUserEmailEdits = true,
+                allowLogOut = true,
                 enableDisplayableDefaultValuesInEce = false,
                 skipWalletInFlowController = false,
                 linkAppearance = null,

@@ -754,6 +754,7 @@ internal class WalletScreenTest {
             state = WalletUiState(
                 paymentDetailsList = paymentDetails,
                 email = "email@email.com",
+                allowLogOut = true,
                 cardBrandFilter = DefaultCardBrandFilter,
                 selectedItemId = paymentDetails.firstOrNull()?.id,
                 isProcessing = false,
