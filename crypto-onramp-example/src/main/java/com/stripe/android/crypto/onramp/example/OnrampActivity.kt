@@ -54,7 +54,6 @@ import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.DateOfBirth
-import com.stripe.android.crypto.onramp.model.IdType
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
@@ -762,7 +761,6 @@ private fun KYCScreen(
                         firstName = firstName,
                         lastName = lastName,
                         idNumber = ssn,
-                        idType = IdType.SOCIAL_SECURITY_NUMBER,
                         dateOfBirth = DateOfBirth(1, month = 1, year = 1990),
                         address = PaymentSheet.Address(
                             city = "New York",
@@ -770,10 +768,7 @@ private fun KYCScreen(
                             line1 = "1234 Fake Street",
                             postalCode = "10108",
                             state = "NY"
-                        ),
-                        nationalities = null,
-                        birthCountry = "US",
-                        birthCity = "Chicago"
+                        )
                     )
                 )
             },
