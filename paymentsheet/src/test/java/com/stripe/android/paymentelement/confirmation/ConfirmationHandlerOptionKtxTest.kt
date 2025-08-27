@@ -663,6 +663,7 @@ class ConfirmationHandlerOptionKtxTest {
             customerId = null,
             saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             forceSetupFutureUseBehaviorAndNewMandate = false,
+            linkMobileDisableLinkOnAttestationFailure = false
         )
     }
 }
