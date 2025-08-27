@@ -137,9 +137,8 @@ internal class CardDetailsSectionElementUITest {
         }
     }
 
-
     @Test
-    fun `CardDetailsSectionElement does not launch card scan when no automaticallyLaunchedCardScanFormData provided to controller`() {
+    fun `CardDetailsSectionElement does not launch card scan when automaticallyLaunchedCardScanFormData null`() {
         FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
         runScenario(
             automaticallyLaunchedCardScanFormData = null

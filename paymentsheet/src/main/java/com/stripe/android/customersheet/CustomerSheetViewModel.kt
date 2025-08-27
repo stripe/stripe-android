@@ -397,12 +397,6 @@ internal class CustomerSheetViewModel(
         }
     }
 
-    private fun getErrorCustomerSheetResult(cause: Throwable): InternalCustomerSheetResult.Error {
-        return InternalCustomerSheetResult.Error(
-            exception = cause,
-        )
-    }
-
     private fun transitionToInitialScreen() {
         val customerState = customerState.value
 
