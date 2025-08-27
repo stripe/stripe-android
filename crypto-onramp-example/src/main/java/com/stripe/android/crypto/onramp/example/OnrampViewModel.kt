@@ -329,17 +329,18 @@ internal class OnrampViewModel(
         }
 
         viewModelScope.launch {
+            val currentScreen = _uiState.value.screen
             _uiState.update { it.copy(screen = Screen.Loading, loadingMessage = "Updating phone number...") }
 
             val result = onrampCoordinator.updatePhoneNumber(phoneNumber.trim())
             when (result) {
                 is OnrampUpdatePhoneNumberResult.Completed -> {
                     _message.value = "Phone number updated successfully!"
-                    _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
+                    _uiState.update { it.copy(screen = currentScreen) }
                 }
                 is OnrampUpdatePhoneNumberResult.Failed -> {
                     _message.value = "Failed to update phone number: ${result.error.message}"
-                    _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
+                    _uiState.update { it.copy(screen = currentScreen) }
                 }
             }
         }

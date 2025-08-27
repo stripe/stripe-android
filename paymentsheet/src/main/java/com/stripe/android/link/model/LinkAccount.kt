@@ -40,6 +40,9 @@ internal data class LinkAccount(
     val email = consumerSession.emailAddress
 
     @IgnoredOnParcel
+    val hasVerifiedSMSSession: Boolean = consumerSession.containsVerifiedSMSSession()
+
+    @IgnoredOnParcel
     val isVerified: Boolean = consumerSession.containsVerifiedSMSSession() ||
         consumerSession.isVerifiedForSignup()
 
@@ -52,7 +55,10 @@ internal data class LinkAccount(
     @IgnoredOnParcel
     val accountStatus = when {
         isVerified -> {
-            AccountStatus.Verified(consentPresentation = consentPresentation)
+            AccountStatus.Verified(
+                hasVerifiedSMSSession = hasVerifiedSMSSession,
+                consentPresentation = consentPresentation
+            )
         }
         consumerSession.containsSMSSessionStarted() -> {
             AccountStatus.VerificationStarted

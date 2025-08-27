@@ -347,6 +347,17 @@ internal class LinkActivityViewModel @Inject constructor(
             return
         }
 
+        if (authenticatingExistingAccount &&
+            accountStatus is AccountStatus.Verified &&
+            !accountStatus.hasVerifiedSMSSession &&
+            linkAccount != null // Should always be non-null.
+        ) {
+            // Handle edge case where status is "verified" but don't have a verified SMS session.
+            // This can happen after registering a new user without verifying their phone number.
+            _linkScreenState.value = ScreenState.VerificationDialog(linkAccount)
+            return
+        }
+
         if (authorizingAuthIntent &&
             accountStatus is AccountStatus.Verified &&
             accountStatus.consentPresentation is ConsentPresentation.Inline

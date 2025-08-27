@@ -588,7 +588,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         linkAccount: LinkAccount?,
         canLookupCustomerEmail: Boolean
     ): AccountStatus {
-        val result =
+        val linkAccountResult =
             when (val linkLaunchMode = this.linkLaunchMode) {
                 null,
                 is LinkLaunchMode.Authentication,
@@ -620,7 +620,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                         )
                 }
             }
-        return result
+        return linkAccountResult
             ?.map { it?.accountStatus }
             ?.getOrElse { AccountStatus.Error }
             ?: AccountStatus.SignedOut

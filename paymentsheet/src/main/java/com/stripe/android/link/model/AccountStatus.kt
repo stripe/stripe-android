@@ -3,7 +3,10 @@ package com.stripe.android.link.model
 import com.stripe.android.paymentsheet.state.LinkState
 
 internal sealed interface AccountStatus {
-    data class Verified(val consentPresentation: ConsentPresentation?) : AccountStatus // Customer is signed in
+    data class Verified(
+        val hasVerifiedSMSSession: Boolean,
+        val consentPresentation: ConsentPresentation?,
+    ) : AccountStatus // Customer is signed in
     data object NeedsVerification : AccountStatus // Customer needs to authenticate
     data object VerificationStarted : AccountStatus // Customer has started OTP verification
     data object SignedOut : AccountStatus // Customer is signed out
