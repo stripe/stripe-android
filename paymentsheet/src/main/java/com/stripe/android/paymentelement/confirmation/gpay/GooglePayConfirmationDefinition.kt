@@ -100,6 +100,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             },
             transactionId = intent.id,
             label = config.customLabel,
+            isElements = true, // TODO Define whether this should set `isElements` to `true or `false`
         )
     }
 
