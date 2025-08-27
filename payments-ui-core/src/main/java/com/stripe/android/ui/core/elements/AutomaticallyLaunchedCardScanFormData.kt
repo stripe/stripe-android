@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.core.utils.FeatureFlags
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AutomaticallyLaunchedCardScanFormData(
@@ -10,7 +11,9 @@ class AutomaticallyLaunchedCardScanFormData(
     private val savedStateHandle: SavedStateHandle
 ) {
     var shouldLaunchCardScanAutomatically: Boolean
-        get() = !hasAutomaticallyLaunchedCardScan && openCardScanAutomaticallyConfig
+        get() = !hasAutomaticallyLaunchedCardScan &&
+            openCardScanAutomaticallyConfig &&
+            FeatureFlags.cardScanGooglePayMigration.isEnabled
         private set(value) {}
 
     var hasAutomaticallyLaunchedCardScan: Boolean

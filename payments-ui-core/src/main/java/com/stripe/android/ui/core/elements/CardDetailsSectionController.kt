@@ -4,7 +4,6 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.CardAccountRangeRepository
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.ui.core.DefaultIsStripeCardScanAvailable
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -33,8 +32,7 @@ class CardDetailsSectionController(
     internal val isStripeCardScanAvailable = DefaultIsStripeCardScanAvailable()
 
     fun shouldAutomaticallyLaunchCardScan(): Boolean {
-        return automaticallyLaunchedCardScanFormData?.shouldLaunchCardScanAutomatically == true &&
-            FeatureFlags.cardScanGooglePayMigration.isEnabled
+        return automaticallyLaunchedCardScanFormData?.shouldLaunchCardScanAutomatically == true
     }
 
     fun setHasAutomaticallyLaunchedCardScan() {
