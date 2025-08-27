@@ -245,14 +245,6 @@ internal class CustomerSheetViewModel(
             }
         }
 
-        if (configuration.opensCardScannerAutomatically &&
-            !FeatureFlags.cardScanGooglePayMigration.isEnabled
-        ) {
-            throw IllegalArgumentException(
-                "GooglePayCardScan must be enabled for automatic Card scan."
-            )
-        }
-
         viewModelScope.launch {
             selectPaymentMethodState.collectLatest { selectPaymentMethodState ->
                 updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
