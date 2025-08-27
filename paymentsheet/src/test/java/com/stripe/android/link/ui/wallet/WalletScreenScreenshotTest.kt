@@ -193,6 +193,15 @@ internal class WalletScreenScreenshotTest {
     }
 
     @Test
+    fun testDisallowLogout() {
+        snapshot(
+            state = walletUiState(
+                allowLogOut = false
+            ),
+        )
+    }
+
+    @Test
     fun testPaymentSelectionHintLong() {
         snapshot(
             state = walletUiState(
@@ -208,6 +217,7 @@ internal class WalletScreenScreenshotTest {
         paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails> =
             TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
         selectedItem: ConsumerPaymentDetails.PaymentDetails? = paymentDetailsList.firstOrNull(),
+        allowLogOut: Boolean = true,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
         hasCompleted: Boolean = false,
         isProcessing: Boolean = false,
@@ -222,7 +232,7 @@ internal class WalletScreenScreenshotTest {
         return WalletUiState(
             paymentDetailsList = paymentDetailsList,
             email = "email@email.com",
-            allowLogOut = true,
+            allowLogOut = allowLogOut,
             cardBrandFilter = cardBrandFilter,
             selectedItemId = selectedItem?.id,
             isProcessing = isProcessing,
