@@ -3,6 +3,7 @@ apply from: configs.androidApplication
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'org.jetbrains.kotlin.plugin.compose'
+apply plugin: 'com.google.firebase.appdistribution'
 
 android {
     defaultConfig {
@@ -20,6 +21,11 @@ android {
         viewBinding true
         compose true
     }
+}
+
+firebaseAppDistribution {
+    groups = "crypto-onramp"
+    appId = "1:538984994431:android:579bee41ae0df8aef3514a"
 }
 
 dependencies {

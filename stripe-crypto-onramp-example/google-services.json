@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "538984994431",
+    "project_id": "link-567f9",
+    "storage_bucket": "link-567f9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:538984994431:android:579bee41ae0df8aef3514a",
+        "android_client_info": {
+          "package_name": "com.stripe.android.crypto.onramp.example"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFXf9k_vJ_yNAkGCm78qerQpVmqi235LU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
