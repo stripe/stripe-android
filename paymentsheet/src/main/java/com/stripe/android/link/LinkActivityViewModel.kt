@@ -326,6 +326,7 @@ internal class LinkActivityViewModel @Inject constructor(
         )
     }
 
+    @Suppress("CyclomaticComplexMethod", "ComplexCondition")
     private suspend fun updateScreenState(withAnimationDelay: Boolean) {
         val accountStatus = linkAccountManager.accountStatus.first()
 

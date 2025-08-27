@@ -47,7 +47,7 @@ import javax.inject.Inject
 /**
  * Manages the Link account for the current user, persisting it across app usages.
  */
-@SuppressWarnings("TooManyFunctions")
+@SuppressWarnings("TooManyFunctions", "LargeClass")
 internal class DefaultLinkAccountManager @Inject constructor(
     private val linkAccountHolder: LinkAccountHolder,
     private val config: LinkConfiguration,
