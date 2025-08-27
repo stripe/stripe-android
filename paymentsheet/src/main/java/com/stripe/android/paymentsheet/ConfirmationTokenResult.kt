@@ -1,44 +1,33 @@
 package com.stripe.android.paymentsheet
 
-import android.os.Parcelable
 import com.stripe.android.model.ConfirmationToken
-import kotlinx.parcelize.Parcelize
 
 /**
- * The result of a ConfirmationToken creation attempt in PaymentSheet.
- *
- * Unlike [PaymentSheetResult] which indicates payment completion status,
- * [ConfirmationTokenResult] returns the generated ConfirmationToken for
- * server-side payment confirmation.
+ * The result of an operation to create a ConfirmationToken.
  */
-sealed class ConfirmationTokenResult : Parcelable {
-
+sealed class ConfirmationTokenResult {
     /**
-     * ConfirmationToken was successfully created.
+     * The ConfirmationToken was created successfully and is ready for server-side confirmation.
      *
-     * The merchant should send the [confirmationToken] to their server to complete
+     * @param confirmationToken The [ConfirmationToken] containing payment method data, shipping details,
+     * and other checkout state collected by PaymentSheet. Send this token to your server to complete
      * payment confirmation using the Stripe server-side API.
-     *
-     * @param confirmationToken The generated ConfirmationToken containing payment method
-     * data, shipping information, and other checkout state collected by PaymentSheet.
      */
-    @Parcelize
     data class Completed(
         val confirmationToken: ConfirmationToken
     ) : ConfirmationTokenResult()
 
     /**
-     * The customer canceled the ConfirmationToken creation attempt.
+     * The ConfirmationToken creation failed.
+     *
+     * @param error The error that occurred during ConfirmationToken creation.
      */
-    @Parcelize
-    data object Canceled : ConfirmationTokenResult()
-
-    /**
-     * The ConfirmationToken creation attempt failed.
-     * @param error The error encountered during token creation.
-     */
-    @Parcelize
     data class Failed(
         val error: Throwable
     ) : ConfirmationTokenResult()
+
+    /**
+     * The user canceled the ConfirmationToken creation flow.
+     */
+    data object Canceled : ConfirmationTokenResult()
 }
