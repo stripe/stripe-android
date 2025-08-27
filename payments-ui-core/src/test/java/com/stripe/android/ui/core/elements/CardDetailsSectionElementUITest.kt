@@ -63,7 +63,7 @@ internal class CardDetailsSectionElementUITest {
         ) {
             composeTestRule.onNodeWithText("4242 4242 4242 4242").assertExists()
 
-            verify(controller).onCardScanResult(
+            verify(controller, times(1)).onCardScanResult(
                 CardScanResult.Completed(
                     scannedCard = ScannedCard(
                         pan = "4242424242424242",
