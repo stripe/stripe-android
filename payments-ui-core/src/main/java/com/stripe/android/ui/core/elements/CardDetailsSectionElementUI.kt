@@ -39,12 +39,10 @@ fun CardDetailsSectionElementUI(
         val cardScanGoogleLauncher = rememberCardScanGoogleLauncher(
             context,
             eventsReporter,
-            controller.cardDetailsElement.controller.onCardScanResult
-        )
+        ) { controller.onCardScanResult(it) }
 
         SideEffect {
             controller.setHasAutomaticallyLaunchedCardScan()
-
             cardScanGoogleLauncher.launch(context)
         }
     }

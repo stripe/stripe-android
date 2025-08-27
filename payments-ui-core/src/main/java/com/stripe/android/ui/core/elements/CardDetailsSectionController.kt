@@ -5,6 +5,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.ui.core.DefaultIsStripeCardScanAvailable
+import com.stripe.android.ui.core.cardscan.CardScanResult
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionFieldErrorController
@@ -45,5 +46,9 @@ class CardDetailsSectionController(
 
     override fun onValidationStateChanged(isValidating: Boolean) {
         cardDetailsElement.onValidationStateChanged(isValidating)
+    }
+
+    internal fun onCardScanResult(cardScanResult: CardScanResult) {
+        cardDetailsElement.controller.onCardScanResult.invoke(cardScanResult)
     }
 }
