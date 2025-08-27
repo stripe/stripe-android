@@ -1,6 +1,5 @@
 package com.stripe.android.paymentelement.confirmation.bacs
 
-import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -38,7 +37,7 @@ class BacsConfirmationFlowTest {
                 optionsParams = BACS_CONFIRMATION_OPTION.optionsParams,
                 shouldSave = false,
                 extraParams = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             ),
             parameters = CONFIRMATION_PARAMETERS,
         ),
@@ -57,7 +56,7 @@ class BacsConfirmationFlowTest {
                 )
             ),
             optionsParams = null,
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            passiveCaptchaParams = null
         )
 
         private val PAYMENT_INTENT = PaymentIntentFactory.create()

@@ -5,7 +5,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
-import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator.Parameters
@@ -92,7 +91,7 @@ class GooglePayConfirmationFlowTest {
                 paymentMethod = PAYMENT_METHOD,
                 optionsParams = null,
                 originatedFromWallet = true,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = null
             ),
             parameters = CONFIRMATION_PARAMETERS,
         )
@@ -112,7 +111,7 @@ class GooglePayConfirmationFlowTest {
                 ),
                 cardBrandFilter = DefaultCardBrandFilter,
             ),
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            passiveCaptchaParams = null
         )
 
         private val PAYMENT_METHOD = PaymentMethodFactory.card()

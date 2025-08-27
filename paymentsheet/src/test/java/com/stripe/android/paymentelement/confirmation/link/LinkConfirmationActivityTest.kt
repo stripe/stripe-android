@@ -22,7 +22,6 @@ import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.NativeLinkArgs
 import com.stripe.android.link.TestFactory
-import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -127,7 +126,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                         paymentMethod = paymentMethod,
                         optionsParams = null,
                         originatedFromWallet = true,
-                        passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                        passiveCaptchaParams = null
                     )
                 )
 
@@ -213,7 +212,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                             linkAccountInfo = LinkAccountUpdate.Value(null),
                             paymentElementCallbackIdentifier = "ConfirmationTestIdentifier",
                             launchMode = LinkLaunchMode.Full,
-                            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                            passiveCaptchaParams = null
                         )
                     )
                 )
@@ -248,7 +247,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
         val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(
             configuration = TestFactory.LINK_CONFIGURATION,
             linkExpressMode = LinkExpressMode.ENABLED,
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            passiveCaptchaParams = null
         )
 
         val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(

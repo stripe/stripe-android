@@ -115,6 +115,7 @@ class BacsConfirmationDefinitionTest {
 
         assertThat(newPaymentMethodOption.createParams).isEqualTo(bacsConfirmationOption.createParams)
         assertThat(newPaymentMethodOption.optionsParams).isEqualTo(bacsConfirmationOption.optionsParams)
+        assertThat(newPaymentMethodOption.passiveCaptchaParams).isEqualTo(bacsConfirmationOption.passiveCaptchaParams)
         assertThat(newPaymentMethodOption.shouldSave).isFalse()
     }
 

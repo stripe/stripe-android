@@ -17,7 +17,6 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
-import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -84,7 +83,7 @@ internal class GooglePayConfirmationActivityTest {
                         paymentMethod = paymentMethod,
                         optionsParams = null,
                         originatedFromWallet = true,
-                        passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                        passiveCaptchaParams = null
                     )
                 )
 
@@ -157,7 +156,7 @@ internal class GooglePayConfirmationActivityTest {
                     PaymentMethodConfirmationOption.Saved(
                         paymentMethod = paymentMethod,
                         optionsParams = null,
-                        passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                        passiveCaptchaParams = null
                     )
                 )
 
@@ -217,7 +216,7 @@ internal class GooglePayConfirmationActivityTest {
                     PaymentMethodConfirmationOption.Saved(
                         paymentMethod = paymentMethod,
                         optionsParams = null,
-                        passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                        passiveCaptchaParams = null
                     )
                 )
 
@@ -297,7 +296,7 @@ internal class GooglePayConfirmationActivityTest {
                     .BillingDetailsCollectionConfiguration(),
                 cardBrandFilter = DefaultCardBrandFilter,
             ),
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            passiveCaptchaParams = null
         )
 
         val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(
