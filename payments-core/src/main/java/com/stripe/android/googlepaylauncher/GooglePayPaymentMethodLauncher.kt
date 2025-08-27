@@ -191,7 +191,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         amount: Int,
         transactionId: String? = null
     ) {
-        present(currencyCode, amount.toLong(), transactionId)
+        // TODO Define whether this should set `isElements` to `true or `false`
+        present(currencyCode, amount.toLong(), transactionId, isElements = true)
     }
 
     /**
@@ -216,6 +217,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         amount: Long = 0L,
         transactionId: String? = null,
         label: String? = null,
+        isElements: Boolean = false,
     ) {
         check(skipReadyCheck || isReady) {
             "present() may only be called when Google Pay is available on this device."
@@ -228,7 +230,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
                 amount = amount,
                 label = label,
                 transactionId = transactionId,
-                cardBrandFilter = cardBrandFilter
+                cardBrandFilter = cardBrandFilter,
+                isElements = isElements,
             )
         )
     }
