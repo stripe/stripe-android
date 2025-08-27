@@ -7,6 +7,8 @@ import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.analytics.FakeLinkAnalyticsHelper
+import com.stripe.android.link.analytics.FakeLinkEventsReporter
+import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.cvc.CvcRecollectionConfirmationDefinition
@@ -90,4 +92,20 @@ internal fun createTestConfirmationHandlerFactory(
         errorReporter = FakeErrorReporter(),
         ioContext = Dispatchers.Unconfined,
     )
+}
+
+internal class ConfirmationTestScenario(
+    val confirmationHandler: ConfirmationHandler,
+)
+
+internal class FakeLinkEventsReporterForConfirmation(
+    reporter: FakeLinkEventsReporter
+) : LinkEventsReporter by reporter {
+    override fun onPopupShow() {
+        // No-op
+    }
+
+    override fun onPopupSuccess() {
+        // No-op
+    }
 }

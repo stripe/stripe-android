@@ -7,7 +7,6 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Base64
 import androidx.core.os.bundleOf
-import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.Intents.intending
@@ -25,12 +24,14 @@ import com.stripe.android.link.TestFactory
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.assertComplete
 import com.stripe.android.paymentelement.confirmation.assertConfirming
 import com.stripe.android.paymentelement.confirmation.assertIdle
 import com.stripe.android.paymentelement.confirmation.assertSucceeded
+import com.stripe.android.paymentelement.confirmation.paymentElementConfirmationTest
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.createTestActivityRule
@@ -39,16 +40,11 @@ import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.runTest
 import org.hamcrest.Matchers.allOf
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.ParameterizedRobolectricTestRunner
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 @RunWith(ParameterizedRobolectricTestRunner::class)
 internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boolean) {
@@ -76,6 +72,29 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
     fun linkSucceeds() = test {
         val paymentMethod = PaymentMethodFactory.card()
 
+        intendingLinkToBeLaunched(
+            LINK_COMPLETE_CODE,
+        ) {
+            val convertedPaymentMethod = String(
+                Base64.encode(
+                    PaymentMethodFactory
+                        .convertCardToJson(paymentMethod)
+                        .toString(2)
+                        .encodeToByteArray(),
+                    0
+                ),
+                Charsets.UTF_8,
+            )
+
+            setData(
+                Uri.parse("https://link.com/redirect?link_status=complete&pm=$convertedPaymentMethod")
+            )
+        }
+
+        intendingPaymentConfirmationToBeLaunched(
+            InternalPaymentResult.Completed(PAYMENT_INTENT.copy(paymentMethod = paymentMethod))
+        )
+
         confirmationHandler.state.test {
             awaitItem().assertIdle()
 
@@ -87,29 +106,6 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                     shippingDetails = CONFIRMATION_PARAMETERS.shippingDetails,
                     initializationMode = CONFIRMATION_PARAMETERS.initializationMode,
                 )
-            )
-
-            intendingLinkToBeLaunched(
-                LINK_COMPLETE_CODE,
-            ) {
-                val convertedPaymentMethod = String(
-                    Base64.encode(
-                        PaymentMethodFactory
-                            .convertCardToJson(paymentMethod)
-                            .toString(2)
-                            .encodeToByteArray(),
-                        0
-                    ),
-                    Charsets.UTF_8,
-                )
-
-                setData(
-                    Uri.parse("https://link.com/redirect?link_status=complete&pm=$convertedPaymentMethod")
-                )
-            }
-
-            intendingPaymentConfirmationToBeLaunched(
-                InternalPaymentResult.Completed(PAYMENT_INTENT.copy(paymentMethod = paymentMethod))
             )
 
             val confirmingWithLink = awaitItem().assertConfirming()
@@ -141,25 +137,11 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
     }
 
     private fun test(
-        test: suspend PaymentElementConfirmationTestActivity.() -> Unit
-    ) = runTest(StandardTestDispatcher()) {
+        test: suspend ConfirmationTestScenario.() -> Unit
+    ) {
         featureFlagTestRule.setEnabled(nativeLinkEnabled)
 
-        val countDownLatch = CountDownLatch(1)
-
-        ActivityScenario.launch<PaymentElementConfirmationTestActivity>(
-            Intent(application, PaymentElementConfirmationTestActivity::class.java)
-        ).use { scenario ->
-            scenario.onActivity { activity ->
-                launch {
-                    test(activity)
-
-                    countDownLatch.countDown()
-                }
-            }
-
-            countDownLatch.await(10, TimeUnit.SECONDS)
-        }
+        paymentElementConfirmationTest(application, test)
     }
 
     private fun intendingLinkToBeLaunched(

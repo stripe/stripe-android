@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation
 
 import android.app.Application
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -11,12 +12,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.test.core.app.ActivityScenario
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
-import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
@@ -48,10 +51,33 @@ import dagger.BindsInstance
 import dagger.Component
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
+import kotlin.coroutines.CoroutineContext
+
+internal fun paymentElementConfirmationTest(
+    application: Application,
+    test: suspend ConfirmationTestScenario.() -> Unit
+) {
+    ActivityScenario.launch<PaymentElementConfirmationTestActivity>(
+        Intent(application, PaymentElementConfirmationTestActivity::class.java)
+    ).use { scenario ->
+        scenario.onActivity { activity ->
+            runTest {
+                test(
+                    ConfirmationTestScenario(
+                        confirmationHandler = activity.confirmationHandler,
+                    )
+                )
+            }
+        }
+    }
+}
 
 internal class PaymentElementConfirmationTestActivity : AppCompatActivity() {
     val viewModel: TestViewModel by viewModels {
@@ -92,7 +118,6 @@ internal class PaymentElementConfirmationTestActivity : AppCompatActivity() {
 @Component(
     modules = [
         PaymentElementConfirmationModule::class,
-        CoroutineContextModule::class,
         PaymentElementConfirmationTestModule::class,
     ]
 )
@@ -127,6 +152,16 @@ internal interface PaymentElementConfirmationTestModule {
     fun bindLinkGateFactory(linkGateFactory: DefaultLinkGate.Factory): LinkGate.Factory
 
     companion object {
+        @Provides
+        @Singleton
+        @IOContext
+        fun provideWorkContext(): CoroutineContext = UnconfinedTestDispatcher()
+
+        @Provides
+        @Singleton
+        @UIContext
+        fun provideUIContext(): CoroutineContext = Dispatchers.Main
+
         @Provides
         @PaymentElementCallbackIdentifier
         fun providesPaymentElementCallbackIdentifier(): String = "ConfirmationTestIdentifier"
@@ -189,6 +224,8 @@ internal interface PaymentElementConfirmationTestModule {
 
         @Provides
         @Singleton
-        fun providesLinkEventsReporter(): LinkEventsReporter = FakeLinkEventsReporter()
+        fun providesLinkEventsReporter(): LinkEventsReporter = FakeLinkEventsReporterForConfirmation(
+            FakeLinkEventsReporter()
+        )
     }
 }
