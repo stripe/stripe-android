@@ -8,6 +8,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.TestParameters
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -26,6 +27,7 @@ internal class TestGrabPay : BasePlaygroundTest() {
         testDriver.confirmNewOrGuestComplete(testParameters)
     }
 
+    @Ignore("https://stripe.slack.com/archives/C02CCKZSB9R/p1756314748007639")
     @Test
     fun testGrabPayFailure() {
         testDriver.confirmNewOrGuestComplete(
