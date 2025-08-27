@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CONFIRMATION_TOKEN
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
@@ -28,6 +29,13 @@ constructor(
     @get:JvmSynthetic internal val paymentMethodId: String? = null,
 
     @get:JvmSynthetic internal val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
+
+    /**
+     * ID of the ConfirmationToken used to confirm this SetupIntent.
+     * ConfirmationTokens contain payment method information, shipping details, and other
+     * checkout state from Elements to simplify server-side confirmation.
+     */
+    @get:JvmSynthetic internal val confirmationTokenId: String? = null,
 
     /**
      * The URL to redirect your customer back to after they authenticate on the payment method’s
@@ -108,6 +116,9 @@ constructor(
     private val paymentMethodParamMap: Map<String, Any>
         get() {
             return when {
+                confirmationTokenId != null -> {
+                    mapOf(PARAM_CONFIRMATION_TOKEN to confirmationTokenId)
+                }
                 paymentMethodCreateParams != null -> {
                     mapOf(PARAM_PAYMENT_METHOD_DATA to paymentMethodCreateParams.toParamMap())
                 }
@@ -232,6 +243,26 @@ constructor(
                 mandateData = mandateData,
                 setAsDefaultPaymentMethod = null,
                 radarOptions = null
+            )
+        }
+
+        /**
+         * Create the parameters necessary for confirming a SetupIntent with a ConfirmationToken.
+         * ConfirmationTokens contain payment method information, shipping details, and other
+         * checkout state from Elements to simplify server-side confirmation.
+         *
+         * @param confirmationTokenId the ID of the ConfirmationToken that contains all payment
+         * method and checkout data needed to confirm this SetupIntent
+         * @param clientSecret client secret from the SetupIntent being confirmed
+         */
+        @JvmStatic
+        fun createWithConfirmationToken(
+            confirmationTokenId: String,
+            clientSecret: String
+        ): ConfirmSetupIntentParams {
+            return ConfirmSetupIntentParams(
+                clientSecret = clientSecret,
+                confirmationTokenId = confirmationTokenId
             )
         }
 

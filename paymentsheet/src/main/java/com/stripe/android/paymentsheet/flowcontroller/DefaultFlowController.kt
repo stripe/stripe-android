@@ -44,6 +44,8 @@ import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.paymentsheet.ConfirmationTokenCallback
+import com.stripe.android.paymentsheet.ConfirmationTokenResult
 import com.stripe.android.paymentsheet.InitializedViaCompose
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentOptionContract
@@ -502,6 +504,16 @@ internal class DefaultFlowController @Inject internal constructor(
                 initializationMode = initializationMode,
             )
         }
+    }
+
+    override fun createConfirmationToken(callback: ConfirmationTokenCallback) {
+        // Note: Implement ConfirmationToken creation
+        // This is a placeholder implementation that needs proper integration with the ConfirmationHandler
+        callback.onConfirmationTokenResult(
+            ConfirmationTokenResult.Failed(
+                error = Exception("ConfirmationToken creation not yet implemented in DefaultFlowController")
+            )
+        )
     }
 
     private fun confirmSavedPaymentMethod(

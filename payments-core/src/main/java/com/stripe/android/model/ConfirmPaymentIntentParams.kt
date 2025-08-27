@@ -6,6 +6,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage.OffS
 import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_ID
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CONFIRMATION_TOKEN
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RADAR_OPTIONS
@@ -32,6 +33,15 @@ constructor(
     val paymentMethodId: String? = null,
     val sourceParams: SourceParams? = null,
     val sourceId: String? = null,
+
+    /**
+     * ID of the ConfirmationToken used to confirm this PaymentIntent.
+     * ConfirmationTokens contain payment method information, shipping details, and other
+     * checkout state from Elements to simplify server-side confirmation.
+     *
+     * See [confirmation_token](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-confirmation_token).
+     */
+    val confirmationTokenId: String? = null,
 
     /**
      * The client secret of this PaymentIntent. Used for client-side retrieval using a
@@ -194,6 +204,9 @@ constructor(
     private val paymentMethodParamMap: Map<String, Any>
         get() {
             return when {
+                confirmationTokenId != null -> {
+                    mapOf(PARAM_CONFIRMATION_TOKEN to confirmationTokenId)
+                }
                 paymentMethodCreateParams != null -> {
                     mapOf(PARAM_PAYMENT_METHOD_DATA to paymentMethodCreateParams.toParamMap())
                 }
@@ -436,6 +449,31 @@ constructor(
                 mandateData = mandateData,
                 setupFutureUsage = setupFutureUsage,
                 shipping = shipping,
+            )
+        }
+
+        /**
+         * Create the parameters necessary for confirming a PaymentIntent with a ConfirmationToken.
+         * ConfirmationTokens contain payment method information, shipping details, and other
+         * checkout state from Elements to simplify server-side confirmation.
+         *
+         * @param confirmationTokenId the ID of the ConfirmationToken that contains all payment
+         * method and checkout data needed to confirm this PaymentIntent
+         * @param clientSecret client secret from the PaymentIntent being confirmed
+         * @param receiptEmail Optional email address that the receipt for the resulting
+         * payment will be sent to
+         */
+        @JvmOverloads
+        @JvmStatic
+        fun createWithConfirmationToken(
+            confirmationTokenId: String,
+            clientSecret: String,
+            receiptEmail: String? = null
+        ): ConfirmPaymentIntentParams {
+            return ConfirmPaymentIntentParams(
+                clientSecret = clientSecret,
+                confirmationTokenId = confirmationTokenId,
+                receiptEmail = receiptEmail
             )
         }
 

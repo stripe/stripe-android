@@ -18,9 +18,7 @@ import kotlinx.parcelize.RawValue
  * Related guides: [Elements](https://stripe.com/docs/payments/elements)
  */
 @Parcelize
-data class ConfirmationTokenCreateParams
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-constructor(
+data class ConfirmationTokenCreateParams constructor(
     /**
      * The type of payment method associated with this confirmation token.
      */
