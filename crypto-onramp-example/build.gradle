@@ -23,7 +23,7 @@ android {
 }
 
 dependencies {
-    implementation project(':stripe-crypto-onramp')
+    implementation project(':crypto-onramp')
     implementation project(':payments')
     implementation project(":stripe-ui-core")
 
