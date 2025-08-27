@@ -8,6 +8,7 @@ import com.stripe.android.customersheet.CustomerSheetState
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -37,6 +38,7 @@ internal class FakeCustomerSheetLoader(
         canUpdateFullPaymentMethodDetails = true,
     ),
     private val isPaymentMethodSyncDefaultEnabled: Boolean = false,
+    private val passiveCaptchaParams: PassiveCaptchaParams? = null,
 ) : CustomerSheetLoader {
 
     override suspend fun load(configuration: CustomerSheet.Configuration): Result<CustomerSheetState.Full> {
@@ -54,6 +56,7 @@ internal class FakeCustomerSheetLoader(
                         paymentMethodOrder = configuration.paymentMethodOrder,
                         isGooglePayReady = isGooglePayAvailable,
                         isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
+                        passiveCaptchaParams = passiveCaptchaParams,
                     ),
                     supportedPaymentMethods = supportedPaymentMethods,
                     customerPaymentMethods = customerPaymentMethods,

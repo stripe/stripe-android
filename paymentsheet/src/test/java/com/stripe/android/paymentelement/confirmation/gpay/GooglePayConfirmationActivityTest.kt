@@ -83,6 +83,7 @@ internal class GooglePayConfirmationActivityTest {
                         paymentMethod = paymentMethod,
                         optionsParams = null,
                         originatedFromWallet = true,
+                        passiveCaptchaParams = null
                     )
                 )
 
@@ -155,6 +156,7 @@ internal class GooglePayConfirmationActivityTest {
                     PaymentMethodConfirmationOption.Saved(
                         paymentMethod = paymentMethod,
                         optionsParams = null,
+                        passiveCaptchaParams = null
                     )
                 )
 
@@ -214,6 +216,7 @@ internal class GooglePayConfirmationActivityTest {
                     PaymentMethodConfirmationOption.Saved(
                         paymentMethod = paymentMethod,
                         optionsParams = null,
+                        passiveCaptchaParams = null
                     )
                 )
 
@@ -292,7 +295,8 @@ internal class GooglePayConfirmationActivityTest {
                 billingDetailsCollectionConfiguration = PaymentSheet
                     .BillingDetailsCollectionConfiguration(),
                 cardBrandFilter = DefaultCardBrandFilter,
-            )
+            ),
+            passiveCaptchaParams = null
         )
 
         val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(

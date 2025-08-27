@@ -126,6 +126,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                         paymentMethod = paymentMethod,
                         optionsParams = null,
                         originatedFromWallet = true,
+                        passiveCaptchaParams = null
                     )
                 )
 
@@ -211,6 +212,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                             linkAccountInfo = LinkAccountUpdate.Value(null),
                             paymentElementCallbackIdentifier = "ConfirmationTestIdentifier",
                             launchMode = LinkLaunchMode.Full,
+                            passiveCaptchaParams = null
                         )
                     )
                 )
@@ -245,6 +247,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
         val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(
             configuration = TestFactory.LINK_CONFIGURATION,
             linkExpressMode = LinkExpressMode.ENABLED,
+            passiveCaptchaParams = null
         )
 
         val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(

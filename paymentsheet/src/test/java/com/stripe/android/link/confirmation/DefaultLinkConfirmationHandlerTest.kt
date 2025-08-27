@@ -11,6 +11,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
@@ -559,7 +560,8 @@ internal class DefaultLinkConfirmationHandlerTest {
         val handler = DefaultLinkConfirmationHandler(
             confirmationHandler = confirmationHandler,
             configuration = configuration,
-            logger = logger
+            logger = logger,
+            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
         )
         confirmationHandler.validate()
         return handler

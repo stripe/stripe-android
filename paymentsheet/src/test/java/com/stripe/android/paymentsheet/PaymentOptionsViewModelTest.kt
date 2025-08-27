@@ -71,6 +71,7 @@ import org.junit.After
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -239,7 +240,8 @@ internal class PaymentOptionsViewModelTest {
             configuration = any(),
             linkAccountInfo = eq(LinkAccountUpdate.Value(unverifiedAccount)),
             launchMode = eq(LinkLaunchMode.PaymentMethodSelection(selectedPayment = null)),
-            linkExpressMode = eq(LinkExpressMode.ENABLED)
+            linkExpressMode = eq(LinkExpressMode.ENABLED),
+            passiveCaptchaParams = anyOrNull()
         )
     }
 
@@ -277,7 +279,8 @@ internal class PaymentOptionsViewModelTest {
             configuration = any(),
             linkAccountInfo = any(),
             launchMode = any(),
-            linkExpressMode = any()
+            linkExpressMode = any(),
+            passiveCaptchaParams = any()
         )
     }
 

@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.utils.FakeActivityResultRegistry
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -147,6 +148,7 @@ internal class LinkControllerCoordinatorTest {
                 linkExpressMode = LinkExpressMode.DISABLED,
                 linkAccountInfo = LinkAccountUpdate.Value(null),
                 launchMode = LinkLaunchMode.PaymentMethodSelection(null),
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
         )
         verify(viewModel).onLinkActivityResult(

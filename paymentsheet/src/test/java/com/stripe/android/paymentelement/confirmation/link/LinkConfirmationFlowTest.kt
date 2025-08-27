@@ -122,6 +122,7 @@ class LinkConfirmationFlowTest {
                     paymentMethod = PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = true,
+                    passiveCaptchaParams = null
                 ),
                 parameters = CONFIRMATION_PARAMETERS,
             )
@@ -153,6 +154,7 @@ class LinkConfirmationFlowTest {
         private val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(
             configuration = TestFactory.LINK_CONFIGURATION,
             linkExpressMode = LinkExpressMode.ENABLED,
+            passiveCaptchaParams = null
         )
     }
 }
