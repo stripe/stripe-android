@@ -100,7 +100,7 @@ class DefaultLinkInlineInteractorTest {
     fun `when account status is LoggedIn, should render button`() = runTest(testDispatcher) {
         // Setup
         linkAccountManager.setLinkAccount(
-            LinkAccountUpdate.Value(createLinkAccount(AccountStatus.Verified(null)))
+            LinkAccountUpdate.Value(createLinkAccount(AccountStatus.Verified(true, null)))
         )
         val metadata = createPaymentMethodMetadata()
         val interactor = createInteractor()

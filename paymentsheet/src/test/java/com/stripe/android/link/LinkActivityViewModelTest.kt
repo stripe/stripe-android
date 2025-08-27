@@ -299,7 +299,7 @@ internal class LinkActivityViewModelTest {
         val linkAccountManager = FakeLinkAccountManager()
 
         val vm = createViewModel(linkAccountManager = linkAccountManager)
-        linkAccountManager.setAccountStatus(AccountStatus.Verified(null))
+        linkAccountManager.setAccountStatus(AccountStatus.Verified(true, null))
 
         vm.onCreate(mock())
 
@@ -552,7 +552,7 @@ internal class LinkActivityViewModelTest {
             vm.onCreate(mock())
             assertThat(awaitItem()).isEqualTo(ScreenState.VerificationDialog(TestFactory.LINK_ACCOUNT))
 
-            linkAccountManager.setAccountStatus(AccountStatus.Verified(null))
+            linkAccountManager.setAccountStatus(AccountStatus.Verified(true, null))
             vm.onVerificationSucceeded()
             assertThat(awaitItem()).isInstanceOf(ScreenState.FullScreen::class.java)
         }
@@ -769,7 +769,7 @@ internal class LinkActivityViewModelTest {
                 linkAccountManager = linkAccountManager,
                 linkLaunchMode = LinkLaunchMode.Authorization(linkAuthIntentId = "lai_123")
             )
-            linkAccountManager.setAccountStatus(AccountStatus.Verified(inlineConsentPresentation))
+            linkAccountManager.setAccountStatus(AccountStatus.Verified(true, inlineConsentPresentation))
 
             vm.result.test {
                 vm.onCreate(mock())
@@ -790,7 +790,7 @@ internal class LinkActivityViewModelTest {
             linkAccountManager = linkAccountManager,
             linkLaunchMode = LinkLaunchMode.Authorization(linkAuthIntentId = "lai_123")
         )
-        linkAccountManager.setAccountStatus(AccountStatus.Verified(null))
+        linkAccountManager.setAccountStatus(AccountStatus.Verified(true, null))
 
         vm.onCreate(mock())
         advanceUntilIdle()
