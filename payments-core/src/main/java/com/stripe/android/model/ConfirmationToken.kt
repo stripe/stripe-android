@@ -6,9 +6,9 @@ import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
 
 /**
- * Confirmation Token objects help transport client-side data collected by Elements to your server 
- * for payment confirmation. They capture payment method information, shipping details, and other 
- * checkout state from Elements, then pass them to your server where you can use them to confirm 
+ * Confirmation Token objects help transport client-side data collected by Elements to your server
+ * for payment confirmation. They capture payment method information, shipping details, and other
+ * checkout state from Elements, then pass them to your server where you can use them to confirm
  * a PaymentIntent or SetupIntent.
  *
  * Confirmation Tokens are single-use and expire 15 minutes after creation.
@@ -34,7 +34,7 @@ constructor(
     @JvmField val `object`: String = "confirmation_token",
 
     /**
-     * Time at which the object was created. Measured in seconds since the Unix epoch.  
+     * Time at which the object was created. Measured in seconds since the Unix epoch.
      */
     @JvmField val created: Long,
 
@@ -66,7 +66,7 @@ constructor(
     @JvmField val setupFutureUsage: SetupFutureUsage? = null,
 
     /**
-     * Payment method options containing both public confirmation parameters and 
+     * Payment method options containing both public confirmation parameters and
      * validation context from Elements configuration.
      */
     @JvmField val paymentMethodOptions: PaymentMethodOptions? = null,
@@ -128,7 +128,7 @@ constructor(
             @JvmField val encryptedData: String? = null
         ) : Parcelable
 
-        @Parcelize  
+        @Parcelize
         data class USBankAccount(
             /**
              * Account holder type.

@@ -2,7 +2,6 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 
@@ -75,7 +74,12 @@ constructor(
     /**
      * Override parameter map for internal use and testing.
      */
-    private val overrideParamMap: Map<String, @RawValue Any>? = null
+    private val overrideParamMap: Map<String, @RawValue Any>? = null,
+
+    /**
+     * Product usage tokens for analytics tracking.
+     */
+    val productUsageTokens: Set<String> = emptySet()
 ) : StripeParamsModel, Parcelable {
 
     private val paymentMethodParamMap: Map<String, Any>
@@ -93,7 +97,7 @@ constructor(
         return overrideParamMap ?: buildMap<String, Any> {
             put(PARAM_PAYMENT_METHOD_TYPE, paymentMethodType.code)
             putAll(paymentMethodParamMap)
-            
+
             returnUrl?.let { put(PARAM_RETURN_URL, it) }
             save?.let { put(PARAM_SAVE, it) }
             setupFutureUsage?.let { put(PARAM_SETUP_FUTURE_USAGE, it.code) }
@@ -116,6 +120,7 @@ constructor(
         private var mandateData: MandateDataParams? = null
         private var receiptEmail: String? = null
         private var shipping: ShippingInformation? = null
+        private var productUsageTokens: Set<String> = emptySet()
 
         /**
          * Set the payment method type.
@@ -185,6 +190,13 @@ constructor(
         }
 
         /**
+         * Set product usage tokens for analytics tracking.
+         */
+        fun setProductUsageTokens(productUsageTokens: Set<String>): Builder = apply {
+            this.productUsageTokens = productUsageTokens
+        }
+
+        /**
          * Build the [ConfirmationTokenCreateParams].
          */
         fun build(): ConfirmationTokenCreateParams {
@@ -205,7 +217,8 @@ constructor(
                 setupFutureUsage = setupFutureUsage,
                 mandateData = mandateData,
                 receiptEmail = receiptEmail,
-                shipping = shipping
+                shipping = shipping,
+                productUsageTokens = productUsageTokens
             )
         }
     }
@@ -248,7 +261,8 @@ constructor(
             setupFutureUsage: SetupFutureUsage? = null,
             mandateData: MandateDataParams? = null,
             receiptEmail: String? = null,
-            shipping: ShippingInformation? = null
+            shipping: ShippingInformation? = null,
+            productUsageTokens: Set<String> = emptySet()
         ): ConfirmationTokenCreateParams {
             val paymentMethodType = PaymentMethod.Type.fromCode(paymentMethodCreateParams.code)
                 ?: throw IllegalArgumentException("Invalid payment method code: ${paymentMethodCreateParams.code}")
@@ -261,7 +275,8 @@ constructor(
                 setupFutureUsage = setupFutureUsage,
                 mandateData = mandateData,
                 receiptEmail = receiptEmail,
-                shipping = shipping
+                shipping = shipping,
+                productUsageTokens = productUsageTokens
             )
         }
 
@@ -278,7 +293,8 @@ constructor(
             setupFutureUsage: SetupFutureUsage? = null,
             mandateData: MandateDataParams? = null,
             receiptEmail: String? = null,
-            shipping: ShippingInformation? = null
+            shipping: ShippingInformation? = null,
+            productUsageTokens: Set<String> = emptySet()
         ): ConfirmationTokenCreateParams {
             return ConfirmationTokenCreateParams(
                 paymentMethodType = paymentMethodType,
@@ -288,7 +304,8 @@ constructor(
                 setupFutureUsage = setupFutureUsage,
                 mandateData = mandateData,
                 receiptEmail = receiptEmail,
-                shipping = shipping
+                shipping = shipping,
+                productUsageTokens = productUsageTokens
             )
         }
 
@@ -304,7 +321,8 @@ constructor(
             save: Boolean? = null,
             setupFutureUsage: SetupFutureUsage? = null,
             receiptEmail: String? = null,
-            shipping: ShippingInformation? = null
+            shipping: ShippingInformation? = null,
+            productUsageTokens: Set<String> = emptySet()
         ): ConfirmationTokenCreateParams {
             return createWithPaymentMethodCreateParams(
                 paymentMethodCreateParams = PaymentMethodCreateParams.create(card, billingDetails),
@@ -312,7 +330,8 @@ constructor(
                 save = save,
                 setupFutureUsage = setupFutureUsage,
                 receiptEmail = receiptEmail,
-                shipping = shipping
+                shipping = shipping,
+                productUsageTokens = productUsageTokens
             )
         }
     }

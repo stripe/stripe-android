@@ -9,6 +9,8 @@ import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.ConfirmationToken
+import com.stripe.android.model.ConfirmationTokenCreateParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
@@ -132,6 +134,13 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         TODO("Not yet implemented")
     }
 
+
+    override suspend fun createConfirmationToken(
+        params: ConfirmationTokenCreateParams,
+        options: ApiRequest.Options
+    ): Result<ConfirmationToken> {
+        TODO("Not yet implemented")
+    }
     override suspend fun updatePaymentMethod(
         paymentMethodId: String,
         paymentMethodUpdateParams: PaymentMethodUpdateParams,

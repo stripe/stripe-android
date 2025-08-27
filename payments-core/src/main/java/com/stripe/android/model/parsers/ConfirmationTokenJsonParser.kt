@@ -4,7 +4,6 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.ConfirmationToken
-import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentMethod
 import org.json.JSONObject
 
@@ -161,29 +160,29 @@ class ConfirmationTokenJsonParser : ModelJsonParser<ConfirmationToken> {
         private const val FIELD_PAYMENT_METHOD_DATA_US_BANK_ACCOUNT = "us_bank_account"
         private const val FIELD_PAYMENT_METHOD_DATA_SEPA_DEBIT = "sepa_debit"
         private const val FIELD_PAYMENT_METHOD_DATA_METADATA = "metadata"
-        
+
         // Card fields
         private const val FIELD_CVC_TOKEN = "cvc_token"
         private const val FIELD_ENCRYPTED_DATA = "encrypted_data"
-        
+
         // USBankAccount fields
         private const val FIELD_ACCOUNT_HOLDER_TYPE = "account_holder_type"
         private const val FIELD_ACCOUNT_TYPE = "account_type"
         private const val FIELD_FINANCIAL_CONNECTIONS_ACCOUNT = "financial_connections_account"
-        
+
         // SepaDebit fields
         private const val FIELD_IBAN = "iban"
-        
+
         // ShippingDetails fields
         private const val FIELD_SHIPPING_ADDRESS = "address"
         private const val FIELD_SHIPPING_NAME = "name"
         private const val FIELD_SHIPPING_PHONE = "phone"
-        
+
         // PaymentMethodOptions fields
         private const val FIELD_PAYMENT_METHOD_OPTIONS_CARD = "card"
         private const val FIELD_PAYMENT_METHOD_OPTIONS_US_BANK_ACCOUNT = "us_bank_account"
         private const val FIELD_PAYMENT_METHOD_OPTIONS_SEPA_DEBIT = "sepa_debit"
-        
+
         // Common fields
         private const val FIELD_NETWORK = "network"
         private const val FIELD_SETUP_FUTURE_USAGE = "setup_future_usage"

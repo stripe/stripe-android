@@ -13,6 +13,9 @@ enum class PaymentAnalyticsEvent(val code: String) : AnalyticsEvent {
     PaymentMethodCreate("payment_method_creation"),
     PaymentMethodUpdate("payment_method_update"),
 
+    // Confirmation Tokens
+    ConfirmationTokenCreate("confirmation_token_creation"),
+
     // Customer
     CustomerRetrieve("retrieve_customer"),
     CustomerRetrievePaymentMethods("retrieve_payment_methods"),
