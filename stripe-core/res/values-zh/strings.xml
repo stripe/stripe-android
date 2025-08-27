@@ -24,4 +24,6 @@
   <string name="stripe_address_label_state">州</string>
   <!-- Label for input requesting zip code, used for US based addreses -->
   <string name="stripe_address_label_zip_code">邮政编码</string>
+  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
+  <string name="stripe_unexpected_error_try_again">发生了意外错误 —— 请过几秒钟再试</string>
 </resources>
