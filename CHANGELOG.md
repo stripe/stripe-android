@@ -2,6 +2,10 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.24.3 - 2025-08-27
+
+Bug fixes and improvements.
+
 ## 21.24.2 - 2025-08-26
 
 Bug fixes and improvements.
