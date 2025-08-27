@@ -5,7 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.utils.FeatureFlags
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class AutomaticallyLaunchedCardScanFormData(
+class AutomaticallyLaunchedCardScanFormDataHelper(
     private val hasAutomaticallyLaunchedCardScanInitialValue: Boolean,
     private val openCardScanAutomaticallyConfig: Boolean,
     private val savedStateHandle: SavedStateHandle

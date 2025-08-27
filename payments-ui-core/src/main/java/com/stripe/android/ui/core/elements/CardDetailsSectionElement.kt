@@ -16,7 +16,7 @@ class CardDetailsSectionElement(
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     initialValues: Map<IdentifierSpec, String?>,
     elementsSessionId: String? = null,
-    automaticallyLaunchedCardScanFormData: AutomaticallyLaunchedCardScanFormData?,
+    automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
     private val collectName: Boolean = false,
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
@@ -28,7 +28,7 @@ class CardDetailsSectionElement(
         cbcEligibility = cbcEligibility,
         cardBrandFilter = cardBrandFilter,
         elementsSessionId = elementsSessionId,
-        automaticallyLaunchedCardScanFormData = automaticallyLaunchedCardScanFormData,
+        automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
     )
 ) : FormElement {
     override val allowsUserInteraction: Boolean = true

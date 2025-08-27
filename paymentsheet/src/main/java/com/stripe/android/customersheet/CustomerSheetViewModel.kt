@@ -75,7 +75,7 @@ import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.ui.core.cardscan.CardScanEvent
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormData
+import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -227,7 +227,7 @@ internal class CustomerSheetViewModel(
 
     private var previouslySelectedPaymentMethod: SupportedPaymentMethod? = null
     private var supportedPaymentMethods = mutableListOf<SupportedPaymentMethod>()
-    private val automaticallyLaunchedCardScanFormData = AutomaticallyLaunchedCardScanFormData(
+    private val automaticallyLaunchedCardScanFormDataHelper = AutomaticallyLaunchedCardScanFormDataHelper(
         openCardScanAutomaticallyConfig = configuration.opensCardScannerAutomatically,
         hasAutomaticallyLaunchedCardScanInitialValue = false,
         savedStateHandle = savedStateHandle,
@@ -482,7 +482,7 @@ internal class CustomerSheetViewModel(
                             )
                         },
                         autocompleteAddressInteractorFactory = null,
-                        automaticallyLaunchedCardScanFormData = automaticallyLaunchedCardScanFormData
+                        automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper
                     ),
                 ) ?: listOf(),
                 primaryButtonLabel = if (
@@ -818,7 +818,7 @@ internal class CustomerSheetViewModel(
             ?: requireNotNull(paymentMethodMetadata.supportedPaymentMethodForCode(paymentMethodCode))
 
         val stripeIntent = paymentMethodMetadata.stripeIntent
-        automaticallyLaunchedCardScanFormData.hasAutomaticallyLaunchedCardScan = false
+        automaticallyLaunchedCardScanFormDataHelper.hasAutomaticallyLaunchedCardScan = false
         val formElements = paymentMethodMetadata.formElementsForCode(
             code = selectedPaymentMethod.code,
             uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
@@ -835,7 +835,7 @@ internal class CustomerSheetViewModel(
                     )
                 },
                 autocompleteAddressInteractorFactory = null,
-                automaticallyLaunchedCardScanFormData = automaticallyLaunchedCardScanFormData,
+                automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
             )
         ) ?: emptyList()
 
