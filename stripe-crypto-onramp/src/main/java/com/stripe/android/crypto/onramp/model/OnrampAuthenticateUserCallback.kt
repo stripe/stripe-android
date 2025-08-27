@@ -3,29 +3,29 @@ package com.stripe.android.crypto.onramp.model
 import androidx.annotation.RestrictTo
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun interface OnrampVerificationCallback {
-    fun onResult(result: OnrampVerificationResult)
+fun interface OnrampAuthenticateUserCallback {
+    fun onResult(result: OnrampAuthenticateResult)
 }
 
 /**
- * Result of an OnRamp User Authentication operation.
+ * Result of an Onramp user authentication operation.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed interface OnrampVerificationResult {
+sealed interface OnrampAuthenticateResult {
     /**
-     * The link authentication was successful.
+     * The Link authentication was successful.
      * @param customerId The crypto customer id that matches the authenticated account.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Completed internal constructor(
         val customerId: String
-    ) : OnrampVerificationResult
+    ) : OnrampAuthenticateResult
 
     /**
-     * The link authentication was cancelled.
+     * The Link authentication was cancelled.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    class Cancelled internal constructor() : OnrampVerificationResult
+    class Cancelled internal constructor() : OnrampAuthenticateResult
 
     /**
      * Authentication failed.
@@ -34,5 +34,5 @@ sealed interface OnrampVerificationResult {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Failed internal constructor(
         val error: Throwable
-    ) : OnrampVerificationResult
+    ) : OnrampAuthenticateResult
 }

@@ -3,15 +3,15 @@ package com.stripe.android.crypto.onramp.model
 import androidx.annotation.RestrictTo
 
 /**
- * Result of KYC submission in Onramp.
+ * Result of KYC attachment in Onramp.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed interface OnrampKYCResult {
+sealed interface OnrampAttachKycInfoResult {
     /**
      * KYC submission completed successfully.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data object Completed : OnrampKYCResult
+    data object Completed : OnrampAttachKycInfoResult
 
     /**
      * KYC submission failed due to an error.
@@ -20,5 +20,5 @@ sealed interface OnrampKYCResult {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Failed internal constructor(
         val error: Throwable
-    ) : OnrampKYCResult
+    ) : OnrampAttachKycInfoResult
 }

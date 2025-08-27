@@ -58,8 +58,8 @@ import com.stripe.android.crypto.onramp.model.IdType
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
+import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
-import com.stripe.android.crypto.onramp.model.PaymentOptionDisplayData
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import kotlinx.coroutines.launch
@@ -80,10 +80,10 @@ internal class OnrampActivity : ComponentActivity() {
         FeatureFlags.nativeLinkEnabled.setEnabled(true)
 
         val callbacks = OnrampCallbacks(
-            authenticationCallback = viewModel::onAuthenticationResult,
-            identityVerificationCallback = viewModel::onIdentityVerificationResult,
+            authenticateUserCallback = viewModel::onAuthenticateUserResult,
+            verifyIdentityCallback = viewModel::onVerifyIdentityResult,
             checkoutCallback = viewModel::onCheckoutResult,
-            selectPaymentCallback = viewModel::onSelectPaymentResult,
+            collectPaymentCallback = viewModel::onCollectPaymentResult,
             authorizeCallback = viewModel::onAuthorizeResult
         )
 
@@ -119,7 +119,7 @@ internal class OnrampActivity : ComponentActivity() {
                         viewModel = viewModel,
                         onAuthenticateUser = { oauthScopes ->
                             if (oauthScopes.isNullOrBlank()) {
-                                onrampPresenter.presentForVerification()
+                                onrampPresenter.authenticateUser()
                             } else {
                                 // Not the cleanest approach, but good enough for an example.
                                 lifecycleScope.launch {
@@ -138,7 +138,7 @@ internal class OnrampActivity : ComponentActivity() {
                             viewModel.registerWalletAddress(address, network)
                         },
                         onStartVerification = {
-                            onrampPresenter.promptForIdentityVerification()
+                            onrampPresenter.verifyIdentity()
                         },
                         onCollectPayment = { type ->
                             onrampPresenter.collectPaymentMethod(type)
@@ -205,9 +205,9 @@ internal fun OnrampScreen(
                     onRegister = { email, phone, country, fullName ->
                         val userInfo = LinkUserInfo(
                             email = email.trim(),
+                            fullName = fullName?.trim()?.takeIf { it.isNotEmpty() },
                             phone = phone.trim(),
                             country = country.trim(),
-                            fullName = fullName?.trim()?.takeIf { it.isNotEmpty() }
                         )
                         viewModel.registerNewLinkUser(userInfo)
                     },
@@ -474,7 +474,7 @@ private fun AuthenticatedOperationsScreen(
     customerId: String,
     consentedLinkAuthIntentIds: List<String>,
     onrampSessionResponse: OnrampSessionResponse?,
-    selectedPaymentData: PaymentOptionDisplayData?,
+    selectedPaymentData: PaymentMethodDisplayData?,
     onAuthenticate: (oauthScopes: String?) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onCollectKYC: (KycInfo) -> Unit,

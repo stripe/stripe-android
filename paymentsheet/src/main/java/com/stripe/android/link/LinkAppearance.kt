@@ -48,7 +48,7 @@ class LinkAppearance(
         internal companion object {
             fun default(isDark: Boolean) = Colors(
                 primary = LinkThemeConfig.colors(isDark = isDark).buttonPrimary,
-                contentOnPrimary = LinkThemeConfig.colors(isDark = isDark).textOnButtonPrimary,
+                contentOnPrimary = LinkThemeConfig.colors(isDark = isDark).onButtonPrimary,
                 borderSelected = LinkThemeConfig.colors(isDark = isDark).borderSelected,
             )
         }

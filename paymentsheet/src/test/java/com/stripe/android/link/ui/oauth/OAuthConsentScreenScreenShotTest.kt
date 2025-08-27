@@ -12,7 +12,7 @@ class OAuthConsentScreenScreenShotTest {
     )
 
     @Test
-    fun testEmptyState() {
+    fun testContent() {
         paparazziRule.snapshot {
             OAuthConsentScreenPreview()
         }

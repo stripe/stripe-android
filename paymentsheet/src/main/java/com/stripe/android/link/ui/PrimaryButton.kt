@@ -21,21 +21,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.LinkThemeConfig.contentOnPrimaryButton
-import com.stripe.android.link.theme.PrimaryButtonHeight
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -62,15 +63,17 @@ internal fun PrimaryButton(
             Button(
                 onClick = onButtonClick,
                 modifier = Modifier
-                    .height(PrimaryButtonHeight)
+                    .height(LinkTheme.shapes.primaryButtonHeight)
                     .fillMaxWidth()
                     .testTag(PrimaryButtonTag),
                 enabled = state == PrimaryButtonState.Enabled,
                 elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
-                shape = LinkTheme.shapes.default,
+                shape = LinkTheme.shapes.primaryButton,
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = LinkTheme.colors.buttonBrand,
+                    contentColor = LinkTheme.colors.onButtonBrand,
                     disabledBackgroundColor = LinkTheme.colors.buttonBrand,
+                    disabledContentColor = LinkTheme.colors.onButtonBrand.copy(alpha = ContentAlpha.disabled),
                 )
             ) {
                 PrimaryContent(
@@ -104,7 +107,7 @@ private fun PrimaryContent(
                 .semantics { testTag = ProgressIndicatorTestTag },
             backgroundColor = LinkTheme.colors.surfaceBackdrop.copy(alpha = 0.1f),
             strokeWidth = 4.dp,
-            filledColor = LinkTheme.colors.contentOnPrimaryButton,
+            filledColor = LinkTheme.colors.onButtonBrand,
         )
         PrimaryButtonState.Completed -> Icon(
             painter = painterResource(id = R.drawable.stripe_link_complete),
@@ -114,14 +117,14 @@ private fun PrimaryContent(
                 .semantics {
                     testTag = CompletedIconTestTag
                 },
-            tint = LinkTheme.colors.contentOnPrimaryButton
+            tint = LinkTheme.colors.onButtonBrand
         )
         else -> Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             PrimaryButtonIcon(iconStart)
             Text(
                 text = label,
                 modifier = Modifier.weight(1f),
-                color = LinkTheme.colors.contentOnPrimaryButton
+                color = LinkTheme.colors.onButtonBrand
                     .copy(alpha = LocalContentAlpha.current),
                 textAlign = TextAlign.Center,
                 style = LinkTheme.typography.bodyEmphasized,
@@ -212,24 +215,40 @@ internal const val CompletedIconTestTag = "CompletedIcon"
 internal const val PrimaryButtonTag = "PrimaryButtonTag"
 
 @Composable
-@Preview
+@PreviewLightDark
 private fun PrimaryButtonPreview() {
-    DefaultLinkTheme {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            PrimaryButton(
-                label = "Testing",
-                state = PrimaryButtonState.Enabled,
-                onButtonClick = { },
-                iconEnd = uiCoreR.drawable.stripe_ic_lock
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        listOf(
+            null,
+            LinkAppearance(
+                darkColors = LinkAppearance.Colors(
+                    primary = Color.Yellow,
+                    contentOnPrimary = Color.DarkGray,
+                    borderSelected = Color.Yellow,
+                ),
+                style = LinkAppearance.Style.ALWAYS_DARK,
+                primaryButton = LinkAppearance.PrimaryButton(
+                    cornerRadiusDp = 0f,
+                    heightDp = 64f,
+                )
             )
-            PrimaryButton(
-                label = "Testing",
-                state = PrimaryButtonState.Processing,
-                onButtonClick = { },
-                iconEnd = uiCoreR.drawable.stripe_ic_lock
-            )
+        ).forEach { appearance ->
+            DefaultLinkTheme(appearance = appearance) {
+                PrimaryButton(
+                    label = "Testing",
+                    state = PrimaryButtonState.Enabled,
+                    onButtonClick = { },
+                    iconEnd = uiCoreR.drawable.stripe_ic_lock
+                )
+                PrimaryButton(
+                    label = "Testing",
+                    state = PrimaryButtonState.Processing,
+                    onButtonClick = { },
+                    iconEnd = uiCoreR.drawable.stripe_ic_lock
+                )
+            }
         }
     }
 }

@@ -10,11 +10,11 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
+import com.stripe.android.crypto.onramp.model.OnrampAuthenticateResult
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
-import com.stripe.android.crypto.onramp.model.OnrampIdentityVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
-import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
+import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
@@ -80,18 +80,18 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
-    fun presentForVerification() {
+    fun authenticateUser() {
         val email = currentLinkAccount?.email
         if (email == null) {
-            onrampCallbacks.authenticationCallback.onResult(
-                OnrampVerificationResult.Failed(NoLinkAccountFoundException())
+            onrampCallbacks.authenticateUserCallback.onResult(
+                OnrampAuthenticateResult.Failed(NoLinkAccountFoundException())
             )
             return
         }
         linkPresenter.authenticateExistingConsumer(email)
     }
 
-    fun promptForIdentityVerification() {
+    fun verifyIdentity() {
         coroutineScope.launch {
             when (val verification = interactor.startIdentityVerification()) {
                 is OnrampStartVerificationResult.Completed -> {
@@ -101,14 +101,14 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                             ephemeralKeySecret = verification.response.ephemeralKey
                         )
                     } ?: run {
-                        onrampCallbacks.identityVerificationCallback.onResult(
-                            OnrampIdentityVerificationResult.Failed(APIException(message = "No ephemeral key found."))
+                        onrampCallbacks.verifyIdentityCallback.onResult(
+                            OnrampVerifyIdentityResult.Failed(APIException(message = "No ephemeral key found."))
                         )
                     }
                 }
                 is OnrampStartVerificationResult.Failed -> {
-                    onrampCallbacks.identityVerificationCallback.onResult(
-                        OnrampIdentityVerificationResult.Failed(verification.error)
+                    onrampCallbacks.verifyIdentityCallback.onResult(
+                        OnrampVerifyIdentityResult.Failed(verification.error)
                     )
                 }
             }
@@ -208,7 +208,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     private fun handleAuthenticationResult(result: LinkController.AuthenticationResult) {
         coroutineScope.launch {
-            onrampCallbacks.authenticationCallback.onResult(
+            onrampCallbacks.authenticateUserCallback.onResult(
                 interactor.handleAuthenticationResult(result)
             )
         }
@@ -224,7 +224,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     private fun handleIdentityVerificationResult(result: IdentityVerificationSheet.VerificationFlowResult) {
         coroutineScope.launch {
-            onrampCallbacks.identityVerificationCallback.onResult(
+            onrampCallbacks.verifyIdentityCallback.onResult(
                 interactor.handleIdentityVerificationResult(result)
             )
         }
@@ -232,7 +232,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     private fun handleSelectPaymentResult(result: LinkController.PresentPaymentMethodsResult) {
         coroutineScope.launch {
-            onrampCallbacks.selectPaymentCallback.onResult(
+            onrampCallbacks.collectPaymentCallback.onResult(
                 interactor.handleSelectPaymentResult(result, activity)
             )
         }
