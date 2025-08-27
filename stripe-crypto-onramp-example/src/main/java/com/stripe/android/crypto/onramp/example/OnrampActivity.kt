@@ -9,6 +9,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -64,9 +65,14 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import kotlinx.coroutines.launch
 
+internal enum class AttestationMode {
+    ENABLED, DISABLED, NONE
+}
+
 internal class OnrampActivity : ComponentActivity() {
 
     private lateinit var onrampPresenter: OnrampCoordinator.Presenter
+    private lateinit var configManager: ConfigurationManager
 
     private val viewModel: OnrampViewModel by viewModels {
         OnrampViewModel.Factory()
@@ -76,6 +82,9 @@ internal class OnrampActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+
+        configManager = ConfigurationManager(this)
+        configManager.restore()
 
         FeatureFlags.nativeLinkEnabled.setEnabled(true)
 
@@ -117,6 +126,7 @@ internal class OnrampActivity : ComponentActivity() {
                     OnrampScreen(
                         modifier = Modifier.padding(innerPadding),
                         viewModel = viewModel,
+                        configManager = configManager,
                         onAuthenticateUser = { oauthScopes ->
                             if (oauthScopes.isNullOrBlank()) {
                                 onrampPresenter.authenticateUser()
@@ -157,6 +167,7 @@ internal class OnrampActivity : ComponentActivity() {
 @Suppress("LongMethod")
 internal fun OnrampScreen(
     viewModel: OnrampViewModel,
+    configManager: ConfigurationManager,
     modifier: Modifier = Modifier,
     onAuthenticateUser: (oauthScopes: String?) -> Unit,
     onAuthorize: (linkAuthIntentId: String) -> Unit,
@@ -187,6 +198,9 @@ internal fun OnrampScreen(
             .fillMaxSize()
             .padding(16.dp)
     ) {
+        // Configuration Section
+        ConfigSection(configManager = configManager)
+
         when (uiState.screen) {
             Screen.EmailInput -> {
                 EmailInputScreen(
@@ -244,6 +258,86 @@ internal fun OnrampScreen(
                         viewModel.onBackToEmailInput()
                     }
                 )
+            }
+        }
+    }
+}
+
+@Composable
+@Suppress("LongMethod")
+private fun ConfigSection(configManager: ConfigurationManager) {
+    var isExpanded by remember { mutableStateOf(false) }
+    var attestationMode by remember { mutableStateOf(configManager.attestationMode) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    isExpanded = !isExpanded
+                }
+                .padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Configuration",
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = if (isExpanded) "▼" else "▶",
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        if (isExpanded) {
+            Column(
+                modifier = Modifier.padding(top = 8.dp, bottom = 16.dp)
+            ) {
+                Text(
+                    text = "Force Attestation (restart app after changing)",
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.padding(bottom = 16.dp)
+                ) {
+                    AttestationMode.entries.forEach { mode ->
+                        val isSelected = attestationMode == mode
+                        Button(
+                            onClick = {
+                                attestationMode = mode
+                                configManager.attestationMode = mode
+                            },
+                            modifier = Modifier.weight(1f),
+                            colors = androidx.compose.material.ButtonDefaults.buttonColors(
+                                backgroundColor = if (isSelected) {
+                                    MaterialTheme.colors.primary
+                                } else {
+                                    MaterialTheme.colors.surface
+                                },
+                                contentColor = if (isSelected) {
+                                    MaterialTheme.colors.onPrimary
+                                } else {
+                                    MaterialTheme.colors.onSurface
+                                }
+                            )
+                        ) {
+                            Text(
+                                text = when (mode) {
+                                    AttestationMode.ENABLED -> "Enabled"
+                                    AttestationMode.DISABLED -> "Disabled"
+                                    AttestationMode.NONE -> "None"
+                                }
+                            )
+                        }
+                    }
+                }
             }
         }
     }
