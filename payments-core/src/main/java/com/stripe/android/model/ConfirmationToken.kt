@@ -27,11 +27,6 @@ data class ConfirmationToken constructor(
     @JvmField val id: String,
 
     /**
-     * The type of the object. Always "confirmation_token".
-     */
-    @JvmField val `object`: String = "confirmation_token",
-
-    /**
      * Time at which the object was created. Measured in seconds since the Unix epoch.
      */
     @JvmField val created: Long,
@@ -44,8 +39,9 @@ data class ConfirmationToken constructor(
     /**
      * Payment method data collected from Elements. This represents the transactional checkout state,
      * not a reusable PaymentMethod object.
+     * Internal field containing sensitive payment data.
      */
-    @JvmField val paymentMethodData: PaymentMethodData? = null,
+    @JvmField internal val paymentMethodData: PaymentMethodData? = null,
 
     /**
      * Return URL that will be used for any redirect-based payment methods.
@@ -60,20 +56,23 @@ data class ConfirmationToken constructor(
     /**
      * Indicates how you intend to use the payment method for future payments.
      * This is automatically determined based on Elements configuration and user input.
+     * Internal field derived from Elements state.
      */
-    @JvmField val setupFutureUsage: SetupFutureUsage? = null,
+    @JvmField internal val setupFutureUsage: SetupFutureUsage? = null,
 
     /**
      * Payment method options containing both public confirmation parameters and
      * validation context from Elements configuration.
+     * Internal field containing SDK configuration details.
      */
-    @JvmField val paymentMethodOptions: PaymentMethodOptions? = null,
+    @JvmField internal val paymentMethodOptions: PaymentMethodOptions? = null,
 
     /**
      * Mandate data for this confirmation token. This is automatically generated based on
      * the payment method and usage, eliminating the need for manual mandate handling.
+     * Internal field containing auto-generated mandate configuration.
      */
-    @JvmField val mandateData: MandateDataParams? = null
+    @JvmField internal val mandateData: MandateDataParams? = null
 ) : StripeModel, Parcelable {
 
     /**

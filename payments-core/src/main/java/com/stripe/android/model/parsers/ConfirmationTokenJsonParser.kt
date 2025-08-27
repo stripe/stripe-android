@@ -20,7 +20,6 @@ class ConfirmationTokenJsonParser : ModelJsonParser<ConfirmationToken> {
 
         return ConfirmationToken(
             id = id,
-            `object` = objectType ?: ConfirmationToken.OBJECT_TYPE,
             created = StripeJsonUtils.optLong(json, ConfirmationToken.FIELD_CREATED) ?: 0L,
             liveMode = StripeJsonUtils.optBoolean(json, ConfirmationToken.FIELD_LIVEMODE) ?: false,
             paymentMethodData = json.optJSONObject(ConfirmationToken.FIELD_PAYMENT_METHOD_DATA)?.let {
