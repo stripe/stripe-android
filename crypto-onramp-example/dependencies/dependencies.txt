@@ -7,7 +7,7 @@
 |                   +--- org.jetbrains.kotlin:kotlin-stdlib-common:2.1.10 (c)
 |                   \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0 -> 1.8.22 (c)
 +--- org.jetbrains.kotlin:kotlin-stdlib:2.1.10 (*)
-+--- project :stripe-crypto-onramp
++--- project :crypto-onramp
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.1.10 (*)
 |    +--- project :stripe-core
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.1.10 (*)
