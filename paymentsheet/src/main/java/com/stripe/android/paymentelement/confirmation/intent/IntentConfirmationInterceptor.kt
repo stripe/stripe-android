@@ -30,6 +30,7 @@ import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor.NextStep
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.ConfirmationTokenCallback
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DeferredIntentValidator
@@ -158,6 +159,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     private val stripeRepository: StripeRepository,
     private val errorReporter: ErrorReporter,
     private val intentCreationCallbackProvider: Provider<CreateIntentCallback?>,
+    private val confirmationTokenCallbackProvider: Provider<ConfirmationTokenCallback?>,
     private val preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?>,
     @Named(ALLOWS_MANUAL_CONFIRMATION) private val allowsManualConfirmation: Boolean,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
@@ -361,6 +363,22 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         shouldSavePaymentMethod: Boolean,
         hCaptchaToken: String?
     ): NextStep {
+        // Check for ConfirmationToken callback first
+        val confirmationTokenCallback = getConfirmationTokenCallback()
+        if (confirmationTokenCallback != null) {
+            return handleConfirmationTokenCreation(
+                confirmationTokenCallback = confirmationTokenCallback,
+                intentConfiguration = intentConfiguration,
+                paymentMethod = paymentMethod,
+                paymentMethodOptionsParams = paymentMethodOptionsParams,
+                paymentMethodExtraParams = paymentMethodExtraParams,
+                shippingValues = shippingValues,
+                shouldSavePaymentMethod = shouldSavePaymentMethod,
+                hCaptchaToken = hCaptchaToken
+            )
+        }
+
+        // Fall back to normal CreateIntentCallback flow
         return when (val callback = waitForIntentCallback()) {
             is CreateIntentCallback -> {
                 handleDeferredIntentCreationFromPaymentMethod(
@@ -507,6 +525,28 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
 
     private fun retrievePreparePaymentMethodHandler(): PreparePaymentMethodHandler? {
         return preparePaymentMethodHandlerProvider.get()
+    }
+
+    private fun getConfirmationTokenCallback(): ConfirmationTokenCallback? {
+        return confirmationTokenCallbackProvider.get()
+    }
+
+    private suspend fun handleConfirmationTokenCreation(
+        confirmationTokenCallback: ConfirmationTokenCallback,
+        intentConfiguration: PaymentSheet.IntentConfiguration,
+        paymentMethod: PaymentMethod,
+        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+        paymentMethodExtraParams: PaymentMethodExtraParams?,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        shouldSavePaymentMethod: Boolean,
+        hCaptchaToken: String?
+    ): NextStep {
+        // In ConfirmationToken mode, we complete without confirming any intent
+        // The ConfirmationToken will be created by the ConfirmationTokenCreator in PaymentSheetViewModel
+        return NextStep.Complete(
+            isForceSuccess = true,
+            completedFullPaymentFlow = false // ConfirmationToken creation, not full payment
+        )
     }
 
     private suspend fun handleDeferredIntentCreationFromPaymentMethod(

@@ -9,6 +9,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.paymentsheet.ConfirmationTokenCallback
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import dagger.Binds
 import dagger.Module
@@ -30,6 +31,13 @@ internal interface IntentConfirmationModule {
             @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
         ): CreateIntentCallback? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.createIntentCallback
+        }
+
+        @Provides
+        fun providesConfirmationTokenCallback(
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+        ): ConfirmationTokenCallback? {
+            return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.confirmationTokenCallback
         }
 
         @OptIn(SharedPaymentTokenSessionPreview::class)

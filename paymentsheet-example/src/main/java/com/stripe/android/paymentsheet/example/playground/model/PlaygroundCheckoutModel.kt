@@ -262,6 +262,20 @@ data class ConfirmIntentRequest(
 )
 
 @Serializable
+data class ConfirmIntentWithTokenRequest(
+    @SerialName("confirmation_token_id")
+    val confirmationTokenId: String,
+    @SerialName("client_secret")
+    val clientSecret: String,
+    @SerialName("merchant_country_code")
+    val merchantCountryCode: String,
+    @SerialName("mode")
+    val mode: String,
+    @SerialName("return_url")
+    val returnUrl: String,
+)
+
+@Serializable
 data class ConfirmIntentResponse(
     @SerialName("client_secret")
     val clientSecret: String,

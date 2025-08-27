@@ -297,7 +297,8 @@ internal class IntentConfirmationFlowTest {
                 intentCreationCallbackProvider = {
                     createIntentCallback
                 },
-                preparePaymentMethodHandlerProvider = { preparePaymentMethodHandler }
+                preparePaymentMethodHandlerProvider = { preparePaymentMethodHandler },
+                confirmationTokenCallbackProvider = { null }
             ),
             paymentLauncherFactory = {
                 FakePaymentLauncher()

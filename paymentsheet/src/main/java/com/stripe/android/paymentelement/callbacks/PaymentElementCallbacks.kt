@@ -10,8 +10,8 @@ import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
-import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ConfirmationTokenCallback
+import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.ShopPayHandlers
 

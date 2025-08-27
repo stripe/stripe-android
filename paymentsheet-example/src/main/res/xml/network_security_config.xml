@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Allow cleartext HTTP traffic for development and testing -->
+    <domain-config cleartextTrafficPermitted="true">
+        <!-- Allow localhost for local development -->
+        <domain includeSubdomains="false">localhost</domain>
+        <domain includeSubdomains="false">127.0.0.1</domain>
+        <domain includeSubdomains="false">10.0.0.92</domain>
+        <domain includeSubdomains="false">10.0.2.2</domain> <!-- Android emulator host -->
+        <domain includeSubdomains="false">10.0.3.2</domain> <!-- Genymotion emulator host -->
+    </domain-config>
+    
+    <!-- Allow cleartext traffic for development domains -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">ngrok.io</domain> <!-- Popular tunneling service -->
+        <domain includeSubdomains="true">ngrok-free.app</domain> <!-- New ngrok domains -->
+        <domain includeSubdomains="true">herokuapp.com</domain> <!-- Heroku apps -->
+        <domain includeSubdomains="true">vercel.app</domain> <!-- Vercel apps -->
+    </domain-config>
+</network-security-config>

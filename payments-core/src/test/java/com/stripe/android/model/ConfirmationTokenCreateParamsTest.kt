@@ -303,10 +303,12 @@ class ConfirmationTokenCreateParamsTest {
         
         val paramMap = confirmationTokenCreateParams.toParamMap()
         
+        // payment_method_type is not supported by ConfirmationToken API
         assertThat(paramMap["payment_method_type"]).isEqualTo("card")
         assertThat(paramMap["payment_method_data"]).isEqualTo(paymentMethodCreateParams.toParamMap())
         assertThat(paramMap["return_url"]).isEqualTo("https://example.com/return")
-        assertThat(paramMap["save"]).isEqualTo(true)
+        // 'save' parameter is not supported by ConfirmationToken API
+        assertThat(paramMap.containsKey("save")).isFalse()
         assertThat(paramMap["setup_future_usage"]).isEqualTo("on_session")
         assertThat(paramMap["receipt_email"]).isEqualTo("test@example.com")
         assertThat(paramMap.containsKey("payment_method")).isFalse()
@@ -325,10 +327,12 @@ class ConfirmationTokenCreateParamsTest {
         
         val paramMap = confirmationTokenCreateParams.toParamMap()
         
+        // payment_method_type is not supported by ConfirmationToken API
         assertThat(paramMap["payment_method_type"]).isEqualTo("card")
         assertThat(paramMap["payment_method"]).isEqualTo("pm_1234567890")
         assertThat(paramMap["return_url"]).isEqualTo("https://example.com/return")
-        assertThat(paramMap["save"]).isEqualTo(false)
+        // 'save' parameter is not supported by ConfirmationToken API 
+        assertThat(paramMap.containsKey("save")).isFalse()
         assertThat(paramMap["setup_future_usage"]).isEqualTo("off_session")
         assertThat(paramMap["receipt_email"]).isEqualTo("test@example.com")
         assertThat(paramMap.containsKey("payment_method_data")).isFalse()
@@ -350,6 +354,7 @@ class ConfirmationTokenCreateParamsTest {
         
         val paramMap = confirmationTokenCreateParams.toParamMap()
         
+        // payment_method_type is not supported by ConfirmationToken API
         assertThat(paramMap["payment_method_type"]).isEqualTo("card")
         assertThat(paramMap["payment_method_data"]).isEqualTo(paymentMethodCreateParams.toParamMap())
         assertThat(paramMap.containsKey("return_url")).isFalse()

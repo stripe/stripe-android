@@ -1,17 +1,19 @@
 package com.stripe.android.paymentsheet
 
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.Logger
+import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.ConfirmationTokenCreateParams
-import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.Address
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.ShippingInformation
-import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.Logger
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import javax.inject.Inject
+import javax.inject.Provider
 
 /**
  * Creates ConfirmationTokens from PaymentSheet checkout state.
@@ -21,8 +23,15 @@ import javax.inject.Inject
  */
 internal class ConfirmationTokenCreator @Inject constructor(
     private val stripeRepository: StripeRepository,
-    private val logger: Logger
+    private val logger: Logger,
+    private val paymentConfiguration: Provider<PaymentConfiguration>,
 ) {
+
+    private val requestOptions: ApiRequest.Options
+        get() = ApiRequest.Options(
+            apiKey = paymentConfiguration.get().publishableKey,
+            stripeAccount = paymentConfiguration.get().stripeAccountId,
+        )
 
     /**
      * Creates a ConfirmationToken from the current PaymentSheet checkout state.
@@ -33,14 +42,12 @@ internal class ConfirmationTokenCreator @Inject constructor(
      * @param paymentSelection The selected payment method from PaymentSheet
      * @param configuration PaymentSheet configuration containing billing/shipping defaults
      * @param shippingDetails Shipping information collected by PaymentSheet
-     * @param publishableKey The publishable key for API calls
      * @return Result containing the ConfirmationToken or an error
      */
     suspend fun createConfirmationToken(
         paymentSelection: PaymentSelection?,
         configuration: PaymentSheet.Configuration,
         shippingDetails: AddressDetails? = null,
-        publishableKey: String,
     ): Result<ConfirmationToken> {
         return try {
             when (paymentSelection) {
@@ -49,7 +56,6 @@ internal class ConfirmationTokenCreator @Inject constructor(
                         paymentSelection = paymentSelection,
                         configuration = configuration,
                         shippingDetails = shippingDetails,
-                        publishableKey = publishableKey
                     )
                 }
                 is PaymentSelection.Saved -> {
@@ -57,7 +63,6 @@ internal class ConfirmationTokenCreator @Inject constructor(
                         paymentSelection = paymentSelection,
                         configuration = configuration,
                         shippingDetails = shippingDetails,
-                        publishableKey = publishableKey
                     )
                 }
                 is PaymentSelection.GooglePay -> {
@@ -101,7 +106,6 @@ internal class ConfirmationTokenCreator @Inject constructor(
         paymentSelection: PaymentSelection.New,
         configuration: PaymentSheet.Configuration,
         shippingDetails: AddressDetails?,
-        publishableKey: String,
     ): Result<ConfirmationToken> {
         // Auto-collect payment method data from PaymentSheet form state
         val paymentMethodCreateParams = createPaymentMethodCreateParams(
@@ -118,14 +122,19 @@ internal class ConfirmationTokenCreator @Inject constructor(
             shipping = shipping,
             // Return URL from configuration (for redirect-based payment methods)
             returnUrl = extractReturnUrl(configuration),
-            // Setup future usage based on PaymentSheet configuration
-            setupFutureUsage = determineSetupFutureUsage(paymentSelection)
+            // Include product usage tokens for payment_user_agent parameter
+            productUsageTokens = paymentMethodCreateParams.attribution
+            // Note: setup_future_usage is not supported by ConfirmationToken API
+            // It should be set when confirming PaymentIntent/SetupIntent on the server
         )
+
+        // Debug: Log the actual API options being used
+        logger.debug("ConfirmationToken API options: apiKey=${paymentConfiguration.get().publishableKey.take(10)}..., stripeAccount=${paymentConfiguration.get().stripeAccountId}")
 
         // Make API call to create ConfirmationToken
         val result = stripeRepository.createConfirmationToken(
             confirmationTokenCreateParams = createParams,
-            options = ApiRequest.Options(publishableKey)
+            options = requestOptions
         )
 
         return if (result.isSuccess) {
@@ -139,10 +148,9 @@ internal class ConfirmationTokenCreator @Inject constructor(
         paymentSelection: PaymentSelection.Saved,
         configuration: PaymentSheet.Configuration,
         shippingDetails: AddressDetails?,
-        publishableKey: String,
     ): Result<ConfirmationToken> {
         val paymentMethod = paymentSelection.paymentMethod
-        
+
         // Auto-collect shipping details if provided
         val shipping = createShippingInformation(shippingDetails, configuration.shippingDetails)
 
@@ -152,19 +160,19 @@ internal class ConfirmationTokenCreator @Inject constructor(
             paymentMethodType = paymentMethod.type!!,
             shipping = shipping,
             returnUrl = extractReturnUrl(configuration),
-            // For saved payment methods, check if we need to collect CVC or setup future usage
-            setupFutureUsage = if (paymentSelection.walletType != null) {
-                // Wallet payments typically don't need setup future usage
-                null
-            } else {
-                determineSetupFutureUsageForSaved(paymentSelection)
-            }
+            // Include PaymentSheet product usage tokens for payment_user_agent parameter
+            productUsageTokens = setOf("paymentsheet")
+            // Note: setup_future_usage is not supported by ConfirmationToken API
+            // It should be set when confirming PaymentIntent/SetupIntent on the server
         )
 
-        // Make API call to create ConfirmationToken  
+        // Debug: Log the actual API options being used
+        logger.debug("ConfirmationToken API options (saved PM): apiKey=${paymentConfiguration.get().publishableKey.take(10)}..., stripeAccount=${paymentConfiguration.get().stripeAccountId}")
+
+        // Make API call to create ConfirmationToken
         val result = stripeRepository.createConfirmationToken(
             confirmationTokenCreateParams = createParams,
-            options = ApiRequest.Options(publishableKey)
+            options = requestOptions
         )
 
         return if (result.isSuccess) {
@@ -192,7 +200,7 @@ internal class ConfirmationTokenCreator @Inject constructor(
         configShippingDetails: AddressDetails?
     ): ShippingInformation? {
         val details = shippingDetails ?: configShippingDetails ?: return null
-        
+
         return ShippingInformation(
             name = details.name ?: "",
             address = com.stripe.android.model.Address(

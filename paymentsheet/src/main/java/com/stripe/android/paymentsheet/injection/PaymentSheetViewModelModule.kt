@@ -52,8 +52,9 @@ internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheet
     @Provides
     fun provideConfirmationTokenCreator(
         stripeRepository: StripeRepository,
-        logger: Logger
+        logger: Logger,
+        paymentConfiguration: Provider<PaymentConfiguration>,
     ): ConfirmationTokenCreator {
-        return ConfirmationTokenCreator(stripeRepository, logger)
+        return ConfirmationTokenCreator(stripeRepository, logger, paymentConfiguration)
     }
 }

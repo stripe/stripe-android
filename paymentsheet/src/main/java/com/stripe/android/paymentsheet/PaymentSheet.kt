@@ -464,13 +464,17 @@ class PaymentSheet internal constructor(
          */
         @Composable
         fun build(): PaymentSheet {
+            // Set the ConfirmationToken callback into the PaymentElementCallbacks
+            callbacksBuilder.confirmationTokenCallback(confirmationTokenCallback)
+            val callbacks = callbacksBuilder.build()
+
             /*
-             * Note: Implement internalRememberConfirmationTokenPaymentSheet
-             * This will be similar to internalRememberPaymentSheet but configured
-             * for ConfirmationToken generation instead of payment completion
+             * Use the same pattern as the regular PaymentSheet Builder composable
+             * The callbacks will be updated dynamically in internalRememberPaymentSheet
+             * using the correct UUID identifier via UpdateCallbacks
              */
             return internalRememberPaymentSheet(
-                callbacks = callbacksBuilder.build(),
+                callbacks = callbacks,
                 paymentResultCallback = adaptToPaymentSheetResult(),
             )
         }
@@ -506,7 +510,8 @@ class PaymentSheet internal constructor(
         private fun initializeCallbacks() {
             // Set the ConfirmationToken callback into the PaymentElementCallbacks
             callbacksBuilder.confirmationTokenCallback(confirmationTokenCallback)
-            setPaymentSheetCallbacks(callbacksBuilder.build())
+            val callbacks = callbacksBuilder.build()
+            setPaymentSheetCallbacks(callbacks)
         }
     }
 

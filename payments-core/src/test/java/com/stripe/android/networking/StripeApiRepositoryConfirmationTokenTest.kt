@@ -119,7 +119,7 @@ class StripeApiRepositoryConfirmationTokenTest {
         // Verify request parameters
         val params = capturedRequest.params!!
         assertThat(params["payment_method_type"]).isEqualTo("card")
-        assertThat(params["payment_method_data"]).isEqualTo(paymentMethodCreateParams.toParamMap())
+        assertThat(params["payment_method_data"]).isEqualTo(paymentMethodCreateParams.toParamMap().plus("payment_user_agent" to "stripe-android/${com.stripe.android.core.version.StripeSdkVersion.VERSION_NAME};test_token"))
         assertThat(params["return_url"]).isEqualTo("https://example.com/return")
         assertThat(params["receipt_email"]).isEqualTo("test@example.com")
     }

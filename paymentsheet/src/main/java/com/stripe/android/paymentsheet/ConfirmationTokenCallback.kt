@@ -28,7 +28,7 @@ fun interface CreateIntentWithConfirmationTokenCallback {
 /**
  * Callback to receive the result of ConfirmationToken creation.
  *
- * Used with PaymentSheet.ConfirmationTokenBuilder and FlowController when operating in 
+ * Used with PaymentSheet.ConfirmationTokenBuilder and FlowController when operating in
  * ConfirmationToken mode, where the SDK generates tokens instead of completing payments directly.
  */
 fun interface ConfirmationTokenCallback {
@@ -36,7 +36,7 @@ fun interface ConfirmationTokenCallback {
     /**
      * Called with the result of ConfirmationToken creation.
      *
-     * @param confirmationTokenResult The [ConfirmationTokenResult] indicating whether the 
+     * @param confirmationTokenResult The [ConfirmationTokenResult] indicating whether the
      * ConfirmationToken was created successfully, failed, or was canceled by the user.
      */
     fun onConfirmationTokenResult(

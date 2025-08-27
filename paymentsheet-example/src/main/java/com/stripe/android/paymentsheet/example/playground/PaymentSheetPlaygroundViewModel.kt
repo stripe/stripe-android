@@ -35,6 +35,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentRequest
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentResponse
+import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentWithTokenRequest
 import com.stripe.android.paymentsheet.example.playground.model.CreateSetupIntentRequest
 import com.stripe.android.paymentsheet.example.playground.model.CreateSetupIntentResponse
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
@@ -521,7 +522,7 @@ internal class PaymentSheetPlaygroundViewModel(
     }
 
     fun onConfirmationTokenResult(confirmationTokenResult: ConfirmationTokenResult) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             when (confirmationTokenResult) {
                 is ConfirmationTokenResult.Completed -> {
                     // Create PaymentIntent with ConfirmationToken on server
@@ -531,24 +532,32 @@ internal class PaymentSheetPlaygroundViewModel(
                             confirmationToken = confirmationTokenResult.confirmationToken,
                             playgroundState = playgroundState
                         )
-                        when (result) {
-                            is CreateIntentResult.Success -> {
-                                setPlaygroundState(null)
-                                status.value = StatusMessage(SUCCESS_RESULT)
-                            }
-                            is CreateIntentResult.Failure -> {
-                                status.value = StatusMessage("Payment failed")
+                        withContext(Dispatchers.Main) {
+                            when (result) {
+                                is CreateIntentResult.Success -> {
+                                    setPlaygroundState(null)
+                                    status.value = StatusMessage(SUCCESS_RESULT)
+                                }
+                                is CreateIntentResult.Failure -> {
+                                    status.value = StatusMessage("Payment failed")
+                                }
                             }
                         }
                     } else {
-                        status.value = StatusMessage("No playground state available")
+                        withContext(Dispatchers.Main) {
+                            status.value = StatusMessage("No playground state available")
+                        }
                     }
                 }
                 is ConfirmationTokenResult.Canceled -> {
-                    status.value = StatusMessage("Canceled")
+                    withContext(Dispatchers.Main) {
+                        status.value = StatusMessage("Canceled")
+                    }
                 }
                 is ConfirmationTokenResult.Failed -> {
-                    status.value = StatusMessage("ConfirmationToken creation failed: ${confirmationTokenResult.error.message}")
+                    withContext(Dispatchers.Main) {
+                        status.value = StatusMessage("ConfirmationToken creation failed: ${confirmationTokenResult.error.message}")
+                    }
                 }
             }
         }
@@ -558,12 +567,41 @@ internal class PaymentSheetPlaygroundViewModel(
         confirmationToken: ConfirmationToken,
         playgroundState: PlaygroundState.Payment
     ): CreateIntentResult {
-        // Note: This simulates creating a PaymentIntent server-side with a ConfirmationToken
-        // In a real implementation, you'd call your backend with the ConfirmationToken ID
-        // and it would create/confirm a PaymentIntent using the Stripe API
-        
-        // For now, we'll simulate success since we don't have a real backend endpoint for this
-        return CreateIntentResult.Success("pi_simulation_${confirmationToken.id}")
+        val request = ConfirmIntentWithTokenRequest(
+            confirmationTokenId = confirmationToken.id,
+            clientSecret = playgroundState.clientSecret,
+            merchantCountryCode = playgroundState.countryCode.value,
+            mode = playgroundState.checkoutMode.value,
+            returnUrl = RETURN_URL,
+        )
+        val result = Fuel.post("http://10.0.0.92:8081" + "/confirm_intent")
+            .jsonBody(Json.encodeToString(ConfirmIntentWithTokenRequest.serializer(), request))
+            .suspendable()
+            .awaitModel(ConfirmIntentResponse.serializer())
+        val createIntentResult = when (result) {
+            is Result.Failure -> {
+                val message = "Creating intent failed:\n${result.getException().message}"
+                status.value = StatusMessage(message)
+
+                val error = if (result.error.cause is IOException) {
+                    ConfirmIntentNetworkException()
+                } else {
+                    ConfirmIntentEndpointException()
+                }
+
+                CreateIntentResult.Failure(
+                    cause = error,
+                    displayMessage = message
+                )
+            }
+
+            is Result.Success -> {
+                CreateIntentResult.Success(
+                    clientSecret = result.value.clientSecret,
+                )
+            }
+        }
+        return createIntentResult
     }
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)

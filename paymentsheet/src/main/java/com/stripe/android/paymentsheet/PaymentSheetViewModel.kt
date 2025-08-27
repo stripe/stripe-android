@@ -17,6 +17,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.IS_LIVE_MODE
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
@@ -27,6 +28,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
@@ -92,7 +95,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val errorReporter: ErrorReporter,
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
-    @Named(IS_LIVE_MODE) val isLiveModeProvider: () -> Boolean
+    @Named(IS_LIVE_MODE) val isLiveModeProvider: () -> Boolean,
+    private val confirmationTokenCreator: ConfirmationTokenCreator,
+    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
+    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -502,52 +508,113 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
         viewModelScope.launch(workContext) {
-            val confirmationOption = withContext(viewModelScope.coroutineContext) {
-                inProgressSelection = paymentSelection
+            // Check if we're in ConfirmationToken mode
+            val callbacks = PaymentElementCallbackReferences[paymentElementCallbackIdentifier]
+            val isConfirmationTokenMode = callbacks?.confirmationTokenCallback != null
 
-                paymentSelectionWithCvcIfEnabled(paymentSelection)
-                    ?.toConfirmationOption(
-                        configuration = config.asCommonConfiguration(),
-                        linkConfiguration = linkHandler.linkConfiguration.value,
-                    )
+            logger.info("ConfirmationToken Debug - Identifier: $paymentElementCallbackIdentifier")
+            logger.info("ConfirmationToken Debug - Callbacks: $callbacks")
+            logger.info("ConfirmationToken Debug - ConfirmationTokenCallback present: ${callbacks?.confirmationTokenCallback != null}")
+            logger.info("ConfirmationToken Debug - CreateIntentCallback present: ${callbacks?.createIntentCallback != null}")
+
+            if (isConfirmationTokenMode) {
+                logger.info("ConfirmationToken Debug - Taking ConfirmationToken path")
+                // ConfirmationToken mode: Create token and invoke callback
+                handleConfirmationTokenCreation(paymentSelection, callbacks.confirmationTokenCallback!!)
+            } else {
+                logger.info("ConfirmationToken Debug - Taking normal payment path")
+                // Normal payment confirmation mode
+                handleNormalPaymentConfirmation(paymentSelection)
             }
+        }
+    }
 
-            confirmationOption?.let { option ->
-                val stripeIntent = awaitStripeIntent()
+    private suspend fun handleConfirmationTokenCreation(
+        paymentSelection: PaymentSelection?,
+        callback: com.stripe.android.paymentsheet.ConfirmationTokenCallback
+    ) {
+        try {
+            inProgressSelection = paymentSelection
 
-                confirmationHandler.start(
-                    arguments = ConfirmationHandler.Args(
-                        intent = stripeIntent,
-                        confirmationOption = option,
-                        initializationMode = args.initializationMode,
-                        appearance = config.appearance,
-                        shippingDetails = config.shippingDetails,
-                    ),
-                )
-            } ?: run {
-                inProgressSelection = null
+            val finalSelection = paymentSelectionWithCvcIfEnabled(paymentSelection)
 
-                val message = paymentSelection?.let {
-                    "Cannot confirm using a ${it::class.qualifiedName} payment selection!"
-                } ?: "Cannot confirm without a payment selection!"
+            // Auto-collect data from PaymentSheet form state using ConfirmationTokenCreator
+            val result = confirmationTokenCreator.createConfirmationToken(
+                paymentSelection = finalSelection,
+                configuration = config,
+                shippingDetails = config.shippingDetails,
+            )
 
-                val exception = IllegalStateException(message)
+            inProgressSelection = null
 
-                val event = paymentSelection?.let {
-                    ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_INVALID_PAYMENT_SELECTION_ON_CHECKOUT
-                } ?: ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_NO_PAYMENT_SELECTION_ON_CHECKOUT
-
-                errorReporter.report(event, StripeException.create(exception))
-
-                withContext(viewModelScope.coroutineContext) {
-                    processConfirmationResult(
-                        ConfirmationHandler.Result.Failed(
-                            cause = exception,
-                            message = exception.stripeErrorMessage(),
-                            type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
-                        )
-                    )
+            withContext(viewModelScope.coroutineContext) {
+                when {
+                    result.isSuccess -> {
+                        val token = result.getOrThrow()
+                        callback.onConfirmationTokenResult(ConfirmationTokenResult.Completed(token))
+                    }
+                    result.isFailure -> {
+                        val error = result.exceptionOrNull() ?: Exception("Unknown ConfirmationToken creation error")
+                        callback.onConfirmationTokenResult(ConfirmationTokenResult.Failed(error))
+                    }
                 }
+            }
+        } catch (e: Exception) {
+            logger.error("ConfirmationToken creation failed", e)
+            inProgressSelection = null
+
+            withContext(viewModelScope.coroutineContext) {
+                callback.onConfirmationTokenResult(ConfirmationTokenResult.Failed(e))
+            }
+        }
+    }
+
+    private suspend fun handleNormalPaymentConfirmation(paymentSelection: PaymentSelection?) {
+        val confirmationOption = withContext(viewModelScope.coroutineContext) {
+            inProgressSelection = paymentSelection
+
+            paymentSelectionWithCvcIfEnabled(paymentSelection)
+                ?.toConfirmationOption(
+                    configuration = config.asCommonConfiguration(),
+                    linkConfiguration = linkHandler.linkConfiguration.value,
+                )
+        }
+
+        confirmationOption?.let { option ->
+            val stripeIntent = awaitStripeIntent()
+
+            confirmationHandler.start(
+                arguments = ConfirmationHandler.Args(
+                    intent = stripeIntent,
+                    confirmationOption = option,
+                    initializationMode = args.initializationMode,
+                    appearance = config.appearance,
+                    shippingDetails = config.shippingDetails,
+                ),
+            )
+        } ?: run {
+            inProgressSelection = null
+
+            val message = paymentSelection?.let {
+                "Cannot confirm using a ${it::class.qualifiedName} payment selection!"
+            } ?: "Cannot confirm without a payment selection!"
+
+            val exception = IllegalStateException(message)
+
+            val event = paymentSelection?.let {
+                ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_INVALID_PAYMENT_SELECTION_ON_CHECKOUT
+            } ?: ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_NO_PAYMENT_SELECTION_ON_CHECKOUT
+
+            errorReporter.report(event, StripeException.create(exception))
+
+            withContext(viewModelScope.coroutineContext) {
+                processConfirmationResult(
+                    ConfirmationHandler.Result.Failed(
+                        cause = exception,
+                        message = exception.stripeErrorMessage(),
+                        type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                    )
+                )
             }
         }
     }

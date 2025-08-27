@@ -5,11 +5,13 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.injection.LinkAnalyticsComponent
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -22,8 +24,6 @@ import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcompo
 import com.stripe.android.paymentsheet.ui.DefaultWalletButtonsInteractor
 import com.stripe.android.paymentsheet.ui.WalletButtonsContent
 import com.stripe.android.uicore.image.StripeImageLoader
-import com.stripe.android.core.Logger
-import com.stripe.android.networking.StripeRepository
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
@@ -136,8 +136,9 @@ internal object FlowControllerModule {
     @Singleton
     fun provideConfirmationTokenCreator(
         stripeRepository: StripeRepository,
-        logger: Logger
+        logger: Logger,
+        paymentConfiguration: Provider<PaymentConfiguration>,
     ): ConfirmationTokenCreator {
-        return ConfirmationTokenCreator(stripeRepository, logger)
+        return ConfirmationTokenCreator(stripeRepository, logger, paymentConfiguration)
     }
 }

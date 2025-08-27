@@ -314,6 +314,17 @@ constructor(
         )
     }
 
+    /**
+     * Creates parameter map with payment_user_agent included for ConfirmationToken API.
+     * This ensures payment_user_agent is properly nested within payment_method_data.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun toParamMapWithPaymentUserAgent(paymentUserAgent: String): Map<String, Any> {
+        return toParamMap().plus(
+            mapOf("payment_user_agent" to paymentUserAgent)
+        )
+    }
+
     private val typeParams: Map<String, Any>
         get() {
             return when (code) {

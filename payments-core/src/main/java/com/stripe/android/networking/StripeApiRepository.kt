@@ -618,15 +618,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
         confirmationTokenCreateParams: ConfirmationTokenCreateParams,
         options: ApiRequest.Options
     ): Result<ConfirmationToken> {
-        fireFraudDetectionDataRequest()
 
+        // Build payment user agent for attribution
+        val paymentUserAgent = buildPaymentUserAgent(confirmationTokenCreateParams.attribution)
+        
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 confirmationTokensUrl,
                 options,
-                confirmationTokenCreateParams.toParamMap()
-                    .plus(buildPaymentUserAgentPair(confirmationTokenCreateParams.productUsageTokens))
-                    .plus(fraudDetectionData?.params.orEmpty())
+                // Use special method that nests payment_user_agent within payment_method_data
+                confirmationTokenCreateParams.toParamMapWithPaymentUserAgent(paymentUserAgent)
             ),
             ConfirmationTokenJsonParser()
         ) {

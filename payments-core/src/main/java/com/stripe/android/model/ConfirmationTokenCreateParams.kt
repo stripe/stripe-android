@@ -80,6 +80,13 @@ data class ConfirmationTokenCreateParams constructor(
     val productUsageTokens: Set<String> = emptySet()
 ) : StripeParamsModel, Parcelable {
 
+    /**
+     * Attribution tokens for payment_user_agent parameter.
+     * Extracted from the underlying PaymentMethodCreateParams or provided for saved payment methods.
+     */
+    val attribution: Set<String>
+        get() = paymentMethodCreateParams?.attribution ?: productUsageTokens
+
     private val paymentMethodParamMap: Map<String, Any>
         get() = when {
             paymentMethodCreateParams != null -> {
@@ -91,17 +98,47 @@ data class ConfirmationTokenCreateParams constructor(
             else -> emptyMap()
         }
 
+    /**
+     * Creates parameter map with payment_user_agent properly nested in payment_method_data.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun toParamMapWithPaymentUserAgent(paymentUserAgent: String): Map<String, Any> {
+        return when {
+            paymentMethodCreateParams != null -> {
+                buildMap<String, Any> {
+                    // Include payment_method_data with payment_user_agent nested inside
+                    put(PARAM_PAYMENT_METHOD_DATA, 
+                        paymentMethodCreateParams.toParamMapWithPaymentUserAgent(paymentUserAgent))
+                    
+                    // Add other ConfirmationToken parameters
+                    returnUrl?.let { put(PARAM_RETURN_URL, it) }
+                    setupFutureUsage?.let { put(PARAM_SETUP_FUTURE_USAGE, it.code) }
+                    mandateData?.let { put(PARAM_MANDATE_DATA, it.toParamMap()) }
+                    receiptEmail?.let { put(PARAM_RECEIPT_EMAIL, it) }
+                    shipping?.let { put(PARAM_SHIPPING, it.toParamMap()) }
+                }
+            }
+            else -> {
+                // For saved payment methods, use regular toParamMap since payment_user_agent
+                // is only needed when creating new payment methods
+                toParamMap()
+            }
+        }
+    }
+
     override fun toParamMap(): Map<String, Any> {
         return overrideParamMap ?: buildMap<String, Any> {
-            put(PARAM_PAYMENT_METHOD_TYPE, paymentMethodType.code)
+            // Only include parameters supported by ConfirmationToken creation API
             putAll(paymentMethodParamMap)
+            // Add payment method type
+            put(PARAM_PAYMENT_METHOD_TYPE, paymentMethodType.code)
 
             returnUrl?.let { put(PARAM_RETURN_URL, it) }
-            save?.let { put(PARAM_SAVE, it) }
             setupFutureUsage?.let { put(PARAM_SETUP_FUTURE_USAGE, it.code) }
             mandateData?.let { put(PARAM_MANDATE_DATA, it.toParamMap()) }
             receiptEmail?.let { put(PARAM_RECEIPT_EMAIL, it) }
             shipping?.let { put(PARAM_SHIPPING, it.toParamMap()) }
+            // Note: 'save' parameter is not supported by ConfirmationToken API
         }
     }
 
