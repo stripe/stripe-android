@@ -3577,6 +3577,7 @@ class CustomerSheetViewModelTest {
             val controller = (formElements[0] as CardDetailsSectionElement).controller
             assertThat(controller.shouldAutomaticallyLaunchCardScan()).isTrue()
         }
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     @Test
@@ -3604,6 +3605,7 @@ class CustomerSheetViewModelTest {
             val controller = (formElements[0] as CardDetailsSectionElement).controller
             assertThat(controller.shouldAutomaticallyLaunchCardScan()).isTrue()
         }
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     @Test
@@ -3652,6 +3654,7 @@ class CustomerSheetViewModelTest {
             assertThat(secondCardFormController).isNotNull()
             assertThat(secondCardFormController!!.shouldAutomaticallyLaunchCardScan()).isFalse()
         }
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     @Test
@@ -3713,6 +3716,7 @@ class CustomerSheetViewModelTest {
             assertThat(secondCardFormController).isNotNull()
             assertThat(secondCardFormController!!.shouldAutomaticallyLaunchCardScan()).isTrue()
         }
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     @Test
@@ -3762,6 +3766,7 @@ class CustomerSheetViewModelTest {
             assertThat(secondCardFormController).isNotNull()
             assertThat(secondCardFormController!!.shouldAutomaticallyLaunchCardScan()).isTrue()
         }
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     private fun getAddPaymentMethodCardDetailsSectionController(

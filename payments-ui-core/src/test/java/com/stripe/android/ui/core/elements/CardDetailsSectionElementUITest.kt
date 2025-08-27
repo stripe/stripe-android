@@ -76,6 +76,7 @@ internal class CardDetailsSectionElementUITest {
 
             assertThat(controller.shouldAutomaticallyLaunchCardScan()).isFalse()
         }
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     @Test
@@ -96,6 +97,7 @@ internal class CardDetailsSectionElementUITest {
             verify(controller, times(0)).onCardScanResult(any())
             verify(controller, times(0)).setHasAutomaticallyLaunchedCardScan()
         }
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     @Test
@@ -116,6 +118,7 @@ internal class CardDetailsSectionElementUITest {
             verify(controller, times(0)).onCardScanResult(any())
             verify(controller, times(0)).setHasAutomaticallyLaunchedCardScan()
         }
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     @Test
@@ -150,6 +153,7 @@ internal class CardDetailsSectionElementUITest {
             verify(controller, times(0)).onCardScanResult(any())
             verify(controller, times(0)).setHasAutomaticallyLaunchedCardScan()
         }
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     private class Scenario(
