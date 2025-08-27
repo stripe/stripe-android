@@ -504,6 +504,8 @@ class PaymentSheet internal constructor(
         }
 
         private fun initializeCallbacks() {
+            // Set the ConfirmationToken callback into the PaymentElementCallbacks
+            callbacksBuilder.confirmationTokenCallback(confirmationTokenCallback)
             setPaymentSheetCallbacks(callbacksBuilder.build())
         }
     }

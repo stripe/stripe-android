@@ -11,6 +11,7 @@ import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.CreateIntentCallback
+import com.stripe.android.paymentsheet.ConfirmationTokenCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.ShopPayHandlers
 
@@ -22,6 +23,7 @@ import com.stripe.android.paymentsheet.ShopPayHandlers
 )
 internal data class PaymentElementCallbacks private constructor(
     val createIntentCallback: CreateIntentCallback?,
+    val confirmationTokenCallback: ConfirmationTokenCallback?,
     val confirmCustomPaymentMethodCallback: ConfirmCustomPaymentMethodCallback?,
     val externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?,
     val analyticEventCallback: AnalyticEventCallback?,
@@ -31,6 +33,7 @@ internal data class PaymentElementCallbacks private constructor(
 ) {
     class Builder {
         private var createIntentCallback: CreateIntentCallback? = null
+        private var confirmationTokenCallback: ConfirmationTokenCallback? = null
         private var confirmCustomPaymentMethodCallback: ConfirmCustomPaymentMethodCallback? = null
         private var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
         private var analyticEventCallback: AnalyticEventCallback? = null
@@ -40,6 +43,10 @@ internal data class PaymentElementCallbacks private constructor(
 
         fun createIntentCallback(createIntentCallback: CreateIntentCallback?) = apply {
             this.createIntentCallback = createIntentCallback
+        }
+
+        fun confirmationTokenCallback(confirmationTokenCallback: ConfirmationTokenCallback?) = apply {
+            this.confirmationTokenCallback = confirmationTokenCallback
         }
 
         fun confirmCustomPaymentMethodCallback(
@@ -80,6 +87,7 @@ internal data class PaymentElementCallbacks private constructor(
         fun build(): PaymentElementCallbacks {
             return PaymentElementCallbacks(
                 createIntentCallback = createIntentCallback,
+                confirmationTokenCallback = confirmationTokenCallback,
                 confirmCustomPaymentMethodCallback = confirmCustomPaymentMethodCallback,
                 externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
                 analyticEventCallback = analyticEventCallback,

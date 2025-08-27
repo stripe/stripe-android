@@ -2,9 +2,12 @@ package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.IS_LIVE_MODE
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
+import com.stripe.android.paymentsheet.ConfirmationTokenCreator
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheetContractV2
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -45,4 +48,12 @@ internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheet
     fun isLiveMode(
         paymentConfiguration: Provider<PaymentConfiguration>
     ): () -> Boolean = { paymentConfiguration.get().publishableKey.startsWith("pk_live") }
+
+    @Provides
+    fun provideConfirmationTokenCreator(
+        stripeRepository: StripeRepository,
+        logger: Logger
+    ): ConfirmationTokenCreator {
+        return ConfirmationTokenCreator(stripeRepository, logger)
+    }
 }

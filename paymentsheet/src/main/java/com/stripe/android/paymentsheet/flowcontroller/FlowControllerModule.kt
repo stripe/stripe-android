@@ -14,6 +14,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.paymentsheet.ConfirmationTokenCreator
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController.Companion.FLOW_CONTROLLER_LINK_LAUNCHER
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController.Companion.WALLETS_BUTTON_LINK_LAUNCHER
@@ -21,6 +22,8 @@ import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcompo
 import com.stripe.android.paymentsheet.ui.DefaultWalletButtonsInteractor
 import com.stripe.android.paymentsheet.ui.WalletButtonsContent
 import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.core.Logger
+import com.stripe.android.networking.StripeRepository
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
@@ -127,5 +130,14 @@ internal object FlowControllerModule {
     @Named(IS_LIVE_MODE)
     fun provideIsLiveMode(paymentConfiguration: Provider<PaymentConfiguration>): () -> Boolean {
         return { paymentConfiguration.get().publishableKey.startsWith("pk_live") }
+    }
+
+    @Provides
+    @Singleton
+    fun provideConfirmationTokenCreator(
+        stripeRepository: StripeRepository,
+        logger: Logger
+    ): ConfirmationTokenCreator {
+        return ConfirmationTokenCreator(stripeRepository, logger)
     }
 }
