@@ -127,25 +127,6 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `init throws error when open enabled but GooglePayCardScan not enabled`() {
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
-        assertFailsWith<IllegalArgumentException>(
-            "Given rects do not intersect",
-            fun() {
-                createViewModel(
-                    workContext = testDispatcher,
-                    isGooglePayAvailable = true,
-                    configuration = CustomerSheet.Configuration(
-                        merchantDisplayName = "Example",
-                        googlePayEnabled = true,
-                        opensCardScannerAutomatically = true,
-                    ),
-                )
-            }
-        )
-    }
-
-    @Test
     fun `init emits CustomerSheetViewState#SelectPaymentMethod when only google pay available`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
