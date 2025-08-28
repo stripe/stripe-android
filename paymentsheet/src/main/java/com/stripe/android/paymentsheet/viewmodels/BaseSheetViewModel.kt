@@ -185,7 +185,7 @@ internal abstract class BaseSheetViewModel(
 
     abstract fun handlePaymentMethodSelected(selection: PaymentSelection?)
 
-    fun checkIfAutomaticCardScanShouldBeLaunched() {
+    fun updateShouldAutomaticallyLaunchCardScan() {
         automaticallyLaunchedCardScanFormDataHelper.hasAutomaticallyLaunchedCardScan =
             newPaymentSelection?.paymentSelection is PaymentSelection.New.Card &&
             newPaymentSelection?.getPaymentMethodCreateParams() != null

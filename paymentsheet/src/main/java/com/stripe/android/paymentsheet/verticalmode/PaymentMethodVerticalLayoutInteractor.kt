@@ -142,7 +142,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     viewModel.navigationHandler.transitionToWithDelay(screen)
                 },
                 transitionToFormScreen = { selectedPaymentMethodCode ->
-                    viewModel.checkIfAutomaticCardScanShouldBeLaunched()
                     val interactor = DefaultVerticalModeFormInteractor.create(
                         selectedPaymentMethodCode = selectedPaymentMethodCode,
                         viewModel = viewModel,
