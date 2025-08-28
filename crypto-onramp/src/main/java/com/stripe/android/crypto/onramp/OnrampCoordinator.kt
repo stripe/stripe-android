@@ -67,18 +67,17 @@ class OnrampCoordinator @Inject internal constructor(
     }
 
     /**
-     * Registers the given crypto wallet address to the current Link account.
      * Updates the phone number for the current Link user.
      *
-     * @param phoneNumber The new phone number to set.
+     * @property phone The phone number of the user. Phone number must be in E.164 format (e.g., +12125551234).
      * @return OnrampUpdatePhoneNumberResult indicating the result of the update.
      */
-    suspend fun updatePhoneNumber(phoneNumber: String): OnrampUpdatePhoneNumberResult {
-        return interactor.updatePhoneNumber(phoneNumber)
+    suspend fun updatePhoneNumber(phone: String): OnrampUpdatePhoneNumberResult {
+        return interactor.updatePhoneNumber(phone)
     }
 
     /**
-     * Registers a wallet address for the user.
+     * Registers the given crypto wallet address to the current Link account.
      * Requires an authenticated Link user.
      *
      * @param walletAddress The crypto wallet address to register.

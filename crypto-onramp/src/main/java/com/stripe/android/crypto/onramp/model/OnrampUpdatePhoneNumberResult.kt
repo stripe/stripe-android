@@ -3,7 +3,7 @@ package com.stripe.android.crypto.onramp.model
 import androidx.annotation.RestrictTo
 
 /**
- * Result of an OnRamp phone number update operation.
+ * Result of an Onramp phone number update operation.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed interface OnrampUpdatePhoneNumberResult {
