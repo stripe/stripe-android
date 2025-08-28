@@ -187,6 +187,7 @@ internal open class FakeConsumersApiService : ConsumersApiService {
     override suspend fun updatePhoneNumber(
         consumerSessionClientSecret: String,
         phoneNumber: String,
+        requestSurface: String,
         requestOptions: ApiRequest.Options
     ): Result<ConsumerSession> {
         TODO("Not yet implemented")

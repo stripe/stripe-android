@@ -508,7 +508,8 @@ internal class LinkApiRepository @Inject constructor(
         consumersApiService.updatePhoneNumber(
             consumerSessionClientSecret = consumerSessionClientSecret,
             phoneNumber = phoneNumber,
-            requestOptions = buildRequestOptions(consumerPublishableKey)
+            requestSurface = requestSurface.value,
+            requestOptions = buildRequestOptions(consumerPublishableKey),
         )
     }
 

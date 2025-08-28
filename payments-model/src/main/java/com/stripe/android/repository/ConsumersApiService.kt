@@ -137,6 +137,7 @@ interface ConsumersApiService {
     suspend fun updatePhoneNumber(
         consumerSessionClientSecret: String,
         phoneNumber: String,
+        requestSurface: String,
         requestOptions: ApiRequest.Options
     ): Result<ConsumerSession>
 }
@@ -480,6 +481,7 @@ class ConsumersApiServiceImpl(
     override suspend fun updatePhoneNumber(
         consumerSessionClientSecret: String,
         phoneNumber: String,
+        requestSurface: String,
         requestOptions: ApiRequest.Options
     ): Result<ConsumerSession> {
         return executeRequestWithResultParser(
@@ -493,6 +495,7 @@ class ConsumersApiServiceImpl(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
                     "phone_number" to phoneNumber,
+                    "request_surface" to requestSurface,
                 ),
             ),
             responseJsonParser = ConsumerSessionJsonParser(),
