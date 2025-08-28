@@ -6,8 +6,11 @@ import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
@@ -23,6 +26,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFo
 import com.stripe.android.paymentsheet.utils.errorTest
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor.ViewAction
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.ui.core.elements.CardDetailsSectionController
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.EmailElement
@@ -198,6 +202,38 @@ internal class DefaultVerticalModeFormInteractorTest {
         }
     }
 
+    @Test
+    fun `automaticallyLaunchCardScan when card form and no create params`() {
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
+        testAutomaticallyLaunchCardScan(
+            selectedPaymentMethodCode = "card",
+            paymentSelection = null,
+        ) { elements ->
+            assertThat(elements[0].controller).isInstanceOf<CardDetailsSectionController>()
+
+            val controller = elements[0].controller as CardDetailsSectionController
+
+            assertThat(controller.shouldAutomaticallyLaunchCardScan()).isTrue()
+        }
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
+    }
+
+    @Test
+    fun `do not automaticallyLaunchCardScan when card form and with paymentSelection`() {
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
+        testAutomaticallyLaunchCardScan(
+            selectedPaymentMethodCode = "card",
+            paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+        ) { elements ->
+            assertThat(elements[0].controller).isInstanceOf<CardDetailsSectionController>()
+
+            val controller = elements[0].controller as CardDetailsSectionController
+
+            assertThat(controller.shouldAutomaticallyLaunchCardScan()).isFalse()
+        }
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
+    }
+
     private fun testSetAsDefaultElements(
         hasSavedPaymentMethods: Boolean,
         block: (SaveForFutureUseElement?, SetAsDefaultPaymentMethodElement?) -> Unit
@@ -224,6 +260,7 @@ internal class DefaultVerticalModeFormInteractorTest {
             embeddedSelectionHolder = selectionHolder,
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = SavedStateHandle(),
+            selectedPaymentMethodCode = "",
         )
         val eventReporter = FakeEventReporter()
         val setAsDefaultInteractor = EmbeddedFormInteractorFactory(
@@ -247,6 +284,45 @@ internal class DefaultVerticalModeFormInteractorTest {
         } as? SetAsDefaultPaymentMethodElement
 
         block(saveForFutureUseElement, setAsDefaultElement)
+    }
+
+    private fun testAutomaticallyLaunchCardScan(
+        selectedPaymentMethodCode: String,
+        paymentSelection: PaymentSelection?,
+        block: (List<FormElement>) -> Unit
+    ) {
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            openCardScanAutomatically = true,
+        )
+        val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
+        selectionHolder.set(paymentSelection)
+        val stateHolder = DefaultFormActivityStateHelper(
+            paymentMethodMetadata = paymentMethodMetadata,
+            selectionHolder = selectionHolder,
+            configuration = EmbeddedConfirmationStateFixtures.defaultStateWithOpenCardScanAutomatically().configuration,
+            coroutineScope = TestScope(UnconfinedTestDispatcher()),
+            onClickDelegate = OnClickDelegateOverrideImpl(),
+            eventReporter = FakeEventReporter()
+        )
+        val formHelperFactory = EmbeddedFormHelperFactory(
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+            embeddedSelectionHolder = selectionHolder,
+            cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+            savedStateHandle = SavedStateHandle(),
+            selectedPaymentMethodCode = selectedPaymentMethodCode,
+        )
+        val eventReporter = FakeEventReporter()
+        val setAsDefaultInteractor = EmbeddedFormInteractorFactory(
+            paymentMethodMetadata = paymentMethodMetadata,
+            paymentMethodCode = selectedPaymentMethodCode,
+            hasSavedPaymentMethods = false,
+            embeddedSelectionHolder = selectionHolder,
+            embeddedFormHelperFactory = formHelperFactory,
+            viewModelScope = TestScope(UnconfinedTestDispatcher()),
+            formActivityStateHelper = stateHolder,
+            eventReporter = eventReporter
+        ).create()
+        block(setAsDefaultInteractor.state.value.formUiElements)
     }
 
     private fun runScenario(
