@@ -242,6 +242,7 @@ internal fun OnrampScreen(
                     onCreatePaymentToken = onCreatePaymentToken,
                     onCreateSession = { viewModel.createSession() },
                     onPerformCheckout = { viewModel.performCheckout() },
+                    onLogOut = { viewModel.logOut() },
                     onBack = {
                         viewModel.onBackToEmailInput()
                     }
@@ -490,6 +491,7 @@ private fun AuthenticatedOperationsScreen(
     onCreatePaymentToken: () -> Unit,
     onCreateSession: () -> Unit,
     onPerformCheckout: () -> Unit,
+    onLogOut: () -> Unit,
     onBack: () -> Unit
 ) {
     // hardcoded sample ETH wallet
@@ -728,6 +730,15 @@ private fun AuthenticatedOperationsScreen(
                     "🚀 Checkout (Create session first)"
                 }
             )
+        }
+
+        Button(
+            onClick = onLogOut,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
+        ) {
+            Text("Log Out")
         }
 
         TextButton(

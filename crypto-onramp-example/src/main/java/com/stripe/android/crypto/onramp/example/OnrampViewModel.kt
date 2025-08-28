@@ -25,6 +25,7 @@ import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
+import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
@@ -495,6 +496,24 @@ internal class OnrampViewModel(
             is Result.Failure -> {
                 _message.value = "Failed to create auth intent: ${result.error.message}"
                 return null
+            }
+        }
+    }
+
+    fun logOut() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(screen = Screen.Loading, loadingMessage = "Logging out...") }
+
+            val result = onrampCoordinator.logOut()
+            when (result) {
+                is OnrampLogOutResult.Completed -> {
+                    _message.value = "Successfully logged out"
+                    _uiState.update { OnrampUiState(screen = Screen.EmailInput) }
+                }
+                is OnrampLogOutResult.Failed -> {
+                    _message.value = "Logout failed: ${result.error.message}"
+                    _uiState.update { it.copy(screen = Screen.AuthenticatedOperations, loadingMessage = null) }
+                }
             }
         }
     }

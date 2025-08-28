@@ -369,6 +369,23 @@ internal class LinkControllerInteractor @Inject constructor(
             )
     }
 
+    suspend fun logOut(): LinkController.LogOutResult {
+        return requireLinkComponent()
+            .mapCatching { component ->
+                component.linkAccountManager.logOut()
+                updateStateOnAccountUpdate(
+                    LinkAccountUpdate.Value(
+                        account = null,
+                        lastUpdateReason = LinkAccountUpdate.Value.UpdateReason.LoggedOut
+                    )
+                )
+            }
+            .fold(
+                onSuccess = { LinkController.LogOutResult.Success() },
+                onFailure = { LinkController.LogOutResult.Failed(it) }
+            )
+    }
+
     suspend fun createPaymentMethod(apiKey: String? = null): LinkController.CreatePaymentMethodResult {
         val paymentMethodResult = performCreatePaymentMethod(apiKey)
         updateState { it.copy(createdPaymentMethod = paymentMethodResult.getOrNull()) }

@@ -20,6 +20,7 @@ import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
+import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
@@ -197,6 +198,13 @@ internal class OnrampInteractor @Inject constructor(
                 onSuccess = { OnrampCreateCryptoPaymentTokenResult.Completed(it) },
                 onFailure = { OnrampCreateCryptoPaymentTokenResult.Failed(it) }
             )
+    }
+
+    suspend fun logOut(): OnrampLogOutResult {
+        return when (val result = linkController.logOut()) {
+            is LinkController.LogOutResult.Success -> OnrampLogOutResult.Completed
+            is LinkController.LogOutResult.Failed -> OnrampLogOutResult.Failed(result.error)
+        }
     }
 
     suspend fun handleAuthenticationResult(

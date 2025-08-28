@@ -16,6 +16,7 @@ import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
+import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
@@ -109,6 +110,15 @@ class OnrampCoordinator @Inject internal constructor(
      */
     suspend fun createCryptoPaymentToken(): OnrampCreateCryptoPaymentTokenResult {
         return interactor.createCryptoPaymentToken()
+    }
+
+    /**
+     * Logs out the current Link user, if any.
+     *
+     * @return [OnrampLogOutResult] indicating the result of the logout operation.
+     */
+    suspend fun logOut(): OnrampLogOutResult {
+        return interactor.logOut()
     }
 
     /**
