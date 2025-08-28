@@ -111,6 +111,7 @@ internal class FormActivityScreenShotTest {
             embeddedSelectionHolder = selectionHolder,
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = SavedStateHandle(),
+            selectedPaymentMethodCode = "",
         )
         val eventReporter = FakeEventReporter()
         val interactor = EmbeddedFormInteractorFactory(
