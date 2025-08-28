@@ -75,6 +75,7 @@ internal class WalletViewModel(
         value = WalletUiState(
             paymentDetailsList = emptyList(),
             email = linkAccount.email,
+            allowLogOut = configuration.allowLogOut,
             isSettingUp = stripeIntent.isSetupForFutureUsage(configuration.passthroughModeEnabled),
             merchantName = configuration.merchantName,
             sellerBusinessName = configuration.sellerBusinessName,
@@ -120,6 +121,8 @@ internal class WalletViewModel(
             ?.resolvableString
 
     val uiState: StateFlow<WalletUiState> = _uiState.asStateFlow()
+
+    val allowLogOut: Boolean = configuration.allowLogOut
 
     val expiryDateController = SimpleTextFieldController(
         textFieldConfig = DateConfig()

@@ -650,6 +650,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             collectMissingBillingDetailsForExistingPaymentMethods =
             configuration.link.collectMissingBillingDetailsForExistingPaymentMethods,
             allowUserEmailEdits = configuration.link.allowUserEmailEdits,
+            allowLogOut = configuration.link.allowLogOut,
             skipWalletInFlowController = elementsSession.linkMobileSkipWalletInFlowController,
             customerId = elementsSession.customer?.session?.customerId,
             linkAppearance = linkAppearance,

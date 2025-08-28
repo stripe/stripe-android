@@ -229,6 +229,7 @@ internal object TestFactory {
         disableRuxInFlowController = false,
         collectMissingBillingDetailsForExistingPaymentMethods = true,
         allowUserEmailEdits = true,
+        allowLogOut = true,
         enableDisplayableDefaultValuesInEce = false,
         skipWalletInFlowController = false,
         linkAppearance = null,

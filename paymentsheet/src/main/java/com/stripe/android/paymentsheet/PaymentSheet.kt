@@ -3216,6 +3216,7 @@ class PaymentSheet internal constructor(
         internal val display: Display,
         internal val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
         internal val allowUserEmailEdits: Boolean,
+        internal val allowLogOut: Boolean,
     ) : Parcelable {
 
         @JvmOverloads
@@ -3225,6 +3226,7 @@ class PaymentSheet internal constructor(
             display = display,
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             allowUserEmailEdits = true,
+            allowLogOut = true,
         )
 
         internal val shouldDisplay: Boolean
@@ -3254,6 +3256,7 @@ class PaymentSheet internal constructor(
                 collectMissingBillingDetailsForExistingPaymentMethods =
                 collectMissingBillingDetailsForExistingPaymentMethods,
                 allowUserEmailEdits = true,
+                allowLogOut = true,
             )
         }
 

@@ -2111,6 +2111,7 @@ internal class PaymentMethodMetadataTest {
             defaultBillingDetails = null,
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             allowUserEmailEdits = true,
+            allowLogOut = true,
             enableDisplayableDefaultValuesInEce = false,
             skipWalletInFlowController = false,
             linkAppearance = null,

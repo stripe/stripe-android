@@ -58,6 +58,8 @@ internal class OnrampInteractor @Inject constructor(
                 merchantDisplayName = configuration.merchantDisplayName,
                 publishableKey = configuration.publishableKey,
             )
+                .allowLogOut(false)
+                .allowUserEmailEdits(false)
                 .appearance(configuration.appearance)
                 .build()
         )
