@@ -36,7 +36,7 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
                     paymentSelection?.paymentMethodCreateParams == null
             AutomaticallyLaunchedCardScanFormDataHelper(
                 hasAutomaticallyLaunchedCardScanInitialValue = !isLaunchingEmptyCardForm,
-                savedStateHandle = SavedStateHandle(),
+                savedStateHandle = savedStateHandle,
                 openCardScanAutomaticallyConfig = paymentMethodMetadata.openCardScanAutomatically,
             )
         } else {
