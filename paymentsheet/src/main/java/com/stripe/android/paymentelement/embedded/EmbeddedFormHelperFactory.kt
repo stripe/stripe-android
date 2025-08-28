@@ -31,11 +31,11 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
     ): FormHelper {
         val automaticallyLaunchedCardScanFormDataHelper = if (selectedPaymentMethodCode.isNotBlank()) {
             val paymentSelection = embeddedSelectionHolder.selection.value as? PaymentSelection.New
-            val isLaunchingCardFormWithNoPreviousCardSelection =
+            val isLaunchingEmptyCardForm =
                 selectedPaymentMethodCode == PaymentMethod.Type.Card.code &&
                     paymentSelection?.paymentMethodCreateParams == null
             AutomaticallyLaunchedCardScanFormDataHelper(
-                hasAutomaticallyLaunchedCardScanInitialValue = !isLaunchingCardFormWithNoPreviousCardSelection,
+                hasAutomaticallyLaunchedCardScanInitialValue = !isLaunchingEmptyCardForm,
                 savedStateHandle = SavedStateHandle(),
                 openCardScanAutomaticallyConfig = paymentMethodMetadata.openCardScanAutomatically,
             )
