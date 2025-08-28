@@ -52,6 +52,8 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
+import com.stripe.android.model.ConfirmationToken
+import com.stripe.android.model.ConfirmationTokenCreateParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
@@ -80,6 +82,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import com.stripe.android.model.parsers.CardMetadataJsonParser
+import com.stripe.android.model.parsers.ConfirmationTokenJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsShareJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
@@ -603,6 +606,34 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 paymentAnalyticsRequestFactory.createPaymentMethodCreation(
                     paymentMethodCreateParams.code,
                     productUsageTokens = paymentMethodCreateParams.attribution
+                )
+            )
+        }
+    }
+
+    /**
+     * Analytics event: [PaymentAnalyticsEvent.ConfirmationTokenCreate]
+     */
+    override suspend fun createConfirmationToken(
+        confirmationTokenCreateParams: ConfirmationTokenCreateParams,
+        options: ApiRequest.Options
+    ): Result<ConfirmationToken> {
+        fireFraudDetectionDataRequest()
+
+        return fetchStripeModelResult(
+            apiRequestFactory.createPost(
+                confirmationTokensUrl,
+                options,
+                confirmationTokenCreateParams.toParamMap()
+                    .plus(buildPaymentUserAgentPair(confirmationTokenCreateParams.productUsageTokens))
+                    .plus(fraudDetectionData?.params.orEmpty())
+            ),
+            ConfirmationTokenJsonParser()
+        ) {
+            fireAnalyticsRequest(
+                paymentAnalyticsRequestFactory.createRequest(
+                    PaymentAnalyticsEvent.ConfirmationTokenCreate,
+                    productUsageTokens = confirmationTokenCreateParams.productUsageTokens
                 )
             )
         }
@@ -1998,6 +2029,13 @@ class StripeApiRepository @JvmOverloads internal constructor(
         internal val paymentMethodsUrl: String
             @JvmSynthetic
             get() = getApiUrl("payment_methods")
+
+        /**
+         * @return `https://api.stripe.com/v1/confirmation_tokens`
+         */
+        internal val confirmationTokensUrl: String
+            @JvmSynthetic
+            get() = getApiUrl("confirmation_tokens")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/sessions/log_out`

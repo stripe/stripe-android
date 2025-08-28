@@ -33,6 +33,8 @@ import com.stripe.android.model.Card
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.ConfirmationToken
+import com.stripe.android.model.ConfirmationTokenCreateParams
 import com.stripe.android.model.CvcTokenParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -789,6 +791,43 @@ class Stripe internal constructor(
     }
 
     /**
+     * Create a [ConfirmationToken] asynchronously.
+     *
+     * ConfirmationTokens help transport client-side data collected by Elements to your server
+     * for payment confirmation. They capture payment method information, shipping details, and other
+     * checkout state from Elements, then pass them to your server where you can use them to confirm
+     * a PaymentIntent or SetupIntent.
+     *
+     * See [Create a ConfirmationToken](https://stripe.com/docs/api/confirmation_tokens/create).
+     * `POST /v1/confirmation_tokens`
+     *
+     * @param confirmationTokenCreateParams the [ConfirmationTokenCreateParams] to be used
+     * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
+     * @param callback a [ApiResultCallback] to receive the result or error
+     */
+    @UiThread
+    @JvmOverloads
+    fun createConfirmationToken(
+        confirmationTokenCreateParams: ConfirmationTokenCreateParams,
+        idempotencyKey: String? = null,
+        stripeAccountId: String? = this.stripeAccountId,
+        callback: ApiResultCallback<ConfirmationToken>
+    ) {
+        executeAsyncForResult(callback) {
+            stripeRepository.createConfirmationToken(
+                confirmationTokenCreateParams,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId,
+                    idempotencyKey = idempotencyKey
+                )
+            )
+        }
+    }
+
+    /**
      * Update a [PaymentMethod] asynchronously.
      *
      * See [Update a PaymentMethod](https://stripe.com/docs/api/payment_methods/update).
@@ -855,6 +894,58 @@ class Stripe internal constructor(
         return runBlocking {
             stripeRepository.createPaymentMethod(
                 paymentMethodCreateParams,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId,
+                    idempotencyKey = idempotencyKey
+                )
+            ).getOrElse { throw StripeException.create(it) }
+        }
+    }
+
+    /**
+     * Create a [ConfirmationToken] synchronously.
+     *
+     * ConfirmationTokens help transport client-side data collected by Elements to your server
+     * for payment confirmation. They capture payment method information, shipping details, and other
+     * checkout state from Elements, then pass them to your server where you can use them to confirm
+     * a PaymentIntent or SetupIntent.
+     *
+     * See [Create a ConfirmationToken](https://stripe.com/docs/api/confirmation_tokens/create).
+     * `POST /v1/confirmation_tokens`
+     *
+     * @param confirmationTokenCreateParams the [ConfirmationTokenCreateParams] to be used
+     * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
+     *
+     * @return [ConfirmationToken] created by this request
+     *
+     * @throws AuthenticationException failure to properly authenticate yourself in the request
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws CardException should not be thrown with this method, but included for completeness
+     * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
+     * @throws IllegalArgumentException if the publishable key is invalid
+     */
+    @JvmOverloads
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        CardException::class,
+        APIException::class,
+        IllegalArgumentException::class
+    )
+    @WorkerThread
+    fun createConfirmationTokenSynchronous(
+        confirmationTokenCreateParams: ConfirmationTokenCreateParams,
+        idempotencyKey: String? = null,
+        stripeAccountId: String? = this.stripeAccountId
+    ): ConfirmationToken {
+        return runBlocking {
+            stripeRepository.createConfirmationToken(
+                confirmationTokenCreateParams,
                 ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId,

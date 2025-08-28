@@ -10,6 +10,8 @@ import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.ConfirmationToken
+import com.stripe.android.model.ConfirmationTokenCreateParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
@@ -123,6 +125,12 @@ interface StripeRepository {
         paymentMethodCreateParams: PaymentMethodCreateParams,
         options: ApiRequest.Options
     ): Result<PaymentMethod>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun createConfirmationToken(
+        confirmationTokenCreateParams: ConfirmationTokenCreateParams,
+        options: ApiRequest.Options
+    ): Result<ConfirmationToken>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun updatePaymentMethod(
