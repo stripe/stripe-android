@@ -145,12 +145,6 @@ internal abstract class BaseSheetViewModel(
         get() = newPaymentSelection?.getPaymentMethodCode()
             ?: paymentMethodMetadata.value!!.supportedPaymentMethodTypes().first()
 
-    val automaticallyLaunchedCardScanFormDataHelper = AutomaticallyLaunchedCardScanFormDataHelper(
-        hasAutomaticallyLaunchedCardScanInitialValue = false,
-        openCardScanAutomaticallyConfig = config.opensCardScannerAutomatically,
-        savedStateHandle = savedStateHandle
-    )
-
     init {
         viewModelScope.launch {
             // Drop the first item, since we don't need to clear errors/mandates when there aren't any.
