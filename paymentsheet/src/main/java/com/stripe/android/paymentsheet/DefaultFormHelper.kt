@@ -50,7 +50,8 @@ internal class DefaultFormHelper(
         fun create(
             viewModel: BaseSheetViewModel,
             paymentMethodMetadata: PaymentMethodMetadata,
-            linkInlineHandler: LinkInlineHandler = LinkInlineHandler.create()
+            linkInlineHandler: LinkInlineHandler = LinkInlineHandler.create(),
+            shouldCreateAutomaticallyLaunchedCardScanFormDataHelper: Boolean = false,
         ): FormHelper {
             return DefaultFormHelper(
                 coroutineScope = viewModel.viewModelScope,
@@ -68,7 +69,20 @@ internal class DefaultFormHelper(
                 eventReporter = viewModel.eventReporter,
                 savedStateHandle = viewModel.savedStateHandle,
                 autocompleteAddressInteractorFactory = viewModel.autocompleteAddressInteractorFactory,
-                automaticallyLaunchedCardScanFormDataHelper = viewModel.automaticallyLaunchedCardScanFormDataHelper,
+                automaticallyLaunchedCardScanFormDataHelper =
+                if (shouldCreateAutomaticallyLaunchedCardScanFormDataHelper) {
+                    val hasSeenAutomaticCardScanLaunch =
+                        viewModel.newPaymentSelection?.paymentSelection is PaymentSelection.New.Card &&
+                            viewModel.newPaymentSelection?.getPaymentMethodCreateParams() != null
+
+                    AutomaticallyLaunchedCardScanFormDataHelper(
+                        openCardScanAutomaticallyConfig = paymentMethodMetadata.openCardScanAutomatically,
+                        savedStateHandle = viewModel.savedStateHandle,
+                        hasAutomaticallyLaunchedCardScanInitialValue = hasSeenAutomaticCardScanLaunch,
+                    )
+                } else {
+                    null
+                },
             )
         }
 
