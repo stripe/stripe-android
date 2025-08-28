@@ -22,10 +22,7 @@ internal class PassiveChallengeViewModelTest {
     private val fakeHCaptchaService = FakeHCaptchaService()
     private val fakeActivity = object : FragmentActivity() {}
 
-    private val testPassiveCaptchaParams = PassiveCaptchaParams(
-        siteKey = "test_site_key",
-        rqData = "test_rq_data"
-    )
+    private val testPassiveCaptchaParams = ChallengeFactory.passiveCaptchaParams()
 
     @Test
     fun `startPassiveChallenge should emit Success result when HCaptcha succeeds`() = runTest {
@@ -77,7 +74,7 @@ internal class PassiveChallengeViewModelTest {
 
         viewModel.startPassiveChallenge(fakeActivity)
 
-        val passiveCaptcha = hCaptchaService.awaitCall()
+        val passiveCaptcha = hCaptchaService.awaitPerformPassiveHCaptchaCall()
         assertThat(passiveCaptcha.siteKey).isEqualTo(passiveCaptcha.siteKey)
         assertThat(passiveCaptcha.rqData).isEqualTo(passiveCaptcha.rqData)
         assertThat(passiveCaptcha.activity).isEqualTo(fakeActivity)

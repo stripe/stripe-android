@@ -1,11 +1,12 @@
 package com.stripe.android.challenge.warmer
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
@@ -18,11 +19,14 @@ internal class PassiveChallengeWarmerActivity : AppCompatActivity() {
         viewModelFactory
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onStart() {
+        super.onStart()
 
         lifecycleScope.launch {
-            viewModel.warmUp(this@PassiveChallengeWarmerActivity)
+            runCatching {
+                viewModel.warmUp(this@PassiveChallengeWarmerActivity)
+            }
+            setResult(Activity.RESULT_OK, Intent())
             finish()
         }
     }
@@ -36,6 +40,10 @@ internal class PassiveChallengeWarmerActivity : AppCompatActivity() {
         ): Intent {
             return Intent(context, PassiveChallengeWarmerActivity::class.java)
                 .putExtra(EXTRA_ARGS, args)
+        }
+
+        internal fun getArgs(savedStateHandle: SavedStateHandle): PassiveChallengeWarmerArgs? {
+            return savedStateHandle.get<PassiveChallengeWarmerArgs>(EXTRA_ARGS)
         }
     }
 }

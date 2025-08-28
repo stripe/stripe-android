@@ -10,7 +10,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.hcaptcha.HCaptchaService
 import com.stripe.android.isInstanceOf
-import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.injectableActivityScenario
@@ -68,10 +67,7 @@ internal class PassiveChallengeActivityTest {
 
     @Test
     fun `createIntent should create proper intent with args`() {
-        val passiveCaptchaParams = PassiveCaptchaParams(
-            siteKey = "test_site_key",
-            rqData = "test_rq_data"
-        )
+        val passiveCaptchaParams = ChallengeFactory.passiveCaptchaParams()
         val args = PassiveChallengeArgs(passiveCaptchaParams)
         val context = ApplicationProvider.getApplicationContext<Context>()
 
@@ -86,10 +82,7 @@ internal class PassiveChallengeActivityTest {
 
     @Test
     fun `getArgs should return args from SavedStateHandle when present`() {
-        val passiveCaptchaParams = PassiveCaptchaParams(
-            siteKey = "test_site_key",
-            rqData = "test_rq_data"
-        )
+        val passiveCaptchaParams = ChallengeFactory.passiveCaptchaParams()
         val args = PassiveChallengeArgs(passiveCaptchaParams)
         val savedStateHandle = SavedStateHandle().apply {
             set(PassiveChallengeActivity.EXTRA_ARGS, args)
@@ -154,9 +147,6 @@ internal class PassiveChallengeActivityTest {
     }
 
     companion object {
-        private val passiveCaptchaParams = PassiveCaptchaParams(
-            siteKey = "test_site_key",
-            rqData = "test_rq_data"
-        )
+        private val passiveCaptchaParams = ChallengeFactory.passiveCaptchaParams()
     }
 }
