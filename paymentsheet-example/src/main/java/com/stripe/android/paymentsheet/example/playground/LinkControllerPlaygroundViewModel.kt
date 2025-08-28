@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+@Suppress("TooManyFunctions")
 internal class LinkControllerPlaygroundViewModel(
     application: Application,
     savedStateHandle: SavedStateHandle,

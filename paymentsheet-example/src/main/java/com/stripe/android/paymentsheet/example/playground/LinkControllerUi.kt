@@ -270,6 +270,7 @@ internal fun LinkControllerUi(
     }
 }
 
+@Suppress("CyclomaticComplexMethod")
 @Composable
 private fun StatusBox(
     controllerState: LinkController.State,
