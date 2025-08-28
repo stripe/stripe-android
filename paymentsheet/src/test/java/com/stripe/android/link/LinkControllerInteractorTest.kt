@@ -1099,6 +1099,44 @@ class LinkControllerInteractorTest {
         }
     }
 
+    @Test
+    fun `logOut() succeeds and clears account`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+        signIn()
+
+        val result = interactor.logOut()
+
+        assertThat(result).isInstanceOf(LinkController.LogOutResult.Success::class.java)
+        assertThat(linkAccountHolder.linkAccountInfo.value.account).isNull()
+    }
+
+    @Test
+    fun `logOut() succeeds and clears account even when request fails`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+        signIn()
+
+        val error = Exception("Logout failed")
+        linkAccountManager.logOutResult = Result.failure(error)
+
+        val result = interactor.logOut()
+
+        assertThat(result).isInstanceOf(LinkController.LogOutResult.Success::class.java)
+        assertThat(linkAccountHolder.linkAccountInfo.value.account).isNull()
+    }
+
+    @Test
+    fun `logOut() fails when configuration is not set`() = runTest {
+        val interactor = createInteractor()
+
+        val result = interactor.logOut()
+
+        assertThat(result).isInstanceOf(LinkController.LogOutResult.Failed::class.java)
+        val error = (result as LinkController.LogOutResult.Failed).error
+        assertThat(error).isInstanceOf(MissingConfigurationException::class.java)
+    }
+
     private data class ConsumerRegistrationParams(
         val email: String = "test@example.com",
         val phone: String = "1234567890",
