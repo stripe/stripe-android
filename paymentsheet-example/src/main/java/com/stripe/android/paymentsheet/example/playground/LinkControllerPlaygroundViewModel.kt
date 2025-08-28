@@ -118,4 +118,11 @@ internal class LinkControllerPlaygroundViewModel(
     private fun onLinkControllerAuthorization(result: LinkController.AuthorizeResult) {
         state.update { it.copy(authorizeResult = result) }
     }
+
+    fun onLogOutClick() {
+        viewModelScope.launch {
+            val result = linkController.logOut()
+            state.update { it.copy(logOutResult = result) }
+        }
+    }
 }

@@ -72,6 +72,7 @@ internal fun LinkControllerUi(
     onAuthorizeClick: (linkAuthIntentId: String) -> Unit,
     onRegisterConsumerClick: (email: String, phone: String, country: String, name: String?) -> Unit,
     onUpdatePhoneNumberClick: (phoneNumber: String) -> Unit,
+    onLogOutClick: () -> Unit,
     onErrorMessage: (message: String) -> Unit,
 ) {
     var email by rememberSaveable { mutableStateOf("") }
@@ -260,6 +261,12 @@ internal fun LinkControllerUi(
             onClick = onCreatePaymentMethodClick,
             enabled = controllerState.selectedPaymentMethodPreview != null,
         )
+        Spacer(Modifier.height(16.dp))
+
+        LogOutButton(
+            onClick = onLogOutClick,
+            enabled = controllerState.isConsumerVerified == true,
+        )
     }
 }
 
@@ -291,6 +298,7 @@ private fun StatusBox(
         add("Authorize result" to (playgroundState.authorizeResult?.toString() ?: ""))
         add("Register result" to (playgroundState.registerConsumerResult?.toString() ?: ""))
         add("Update phone result" to (playgroundState.updatePhoneNumberResult?.toString() ?: ""))
+        add("Logout result" to (playgroundState.logOutResult?.toString() ?: ""))
     }
 
     if (statusItems.isNotEmpty()) {
@@ -336,6 +344,7 @@ private fun LinkControllerPlaygroundState.linkControllerError(): Throwable? = li
     (createPaymentMethodResult as? LinkController.CreatePaymentMethodResult.Failed)?.error,
     (authenticationResult as? LinkController.AuthenticationResult.Failed)?.error,
     (authorizeResult as? LinkController.AuthorizeResult.Failed)?.error,
+    (logOutResult as? LinkController.LogOutResult.Failed)?.error,
 ).firstOrNull { it != null }
 
 @Composable
@@ -353,6 +362,7 @@ private fun LinkControllerUiPreview() {
             onAuthorizeClick = {},
             onRegisterConsumerClick = { _, _, _, _ -> },
             onUpdatePhoneNumberClick = {},
+            onLogOutClick = {},
             onErrorMessage = {},
         )
     }
@@ -488,6 +498,21 @@ private fun PaymentMethodButtonPreview() {
                 onClick = {},
             )
         }
+    }
+}
+
+@Composable
+private fun LogOutButton(
+    onClick: () -> Unit,
+    enabled: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        Text("Log Out")
     }
 }
 
