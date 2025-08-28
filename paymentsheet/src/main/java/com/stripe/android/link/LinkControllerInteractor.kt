@@ -6,7 +6,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.DrawableRes
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.flatMapCatching
 import com.stripe.android.link.account.LinkAccountHolder
@@ -25,13 +24,11 @@ import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformToBankIcon
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.transformBankIconCodeToBankIcon
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.getCardBrandIconForVerticalMode
 import com.stripe.android.paymentsheet.ui.getLinkIcon
-import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.isSystemDarkTheme
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -92,13 +89,11 @@ internal class LinkControllerInteractor @Inject constructor(
     val authorizeResultFlow = _authorizeResultFlow.asSharedFlow()
 
     fun state(context: Context): StateFlow<LinkController.State> {
-        val imageLoader = StripeImageLoader(context)
-        val iconLoader = PaymentSelection.IconLoader(context.resources, imageLoader)
         return combineAsStateFlow(_internalLinkAccount, _state) { account, state ->
             LinkController.State(
                 internalLinkAccount = account,
                 merchantLogoUrl = state.linkComponent?.configuration?.merchantLogoUrl,
-                selectedPaymentMethodPreview = state.selectedPaymentMethod?.details?.toPreview(context, iconLoader),
+                selectedPaymentMethodPreview = state.selectedPaymentMethod?.details?.toPreview(context),
                 createdPaymentMethod = state.createdPaymentMethod,
             )
         }
@@ -543,7 +538,6 @@ internal class LinkControllerInteractor @Inject constructor(
 
 internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
     context: Context,
-    iconLoader: PaymentSelection.IconLoader
 ): LinkController.PaymentMethodPreview {
     val label = context.getString(com.stripe.android.R.string.stripe_link)
     val sublabel = buildString {
@@ -557,13 +551,7 @@ internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
     val drawableResourceId = getIconDrawableRes(context.isSystemDarkTheme())
 
     return LinkController.PaymentMethodPreview(
-        icon = DelegateDrawable {
-            iconLoader.load(
-                drawableResourceId = drawableResourceId,
-                lightThemeIconUrl = null,
-                darkThemeIconUrl = null,
-            )
-        },
+        iconRes = drawableResourceId,
         label = label,
         sublabel = sublabel,
     )

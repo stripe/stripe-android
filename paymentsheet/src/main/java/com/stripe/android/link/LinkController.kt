@@ -2,12 +2,13 @@ package com.stripe.android.link
 
 import android.app.Application
 import android.content.Context
-import android.graphics.drawable.Drawable
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
+import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.link.injection.DaggerLinkControllerComponent
@@ -15,7 +16,6 @@ import com.stripe.android.link.injection.LinkControllerPresenterComponent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
@@ -652,7 +652,7 @@ class LinkController @Inject internal constructor(
     /**
      * Preview information for a Link payment method.
      *
-     * @param icon An image representing a payment method; e.g. the VISA logo.
+     * @param iconRes An image representing a payment method; e.g. the VISA logo.
      * @param label The main label text (e.g., "Link").
      * @param sublabel Additional descriptive text (e.g., "Visa •••• 4242").
      */
@@ -661,7 +661,7 @@ class LinkController @Inject internal constructor(
     class PaymentMethodPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
-        val icon: Drawable,
+        @DrawableRes val iconRes: Int,
         val label: String,
         val sublabel: String?,
     ) {
@@ -670,7 +670,7 @@ class LinkController @Inject internal constructor(
          */
         val iconPainter: Painter
             @Composable
-            get() = rememberDrawablePainter(icon)
+            get() = painterResource(iconRes)
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

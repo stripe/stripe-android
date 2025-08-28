@@ -50,14 +50,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import com.stripe.android.link.LinkController
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 import com.stripe.android.ui.core.R
@@ -453,7 +451,6 @@ private fun PaymentMethodButton(
 @PreviewLightDark
 @Composable
 private fun PaymentMethodButtonPreview() {
-    val context = LocalContext.current
     PaymentSheetExampleTheme {
         Column {
             PaymentMethodButton(
@@ -464,10 +461,7 @@ private fun PaymentMethodButtonPreview() {
             PaymentMethodButton(
                 modifier = Modifier.padding(16.dp),
                 preview = LinkController.PaymentMethodPreview(
-                    icon = ContextCompat.getDrawable(
-                        context,
-                        com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_link_arrow,
-                    )!!,
+                    iconRes = com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_link_arrow,
                     label = "Link",
                     sublabel = "Visa (Personal) •••• 4242",
                 ),

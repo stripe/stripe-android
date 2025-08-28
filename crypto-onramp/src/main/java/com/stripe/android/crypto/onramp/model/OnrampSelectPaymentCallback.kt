@@ -1,6 +1,6 @@
 package com.stripe.android.crypto.onramp.model
 
-import android.graphics.drawable.Drawable
+import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import dev.drewhamilton.poko.Poko
 
@@ -41,10 +41,13 @@ class PaymentMethodDisplayData internal constructor(
     /**
      * User facing icon represented payment method.
      */
-    val icon: Drawable,
+    @DrawableRes
+    val iconRes: Int,
+
     /**
      * User facing strings representing payment method information
      */
     val label: String,
+
     val sublabel: String?
 )
