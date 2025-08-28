@@ -488,7 +488,7 @@ class PaymentSheetEventTest {
                 "fc_sdk_availability" to "FULL",
                 "payment_method_options_setup_future_usage" to false,
                 "setup_future_usage" to null,
-                "direct_to_card_scan" to false,
+                "open_card_scan_automatically" to false,
             )
         )
     }
@@ -665,7 +665,7 @@ class PaymentSheetEventTest {
         )
 
         assertThat(event.params).containsEntry(
-            "direct_to_card_scan",
+            "open_card_scan_automatically",
             true
         )
     }
