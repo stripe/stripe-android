@@ -91,6 +91,15 @@ class LinkController @Inject internal constructor(
     }
 
     /**
+     * Log out the current Link consumer.
+     *
+     * @return The result of the logout operation.
+     */
+    suspend fun logOut(): LogOutResult {
+        return interactor.logOut()
+    }
+
+    /**
      * Creates a [Presenter] for the Link controller that can present user-interactive flows.
      *
      * @param activity The [ComponentActivity] that will host the Link UI.
@@ -481,6 +490,28 @@ class LinkController @Inject internal constructor(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Poko
         class Failed internal constructor(val email: String, val error: Throwable) : LookupConsumerResult
+    }
+
+    /**
+     * Result of logging out from Link.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    sealed interface LogOutResult {
+
+        /**
+         * The user successfully logged out from Link.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class Success internal constructor() : LogOutResult
+
+        /**
+         * An error occurred while logging out from Link.
+         *
+         * @param error The error that occurred during logout.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Poko
+        class Failed internal constructor(val error: Throwable) : LogOutResult
     }
 
     /**
