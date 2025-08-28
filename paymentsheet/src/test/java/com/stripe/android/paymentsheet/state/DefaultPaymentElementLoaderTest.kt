@@ -1339,7 +1339,8 @@ internal class DefaultPaymentElementLoaderTest {
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
-            setupFutureUsage = null
+            setupFutureUsage = null,
+            openCardScanAutomatically = false,
         )
     }
 
@@ -1403,7 +1404,8 @@ internal class DefaultPaymentElementLoaderTest {
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
-            setupFutureUsage = null
+            setupFutureUsage = null,
+            openCardScanAutomatically = false,
         )
     }
 
@@ -2894,7 +2896,8 @@ internal class DefaultPaymentElementLoaderTest {
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
-            setupFutureUsage = null
+            setupFutureUsage = null,
+            openCardScanAutomatically = false,
         )
     }
 
@@ -2929,7 +2932,8 @@ internal class DefaultPaymentElementLoaderTest {
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
-            setupFutureUsage = null
+            setupFutureUsage = null,
+            openCardScanAutomatically = false,
         )
     }
 
@@ -2964,7 +2968,8 @@ internal class DefaultPaymentElementLoaderTest {
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
-            setupFutureUsage = null
+            setupFutureUsage = null,
+            openCardScanAutomatically = false,
         )
     }
 
@@ -2997,7 +3002,8 @@ internal class DefaultPaymentElementLoaderTest {
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
-            setupFutureUsage = null
+            setupFutureUsage = null,
+            openCardScanAutomatically = false,
         )
     }
 
@@ -3040,7 +3046,8 @@ internal class DefaultPaymentElementLoaderTest {
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
-            setupFutureUsage = null
+            setupFutureUsage = null,
+            openCardScanAutomatically = false,
         )
     }
 
@@ -3083,7 +3090,8 @@ internal class DefaultPaymentElementLoaderTest {
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
-            setupFutureUsage = null
+            setupFutureUsage = null,
+            openCardScanAutomatically = false,
         )
     }
 
@@ -3225,7 +3233,8 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = anyOrNull(),
             setAsDefaultEnabled = anyOrNull(),
             paymentMethodOptionsSetupFutureUsage = anyOrNull(),
-            setupFutureUsage = anyOrNull()
+            setupFutureUsage = anyOrNull(),
+            openCardScanAutomatically = anyOrNull(),
         )
     }
 
@@ -3293,7 +3302,8 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = anyOrNull(),
             setAsDefaultEnabled = anyOrNull(),
             paymentMethodOptionsSetupFutureUsage = anyOrNull(),
-            setupFutureUsage = anyOrNull()
+            setupFutureUsage = anyOrNull(),
+            openCardScanAutomatically = anyOrNull(),
         )
     }
 
@@ -3329,7 +3339,8 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = anyOrNull(),
             setAsDefaultEnabled = anyOrNull(),
             paymentMethodOptionsSetupFutureUsage = eq(true),
-            setupFutureUsage = anyOrNull()
+            setupFutureUsage = anyOrNull(),
+            openCardScanAutomatically = anyOrNull(),
         )
     }
 
@@ -3452,7 +3463,46 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = anyOrNull(),
             setAsDefaultEnabled = anyOrNull(),
             paymentMethodOptionsSetupFutureUsage = anyOrNull(),
-            setupFutureUsage = eq(StripeIntent.Usage.OffSession)
+            setupFutureUsage = eq(StripeIntent.Usage.OffSession),
+            openCardScanAutomatically = anyOrNull(),
+        )
+    }
+
+    @Test
+    fun `Emits correct load event for openCardScanAutomatically'`() = runTest {
+        val loader = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+        )
+
+        loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration(
+                merchantDisplayName = "Some Name",
+                opensCardScannerAutomatically = true,
+            ),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        ).getOrThrow()
+
+        verify(eventReporter).onLoadSucceeded(
+            paymentSelection = anyOrNull(),
+            linkEnabled = anyOrNull(),
+            linkMode = anyOrNull(),
+            googlePaySupported = any(),
+            linkDisplay = anyOrNull(),
+            currency = anyOrNull(),
+            initializationMode = any(),
+            financialConnectionsAvailability = anyOrNull(),
+            orderedLpms = any(),
+            requireCvcRecollection = any(),
+            hasDefaultPaymentMethod = anyOrNull(),
+            setAsDefaultEnabled = anyOrNull(),
+            paymentMethodOptionsSetupFutureUsage = anyOrNull(),
+            setupFutureUsage = anyOrNull(),
+            openCardScanAutomatically = eq(true),
         )
     }
 
@@ -3647,7 +3697,8 @@ internal class DefaultPaymentElementLoaderTest {
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
-            setupFutureUsage = null
+            setupFutureUsage = null,
+            openCardScanAutomatically = false,
         )
     }
 

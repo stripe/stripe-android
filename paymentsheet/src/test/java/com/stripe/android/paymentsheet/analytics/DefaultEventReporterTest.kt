@@ -1455,7 +1455,8 @@ class DefaultEventReporterTest {
         financialConnectionsAvailability: FinancialConnectionsAvailability = FinancialConnectionsAvailability.Full,
         linkDisplay: PaymentSheet.LinkConfiguration.Display = PaymentSheet.LinkConfiguration.Display.Automatic,
         paymentMethodOptionsSetupFutureUsage: Boolean = false,
-        setupFutureUsage: StripeIntent.Usage? = null
+        setupFutureUsage: StripeIntent.Usage? = null,
+        openCardScanAutomatically: Boolean = false,
     ) {
         simulateInit()
         onLoadStarted(initializedViaCompose = false)
@@ -1473,7 +1474,8 @@ class DefaultEventReporterTest {
             financialConnectionsAvailability = financialConnectionsAvailability,
             linkDisplay = linkDisplay,
             paymentMethodOptionsSetupFutureUsage = paymentMethodOptionsSetupFutureUsage,
-            setupFutureUsage = setupFutureUsage
+            setupFutureUsage = setupFutureUsage,
+            openCardScanAutomatically = openCardScanAutomatically,
         )
     }
 
