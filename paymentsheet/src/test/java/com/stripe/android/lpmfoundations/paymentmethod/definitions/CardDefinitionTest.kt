@@ -1,7 +1,9 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
+import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
@@ -21,7 +23,9 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
+import com.stripe.android.ui.core.elements.CardDetailsSectionController
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
@@ -557,6 +561,78 @@ class CardDefinitionTest {
         assertThat(formElements[0].identifier.v1).isEqualTo("card_details")
         assertThat(formElements[1].identifier.v1).isEqualTo("credit_billing_section")
         testStaticMandateElement(metadata, formElements[2])
+    }
+
+    @Test
+    fun `createFormElements shouldAutomaticallyLaunchCardScan in CardDetailsSectionController`() {
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
+        val formElements = CardDefinition.formElements(
+            metadata = PaymentMethodMetadataFactory.create(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+                )
+            ),
+            automaticallyLaunchedCardScanFormDataHelper = AutomaticallyLaunchedCardScanFormDataHelper(
+                hasAutomaticallyLaunchedCardScanInitialValue = false,
+                openCardScanAutomaticallyConfig = true,
+                savedStateHandle = SavedStateHandle()
+            )
+        )
+        assertThat(formElements[0].controller).isInstanceOf<CardDetailsSectionController>()
+
+        assertThat(
+            (formElements[0].controller as CardDetailsSectionController).shouldAutomaticallyLaunchCardScan()
+        ).isTrue()
+
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
+    }
+
+    @Test
+    fun `createFormElements should not automaticallyLaunchCardScan when config is false`() {
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
+        val formElements = CardDefinition.formElements(
+            metadata = PaymentMethodMetadataFactory.create(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+                )
+            ),
+            automaticallyLaunchedCardScanFormDataHelper = AutomaticallyLaunchedCardScanFormDataHelper(
+                hasAutomaticallyLaunchedCardScanInitialValue = false,
+                openCardScanAutomaticallyConfig = false,
+                savedStateHandle = SavedStateHandle()
+            )
+        )
+        assertThat(formElements[0].controller).isInstanceOf<CardDetailsSectionController>()
+
+        assertThat(
+            (formElements[0].controller as CardDetailsSectionController).shouldAutomaticallyLaunchCardScan()
+        ).isFalse()
+
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
+    }
+
+    @Test
+    fun `createFormElements should not automaticallyLaunchCardScan when has automaticallyLaunchedCardScan`() {
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
+        val formElements = CardDefinition.formElements(
+            metadata = PaymentMethodMetadataFactory.create(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+                )
+            ),
+            automaticallyLaunchedCardScanFormDataHelper = AutomaticallyLaunchedCardScanFormDataHelper(
+                hasAutomaticallyLaunchedCardScanInitialValue = true,
+                openCardScanAutomaticallyConfig = true,
+                savedStateHandle = SavedStateHandle()
+            )
+        )
+        assertThat(formElements[0].controller).isInstanceOf<CardDetailsSectionController>()
+
+        assertThat(
+            (formElements[0].controller as CardDetailsSectionController).shouldAutomaticallyLaunchCardScan()
+        ).isFalse()
+
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     private fun createLinkConfiguration(): LinkConfiguration {

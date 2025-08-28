@@ -123,7 +123,8 @@ internal class DefaultVerticalModeFormInteractor(
             val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
             val formHelper = DefaultFormHelper.create(
                 viewModel = viewModel,
-                paymentMethodMetadata = paymentMethodMetadata
+                paymentMethodMetadata = paymentMethodMetadata,
+                shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = true,
             )
             return DefaultVerticalModeFormInteractor(
                 selectedPaymentMethodCode = selectedPaymentMethodCode,

@@ -235,5 +235,12 @@ internal interface EmbeddedPaymentElementViewModelModule {
         ): InternalRowSelectionCallback? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.rowSelectionCallback
         }
+
+        // SelectedPaymentMethodCode is used in FormActivity to determine if cardScan should be automatically launched
+        // Outside of FormActivity it is not relevant, but is still required for dependency injection
+        @Provides
+        fun providesSelectedPaymentMethodCode(): String {
+            return ""
+        }
     }
 }

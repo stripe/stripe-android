@@ -875,7 +875,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 setAsDefaultEnabled = setAsDefaultEnabled,
                 setupFutureUsage = elementsSession.stripeIntent.setupFutureUsage(),
                 paymentMethodOptionsSetupFutureUsage = elementsSession.stripeIntent
-                    .paymentMethodOptionsSetupFutureUsageMap()
+                    .paymentMethodOptionsSetupFutureUsageMap(),
+                openCardScanAutomatically = state.paymentMethodMetadata.openCardScanAutomatically
             )
         }
     }

@@ -101,6 +101,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         setAsDefaultEnabled: Boolean? = null,
         setupFutureUsage: StripeIntent.Usage? = null,
         paymentMethodOptionsSetupFutureUsage: Boolean,
+        openCardScanAutomatically: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_succeeded"
         override val additionalParams: Map<String, Any?> = buildMap {
@@ -118,6 +119,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             setAsDefaultEnabled?.let {
                 put(FIELD_SET_AS_DEFAULT_ENABLED, it)
             }
+            put(FIELD_DIRECT_TO_CARD_SCAN, openCardScanAutomatically)
             put(FIELD_LINK_DISPLAY, linkDisplay.analyticsValue)
             if (setAsDefaultEnabled == true && hasDefaultPaymentMethod != null) {
                 put(FIELD_HAS_DEFAULT_PAYMENT_METHOD, hasDefaultPaymentMethod)
@@ -859,6 +861,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_CBC_EVENT_SOURCE = "cbc_event_source"
         const val FIELD_PAYMENT_METHOD_TYPE = "payment_method_type"
         const val FIELD_SET_AS_DEFAULT_ENABLED = "set_as_default_enabled"
+        const val FIELD_DIRECT_TO_CARD_SCAN = "direct_to_card_scan"
         const val FIELD_HAS_DEFAULT_PAYMENT_METHOD = "has_default_payment_method"
         const val FIELD_SELECTED_CARD_BRAND = "selected_card_brand"
         const val FIELD_SET_AS_DEFAULT = "set_as_default"
