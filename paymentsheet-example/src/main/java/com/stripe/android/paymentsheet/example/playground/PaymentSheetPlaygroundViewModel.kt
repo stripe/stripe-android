@@ -521,44 +521,56 @@ internal class PaymentSheetPlaygroundViewModel(
         )
     }
 
-    fun onConfirmationTokenResult(confirmationTokenResult: ConfirmationTokenResult) {
-        viewModelScope.launch(Dispatchers.IO) {
-            when (confirmationTokenResult) {
-                is ConfirmationTokenResult.Completed -> {
-                    // Create PaymentIntent with ConfirmationToken on server
-                    val playgroundState = state.value?.asPaymentState()
-                    if (playgroundState != null) {
-                        val result = createPaymentIntentWithConfirmationToken(
-                            confirmationToken = confirmationTokenResult.confirmationToken,
-                            playgroundState = playgroundState
-                        )
-                        withContext(Dispatchers.Main) {
-                            when (result) {
-                                is CreateIntentResult.Success -> {
-                                    setPlaygroundState(null)
-                                    status.value = StatusMessage(SUCCESS_RESULT)
-                                }
-                                is CreateIntentResult.Failure -> {
-                                    status.value = StatusMessage("Payment failed")
-                                }
+    suspend fun onConfirmationTokenResult(confirmationTokenResult: ConfirmationTokenResult): CreateIntentResult {
+        return when (confirmationTokenResult) {
+            is ConfirmationTokenResult.Completed -> {
+                // Create PaymentIntent with ConfirmationToken on server
+                val playgroundState = state.value?.asPaymentState()
+                if (playgroundState != null) {
+                    val result = createPaymentIntentWithConfirmationToken(
+                        confirmationToken = confirmationTokenResult.confirmationToken,
+                        playgroundState = playgroundState
+                    )
+                    
+                    // Update UI state based on result
+                    when (result) {
+                        is CreateIntentResult.Success -> {
+                            withContext(Dispatchers.Main) {
+                                setPlaygroundState(null)
+                                // Status will be updated when the payment completes via onPaymentSheetResult
                             }
                         }
-                    } else {
-                        withContext(Dispatchers.Main) {
-                            status.value = StatusMessage("No playground state available")
+                        is CreateIntentResult.Failure -> {
+                            withContext(Dispatchers.Main) {
+                                status.value = StatusMessage("Payment failed")
+                            }
                         }
                     }
-                }
-                is ConfirmationTokenResult.Canceled -> {
+                    
+                    // Return the result so the SDK can continue with confirmation
+                    result
+                } else {
+                    val error = Exception("No playground state available")
                     withContext(Dispatchers.Main) {
-                        status.value = StatusMessage("Canceled")
+                        status.value = StatusMessage("No playground state available")
                     }
+                    CreateIntentResult.Failure(error)
                 }
-                is ConfirmationTokenResult.Failed -> {
-                    withContext(Dispatchers.Main) {
-                        status.value = StatusMessage("ConfirmationToken creation failed: ${confirmationTokenResult.error.message}")
-                    }
+            }
+            is ConfirmationTokenResult.Canceled -> {
+                withContext(Dispatchers.Main) {
+                    status.value = StatusMessage("Canceled")
                 }
+                CreateIntentResult.Failure(Exception("User canceled"))
+            }
+            is ConfirmationTokenResult.Failed -> {
+                withContext(Dispatchers.Main) {
+                    status.value = StatusMessage("ConfirmationToken creation failed: ${confirmationTokenResult.error.message}")
+                }
+                CreateIntentResult.Failure(
+                    confirmationTokenResult.error as? Exception 
+                        ?: Exception(confirmationTokenResult.error.message, confirmationTokenResult.error)
+                )
             }
         }
     }
@@ -567,17 +579,19 @@ internal class PaymentSheetPlaygroundViewModel(
         confirmationToken: ConfirmationToken,
         playgroundState: PlaygroundState.Payment
     ): CreateIntentResult {
-        val request = ConfirmIntentWithTokenRequest(
-            confirmationTokenId = confirmationToken.id,
-            clientSecret = playgroundState.clientSecret,
-            merchantCountryCode = playgroundState.countryCode.value,
-            mode = playgroundState.checkoutMode.value,
-            returnUrl = RETURN_URL,
-        )
-        val result = Fuel.post("http://10.0.0.92:8081" + "/confirm_intent")
-            .jsonBody(Json.encodeToString(ConfirmIntentWithTokenRequest.serializer(), request))
-            .suspendable()
-            .awaitModel(ConfirmIntentResponse.serializer())
+        val result = withContext(Dispatchers.IO) {
+            val request = ConfirmIntentWithTokenRequest(
+                confirmationTokenId = confirmationToken.id,
+                clientSecret = playgroundState.clientSecret,
+                merchantCountryCode = playgroundState.countryCode.value,
+                mode = playgroundState.checkoutMode.value,
+                returnUrl = RETURN_URL,
+            )
+             Fuel.post("http://10.0.0.92:8081" + "/confirm_intent")
+                .jsonBody(Json.encodeToString(ConfirmIntentWithTokenRequest.serializer(), request))
+                .suspendable()
+                .awaitModel(ConfirmIntentResponse.serializer())
+        }
         val createIntentResult = when (result) {
             is Result.Failure -> {
                 val message = "Creating intent failed:\n${result.getException().message}"

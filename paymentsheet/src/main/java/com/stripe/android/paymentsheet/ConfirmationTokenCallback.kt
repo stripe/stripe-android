@@ -6,40 +6,27 @@ import com.stripe.android.model.ConfirmationToken
  * Callback to be used when you use `PaymentSheet` and intend to create ConfirmationTokens
  * for server-side payment confirmation.
  *
- * This is the ConfirmationToken equivalent of [CreateIntentCallback].
- */
-fun interface CreateIntentWithConfirmationTokenCallback {
-
-    /**
-     * Called when the customer confirms the payment or setup and a ConfirmationToken is ready.
-     *
-     * Your implementation should create and optionally confirm a PaymentIntent or SetupIntent
-     * on your server using the [confirmationToken] and return its client secret or an error if one occurred.
-     *
-     * @param confirmationToken The [ConfirmationToken] containing payment method data, shipping details,
-     * and other checkout state collected by PaymentSheet. Send this token to your server to complete
-     * payment confirmation using the Stripe server-side API.
-     */
-    suspend fun onCreateIntent(
-        confirmationToken: ConfirmationToken,
-    ): CreateIntentResult
-}
-
-/**
- * Callback to receive the result of ConfirmationToken creation.
- *
- * Used with PaymentSheet.ConfirmationTokenBuilder and FlowController when operating in
- * ConfirmationToken mode, where the SDK generates tokens instead of completing payments directly.
+ * This callback is called with the ConfirmationToken result and allows merchants to process
+ * the token on their server, then return a CreateIntentResult to continue the payment flow.
+ * The SDK will then call confirmationHandler.start() with the returned client secret.
  */
 fun interface ConfirmationTokenCallback {
 
     /**
-     * Called with the result of ConfirmationToken creation.
+     * Called with the ConfirmationToken result when the customer confirms the payment or setup.
      *
-     * @param confirmationTokenResult The [ConfirmationTokenResult] indicating whether the
-     * ConfirmationToken was created successfully, failed, or was canceled by the user.
+     * @param confirmationTokenResult The [ConfirmationTokenResult] containing the ConfirmationToken
+     * or error information. When successful, your implementation should:
+     * 1. Send the ConfirmationToken to your server
+     * 2. Create a PaymentIntent or SetupIntent using the server-side API
+     * 3. Return the client secret wrapped in CreateIntentResult.Success
+     * 
+     * The SDK will then automatically call confirmationHandler.start() to handle 3DS and other
+     * authentication flows.
+     *
+     * @return CreateIntentResult.Success with client secret, or CreateIntentResult.Failure if an error occurred.
      */
-    fun onConfirmationTokenResult(
+    suspend fun onConfirmationTokenResult(
         confirmationTokenResult: ConfirmationTokenResult
-    )
+    ): CreateIntentResult
 }

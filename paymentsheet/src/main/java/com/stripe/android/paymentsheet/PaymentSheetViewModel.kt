@@ -18,7 +18,9 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -26,13 +28,17 @@ import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.intent.CreateIntentCallbackFailureException
+import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -98,7 +104,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     @Named(IS_LIVE_MODE) val isLiveModeProvider: () -> Boolean,
     private val confirmationTokenCreator: ConfirmationTokenCreator,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
-    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String
+    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
+    private val stripeRepository: StripeRepository
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -155,6 +162,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             ?: false
 
     override var newPaymentSelection: NewPaymentOptionSelection? = null
+
+    // Request options for StripeRepository calls
+    private val requestOptions
+        get() = ApiRequest.Options(
+            apiKey = publishableKeyProvider(),
+            stripeAccount = null, // StripeAccount not available from config
+        )
 
     @VisibleForTesting
     internal val googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config? =
@@ -520,7 +534,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             if (isConfirmationTokenMode) {
                 logger.info("ConfirmationToken Debug - Taking ConfirmationToken path")
                 // ConfirmationToken mode: Create token and invoke callback
-                handleConfirmationTokenCreation(paymentSelection, callbacks.confirmationTokenCallback!!)
+                handleConfirmationTokenCreation(paymentSelection)
             } else {
                 logger.info("ConfirmationToken Debug - Taking normal payment path")
                 // Normal payment confirmation mode
@@ -529,33 +543,118 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
+    /**
+     * Handles ConfirmationToken creation following the same architectural patterns as handleNormalPaymentConfirmation.
+     *
+     * Key architectural alignments:
+     * - Same parameter signature pattern (only PaymentSelection?)
+     * - Same error handling and analytics reporting
+     * - Same state management (inProgressSelection)
+     * - Same threading/coroutine patterns
+     * - Same validation and null checking
+     * - Integration with existing error reporting system
+     * - Consistent callback handling through PaymentElementCallbackReferences
+     */
     private suspend fun handleConfirmationTokenCreation(
-        paymentSelection: PaymentSelection?,
-        callback: com.stripe.android.paymentsheet.ConfirmationTokenCallback
+        paymentSelection: PaymentSelection?
     ) {
-        try {
+        // Get the confirmation token callback from the registry
+        val callbacks = PaymentElementCallbackReferences[paymentElementCallbackIdentifier]
+        val confirmationTokenCallback = callbacks?.confirmationTokenCallback
+
+        // Check if callback is available
+        if (confirmationTokenCallback == null) {
+            val message = "ConfirmationTokenCallback must be implemented when using ConfirmationToken mode"
+            val exception = IllegalStateException(message)
+            
+            val event = ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_INVALID_PAYMENT_SELECTION_ON_CHECKOUT
+            errorReporter.report(event, StripeException.create(exception))
+
+            withContext(viewModelScope.coroutineContext) {
+                processConfirmationResult(
+                    ConfirmationHandler.Result.Failed(
+                        cause = exception,
+                        message = exception.stripeErrorMessage(),
+                        type = ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration,
+                    )
+                )
+            }
+            return
+        }
+
+        // Follow same context switching and state management pattern as normal confirmation
+        val finalSelection = withContext(viewModelScope.coroutineContext) {
             inProgressSelection = paymentSelection
+            paymentSelectionWithCvcIfEnabled(paymentSelection)
+        }
 
-            val finalSelection = paymentSelectionWithCvcIfEnabled(paymentSelection)
+        if (finalSelection == null) {
+            inProgressSelection = null
 
-            // Auto-collect data from PaymentSheet form state using ConfirmationTokenCreator
+            val message = paymentSelection?.let {
+                "Cannot create ConfirmationToken using a ${it::class.qualifiedName} payment selection!"
+            } ?: "Cannot create ConfirmationToken without a payment selection!"
+
+            val exception = IllegalStateException(message)
+
+            val event = paymentSelection?.let {
+                ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_INVALID_PAYMENT_SELECTION_ON_CHECKOUT
+            } ?: ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_NO_PAYMENT_SELECTION_ON_CHECKOUT
+
+            errorReporter.report(event, StripeException.create(exception))
+
+            withContext(viewModelScope.coroutineContext) {
+                processConfirmationResult(
+                    ConfirmationHandler.Result.Failed(
+                        cause = exception,
+                        message = exception.stripeErrorMessage(),
+                        type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                    )
+                )
+            }
+            return
+        }
+
+        // Execute ConfirmationToken creation with proper error handling
+        try {
             val result = confirmationTokenCreator.createConfirmationToken(
                 paymentSelection = finalSelection,
                 configuration = config,
                 shippingDetails = config.shippingDetails,
             )
 
+            // Clear in-progress state and handle result
             inProgressSelection = null
 
             withContext(viewModelScope.coroutineContext) {
                 when {
                     result.isSuccess -> {
                         val token = result.getOrThrow()
-                        callback.onConfirmationTokenResult(ConfirmationTokenResult.Completed(token))
+                        
+                        // Simplified single-callback flow: always call merchant callback and continue to confirmation
+                        handleConfirmationTokenFlow(
+                            confirmationToken = token,
+                            callback = confirmationTokenCallback,
+                            finalSelection = finalSelection
+                        )
                     }
                     result.isFailure -> {
                         val error = result.exceptionOrNull() ?: Exception("Unknown ConfirmationToken creation error")
-                        callback.onConfirmationTokenResult(ConfirmationTokenResult.Failed(error))
+                        
+                        // Report failure with proper analytics
+                        eventReporter.onPaymentFailure(
+                            paymentSelection = finalSelection,
+                            error = PaymentSheetConfirmationError.Stripe(StripeException.create(error)),
+                        )
+                        
+                        // Handle error through standard confirmation flow
+                        processConfirmationResult(
+                            ConfirmationHandler.Result.Failed(
+                                cause = error,
+                                message = error.stripeErrorMessage(),
+                                type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                            )
+                        )
                     }
                 }
             }
@@ -563,9 +662,177 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             logger.error("ConfirmationToken creation failed", e)
             inProgressSelection = null
 
-            withContext(viewModelScope.coroutineContext) {
-                callback.onConfirmationTokenResult(ConfirmationTokenResult.Failed(e))
+            // Report error with proper analytics - check if finalSelection exists
+            finalSelection?.let { selection ->
+                eventReporter.onPaymentFailure(
+                    paymentSelection = selection,
+                    error = PaymentSheetConfirmationError.Stripe(StripeException.create(e)),
+                )
             }
+
+            errorReporter.report(
+                ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_INVALID_PAYMENT_SELECTION_ON_CHECKOUT,
+                StripeException.create(e)
+            )
+
+            withContext(viewModelScope.coroutineContext) {
+                processConfirmationResult(
+                    ConfirmationHandler.Result.Failed(
+                        cause = e,
+                        message = e.stripeErrorMessage(),
+                        type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                    )
+                )
+            }
+        }
+    }
+
+    /**
+     * Handles the simplified ConfirmationToken callback flow.
+     * This flow calls the merchant callback with the ConfirmationTokenResult, gets a CreateIntentResult back,
+     * and then continues to confirmationHandler.start() to handle 3DS and other authentication flows.
+     */
+    private suspend fun handleConfirmationTokenFlow(
+        confirmationToken: ConfirmationToken,
+        callback: ConfirmationTokenCallback,
+        finalSelection: PaymentSelection
+    ) {
+        try {
+            // Call merchant with ConfirmationTokenResult - they process it server-side and return CreateIntentResult
+            val createIntentResult = callback.onConfirmationTokenResult(ConfirmationTokenResult.Completed(confirmationToken))
+            
+            when (createIntentResult) {
+                is CreateIntentResult.Success -> {
+                    if (createIntentResult.clientSecret == IntentConfirmationInterceptor.COMPLETE_WITHOUT_CONFIRMING_INTENT) {
+                        // Merchant completed everything server-side, no further confirmation needed
+                        eventReporter.onPaymentSuccess(
+                            paymentSelection = finalSelection,
+                            deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                        )
+                        _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
+                    } else {
+                        // Continue with confirmation using the returned client_secret
+                        // This always calls confirmationHandler.start() to handle 3DS, etc.
+                        handleConfirmedIntentFromMerchant(
+                            clientSecret = createIntentResult.clientSecret,
+                            finalSelection = finalSelection
+                        )
+                    }
+                }
+                is CreateIntentResult.Failure -> {
+                    val exception = CreateIntentCallbackFailureException(createIntentResult.cause)
+                    eventReporter.onPaymentFailure(
+                        paymentSelection = finalSelection,
+                        error = PaymentSheetConfirmationError.Stripe(StripeException.create(exception)),
+                    )
+                    processConfirmationResult(
+                        ConfirmationHandler.Result.Failed(
+                            cause = exception,
+                            message = (createIntentResult.displayMessage ?: exception.message ?: "Unknown error").resolvableString,
+                            type = ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration,
+                        )
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            logger.error("ConfirmationToken flow failed", e)
+            
+            // Reset in-progress state on failure
+            inProgressSelection = null
+            
+            eventReporter.onPaymentFailure(
+                paymentSelection = finalSelection,
+                error = PaymentSheetConfirmationError.Stripe(StripeException.create(e)),
+            )
+            
+            processConfirmationResult(
+                ConfirmationHandler.Result.Failed(
+                    cause = e,
+                    message = e.stripeErrorMessage(),
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                )
+            )
+        }
+    }
+
+    /**
+     * Handles the confirmed intent returned by the merchant after ConfirmationToken processing.
+     * This retrieves the intent and continues with the standard confirmation flow.
+     */
+    private suspend fun handleConfirmedIntentFromMerchant(
+        clientSecret: String,
+        finalSelection: PaymentSelection
+    ) {
+        try {
+            // Retrieve the intent using the client_secret from merchant
+            val stripeIntent = awaitStripeIntent(clientSecret)
+            
+            if (stripeIntent.isConfirmed) {
+                // Intent is already confirmed by merchant, just complete the flow
+                eventReporter.onPaymentSuccess(
+                    paymentSelection = finalSelection,
+                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                )
+                _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
+            } else if (stripeIntent.requiresAction()) {
+                // Intent requires action (3DS, redirect, etc.) - handle it
+                val confirmationOption = finalSelection.toConfirmationOption(
+                    configuration = config.asCommonConfiguration(),
+                    linkConfiguration = linkHandler.linkConfiguration.value,
+                )
+                
+                if (confirmationOption != null) {
+                    confirmationHandler.start(
+                        arguments = ConfirmationHandler.Args(
+                            intent = stripeIntent,
+                            confirmationOption = confirmationOption,
+                            initializationMode = args.initializationMode,
+                            appearance = config.appearance,
+                            shippingDetails = config.shippingDetails,
+                        ),
+                    )
+                } else {
+                    throw IllegalStateException("Cannot create confirmation option from payment selection")
+                }
+            } else {
+                // Intent needs to be confirmed on the client-side
+                val confirmationOption = finalSelection.toConfirmationOption(
+                    configuration = config.asCommonConfiguration(),
+                    linkConfiguration = linkHandler.linkConfiguration.value,
+                )
+                
+                if (confirmationOption != null) {
+                    confirmationHandler.start(
+                        arguments = ConfirmationHandler.Args(
+                            intent = stripeIntent,
+                            confirmationOption = confirmationOption,
+                            initializationMode = args.initializationMode,
+                            appearance = config.appearance,
+                            shippingDetails = config.shippingDetails,
+                        ),
+                    )
+                } else {
+                    throw IllegalStateException("Cannot create confirmation option from payment selection")
+                }
+            }
+        } catch (e: Exception) {
+            logger.error("Failed to handle confirmed intent from merchant", e)
+            
+            // Reset in-progress state on failure
+            inProgressSelection = null
+            
+            eventReporter.onPaymentFailure(
+                paymentSelection = finalSelection,
+                error = PaymentSheetConfirmationError.Stripe(StripeException.create(e)),
+            )
+            
+            processConfirmationResult(
+                ConfirmationHandler.Result.Failed(
+                    cause = e,
+                    message = e.stripeErrorMessage(),
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                )
+            )
         }
     }
 
@@ -760,6 +1027,18 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private suspend fun awaitStripeIntent(): StripeIntent {
         return paymentMethodMetadata.filterNotNull().first().stripeIntent
+    }
+
+    /**
+     * Retrieves a StripeIntent using the provided client secret.
+     * This is used in the ConfirmationToken flow when the merchant returns a client_secret.
+     */
+    private suspend fun awaitStripeIntent(clientSecret: String): StripeIntent {
+        val result = stripeRepository.retrieveStripeIntent(
+            clientSecret = clientSecret,
+            options = requestOptions,
+        )
+        return result.getOrThrow()
     }
 
     internal fun getCvcRecollectionState(): PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState {

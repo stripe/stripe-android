@@ -159,7 +159,8 @@ internal class PaymentSheetPlaygroundActivity :
                 window.isNavigationBarContrastEnforced = false
             }
             val paymentSheet = remember {
-                PaymentSheet.ConfirmationTokenBuilder(viewModel::onConfirmationTokenResult)
+                PaymentSheet.Builder(viewModel::onPaymentSheetResult)
+                    .confirmationTokenCallback(viewModel::onConfirmationTokenResult)
                     .externalPaymentMethodConfirmHandler(this@PaymentSheetPlaygroundActivity)
                     .confirmCustomPaymentMethodCallback(this@PaymentSheetPlaygroundActivity)
                     .analyticEventCallback(viewModel::analyticCallback)

@@ -541,12 +541,47 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         shouldSavePaymentMethod: Boolean,
         hCaptchaToken: String?
     ): NextStep {
-        // In ConfirmationToken mode, we complete without confirming any intent
-        // The ConfirmationToken will be created by the ConfirmationTokenCreator in PaymentSheetViewModel
-        return NextStep.Complete(
-            isForceSuccess = true,
-            completedFullPaymentFlow = false // ConfirmationToken creation, not full payment
-        )
+        // Validate ConfirmationToken mode requirements - follow same validation pattern as deferred intents
+        try {
+            // Ensure payment method is valid for ConfirmationToken creation
+            if (paymentMethod.id.isNullOrBlank()) {
+                throw IllegalStateException("PaymentMethod must have a valid ID for ConfirmationToken creation")
+            }
+
+            // Validate intent configuration compatibility
+            when (intentConfiguration.mode) {
+                is PaymentSheet.IntentConfiguration.Mode.Payment -> {
+                    // ConfirmationToken works with both payment and setup intents
+                }
+                is PaymentSheet.IntentConfiguration.Mode.Setup -> {
+                    // ConfirmationToken works with both payment and setup intents  
+                }
+            }
+
+            // Check for unsupported features in ConfirmationToken mode
+            if (paymentMethodExtraParams != null) {
+                failIfSetAsDefaultFeatureIsEnabled(paymentMethodExtraParams)
+            }
+
+            // In the simplified ConfirmationToken flow, we complete without confirming any intent here.
+            // The ConfirmationToken will be created by the ConfirmationTokenCreator in PaymentSheetViewModel,
+            // which will call the merchant callback, get the CreateIntentResult, and then continue to 
+            // confirmationHandler.start() to handle 3DS and other authentication flows.
+            return NextStep.Complete(
+                isForceSuccess = true,
+                completedFullPaymentFlow = false // ConfirmationToken creation, not full payment confirmation
+            )
+            
+        } catch (exception: Exception) {
+            return NextStep.Fail(
+                cause = exception,
+                message = if (requestOptions.apiKeyIsLiveMode) {
+                    PaymentsCoreR.string.stripe_internal_error.resolvableString
+                } else {
+                    exception.message?.resolvableString ?: "ConfirmationToken creation validation failed".resolvableString
+                }
+            )
+        }
     }
 
     private suspend fun handleDeferredIntentCreationFromPaymentMethod(

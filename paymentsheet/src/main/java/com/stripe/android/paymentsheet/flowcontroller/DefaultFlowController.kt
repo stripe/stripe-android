@@ -507,13 +507,16 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     override fun createConfirmationToken(callback: ConfirmationTokenCallback) {
-        // Note: Implement ConfirmationToken creation
-        // This is a placeholder implementation that needs proper integration with the ConfirmationHandler
-        callback.onConfirmationTokenResult(
-            ConfirmationTokenResult.Failed(
-                error = Exception("ConfirmationToken creation not yet implemented in DefaultFlowController")
+        // Launch a coroutine to handle the suspend callback
+        viewModelScope.launch {
+            val result = callback.onConfirmationTokenResult(
+                ConfirmationTokenResult.Failed(
+                    error = Exception("ConfirmationToken creation not yet implemented in DefaultFlowController")
+                )
             )
-        )
+            // For now, just ignore the returned CreateIntentResult since this is a placeholder
+            // In a full implementation, this would need to handle the result properly
+        }
     }
 
     private fun confirmSavedPaymentMethod(
