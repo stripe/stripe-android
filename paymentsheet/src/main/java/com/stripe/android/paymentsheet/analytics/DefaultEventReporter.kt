@@ -116,7 +116,8 @@ internal class DefaultEventReporter @Inject internal constructor(
         hasDefaultPaymentMethod: Boolean?,
         setAsDefaultEnabled: Boolean?,
         paymentMethodOptionsSetupFutureUsage: Boolean,
-        setupFutureUsage: StripeIntent.Usage?
+        setupFutureUsage: StripeIntent.Usage?,
+        openCardScanAutomatically: Boolean,
     ) {
         this.currency = currency
         this.linkEnabled = linkEnabled
@@ -148,7 +149,8 @@ internal class DefaultEventReporter @Inject internal constructor(
                 financialConnectionsAvailability = financialConnectionsAvailability,
                 setAsDefaultEnabled = setAsDefaultEnabled,
                 paymentMethodOptionsSetupFutureUsage = paymentMethodOptionsSetupFutureUsage,
-                setupFutureUsage = setupFutureUsage
+                setupFutureUsage = setupFutureUsage,
+                openCardScanAutomatically = openCardScanAutomatically,
             )
         )
     }
