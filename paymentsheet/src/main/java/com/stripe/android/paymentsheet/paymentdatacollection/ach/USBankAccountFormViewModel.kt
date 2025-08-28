@@ -597,6 +597,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             amount = args.formArgs.amount?.value,
             currency = args.formArgs.amount?.currencyCode,
             linkMode = args.linkMode,
+            allowRedisplay = makeElementsSessionAllowRedisplay(),
             billingDetails = makeElementsSessionContextBillingDetails(),
             prefillDetails = makePrefillDetails(),
             incentiveEligibilitySession = incentiveEligibilitySession,
@@ -608,6 +609,17 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         phoneController.onValidationStateChanged(isValidating)
         emailController.onValidationStateChanged(isValidating)
         addressElement.onValidationStateChanged(isValidating)
+    }
+
+    private fun makeElementsSessionAllowRedisplay(): ElementsSessionContext.AllowRedisplay {
+        val customerRequestedSave = createCustomerRequestedSave()
+        val allowRedisplay = createAllowRedisplay(customerRequestedSave)
+
+        return when (allowRedisplay) {
+            PaymentMethod.AllowRedisplay.UNSPECIFIED -> ElementsSessionContext.AllowRedisplay.Unspecified
+            PaymentMethod.AllowRedisplay.LIMITED -> ElementsSessionContext.AllowRedisplay.Limited
+            PaymentMethod.AllowRedisplay.ALWAYS -> ElementsSessionContext.AllowRedisplay.Always
+        }
     }
 
     private fun makeElementsSessionContextBillingDetails(): ElementsSessionContext.BillingDetails {
@@ -681,20 +693,15 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         bankName: String?,
         billingDetails: PaymentMethod.BillingDetails,
     ): PaymentSelection.New.USBankAccount {
-        val customerRequestedSave = customerRequestedSave(
-            showCheckbox = args.showCheckbox,
-            saveForFutureUse = saveForFutureUseCheckedFlow.value
-        )
+        val customerRequestedSave = createCustomerRequestedSave()
+        val allowRedisplay = createAllowRedisplay(customerRequestedSave)
 
         val paymentMethodCreateParams = when (resultIdentifier) {
             is ResultIdentifier.PaymentMethod -> {
                 PaymentMethodCreateParams.createInstantDebits(
                     requiresMandate = true,
                     productUsage = setOf("PaymentSheet"),
-                    allowRedisplay = args.formArgs.paymentMethodSaveConsentBehavior.allowRedisplay(
-                        isSetupIntent = args.formArgs.hasIntentToSetup,
-                        customerRequestedSave = customerRequestedSave,
-                    ),
+                    allowRedisplay = allowRedisplay,
                 )
             }
             is ResultIdentifier.Session -> {
@@ -703,10 +710,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                         linkAccountSessionId = resultIdentifier.id,
                     ),
                     billingDetails = billingDetails,
-                    allowRedisplay = args.formArgs.paymentMethodSaveConsentBehavior.allowRedisplay(
-                        isSetupIntent = args.formArgs.hasIntentToSetup,
-                        customerRequestedSave = customerRequestedSave,
-                    ),
+                    allowRedisplay = allowRedisplay,
                 )
             }
         }
@@ -757,6 +761,22 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             } else {
                 null
             }
+        )
+    }
+
+    private fun createCustomerRequestedSave() = customerRequestedSave(
+        showCheckbox = args.showCheckbox,
+        saveForFutureUse = saveForFutureUseCheckedFlow.value
+    )
+
+    private fun createAllowRedisplay(
+        customerRequestedSave: PaymentSelection.CustomerRequestedSave
+    ): PaymentMethod.AllowRedisplay {
+        val formArgs = args.formArgs
+
+        return formArgs.paymentMethodSaveConsentBehavior.allowRedisplay(
+            isSetupIntent = formArgs.hasIntentToSetup,
+            customerRequestedSave = customerRequestedSave,
         )
     }
 

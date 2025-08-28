@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.LinkMode
 import kotlinx.parcelize.Parcelize
@@ -26,6 +27,7 @@ data class ElementsSessionContext(
     val amount: Long?,
     val currency: String?,
     val linkMode: LinkMode?,
+    val allowRedisplay: AllowRedisplay?,
     val billingDetails: BillingDetails?,
     val prefillDetails: PrefillDetails,
     val incentiveEligibilitySession: IncentiveEligibilitySession?
@@ -63,5 +65,13 @@ data class ElementsSessionContext(
         companion object {
             private const val serialVersionUID: Long = 626669472462415908L
         }
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    enum class AllowRedisplay(val value: String) : StripeModel {
+        Unspecified("unspecified"),
+        Limited("limited"),
+        Always("always"),
     }
 }

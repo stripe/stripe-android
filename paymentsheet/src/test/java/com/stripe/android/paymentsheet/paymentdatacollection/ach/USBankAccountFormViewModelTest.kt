@@ -896,6 +896,7 @@ class USBankAccountFormViewModelTest {
                             phoneCountryCode = "US",
                         ),
                         incentiveEligibilitySession = null,
+                        allowRedisplay = ElementsSessionContext.AllowRedisplay.Unspecified,
                     ),
                 )
             ),
@@ -945,6 +946,7 @@ class USBankAccountFormViewModelTest {
                             phoneCountryCode = "US",
                         ),
                         incentiveEligibilitySession = null,
+                        allowRedisplay = ElementsSessionContext.AllowRedisplay.Unspecified,
                     ),
                 )
             ),
@@ -1118,6 +1120,7 @@ class USBankAccountFormViewModelTest {
                             phoneCountryCode = "US",
                         ),
                         incentiveEligibilitySession = null,
+                        allowRedisplay = ElementsSessionContext.AllowRedisplay.Unspecified,
                     ),
                 )
             ),
@@ -1159,6 +1162,7 @@ class USBankAccountFormViewModelTest {
                             phoneCountryCode = "US",
                         ),
                         incentiveEligibilitySession = null,
+                        allowRedisplay = ElementsSessionContext.AllowRedisplay.Unspecified,
                     ),
                 )
             ),
@@ -1693,6 +1697,125 @@ class USBankAccountFormViewModelTest {
     }
 
     @Test
+    fun `ElementsSessionContext contains correct allowRedisplay when using Legacy save behavior`() = runTest {
+        val elementsSessionContext = testElementsSessionContextGeneration(
+            viewModelArgs = defaultArgs.copy(
+                instantDebits = true,
+                showCheckbox = false,
+                formArgs = defaultArgs.formArgs.copy(
+                    hasIntentToSetup = false,
+                    paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+                )
+            )
+        )
+
+        assertThat(elementsSessionContext).isNotNull()
+        assertThat(elementsSessionContext?.allowRedisplay)
+            .isEqualTo(ElementsSessionContext.AllowRedisplay.Unspecified)
+    }
+
+    @Test
+    fun `ElementsSessionContext contains correct allowRedisplay when using Enabled save behavior and checked`() =
+        runTest {
+            val elementsSessionContext = testElementsSessionContextGeneration(
+                viewModelArgs = defaultArgs.copy(
+                    instantDebits = true,
+                    showCheckbox = true,
+                    formArgs = defaultArgs.formArgs.copy(
+                        hasIntentToSetup = false,
+                        paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
+                    )
+                ),
+                checkboxValue = true,
+            )
+
+            assertThat(elementsSessionContext).isNotNull()
+            assertThat(elementsSessionContext?.allowRedisplay)
+                .isEqualTo(ElementsSessionContext.AllowRedisplay.Always)
+        }
+
+    @Test
+    fun `ElementsSessionContext contains correct allowRedisplay when using Enabled save behavior and not checked`() =
+        runTest {
+            val elementsSessionContext = testElementsSessionContextGeneration(
+                viewModelArgs = defaultArgs.copy(
+                    instantDebits = true,
+                    showCheckbox = true,
+                    formArgs = defaultArgs.formArgs.copy(
+                        hasIntentToSetup = false,
+                        paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
+                    )
+                ),
+                checkboxValue = false,
+            )
+
+            assertThat(elementsSessionContext).isNotNull()
+            assertThat(elementsSessionContext?.allowRedisplay)
+                .isEqualTo(ElementsSessionContext.AllowRedisplay.Unspecified)
+        }
+
+    @Test
+    fun `ElementsSessionContext has correct allowRedisplay when Enabled behavior with setup intent & not checked`() =
+        runTest {
+            val elementsSessionContext = testElementsSessionContextGeneration(
+                viewModelArgs = defaultArgs.copy(
+                    instantDebits = true,
+                    showCheckbox = true,
+                    formArgs = defaultArgs.formArgs.copy(
+                        hasIntentToSetup = true,
+                        paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
+                    )
+                ),
+                checkboxValue = false,
+            )
+
+            assertThat(elementsSessionContext).isNotNull()
+            assertThat(elementsSessionContext?.allowRedisplay)
+                .isEqualTo(ElementsSessionContext.AllowRedisplay.Limited)
+        }
+
+    @Test
+    fun `ElementsSessionContext contains correct allowRedisplay with Disabled behavior without override`() = runTest {
+        val elementsSessionContext = testElementsSessionContextGeneration(
+            viewModelArgs = defaultArgs.copy(
+                instantDebits = true,
+                showCheckbox = false,
+                formArgs = defaultArgs.formArgs.copy(
+                    hasIntentToSetup = true,
+                    paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
+                        overrideAllowRedisplay = null
+                    ),
+                )
+            ),
+        )
+
+        assertThat(elementsSessionContext).isNotNull()
+        assertThat(elementsSessionContext?.allowRedisplay)
+            .isEqualTo(ElementsSessionContext.AllowRedisplay.Limited)
+    }
+
+    @Test
+    fun `ElementsSessionContext contains correct allowRedisplay with Disabled behavior with Always override`() =
+        runTest {
+            val elementsSessionContext = testElementsSessionContextGeneration(
+                viewModelArgs = defaultArgs.copy(
+                    instantDebits = true,
+                    showCheckbox = false,
+                    formArgs = defaultArgs.formArgs.copy(
+                        hasIntentToSetup = true,
+                        paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
+                            overrideAllowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS
+                        ),
+                    )
+                ),
+            )
+
+            assertThat(elementsSessionContext).isNotNull()
+            assertThat(elementsSessionContext?.allowRedisplay)
+                .isEqualTo(ElementsSessionContext.AllowRedisplay.Always)
+        }
+
+    @Test
     fun `Contains all supported billing countries when allowed countries is empty`() {
         val viewModel = createViewModel(
             args = defaultArgs.run {
@@ -1809,9 +1932,14 @@ class USBankAccountFormViewModelTest {
 
     private fun testElementsSessionContextGeneration(
         viewModelArgs: USBankAccountFormViewModel.Args,
+        checkboxValue: Boolean? = null
     ): ElementsSessionContext? {
         val viewModel = createViewModel(viewModelArgs)
         viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
+
+        checkboxValue?.let {
+            viewModel.saveForFutureUseElement.controller.onValueChange(it)
+        }
 
         viewModel.handlePrimaryButtonClick()
 
