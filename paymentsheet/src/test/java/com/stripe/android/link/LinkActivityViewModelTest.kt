@@ -412,6 +412,30 @@ internal class LinkActivityViewModelTest {
         assertEquals(state.initialDestination, LinkScreen.SignUp)
     }
 
+    @Test
+    fun `onCreate shows VerificationDialog when Authentication existingOnly with Verified status but no SMS session`() =
+        runTest {
+            val linkAccountManager = FakeLinkAccountManager()
+            linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+
+            val vm = createViewModel(
+                linkAccountManager = linkAccountManager,
+                linkLaunchMode = LinkLaunchMode.Authentication(existingOnly = true)
+            )
+            linkAccountManager.setAccountStatus(
+                AccountStatus.Verified(
+                    hasVerifiedSMSSession = false,
+                    consentPresentation = null
+                )
+            )
+
+            vm.onCreate(mock())
+
+            advanceUntilIdle()
+
+            assertThat(vm.linkScreenState.value).isEqualTo(ScreenState.VerificationDialog(TestFactory.LINK_ACCOUNT))
+        }
+
     private fun testAuthenticationFailureCase(
         accountStatus: AccountStatus,
         existingOnly: Boolean,
