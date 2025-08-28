@@ -663,6 +663,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         paymentMethodMetadata: PaymentMethodMetadata,
         customerStateHolder: CustomerStateHolder,
     ): List<PaymentSheetScreen> {
+        checkIfAutomaticCardScanShouldBeLaunched()
         if (config.paymentMethodLayout != PaymentSheet.PaymentMethodLayout.Horizontal) {
             return VerticalModeInitialScreenFactory.create(
                 viewModel = this,

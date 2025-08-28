@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.ui.core.elements.CvcConfig
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -144,6 +145,12 @@ internal abstract class BaseSheetViewModel(
         get() = newPaymentSelection?.getPaymentMethodCode()
             ?: paymentMethodMetadata.value!!.supportedPaymentMethodTypes().first()
 
+    val automaticallyLaunchedCardScanFormDataHelper = AutomaticallyLaunchedCardScanFormDataHelper(
+        hasAutomaticallyLaunchedCardScanInitialValue = false,
+        openCardScanAutomaticallyConfig = config.opensCardScannerAutomatically,
+        savedStateHandle = savedStateHandle
+    )
+
     init {
         viewModelScope.launch {
             // Drop the first item, since we don't need to clear errors/mandates when there aren't any.
@@ -177,6 +184,12 @@ internal abstract class BaseSheetViewModel(
     }
 
     abstract fun handlePaymentMethodSelected(selection: PaymentSelection?)
+
+    fun checkIfAutomaticCardScanShouldBeLaunched() {
+        automaticallyLaunchedCardScanFormDataHelper.hasAutomaticallyLaunchedCardScan =
+            newPaymentSelection?.paymentSelection is PaymentSelection.New.Card &&
+            newPaymentSelection?.getPaymentMethodCreateParams() != null
+    }
 
     fun updateSelection(selection: PaymentSelection?) {
         when (selection) {

@@ -1059,6 +1059,174 @@ internal class PaymentOptionsViewModelTest {
             }
         }
 
+    @Test
+    fun `Resets automaticallyLaunchedCardScanFormDataHelper for VerticalMode when paymentSelection null`() =
+        runTest {
+            val viewModel = createViewModel(
+                args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                        .build(),
+                    paymentMethods = listOf(),
+                    isGooglePayReady = false,
+                    linkState = null,
+                    stripeIntent = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
+                        paymentMethodTypes = listOf("card")
+                    ),
+                    paymentSelection = null,
+                )
+            )
+
+            assertThat(viewModel.automaticallyLaunchedCardScanFormDataHelper.hasAutomaticallyLaunchedCardScan)
+                .isFalse()
+            viewModel.navigationHandler.currentScreen.test {
+                assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
+            }
+        }
+
+    @Test
+    fun `Resets automaticallyLaunchedCardScanFormDataHelper for VerticalMode when paymentSelection not card`() =
+        runTest {
+            val viewModel = createViewModel(
+                args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                        .build(),
+                    paymentMethods = listOf(),
+                    isGooglePayReady = false,
+                    linkState = null,
+                    stripeIntent = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
+                        paymentMethodTypes = listOf("card", "us_bank_account")
+                    ),
+                    paymentSelection = PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION
+                )
+            )
+
+            assertThat(viewModel.automaticallyLaunchedCardScanFormDataHelper.hasAutomaticallyLaunchedCardScan)
+                .isFalse()
+            viewModel.navigationHandler.currentScreen.test {
+                assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
+            }
+        }
+
+    @Test
+    fun `Does not reset automaticallyLaunchedCardScanFormDataHelper for VerticalMode when paymentSelection card`() =
+        runTest {
+            val viewModel = createViewModel(
+                args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                        .build(),
+                    paymentMethods = listOf(),
+                    isGooglePayReady = false,
+                    linkState = null,
+                    stripeIntent = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
+                        paymentMethodTypes = listOf("card", "us_bank_account")
+                    ),
+                    paymentSelection = CARD_PAYMENT_SELECTION
+                )
+            )
+
+            assertThat(viewModel.automaticallyLaunchedCardScanFormDataHelper.hasAutomaticallyLaunchedCardScan)
+                .isTrue()
+            viewModel.navigationHandler.currentScreen.test {
+                assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
+            }
+        }
+
+    @Test
+    fun `Resets automaticallyLaunchedCardScanFormDataHelper for HorizontalMode when paymentSelection null`() =
+        runTest {
+            val viewModel = createViewModel(
+                args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                        .build(),
+                    paymentMethods = listOf(),
+                    isGooglePayReady = false,
+                    linkState = null,
+                    stripeIntent = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
+                        paymentMethodTypes = listOf("card")
+                    ),
+                    paymentSelection = null,
+                )
+            )
+
+            assertThat(viewModel.automaticallyLaunchedCardScanFormDataHelper.hasAutomaticallyLaunchedCardScan)
+                .isFalse()
+            viewModel.navigationHandler.currentScreen.test {
+                assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.AddFirstPaymentMethod>()
+            }
+        }
+
+    @Test
+    fun `Resets automaticallyLaunchedCardScanFormDataHelper for HorizontalMode when paymentSelection not card`() =
+        runTest {
+            val viewModel = createViewModel(
+                args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                        .build(),
+                    paymentMethods = listOf(),
+                    isGooglePayReady = false,
+                    linkState = null,
+                    stripeIntent = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
+                        paymentMethodTypes = listOf("card", "us_bank_account")
+                    ),
+                    paymentSelection = PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION
+                )
+            )
+
+            assertThat(viewModel.automaticallyLaunchedCardScanFormDataHelper.hasAutomaticallyLaunchedCardScan)
+                .isFalse()
+            viewModel.navigationHandler.currentScreen.test {
+                assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.AddFirstPaymentMethod>()
+            }
+        }
+
+    @Test
+    fun `Does not reset automaticallyLaunchedCardScanFormDataHelper for HorizontalMode when paymentSelection card`() =
+        runTest {
+            val viewModel = createViewModel(
+                args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                        .build(),
+                    paymentMethods = listOf(),
+                    isGooglePayReady = false,
+                    linkState = null,
+                    stripeIntent = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
+                        paymentMethodTypes = listOf("card", "us_bank_account")
+                    ),
+                    paymentSelection = CARD_PAYMENT_SELECTION
+                )
+            )
+
+            assertThat(viewModel.automaticallyLaunchedCardScanFormDataHelper.hasAutomaticallyLaunchedCardScan)
+                .isTrue()
+            viewModel.navigationHandler.currentScreen.test {
+                assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.AddFirstPaymentMethod>()
+            }
+        }
+
+    @Test
+    fun `When user previously selected a new payment method, don't show auto card scan`() = runTest {
+        val viewModel = createViewModel(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+                paymentSelection = NEW_CARD_PAYMENT_SELECTION.copy(
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+                ),
+            )
+        )
+
+        viewModel.navigationHandler.currentScreen.test {
+            assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.AddAnotherPaymentMethod>()
+        }
+        assertThat(viewModel.automaticallyLaunchedCardScanFormDataHelper.hasAutomaticallyLaunchedCardScan)
+            .isTrue()
+    }
+
     /**
      * Helper function to test user cancellation scenarios
      */

@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
@@ -620,6 +621,7 @@ internal class FormHelperTest {
         linkInlineHandler: LinkInlineHandler = LinkInlineHandler.create(),
         eventReporter: FakeEventReporter = FakeEventReporter(),
         newPaymentSelectionProvider: () -> NewPaymentOptionSelection? = { throw AssertionError("Not implemented") },
+        automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper? = null,
         selectionUpdater: (PaymentSelection?) -> Unit = { throw AssertionError("Not implemented") },
     ): FormHelper {
         return DefaultFormHelper(
@@ -634,6 +636,7 @@ internal class FormHelperTest {
             eventReporter = eventReporter,
             savedStateHandle = SavedStateHandle(),
             autocompleteAddressInteractorFactory = null,
+            automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
         )
     }
 

@@ -1154,7 +1154,8 @@ internal class PaymentMethodMetadataTest {
             shopPayConfiguration = null,
             termsDisplay = emptyMap(),
             forceSetupFutureUseBehaviorAndNewMandate = false,
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+            openCardScanAutomatically = false,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1231,7 +1232,8 @@ internal class PaymentMethodMetadataTest {
             shopPayConfiguration = null,
             termsDisplay = emptyMap(),
             forceSetupFutureUseBehaviorAndNewMandate = false,
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+            openCardScanAutomatically = false,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }

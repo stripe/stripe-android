@@ -346,6 +346,8 @@ internal class SavedPaymentMethodMutator(
                             viewModel = viewModel,
                             paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
                         )
+                        // There will never be card information in the form, so we should always launch card scan
+                        viewModel.automaticallyLaunchedCardScanFormDataHelper.hasAutomaticallyLaunchedCardScan = false
                         val screen = PaymentSheetScreen.AddFirstPaymentMethod(interactor)
                         viewModel.navigationHandler.resetTo(listOf(screen))
                     } else {

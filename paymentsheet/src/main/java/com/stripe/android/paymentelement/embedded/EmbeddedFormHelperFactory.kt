@@ -51,6 +51,7 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
             eventReporter = eventReporter,
             savedStateHandle = savedStateHandle,
             autocompleteAddressInteractorFactory = null,
+            automaticallyLaunchedCardScanFormDataHelper = null,
         )
     }
 }

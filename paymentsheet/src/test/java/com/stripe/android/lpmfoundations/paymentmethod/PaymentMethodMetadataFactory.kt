@@ -51,7 +51,8 @@ internal object PaymentMethodMetadataFactory {
         shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = SHOP_PAY_CONFIGURATION,
         termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay> = emptyMap(),
         forceSetupFutureUseBehaviorAndNewMandate: Boolean = false,
-        passiveCaptchaParams: PassiveCaptchaParams? = null
+        passiveCaptchaParams: PassiveCaptchaParams? = null,
+        openCardScanAutomatically: Boolean = false,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -86,7 +87,8 @@ internal object PaymentMethodMetadataFactory {
             shopPayConfiguration = shopPayConfiguration,
             termsDisplay = termsDisplay,
             forceSetupFutureUseBehaviorAndNewMandate = forceSetupFutureUseBehaviorAndNewMandate,
-            passiveCaptchaParams = passiveCaptchaParams
+            passiveCaptchaParams = passiveCaptchaParams,
+            openCardScanAutomatically = openCardScanAutomatically,
         )
     }
 

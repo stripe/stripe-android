@@ -74,7 +74,8 @@ internal data class PaymentMethodMetadata(
     val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
     val termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay>,
     val forceSetupFutureUseBehaviorAndNewMandate: Boolean,
-    val passiveCaptchaParams: PassiveCaptchaParams?
+    val passiveCaptchaParams: PassiveCaptchaParams?,
+    val openCardScanAutomatically: Boolean,
 ) : Parcelable {
 
     fun hasIntentToSetup(code: PaymentMethodCode): Boolean {
@@ -351,7 +352,8 @@ internal data class PaymentMethodMetadata(
                 termsDisplay = configuration.termsDisplay,
                 forceSetupFutureUseBehaviorAndNewMandate = elementsSession
                     .flags[ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT] == true,
-                passiveCaptchaParams = elementsSession.passiveCaptchaParams
+                passiveCaptchaParams = elementsSession.passiveCaptchaParams,
+                openCardScanAutomatically = configuration.opensCardScannerAutomatically,
             )
         }
 
@@ -401,7 +403,8 @@ internal data class PaymentMethodMetadata(
                 termsDisplay = emptyMap(),
                 forceSetupFutureUseBehaviorAndNewMandate = elementsSession
                     .flags[ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT] == true,
-                passiveCaptchaParams = elementsSession.passiveCaptchaParams
+                passiveCaptchaParams = elementsSession.passiveCaptchaParams,
+                openCardScanAutomatically = configuration.opensCardScannerAutomatically,
             )
         }
 
@@ -456,7 +459,8 @@ internal data class PaymentMethodMetadata(
                 shopPayConfiguration = null,
                 termsDisplay = emptyMap(),
                 forceSetupFutureUseBehaviorAndNewMandate = configuration.forceSetupFutureUseBehaviorAndNewMandate,
-                passiveCaptchaParams = passiveCaptchaParams
+                passiveCaptchaParams = passiveCaptchaParams,
+                openCardScanAutomatically = false,
             )
         }
     }

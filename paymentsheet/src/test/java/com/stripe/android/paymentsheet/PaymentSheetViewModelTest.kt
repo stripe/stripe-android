@@ -68,6 +68,7 @@ import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignu
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.ARGS_DEFERRED_INTENT
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.BILLING_DETAILS_FORM_DETAILS
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
@@ -3592,6 +3593,44 @@ internal class PaymentSheetViewModelTest {
                 assertThat(awaitNextUnregisteredLauncher()).isEqualTo(autocompleteLauncher)
             }
         }
+
+    @Test
+    fun `Resets automaticallyLaunchedCardScanFormDataHelper for VerticalMode`() = runTest {
+        val config = CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical
+        )
+        val viewModel = createViewModel(
+            customer = EMPTY_CUSTOMER_STATE,
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                config = config
+            ),
+        )
+
+        viewModel.navigationHandler.currentScreen.test {
+            assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.VerticalMode>()
+        }
+
+        viewModel.automaticallyLaunchedCardScanFormDataHelper.hasAutomaticallyLaunchedCardScan = false
+    }
+
+    @Test
+    fun `Resets automaticallyLaunchedCardScanFormDataHelper for HorizontalMode`() = runTest {
+        val config = CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal
+        )
+        val viewModel = createViewModel(
+            customer = EMPTY_CUSTOMER_STATE,
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                config = config
+            ),
+        )
+
+        viewModel.navigationHandler.currentScreen.test {
+            assertThat(awaitItem()).isInstanceOf<AddFirstPaymentMethod>()
+        }
+
+        viewModel.automaticallyLaunchedCardScanFormDataHelper.hasAutomaticallyLaunchedCardScan = false
+    }
 
     private fun testConfirmationStateRestorationAfterPaymentSuccess(
         loadStateBeforePaymentResult: Boolean
