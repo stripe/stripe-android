@@ -326,6 +326,7 @@ internal class LinkActivityViewModel @Inject constructor(
         )
     }
 
+    @Suppress("CyclomaticComplexMethod", "ComplexCondition")
     private suspend fun updateScreenState(withAnimationDelay: Boolean) {
         val accountStatus = linkAccountManager.accountStatus.first()
 
@@ -344,6 +345,17 @@ internal class LinkActivityViewModel @Inject constructor(
                     linkAccountUpdate = LinkAccountUpdate.None
                 )
             )
+            return
+        }
+
+        if (authenticatingExistingAccount &&
+            accountStatus is AccountStatus.Verified &&
+            !accountStatus.hasVerifiedSMSSession &&
+            linkAccount != null // Should always be non-null.
+        ) {
+            // Handle edge case where status is "verified" but don't have a verified SMS session.
+            // This can happen after registering a new user without verifying their phone number.
+            _linkScreenState.value = ScreenState.VerificationDialog(linkAccount)
             return
         }
 

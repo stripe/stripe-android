@@ -500,6 +500,19 @@ internal class LinkApiRepository @Inject constructor(
         )
     }
 
+    override suspend fun updatePhoneNumber(
+        consumerSessionClientSecret: String,
+        phoneNumber: String,
+        consumerPublishableKey: String?
+    ): Result<ConsumerSession> = withContext(workContext) {
+        consumersApiService.updatePhoneNumber(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            phoneNumber = phoneNumber,
+            requestSurface = requestSurface.value,
+            requestOptions = buildRequestOptions(consumerPublishableKey),
+        )
+    }
+
     private fun buildRequestOptions(
         apiKey: String? = null,
     ): ApiRequest.Options {

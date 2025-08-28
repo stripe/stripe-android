@@ -82,7 +82,7 @@ class DefaultLinkAccountManagerTest {
                 TestFactory.EMAIL,
                 linkRepository = linkRepository
             ).accountStatus.first()
-        ).isEqualTo(AccountStatus.Verified(null))
+        ).isEqualTo(AccountStatus.Verified(true, null))
 
         assertThat(linkRepository.callCount).isEqualTo(1)
     }
@@ -442,7 +442,7 @@ class DefaultLinkAccountManagerTest {
         assertThat(result.exceptionOrNull()).isEqualTo(
             AlreadyLoggedInLinkException(
                 email = TestFactory.EMAIL,
-                accountStatus = AccountStatus.Verified(null)
+                accountStatus = AccountStatus.Verified(true, null)
             )
         )
     }
@@ -1092,7 +1092,7 @@ class DefaultLinkAccountManagerTest {
         accountStatusFlowTest(
             customerEmail = TestFactory.CUSTOMER_EMAIL,
             allowUserEmailEdits = true,
-            expectedStatus = AccountStatus.Verified(null),
+            expectedStatus = AccountStatus.Verified(true, null),
             expectedLookupEmail = TestFactory.CUSTOMER_EMAIL
         )
 
@@ -1101,7 +1101,7 @@ class DefaultLinkAccountManagerTest {
         accountStatusFlowTest(
             customerEmail = TestFactory.CUSTOMER_EMAIL,
             allowUserEmailEdits = false,
-            expectedStatus = AccountStatus.Verified(null),
+            expectedStatus = AccountStatus.Verified(true, null),
             expectedLookupEmail = TestFactory.CUSTOMER_EMAIL
         )
 

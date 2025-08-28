@@ -179,7 +179,8 @@ internal class LinkControllerInteractor @Inject constructor(
                 )
             },
             getLaunchMode = { linkAccount, _ ->
-                if (linkAccount?.isVerified == true) {
+                // This condition will need to change for web fallback.
+                if (linkAccount?.hasVerifiedSMSSession == true) {
                     logger.debug("$tag: account is already verified, skipping authentication")
                     _authenticationResultFlow.tryEmit(LinkController.AuthenticationResult.Success)
                     null
@@ -402,6 +403,23 @@ internal class LinkControllerInteractor @Inject constructor(
                 onFailure = {
                     updateStateOnAccountUpdate(LinkAccountUpdate.Value(null))
                     LinkController.RegisterConsumerResult.Failed(it)
+                }
+            )
+    }
+
+    suspend fun updatePhoneNumber(phoneNumber: String): LinkController.UpdatePhoneNumberResult {
+        return requireLinkComponent()
+            .flatMapCatching { component ->
+                component.linkAccountManager.updatePhoneNumber(phoneNumber)
+            }
+            .fold(
+                onSuccess = { linkAccount ->
+                    // Update the account with the new phone number info
+                    updateStateOnAccountUpdate(LinkAccountUpdate.Value(linkAccount))
+                    LinkController.UpdatePhoneNumberResult.Success
+                },
+                onFailure = {
+                    LinkController.UpdatePhoneNumberResult.Failed(it)
                 }
             )
     }

@@ -47,7 +47,7 @@ import javax.inject.Inject
 /**
  * Manages the Link account for the current user, persisting it across app usages.
  */
-@SuppressWarnings("TooManyFunctions")
+@SuppressWarnings("TooManyFunctions", "LargeClass")
 internal class DefaultLinkAccountManager @Inject constructor(
     private val linkAccountHolder: LinkAccountHolder,
     private val config: LinkConfiguration,
@@ -567,11 +567,28 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
+    override suspend fun updatePhoneNumber(phoneNumber: String): Result<LinkAccount> {
+        val linkAccount = linkAccountHolder.linkAccountInfo.value.account
+            ?: return Result.failure(NoLinkAccountFoundException())
+        return linkRepository.updatePhoneNumber(
+            consumerSessionClientSecret = linkAccount.clientSecret,
+            phoneNumber = phoneNumber,
+            consumerPublishableKey = linkAccount.consumerPublishableKey
+        ).map { consumerSession ->
+            setAccount(
+                consumerSession = consumerSession,
+                publishableKey = null,
+                displayablePaymentDetails = null,
+                linkAuthIntentInfo = linkAccount.linkAuthIntentInfo,
+            )
+        }
+    }
+
     private suspend fun getAccountStatus(
         linkAccount: LinkAccount?,
         canLookupCustomerEmail: Boolean
     ): AccountStatus {
-        val result =
+        val linkAccountResult =
             when (val linkLaunchMode = this.linkLaunchMode) {
                 null,
                 is LinkLaunchMode.Authentication,
@@ -603,7 +620,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                         )
                 }
             }
-        return result
+        return linkAccountResult
             ?.map { it?.accountStatus }
             ?.getOrElse { AccountStatus.Error }
             ?: AccountStatus.SignedOut

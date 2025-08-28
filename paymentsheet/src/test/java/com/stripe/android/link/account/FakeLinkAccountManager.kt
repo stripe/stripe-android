@@ -74,6 +74,7 @@ internal open class FakeLinkAccountManager(
     )
     var sharePaymentDetails: Result<SharePaymentDetails> = Result.success(TestFactory.LINK_SHARE_PAYMENT_DETAILS)
     var updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
+    var updatePhoneNumberResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
     var deletePaymentDetailsResult: Result<Unit> = Result.success(Unit)
     var listPaymentDetailsResult: Result<ConsumerPaymentDetails> = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
         set(value) {
@@ -305,6 +306,10 @@ internal open class FakeLinkAccountManager(
             updateParams
         )
         return updatePaymentDetailsResult
+    }
+
+    override suspend fun updatePhoneNumber(phoneNumber: String): Result<LinkAccount> {
+        return updatePhoneNumberResult
     }
 
     suspend fun awaitMobileSignUpCall(): MobileSignUpCall {

@@ -199,6 +199,11 @@ internal interface LinkAccountManager {
         updateParams: ConsumerPaymentDetailsUpdateParams,
         phone: String? = null
     ): Result<ConsumerPaymentDetails>
+
+    /**
+     * Update the phone number for the signed in consumer.
+     */
+    suspend fun updatePhoneNumber(phoneNumber: String): Result<LinkAccount>
 }
 
 internal val LinkAccountManager.consumerPublishableKey: String?

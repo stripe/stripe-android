@@ -18,6 +18,7 @@ import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResu
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
+import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import javax.inject.Inject
 
@@ -63,6 +64,16 @@ class OnrampCoordinator @Inject internal constructor(
      */
     suspend fun registerLinkUser(info: LinkUserInfo): OnrampRegisterLinkUserResult {
         return interactor.registerLinkUser(info)
+    }
+
+    /**
+     * Updates the phone number for the current Link user.
+     *
+     * @property phone The phone number of the user. Phone number must be in E.164 format (e.g., +12125551234).
+     * @return OnrampUpdatePhoneNumberResult indicating the result of the update.
+     */
+    suspend fun updatePhoneNumber(phone: String): OnrampUpdatePhoneNumberResult {
+        return interactor.updatePhoneNumber(phone)
     }
 
     /**

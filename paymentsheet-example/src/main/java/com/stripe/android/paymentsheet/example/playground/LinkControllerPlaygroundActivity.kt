@@ -52,6 +52,7 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
                         onAuthenticationClick = viewModel::onAuthenticateClick,
                         onAuthorizeClick = viewModel::onAuthorizeClick,
                         onRegisterConsumerClick = viewModel::onRegisterConsumerClick,
+                        onUpdatePhoneNumberClick = viewModel::onUpdatePhoneNumberClick,
                         onErrorMessage = { viewModel.status.value = StatusMessage(it) },
                     )
                 }

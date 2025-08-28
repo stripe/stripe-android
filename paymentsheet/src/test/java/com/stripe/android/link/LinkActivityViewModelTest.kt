@@ -299,7 +299,7 @@ internal class LinkActivityViewModelTest {
         val linkAccountManager = FakeLinkAccountManager()
 
         val vm = createViewModel(linkAccountManager = linkAccountManager)
-        linkAccountManager.setAccountStatus(AccountStatus.Verified(null))
+        linkAccountManager.setAccountStatus(AccountStatus.Verified(true, null))
 
         vm.onCreate(mock())
 
@@ -411,6 +411,30 @@ internal class LinkActivityViewModelTest {
         val state = vm.linkScreenState.value as ScreenState.FullScreen
         assertEquals(state.initialDestination, LinkScreen.SignUp)
     }
+
+    @Test
+    fun `onCreate shows VerificationDialog when Authentication existingOnly with Verified status but no SMS session`() =
+        runTest {
+            val linkAccountManager = FakeLinkAccountManager()
+            linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+
+            val vm = createViewModel(
+                linkAccountManager = linkAccountManager,
+                linkLaunchMode = LinkLaunchMode.Authentication(existingOnly = true)
+            )
+            linkAccountManager.setAccountStatus(
+                AccountStatus.Verified(
+                    hasVerifiedSMSSession = false,
+                    consentPresentation = null
+                )
+            )
+
+            vm.onCreate(mock())
+
+            advanceUntilIdle()
+
+            assertThat(vm.linkScreenState.value).isEqualTo(ScreenState.VerificationDialog(TestFactory.LINK_ACCOUNT))
+        }
 
     private fun testAuthenticationFailureCase(
         accountStatus: AccountStatus,
@@ -552,7 +576,7 @@ internal class LinkActivityViewModelTest {
             vm.onCreate(mock())
             assertThat(awaitItem()).isEqualTo(ScreenState.VerificationDialog(TestFactory.LINK_ACCOUNT))
 
-            linkAccountManager.setAccountStatus(AccountStatus.Verified(null))
+            linkAccountManager.setAccountStatus(AccountStatus.Verified(true, null))
             vm.onVerificationSucceeded()
             assertThat(awaitItem()).isInstanceOf(ScreenState.FullScreen::class.java)
         }
@@ -769,7 +793,7 @@ internal class LinkActivityViewModelTest {
                 linkAccountManager = linkAccountManager,
                 linkLaunchMode = LinkLaunchMode.Authorization(linkAuthIntentId = "lai_123")
             )
-            linkAccountManager.setAccountStatus(AccountStatus.Verified(inlineConsentPresentation))
+            linkAccountManager.setAccountStatus(AccountStatus.Verified(true, inlineConsentPresentation))
 
             vm.result.test {
                 vm.onCreate(mock())
@@ -790,7 +814,7 @@ internal class LinkActivityViewModelTest {
             linkAccountManager = linkAccountManager,
             linkLaunchMode = LinkLaunchMode.Authorization(linkAuthIntentId = "lai_123")
         )
-        linkAccountManager.setAccountStatus(AccountStatus.Verified(null))
+        linkAccountManager.setAccountStatus(AccountStatus.Verified(true, null))
 
         vm.onCreate(mock())
         advanceUntilIdle()

@@ -378,6 +378,32 @@ class LinkControllerInteractorTest {
         }
 
     @Test
+    fun `updatePhoneNumber() on success emits success result`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+        signIn()
+
+        linkAccountManager.updatePhoneNumberResult = Result.success(TestFactory.LINK_ACCOUNT)
+
+        assertThat(interactor.updatePhoneNumber("+1234567890"))
+            .isEqualTo(LinkController.UpdatePhoneNumberResult.Success)
+    }
+
+    @Test
+    fun `updatePhoneNumber() on failure emits failure result`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+        signIn()
+
+        val error = Exception("Phone update error")
+        linkAccountManager.updatePhoneNumberResult = Result.failure(error)
+
+        val result = interactor.updatePhoneNumber("+1234567890")
+        assertThat(result).isInstanceOf(LinkController.UpdatePhoneNumberResult.Failed::class.java)
+        assertThat((result as LinkController.UpdatePhoneNumberResult.Failed).error).isEqualTo(error)
+    }
+
+    @Test
     fun `onPresentPaymentMethods() launches Link with correct arguments`() = runTest {
         val interactor = createInteractor()
         configure(interactor)

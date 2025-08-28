@@ -184,6 +184,15 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         TODO("Not yet implemented")
     }
 
+    override suspend fun updatePhoneNumber(
+        consumerSessionClientSecret: String,
+        phoneNumber: String,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options
+    ): Result<ConsumerSession> {
+        TODO("Not yet implemented")
+    }
+
     data class LookupCall(
         val email: String?,
         val linkAuthIntentId: String?,

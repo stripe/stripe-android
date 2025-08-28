@@ -27,6 +27,7 @@ import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResu
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
+import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.link.LinkAppearance
@@ -316,6 +317,30 @@ internal class OnrampViewModel(
                 is OnrampAttachKycInfoResult.Failed -> {
                     _message.value = "KYC Collection failed: ${result.error.message}"
                     _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
+                }
+            }
+        }
+    }
+
+    fun updatePhoneNumber(phoneNumber: String) {
+        if (phoneNumber.isBlank()) {
+            _message.value = "Please enter a phone number"
+            return
+        }
+
+        viewModelScope.launch {
+            val currentScreen = _uiState.value.screen
+            _uiState.update { it.copy(screen = Screen.Loading, loadingMessage = "Updating phone number...") }
+
+            val result = onrampCoordinator.updatePhoneNumber(phoneNumber.trim())
+            when (result) {
+                is OnrampUpdatePhoneNumberResult.Completed -> {
+                    _message.value = "Phone number updated successfully!"
+                    _uiState.update { it.copy(screen = currentScreen) }
+                }
+                is OnrampUpdatePhoneNumberResult.Failed -> {
+                    _message.value = "Failed to update phone number: ${result.error.message}"
+                    _uiState.update { it.copy(screen = currentScreen) }
                 }
             }
         }

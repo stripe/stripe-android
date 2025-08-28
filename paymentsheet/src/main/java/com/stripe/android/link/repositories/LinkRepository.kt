@@ -200,4 +200,13 @@ internal interface LinkRepository {
         linkMode: LinkMode?,
         consumerPublishableKey: String?
     ): Result<LinkAccountSession>
+
+    /**
+     * Update the phone number for the signed in consumer.
+     */
+    suspend fun updatePhoneNumber(
+        consumerSessionClientSecret: String,
+        phoneNumber: String,
+        consumerPublishableKey: String?
+    ): Result<ConsumerSession>
 }

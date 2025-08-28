@@ -11,4 +11,5 @@ data class LinkControllerPlaygroundState(
     val authenticationResult: LinkController.AuthenticationResult? = null,
     val authorizeResult: LinkController.AuthorizeResult? = null,
     val registerConsumerResult: LinkController.RegisterConsumerResult? = null,
+    val updatePhoneNumberResult: LinkController.UpdatePhoneNumberResult? = null,
 )

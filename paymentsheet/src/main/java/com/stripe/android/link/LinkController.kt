@@ -82,6 +82,15 @@ class LinkController @Inject internal constructor(
     }
 
     /**
+     * Update the phone number associated with the current Link consumer account.
+     *
+     * @param phoneNumber The new phone number to associate with the Link account, in E.164 format.
+     */
+    suspend fun updatePhoneNumber(phoneNumber: String): UpdatePhoneNumberResult {
+        return interactor.updatePhoneNumber(phoneNumber)
+    }
+
+    /**
      * Creates a [Presenter] for the Link controller that can present user-interactive flows.
      *
      * @param activity The [ComponentActivity] that will host the Link UI.
@@ -307,9 +316,6 @@ class LinkController @Inject internal constructor(
         private val coordinator: LinkControllerCoordinator,
         private val interactor: LinkControllerInteractor,
     ) {
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        var paymentSelectionHint: String? = null
-
         /**
          * Present the Link payment methods selection screen.
          *
@@ -580,6 +586,28 @@ class LinkController @Inject internal constructor(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Poko
         class Failed internal constructor(val error: Throwable) : AuthorizeResult
+    }
+
+    /**
+     * Result of updating a consumer's phone number.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    sealed interface UpdatePhoneNumberResult {
+
+        /**
+         * The phone number was updated successfully.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data object Success : UpdatePhoneNumberResult
+
+        /**
+         * An error occurred while updating the phone number.
+         *
+         * @param error The error that occurred.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Poko
+        class Failed internal constructor(val error: Throwable) : UpdatePhoneNumberResult
     }
 
     /**
