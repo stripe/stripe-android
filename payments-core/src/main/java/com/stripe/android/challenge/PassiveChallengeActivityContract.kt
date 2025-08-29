@@ -32,7 +32,8 @@ class PassiveChallengeActivityContract :
         val productUsage: Set<String>
     )
 
-    internal companion object {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
         const val EXTRA_RESULT = "com.stripe.android.challenge.PassiveChallengeActivityContract.extra_result"
     }
 }
