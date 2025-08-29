@@ -132,6 +132,9 @@ internal class GooglePayLauncherViewModel(
                 transactionInfo = info,
                 merchantInfo = GooglePayJsonFactory.MerchantInfo(
                     merchantName = args.config.merchantName,
+                    softwareInfo = GooglePayJsonFactory.SoftwareInfo(
+                        id = GooglePayJsonFactory.SoftwareInfo.SoftwareId.Launcher
+                    )
                 ),
                 billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(
                     isRequired = args.config.billingAddressConfig.isRequired,
