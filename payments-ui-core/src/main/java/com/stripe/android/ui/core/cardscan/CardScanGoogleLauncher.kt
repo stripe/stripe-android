@@ -11,6 +11,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
+import androidx.core.app.ActivityOptionsCompat
 import com.google.android.gms.wallet.PaymentCardRecognitionResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 internal class CardScanGoogleLauncher @VisibleForTesting constructor(
     context: Context,
+    private val options: ActivityOptionsCompat?,
     private val eventsReporter: CardScanEventsReporter,
     private val paymentCardRecognitionClient: PaymentCardRecognitionClient
 ) {
@@ -50,7 +52,7 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
             },
             onSuccess = { intentSenderRequest ->
                 eventsReporter.onCardScanStarted("google_pay")
-                activityLauncher.launch(intentSenderRequest)
+                activityLauncher.launch(intentSenderRequest, options)
             }
         )
     }
@@ -97,12 +99,14 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
         internal fun rememberCardScanGoogleLauncher(
             context: Context,
             eventsReporter: CardScanEventsReporter,
+            options: ActivityOptionsCompat? = null,
             onResult: (CardScanResult) -> Unit
         ): CardScanGoogleLauncher {
             val paymentCardRecognitionClient = LocalPaymentCardRecognitionClient.current
-            val launcher = remember(context, eventsReporter, paymentCardRecognitionClient) {
+            val launcher = remember(context, options, eventsReporter, paymentCardRecognitionClient) {
                 CardScanGoogleLauncher(
                     context,
+                    options,
                     eventsReporter,
                     paymentCardRecognitionClient
                 )

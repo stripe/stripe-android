@@ -15,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityOptionsCompat
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cardscan.CardScanGoogleLauncher.Companion.rememberCardScanGoogleLauncher
 import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
@@ -23,6 +24,7 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionController
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionElementUI
+import com.stripe.android.uicore.utils.AnimationConstants
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -33,12 +35,19 @@ fun CardDetailsSectionElementUI(
     lastTextFieldIdentifier: IdentifierSpec?,
     modifier: Modifier = Modifier,
 ) {
+    val options = ActivityOptionsCompat.makeCustomAnimation(
+        LocalContext.current,
+        AnimationConstants.FADE_IN,
+        AnimationConstants.FADE_OUT,
+    )
+
     if (controller.shouldAutomaticallyLaunchCardScan()) {
         val context = LocalContext.current
         val eventsReporter = LocalCardScanEventsReporter.current
         val cardScanGoogleLauncher = rememberCardScanGoogleLauncher(
-            context,
-            eventsReporter,
+            context = context,
+            options = options,
+            eventsReporter = eventsReporter,
         ) { controller.onCardScanResult(it) }
 
         SideEffect {
@@ -63,6 +72,7 @@ fun CardDetailsSectionElementUI(
             )
             ScanCardButtonUI(
                 enabled = enabled,
+                launchOptions = options,
                 controller = controller
             )
         }

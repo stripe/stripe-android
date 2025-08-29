@@ -22,6 +22,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityOptionsCompat
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.stripecardscan.cardscan.CardScanConfiguration
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
@@ -37,6 +38,7 @@ import com.stripe.android.uicore.utils.collectAsState
 @Composable
 internal fun ScanCardButtonUI(
     enabled: Boolean,
+    launchOptions: ActivityOptionsCompat? = null,
     controller: CardDetailsSectionController
 ) {
     if (controller.isStripeCardScanAvailable() || FeatureFlags.cardScanGooglePayMigration.isEnabled) {
@@ -48,8 +50,9 @@ internal fun ScanCardButtonUI(
         val cardScanGoogleLauncher = if (FeatureFlags.cardScanGooglePayMigration.isEnabled) {
             val eventsReporter = LocalCardScanEventsReporter.current
             rememberCardScanGoogleLauncher(
-                context,
-                eventsReporter,
+                context = context,
+                eventsReporter = eventsReporter,
+                options = launchOptions,
                 controller.cardDetailsElement.controller.onCardScanResult
             )
         } else {
@@ -58,6 +61,7 @@ internal fun ScanCardButtonUI(
 
         ScanCardButtonContent(
             enabled = enabled,
+            launchOptions = launchOptions,
             elementsSessionId = controller.elementsSessionId,
             cardScanLauncher = cardScanLauncher,
             cardScanGoogleLauncher = cardScanGoogleLauncher,
@@ -69,6 +73,7 @@ internal fun ScanCardButtonUI(
 @Suppress("LongMethod") // Should be removed along with feature flag when ready
 private fun ScanCardButtonContent(
     enabled: Boolean,
+    launchOptions: ActivityOptionsCompat?,
     elementsSessionId: String?,
     cardScanLauncher: ManagedActivityResultLauncher<CardScanContract.Args, CardScanSheetResult>,
     cardScanGoogleLauncher: CardScanGoogleLauncher?
@@ -96,7 +101,8 @@ private fun ScanCardButtonContent(
                                 configuration = CardScanConfiguration(
                                     elementsSessionId = elementsSessionId
                                 )
-                            )
+                            ),
+                            options = launchOptions,
                         )
                     }
                 }

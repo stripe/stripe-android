@@ -162,6 +162,7 @@ class CardScanGoogleLauncherTest {
         val launcher = CardScanGoogleLauncher(
             context = ApplicationProvider.getApplicationContext(),
             eventsReporter = fakeEventsReporter,
+            options = null,
             paymentCardRecognitionClient = FakePaymentCardRecognitionClient(isFetchClientSucceed)
         ).apply {
             this.activityLauncher = activityLauncher
