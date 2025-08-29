@@ -241,6 +241,10 @@ internal object TestFactory {
         linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
     )
 
+    val LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING = LINK_CONFIGURATION.copy(
+        linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD", "INSTANT_DEBITS"),
+    )
+
     val LINK_WALLET_PRIMARY_BUTTON_LABEL = Amount(
         requireNotNull(PaymentIntentFixtures.PI_SUCCEEDED.amount),
         requireNotNull(PaymentIntentFixtures.PI_SUCCEEDED.currency)
