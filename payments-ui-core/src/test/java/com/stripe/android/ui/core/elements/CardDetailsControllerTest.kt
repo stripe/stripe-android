@@ -179,4 +179,41 @@ class CardDetailsControllerTest {
         assertThat(cardController.expirationDateElement.controller.rawFieldValue.value)
             .isEqualTo("")
     }
+
+    @Test
+    fun `When new card scanned with no expiry date, should clear date`() = runTest {
+        val cardController = CardDetailsController(
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            initialValues = mapOf(
+                IdentifierSpec.CardNumber to "4242424242424242",
+                IdentifierSpec.CardExpYear to "2042",
+                IdentifierSpec.CardExpMonth to "2",
+                IdentifierSpec.CardCvc to "123",
+            ),
+        )
+        assertThat(cardController.numberElement.controller.rawFieldValue.value)
+            .isEqualTo("4242424242424242")
+        assertThat(cardController.expirationDateElement.controller.rawFieldValue.value)
+            .isEqualTo("242")
+        assertThat(cardController.cvcElement.controller.rawFieldValue.value)
+            .isEqualTo("123")
+
+        val scannedCard = ScannedCard(
+            pan = "5555555555554444",
+            expirationYear = null,
+            expirationMonth = null,
+        )
+
+        val cardScanResult = CardScanResult.Completed(
+            scannedCard = scannedCard
+        )
+        idleLooper()
+
+        cardController.onCardScanResult.invoke(cardScanResult)
+
+        assertThat(cardController.numberElement.controller.rawFieldValue.value)
+            .isEqualTo("5555555555554444")
+        assertThat(cardController.expirationDateElement.controller.rawFieldValue.value)
+            .isEqualTo("")
+    }
 }
