@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.link.TestFactory
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement.InstantDebits
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement.LinkCardBrand
 import com.stripe.android.model.Address
@@ -15,6 +16,7 @@ import com.stripe.android.payments.financialconnections.FinancialConnectionsAvai
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.testing.PaymentIntentFactory
 import org.junit.Test
 
@@ -214,28 +216,27 @@ internal class AddPaymentMethodRequirementTest {
     fun testInstantDebitsReturnsTrue() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = createValidInstantDebitsPaymentIntent(),
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            )
         )
 
         assertThat(InstantDebits.isMetBy(metadata, "")).isTrue()
     }
 
     @Test
-    fun testInstantDebitsReturnsFalseIfShowingUsBankAccount() {
+    fun testInstantDebitsReturnsFalseIfOnboardingDisabledForInstantDebits() {
         val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = createValidInstantDebitsPaymentIntent().copy(
-                paymentMethodTypes = listOf("card", "link", "us_bank_account"),
-            ),
-        )
-
-        assertThat(InstantDebits.isMetBy(metadata, "")).isFalse()
-    }
-
-    @Test
-    fun testInstantDebitsReturnsFalseIfOnlyCardFundingSource() {
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = createValidInstantDebitsPaymentIntent().copy(
-                linkFundingSources = listOf("card"),
-            ),
+            stripeIntent = createValidInstantDebitsPaymentIntent(),
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION.copy(
+                    linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+                ),
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            )
         )
 
         assertThat(InstantDebits.isMetBy(metadata, "")).isFalse()
@@ -246,6 +247,11 @@ internal class AddPaymentMethodRequirementTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = createValidInstantDebitsPaymentIntent(),
             linkMode = LinkMode.LinkCardBrand,
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
         )
 
         assertThat(InstantDebits.isMetBy(metadata, "")).isFalse()
@@ -257,6 +263,11 @@ internal class AddPaymentMethodRequirementTest {
             stripeIntent = createValidInstantDebitsPaymentIntent(),
             linkConfiguration = PaymentSheet.LinkConfiguration(
                 display = PaymentSheet.LinkConfiguration.Display.Automatic,
+            ),
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
             ),
         )
 
@@ -270,6 +281,11 @@ internal class AddPaymentMethodRequirementTest {
             linkConfiguration = PaymentSheet.LinkConfiguration(
                 display = PaymentSheet.LinkConfiguration.Display.Never,
             ),
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
         )
 
         assertThat(InstantDebits.isMetBy(metadata, "")).isFalse()
@@ -280,6 +296,11 @@ internal class AddPaymentMethodRequirementTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = createValidInstantDebitsPaymentIntent(),
             linkMode = LinkMode.LinkCardBrand,
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
         )
 
         assertThat(LinkCardBrand.isMetBy(metadata, "")).isTrue()
@@ -290,6 +311,11 @@ internal class AddPaymentMethodRequirementTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = createValidInstantDebitsPaymentIntent(),
             linkMode = LinkMode.LinkCardBrand,
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
             billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                 email = CollectionMode.Never,
                 attachDefaultsToPaymentMethod = true,
@@ -305,6 +331,11 @@ internal class AddPaymentMethodRequirementTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = createValidInstantDebitsPaymentIntent(),
             linkMode = LinkMode.LinkCardBrand,
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
             billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                 email = CollectionMode.Never,
                 attachDefaultsToPaymentMethod = false,
@@ -322,6 +353,11 @@ internal class AddPaymentMethodRequirementTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = createValidInstantDebitsPaymentIntent(),
             linkMode = LinkMode.LinkCardBrand,
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
             billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                 email = CollectionMode.Never,
                 attachDefaultsToPaymentMethod = true,
@@ -342,6 +378,11 @@ internal class AddPaymentMethodRequirementTest {
             linkConfiguration = PaymentSheet.LinkConfiguration(
                 display = PaymentSheet.LinkConfiguration.Display.Automatic,
             ),
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            )
         )
 
         assertThat(LinkCardBrand.isMetBy(metadata, "")).isTrue()
@@ -352,6 +393,11 @@ internal class AddPaymentMethodRequirementTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = createValidInstantDebitsPaymentIntent(),
             linkMode = LinkMode.LinkCardBrand,
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
             linkConfiguration = PaymentSheet.LinkConfiguration(
                 display = PaymentSheet.LinkConfiguration.Display.Never,
             ),
