@@ -3,6 +3,7 @@ package com.stripe.android.model.parsers
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.PaymentMethod
 import org.json.JSONObject
@@ -22,8 +23,8 @@ class ConfirmationTokenJsonParser : ModelJsonParser<ConfirmationToken> {
             id = id,
             created = StripeJsonUtils.optLong(json, ConfirmationToken.FIELD_CREATED) ?: 0L,
             liveMode = StripeJsonUtils.optBoolean(json, ConfirmationToken.FIELD_LIVEMODE) ?: false,
-            paymentMethodData = json.optJSONObject(ConfirmationToken.FIELD_PAYMENT_METHOD_DATA)?.let {
-                parsePaymentMethodData(it)
+            paymentMethodPreview = json.optJSONObject(ConfirmationToken.FIELD_PAYMENT_METHOD_DATA)?.let {
+                PaymentMethod.fromJson(it)
             },
             returnUrl = StripeJsonUtils.optString(json, ConfirmationToken.FIELD_RETURN_URL),
             shipping = json.optJSONObject(ConfirmationToken.FIELD_SHIPPING)?.let {
@@ -43,55 +44,8 @@ class ConfirmationTokenJsonParser : ModelJsonParser<ConfirmationToken> {
         )
     }
 
-    private fun parseSetupFutureUsage(value: String): ConfirmationToken.SetupFutureUsage? {
-        return ConfirmationToken.SetupFutureUsage.entries.find { it.code == value }
-    }
-
-    private fun parsePaymentMethodData(json: JSONObject): ConfirmationToken.PaymentMethodData? {
-        val typeCode = StripeJsonUtils.optString(json, FIELD_PAYMENT_METHOD_DATA_TYPE) ?: return null
-        val type = PaymentMethod.Type.fromCode(typeCode) ?: return null
-
-        return ConfirmationToken.PaymentMethodData(
-            type = type,
-            billingDetails = json.optJSONObject(FIELD_PAYMENT_METHOD_DATA_BILLING_DETAILS)?.let {
-                PaymentMethodJsonParser.BillingDetails().parse(it)
-            },
-            card = json.optJSONObject(FIELD_PAYMENT_METHOD_DATA_CARD)?.let {
-                parsePaymentMethodDataCard(it)
-            },
-            usBankAccount = json.optJSONObject(FIELD_PAYMENT_METHOD_DATA_US_BANK_ACCOUNT)?.let {
-                parsePaymentMethodDataUSBankAccount(it)
-            },
-            sepaDebit = json.optJSONObject(FIELD_PAYMENT_METHOD_DATA_SEPA_DEBIT)?.let {
-                parsePaymentMethodDataSepaDebit(it)
-            },
-            metadata = StripeJsonUtils.jsonObjectToStringMap(json.optJSONObject(FIELD_PAYMENT_METHOD_DATA_METADATA))
-        )
-    }
-
-    private fun parsePaymentMethodDataCard(json: JSONObject): ConfirmationToken.PaymentMethodData.Card {
-        return ConfirmationToken.PaymentMethodData.Card(
-            cvcToken = StripeJsonUtils.optString(json, FIELD_CVC_TOKEN),
-            encryptedData = StripeJsonUtils.optString(json, FIELD_ENCRYPTED_DATA)
-        )
-    }
-
-    private fun parsePaymentMethodDataUSBankAccount(json: JSONObject): ConfirmationToken.PaymentMethodData.USBankAccount {
-        return ConfirmationToken.PaymentMethodData.USBankAccount(
-            accountHolderType = StripeJsonUtils.optString(json, FIELD_ACCOUNT_HOLDER_TYPE)?.let { value ->
-                PaymentMethod.USBankAccount.USBankAccountHolderType.entries.find { it.value == value }
-            },
-            accountType = StripeJsonUtils.optString(json, FIELD_ACCOUNT_TYPE)?.let { value ->
-                PaymentMethod.USBankAccount.USBankAccountType.entries.find { it.value == value }
-            },
-            financialConnectionsAccount = StripeJsonUtils.optString(json, FIELD_FINANCIAL_CONNECTIONS_ACCOUNT)
-        )
-    }
-
-    private fun parsePaymentMethodDataSepaDebit(json: JSONObject): ConfirmationToken.PaymentMethodData.SepaDebit {
-        return ConfirmationToken.PaymentMethodData.SepaDebit(
-            iban = StripeJsonUtils.optString(json, FIELD_IBAN)
-        )
+    private fun parseSetupFutureUsage(value: String): ConfirmPaymentIntentParams.SetupFutureUsage? {
+        return ConfirmPaymentIntentParams.SetupFutureUsage.entries.find { it.code == value }
     }
 
     private fun parseShippingDetails(json: JSONObject): ConfirmationToken.ShippingDetails? {

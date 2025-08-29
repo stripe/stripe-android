@@ -3,6 +3,7 @@ package com.stripe.android.model
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -20,7 +21,8 @@ import kotlinx.parcelize.Parcelize
  * Related guides: [Elements](https://stripe.com/docs/payments/elements)
  */
 @Parcelize
-data class ConfirmationToken
+@Poko
+class ConfirmationToken
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
     /**
@@ -34,219 +36,171 @@ constructor(
     @JvmField val created: Long,
 
     /**
+     * Time at which this ConfirmationToken expires and can no longer be used to confirm a PaymentIntent or SetupIntent.
+     */
+    @JvmField val expireAt: Long?,
+
+    /**
      * Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode.
      */
     @JvmField val liveMode: Boolean,
-
-    /**
-     * Payment method data collected from Elements. This represents the transactional checkout state,
-     * not a reusable PaymentMethod object.
-     * Internal field containing sensitive payment data.
-     */
-    @JvmField internal val paymentMethodData: PaymentMethodData? = null,
-
-    /**
-     * Return URL that will be used for any redirect-based payment methods.
-     */
-    @JvmField val returnUrl: String? = null,
-
-    /**
-     * Shipping information collected by Elements (e.g., from Address Element).
-     */
-    @JvmField val shipping: ShippingDetails? = null,
-
-    /**
-     * Indicates how you intend to use the payment method for future payments.
-     * This is automatically determined based on Elements configuration and user input.
-     * Internal field derived from Elements state.
-     */
-    @JvmField internal val setupFutureUsage: SetupFutureUsage? = null,
-
-    /**
-     * Payment method options containing both public confirmation parameters and
-     * validation context from Elements configuration.
-     * Internal field containing SDK configuration details.
-     */
-    @JvmField internal val paymentMethodOptions: PaymentMethodOptions? = null,
 
     /**
      * Mandate data for this confirmation token. This is automatically generated based on
      * the payment method and usage, eliminating the need for manual mandate handling.
      * Internal field containing auto-generated mandate configuration.
      */
-    @JvmField internal val mandateData: MandateDataParams? = null
-) : StripeModel, Parcelable {
+    @JvmField val mandateData: MandateData? = null,
 
     /**
-     * Payment method data captured from Elements at the time of ConfirmationToken creation.
-     * This represents transactional checkout state, not a reusable payment method.
+     * ID of the PaymentIntent that this ConfirmationToken was used to confirm,
+     * or null if this ConfirmationToken has not yet been used.
      */
-    @Parcelize
-    data class PaymentMethodData(
-        /**
-         * The type of payment method.
-         */
-        @JvmField val type: PaymentMethod.Type,
-
-        /**
-         * Billing details collected from Elements.
-         */
-        @JvmField val billingDetails: PaymentMethod.BillingDetails? = null,
-
-        /**
-         * Card data collected from Elements (for card payment methods).
-         */
-        @JvmField val card: Card? = null,
-
-        /**
-         * US bank account data collected from Elements.
-         */
-        @JvmField val usBankAccount: USBankAccount? = null,
-
-        /**
-         * SEPA debit data collected from Elements.
-         */
-        @JvmField val sepaDebit: SepaDebit? = null,
-
-        /**
-         * Metadata associated with the payment method data.
-         */
-        @JvmField val metadata: Map<String, String>? = null
-    ) : Parcelable {
-
-        @Parcelize
-        data class Card(
-            /**
-             * CVC token generated for saved payment method CVC recollection.
-             */
-            @JvmField val cvcToken: String? = null,
-
-            /**
-             * Encrypted card data for new card entries.
-             */
-            @JvmField val encryptedData: String? = null
-        ) : Parcelable
-
-        @Parcelize
-        data class USBankAccount(
-            /**
-             * Account holder type.
-             */
-            @JvmField val accountHolderType: PaymentMethod.USBankAccount.USBankAccountHolderType? = null,
-
-            /**
-             * Account type.
-             */
-            @JvmField val accountType: PaymentMethod.USBankAccount.USBankAccountType? = null,
-
-            /**
-             * Financial connections account token for verified accounts.
-             */
-            @JvmField val financialConnectionsAccount: String? = null
-        ) : Parcelable
-
-        @Parcelize
-        data class SepaDebit(
-            /**
-             * IBAN for SEPA debit payments.
-             */
-            @JvmField val iban: String? = null
-        ) : Parcelable
-    }
+    @JvmField val paymentIntentId: String? = null,
 
     /**
-     * Shipping details collected by Elements.
+     * Payment method options containing both public confirmation parameters and
+     * validation context from Elements configuration.
+     * Internal field containing SDK configuration details.
      */
-    @Parcelize
-    data class ShippingDetails(
-        /**
-         * Shipping address.
-         */
-        @JvmField val address: Address,
+    @JvmField val paymentMethodOptions: PaymentMethodOptions? = null,
 
-        /**
-         * Recipient name.
-         */
-        @JvmField val name: String,
+    /**
+     * Payment method data collected from Elements. This represents the transactional checkout state,
+     * not a reusable PaymentMethod object.
+     * Internal field containing sensitive payment data.
+     */
+    @JvmField val paymentMethodPreview: PaymentMethod? = null,
 
-        /**
-         * Recipient phone number.
-         */
-        @JvmField val phone: String? = null
-    ) : Parcelable
+    /**
+     * Return URL used to confirm the Intent.
+     */
+    @JvmField val returnUrl: String? = null,
+
+    /**
+     * Indicates how you intend to use the payment method for future payments.
+     * This is automatically determined based on Elements configuration and user input.
+     * Internal field derived from Elements state.
+     */
+    @JvmField val setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null,
+
+    /**
+     * ID of the SetupIntent that this ConfirmationToken was used to confirm,
+     * or null if this ConfirmationToken has not yet been used.
+     */
+    @JvmField val setupIntentId: String? = null,
+
+    /**
+     * Shipping information collected on this ConfirmationToken.
+     */
+    @JvmField val shipping: ShippingInformation? = null,
+
+) : StripeModel {
 
     /**
      * Payment method options containing configuration and collected data.
-     * These include both public parameters (applied to Intent) and private validation context.
      */
     @Parcelize
-    data class PaymentMethodOptions(
+    @Poko
+    class PaymentMethodOptions(
         /**
          * Card-specific options.
          */
         @JvmField val card: Card? = null,
 
-        /**
-         * US bank account specific options.
-         */
-        @JvmField val usBankAccount: USBankAccount? = null,
-
-        /**
-         * SEPA debit specific options.
-         */
-        @JvmField val sepaDebit: SepaDebit? = null
     ) : Parcelable {
 
         @Parcelize
-        data class Card(
+        @Poko
+        class Card(
             /**
-             * CVC token for saved payment method recollection (public parameter).
-             * This gets applied to the Intent during confirmation.
+             * CVC token for the card.
              */
             @JvmField val cvcToken: String? = null,
 
-            /**
-             * Network for card payments (public parameter).
-             */
-            @JvmField val network: String? = null,
-
-            /**
-             * Setup future usage for this payment method.
-             */
-            @JvmField val setupFutureUsage: SetupFutureUsage? = null
         ) : Parcelable
 
-        @Parcelize
-        data class USBankAccount(
-            /**
-             * Verification method used.
-             */
-            @JvmField val verificationMethod: String? = null
-        ) : Parcelable
-
-        @Parcelize
-        data class SepaDebit(
-            /**
-             * Setup future usage for SEPA debit.
-             */
-            @JvmField val setupFutureUsage: SetupFutureUsage? = null
-        ) : Parcelable
     }
 
     /**
-     * Setup future usage values.
+     * Preview of the payment method data collected from Elements.
+     * This represents the transactional checkout state, not a reusable PaymentMethod object.
      */
-    enum class SetupFutureUsage(val code: String) {
+    @Parcelize
+    @Poko
+    class PaymentMethodPreview(
         /**
-         * Use the payment method for future on-session payments.
+         *  This field indicates whether this payment method can be shown again to its customer in a checkout flow.
+         *  Stripe products such as Checkout and Elements use this field to determine
+         *  whether a payment method can be shown as a saved payment method in a checkout flow.
+         *  The field defaults to “unspecified”.
          */
-        OnSession("on_session"),
+        @JvmField val allowRedisplay: PaymentMethod.AllowRedisplay? = null,
 
         /**
-         * Use the payment method for future off-session payments.
+         *  If this is an AU BECS Debit PaymentMethod, this contains additional details.
          */
-        OffSession("off_session")
-    }
+        @JvmField val auBecsDebit: PaymentMethod.AuBecsDebit? = null,
+
+        /**
+         *  If this is a Bacs Debit PaymentMethod, this contains additional details.
+         */
+        @JvmField val bacsDebit: PaymentMethod.BacsDebit? = null,
+
+        /**
+         *  Billing information associated with the PaymentMethod that may be used or required by
+         *  particular types of payment methods.
+         */
+        @JvmField val billingDetails: PaymentMethod.BillingDetails? = null,
+
+        /**
+         *  If this is a Card PaymentMethod, this contains additional details.
+         */
+        @JvmField val card: PaymentMethod.Card? = null,
+
+        /**
+         *  If this is a Card Present PaymentMethod, this contains additional details.
+         */
+        @JvmField val cardPresent: PaymentMethod.CardPresent? = null,
+
+        /**
+         *  The ID of the Customer to which this PaymentMethod is saved.
+         *  This will not be set when the PaymentMethod has not been saved to a Customer.
+         */
+        @JvmField val customerId: String? = null,
+
+        /**
+         * If this is an FPX PaymentMethod, this contains additional details.
+         */
+        @JvmField val fpx: PaymentMethod.Fpx? = null,
+
+        /**
+         * If this is an IDEAL PaymentMethod, this contains additional details.
+         */
+        @JvmField val ideal: PaymentMethod.Ideal? = null,
+
+        /**
+         * If this is a SEPA debit PaymentMethod, this contains additional details.
+         */
+        @JvmField val sepaDebit: PaymentMethod.SepaDebit? = null,
+
+        /**
+         * If this is a Sofort PaymentMethod, this contains additional details.
+         */
+        @JvmField val sofort: PaymentMethod.Sofort? = null,
+
+        /**
+         * The type of the PaymentMethod.
+         * An additional hash is included on the PaymentMethod with a name matching this value.
+         */
+        @JvmField val type: PaymentMethod.Type? = null,
+
+        /**
+         * If this is a US Bank Account PaymentMethod, this contains additional details.
+         */
+        @JvmField val usBankAccount: PaymentMethod.USBankAccount? = null,
+
+    ) : Parcelable
 
     companion object {
         internal const val OBJECT_TYPE = "confirmation_token"

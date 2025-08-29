@@ -1,9 +1,7 @@
 package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmationToken
-import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentMethod
 import org.json.JSONObject
 import kotlin.test.Test
@@ -63,11 +61,11 @@ class ConfirmationTokenJsonParserTest {
         val result = parser.parse(json)
         
         assertThat(result).isNotNull()
-        assertThat(result!!.paymentMethodData).isNotNull()
-        assertThat(result.paymentMethodData!!.type).isEqualTo(PaymentMethod.Type.Card)
-        assertThat(result.paymentMethodData!!.card).isNotNull()
-        assertThat(result.paymentMethodData!!.card!!.cvcToken).isEqualTo("cvc_token_123")
-        assertThat(result.paymentMethodData!!.card!!.encryptedData).isEqualTo("encrypted_card_data_abc")
+        assertThat(result!!.paymentMethodPreview).isNotNull()
+        assertThat(result.paymentMethodPreview!!.type).isEqualTo(PaymentMethod.Type.Card)
+        assertThat(result.paymentMethodPreview!!.card).isNotNull()
+        assertThat(result.paymentMethodPreview!!.card!!.cvcToken).isEqualTo("cvc_token_123")
+        assertThat(result.paymentMethodPreview!!.card!!.encryptedData).isEqualTo("encrypted_card_data_abc")
     }
 
     @Test
@@ -77,14 +75,14 @@ class ConfirmationTokenJsonParserTest {
         val result = parser.parse(json)
         
         assertThat(result).isNotNull()
-        assertThat(result!!.paymentMethodData).isNotNull()
-        assertThat(result.paymentMethodData!!.type).isEqualTo(PaymentMethod.Type.USBankAccount)
-        assertThat(result.paymentMethodData!!.usBankAccount).isNotNull()
-        assertThat(result.paymentMethodData!!.usBankAccount!!.accountHolderType)
+        assertThat(result!!.paymentMethodPreview).isNotNull()
+        assertThat(result.paymentMethodPreview!!.type).isEqualTo(PaymentMethod.Type.USBankAccount)
+        assertThat(result.paymentMethodPreview!!.usBankAccount).isNotNull()
+        assertThat(result.paymentMethodPreview!!.usBankAccount!!.accountHolderType)
             .isEqualTo(PaymentMethod.USBankAccount.USBankAccountHolderType.INDIVIDUAL)
-        assertThat(result.paymentMethodData!!.usBankAccount!!.accountType)
+        assertThat(result.paymentMethodPreview!!.usBankAccount!!.accountType)
             .isEqualTo(PaymentMethod.USBankAccount.USBankAccountType.CHECKING)
-        assertThat(result.paymentMethodData!!.usBankAccount!!.financialConnectionsAccount)
+        assertThat(result.paymentMethodPreview!!.usBankAccount!!.financialConnectionsAccount)
             .isEqualTo("fca_123456")
     }
 
@@ -95,10 +93,10 @@ class ConfirmationTokenJsonParserTest {
         val result = parser.parse(json)
         
         assertThat(result).isNotNull()
-        assertThat(result!!.paymentMethodData).isNotNull()
-        assertThat(result.paymentMethodData!!.type).isEqualTo(PaymentMethod.Type.SepaDebit)
-        assertThat(result.paymentMethodData!!.sepaDebit).isNotNull()
-        assertThat(result.paymentMethodData!!.sepaDebit!!.iban).isEqualTo("DE89370400440532013000")
+        assertThat(result!!.paymentMethodPreview).isNotNull()
+        assertThat(result.paymentMethodPreview!!.type).isEqualTo(PaymentMethod.Type.SepaDebit)
+        assertThat(result.paymentMethodPreview!!.sepaDebit).isNotNull()
+        assertThat(result.paymentMethodPreview!!.sepaDebit!!.iban).isEqualTo("DE89370400440532013000")
     }
 
     @Test
@@ -108,10 +106,10 @@ class ConfirmationTokenJsonParserTest {
         val result = parser.parse(json)
         
         assertThat(result).isNotNull()
-        assertThat(result!!.paymentMethodData).isNotNull()
-        assertThat(result.paymentMethodData!!.billingDetails).isNotNull()
+        assertThat(result!!.paymentMethodPreview).isNotNull()
+        assertThat(result.paymentMethodPreview!!.billingDetails).isNotNull()
         
-        val billingDetails = result.paymentMethodData!!.billingDetails!!
+        val billingDetails = result.paymentMethodPreview!!.billingDetails!!
         assertThat(billingDetails.name).isEqualTo("Jenny Rosen")
         assertThat(billingDetails.email).isEqualTo("jenny@example.com")
         assertThat(billingDetails.phone).isEqualTo("+1234567890")
@@ -249,10 +247,10 @@ class ConfirmationTokenJsonParserTest {
         val result = parser.parse(json)
         
         assertThat(result).isNotNull()
-        assertThat(result!!.paymentMethodData).isNotNull()
-        assertThat(result.paymentMethodData!!.metadata).isNotNull()
+        assertThat(result!!.paymentMethodPreview).isNotNull()
+        assertThat(result.paymentMethodPreview!!.metadata).isNotNull()
         
-        val metadata = result.paymentMethodData!!.metadata!!
+        val metadata = result.paymentMethodPreview!!.metadata!!
         assertThat(metadata["order_id"]).isEqualTo("order_123")
         assertThat(metadata["customer_id"]).isEqualTo("cus_abc")
     }
