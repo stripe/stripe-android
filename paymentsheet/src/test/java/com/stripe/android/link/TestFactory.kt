@@ -238,6 +238,7 @@ internal object TestFactory {
         customerId = null,
         saveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(null),
         forceSetupFutureUseBehaviorAndNewMandate = false,
+        linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
     )
 
     val LINK_WALLET_PRIMARY_BUTTON_LABEL = Amount(

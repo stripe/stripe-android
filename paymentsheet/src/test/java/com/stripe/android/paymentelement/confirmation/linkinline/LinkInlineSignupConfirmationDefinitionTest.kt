@@ -713,6 +713,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 customerId = null,
                 saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
                 forceSetupFutureUseBehaviorAndNewMandate = false,
+                linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
             ),
             userInput = userInput,
             passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
