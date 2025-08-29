@@ -71,6 +71,12 @@
             android:name=".challenge.PassiveChallengeActivity"
             android:theme="@style/StripeTransparentTheme"
             android:exported="false" />
+
+        <activity
+            android:name="com.stripe.android.challenge.warmer.PassiveChallengeWarmerActivity"
+            android:exported="false"
+            android:theme="@style/StripeTransparentTheme"
+            android:launchMode="singleInstance"/>
     </application>
 
     <!--

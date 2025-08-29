@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
@@ -27,218 +28,375 @@ internal class DefaultHCaptchaServiceTest {
 
     @Test
     fun `performPassiveHCaptcha calls hCaptchaProvider`() = runTest {
-        val testContext = createTestContext()
-        testContext.setupSuccessfulHCaptcha("test-token")
+        TestContext.test {
+            hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha()
 
-        testContext.service.performPassiveHCaptcha(
-            testContext.activity,
-            siteKey = "test-site-key",
-            rqData = null
-        )
+            service.performPassiveHCaptcha(
+                activity,
+                siteKey = TEST_SITE_KEY,
+                rqData = null
+            )
 
-        testContext.hCaptchaProvider.awaitCall()
+            hCaptchaProvider.awaitCall()
+        }
     }
 
     @Test
     fun `performPassiveHCaptcha configures HCaptcha with correct settings`() = runTest {
-        val testContext = createTestContext()
-        testContext.setupSuccessfulHCaptcha()
-        val testSiteKey = "test-site-key"
-        val testRqData = "test-rq-data"
+        TestContext.test {
+            hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha()
 
-        testContext.service.performPassiveHCaptcha(
-            testContext.activity,
-            siteKey = testSiteKey,
-            rqData = testRqData
-        )
+            service.performPassiveHCaptcha(
+                activity,
+                siteKey = TEST_SITE_KEY,
+                rqData = TEST_RQ_DATA
+            )
 
-        val configCaptor = argumentCaptor<HCaptchaConfig>()
-        verify(testContext.hCaptcha).setup(any(), configCaptor.capture())
-
-        with(configCaptor.firstValue) {
-            assertThat(siteKey).isEqualTo(testSiteKey)
-            assertThat(size).isEqualTo(HCaptchaSize.INVISIBLE)
-            assertThat(rqdata).isEqualTo(testRqData)
-            assertThat(loading).isFalse()
-            assertThat(hideDialog).isTrue()
-            assertThat(disableHardwareAcceleration).isTrue()
+            val configCaptor = argumentCaptor<HCaptchaConfig>()
+            verify(hCaptchaProvider.awaitCall()).setup(any(), configCaptor.capture())
+            with(configCaptor.firstValue) {
+                assertThat(siteKey).isEqualTo(TEST_SITE_KEY)
+                assertThat(size).isEqualTo(HCaptchaSize.INVISIBLE)
+                assertThat(rqdata).isEqualTo(TEST_RQ_DATA)
+                assertThat(loading).isFalse()
+                assertThat(hideDialog).isTrue()
+                assertThat(disableHardwareAcceleration).isTrue()
+            }
         }
     }
 
     @Test
     fun `performPassiveHCaptcha returns success when HCaptcha succeeds`() = runTest {
-        val testContext = createTestContext()
-        val expectedToken = "success-token"
-        testContext.setupSuccessfulHCaptcha(expectedToken)
+        TestContext.test {
+            hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha()
 
-        val result = testContext.service.performPassiveHCaptcha(
-            testContext.activity,
-            siteKey = "test-site-key",
-            rqData = null
-        )
+            val result = service.performPassiveHCaptcha(
+                activity,
+                siteKey = TEST_SITE_KEY,
+                rqData = null
+            )
 
-        assertThat(result).isInstanceOf(HCaptchaService.Result.Success::class.java)
-        assertThat((result as HCaptchaService.Result.Success).token).isEqualTo(expectedToken)
+            assertThat(result).isInstanceOf(HCaptchaService.Result.Success::class.java)
+            assertThat((result as HCaptchaService.Result.Success).token).isEqualTo("token")
+        }
     }
 
     @Test
     fun `performPassiveHCaptcha returns failure when HCaptcha fails`() = runTest {
-        val testContext = createTestContext()
-        val exception = HCaptchaException(HCaptchaError.NETWORK_ERROR)
-        testContext.setupFailedHCaptcha(exception)
+        TestContext.test {
+            val exception = HCaptchaException(HCaptchaError.NETWORK_ERROR)
+            hCaptchaProvider.hCaptchaHandler = SetupFailedHCaptcha(exception)
 
-        val result = testContext.service.performPassiveHCaptcha(
-            testContext.activity,
-            siteKey = "test-site-key",
-            rqData = null
-        )
+            val result = service.performPassiveHCaptcha(
+                activity,
+                siteKey = TEST_SITE_KEY,
+                rqData = null
+            )
 
-        assertThat(result).isInstanceOf(HCaptchaService.Result.Failure::class.java)
-        assertThat((result as HCaptchaService.Result.Failure).error).isEqualTo(exception)
+            assertThat(result).isInstanceOf(HCaptchaService.Result.Failure::class.java)
+            assertThat((result as HCaptchaService.Result.Failure).error).isEqualTo(exception)
+        }
     }
 
     @Test
     fun `performPassiveHCaptcha calls reset after successful completion`() = runTest {
-        val testContext = createTestContext()
-        testContext.setupSuccessfulHCaptcha("test-token")
+        TestContext.test {
+            hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha()
 
-        testContext.service.performPassiveHCaptcha(
-            testContext.activity,
-            siteKey = "test-site-key",
-            rqData = null
-        )
-
-        verify(testContext.hCaptcha).reset()
+            service.performPassiveHCaptcha(
+                activity,
+                siteKey = TEST_SITE_KEY,
+                rqData = null
+            )
+            verify(hCaptchaProvider.awaitCall()).reset()
+        }
     }
 
     @Test
     fun `performPassiveHCaptcha calls reset after failed completion`() = runTest {
-        val testContext = createTestContext()
-        val exception = HCaptchaException(HCaptchaError.NETWORK_ERROR)
-        testContext.setupFailedHCaptcha(exception)
+        TestContext.test {
+            val exception = HCaptchaException(HCaptchaError.NETWORK_ERROR)
+            hCaptchaProvider.hCaptchaHandler = SetupFailedHCaptcha(exception)
 
-        testContext.service.performPassiveHCaptcha(
-            testContext.activity,
-            siteKey = "test-site-key",
-            rqData = null
-        )
+            service.performPassiveHCaptcha(
+                activity,
+                siteKey = TEST_SITE_KEY,
+                rqData = null
+            )
 
-        verify(testContext.hCaptcha).reset()
+            verify(hCaptchaProvider.awaitCall()).reset()
+        }
     }
 
     @Test
     fun `performPassiveHCaptcha calls reset on coroutine cancellation`() = runTest {
-        val testContext = createTestContext()
-        testContext.setupHangingHCaptcha()
+        TestContext.test {
+            hCaptchaProvider.hCaptchaHandler = SetupHangingHCaptcha
 
-        val job = launch {
-            testContext.service.performPassiveHCaptcha(
-                testContext.activity,
-                siteKey = "test-site-key",
-                rqData = null
-            )
+            val job = launch {
+                service.performPassiveHCaptcha(
+                    activity,
+                    siteKey = TEST_SITE_KEY,
+                    rqData = null
+                )
+            }
+
+            val hCaptcha = hCaptchaProvider.awaitCall()
+            job.cancel()
+            job.join()
+
+            verify(hCaptcha, times(2)).reset()
         }
-
-        testContext.hCaptchaProvider.awaitCall()
-        job.cancel()
-        job.join()
-
-        verify(testContext.hCaptcha, times(2)).reset()
     }
 
     @Test
     fun `performPassiveHCaptcha returns failure when startVerification throws exception`() = runTest {
-        val testContext = createTestContext()
-        val expectedException = RuntimeException("Test exception")
-        testContext.setupExceptionDuringSetup(expectedException)
+        TestContext.test {
+            val expectedException = RuntimeException("Test exception")
+            hCaptchaProvider.hCaptchaHandler = SetupExceptionDuringSetup(expectedException)
 
-        val result = testContext.service.performPassiveHCaptcha(
-            testContext.activity,
-            siteKey = "test-site-key",
-            rqData = null
-        )
+            val result = service.performPassiveHCaptcha(
+                activity,
+                siteKey = TEST_SITE_KEY,
+                rqData = null
+            )
 
-        assertThat(result).isInstanceOf(HCaptchaService.Result.Failure::class.java)
-        assertThat((result as HCaptchaService.Result.Failure).error).isEqualTo(expectedException)
-        verify(testContext.hCaptcha).reset()
-    }
-
-    private fun createTestContext(): TestContext {
-        val activity = mock<FragmentActivity>()
-        val hCaptcha = mock<HCaptcha>()
-        val hCaptchaProvider = FakeHCaptchaProvider(hCaptcha)
-        val service = DefaultHCaptchaService(hCaptchaProvider)
-
-        return TestContext(
-            activity = activity,
-            hCaptcha = hCaptcha,
-            hCaptchaProvider = hCaptchaProvider,
-            service = service
-        )
-    }
-
-    private fun TestContext.setupHCaptchaChaining() {
-        whenever(hCaptcha.addOnSuccessListener(any())).doReturn(hCaptcha)
-        whenever(hCaptcha.addOnFailureListener(any())).doReturn(hCaptcha)
-        whenever(hCaptcha.setup(any(), any())).doReturn(hCaptcha)
-    }
-
-    private fun TestContext.setupSuccessfulHCaptcha(token: String = "test-token") {
-        setupHCaptchaChaining()
-
-        whenever(hCaptcha.verifyWithHCaptcha(any())).then {
-            val successCaptor = argumentCaptor<OnSuccessListener<HCaptchaTokenResponse>>()
-            verify(hCaptcha).addOnSuccessListener(successCaptor.capture())
-            successCaptor.firstValue.onSuccess(createHCaptchaTokenResponse(token))
-            hCaptcha
+            assertThat(result).isInstanceOf(HCaptchaService.Result.Failure::class.java)
+            assertThat((result as HCaptchaService.Result.Failure).error).isEqualTo(expectedException)
+            verify(hCaptchaProvider.awaitCall(), atLeastOnce()).reset()
         }
     }
 
-    private fun TestContext.setupFailedHCaptcha(exception: HCaptchaException) {
-        setupHCaptchaChaining()
+    @Test
+    fun `warmUp calls hCaptchaProvider and updates cache on success`() = runTest {
+        TestContext.test {
+            val expectedToken = "warm-up-token"
+            hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha(expectedToken)
 
-        whenever(hCaptcha.verifyWithHCaptcha(any())).then {
-            val failureCaptor = argumentCaptor<OnFailureListener>()
-            verify(hCaptcha).addOnFailureListener(failureCaptor.capture())
-            failureCaptor.firstValue.onFailure(exception)
-            hCaptcha
+            service.warmUp(
+                activity,
+                siteKey = TEST_SITE_KEY,
+                rqData = TEST_RQ_DATA
+            )
+
+            hCaptchaProvider.awaitCall()
+
+            val result = service.performPassiveHCaptcha(
+                activity,
+                siteKey = TEST_SITE_KEY,
+                rqData = TEST_RQ_DATA
+            )
+            assertThat(result).isInstanceOf(HCaptchaService.Result.Success::class.java)
+            assertThat((result as HCaptchaService.Result.Success).token).isEqualTo(expectedToken)
         }
     }
 
-    private fun TestContext.setupHangingHCaptcha() {
-        setupHCaptchaChaining()
-        whenever(hCaptcha.verifyWithHCaptcha(any())).doReturn(hCaptcha)
+    @Test
+    fun `warmUp updates cache on failure`() = runTest {
+        TestContext.test {
+            val expectedException = HCaptchaException(HCaptchaError.NETWORK_ERROR)
+            hCaptchaProvider.hCaptchaHandler = SetupFailedHCaptcha(expectedException)
+
+            service.warmUp(
+                activity,
+                siteKey = TEST_SITE_KEY,
+                rqData = null
+            )
+
+            hCaptchaProvider.awaitCall()
+
+            val result = service.performPassiveHCaptcha(
+                activity,
+                siteKey = TEST_SITE_KEY,
+                rqData = null
+            )
+
+            assertThat(result).isInstanceOf(HCaptchaService.Result.Failure::class.java)
+            assertThat((result as HCaptchaService.Result.Failure).error).isEqualTo(expectedException)
+        }
     }
 
-    private fun TestContext.setupExceptionDuringSetup(exception: Throwable) {
-        whenever(hCaptcha.addOnSuccessListener(any())).doReturn(hCaptcha)
-        whenever(hCaptcha.addOnFailureListener(any())).doReturn(hCaptcha)
-        whenever(hCaptcha.setup(any(), any())).thenThrow(exception)
+    @Test
+    fun `warmUp skips execution when cache is in Loading state`() = runTest {
+        TestContext.test {
+            hCaptchaProvider.hCaptchaHandler = SetupHangingHCaptcha
+
+            // Start first warmUp that will hang (Loading state)
+            val firstWarmUpJob = launch {
+                service.warmUp(
+                    activity,
+                    siteKey = TEST_SITE_KEY,
+                    rqData = null
+                )
+            }
+
+            val firstHCaptcha = hCaptchaProvider.awaitCall()
+
+            service.warmUp(
+                activity,
+                siteKey = TEST_SITE_KEY,
+                rqData = null
+            )
+
+            hCaptchaProvider.ensureAllEventsConsumed()
+
+            verify(firstHCaptcha).verifyWithHCaptcha(any())
+
+            firstWarmUpJob.cancel()
+            firstWarmUpJob.join()
+        }
     }
 
-    private fun createHCaptchaTokenResponse(token: String): HCaptchaTokenResponse {
-        return HCaptchaTokenResponse(token, mock<Handler>())
+    @Test
+    fun `warmUp skips execution when cache has Success state`() = runTest {
+        TestContext.test {
+            hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha()
+
+            service.warmUp(
+                activity,
+                siteKey = TEST_SITE_KEY,
+                rqData = null
+            )
+
+            hCaptchaProvider.awaitCall()
+
+            service.warmUp(
+                activity,
+                siteKey = TEST_SITE_KEY,
+                rqData = null
+            )
+
+            hCaptchaProvider.ensureAllEventsConsumed()
+        }
     }
 
-    private data class TestContext(
+    @Test
+    fun `warmUp allows execution when cache is in Failure state`() = runTest {
+        TestContext.test {
+            val exception = HCaptchaException(HCaptchaError.NETWORK_ERROR)
+            hCaptchaProvider.hCaptchaHandler = SetupFailedHCaptcha(exception)
+
+            service.warmUp(
+                activity,
+                siteKey = TEST_SITE_KEY,
+                rqData = null
+            )
+
+            hCaptchaProvider.awaitCall()
+
+            hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha()
+
+            service.warmUp(
+                activity,
+                siteKey = TEST_SITE_KEY,
+                rqData = null
+            )
+
+            val secondHCaptcha = hCaptchaProvider.awaitCall()
+            verify(secondHCaptcha).verifyWithHCaptcha(any())
+        }
+    }
+
+    private object SetupHCaptchaChaining : FakeHCaptchaProvider.HCaptchaHandler {
+        override fun handle(hCaptcha: HCaptcha) {
+            whenever(hCaptcha.addOnSuccessListener(any())).doReturn(hCaptcha)
+            whenever(hCaptcha.addOnFailureListener(any())).doReturn(hCaptcha)
+            whenever(hCaptcha.setup(any(), any())).doReturn(hCaptcha)
+        }
+    }
+
+    private class SetupSuccessfulHCaptcha(private val token: String = "token") : FakeHCaptchaProvider.HCaptchaHandler {
+        override fun handle(hCaptcha: HCaptcha) {
+            SetupHCaptchaChaining.handle(hCaptcha)
+
+            whenever(hCaptcha.verifyWithHCaptcha(any())).then {
+                val successCaptor = argumentCaptor<OnSuccessListener<HCaptchaTokenResponse>>()
+                verify(hCaptcha).addOnSuccessListener(successCaptor.capture())
+                successCaptor.firstValue.onSuccess(createHCaptchaTokenResponse(token))
+                hCaptcha
+            }
+        }
+
+        private fun createHCaptchaTokenResponse(token: String): HCaptchaTokenResponse {
+            return HCaptchaTokenResponse(token, mock<Handler>())
+        }
+    }
+
+    private object SetupHangingHCaptcha : FakeHCaptchaProvider.HCaptchaHandler {
+        override fun handle(hCaptcha: HCaptcha) {
+            SetupHCaptchaChaining.handle(hCaptcha)
+
+            whenever(hCaptcha.verifyWithHCaptcha(any())).doReturn(hCaptcha)
+        }
+    }
+
+    private class SetupExceptionDuringSetup(private val exception: Throwable) : FakeHCaptchaProvider.HCaptchaHandler {
+        override fun handle(hCaptcha: HCaptcha) {
+            whenever(hCaptcha.addOnSuccessListener(any())).doReturn(hCaptcha)
+            whenever(hCaptcha.addOnFailureListener(any())).doReturn(hCaptcha)
+            whenever(hCaptcha.setup(any(), any())).thenThrow(exception)
+        }
+    }
+
+    private class SetupFailedHCaptcha(private val exception: HCaptchaException) : FakeHCaptchaProvider.HCaptchaHandler {
+        override fun handle(hCaptcha: HCaptcha) {
+            SetupHCaptchaChaining.handle(hCaptcha)
+
+            whenever(hCaptcha.verifyWithHCaptcha(any())).then {
+                val failureCaptor = argumentCaptor<OnFailureListener>()
+                verify(hCaptcha).addOnFailureListener(failureCaptor.capture())
+                failureCaptor.firstValue.onFailure(exception)
+                hCaptcha
+            }
+        }
+    }
+
+    private data class TestContext private constructor(
         val activity: FragmentActivity,
-        val hCaptcha: HCaptcha,
         val hCaptchaProvider: FakeHCaptchaProvider,
         val service: DefaultHCaptchaService
-    )
+    ) {
 
-    private class FakeHCaptchaProvider(
-        private val hCaptcha: HCaptcha
-    ) : HCaptchaProvider {
-        private val calls = Turbine<Unit>()
+        companion object {
+            suspend fun test(
+                activity: FragmentActivity = mock<FragmentActivity>(),
+                hCaptchaProvider: FakeHCaptchaProvider = FakeHCaptchaProvider(),
+                service: DefaultHCaptchaService = DefaultHCaptchaService(hCaptchaProvider),
+                block: suspend TestContext.() -> Unit
+            ) {
+                TestContext(
+                    activity = activity,
+                    hCaptchaProvider = hCaptchaProvider,
+                    service = service
+                ).apply { block(this) }
+            }
+        }
+    }
+
+    private class FakeHCaptchaProvider : HCaptchaProvider {
+        var hCaptchaHandler: HCaptchaHandler = HCaptchaHandler {}
+        private val calls = Turbine<HCaptcha>()
 
         override fun get(): HCaptcha {
-            calls.add(Unit)
+            val hCaptcha = mock<HCaptcha>()
+            hCaptchaHandler.handle(hCaptcha)
+            calls.add(hCaptcha)
             return hCaptcha
         }
 
-        suspend fun awaitCall() {
-            calls.awaitItem()
+        suspend fun awaitCall(): HCaptcha {
+            return calls.awaitItem()
         }
+
+        fun ensureAllEventsConsumed() = calls.ensureAllEventsConsumed()
+
+        fun interface HCaptchaHandler {
+            fun handle(hCaptcha: HCaptcha)
+        }
+    }
+
+    companion object {
+        private const val TEST_SITE_KEY = "test-site-key"
+        private const val TEST_RQ_DATA = "test-rq-data"
     }
 }

@@ -10,6 +10,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
@@ -19,6 +20,7 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.launch
 
 internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
@@ -51,6 +53,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         if (!applicationIsTaskOwner()) {
             viewModel.analyticsListener.cannotProperlyReturnFromLinkAndOtherLPMs()
+        }
+
+        lifecycleScope.launch {
+            viewModel.warmUpCaptcha(this@PaymentSheetActivity)
         }
 
         setContent {

@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.annotation.VisibleForTesting
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -21,6 +22,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.hcaptcha.HCaptchaService
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
@@ -68,8 +70,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -92,6 +96,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val errorReporter: ErrorReporter,
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
+    private val hCaptchaService: HCaptchaService,
     @Named(IS_LIVE_MODE) val isLiveModeProvider: () -> Boolean
 ) : BaseSheetViewModel(
     config = args.config,
@@ -713,6 +718,19 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         } else {
             viewState
         }
+    }
+
+    internal suspend fun warmUpCaptcha(activity: FragmentActivity) {
+        paymentMethodMetadata.mapNotNull {
+            it?.passiveCaptchaParams
+        }.distinctUntilChanged()
+            .collect { passiveCaptchaParams ->
+                hCaptchaService.warmUp(
+                    activity = activity,
+                    siteKey = passiveCaptchaParams.siteKey,
+                    rqData = passiveCaptchaParams.rqData
+                )
+            }
     }
 
     internal class Factory(

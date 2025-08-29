@@ -7,7 +7,6 @@ import androidx.core.os.bundleOf
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
-import com.stripe.android.model.PassiveCaptchaParams
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -19,10 +18,7 @@ internal class PassiveChallengeActivityContractTest {
 
     @Test
     fun `createIntent creates intent correctly with PassiveChallengeArgs`() {
-        val passiveCaptchaParams = PassiveCaptchaParams(
-            siteKey = "test_site_key",
-            rqData = "test_rq_data"
-        )
+        val passiveCaptchaParams = ChallengeFactory.passiveCaptchaParams()
         val args = PassiveChallengeActivityContract.Args(passiveCaptchaParams)
 
         val intent = contract.createIntent(ApplicationProvider.getApplicationContext(), args)
