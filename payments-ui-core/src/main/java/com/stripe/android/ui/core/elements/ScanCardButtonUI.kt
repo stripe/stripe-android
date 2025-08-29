@@ -61,7 +61,6 @@ internal fun ScanCardButtonUI(
 
         ScanCardButtonContent(
             enabled = enabled,
-            launchOptions = launchOptions,
             elementsSessionId = controller.elementsSessionId,
             cardScanLauncher = cardScanLauncher,
             cardScanGoogleLauncher = cardScanGoogleLauncher,
@@ -73,7 +72,6 @@ internal fun ScanCardButtonUI(
 @Suppress("LongMethod") // Should be removed along with feature flag when ready
 private fun ScanCardButtonContent(
     enabled: Boolean,
-    launchOptions: ActivityOptionsCompat?,
     elementsSessionId: String?,
     cardScanLauncher: ManagedActivityResultLauncher<CardScanContract.Args, CardScanSheetResult>,
     cardScanGoogleLauncher: CardScanGoogleLauncher?
@@ -101,8 +99,7 @@ private fun ScanCardButtonContent(
                                 configuration = CardScanConfiguration(
                                     elementsSessionId = elementsSessionId
                                 )
-                            ),
-                            options = launchOptions,
+                            )
                         )
                     }
                 }
