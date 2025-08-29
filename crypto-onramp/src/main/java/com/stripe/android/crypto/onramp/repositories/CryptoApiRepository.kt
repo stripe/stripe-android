@@ -2,7 +2,6 @@ package com.stripe.android.crypto.onramp.repositories
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.AppInfo
-import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
@@ -249,19 +248,21 @@ internal class CryptoApiRepository @Inject constructor(
         responseSerializer: KSerializer<Response>,
     ): Result<Response> {
         return runCatching {
-            stripeNetworkClient.executeRequest(request)
-        }.mapCatching { response ->
+            val response = stripeNetworkClient.executeRequest(request)
             if (response.isError) {
                 val error = StripeErrorJsonParser().parse(response.responseJson())
                 throw APIException(error)
             }
-
-            val body = requireNotNull(response.body) { "No response body found" }
-
-            val json = Json { ignoreUnknownKeys = true }
-            json.decodeFromString(responseSerializer, body)
-        }.recoverCatching {
-            throw APIConnectionException("Failed to execute $request", cause = it)
+            try {
+                val body = requireNotNull(response.body) { "No response body found" }
+                val json = Json { ignoreUnknownKeys = true }
+                json.decodeFromString(responseSerializer, body)
+            } catch (e: Exception) {
+                throw APIException(
+                    message = "Unable to parse response with ${responseSerializer::class.java.simpleName}",
+                    cause = e,
+                )
+            }
         }
     }
 
