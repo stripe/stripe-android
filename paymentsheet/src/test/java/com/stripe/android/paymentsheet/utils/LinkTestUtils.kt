@@ -103,6 +103,7 @@ internal object LinkTestUtils {
             customerId = null,
             saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             forceSetupFutureUseBehaviorAndNewMandate = false,
+            linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
         )
     }
 }

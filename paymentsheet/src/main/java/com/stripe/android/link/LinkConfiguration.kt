@@ -46,6 +46,7 @@ internal data class LinkConfiguration(
     private val customerId: String?,
     val saveConsentBehavior: PaymentMethodSaveConsentBehavior,
     val forceSetupFutureUseBehaviorAndNewMandate: Boolean,
+    val linkSupportedPaymentMethodsOnboardingEnabled: List<String>,
 ) : Parcelable {
 
     val customerIdForEceDefaultValues: String?
@@ -53,6 +54,9 @@ internal data class LinkConfiguration(
 
     val enableLinkPaymentSelectionHint: Boolean
         get() = flags["link_show_prefer_debit_card_hint"] == true
+
+    val supportsInstantDebitsOnboarding: Boolean
+        get() = linkSupportedPaymentMethodsOnboardingEnabled.contains("INSTANT_DEBITS")
 
     @Parcelize
     data class CustomerInfo(

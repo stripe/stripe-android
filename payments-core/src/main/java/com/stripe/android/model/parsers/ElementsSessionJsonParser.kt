@@ -202,6 +202,10 @@ internal class ElementsSessionJsonParser(
             null
         }
 
+        val linkSupportedPaymentMethodsOnboardingEnabled = jsonArrayToList(
+            jsonArray = json?.optJSONArray(FIELD_LINK_SUPPORTED_PAYMENT_METHODS_ONBOARDING_ENABLED),
+        )
+
         return ElementsSession.LinkSettings(
             linkFundingSources = jsonArrayToList(linkFundingSources),
             linkPassthroughModeEnabled = linkPassthroughModeEnabled,
@@ -215,7 +219,8 @@ internal class ElementsSessionJsonParser(
             linkEnableDisplayableDefaultValuesInEce = linkEnableDisplayableDefaultValuesInEce,
             linkMobileSkipWalletInFlowController = linkMobileSkipWalletInFlowController,
             linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
-            linkSignUpOptInInitialValue = linkSignUpOptInInitialValue
+            linkSignUpOptInInitialValue = linkSignUpOptInInitialValue,
+            linkSupportedPaymentMethodsOnboardingEnabled = linkSupportedPaymentMethodsOnboardingEnabled,
         )
     }
 
@@ -479,6 +484,8 @@ internal class ElementsSessionJsonParser(
             "link_mobile_skip_wallet_in_flow_controller"
         private const val FIELD_LINK_SIGN_UP_OPT_IN_FEATURE_ENABLED = "link_sign_up_opt_in_feature_enabled"
         private const val FIELD_LINK_SIGN_UP_OPT_IN_INITIAL_VALUE = "link_sign_up_opt_in_initial_value"
+        private const val FIELD_LINK_SUPPORTED_PAYMENT_METHODS_ONBOARDING_ENABLED =
+            "link_supported_payment_methods_onboarding_enabled"
         private const val FIELD_MERCHANT_COUNTRY = "merchant_country"
         private const val FIELD_MERCHANT_LOGO_URL = "merchant_logo_url"
         private const val FIELD_PAYMENT_METHOD_PREFERENCE = "payment_method_preference"

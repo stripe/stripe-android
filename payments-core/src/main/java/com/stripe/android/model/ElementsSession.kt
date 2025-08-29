@@ -90,7 +90,8 @@ data class ElementsSession(
         val linkEnableDisplayableDefaultValuesInEce: Boolean,
         val linkMobileSkipWalletInFlowController: Boolean,
         val linkSignUpOptInFeatureEnabled: Boolean,
-        val linkSignUpOptInInitialValue: Boolean
+        val linkSignUpOptInInitialValue: Boolean,
+        val linkSupportedPaymentMethodsOnboardingEnabled: List<String>,
     ) : StripeModel
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
