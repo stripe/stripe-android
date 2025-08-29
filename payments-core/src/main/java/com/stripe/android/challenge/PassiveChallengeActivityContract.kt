@@ -12,7 +12,10 @@ class PassiveChallengeActivityContract :
     ActivityResultContract<PassiveChallengeActivityContract.Args, PassiveChallengeActivityResult>() {
 
     override fun createIntent(context: Context, input: Args): Intent {
-        return PassiveChallengeActivity.createIntent(context, PassiveChallengeArgs(input.passiveCaptchaParams))
+        return PassiveChallengeActivity.createIntent(
+            context,
+            PassiveChallengeArgs(input.passiveCaptchaParams, input.publishableKey, input.productUsage.toList())
+        )
     }
 
     override fun parseResult(resultCode: Int, intent: Intent?): PassiveChallengeActivityResult {
@@ -24,10 +27,13 @@ class PassiveChallengeActivityContract :
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Args(
-        val passiveCaptchaParams: PassiveCaptchaParams
+        val passiveCaptchaParams: PassiveCaptchaParams,
+        val publishableKey: String,
+        val productUsage: Set<String>
     )
 
-    internal companion object {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
         const val EXTRA_RESULT = "com.stripe.android.challenge.PassiveChallengeActivityContract.extra_result"
     }
 }

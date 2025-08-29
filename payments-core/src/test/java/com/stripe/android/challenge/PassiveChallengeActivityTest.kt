@@ -68,11 +68,6 @@ internal class PassiveChallengeActivityTest {
 
     @Test
     fun `createIntent should create proper intent with args`() {
-        val passiveCaptchaParams = PassiveCaptchaParams(
-            siteKey = "test_site_key",
-            rqData = "test_rq_data"
-        )
-        val args = PassiveChallengeArgs(passiveCaptchaParams)
         val context = ApplicationProvider.getApplicationContext<Context>()
 
         val intent = PassiveChallengeActivity.createIntent(context, args)
@@ -86,11 +81,6 @@ internal class PassiveChallengeActivityTest {
 
     @Test
     fun `getArgs should return args from SavedStateHandle when present`() {
-        val passiveCaptchaParams = PassiveCaptchaParams(
-            siteKey = "test_site_key",
-            rqData = "test_rq_data"
-        )
-        val args = PassiveChallengeArgs(passiveCaptchaParams)
         val savedStateHandle = SavedStateHandle().apply {
             set(PassiveChallengeActivity.EXTRA_ARGS, args)
         }
@@ -124,7 +114,7 @@ internal class PassiveChallengeActivityTest {
         ApplicationProvider.getApplicationContext(),
         PassiveChallengeActivity::class.java
     ).apply {
-        putExtra(PassiveChallengeActivity.EXTRA_ARGS, PassiveChallengeArgs(passiveCaptchaParams))
+        putExtra(PassiveChallengeActivity.EXTRA_ARGS, args)
     }
 
     private fun extractActivityResult(
@@ -157,6 +147,12 @@ internal class PassiveChallengeActivityTest {
         private val passiveCaptchaParams = PassiveCaptchaParams(
             siteKey = "test_site_key",
             rqData = "test_rq_data"
+        )
+
+        private val args = PassiveChallengeArgs(
+            passiveCaptchaParams = passiveCaptchaParams,
+            publishableKey = "pk_123",
+            productUsage = listOf("PaymentSheet")
         )
     }
 }

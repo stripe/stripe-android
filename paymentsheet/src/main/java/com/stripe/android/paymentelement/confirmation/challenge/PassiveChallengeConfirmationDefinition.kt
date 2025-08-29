@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.challenge.PassiveChallengeActivityContract
 import com.stripe.android.challenge.PassiveChallengeActivityResult
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.RadarOptions
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -12,10 +13,14 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import javax.inject.Inject
+import javax.inject.Named
 
 internal class PassiveChallengeConfirmationDefinition @Inject constructor(
     private val errorReporter: ErrorReporter,
+    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
+    @Named(PRODUCT_USAGE) private val productUsage: Set<String>
 ) : ConfirmationDefinition<
     PaymentMethodConfirmationOption,
     ActivityResultLauncher<PassiveChallengeActivityContract.Args>,
@@ -32,7 +37,7 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
         confirmationOption: PaymentMethodConfirmationOption,
         confirmationParameters: ConfirmationDefinition.Parameters
     ): Boolean {
-        return false
+        return confirmationOption.passiveCaptchaParams != null
     }
 
     override fun toResult(
@@ -80,7 +85,11 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
         val passiveCaptchaParams = confirmationOption.passiveCaptchaParams
         if (passiveCaptchaParams != null) {
             return ConfirmationDefinition.Action.Launch(
-                launcherArguments = PassiveChallengeActivityContract.Args(passiveCaptchaParams),
+                launcherArguments = PassiveChallengeActivityContract.Args(
+                    passiveCaptchaParams,
+                    publishableKey = publishableKeyProvider(),
+                    productUsage = productUsage
+                ),
                 receivesResultInProcess = false,
                 deferredIntentConfirmationType = null,
             )

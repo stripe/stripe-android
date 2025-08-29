@@ -1,6 +1,12 @@
 package com.stripe.android.hcaptcha
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.hcaptcha.analytics.CaptchaEventsReporter
+import com.stripe.android.hcaptcha.analytics.DefaultCaptchaEventsReporter
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import dagger.Module
 import dagger.Provides
 
@@ -14,8 +20,24 @@ object HCaptchaModule {
 
     @Provides
     fun provideHCaptchaService(
-        hCaptchaProvider: HCaptchaProvider
+        hCaptchaProvider: HCaptchaProvider,
+        captchaEventsReporter: CaptchaEventsReporter
     ): HCaptchaService {
-        return DefaultHCaptchaService(hCaptchaProvider)
+        return DefaultHCaptchaService(hCaptchaProvider, captchaEventsReporter)
+    }
+
+    @Provides
+    internal fun provideChallengeEventsReporter(
+        analyticsRequestExecutor: AnalyticsRequestExecutor,
+        analyticsRequestFactory: AnalyticsRequestFactory,
+        durationProvider: DurationProvider,
+        errorReporter: ErrorReporter
+    ): CaptchaEventsReporter {
+        return DefaultCaptchaEventsReporter(
+            analyticsRequestExecutor,
+            analyticsRequestFactory,
+            durationProvider,
+            errorReporter
+        )
     }
 }
