@@ -68,7 +68,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
             confirmationParameters = CONFIRMATION_PARAMETERS
         )
 
-        assertThat(result).isFalse()
+        assertThat(result).isTrue()
     }
 
     @Test
@@ -80,7 +80,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
             confirmationParameters = CONFIRMATION_PARAMETERS
         )
 
-        assertThat(result).isFalse()
+        assertThat(result).isTrue()
     }
 
     @Test
