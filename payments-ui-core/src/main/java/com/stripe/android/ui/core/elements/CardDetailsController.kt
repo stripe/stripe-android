@@ -105,20 +105,20 @@ internal class CardDetailsController(
             numberElement.controller.onRawValueChange(
                 scannedCard.pan
             )
-            if (scannedCard.expirationMonth != null && scannedCard.expirationYear != null) {
-                val newDate = if (
-                    DateUtils.isExpiryDataValid(
-                        expiryMonth = scannedCard.expirationMonth,
-                        expiryYear = scannedCard.expirationYear
-                    )
-                ) {
-                    @Suppress("MagicNumber")
-                    "${scannedCard.expirationMonth}/${scannedCard.expirationYear % 100}"
-                } else {
-                    ""
-                }
-                expirationDateElement.controller.onRawValueChange(newDate)
+            val newDate = if (
+                scannedCard.expirationMonth != null &&
+                scannedCard.expirationYear != null &&
+                DateUtils.isExpiryDataValid(
+                    expiryMonth = scannedCard.expirationMonth,
+                    expiryYear = scannedCard.expirationYear
+                )
+            ) {
+                @Suppress("MagicNumber")
+                "${scannedCard.expirationMonth}/${scannedCard.expirationYear % 100}"
+            } else {
+                ""
             }
+            expirationDateElement.controller.onRawValueChange(newDate)
         }
     }
 
