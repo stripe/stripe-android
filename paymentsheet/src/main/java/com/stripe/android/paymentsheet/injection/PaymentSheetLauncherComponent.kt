@@ -2,12 +2,12 @@ package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.challenge.warmer.PassiveChallengeWarmerModule
 import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.common.di.MobileSessionIdModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
-import com.stripe.android.hcaptcha.HCaptchaModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
@@ -32,7 +32,7 @@ import javax.inject.Singleton
         MobileSessionIdModule::class,
         CardScanModule::class,
         LinkHoldbackExposureModule::class,
-        HCaptchaModule::class
+        PassiveChallengeWarmerModule::class
     ]
 )
 internal interface PaymentSheetLauncherComponent {

@@ -2,16 +2,17 @@ package com.stripe.android.paymentsheet
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.annotation.VisibleForTesting
-import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.Logger
@@ -26,6 +27,7 @@ import com.stripe.android.hcaptcha.HCaptchaService
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -70,10 +72,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -96,7 +96,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val errorReporter: ErrorReporter,
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
-    private val hCaptchaService: HCaptchaService,
+    private val passiveChallengeWarmer: PassiveChallengeWarmer,
     @Named(IS_LIVE_MODE) val isLiveModeProvider: () -> Boolean
 ) : BaseSheetViewModel(
     config = args.config,
@@ -478,6 +478,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         lifecycleOwner: LifecycleOwner,
     ) {
         confirmationHandler.register(activityResultCaller, lifecycleOwner)
+        warmUpCaptcha(activityResultCaller, lifecycleOwner)
     }
 
     @Suppress("ComplexCondition")
@@ -720,17 +721,19 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    internal suspend fun warmUpCaptcha(activity: FragmentActivity) {
-        paymentMethodMetadata.mapNotNull {
-            it?.passiveCaptchaParams
-        }.distinctUntilChanged()
-            .collect { passiveCaptchaParams ->
-                hCaptchaService.warmUp(
-                    activity = activity,
-                    siteKey = passiveCaptchaParams.siteKey,
-                    rqData = passiveCaptchaParams.rqData
-                )
-            }
+    private fun warmUpCaptcha(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
+        passiveChallengeWarmer.register(activityResultCaller, lifecycleOwner)
+//        paymentMethodMetadata.mapNotNull {
+//            it?.passiveCaptchaParams
+//        }.distinctUntilChanged()
+//            .take(1)
+//            .collect { passiveCaptchaParams ->
+//                passiveChallengeWarmer.start(activityResultCaller, lifecycleOwner, passiveCaptchaParams)
+//            }
+
+        // TODO: Wait for passive captcha params to be available (above commented code) instead of hardcoded params
+        val params = PassiveCaptchaParams("143aadb6-fb60-4ab6-b128-f7fe53426d4a", null)
+        passiveChallengeWarmer.start(params)
     }
 
     internal class Factory(

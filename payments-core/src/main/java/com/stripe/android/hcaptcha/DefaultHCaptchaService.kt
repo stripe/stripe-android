@@ -9,6 +9,7 @@ import com.stripe.hcaptcha.config.HCaptchaConfig
 import com.stripe.hcaptcha.config.HCaptchaSize
 import com.stripe.hcaptcha.task.OnFailureListener
 import com.stripe.hcaptcha.task.OnSuccessListener
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapNotNull

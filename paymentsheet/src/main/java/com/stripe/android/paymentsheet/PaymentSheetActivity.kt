@@ -55,10 +55,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             viewModel.analyticsListener.cannotProperlyReturnFromLinkAndOtherLPMs()
         }
 
-        lifecycleScope.launch {
-            viewModel.warmUpCaptcha(this@PaymentSheetActivity)
-        }
-
         setContent {
             StripeTheme {
                 val isProcessing by viewModel.processing.collectAsState()

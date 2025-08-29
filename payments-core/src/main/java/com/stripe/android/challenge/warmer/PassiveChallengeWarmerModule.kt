@@ -6,7 +6,7 @@ import dagger.Provides
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Module
-interface PassiveChallengeWarmerModule {
+object PassiveChallengeWarmerModule {
     @Provides
     fun providePassiveChallengeWarmer(): PassiveChallengeWarmer {
         return DefaultPassiveChallengeWarmer()
