@@ -21,26 +21,20 @@ internal class PassiveChallengeConfirmationFlowTest {
     fun `on launch with New option, should persist parameters & launch using launcher as expected`() = runLaunchTest(
         confirmationOption = NEW_CONFIRMATION_OPTION,
         parameters = CONFIRMATION_PARAMETERS,
-        definition = PassiveChallengeConfirmationDefinition(
-            errorReporter = FakeErrorReporter(),
-        ),
+        definition = confirmationDefinition(),
     )
 
     @Test
     fun `on launch with Saved option, should persist parameters & launch using launcher as expected`() = runLaunchTest(
         confirmationOption = SAVED_CONFIRMATION_OPTION,
         parameters = CONFIRMATION_PARAMETERS,
-        definition = PassiveChallengeConfirmationDefinition(
-            errorReporter = FakeErrorReporter(),
-        ),
+        definition = confirmationDefinition(),
     )
 
     @Test
     fun `on result with Success, should return NextStep result with token attached for New option`() = runResultTest(
         confirmationOption = NEW_CONFIRMATION_OPTION,
-        definition = PassiveChallengeConfirmationDefinition(
-            errorReporter = FakeErrorReporter(),
-        ),
+        definition = confirmationDefinition(),
         launcherResult = PassiveChallengeActivityResult.Success("test_token"),
         parameters = CONFIRMATION_PARAMETERS,
         definitionResult = ConfirmationDefinition.Result.NextStep(
@@ -60,9 +54,7 @@ internal class PassiveChallengeConfirmationFlowTest {
     @Test
     fun `on result with Success, should return NextStep result with token attached for Saved option`() = runResultTest(
         confirmationOption = SAVED_CONFIRMATION_OPTION,
-        definition = PassiveChallengeConfirmationDefinition(
-            errorReporter = FakeErrorReporter(),
-        ),
+        definition = confirmationDefinition(),
         launcherResult = PassiveChallengeActivityResult.Success("test_token"),
         parameters = CONFIRMATION_PARAMETERS,
         definitionResult = ConfirmationDefinition.Result.NextStep(
@@ -80,9 +72,7 @@ internal class PassiveChallengeConfirmationFlowTest {
     @Test
     fun `on result with Failed, should return NextStep result with no token for New option`() = runResultTest(
         confirmationOption = NEW_CONFIRMATION_OPTION,
-        definition = PassiveChallengeConfirmationDefinition(
-            errorReporter = FakeErrorReporter(),
-        ),
+        definition = confirmationDefinition(),
         launcherResult = PassiveChallengeActivityResult.Failed(RuntimeException("Challenge failed")),
         parameters = CONFIRMATION_PARAMETERS,
         definitionResult = ConfirmationDefinition.Result.NextStep(
@@ -100,9 +90,7 @@ internal class PassiveChallengeConfirmationFlowTest {
     @Test
     fun `on result with Failed, should return NextStep result with no token for Saved option`() = runResultTest(
         confirmationOption = SAVED_CONFIRMATION_OPTION,
-        definition = PassiveChallengeConfirmationDefinition(
-            errorReporter = FakeErrorReporter(),
-        ),
+        definition = confirmationDefinition(),
         launcherResult = PassiveChallengeActivityResult.Failed(RuntimeException("Challenge failed")),
         parameters = CONFIRMATION_PARAMETERS,
         definitionResult = ConfirmationDefinition.Result.NextStep(
@@ -149,4 +137,12 @@ internal class PassiveChallengeConfirmationFlowTest {
             appearance = PaymentSheet.Appearance(),
         )
     }
+
+    private fun confirmationDefinition(
+        errorReporter: FakeErrorReporter = FakeErrorReporter(),
+    ) = PassiveChallengeConfirmationDefinition(
+        errorReporter = errorReporter,
+        publishableKeyProvider = { "pk_123" },
+        productUsage = setOf("PaymentSheet"),
+    )
 }
