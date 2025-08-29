@@ -40,20 +40,23 @@ internal fun ScanCardButtonUI(
     controller: CardDetailsSectionController
 ) {
     if (controller.isStripeCardScanAvailable() || FeatureFlags.cardScanGooglePayMigration.isEnabled) {
-        val cardScanLauncher = rememberLauncherForActivityResult(CardScanContract()) {
-            controller.cardDetailsElement.controller.numberElement.controller.onCardScanResult(it)
-        }
-
         val context = LocalContext.current
-        val cardScanGoogleLauncher = if (FeatureFlags.cardScanGooglePayMigration.isEnabled) {
+        val cardScanLauncher: ManagedActivityResultLauncher<CardScanContract.Args, CardScanSheetResult>?
+        val cardScanGoogleLauncher: CardScanGoogleLauncher?
+
+        if (FeatureFlags.cardScanGooglePayMigration.isEnabled) {
             val eventsReporter = LocalCardScanEventsReporter.current
-            rememberCardScanGoogleLauncher(
+            cardScanGoogleLauncher = rememberCardScanGoogleLauncher(
                 context,
                 eventsReporter,
                 controller.cardDetailsElement.controller.onCardScanResult
             )
+            cardScanLauncher = null
         } else {
-            null
+            cardScanLauncher = rememberLauncherForActivityResult(CardScanContract()) {
+                controller.cardDetailsElement.controller.numberElement.controller.onCardScanResult(it)
+            }
+            cardScanGoogleLauncher = null
         }
 
         ScanCardButtonContent(
@@ -70,7 +73,7 @@ internal fun ScanCardButtonUI(
 private fun ScanCardButtonContent(
     enabled: Boolean,
     elementsSessionId: String?,
-    cardScanLauncher: ManagedActivityResultLauncher<CardScanContract.Args, CardScanSheetResult>,
+    cardScanLauncher: ManagedActivityResultLauncher<CardScanContract.Args, CardScanSheetResult>?,
     cardScanGoogleLauncher: CardScanGoogleLauncher?
 ) {
     val context = LocalContext.current
@@ -91,7 +94,7 @@ private fun ScanCardButtonContent(
                     if (FeatureFlags.cardScanGooglePayMigration.isEnabled) {
                         cardScanGoogleLauncher?.launch(context)
                     } else {
-                        cardScanLauncher.launch(
+                        cardScanLauncher?.launch(
                             input = CardScanContract.Args(
                                 configuration = CardScanConfiguration(
                                     elementsSessionId = elementsSessionId
