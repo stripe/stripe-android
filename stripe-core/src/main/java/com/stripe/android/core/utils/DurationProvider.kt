@@ -17,7 +17,8 @@ interface DurationProvider {
         Checkout,
         LinkSignup,
         ConfirmButtonClicked,
-        CardScan
+        CardScan,
+        Captcha
     }
 }
 
