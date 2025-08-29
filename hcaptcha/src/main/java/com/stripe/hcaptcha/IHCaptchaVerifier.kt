@@ -1,7 +1,7 @@
 package com.stripe.hcaptcha
 
+import android.content.Context
 import androidx.annotation.RestrictTo
-import androidx.fragment.app.FragmentActivity
 import com.stripe.hcaptcha.task.OnFailureListener
 import com.stripe.hcaptcha.task.OnLoadedListener
 import com.stripe.hcaptcha.task.OnOpenListener
@@ -12,7 +12,7 @@ internal interface IHCaptchaVerifier : OnLoadedListener, OnOpenListener, OnSucce
     /**
      * Starts the human verification process.
      */
-    fun startVerification(activity: FragmentActivity)
+    fun startVerification(context: Context)
 
     /**
      * Force stop verification and release resources.

@@ -1,6 +1,6 @@
 package com.stripe.android.challenge
 
-import androidx.fragment.app.FragmentActivity
+import android.content.Context
 import app.cash.turbine.Turbine
 import com.stripe.android.hcaptcha.HCaptchaService
 
@@ -9,11 +9,11 @@ internal class FakeHCaptchaService : HCaptchaService {
     private val calls = Turbine<Call>()
 
     override suspend fun performPassiveHCaptcha(
-        activity: FragmentActivity,
+        context: Context,
         siteKey: String,
         rqData: String?
     ): HCaptchaService.Result {
-        calls.add(Call(activity, siteKey, rqData))
+        calls.add(Call(context, siteKey, rqData))
         return result ?: HCaptchaService.Result.Success("default_token")
     }
 
@@ -22,7 +22,7 @@ internal class FakeHCaptchaService : HCaptchaService {
     }
 
     data class Call(
-        val activity: FragmentActivity,
+        val context: Context,
         val siteKey: String,
         val rqData: String?
     )
