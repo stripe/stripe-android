@@ -575,4 +575,36 @@ class GooglePayJsonFactoryTest {
         assertThat(paymentDataAllowedCardNetworks)
             .containsExactly("MASTERCARD", "VISA")
     }
+
+    @Test
+    fun `cardBrandFilter should correctly filter out card brands`() {
+        // CardBrandFilter that only allows Visa
+        val visaOnlyFilter = object : CardBrandFilter {
+            override fun isAccepted(cardBrand: CardBrand): Boolean {
+                return cardBrand == CardBrand.Visa
+            }
+            override fun describeContents(): Int {
+                throw IllegalStateException("describeContents should not be called.")
+            }
+
+            override fun writeToParcel(p0: Parcel, p1: Int) {
+                throw IllegalStateException("writeToParcel should not be called.")
+            }
+        }
+        val factory = GooglePayJsonFactory(
+            googlePayConfig = googlePayConfig,
+            isJcbEnabled = true,
+            cardBrandFilter = visaOnlyFilter
+        )
+        val paymentMethodJson = factory.createCardPaymentMethod(
+            billingAddressParameters = null,
+            allowCreditCards = true
+        )
+        val allowedCardNetworks = paymentMethodJson
+            .getJSONObject("parameters")
+            .optJSONArray("allowedCardNetworks")
+            .let { StripeJsonUtils.jsonArrayToList(it) }
+        // Only Visa should be present
+        assertThat(allowedCardNetworks).containsExactly("VISA")
+    }
 }
