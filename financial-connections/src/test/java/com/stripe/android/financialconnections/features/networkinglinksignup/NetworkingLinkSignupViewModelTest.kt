@@ -152,6 +152,7 @@ class NetworkingLinkSignupViewModelTest {
                     phoneCountryCode = "US",
                 ),
                 incentiveEligibilitySession = null,
+                allowRedisplay = null,
             )
         )
 
