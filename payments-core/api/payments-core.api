@@ -6797,6 +6797,8 @@ public final class com/stripe/android/payments/StripeErrorLocalizations {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/payments/StripeErrorLocalizations;
 	public static final fun forCode (Landroid/content/Context;Ljava/lang/String;)Ljava/lang/String;
+	public static final fun forCode (Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+	public static synthetic fun forCode$default (Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ljava/lang/String;
 }
 
 public abstract interface class com/stripe/android/payments/bankaccount/CollectBankAccountConfiguration : android/os/Parcelable {
