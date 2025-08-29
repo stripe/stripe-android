@@ -88,10 +88,8 @@ internal enum class AddPaymentMethodRequirement {
 
 private val PaymentMethodMetadata.supportsMobileInstantDebitsFlow: Boolean
     get() {
-        val paymentMethodTypes = stripeIntent.paymentMethodTypes
-        val noUsBankAccount = USBankAccount.code !in paymentMethodTypes
-        val supportsBankAccounts = "bank_account" in stripeIntent.linkFundingSources
-        return noUsBankAccount && supportsBankAccounts && canShowBankForm
+        val supportsInstantDebitsOnboarding = linkState?.configuration?.supportsInstantDebitsOnboarding == true
+        return supportsInstantDebitsOnboarding && canShowBankForm
     }
 
 private val PaymentMethodMetadata.canShowBankForm: Boolean
