@@ -108,4 +108,13 @@ class StripeErrorLocalizationsTest {
             expected = "Your card's security code is invalid."
         )
     }
+
+    @Test
+    fun declineCodeWithNoTranslationAndGeneralCode_returnsGeneralCodeMessage() {
+        assertLocalizedMessage(
+            code = "generic_decline",
+            declineCode = "incorrect_field_we_do_not_know_about",
+            expected = "Your payment method was declined."
+        )
+    }
 }
