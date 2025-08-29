@@ -434,7 +434,6 @@ workflows:
       - activate-ssh-key@4:
           run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
       - git-clone@8: { }
-      - cache-pull@2: { }
       - restore-gradle-cache@1: { }
       - set-java-version@1:
           inputs:
@@ -463,7 +462,6 @@ workflows:
             - deploy_path: /tmp/test_results
             - is_enable_public_page: "false"
           title: Deploy test results artifacts
-      - cache-push@2: { }
       - save-gradle-cache@1: { }
 meta:
   bitrise.io:
