@@ -1,6 +1,7 @@
 package com.stripe.android.hcaptcha
 
 import androidx.fragment.app.FragmentActivity
+import com.stripe.android.hcaptcha.analytics.CaptchaEventsReporter
 import com.stripe.hcaptcha.HCaptcha
 import com.stripe.hcaptcha.HCaptchaError
 import com.stripe.hcaptcha.HCaptchaException
@@ -13,7 +14,8 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
 internal class DefaultHCaptchaService(
-    private val hCaptchaProvider: HCaptchaProvider
+    private val hCaptchaProvider: HCaptchaProvider,
+    private val captchaEventsReporter: CaptchaEventsReporter
 ) : HCaptchaService {
     override suspend fun performPassiveHCaptcha(
         activity: FragmentActivity,
@@ -21,6 +23,7 @@ internal class DefaultHCaptchaService(
         rqData: String?
     ): HCaptchaService.Result {
         val hCaptcha = hCaptchaProvider.get()
+        captchaEventsReporter.init(siteKey)
         val result = runCatching {
             startVerification(
                 activity = activity,
@@ -30,6 +33,14 @@ internal class DefaultHCaptchaService(
             )
         }.getOrElse { e ->
             HCaptchaService.Result.Failure(e)
+        }
+        when (result) {
+            is HCaptchaService.Result.Failure -> {
+                captchaEventsReporter.error(result.error, siteKey)
+            }
+            is HCaptchaService.Result.Success -> {
+                captchaEventsReporter.success(siteKey)
+            }
         }
         hCaptcha.reset()
         return result
@@ -67,6 +78,7 @@ internal class DefaultHCaptchaService(
             )
 
             hCaptcha.setup(activity, config).verifyWithHCaptcha(activity)
+            captchaEventsReporter.execute(siteKey)
         }
     }
 }

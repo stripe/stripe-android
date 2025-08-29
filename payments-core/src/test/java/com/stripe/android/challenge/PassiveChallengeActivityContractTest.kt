@@ -23,7 +23,11 @@ internal class PassiveChallengeActivityContractTest {
             siteKey = "test_site_key",
             rqData = "test_rq_data"
         )
-        val args = PassiveChallengeActivityContract.Args(passiveCaptchaParams)
+        val args = PassiveChallengeActivityContract.Args(
+            passiveCaptchaParams,
+            publishableKey = "pk_123",
+            productUsage = emptySet()
+        )
 
         val intent = contract.createIntent(ApplicationProvider.getApplicationContext(), args)
         val intentArgs = intent.extras?.let {

@@ -4,6 +4,7 @@ import android.os.Handler
 import androidx.fragment.app.FragmentActivity
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.hcaptcha.analytics.CaptchaEventsReporter
 import com.stripe.hcaptcha.HCaptcha
 import com.stripe.hcaptcha.HCaptchaError
 import com.stripe.hcaptcha.HCaptchaException
@@ -69,32 +70,52 @@ internal class DefaultHCaptchaServiceTest {
     fun `performPassiveHCaptcha returns success when HCaptcha succeeds`() = runTest {
         val testContext = createTestContext()
         val expectedToken = "success-token"
+        val siteKey = "test-site-key"
         testContext.setupSuccessfulHCaptcha(expectedToken)
 
         val result = testContext.service.performPassiveHCaptcha(
             testContext.activity,
-            siteKey = "test-site-key",
+            siteKey = siteKey,
             rqData = null
         )
 
         assertThat(result).isInstanceOf(HCaptchaService.Result.Success::class.java)
         assertThat((result as HCaptchaService.Result.Success).token).isEqualTo(expectedToken)
+
+        // Verify analytics calls in order
+        assertThat(testContext.captchaEventsReporter.awaitCall())
+            .isEqualTo(FakeCaptchaEventsReporter.Call.Init(siteKey))
+        assertThat(testContext.captchaEventsReporter.awaitCall())
+            .isEqualTo(FakeCaptchaEventsReporter.Call.Execute(siteKey))
+        assertThat(testContext.captchaEventsReporter.awaitCall())
+            .isEqualTo(FakeCaptchaEventsReporter.Call.Success(siteKey))
+        testContext.captchaEventsReporter.ensureAllEventsConsumed()
     }
 
     @Test
     fun `performPassiveHCaptcha returns failure when HCaptcha fails`() = runTest {
         val testContext = createTestContext()
         val exception = HCaptchaException(HCaptchaError.NETWORK_ERROR)
+        val siteKey = "test-site-key"
         testContext.setupFailedHCaptcha(exception)
 
         val result = testContext.service.performPassiveHCaptcha(
             testContext.activity,
-            siteKey = "test-site-key",
+            siteKey = siteKey,
             rqData = null
         )
 
         assertThat(result).isInstanceOf(HCaptchaService.Result.Failure::class.java)
         assertThat((result as HCaptchaService.Result.Failure).error).isEqualTo(exception)
+
+        // Verify analytics calls in order
+        assertThat(testContext.captchaEventsReporter.awaitCall())
+            .isEqualTo(FakeCaptchaEventsReporter.Call.Init(siteKey))
+        assertThat(testContext.captchaEventsReporter.awaitCall())
+            .isEqualTo(FakeCaptchaEventsReporter.Call.Execute(siteKey))
+        assertThat(testContext.captchaEventsReporter.awaitCall())
+            .isEqualTo(FakeCaptchaEventsReporter.Call.Error(exception, siteKey))
+        testContext.captchaEventsReporter.ensureAllEventsConsumed()
     }
 
     @Test
@@ -150,28 +171,38 @@ internal class DefaultHCaptchaServiceTest {
     fun `performPassiveHCaptcha returns failure when startVerification throws exception`() = runTest {
         val testContext = createTestContext()
         val expectedException = RuntimeException("Test exception")
+        val siteKey = "test-site-key"
         testContext.setupExceptionDuringSetup(expectedException)
 
         val result = testContext.service.performPassiveHCaptcha(
             testContext.activity,
-            siteKey = "test-site-key",
+            siteKey = siteKey,
             rqData = null
         )
 
         assertThat(result).isInstanceOf(HCaptchaService.Result.Failure::class.java)
         assertThat((result as HCaptchaService.Result.Failure).error).isEqualTo(expectedException)
         verify(testContext.hCaptcha).reset()
+
+        // Verify analytics calls - setup failure happens before execute
+        assertThat(testContext.captchaEventsReporter.awaitCall())
+            .isEqualTo(FakeCaptchaEventsReporter.Call.Init(siteKey))
+        assertThat(testContext.captchaEventsReporter.awaitCall())
+            .isEqualTo(FakeCaptchaEventsReporter.Call.Error(expectedException, siteKey))
+        testContext.captchaEventsReporter.ensureAllEventsConsumed()
     }
 
     private fun createTestContext(): TestContext {
         val activity = mock<FragmentActivity>()
         val hCaptcha = mock<HCaptcha>()
         val hCaptchaProvider = FakeHCaptchaProvider(hCaptcha)
-        val service = DefaultHCaptchaService(hCaptchaProvider)
+        val captchaEventsReporter = FakeCaptchaEventsReporter()
+        val service = DefaultHCaptchaService(hCaptchaProvider, captchaEventsReporter)
 
         return TestContext(
             activity = activity,
             hCaptcha = hCaptcha,
+            captchaEventsReporter = captchaEventsReporter,
             hCaptchaProvider = hCaptchaProvider,
             service = service
         )
@@ -223,9 +254,45 @@ internal class DefaultHCaptchaServiceTest {
     private data class TestContext(
         val activity: FragmentActivity,
         val hCaptcha: HCaptcha,
+        val captchaEventsReporter: FakeCaptchaEventsReporter,
         val hCaptchaProvider: FakeHCaptchaProvider,
         val service: DefaultHCaptchaService
     )
+
+    private class FakeCaptchaEventsReporter : CaptchaEventsReporter {
+        private val calls = Turbine<Call>()
+
+        override fun init(siteKey: String) {
+            calls.add(Call.Init(siteKey))
+        }
+
+        override fun execute(siteKey: String) {
+            calls.add(Call.Execute(siteKey))
+        }
+
+        override fun success(siteKey: String) {
+            calls.add(Call.Success(siteKey))
+        }
+
+        override fun error(error: Throwable?, siteKey: String) {
+            calls.add(Call.Error(error, siteKey))
+        }
+
+        suspend fun awaitCall(): Call = calls.awaitItem()
+
+        fun ensureAllEventsConsumed() {
+            calls.ensureAllEventsConsumed()
+        }
+
+        sealed interface Call {
+            val siteKey: String
+
+            data class Init(override val siteKey: String) : Call
+            data class Execute(override val siteKey: String) : Call
+            data class Success(override val siteKey: String) : Call
+            data class Error(val error: Throwable?, override val siteKey: String) : Call
+        }
+    }
 
     private class FakeHCaptchaProvider(
         private val hCaptcha: HCaptcha
