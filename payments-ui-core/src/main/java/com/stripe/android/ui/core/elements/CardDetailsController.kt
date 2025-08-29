@@ -7,6 +7,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.DateUtils
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cardscan.CardScanResult
@@ -100,15 +101,24 @@ internal class CardDetailsController(
 
     val onCardScanResult: (CardScanResult) -> Unit = { result ->
         (result as? CardScanResult.Completed)?.scannedCard?.let { scannedCard ->
+            cvcElement.controller.onRawValueChange("")
             numberElement.controller.onRawValueChange(
                 scannedCard.pan
             )
-            if (scannedCard.expirationMonth != null && scannedCard.expirationYear != null) {
-                @Suppress("MagicNumber")
-                expirationDateElement.controller.onRawValueChange(
-                    "${scannedCard.expirationMonth}/${scannedCard.expirationYear % 100}"
+            val newDate = if (
+                scannedCard.expirationMonth != null &&
+                scannedCard.expirationYear != null &&
+                DateUtils.isExpiryDataValid(
+                    expiryMonth = scannedCard.expirationMonth,
+                    expiryYear = scannedCard.expirationYear
                 )
+            ) {
+                @Suppress("MagicNumber")
+                "${scannedCard.expirationMonth}/${scannedCard.expirationYear % 100}"
+            } else {
+                ""
             }
+            expirationDateElement.controller.onRawValueChange(newDate)
         }
     }
 

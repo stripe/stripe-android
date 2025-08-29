@@ -22,6 +22,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityOptionsCompat
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.stripecardscan.cardscan.CardScanConfiguration
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
@@ -37,6 +38,7 @@ import com.stripe.android.uicore.utils.collectAsState
 @Composable
 internal fun ScanCardButtonUI(
     enabled: Boolean,
+    launchOptions: ActivityOptionsCompat? = null,
     controller: CardDetailsSectionController
 ) {
     if (controller.isStripeCardScanAvailable() || FeatureFlags.cardScanGooglePayMigration.isEnabled) {
@@ -49,6 +51,7 @@ internal fun ScanCardButtonUI(
             cardScanGoogleLauncher = rememberCardScanGoogleLauncher(
                 context,
                 eventsReporter,
+                options = launchOptions,
                 controller.cardDetailsElement.controller.onCardScanResult
             )
             cardScanLauncher = null
