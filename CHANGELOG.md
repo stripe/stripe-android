@@ -4,6 +4,13 @@
 
 ## 21.24.4 - 2025-08-29
 
+### CryptoOnramp
+[Added] Additional APIs and improvements to support the development of the React Native CryptoOnramp SDK.
+
+## 21.24.3 - 2025-08-27
+
+Bug fixes and improvements.
+
 ## 21.24.2 - 2025-08-26
 
 Bug fixes and improvements.
