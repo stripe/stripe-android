@@ -1,7 +1,7 @@
 package com.stripe.android.challenge
 
 import android.app.Application
-import androidx.fragment.app.FragmentActivity
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.createSavedStateHandle
@@ -15,15 +15,16 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import javax.inject.Inject
 
 internal class PassiveChallengeViewModel @Inject constructor(
+    private val context: Context,
     private val passiveCaptchaParams: PassiveCaptchaParams,
     private val hCaptchaService: HCaptchaService
 ) : ViewModel() {
     private val _result = MutableSharedFlow<PassiveChallengeActivityResult>(replay = 1)
     val result: Flow<PassiveChallengeActivityResult> = _result
 
-    suspend fun startPassiveChallenge(activity: FragmentActivity) {
+    suspend fun startPassiveChallenge() {
         val result = hCaptchaService.performPassiveHCaptcha(
-            activity = activity,
+            context = context,
             siteKey = passiveCaptchaParams.siteKey,
             rqData = passiveCaptchaParams.rqData
         )

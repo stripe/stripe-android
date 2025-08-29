@@ -1,8 +1,8 @@
 package com.stripe.hcaptcha
 
+import android.content.Context
 import android.util.AndroidRuntimeException
 import androidx.annotation.RestrictTo
-import androidx.fragment.app.FragmentActivity
 import com.stripe.hcaptcha.config.HCaptchaConfig
 import com.stripe.hcaptcha.config.HCaptchaInternalConfig
 import com.stripe.hcaptcha.config.HCaptchaSize
@@ -48,12 +48,12 @@ interface IHCaptcha {
     /**
      * Constructs a new client which allows to display a challenge dialog
      *
-     * @param activity The FragmentActivity context required for starting the challenge
+     * @param context The Context required for starting the challenge
      * @param config Config to customize: size, theme, locale, endpoint, rqdata, etc.
      * @return new [HCaptcha] object
      */
     fun setup(
-        activity: FragmentActivity,
+        context: Context,
         config: HCaptchaConfig
     ): HCaptcha?
 
@@ -61,10 +61,10 @@ interface IHCaptcha {
      * Presents a captcha challenge. Depending on the configuration passed in setup, this will be either a passive
      * challenge or a dialog to be completed by the user.
      *
-     * @param activity The FragmentActivity context required for starting the challenge
+     * @param context The Context required for starting the challenge
      * @return [HCaptcha]
      */
-    fun verifyWithHCaptcha(activity: FragmentActivity): HCaptcha?
+    fun verifyWithHCaptcha(context: Context): HCaptcha
 
     /**
      * Force stop verification and release resources.
@@ -78,7 +78,7 @@ class HCaptcha private constructor(
 ) : Task<HCaptchaTokenResponse>(), IHCaptcha {
     private var captchaVerifier: IHCaptchaVerifier? = null
 
-    override fun setup(activity: FragmentActivity, config: HCaptchaConfig): HCaptcha {
+    override fun setup(context: Context, config: HCaptchaConfig): HCaptcha {
         val listener = HCaptchaStateListener(
             onOpen = { captchaOpened() },
             onSuccess = { token ->
@@ -92,7 +92,7 @@ class HCaptcha private constructor(
             captchaVerifier = if (config.hideDialog) {
                 // Overwrite certain config values in case the dialog is hidden to avoid behavior collision
                 HCaptchaHeadlessWebView(
-                    activity = activity,
+                    context = context,
                     config = config.copy(size = HCaptchaSize.INVISIBLE, loading = false),
                     internalConfig = internalConfig,
                     listener = listener
@@ -106,12 +106,12 @@ class HCaptcha private constructor(
         return this
     }
 
-    override fun verifyWithHCaptcha(activity: FragmentActivity): HCaptcha? {
+    override fun verifyWithHCaptcha(context: Context): HCaptcha {
         val captchaVerifier = captchaVerifier
             ?: // Cold start at verification time.
             throw IllegalStateException("verifyWithHCaptcha must not be called before setup.")
         handler.removeCallbacksAndMessages(null)
-        captchaVerifier.startVerification(activity)
+        captchaVerifier.startVerification(context)
         return this
     }
 

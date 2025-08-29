@@ -30,7 +30,7 @@ internal class PassiveChallengeActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            viewModel.startPassiveChallenge(this@PassiveChallengeActivity)
+            viewModel.startPassiveChallenge()
         }
     }
 

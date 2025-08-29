@@ -1,6 +1,6 @@
 package com.stripe.android.hcaptcha
 
-import androidx.fragment.app.FragmentActivity
+import android.content.Context
 import com.stripe.android.hcaptcha.analytics.CaptchaEventsReporter
 import com.stripe.hcaptcha.HCaptcha
 import com.stripe.hcaptcha.HCaptchaError
@@ -18,7 +18,7 @@ internal class DefaultHCaptchaService(
     private val captchaEventsReporter: CaptchaEventsReporter
 ) : HCaptchaService {
     override suspend fun performPassiveHCaptcha(
-        activity: FragmentActivity,
+        context: Context,
         siteKey: String,
         rqData: String?
     ): HCaptchaService.Result {
@@ -26,7 +26,7 @@ internal class DefaultHCaptchaService(
         captchaEventsReporter.init(siteKey)
         val result = runCatching {
             startVerification(
-                activity = activity,
+                context = context,
                 siteKey = siteKey,
                 rqData = rqData,
                 hCaptcha = hCaptcha
@@ -47,7 +47,7 @@ internal class DefaultHCaptchaService(
     }
 
     private suspend fun startVerification(
-        activity: FragmentActivity,
+        context: Context,
         siteKey: String,
         rqData: String?,
         hCaptcha: HCaptcha
@@ -77,7 +77,7 @@ internal class DefaultHCaptchaService(
                 retryPredicate = { _, exception -> exception.hCaptchaError == HCaptchaError.SESSION_TIMEOUT }
             )
 
-            hCaptcha.setup(activity, config).verifyWithHCaptcha(activity)
+            hCaptcha.setup(context, config).verifyWithHCaptcha(context)
             captchaEventsReporter.execute(siteKey)
         }
     }
