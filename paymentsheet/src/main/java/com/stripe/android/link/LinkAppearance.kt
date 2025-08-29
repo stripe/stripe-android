@@ -25,7 +25,7 @@ import kotlinx.parcelize.TypeParceler
 class LinkAppearance(
     val lightColors: Colors = Colors.default(isDark = false),
     val darkColors: Colors = Colors.default(isDark = true),
-    val style: Style,
+    val style: Style = Style.AUTOMATIC,
     val primaryButton: PrimaryButton = PrimaryButton()
 ) : Parcelable {
 
