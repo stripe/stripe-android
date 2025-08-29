@@ -16,7 +16,6 @@ import app.cash.turbine.Turbine
 import com.google.android.gms.wallet.CreditCardExpirationDate
 import com.google.android.gms.wallet.PaymentCardRecognitionResult
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.ui.core.DefaultIsStripeCardScanAvailable
 import com.stripe.android.ui.core.cardscan.FakeCardScanEventsReporter
 import com.stripe.android.ui.core.cardscan.FakePaymentCardRecognitionClient
@@ -38,18 +37,8 @@ internal class ScanCardButtonUITest {
     val composeTestRule = createComposeRule()
 
     @Test
-    fun `ScanCardButtonUI should launch legacy launcher when stripe card scan is available`() = runScenario(
-        isStripeCardScanAvailable = true,
-        isCardScanGooglePayMigrationEnabled = false,
-    ) {
-        composeTestRule.onNodeWithText("Scan card").performClick()
-        assertThat(cardScanCall.awaitItem()).isEqualTo("stripe")
-    }
-
-    @Test
     fun `ScanCardButtonUI should launch Google launcher when Google migration is enabled and available`() = runScenario(
         isStripeCardScanAvailable = true,
-        isCardScanGooglePayMigrationEnabled = true,
         isFetchClientSucceed = true,
     ) {
         composeTestRule.onNodeWithText("Scan card").performClick()
@@ -59,16 +48,7 @@ internal class ScanCardButtonUITest {
     @Test
     fun `ScanCardButtonUI hidden when Google migration is enabled but not available`() = runScenario(
         isStripeCardScanAvailable = true,
-        isCardScanGooglePayMigrationEnabled = true,
         isFetchClientSucceed = false,
-    ) {
-        composeTestRule.onNodeWithText("Scan card").assertDoesNotExist()
-    }
-
-    @Test
-    fun `ScanCardButtonUI hidden when card scan is disabled`() = runScenario(
-        isStripeCardScanAvailable = false,
-        isCardScanGooglePayMigrationEnabled = false,
     ) {
         composeTestRule.onNodeWithText("Scan card").assertDoesNotExist()
     }
@@ -125,11 +105,9 @@ internal class ScanCardButtonUITest {
 
     private fun runScenario(
         isStripeCardScanAvailable: Boolean = true,
-        isCardScanGooglePayMigrationEnabled: Boolean = true,
         isFetchClientSucceed: Boolean = true,
         block: suspend Scenario.() -> Unit
     ) = runTest {
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(isCardScanGooglePayMigrationEnabled)
 
         val cardScanCall = Turbine<String>()
         val registryOwner = object : ActivityResultRegistryOwner {

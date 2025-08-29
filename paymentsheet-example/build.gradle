@@ -47,7 +47,10 @@ sentry {
 
 dependencies {
     implementation project(':payments')
-    implementation project(':stripecardscan')
+    implementation(project(':stripecardscan')) {
+        exclude module: 'cardscan'
+    }
+    implementation project(':ml-core:googleplay')
     implementation project(':financial-connections')
 
     implementation libs.androidx.activity
