@@ -19,7 +19,6 @@ import com.google.android.gms.wallet.PaymentCardRecognitionResult
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.stripecardscan.R
 import com.stripe.android.ui.core.cardscan.CardScanResult
 import com.stripe.android.ui.core.cardscan.FakeCardScanEventsReporter
@@ -53,7 +52,6 @@ internal class CardDetailsSectionElementUITest {
 
     @Test
     fun `CardDetailsSectionElement automatically launches card scan and gets result`() {
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
         runScenario(
             automaticallyLaunchedCardScanFormDataHelper = AutomaticallyLaunchedCardScanFormDataHelper(
                 openCardScanAutomaticallyConfig = true,
@@ -76,12 +74,10 @@ internal class CardDetailsSectionElementUITest {
 
             assertThat(controller.shouldAutomaticallyLaunchCardScan()).isFalse()
         }
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     @Test
     fun `CardDetailsSectionElement does not launch card scan when openCardScanAutomaticallyConfig false`() {
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
         runScenario(
             automaticallyLaunchedCardScanFormDataHelper = AutomaticallyLaunchedCardScanFormDataHelper(
                 openCardScanAutomaticallyConfig = false,
@@ -97,12 +93,10 @@ internal class CardDetailsSectionElementUITest {
             verify(controller, times(0)).onCardScanResult(any())
             verify(controller, times(0)).setHasAutomaticallyLaunchedCardScan()
         }
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     @Test
     fun `CardDetailsSectionElement does not launch card scan when hasAutomaticallyLaunchedCardScanInitialValue true`() {
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
 
         runScenario(
             automaticallyLaunchedCardScanFormDataHelper = AutomaticallyLaunchedCardScanFormDataHelper(
@@ -118,31 +112,10 @@ internal class CardDetailsSectionElementUITest {
             verify(controller, times(0)).onCardScanResult(any())
             verify(controller, times(0)).setHasAutomaticallyLaunchedCardScan()
         }
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
-    }
-
-    @Test
-    fun `CardDetailsSectionElement does not launch card scan when FeatureFlags cardScanGooglePayMigration disabled`() {
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
-        runScenario(
-            automaticallyLaunchedCardScanFormDataHelper = AutomaticallyLaunchedCardScanFormDataHelper(
-                openCardScanAutomaticallyConfig = true,
-                hasAutomaticallyLaunchedCardScanInitialValue = false,
-                savedStateHandle = SavedStateHandle()
-            )
-        ) {
-            composeTestRule.onNodeWithText("4242 4242 4242 4242").assertDoesNotExist()
-            composeTestRule.onNodeWithText("Card number").assertExists()
-
-            assertThat(controller.shouldAutomaticallyLaunchCardScan()).isFalse()
-            verify(controller, times(0)).onCardScanResult(any())
-            verify(controller, times(0)).setHasAutomaticallyLaunchedCardScan()
-        }
     }
 
     @Test
     fun `CardDetailsSectionElement does not launch card scan when automaticallyLaunchedCardScanFormDataHelper null`() {
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
         runScenario(
             automaticallyLaunchedCardScanFormDataHelper = null
         ) {
@@ -153,7 +126,6 @@ internal class CardDetailsSectionElementUITest {
             verify(controller, times(0)).onCardScanResult(any())
             verify(controller, times(0)).setHasAutomaticallyLaunchedCardScan()
         }
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     private class Scenario(

@@ -549,15 +549,6 @@ internal class PlaygroundSettings private constructor(
             ),
             TermsDisplaySettingsDefinition,
             FeatureFlagSettingsDefinition(
-                FeatureFlags.cardScanGooglePayMigration,
-                listOf(
-                    PlaygroundConfigurationData.IntegrationType.PaymentSheet,
-                    PlaygroundConfigurationData.IntegrationType.FlowController,
-                    PlaygroundConfigurationData.IntegrationType.Embedded,
-                    PlaygroundConfigurationData.IntegrationType.CustomerSheet,
-                )
-            ),
-            FeatureFlagSettingsDefinition(
                 FeatureFlags.enablePayNow,
                 allowedIntegrationTypes = PlaygroundConfigurationData.IntegrationType.paymentFlows().toList(),
             )

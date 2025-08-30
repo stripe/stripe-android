@@ -486,7 +486,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
              * the card entry form will initialize with the card scanner already open.
              * **Note**: The stripecardscan dependency must be added to set `opensCardScannerAutomatically` to true
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun opensCardScannerAutomatically(opensCardScannerAutomatically: Boolean) = apply {
                 this.opensCardScannerAutomatically = opensCardScannerAutomatically
             }
