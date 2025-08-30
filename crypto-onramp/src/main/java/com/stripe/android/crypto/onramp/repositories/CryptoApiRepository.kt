@@ -253,6 +253,7 @@ internal class CryptoApiRepository @Inject constructor(
                 val error = StripeErrorJsonParser().parse(response.responseJson())
                 throw APIException(error)
             }
+            @Suppress("TooGenericExceptionCaught")
             try {
                 val body = requireNotNull(response.body) { "No response body found" }
                 val json = Json { ignoreUnknownKeys = true }
