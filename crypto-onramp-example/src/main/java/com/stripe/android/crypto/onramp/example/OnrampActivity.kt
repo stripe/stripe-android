@@ -454,7 +454,7 @@ private fun AuthenticationScreen(
 fun AuthenticateSection(
     onAuthenticate: (oauthScopes: String?) -> Unit,
 ) {
-    var oauthScopes by remember { mutableStateOf("") }
+    var oauthScopes by remember { mutableStateOf("kyc.status:read,crypto:ramp") }
     OutlinedTextField(
         value = oauthScopes,
         onValueChange = { oauthScopes = it },
