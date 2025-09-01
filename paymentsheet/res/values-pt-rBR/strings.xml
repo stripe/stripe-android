@@ -29,6 +29,9 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">Salvar meus dados para um checkout mais rápido com o Link</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_toggle">Crie uma conta com o Link para um checkout mais rápido na web</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">Crédito %1$s</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -287,6 +290,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_passthrough_description">Processamento</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
   <string name="stripe_wallet_pay_another_way">Pagar de outra forma</string>
+  <!-- Hint shown when selecting a payment method indicating debit cards are preferred. -->
+  <string name="stripe_wallet_prefer_debit_card_hint">Os cartões de débito têm maior probabilidade de serem aceitos.</string>
   <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
   <string name="stripe_wallet_recollect_cvc_error">Por segurança, digite novamente o código de segurança do cartão.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->

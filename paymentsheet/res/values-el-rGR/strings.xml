@@ -29,6 +29,9 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">Αποθήκευση των στοιχείων μου για ταχύτερη ολοκλήρωση αγοράς με το Link</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_toggle">Δημιουργήστε λογαριασμό με το Link για ταχύτερη ολοκλήρωση αγοράς σε όλο το διαδίκτυο</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">Πιστωτική κάρτα %1$s</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
