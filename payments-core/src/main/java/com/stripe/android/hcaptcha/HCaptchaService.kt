@@ -1,12 +1,12 @@
 package com.stripe.android.hcaptcha
 
-import android.content.Context
 import androidx.annotation.RestrictTo
+import androidx.fragment.app.FragmentActivity
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface HCaptchaService {
     suspend fun performPassiveHCaptcha(
-        context: Context,
+        activity: FragmentActivity,
         siteKey: String,
         rqData: String?
     ): Result

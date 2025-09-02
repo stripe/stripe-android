@@ -2,7 +2,6 @@ package com.stripe.hcaptcha
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
-import android.content.Context
 import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -204,8 +203,8 @@ class HCaptchaDialogFragment : DialogFragment(), IHCaptchaVerifier {
         webViewHelper?.listener?.onSuccess?.let { it(result) }
     }
 
-    override fun startVerification(context: Context) {
-        val fragmentManager = (context as? FragmentActivity)?.supportFragmentManager ?: return
+    override fun startVerification(activity: FragmentActivity) {
+        val fragmentManager = activity.supportFragmentManager
         val oldFragment = fragmentManager.findFragmentByTag(TAG)
 
         if (oldFragment?.isAdded == true) {

@@ -1,12 +1,13 @@
 package com.stripe.hcaptcha.webview
 
-import android.content.Context
+import android.app.Activity
 import android.os.Handler
 import android.os.Looper
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
 import androidx.annotation.RestrictTo
+import androidx.fragment.app.FragmentActivity
 import com.stripe.hcaptcha.HCaptchaException
 import com.stripe.hcaptcha.HCaptchaStateListener
 import com.stripe.hcaptcha.IHCaptchaVerifier
@@ -16,7 +17,7 @@ import com.stripe.hcaptcha.config.HCaptchaInternalConfig
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal class HCaptchaHeadlessWebView(
-    context: Context,
+    activity: Activity,
     config: HCaptchaConfig,
     internalConfig: HCaptchaInternalConfig,
     private val listener: HCaptchaStateListener
@@ -27,13 +28,18 @@ internal class HCaptchaHeadlessWebView(
     private var shouldResetOnLoad = false
 
     init {
-        val webView: WebView = HCaptchaWebView(context)
+        val webView: WebView = HCaptchaWebView(activity)
         webView.id = R.id.webView
         webView.visibility = View.GONE
 
+        if (webView.parent == null) {
+            val rootView = activity.window.decorView.rootView as ViewGroup
+            rootView.addView(webView)
+        }
+
         webViewHelper = HCaptchaWebViewHelper(
             Handler(Looper.getMainLooper()),
-            context,
+            activity,
             config,
             internalConfig,
             this,
@@ -42,7 +48,7 @@ internal class HCaptchaHeadlessWebView(
         )
     }
 
-    override fun startVerification(context: Context) {
+    override fun startVerification(activity: FragmentActivity) {
         if (webViewLoaded) {
             // Safe to execute
             webViewHelper.resetAndExecute()

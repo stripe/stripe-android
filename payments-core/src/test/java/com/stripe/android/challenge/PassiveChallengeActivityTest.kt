@@ -130,16 +130,14 @@ internal class PassiveChallengeActivityTest {
     }
 
     private fun createTestViewModelFactory(
-        hCaptchaService: HCaptchaService = FakeHCaptchaService(),
-        context: Context = ApplicationProvider.getApplicationContext()
+        hCaptchaService: HCaptchaService = FakeHCaptchaService()
     ): ViewModelProvider.Factory {
         return object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return PassiveChallengeViewModel(
                     passiveCaptchaParams = passiveCaptchaParams,
-                    hCaptchaService = hCaptchaService,
-                    context = context
+                    hCaptchaService = hCaptchaService
                 ) as T
             }
         }
