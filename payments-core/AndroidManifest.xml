@@ -49,6 +49,11 @@
             android:exported="false" />
 
         <activity
+            android:name=".payments.core.authentication.stripejs.StripeJsNextActionActivity"
+            android:theme="@style/StripeDefaultTheme"
+            android:exported="false" />
+
+        <activity
             android:name=".googlepaylauncher.GooglePayLauncherActivity"
             android:theme="@style/StripeGooglePayDefaultTheme"
             android:exported="false" />

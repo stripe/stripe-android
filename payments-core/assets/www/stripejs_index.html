@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://js.stripe.com/v3/"></script>
+    <title>Stripe Next Action Handler</title>
+</head>
+<body>
+
+<script>
+    let stripe;
+
+    function initializeStripe() {
+        try {
+            console.log("hiiiiiiiiiiii")
+            console.log(JSON.stringify(window.NativeStripeNextAction))
+            const initParams = window.NativeStripeNextAction.getInitParams();
+            console.log("Initializing Stripe with params:", initParams);
+
+            stripe = window.Stripe(initParams.publishableKey);
+
+            console.log("Stripe initialized successfully");
+            window.NativeStripeNextAction.onReady();
+        } catch (error) {
+            console.error("Error initializing Stripe:", error);
+            // window.NativeStripeNextAction.onError(error.message);
+        }
+    }
+
+    async function handleNextAction(clientSecret) {
+        try {
+            console.log("Handling next action for client secret:", clientSecret);
+
+            const result = await stripe.handleNextAction({
+                clientSecret: clientSecret
+            });
+
+            console.log("Next action result:", result);
+
+            if (result.error) {
+                console.error("Next action error:", result.error);
+                window.NativeStripeNextAction.onError(result.error.message);
+            } else {
+                console.log("Next action completed successfully");
+                window.NativeStripeNextAction.onSuccess(result.paymentIntent);
+            }
+        } catch (error) {
+            console.error("Exception during next action:", error);
+            window.NativeStripeNextAction.onError(error.message);
+        }
+    }
+
+    console.log("Waiting for bridge to initialize...");
+</script>
+</body>
+</html>
