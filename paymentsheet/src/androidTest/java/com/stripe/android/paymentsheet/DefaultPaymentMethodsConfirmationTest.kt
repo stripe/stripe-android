@@ -20,15 +20,17 @@ import com.stripe.paymentelementtestpages.FormPage
 import com.stripe.paymentelementtestpages.VerticalModePage
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 
 @RunWith(TestParameterInjector::class)
 internal class DefaultPaymentMethodsConfirmationTest {
+    private val testRules: TestRules = TestRules.create()
 
     @get:Rule
-    val testRules: TestRules = TestRules.create {
-        around(IntentsRule())
-    }
+    val rules: RuleChain = RuleChain.emptyRuleChain()
+        .around(IntentsRule())
+        .around(testRules)
 
     private val composeTestRule = testRules.compose
     private val networkRule = testRules.networkRule
