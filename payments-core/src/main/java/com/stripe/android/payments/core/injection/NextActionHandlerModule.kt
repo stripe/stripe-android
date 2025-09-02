@@ -12,6 +12,7 @@ import com.stripe.android.payments.core.authentication.RealRedirectResolver
 import com.stripe.android.payments.core.authentication.RedirectResolver
 import com.stripe.android.payments.core.authentication.VoucherNextActionHandler
 import com.stripe.android.payments.core.authentication.WebIntentNextActionHandler
+import com.stripe.android.payments.core.authentication.stripejs.StripeJSNextActionHandler
 import com.stripe.android.view.AuthActivityStarterHost
 import dagger.Binds
 import dagger.Lazy
@@ -39,7 +40,7 @@ internal abstract class NextActionHandlerModule {
     @IntoMap
     @IntentAuthenticatorKey(NextActionData.RedirectToUrl::class)
     abstract fun bindsRedirectNextActionHandler(
-        webIntentNextActionHandler: WebIntentNextActionHandler
+        stripeJSNextActionHandler: StripeJSNextActionHandler
     ): PaymentNextActionHandler<StripeIntent>
 
     @IntentAuthenticatorMap
@@ -47,7 +48,7 @@ internal abstract class NextActionHandlerModule {
     @IntoMap
     @IntentAuthenticatorKey(NextActionData.AlipayRedirect::class)
     abstract fun bindsAlipayRedirectNextActionHandler(
-        webIntentNextActionHandler: WebIntentNextActionHandler
+        stripeJSNextActionHandler: StripeJSNextActionHandler
     ): PaymentNextActionHandler<StripeIntent>
 
     @IntentAuthenticatorMap
@@ -96,6 +97,14 @@ internal abstract class NextActionHandlerModule {
     @IntentAuthenticatorKey(NextActionData.SwishRedirect::class)
     abstract fun bindsSwishRedirectNextActionHandler(
         webIntentNextActionHandler: WebIntentNextActionHandler
+    ): PaymentNextActionHandler<StripeIntent>
+
+    @IntentAuthenticatorMap
+    @Binds
+    @IntoMap
+    @IntentAuthenticatorKey(NextActionData.SdkData.IntentConfirmationChallenge::class)
+    abstract fun bindsIntentConfirmationChallengeNextActionHandler(
+        stripeJSNextActionHandler: StripeJSNextActionHandler
     ): PaymentNextActionHandler<StripeIntent>
 
     @Binds
