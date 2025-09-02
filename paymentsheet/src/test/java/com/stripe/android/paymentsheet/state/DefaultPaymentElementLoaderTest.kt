@@ -11,11 +11,9 @@ import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.FakeIntegrityRequestManager
 import com.stripe.android.link.LinkConfiguration
-import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.account.LinkStore
-import com.stripe.android.link.attestation.FakeLinkAttestationCheck
-import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
@@ -64,7 +62,7 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeElementsSessionRepository
-import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -878,8 +876,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkEnableDisplayableDefaultValuesInEce = false,
                 linkMobileSkipWalletInFlowController = false,
                 linkSignUpOptInFeatureEnabled = false,
-                linkSignUpOptInInitialValue = false,
-                linkMobileDisableLinkOnAttestationFailure = false
+                linkSignUpOptInInitialValue = false
             )
         )
 
@@ -920,8 +917,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkEnableDisplayableDefaultValuesInEce = false,
                 linkMobileSkipWalletInFlowController = false,
                 linkSignUpOptInFeatureEnabled = false,
-                linkSignUpOptInInitialValue = false,
-                linkMobileDisableLinkOnAttestationFailure = false
+                linkSignUpOptInInitialValue = false
             )
         )
 
@@ -1010,8 +1006,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkEnableDisplayableDefaultValuesInEce = false,
                 linkMobileSkipWalletInFlowController = false,
                 linkSignUpOptInFeatureEnabled = false,
-                linkSignUpOptInInitialValue = false,
-                linkMobileDisableLinkOnAttestationFailure = false
+                linkSignUpOptInInitialValue = false
             ),
             linkStore = mock {
                 on { hasUsedLink() } doReturn true
@@ -1046,8 +1041,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkEnableDisplayableDefaultValuesInEce = false,
                 linkMobileSkipWalletInFlowController = false,
                 linkSignUpOptInFeatureEnabled = false,
-                linkSignUpOptInInitialValue = false,
-                linkMobileDisableLinkOnAttestationFailure = false
+                linkSignUpOptInInitialValue = false
             )
         )
 
@@ -1572,8 +1566,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkEnableDisplayableDefaultValuesInEce = false,
                 linkMobileSkipWalletInFlowController = false,
                 linkSignUpOptInFeatureEnabled = false,
-                linkSignUpOptInInitialValue = false,
-                linkMobileDisableLinkOnAttestationFailure = false
+                linkSignUpOptInInitialValue = false
             ),
             linkStore = linkStore,
         )
@@ -3352,98 +3345,90 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Link is enabled when attestation check fails and fflag is off`() = runTest {
-        val failingAttestationCheck = FakeLinkAttestationCheck().apply {
-            result = LinkAttestationCheck.Result.AttestationFailed(Exception("Attestation failed"))
-        }
-
-        val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
-            linkAttestationCheck = failingAttestationCheck
-        )
+    fun `Should call prepare on integrity manager when attestation endpoints are enabled`() = runTest {
+        val integrityRequestManager = FakeIntegrityRequestManager()
 
         val loader = createPaymentElementLoader(
-            linkConfigurationCoordinator = linkConfigurationCoordinator,
-            linkSettings = createLinkSettings(
-                passthroughModeEnabled = false,
-                linkMobileDisableLinkOnAttestationFailure = false
-            ).copy(useAttestationEndpoints = true),
-        )
-
-        val result = loader.load(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                isLiveMode = true // In live mode, shouldWarmUpIntegrity depends on useAttestationEndpointsForLink
             ),
-            configuration = mockConfiguration().asCommonConfiguration(),
-            metadata = PaymentElementLoader.Metadata(
-                initializedViaCompose = false,
-            ),
-        ).getOrThrow()
-
-        // Verify that Link is disabled when attestation fails
-        assertThat(result.paymentMethodMetadata.linkState?.configuration).isNotNull()
-    }
-
-    @Test
-    fun `Link is disabled when attestation check fails and fflag is on`() = runTest {
-        val failingAttestationCheck = FakeLinkAttestationCheck().apply {
-            result = LinkAttestationCheck.Result.AttestationFailed(Exception("Attestation failed"))
-        }
-
-        val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
-            linkAttestationCheck = failingAttestationCheck
-        )
-
-        val loader = createPaymentElementLoader(
-            linkConfigurationCoordinator = linkConfigurationCoordinator,
-            linkSettings = createLinkSettings(
-                passthroughModeEnabled = false,
-                linkMobileDisableLinkOnAttestationFailure = true
-            ).copy(useAttestationEndpoints = true),
-        )
-
-        val result = loader.load(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-            ),
-            configuration = mockConfiguration().asCommonConfiguration(),
-            metadata = PaymentElementLoader.Metadata(
-                initializedViaCompose = false,
-            ),
-        ).getOrThrow()
-
-        // Verify that Link is disabled when attestation fails
-        assertThat(result.paymentMethodMetadata.linkState?.configuration).isNull()
-    }
-
-    @Test
-    fun `Link is enabled when attestation check succeeds`() = runTest {
-        val successfulAttestationCheck = FakeLinkAttestationCheck().apply {
-            result = LinkAttestationCheck.Result.Successful
-        }
-
-        val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
-            linkAttestationCheck = successfulAttestationCheck
-        )
-
-        val loader = createPaymentElementLoader(
-            linkConfigurationCoordinator = linkConfigurationCoordinator,
             linkSettings = createLinkSettings(
                 passthroughModeEnabled = false
             ).copy(useAttestationEndpoints = true),
+            integrityRequestManager = integrityRequestManager,
         )
 
-        val result = loader.load(
+        loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
-            configuration = mockConfiguration().asCommonConfiguration(),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
             ),
-        ).getOrThrow()
+        )
 
-        // Verify that Link is enabled when attestation succeeds
-        assertThat(result.paymentMethodMetadata.linkState?.configuration).isNotNull()
+        // Verify prepare was called
+        integrityRequestManager.awaitPrepareCall()
+        integrityRequestManager.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `Should not call prepare on integrity manager when attestation endpoints are disabled`() = runTest {
+        val integrityRequestManager = FakeIntegrityRequestManager()
+
+        val loader = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                isLiveMode = true // In live mode, shouldWarmUpIntegrity depends on useAttestationEndpointsForLink
+            ),
+            linkSettings = createLinkSettings(
+                passthroughModeEnabled = false
+            ).copy(useAttestationEndpoints = false),
+            integrityRequestManager = integrityRequestManager,
+        )
+
+        loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        )
+
+        // Verify prepare was not called by ensuring all events are consumed (no calls made)
+        integrityRequestManager.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `Should call prepare on integrity manager in test mode when attestation endpoints are enabled`() = runTest {
+        val integrityRequestManager = FakeIntegrityRequestManager()
+
+        val loader = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                isLiveMode = false // In test mode, behavior depends on feature flag + useAttestationEndpointsForLink
+            ),
+            linkSettings = createLinkSettings(
+                passthroughModeEnabled = false
+            ).copy(useAttestationEndpoints = true),
+            integrityRequestManager = integrityRequestManager,
+        )
+
+        loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        )
+
+        // In test mode with attestation endpoints enabled, prepare should still be called
+        // (the exact behavior depends on the feature flag, but this tests the useAttestationEndpoints path)
+        integrityRequestManager.awaitPrepareCall()
+        integrityRequestManager.ensureAllEventsConsumed()
     }
 
     @Test
@@ -3719,8 +3704,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     private fun createLinkSettings(
         passthroughModeEnabled: Boolean,
-        linkSignUpOptInFeatureEnabled: Boolean = false,
-        linkMobileDisableLinkOnAttestationFailure: Boolean = false
+        linkSignUpOptInFeatureEnabled: Boolean = false
     ): ElementsSession.LinkSettings {
         return ElementsSession.LinkSettings(
             linkFundingSources = listOf("card", "bank"),
@@ -3736,7 +3720,6 @@ internal class DefaultPaymentElementLoaderTest {
             linkMobileSkipWalletInFlowController = false,
             linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
             linkSignUpOptInInitialValue = false,
-            linkMobileDisableLinkOnAttestationFailure = linkMobileDisableLinkOnAttestationFailure,
         )
     }
 
@@ -3855,7 +3838,7 @@ internal class DefaultPaymentElementLoaderTest {
             externalPaymentMethodData = externalPaymentMethodData,
         ),
         userFacingLogger: FakeUserFacingLogger = FakeUserFacingLogger(),
-        linkConfigurationCoordinator: LinkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+        integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
     ): PaymentElementLoader {
         return DefaultPaymentElementLoader(
             prefsRepositoryFactory = { prefsRepository },
@@ -3872,12 +3855,12 @@ internal class DefaultPaymentElementLoaderTest {
             retrieveCustomerEmail = DefaultRetrieveCustomerEmail(customerRepo),
             accountStatusProvider = { linkAccountState },
             logLinkHoldbackExperiment = logLinkHoldbackExperiment,
-            linkConfigurationCoordinator = linkConfigurationCoordinator,
             linkStore = linkStore,
             linkGateFactory = { linkGate },
             externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter = FakeErrorReporter()),
             userFacingLogger = userFacingLogger,
             cvcRecollectionHandler = CvcRecollectionHandlerImpl(),
+            integrityRequestManager = integrityRequestManager,
         )
     }
 

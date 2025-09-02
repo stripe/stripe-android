@@ -187,10 +187,6 @@ internal class ElementsSessionJsonParser(
         val linkSignUpOptInFeatureEnabled = json?.optBoolean(FIELD_LINK_SIGN_UP_OPT_IN_FEATURE_ENABLED) == true
         val linkSignUpOptInInitialValue = json?.optBoolean(FIELD_LINK_SIGN_UP_OPT_IN_INITIAL_VALUE) == true
 
-        val linkMobileDisableLinkOnAttestationFailure = json?.optBoolean(
-            FIELD_LINK_MOBILE_DISABLE_LINK_ON_ATTESTATION_FAILURE
-        ) == true
-
         val linkMode = json?.optString(FIELD_LINK_MODE)?.let { mode ->
             LinkMode.entries.firstOrNull { it.value == mode }
         }
@@ -219,8 +215,7 @@ internal class ElementsSessionJsonParser(
             linkEnableDisplayableDefaultValuesInEce = linkEnableDisplayableDefaultValuesInEce,
             linkMobileSkipWalletInFlowController = linkMobileSkipWalletInFlowController,
             linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
-            linkSignUpOptInInitialValue = linkSignUpOptInInitialValue,
-            linkMobileDisableLinkOnAttestationFailure = linkMobileDisableLinkOnAttestationFailure
+            linkSignUpOptInInitialValue = linkSignUpOptInInitialValue
         )
     }
 
@@ -484,8 +479,6 @@ internal class ElementsSessionJsonParser(
             "link_mobile_skip_wallet_in_flow_controller"
         private const val FIELD_LINK_SIGN_UP_OPT_IN_FEATURE_ENABLED = "link_sign_up_opt_in_feature_enabled"
         private const val FIELD_LINK_SIGN_UP_OPT_IN_INITIAL_VALUE = "link_sign_up_opt_in_initial_value"
-        private const val FIELD_LINK_MOBILE_DISABLE_LINK_ON_ATTESTATION_FAILURE =
-            "link_mobile_disable_link_on_attestation_failure"
         private const val FIELD_MERCHANT_COUNTRY = "merchant_country"
         private const val FIELD_MERCHANT_LOGO_URL = "merchant_logo_url"
         private const val FIELD_PAYMENT_METHOD_PREFERENCE = "payment_method_preference"

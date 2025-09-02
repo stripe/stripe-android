@@ -9,12 +9,13 @@ import com.stripe.android.common.validation.isSupportedWithBillingConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.utils.FeatureFlag
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkConfiguration
-import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
@@ -53,9 +54,11 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
+import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -153,12 +156,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val retrieveCustomerEmail: RetrieveCustomerEmail,
     private val accountStatusProvider: LinkAccountStatusProvider,
     private val logLinkHoldbackExperiment: LogLinkHoldbackExperiment,
-    private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val linkStore: LinkStore,
     private val linkGateFactory: LinkGate.Factory,
     private val externalPaymentMethodsRepository: ExternalPaymentMethodsRepository,
     private val userFacingLogger: UserFacingLogger,
     private val cvcRecollectionHandler: CvcRecollectionHandler,
+    private val integrityRequestManager: IntegrityRequestManager,
 ) : PaymentElementLoader {
 
     @Suppress("LongMethod")
@@ -177,6 +180,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             externalPaymentMethods = configuration.externalPaymentMethods,
             savedPaymentMethodSelectionId = savedPaymentMethodSelection?.id,
         ).getOrThrow()
+
+        // Preemptively prepare Integrity asynchronously if needed, as warm up can take
+        // a few seconds.
+        if (elementsSession.shouldWarmUpIntegrity()) {
+            launch { integrityRequestManager.prepare() }
+        }
 
         val customerInfo = createCustomerInfo(
             configuration = configuration,
@@ -269,6 +278,15 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         )
 
         return@runCatching state
+    }
+
+    private fun ElementsSession.shouldWarmUpIntegrity(): Boolean = when {
+        stripeIntent.isLiveMode -> useAttestationEndpointsForLink
+        else -> when (FeatureFlags.nativeLinkAttestationEnabled.value) {
+            FeatureFlag.Flag.Disabled -> false
+            FeatureFlag.Flag.Enabled -> true
+            FeatureFlag.Flag.NotSet -> useAttestationEndpointsForLink
+        }
     }
 
     private fun logLinkExperimentExposures(
@@ -499,7 +517,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 initializationMode = initializationMode,
                 linkAppearance = linkAppearance
             ) ?: return null
-
         return loadLinkState(
             configuration = configuration,
             linkConfiguration = linkConfig,
@@ -630,12 +647,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             defaultBillingDetails = configuration.defaultBillingDetails,
             allowDefaultOptIn = elementsSession.allowLinkDefaultOptIn,
             googlePlacesApiKey = configuration.googlePlacesApiKey,
-            collectMissingBillingDetailsForExistingPaymentMethods = configuration.link
-                .collectMissingBillingDetailsForExistingPaymentMethods,
+            collectMissingBillingDetailsForExistingPaymentMethods =
+            configuration.link.collectMissingBillingDetailsForExistingPaymentMethods,
             allowUserEmailEdits = configuration.link.allowUserEmailEdits,
             allowLogOut = configuration.link.allowLogOut,
             skipWalletInFlowController = elementsSession.linkMobileSkipWalletInFlowController,
-            linkMobileDisableLinkOnAttestationFailure = elementsSession.linkMobileDisableLinkOnAttestationFailure,
             customerId = elementsSession.customer?.session?.customerId,
             linkAppearance = linkAppearance,
             saveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
@@ -646,13 +662,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         // CBF isn't currently supported in the web flow.
         val useWebLink = !linkGateFactory.create(linkConfiguration).useNativeLink
         if (isCardBrandFilteringRequired && useWebLink) {
-            return null
-        }
-
-        // If the link attestation check fails, we don't want to proceed with the flow if
-        // linkMobileDisableLinkOnAttestationFailure is enabled.
-        val attestationCheck = linkConfigurationCoordinator.linkAttestationCheck(linkConfiguration)
-        if (attestationCheck.invoke().succeeded.not() && elementsSession.linkMobileDisableLinkOnAttestationFailure) {
             return null
         }
 
