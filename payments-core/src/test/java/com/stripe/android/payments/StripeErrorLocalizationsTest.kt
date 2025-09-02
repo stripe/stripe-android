@@ -17,8 +17,12 @@ class StripeErrorLocalizationsTest {
     @get:Rule
     val localeRule = LocaleTestRule(Locale.US)
 
-    private fun assertLocalizedMessage(code: String, expected: String) {
-        val result = StripeErrorLocalizations.forCode(localeRule.contextForLocale(context), code)
+    private fun assertLocalizedMessage(code: String, declineCode: String? = null, expected: String) {
+        val result = StripeErrorLocalizations.forCode(
+            context = localeRule.contextForLocale(context),
+            code = code,
+            declineCode = declineCode
+        )
         assertThat(result).isEqualTo(expected)
     }
 
@@ -30,47 +34,47 @@ class StripeErrorLocalizationsTest {
     @Test
     fun errorsAreLocalizedInNonUsLocales() {
         localeRule.setTemporarily(Locale.GERMAN)
-        assertLocalizedMessage("incorrect_number", "Die Kartennummer ist ungültig.")
+        assertLocalizedMessage(code = "incorrect_number", expected = "Die Kartennummer ist ungültig.")
     }
 
     @Test
     fun incorrectNumber_returnsInvalidCardNumberMessage() {
-        assertLocalizedMessage("incorrect_number", "Your card's number is invalid.")
+        assertLocalizedMessage(code = "incorrect_number", expected = "Your card's number is invalid.")
     }
 
     @Test
     fun invalidNumber_returnsInvalidCardNumberMessage() {
-        assertLocalizedMessage("invalid_number", "Your card's number is invalid.")
+        assertLocalizedMessage(code = "invalid_number", expected = "Your card's number is invalid.")
     }
 
     @Test
     fun invalidExpiryMonth_returnsInvalidExpiryMonthMessage() {
-        assertLocalizedMessage("invalid_expiry_month", "Your card's expiration month is invalid.")
+        assertLocalizedMessage(code = "invalid_expiry_month", expected = "Your card's expiration month is invalid.")
     }
 
     @Test
     fun invalidExpiryYear_returnsInvalidExpiryYearMessage() {
-        assertLocalizedMessage("invalid_expiry_year", "Your card's expiration year is invalid.")
+        assertLocalizedMessage(code = "invalid_expiry_year", expected = "Your card's expiration year is invalid.")
     }
 
     @Test
     fun invalidCvc_returnsInvalidCvcMessage() {
-        assertLocalizedMessage("invalid_cvc", "Your card's security code is invalid.")
+        assertLocalizedMessage(code = "invalid_cvc", expected = "Your card's security code is invalid.")
     }
 
     @Test
     fun expiredCard_returnsExpiredCardMessage() {
-        assertLocalizedMessage("expired_card", "Your card has expired")
+        assertLocalizedMessage(code = "expired_card", expected = "Your card has expired")
     }
 
     @Test
     fun incorrectCvc_returnsInvalidCvcMessage() {
-        assertLocalizedMessage("incorrect_cvc", "Your card's security code is invalid.")
+        assertLocalizedMessage(code = "incorrect_cvc", expected = "Your card's security code is invalid.")
     }
 
     @Test
     fun cardDeclined_returnsCardDeclinedMessage() {
-        assertLocalizedMessage("card_declined", "Your card was declined")
+        assertLocalizedMessage(code = "card_declined", expected = "Your card was declined")
     }
 
     @Test
@@ -83,16 +87,34 @@ class StripeErrorLocalizationsTest {
 
     @Test
     fun invalidOwnerName_returnsInvalidOwnerNameMessage() {
-        assertLocalizedMessage("invalid_owner_name", "Your name is invalid.")
+        assertLocalizedMessage(code = "invalid_owner_name", expected = "Your name is invalid.")
     }
 
     @Test
     fun invalidBankAccountIban_returnsInvalidIbanMessage() {
-        assertLocalizedMessage("invalid_bank_account_iban", "The IBAN you entered is invalid.")
+        assertLocalizedMessage(code = "invalid_bank_account_iban", expected = "The IBAN you entered is invalid.")
     }
 
     @Test
     fun genericDecline_returnsGenericDeclineMessage() {
-        assertLocalizedMessage("generic_decline", "Your payment method was declined.")
+        assertLocalizedMessage(code = "generic_decline", expected = "Your payment method was declined.")
+    }
+
+    @Test
+    fun declineCodeAndGeneralCode_returnsDeclineCodeMessage() {
+        assertLocalizedMessage(
+            code = "generic_decline",
+            declineCode = "incorrect_cvc",
+            expected = "Your card's security code is invalid."
+        )
+    }
+
+    @Test
+    fun declineCodeWithNoTranslationAndGeneralCode_returnsGeneralCodeMessage() {
+        assertLocalizedMessage(
+            code = "generic_decline",
+            declineCode = "incorrect_field_we_do_not_know_about",
+            expected = "Your payment method was declined."
+        )
     }
 }

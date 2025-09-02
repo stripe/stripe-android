@@ -167,11 +167,12 @@ class SimpleTextFieldController(
 
     override val loading: StateFlow<Boolean> = textFieldConfig.loading
 
+    private val _isValidating = MutableStateFlow(false)
     private val _hasFocus = MutableStateFlow(false)
 
     override val visibleError: StateFlow<Boolean> =
-        combineAsStateFlow(_fieldState, _hasFocus) { fieldState, hasFocus ->
-            fieldState.shouldShowError(hasFocus)
+        combineAsStateFlow(_fieldState, _hasFocus, _isValidating) { fieldState, hasFocus, isValidating ->
+            fieldState.shouldShowError(hasFocus, isValidating)
         }
 
     /**
@@ -223,6 +224,10 @@ class SimpleTextFieldController(
 
     override fun onFocusChange(newHasFocus: Boolean) {
         _hasFocus.value = newHasFocus
+    }
+
+    override fun onValidationStateChanged(isValidating: Boolean) {
+        _isValidating.value = isValidating
     }
 
     @Composable

@@ -205,8 +205,6 @@
   <string name="stripe_test_model_title">Está de momento no modo de teste</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Tentar novamente</string>
-  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
-  <string name="stripe_unexpected_error_try_again">Ocorreu um erro inesperado -- tente novamente dentro de alguns segundos</string>
   <!-- Description to upload a photo -->
   <string name="stripe_upload_a_photo">Carregar uma fotografia</string>
   <!-- Title of dialog to upload back of driver license -->

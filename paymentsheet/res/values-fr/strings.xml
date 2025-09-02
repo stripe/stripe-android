@@ -29,6 +29,9 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">Enregistrer mes informations pour régler plus rapidement avec Link</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_toggle">Créez un compte avec Link pour un paiement plus rapide sur le Web</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">Carte de crédit %1$s</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -176,6 +179,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_remove_card">Supprimer la carte bancaire</string>
   <!-- Title for confirmation alert to remove a card -->
   <string name="stripe_paymentsheet_remove_card_title">Voulez-vous supprimer la carte ?</string>
+  <!-- Description for a confirmation alert indicating to the customer that their payment method will be removed but still available to the merchant for subscriptions -->
+  <string name="stripe_paymentsheet_remove_partial_description">Ce moyen de paiement sera supprimé mais restera disponible pour les Abonnements %s.</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Supprimer %s</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
@@ -206,6 +211,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_total_amount">Total : %s</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">La marque de la carte n\'a pas été modifiée. Veuillez réessayer.</string>
+  <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
+  <string name="stripe_paynow_confirm_payment">Veuillez confirmer le paiement dans votre application bancaire ou de paiement sous %s pour finaliser l\'achat.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Définir comme moyen de paiement par défaut</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -283,6 +290,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_passthrough_description">Passthrough</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
   <string name="stripe_wallet_pay_another_way">Utiliser un autre moyen de paiement</string>
+  <!-- Hint shown when selecting a payment method indicating debit cards are preferred. -->
+  <string name="stripe_wallet_prefer_debit_card_hint">Les cartes de débit sont les plus susceptibles d\'être acceptées.</string>
   <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
   <string name="stripe_wallet_recollect_cvc_error">Pour des raisons de sécurité, veuillez ressaisir le code de sécurité de votre carte bancaire.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->

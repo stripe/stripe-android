@@ -634,6 +634,7 @@ internal class FormHelperTest {
             eventReporter = eventReporter,
             savedStateHandle = SavedStateHandle(),
             autocompleteAddressInteractorFactory = null,
+            automaticallyLaunchedCardScanFormDataHelper = null,
         )
     }
 

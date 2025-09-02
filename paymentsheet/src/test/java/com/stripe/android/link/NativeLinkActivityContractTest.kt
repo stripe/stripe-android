@@ -7,6 +7,7 @@ import androidx.core.os.bundleOf
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.RequestSurface
 import org.junit.After
@@ -41,7 +42,8 @@ class NativeLinkActivityContractTest {
             configuration = TestFactory.LINK_CONFIGURATION,
             linkExpressMode = LinkExpressMode.DISABLED,
             linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
-            launchMode = LinkLaunchMode.Full
+            launchMode = LinkLaunchMode.Full,
+            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
         )
 
         val intent = contract.createIntent(ApplicationProvider.getApplicationContext(), args)
@@ -60,7 +62,8 @@ class NativeLinkActivityContractTest {
                 linkExpressMode = LinkExpressMode.DISABLED,
                 linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                 paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER,
-                launchMode = LinkLaunchMode.Full
+                launchMode = LinkLaunchMode.Full,
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
         )
     }

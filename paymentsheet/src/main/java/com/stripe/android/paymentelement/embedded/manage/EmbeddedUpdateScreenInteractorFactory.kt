@@ -77,6 +77,8 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                     defaultPaymentMethodId = customerStateHolder.customer.value?.defaultPaymentMethodId
                 )
                 ),
+            removeMessage = paymentMethodMetadata.customerMetadata?.permissions?.removePaymentMethod
+                ?.removeMessage(paymentMethodMetadata.merchantName),
             onUpdateSuccess = {
                 manageNavigatorProvider.get().performAction(ManageNavigator.Action.Back)
             },

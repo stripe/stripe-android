@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.utils.FakeActivityResultRegistry
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -31,14 +32,17 @@ internal class LinkControllerCoordinatorTest {
 
     private val presentPaymentMethodsResultFlow = MutableSharedFlow<LinkController.PresentPaymentMethodsResult>()
     private val authenticationResultFlow = MutableSharedFlow<LinkController.AuthenticationResult>()
+    private val authorizeResultFlow = MutableSharedFlow<LinkController.AuthorizeResult>()
 
     private val viewModel: LinkControllerInteractor = mock {
         on { presentPaymentMethodsResultFlow } doReturn presentPaymentMethodsResultFlow
         on { authenticationResultFlow } doReturn authenticationResultFlow
+        on { authorizeResultFlow } doReturn authorizeResultFlow
     }
 
     private val presentPaymentMethodsResults = mutableListOf<LinkController.PresentPaymentMethodsResult>()
     private val authenticationResults = mutableListOf<LinkController.AuthenticationResult>()
+    private val authorizeResults = mutableListOf<LinkController.AuthorizeResult>()
 
     private val lifecycleOwner = TestLifecycleOwner(initialState = Lifecycle.State.INITIALIZED)
 
@@ -57,6 +61,7 @@ internal class LinkControllerCoordinatorTest {
             linkActivityContract = linkActivityContract,
             selectedPaymentMethodCallback = { presentPaymentMethodsResults.add(it) },
             authenticationCallback = { authenticationResults.add(it) },
+            authorizeCallback = { authorizeResults.add(it) },
         )
     }
 
@@ -86,8 +91,12 @@ internal class LinkControllerCoordinatorTest {
         val authResult = LinkController.AuthenticationResult.Success
         authenticationResultFlow.emit(authResult)
 
+        val authorizeResult = LinkController.AuthorizeResult.Denied
+        authorizeResultFlow.emit(authorizeResult)
+
         assertThat(presentPaymentMethodsResults).containsExactly(presentResult)
         assertThat(authenticationResults).containsExactly(authResult)
+        assertThat(authorizeResults).containsExactly(authorizeResult)
     }
 
     @Test
@@ -99,9 +108,11 @@ internal class LinkControllerCoordinatorTest {
             LinkController.PresentPaymentMethodsResult.Success
         )
         authenticationResultFlow.emit(LinkController.AuthenticationResult.Success)
+        authorizeResultFlow.emit(LinkController.AuthorizeResult.Denied)
 
         assertThat(presentPaymentMethodsResults).isEmpty()
         assertThat(authenticationResults).isEmpty()
+        assertThat(authorizeResults).isEmpty()
     }
 
     @Test
@@ -137,6 +148,7 @@ internal class LinkControllerCoordinatorTest {
                 linkExpressMode = LinkExpressMode.DISABLED,
                 linkAccountInfo = LinkAccountUpdate.Value(null),
                 launchMode = LinkLaunchMode.PaymentMethodSelection(null),
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
         )
         verify(viewModel).onLinkActivityResult(

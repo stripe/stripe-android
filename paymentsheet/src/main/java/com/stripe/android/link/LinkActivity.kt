@@ -81,8 +81,11 @@ internal class LinkActivity : ComponentActivity() {
         when (this) {
             is LinkLaunchMode.Full,
             is LinkLaunchMode.PaymentMethodSelection,
-            is LinkLaunchMode.Authentication -> setTheme(R.style.StripePaymentSheetDefaultTheme)
-            is LinkLaunchMode.Confirmation -> setTheme(R.style.StripeTransparentTheme)
+            is LinkLaunchMode.Authentication,
+            is LinkLaunchMode.Authorization ->
+                setTheme(R.style.StripePaymentSheetDefaultTheme)
+            is LinkLaunchMode.Confirmation ->
+                setTheme(R.style.StripeTransparentTheme)
         }
         renderEdgeToEdge()
     }
@@ -122,6 +125,7 @@ internal class LinkActivity : ComponentActivity() {
                     lastUpdateReason = null
                 ),
                 launchMode = LinkLaunchMode.Full,
+                passiveCaptchaParams = null,
             )
         )
     }

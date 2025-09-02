@@ -5,7 +5,6 @@ import android.app.Application
 import android.app.Instrumentation
 import android.content.Intent
 import androidx.core.os.bundleOf
-import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.Intents.intending
@@ -18,6 +17,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.assertCanceled
@@ -26,6 +26,7 @@ import com.stripe.android.paymentelement.confirmation.assertConfirming
 import com.stripe.android.paymentelement.confirmation.assertFailed
 import com.stripe.android.paymentelement.confirmation.assertIdle
 import com.stripe.android.paymentelement.confirmation.assertSucceeded
+import com.stripe.android.paymentelement.confirmation.paymentElementConfirmationTest
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
@@ -34,15 +35,10 @@ import com.stripe.android.paymentsheet.createTestActivityRule
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 import com.stripe.android.R as PaymentsCoreR
 
 @RunWith(RobolectricTestRunner::class)
@@ -83,6 +79,7 @@ internal class GooglePayConfirmationActivityTest {
                         paymentMethod = paymentMethod,
                         optionsParams = null,
                         originatedFromWallet = true,
+                        passiveCaptchaParams = null
                     )
                 )
 
@@ -155,6 +152,8 @@ internal class GooglePayConfirmationActivityTest {
                     PaymentMethodConfirmationOption.Saved(
                         paymentMethod = paymentMethod,
                         optionsParams = null,
+                        originatedFromWallet = true,
+                        passiveCaptchaParams = null,
                     )
                 )
 
@@ -214,6 +213,8 @@ internal class GooglePayConfirmationActivityTest {
                     PaymentMethodConfirmationOption.Saved(
                         paymentMethod = paymentMethod,
                         optionsParams = null,
+                        originatedFromWallet = true,
+                        passiveCaptchaParams = null,
                     )
                 )
 
@@ -226,23 +227,8 @@ internal class GooglePayConfirmationActivityTest {
     }
 
     private fun test(
-        test: suspend PaymentElementConfirmationTestActivity.() -> Unit
-    ) = runTest(StandardTestDispatcher()) {
-        val countDownLatch = CountDownLatch(1)
-
-        ActivityScenario.launch<PaymentElementConfirmationTestActivity>(
-            Intent(application, PaymentElementConfirmationTestActivity::class.java)
-        ).use { scenario ->
-            scenario.onActivity { activity ->
-                launch {
-                    test(activity)
-                    countDownLatch.countDown()
-                }
-            }
-
-            countDownLatch.await(10, TimeUnit.SECONDS)
-        }
-    }
+        test: suspend ConfirmationTestScenario.() -> Unit
+    ) = paymentElementConfirmationTest(application, test)
 
     private fun intendingGooglePayToBeLaunched(result: GooglePayPaymentMethodLauncher.Result) {
         intending(hasComponent(GOOGLE_PAY_ACTIVITY_NAME)).respondWith(
@@ -292,7 +278,8 @@ internal class GooglePayConfirmationActivityTest {
                 billingDetailsCollectionConfiguration = PaymentSheet
                     .BillingDetailsCollectionConfiguration(),
                 cardBrandFilter = DefaultCardBrandFilter,
-            )
+            ),
+            passiveCaptchaParams = null
         )
 
         val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(

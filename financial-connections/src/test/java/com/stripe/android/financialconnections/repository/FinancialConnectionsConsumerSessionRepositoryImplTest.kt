@@ -153,6 +153,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                     phoneCountryCode = null,
                 ),
                 incentiveEligibilitySession = IncentiveEligibilitySession.PaymentIntent("pi_123"),
+                allowRedisplay = null,
             )
         )
 

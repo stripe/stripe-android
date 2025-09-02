@@ -29,6 +29,9 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">Saglabāt manu informāciju, lai varētu norēķināties ar Link</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_toggle">Izveidojiet kontu Link, lai varētu ātrāk veikt apmaksu visā tīmeklī</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s Kredīta</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -176,6 +179,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_remove_card">Noņemt karti</string>
   <!-- Title for confirmation alert to remove a card -->
   <string name="stripe_paymentsheet_remove_card_title">Noņemt karti?</string>
+  <!-- Description for a confirmation alert indicating to the customer that their payment method will be removed but still available to the merchant for subscriptions -->
+  <string name="stripe_paymentsheet_remove_partial_description">Šis maksājuma veids tiks noņemts, bet joprojām būs pieejams %s abonementiem.</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Noņemt%s</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
@@ -206,6 +211,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_total_amount">Kopā: %s</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Kartes zīmols netika atjaunināts. Lūdzu, mēģiniet vēlreiz.</string>
+  <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
+  <string name="stripe_paynow_confirm_payment">Apstipriniet maksājumu savā bankā vai maksājumu programmā %s laikā, lai pabeigtu pirkumu.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Iestatīt kā noklusējuma maksājuma veidu</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -283,6 +290,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_passthrough_description">Caurlaide</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
   <string name="stripe_wallet_pay_another_way">Maksāt citā veidā</string>
+  <!-- Hint shown when selecting a payment method indicating debit cards are preferred. -->
+  <string name="stripe_wallet_prefer_debit_card_hint">Visticamāk, tiks pieņemtas debetkartes.</string>
   <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
   <string name="stripe_wallet_recollect_cvc_error">Drošības nolūkos atkārtoti ievadiet kartes drošības kodu.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->

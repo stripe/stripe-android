@@ -29,6 +29,9 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">Uložit mé informace pro rychlejší odbavení pomocí Link</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_toggle">Vytvořte si účet ve službě Link a plaťte na webu rychleji</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">Kredit %1$s</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -176,6 +179,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_remove_card">Odebrat kartu</string>
   <!-- Title for confirmation alert to remove a card -->
   <string name="stripe_paymentsheet_remove_card_title">Odebrat kartu?</string>
+  <!-- Description for a confirmation alert indicating to the customer that their payment method will be removed but still available to the merchant for subscriptions -->
+  <string name="stripe_paymentsheet_remove_partial_description">Tato platební metoda bude odebrána, ale zůstane dostupná pro předplatné %s.</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Odebrat %s</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
@@ -206,6 +211,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_total_amount">Celkem: %s</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Značka karty nebyla aktualizována. Zkuste to prosím znovu.</string>
+  <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
+  <string name="stripe_paynow_confirm_payment">Pro dokončení nákupu potvrďte platbu ve své bance nebo platební aplikaci do %.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Nastavit jako výchozí způsob platby</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -283,6 +290,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_passthrough_description">Passthrough</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
   <string name="stripe_wallet_pay_another_way">Zaplatit jiným způsobem</string>
+  <!-- Hint shown when selecting a payment method indicating debit cards are preferred. -->
+  <string name="stripe_wallet_prefer_debit_card_hint">Debetní karty budou s největší pravděpodobností akceptovány.</string>
   <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
   <string name="stripe_wallet_recollect_cvc_error">Z bezpečnostních důvodů zadejte znovu bezpečnostní kód své karty.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->

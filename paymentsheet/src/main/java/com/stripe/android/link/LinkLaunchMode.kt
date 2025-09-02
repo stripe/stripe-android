@@ -58,8 +58,17 @@ internal sealed interface LinkLaunchMode : Parcelable {
         val existingOnly: Boolean = false,
     ) : LinkLaunchMode
 
+    /**
+     * Link is launched with the intent to authorize a LinkAuthIntent.
+     */
+    @Parcelize
+    data class Authorization(
+        val linkAuthIntentId: String,
+    ) : LinkLaunchMode
+
     fun selectedPayment(): ConsumerPaymentDetails.PaymentDetails? = when (this) {
         is Authentication -> null
+        is Authorization -> null
         is Full -> null
         is Confirmation -> selectedPayment.details
         is PaymentMethodSelection -> selectedPayment

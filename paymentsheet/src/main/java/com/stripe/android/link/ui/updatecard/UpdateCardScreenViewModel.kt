@@ -144,6 +144,10 @@ internal class UpdateCardScreenViewModel @Inject constructor(
         }
     }
 
+    fun onDisabledUpdateClicked() {
+        interactor.value?.handleViewAction(EditCardDetailsInteractor.ViewAction.Validate)
+    }
+
     private fun CardUpdateParams.toApiParams(): PaymentMethodCreateParams = PaymentMethodCreateParams.create(
         card = PaymentMethodCreateParams.Card.Builder().apply {
             setExpiryMonth(this@toApiParams.expiryMonth)

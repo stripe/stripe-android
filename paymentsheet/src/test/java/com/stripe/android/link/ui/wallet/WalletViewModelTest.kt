@@ -82,6 +82,7 @@ class WalletViewModelTest {
             WalletUiState(
                 paymentDetailsList = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
                 email = "email@stripe.com",
+                allowLogOut = true,
                 selectedItemId = null,
                 cardBrandFilter = TestFactory.LINK_CONFIGURATION.cardBrandFilter,
                 isProcessing = false,

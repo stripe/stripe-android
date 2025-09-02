@@ -9,6 +9,7 @@ import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.model.PassiveCaptchaParams
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doAnswer
@@ -41,7 +42,7 @@ internal object RecordingLinkPaymentLauncher {
                 unregisterCalls.add(Unit)
             }
 
-            on { present(any(), anyOrNull(), any(), any()) } doAnswer { invocation ->
+            on { present(any(), anyOrNull(), any(), any(), anyOrNull()) } doAnswer { invocation ->
                 val arguments = invocation.arguments
 
                 presentCalls.add(
@@ -49,7 +50,8 @@ internal object RecordingLinkPaymentLauncher {
                         configuration = arguments[0] as LinkConfiguration,
                         linkAccount = arguments[1] as? LinkAccount,
                         launchMode = arguments[2] as LinkLaunchMode,
-                        linkExpressMode = arguments[3] as LinkExpressMode
+                        linkExpressMode = arguments[3] as LinkExpressMode,
+                        passiveCaptchaParams = arguments[4] as? PassiveCaptchaParams,
                     )
                 )
             }
@@ -86,5 +88,6 @@ internal object RecordingLinkPaymentLauncher {
         val linkAccount: LinkAccount?,
         val launchMode: LinkLaunchMode,
         val linkExpressMode: LinkExpressMode,
+        val passiveCaptchaParams: PassiveCaptchaParams?
     )
 }

@@ -8,6 +8,7 @@ internal interface LinkAuth {
         email: String,
         phoneNumber: String,
         country: String,
+        countryInferringMethod: String,
         name: String?,
         consentAction: SignUpConsentAction
     ): LinkAuthResult

@@ -31,7 +31,7 @@ class LinkConfigurationCoordinatorTest {
             val component = mock<LinkComponent>()
             val linkAccountManager = FakeLinkAccountManager()
             whenever(component.linkAccountManager).thenReturn(linkAccountManager)
-            linkAccountManager.setAccountStatus(AccountStatus.Verified)
+            linkAccountManager.setAccountStatus(AccountStatus.Verified(true, null))
             linkAccountManager.signInWithUserInputResult = Result.failure(IllegalStateException("Test"))
 
             whenever(component.configuration).thenReturn(configurationCapture.lastValue)

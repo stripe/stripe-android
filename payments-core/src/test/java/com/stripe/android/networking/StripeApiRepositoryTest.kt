@@ -15,6 +15,7 @@ import com.stripe.android.core.frauddetection.FraudDetectionDataParamsUtils
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.model.StripeFilePurpose
+import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
@@ -3278,6 +3279,89 @@ internal class StripeApiRepositoryTest {
                 assertThat(this["postal_code"]).isEqualTo("94111")
             }
         }
+    }
+
+    @Test
+    fun `elements session accepts PMO SFU params`() = runTest {
+        val pmMap = mutableMapOf<String, Map<String, String>>()
+        PaymentMethod.Type.entries.forEach {
+            pmMap[it.code] = mapOf(
+                "setup_future_usage" to "off_session"
+            )
+        }
+
+        val session = stripeApiRepository.retrieveElementsSession(
+            params = ElementsSessionParams.DeferredIntentType(
+                deferredIntentParams = DeferredIntentParams(
+                    mode = DeferredIntentParams.Mode.Payment(
+                        amount = 5000,
+                        currency = "usd",
+                        setupFutureUsage = null,
+                        captureMethod = PaymentIntent.CaptureMethod.Automatic,
+                        paymentMethodOptionsJsonString = StripeJsonUtils.mapToJsonObject(pmMap)?.toString()
+                    ),
+                    paymentMethodTypes = listOf(),
+                    paymentMethodConfigurationId = null,
+                    onBehalfOf = null
+                ),
+                customPaymentMethods = listOf(),
+                externalPaymentMethods = listOf(),
+                appId = APP_ID,
+            ),
+            options = ApiRequest.Options(ApiKeyFixtures.MULTIBANCO_PUBLISHABLE_KEY)
+        )
+
+        assertThat(session.isSuccess).isTrue()
+    }
+
+    @Test
+    fun `PaymentMethodOptions params are sent to elements session`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            "",
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
+        val pmMap = mapOf(
+            "card" to mapOf(
+                "setup_future_usage" to "on_session"
+            ),
+            "affirm" to mapOf(
+                "setup_future_usage" to "none"
+            ),
+            "amazon_pay" to mapOf(
+                "setup_future_usage" to "off_session"
+            ),
+        )
+
+        create().retrieveElementsSession(
+            params = ElementsSessionParams.DeferredIntentType(
+                deferredIntentParams = DeferredIntentParams(
+                    mode = DeferredIntentParams.Mode.Payment(
+                        amount = 5000,
+                        currency = "usd",
+                        setupFutureUsage = null,
+                        captureMethod = PaymentIntent.CaptureMethod.Automatic,
+                        paymentMethodOptionsJsonString = StripeJsonUtils.mapToJsonObject(pmMap)?.toString()
+                    ),
+                    paymentMethodTypes = listOf(),
+                    paymentMethodConfigurationId = null,
+                    onBehalfOf = null
+                ),
+                customPaymentMethods = listOf(),
+                externalPaymentMethods = listOf(),
+                appId = APP_ID,
+            ),
+            options = DEFAULT_OPTIONS
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        assertThat(params["deferred_intent[payment_method_options]"]).isEqualTo(pmMap)
     }
 
     /**

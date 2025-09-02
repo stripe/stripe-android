@@ -199,9 +199,9 @@ internal class VerificationScreenTest {
                     onBack = viewModel::onBack,
                     onChangeEmailClick = viewModel::onChangeEmailButtonClicked,
                     onResendCodeClick = viewModel::resendCode,
+                    onConsentShown = viewModel::onConsentShown,
                     onFocusRequested = viewModel::onFocusRequested,
                     didShowCodeSentNotification = viewModel::didShowCodeSentNotification,
-                    linkAppearance = null
                 )
             }
         }
@@ -241,9 +241,9 @@ internal class VerificationScreenTest {
                     onBack = viewModel::onBack,
                     onChangeEmailClick = viewModel::onChangeEmailButtonClicked,
                     onResendCodeClick = viewModel::resendCode,
+                    onConsentShown = viewModel::onConsentShown,
                     onFocusRequested = viewModel::onFocusRequested,
                     didShowCodeSentNotification = viewModel::didShowCodeSentNotification,
-                    linkAppearance = null
                 )
             }
         }

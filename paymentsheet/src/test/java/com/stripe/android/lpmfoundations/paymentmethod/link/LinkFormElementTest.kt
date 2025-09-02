@@ -123,6 +123,7 @@ class LinkFormElementTest {
             initialLinkUserInput = initialLinkUserInput,
             linkConfigurationCoordinator = createLinkConfigurationCoordinator(),
             onLinkInlineSignupStateChanged = {},
+            previousLinkSignupCheckboxSelection = null,
         )
     }
 
@@ -158,6 +159,7 @@ class LinkFormElementTest {
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             allowUserEmailEdits = true,
+            allowLogOut = true,
             enableDisplayableDefaultValuesInEce = false,
             skipWalletInFlowController = false,
             linkAppearance = null,
@@ -227,7 +229,11 @@ class LinkFormElementTest {
         private val linkAccountManager: LinkAccountManager,
         private val configuration: LinkConfiguration,
     ) : LinkInlineSignupAssistedViewModelFactory {
-        override fun create(signupMode: LinkSignupMode, initialUserInput: UserInput?): InlineSignupViewModel {
+        override fun create(
+            signupMode: LinkSignupMode,
+            initialUserInput: UserInput?,
+            previousLinkSignupCheckboxSelection: Boolean?
+        ): InlineSignupViewModel {
             return InlineSignupViewModel(
                 signupMode = signupMode,
                 config = configuration,
@@ -236,6 +242,7 @@ class LinkFormElementTest {
                 linkEventsReporter = FakeLinkInlineSignupEventsReporter,
                 logger = Logger.noop(),
                 lookupDelay = 0L,
+                previousLinkSignupCheckboxSelection = previousLinkSignupCheckboxSelection,
             )
         }
     }

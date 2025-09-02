@@ -91,6 +91,7 @@ class GooglePayConfirmationFlowTest {
                 paymentMethod = PAYMENT_METHOD,
                 optionsParams = null,
                 originatedFromWallet = true,
+                passiveCaptchaParams = null
             ),
             parameters = CONFIRMATION_PARAMETERS,
         )
@@ -109,7 +110,8 @@ class GooglePayConfirmationFlowTest {
                     address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 ),
                 cardBrandFilter = DefaultCardBrandFilter,
-            )
+            ),
+            passiveCaptchaParams = null
         )
 
         private val PAYMENT_METHOD = PaymentMethodFactory.card()

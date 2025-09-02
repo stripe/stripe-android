@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.TestFactory
@@ -81,7 +82,7 @@ class DefaultLinkAccountManagerTest {
                 TestFactory.EMAIL,
                 linkRepository = linkRepository
             ).accountStatus.first()
-        ).isEqualTo(AccountStatus.Verified)
+        ).isEqualTo(AccountStatus.Verified(true, null))
 
         assertThat(linkRepository.callCount).isEqualTo(1)
     }
@@ -110,7 +111,6 @@ class DefaultLinkAccountManagerTest {
 
         accountManager.lookupConsumer(
             email = "email",
-            linkAuthIntentId = null,
             startSession = true,
             customerId = null
         )
@@ -127,7 +127,6 @@ class DefaultLinkAccountManagerTest {
 
         accountManager.lookupConsumer(
             email = "email",
-            linkAuthIntentId = null,
             startSession = true,
             customerId = null
         )
@@ -181,7 +180,6 @@ class DefaultLinkAccountManagerTest {
         accountManager(linkRepository = linkRepository, linkEventsReporter = linkEventsReporter)
             .lookupConsumer(
                 email = TestFactory.EMAIL,
-                linkAuthIntentId = null,
                 startSession = false,
                 customerId = null
             )
@@ -227,6 +225,7 @@ class DefaultLinkAccountManagerTest {
                 actualEmail: String,
                 actualPhone: String?,
                 actualCountry: String?,
+                countryInferringMethod: String,
                 actualName: String?,
                 actualConsentAction: ConsumerSignUpConsentAction
             ): Result<ConsumerSessionSignup> {
@@ -241,6 +240,7 @@ class DefaultLinkAccountManagerTest {
                     actualEmail,
                     actualPhone,
                     actualCountry,
+                    countryInferringMethod,
                     actualName,
                     actualConsentAction
                 )
@@ -270,11 +270,12 @@ class DefaultLinkAccountManagerTest {
                 email: String,
                 phone: String?,
                 country: String?,
+                countryInferringMethod: String,
                 name: String?,
                 consentAction: ConsumerSignUpConsentAction
             ): Result<ConsumerSessionSignup> {
                 if (consentAction == ConsumerSignUpConsentAction.Checkbox) callCount += 1
-                return super.consumerSignUp(email, phone, country, name, consentAction)
+                return super.consumerSignUp(email, phone, country, countryInferringMethod, name, consentAction)
             }
         }
         accountManager(linkRepository = linkRepository).signInWithUserInput(
@@ -295,13 +296,14 @@ class DefaultLinkAccountManagerTest {
                     email: String,
                     phone: String?,
                     country: String?,
+                    countryInferringMethod: String,
                     name: String?,
                     consentAction: ConsumerSignUpConsentAction
                 ): Result<ConsumerSessionSignup> {
                     if (consentAction == ConsumerSignUpConsentAction.CheckboxWithPrefilledEmail) {
                         callCount += 1
                     }
-                    return super.consumerSignUp(email, phone, country, name, consentAction)
+                    return super.consumerSignUp(email, phone, country, countryInferringMethod, name, consentAction)
                 }
             }
             accountManager(linkRepository = linkRepository).signInWithUserInput(
@@ -322,13 +324,14 @@ class DefaultLinkAccountManagerTest {
                     email: String,
                     phone: String?,
                     country: String?,
+                    countryInferringMethod: String,
                     name: String?,
                     consentAction: ConsumerSignUpConsentAction
                 ): Result<ConsumerSessionSignup> {
                     if (consentAction == ConsumerSignUpConsentAction.CheckboxWithPrefilledEmailAndPhone) {
                         callCount += 1
                     }
-                    return super.consumerSignUp(email, phone, country, name, consentAction)
+                    return super.consumerSignUp(email, phone, country, countryInferringMethod, name, consentAction)
                 }
             }
             accountManager(linkRepository = linkRepository).signInWithUserInput(
@@ -348,13 +351,14 @@ class DefaultLinkAccountManagerTest {
                 email: String,
                 phone: String?,
                 country: String?,
+                countryInferringMethod: String,
                 name: String?,
                 consentAction: ConsumerSignUpConsentAction
             ): Result<ConsumerSessionSignup> {
                 if (consentAction == ConsumerSignUpConsentAction.Implied) {
                     callCount += 1
                 }
-                return super.consumerSignUp(email, phone, country, name, consentAction)
+                return super.consumerSignUp(email, phone, country, countryInferringMethod, name, consentAction)
             }
         }
         accountManager(linkRepository = linkRepository).signInWithUserInput(
@@ -375,11 +379,12 @@ class DefaultLinkAccountManagerTest {
                     email: String,
                     phone: String?,
                     country: String?,
+                    countryInferringMethod: String,
                     name: String?,
                     consentAction: ConsumerSignUpConsentAction
                 ): Result<ConsumerSessionSignup> {
                     consentActions.add(consentAction)
-                    return super.consumerSignUp(email, phone, country, name, consentAction)
+                    return super.consumerSignUp(email, phone, country, countryInferringMethod, name, consentAction)
                 }
             }
             accountManager(linkRepository = linkRepository).signInWithUserInput(
@@ -437,7 +442,7 @@ class DefaultLinkAccountManagerTest {
         assertThat(result.exceptionOrNull()).isEqualTo(
             AlreadyLoggedInLinkException(
                 email = TestFactory.EMAIL,
-                accountStatus = AccountStatus.Verified
+                accountStatus = AccountStatus.Verified(true, null)
             )
         )
     }
@@ -613,7 +618,6 @@ class DefaultLinkAccountManagerTest {
 
         accountManager.lookupConsumer(
             email = TestFactory.EMAIL,
-            linkAuthIntentId = null,
             startSession = false,
             customerId = null
         )
@@ -876,7 +880,6 @@ class DefaultLinkAccountManagerTest {
         val result = accountManager.mobileLookupConsumer(
             email = TestFactory.CUSTOMER_EMAIL,
             emailSource = TestFactory.EMAIL_SOURCE,
-            linkAuthIntentId = null,
             verificationToken = TestFactory.VERIFICATION_TOKEN,
             appId = TestFactory.APP_ID,
             startSession = false,
@@ -907,7 +910,6 @@ class DefaultLinkAccountManagerTest {
         val result = accountManager.mobileLookupConsumer(
             email = TestFactory.CUSTOMER_EMAIL,
             emailSource = TestFactory.EMAIL_SOURCE,
-            linkAuthIntentId = null,
             verificationToken = TestFactory.VERIFICATION_TOKEN,
             appId = TestFactory.APP_ID,
             startSession = true,
@@ -938,7 +940,6 @@ class DefaultLinkAccountManagerTest {
         val result = accountManager.mobileLookupConsumer(
             email = TestFactory.CUSTOMER_EMAIL,
             emailSource = TestFactory.EMAIL_SOURCE,
-            linkAuthIntentId = null,
             verificationToken = TestFactory.VERIFICATION_TOKEN,
             appId = TestFactory.APP_ID,
             startSession = true,
@@ -969,6 +970,7 @@ class DefaultLinkAccountManagerTest {
             verificationToken = TestFactory.VERIFICATION_TOKEN,
             appId = TestFactory.APP_ID,
             country = TestFactory.COUNTRY,
+            countryInferringMethod = "PHONE_NUMBER",
             phone = TestFactory.CUSTOMER_PHONE,
             name = TestFactory.CUSTOMER_NAME,
             consentAction = SignUpConsentAction.Implied
@@ -1004,6 +1006,7 @@ class DefaultLinkAccountManagerTest {
             verificationToken = TestFactory.VERIFICATION_TOKEN,
             appId = TestFactory.APP_ID,
             country = TestFactory.COUNTRY,
+            countryInferringMethod = "PHONE_NUMBER",
             phone = TestFactory.CUSTOMER_PHONE,
             name = TestFactory.CUSTOMER_NAME,
             consentAction = SignUpConsentAction.Implied
@@ -1089,7 +1092,7 @@ class DefaultLinkAccountManagerTest {
         accountStatusFlowTest(
             customerEmail = TestFactory.CUSTOMER_EMAIL,
             allowUserEmailEdits = true,
-            expectedStatus = AccountStatus.Verified,
+            expectedStatus = AccountStatus.Verified(true, null),
             expectedLookupEmail = TestFactory.CUSTOMER_EMAIL
         )
 
@@ -1098,7 +1101,7 @@ class DefaultLinkAccountManagerTest {
         accountStatusFlowTest(
             customerEmail = TestFactory.CUSTOMER_EMAIL,
             allowUserEmailEdits = false,
-            expectedStatus = AccountStatus.Verified,
+            expectedStatus = AccountStatus.Verified(true, null),
             expectedLookupEmail = TestFactory.CUSTOMER_EMAIL
         )
 
@@ -1109,6 +1112,53 @@ class DefaultLinkAccountManagerTest {
             allowUserEmailEdits = true,
             expectedStatus = AccountStatus.SignedOut
         )
+
+    @Test
+    fun `lookupConsumerByAuthIntent returns success when repository call succeeds`() = runSuspendTest {
+        val linkAuthIntentId = "lai_123"
+        val linkRepository = FakeLinkRepository()
+        val accountManager = accountManager(linkRepository = linkRepository)
+
+        val result = accountManager.lookupConsumerByAuthIntent(
+            linkAuthIntentId = linkAuthIntentId,
+            customerId = null
+        )
+
+        val call = linkRepository.awaitLookup()
+        assertThat(call.linkAuthIntentId).isEqualTo(linkAuthIntentId)
+        assertThat(call.email).isNull()
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()?.email).isEqualTo(TestFactory.LINK_ACCOUNT.email)
+
+        linkRepository.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `mobileLookupConsumerByAuthIntent returns success when repository call succeeds`() = runSuspendTest {
+        val linkAuthIntentId = "lai_123"
+        val linkRepository = FakeLinkRepository()
+        val accountManager = accountManager(linkRepository = linkRepository)
+
+        val result = accountManager.mobileLookupConsumerByAuthIntent(
+            linkAuthIntentId = linkAuthIntentId,
+            verificationToken = TestFactory.VERIFICATION_TOKEN,
+            appId = TestFactory.APP_ID,
+            customerId = null
+        )
+
+        val call = linkRepository.awaitMobileLookup()
+        assertThat(call.linkAuthIntentId).isEqualTo(linkAuthIntentId)
+        assertThat(call.email).isNull()
+        assertThat(call.emailSource).isNull()
+        assertThat(call.verificationToken).isEqualTo(TestFactory.VERIFICATION_TOKEN)
+        assertThat(call.appId).isEqualTo(TestFactory.APP_ID)
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()?.email).isEqualTo(TestFactory.LINK_ACCOUNT.email)
+
+        linkRepository.ensureAllEventsConsumed()
+    }
 
     @Test
     fun `allowUserEmailEdits configuration is properly passed to LinkConfiguration`() = runSuspendTest {
@@ -1151,7 +1201,8 @@ class DefaultLinkAccountManagerTest {
             ),
             linkRepository = linkRepository,
             linkEventsReporter = linkEventsReporter,
-            errorReporter = FakeErrorReporter()
+            errorReporter = FakeErrorReporter(),
+            linkLaunchMode = LinkLaunchMode.Full
         )
     }
 

@@ -59,6 +59,23 @@ class CardUiDefinitionFactoryTest {
     }
 
     @Test
+    fun testCardWithValidation() {
+        paparazziRule.snapshot {
+            CardDefinition.CreateFormUi(
+                metadata = metadata.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                    )
+                ),
+                isValidating = true,
+            )
+        }
+    }
+
+    @Test
     fun testCardWithDefaultValues() {
         paparazziRule.snapshot {
             CardDefinition.CreateFormUi(
@@ -98,6 +115,23 @@ class CardUiDefinitionFactoryTest {
                         address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                     )
                 )
+            )
+        }
+    }
+
+    @Test
+    fun testCardWithBillingDetailsCollectionConfigurationAndValidation() {
+        paparazziRule.snapshot {
+            CardDefinition.CreateFormUi(
+                metadata = metadata.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    )
+                ),
+                isValidating = true,
             )
         }
     }
@@ -301,6 +335,36 @@ class CardUiDefinitionFactoryTest {
                         )
                     )
                 }
+            )
+        }
+    }
+
+    @Test
+    fun testCondensedAutocompleteFormWithValidation() {
+        paparazziRule.snapshot {
+            CardDefinition.CreateFormUi(
+                paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
+                    code = "card",
+                    billingDetails = null,
+                    requiresMandate = false,
+                    overrideParamMap = emptyMap(),
+                    productUsage = emptySet(),
+                ),
+                metadata = metadata.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    ),
+                ),
+                autocompleteAddressInteractorFactory = {
+                    TestAutocompleteAddressInteractor.noOp(
+                        autocompleteConfig = AutocompleteAddressInteractor.Config(
+                            googlePlacesApiKey = "123",
+                            autocompleteCountries = setOf("US"),
+                            isPlacesAvailable = true,
+                        )
+                    )
+                },
+                isValidating = true,
             )
         }
     }

@@ -25,7 +25,7 @@ import kotlinx.parcelize.TypeParceler
 class LinkAppearance(
     val lightColors: Colors = Colors.default(isDark = false),
     val darkColors: Colors = Colors.default(isDark = true),
-    val style: Style,
+    val style: Style = Style.AUTOMATIC,
     val primaryButton: PrimaryButton = PrimaryButton()
 ) : Parcelable {
 
@@ -33,6 +33,7 @@ class LinkAppearance(
      * Color configuration for Link components.
      *
      * @param primary The primary color used for buttons, highlights, and interactive elements.
+     * @param contentOnPrimary The color used for text and icons on primary elements.
      * @param borderSelected The color used for the border of selected views.
      */
     @Poko
@@ -41,11 +42,13 @@ class LinkAppearance(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Colors(
         val primary: Color,
+        val contentOnPrimary: Color,
         val borderSelected: Color
     ) : Parcelable {
         internal companion object {
             fun default(isDark: Boolean) = Colors(
                 primary = LinkThemeConfig.colors(isDark = isDark).buttonPrimary,
+                contentOnPrimary = LinkThemeConfig.colors(isDark = isDark).onButtonPrimary,
                 borderSelected = LinkThemeConfig.colors(isDark = isDark).borderSelected,
             )
         }
@@ -92,6 +95,7 @@ class LinkAppearance(
     private object ColorParceler : Parceler<Color> {
         override fun create(parcel: Parcel): Color =
             Color(parcel.readInt())
+
         override fun Color.write(parcel: Parcel, flags: Int) =
             parcel.writeInt(this.toArgb())
     }

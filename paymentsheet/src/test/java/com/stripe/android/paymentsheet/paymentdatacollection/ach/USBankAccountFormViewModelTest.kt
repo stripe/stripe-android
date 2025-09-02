@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
+import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
@@ -275,6 +276,125 @@ class USBankAccountFormViewModelTest {
             assertThat(awaitItem()).isFalse()
             viewModel.reset()
             assertThat(awaitItem()).isTrue()
+        }
+    }
+
+    @Test
+    fun `Correctly creates selection when default address`() = runTest {
+        val customerAddress = CUSTOMER_ADDRESS.asAddressModel()
+        val viewModel = createViewModel(
+            defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        attachDefaultsToPaymentMethod = true,
+                        name = CollectionMode.Always,
+                        email = CollectionMode.Always,
+                        phone = CollectionMode.Always,
+                        address = AddressCollectionMode.Full,
+                    ),
+                    billingDetails = PaymentSheet.BillingDetails(
+                        name = CUSTOMER_NAME,
+                        email = CUSTOMER_EMAIL,
+                        phone = CUSTOMER_PHONE,
+                        address = CUSTOMER_ADDRESS,
+                    )
+                ),
+                savedPaymentMethod = null,
+            )
+        )
+
+        viewModel.handleCollectBankAccountResult(mockManuallyEnteredBankAccount(usesMicrodeposits = true))
+
+        viewModel.linkedAccount.test {
+            val paymentSelection = awaitItem()
+
+            assertThat(paymentSelection?.input).isNotNull()
+
+            val input = requireNotNull(paymentSelection?.input)
+
+            assertThat(input.name).isEqualTo(CUSTOMER_NAME)
+            assertThat(input.email).isEqualTo(CUSTOMER_EMAIL)
+            assertThat(input.phone).isEqualTo(CUSTOMER_PHONE)
+            assertThat(input.address).isEqualTo(customerAddress)
+
+            assertThat(paymentSelection?.paymentMethodCreateParams).isNotNull()
+
+            val paymentMethodCreateParams = requireNotNull(paymentSelection?.paymentMethodCreateParams)
+
+            assertThat(paymentMethodCreateParams.billingDetails).isNotNull()
+
+            val billingDetails = requireNotNull(paymentMethodCreateParams.billingDetails)
+
+            assertThat(billingDetails.name).isEqualTo(CUSTOMER_NAME)
+            assertThat(billingDetails.email).isEqualTo(CUSTOMER_EMAIL)
+            assertThat(billingDetails.phone).isEqualTo(CUSTOMER_PHONE)
+            assertThat(billingDetails.address).isEqualTo(customerAddress)
+        }
+    }
+
+    @Test
+    fun `Correctly creates selection when no default address`() = runTest {
+        val viewModel = createViewModel(
+            defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        attachDefaultsToPaymentMethod = true,
+                        name = CollectionMode.Always,
+                        email = CollectionMode.Always,
+                        phone = CollectionMode.Always,
+                        address = AddressCollectionMode.Full,
+                    ),
+                    billingDetails = null
+                ),
+                savedPaymentMethod = null,
+            )
+        )
+
+        val customerAddress = CUSTOMER_ADDRESS.asAddressModel()
+
+        viewModel.nameController.onValueChange(CUSTOMER_NAME)
+        viewModel.emailController.onValueChange(CUSTOMER_EMAIL)
+        viewModel.phoneController.onValueChange(CUSTOMER_PHONE.removePrefix("+1"))
+        viewModel.addressElement.addressController.test {
+            val controller = awaitItem()
+
+            controller.fieldsFlowable.test {
+                val formFieldValues = customerAddress.asFormFieldValues()
+
+                awaitItem().forEach { field ->
+                    field.setRawValue(formFieldValues)
+                }
+
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+        viewModel.handleCollectBankAccountResult(mockManuallyEnteredBankAccount(usesMicrodeposits = true))
+
+        viewModel.linkedAccount.test {
+            val paymentSelection = awaitItem()
+
+            assertThat(paymentSelection?.input).isNotNull()
+
+            val input = requireNotNull(paymentSelection?.input)
+
+            assertThat(input.name).isEqualTo(CUSTOMER_NAME)
+            assertThat(input.email).isEqualTo(CUSTOMER_EMAIL)
+            assertThat(input.phone).isEqualTo(CUSTOMER_PHONE)
+            assertThat(input.address).isEqualTo(customerAddress)
+
+            assertThat(paymentSelection?.paymentMethodCreateParams).isNotNull()
+
+            val paymentMethodCreateParams = requireNotNull(paymentSelection?.paymentMethodCreateParams)
+
+            assertThat(paymentMethodCreateParams.billingDetails).isNotNull()
+
+            val billingDetails = requireNotNull(paymentMethodCreateParams.billingDetails)
+
+            assertThat(billingDetails.name).isEqualTo(CUSTOMER_NAME)
+            assertThat(billingDetails.email).isEqualTo(CUSTOMER_EMAIL)
+            assertThat(billingDetails.phone).isEqualTo(CUSTOMER_PHONE)
+            assertThat(billingDetails.address).isEqualTo(customerAddress)
         }
     }
 
@@ -776,6 +896,7 @@ class USBankAccountFormViewModelTest {
                             phoneCountryCode = "US",
                         ),
                         incentiveEligibilitySession = null,
+                        allowRedisplay = ElementsSessionContext.AllowRedisplay.Unspecified,
                     ),
                 )
             ),
@@ -825,6 +946,7 @@ class USBankAccountFormViewModelTest {
                             phoneCountryCode = "US",
                         ),
                         incentiveEligibilitySession = null,
+                        allowRedisplay = ElementsSessionContext.AllowRedisplay.Unspecified,
                     ),
                 )
             ),
@@ -998,6 +1120,7 @@ class USBankAccountFormViewModelTest {
                             phoneCountryCode = "US",
                         ),
                         incentiveEligibilitySession = null,
+                        allowRedisplay = ElementsSessionContext.AllowRedisplay.Unspecified,
                     ),
                 )
             ),
@@ -1039,6 +1162,7 @@ class USBankAccountFormViewModelTest {
                             phoneCountryCode = "US",
                         ),
                         incentiveEligibilitySession = null,
+                        allowRedisplay = ElementsSessionContext.AllowRedisplay.Unspecified,
                     ),
                 )
             ),
@@ -1573,6 +1697,125 @@ class USBankAccountFormViewModelTest {
     }
 
     @Test
+    fun `ElementsSessionContext contains correct allowRedisplay when using Legacy save behavior`() = runTest {
+        val elementsSessionContext = testElementsSessionContextGeneration(
+            viewModelArgs = defaultArgs.copy(
+                instantDebits = true,
+                showCheckbox = false,
+                formArgs = defaultArgs.formArgs.copy(
+                    hasIntentToSetup = false,
+                    paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+                )
+            )
+        )
+
+        assertThat(elementsSessionContext).isNotNull()
+        assertThat(elementsSessionContext?.allowRedisplay)
+            .isEqualTo(ElementsSessionContext.AllowRedisplay.Unspecified)
+    }
+
+    @Test
+    fun `ElementsSessionContext contains correct allowRedisplay when using Enabled save behavior and checked`() =
+        runTest {
+            val elementsSessionContext = testElementsSessionContextGeneration(
+                viewModelArgs = defaultArgs.copy(
+                    instantDebits = true,
+                    showCheckbox = true,
+                    formArgs = defaultArgs.formArgs.copy(
+                        hasIntentToSetup = false,
+                        paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
+                    )
+                ),
+                checkboxValue = true,
+            )
+
+            assertThat(elementsSessionContext).isNotNull()
+            assertThat(elementsSessionContext?.allowRedisplay)
+                .isEqualTo(ElementsSessionContext.AllowRedisplay.Always)
+        }
+
+    @Test
+    fun `ElementsSessionContext contains correct allowRedisplay when using Enabled save behavior and not checked`() =
+        runTest {
+            val elementsSessionContext = testElementsSessionContextGeneration(
+                viewModelArgs = defaultArgs.copy(
+                    instantDebits = true,
+                    showCheckbox = true,
+                    formArgs = defaultArgs.formArgs.copy(
+                        hasIntentToSetup = false,
+                        paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
+                    )
+                ),
+                checkboxValue = false,
+            )
+
+            assertThat(elementsSessionContext).isNotNull()
+            assertThat(elementsSessionContext?.allowRedisplay)
+                .isEqualTo(ElementsSessionContext.AllowRedisplay.Unspecified)
+        }
+
+    @Test
+    fun `ElementsSessionContext has correct allowRedisplay when Enabled behavior with setup intent & not checked`() =
+        runTest {
+            val elementsSessionContext = testElementsSessionContextGeneration(
+                viewModelArgs = defaultArgs.copy(
+                    instantDebits = true,
+                    showCheckbox = true,
+                    formArgs = defaultArgs.formArgs.copy(
+                        hasIntentToSetup = true,
+                        paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
+                    )
+                ),
+                checkboxValue = false,
+            )
+
+            assertThat(elementsSessionContext).isNotNull()
+            assertThat(elementsSessionContext?.allowRedisplay)
+                .isEqualTo(ElementsSessionContext.AllowRedisplay.Limited)
+        }
+
+    @Test
+    fun `ElementsSessionContext contains correct allowRedisplay with Disabled behavior without override`() = runTest {
+        val elementsSessionContext = testElementsSessionContextGeneration(
+            viewModelArgs = defaultArgs.copy(
+                instantDebits = true,
+                showCheckbox = false,
+                formArgs = defaultArgs.formArgs.copy(
+                    hasIntentToSetup = true,
+                    paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
+                        overrideAllowRedisplay = null
+                    ),
+                )
+            ),
+        )
+
+        assertThat(elementsSessionContext).isNotNull()
+        assertThat(elementsSessionContext?.allowRedisplay)
+            .isEqualTo(ElementsSessionContext.AllowRedisplay.Limited)
+    }
+
+    @Test
+    fun `ElementsSessionContext contains correct allowRedisplay with Disabled behavior with Always override`() =
+        runTest {
+            val elementsSessionContext = testElementsSessionContextGeneration(
+                viewModelArgs = defaultArgs.copy(
+                    instantDebits = true,
+                    showCheckbox = false,
+                    formArgs = defaultArgs.formArgs.copy(
+                        hasIntentToSetup = true,
+                        paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
+                            overrideAllowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS
+                        ),
+                    )
+                ),
+            )
+
+            assertThat(elementsSessionContext).isNotNull()
+            assertThat(elementsSessionContext?.allowRedisplay)
+                .isEqualTo(ElementsSessionContext.AllowRedisplay.Always)
+        }
+
+    @Test
     fun `Contains all supported billing countries when allowed countries is empty`() {
         val viewModel = createViewModel(
             args = defaultArgs.run {
@@ -1635,11 +1878,68 @@ class USBankAccountFormViewModelTest {
         assertThat(viewModel.addressElement).isInstanceOf<AutocompleteAddressElement>()
     }
 
+    @Test
+    fun `If missing required fields, 'validate' should validate fields & reset validation on 'reset'`() = runTest {
+        val viewModel = createViewModel(
+            args = defaultArgs.run {
+                copy(
+                    formArgs = formArgs.copy(
+                        billingDetails = null,
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            name = CollectionMode.Always,
+                            phone = CollectionMode.Always,
+                            email = CollectionMode.Always,
+                            address = AddressCollectionMode.Full,
+                            allowedCountries = emptySet()
+                        )
+                    )
+                )
+            }
+        )
+
+        turbineScope {
+            val nameErrorTurbine = viewModel.nameController.error.testIn(this)
+            val emailErrorTurbine = viewModel.emailController.error.testIn(this)
+            val phoneErrorTurbine = viewModel.phoneController.error.testIn(this)
+            val addressErrorTurbine =
+                viewModel.addressElement.sectionFieldErrorController().error.testIn(this)
+
+            assertThat(nameErrorTurbine.awaitItem()).isNull()
+            assertThat(emailErrorTurbine.awaitItem()).isNull()
+            assertThat(phoneErrorTurbine.awaitItem()).isNull()
+            assertThat(addressErrorTurbine.awaitItem()).isNull()
+
+            viewModel.validate()
+
+            assertThat(nameErrorTurbine.awaitItem()).isNotNull()
+            assertThat(emailErrorTurbine.awaitItem()).isNotNull()
+            assertThat(phoneErrorTurbine.awaitItem()).isNotNull()
+            assertThat(addressErrorTurbine.awaitItem()).isNotNull()
+
+            viewModel.onDestroy()
+
+            assertThat(nameErrorTurbine.awaitItem()).isNull()
+            assertThat(emailErrorTurbine.awaitItem()).isNull()
+            assertThat(phoneErrorTurbine.awaitItem()).isNull()
+            assertThat(addressErrorTurbine.expectMostRecentItem()).isNull()
+
+            nameErrorTurbine.cancelAndIgnoreRemainingEvents()
+            emailErrorTurbine.cancelAndIgnoreRemainingEvents()
+            phoneErrorTurbine.cancelAndIgnoreRemainingEvents()
+            addressErrorTurbine.cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     private fun testElementsSessionContextGeneration(
         viewModelArgs: USBankAccountFormViewModel.Args,
+        checkboxValue: Boolean? = null
     ): ElementsSessionContext? {
         val viewModel = createViewModel(viewModelArgs)
         viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
+
+        checkboxValue?.let {
+            viewModel.saveForFutureUseElement.controller.onValueChange(it)
+        }
 
         viewModel.handlePrimaryButtonClick()
 

@@ -6,11 +6,14 @@ import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheetViewState.AddPaymentMethod
 import com.stripe.android.customersheet.CustomerSheetViewState.SelectPaymentMethod
+import com.stripe.android.customersheet.analytics.CustomerSheetEvent
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.data.CustomerSheetDataResult
 import com.stripe.android.customersheet.data.FakeCustomerSheetIntentDataSource
@@ -22,6 +25,7 @@ import com.stripe.android.customersheet.utils.FakeCustomerSheetLoader
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
@@ -30,6 +34,8 @@ import com.stripe.android.model.PaymentMethodFixtures.US_BANK_ACCOUNT_VERIFIED
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.networking.PaymentAnalyticsEvent
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
@@ -48,6 +54,7 @@ import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
+import com.stripe.android.ui.core.elements.CardDetailsSectionController
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -61,7 +68,9 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -540,7 +549,7 @@ class CustomerSheetViewModelTest {
             ),
             customerPaymentMethods = listOf(CARD_PAYMENT_METHOD, CARD_PAYMENT_METHOD.copy(id = "pm_543")),
             customerPermissions = CustomerPermissions(
-                canRemovePaymentMethods = true,
+                removePaymentMethod = PaymentMethodRemovePermission.Full,
                 canRemoveLastPaymentMethod = false,
                 canUpdateFullPaymentMethodDetails = false,
             )
@@ -580,7 +589,7 @@ class CustomerSheetViewModelTest {
             workContext = testDispatcher,
             customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
             customerPermissions = CustomerPermissions(
-                canRemovePaymentMethods = false,
+                removePaymentMethod = PaymentMethodRemovePermission.None,
                 canRemoveLastPaymentMethod = false,
                 canUpdateFullPaymentMethodDetails = true,
             )
@@ -603,7 +612,7 @@ class CustomerSheetViewModelTest {
             workContext = testDispatcher,
             customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
             customerPermissions = CustomerPermissions(
-                canRemovePaymentMethods = false,
+                removePaymentMethod = PaymentMethodRemovePermission.None,
                 canRemoveLastPaymentMethod = false,
                 canUpdateFullPaymentMethodDetails = false,
             )
@@ -626,7 +635,7 @@ class CustomerSheetViewModelTest {
                 workContext = testDispatcher,
                 customerPaymentMethods = listOf(CARD_WITH_NETWORKS_PAYMENT_METHOD),
                 customerPermissions = CustomerPermissions(
-                    canRemovePaymentMethods = false,
+                    removePaymentMethod = PaymentMethodRemovePermission.None,
                     canRemoveLastPaymentMethod = false,
                     canUpdateFullPaymentMethodDetails = false,
                 ),
@@ -1910,6 +1919,25 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
+    fun `on cardscan event, should call event reporter`() = runTest(testDispatcher) {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            eventReporter = eventReporter,
+            integrationType = CustomerSheetIntegration.Type.CustomerAdapter,
+            configuration = CustomerSheetFixtures.MINIMUM_CONFIG,
+        )
+
+        val cardScanEvent = CustomerSheetEvent.CardScanStarted("google_pay")
+        viewModel.handleViewAction(
+            CustomerSheetViewAction.OnCardScanEvent(cardScanEvent)
+        )
+
+        verify(eventReporter).onCardScanEvent(cardScanEvent)
+    }
+
+    @Test
     fun `Payment method form changes on user selection`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
@@ -3084,7 +3112,7 @@ class CustomerSheetViewModelTest {
                 originalSelection = PaymentSelection.Saved(paymentMethodToRemove),
                 paymentMethodToRemove = paymentMethodToRemove,
                 permissions = CustomerPermissions(
-                    canRemovePaymentMethods = true,
+                    removePaymentMethod = PaymentMethodRemovePermission.Full,
                     canRemoveLastPaymentMethod = false,
                     canUpdateFullPaymentMethodDetails = false,
                 )
@@ -3219,6 +3247,64 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
+    fun `When starting confirmation, should pass passiveCaptchaParams when available`() = runTest(testDispatcher) {
+        val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+
+        val mockConfirmationHandler = mock<ConfirmationHandler>()
+        val confirmationHandlerFactory = ConfirmationHandler.Factory { mockConfirmationHandler }
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            customerPaymentMethods = listOf(),
+            isGooglePayAvailable = false,
+            confirmationHandlerFactory = confirmationHandlerFactory,
+            customerSheetLoader = FakeCustomerSheetLoader(
+                customerPaymentMethods = emptyList(),
+                isGooglePayAvailable = false,
+                passiveCaptchaParams = passiveCaptchaParams
+            ),
+            intentDataSource = FakeCustomerSheetIntentDataSource(
+                canCreateSetupIntents = true,
+                onRetrieveSetupIntentClientSecret = {
+                    CustomerSheetDataResult.success("seti_123")
+                }
+            ),
+            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
+                onAttachPaymentMethod = {
+                    CustomerSheetDataResult.success(CARD_PAYMENT_METHOD)
+                }
+            ),
+            stripeRepository = FakeStripeRepository(
+                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
+                retrieveSetupIntent = Result.success(SetupIntentFixtures.SI_SUCCEEDED),
+            ),
+        ).apply {
+            handleViewAction(
+                CustomerSheetViewAction.OnFormFieldValuesCompleted(
+                    formFieldValues = TEST_FORM_VALUES,
+                )
+            )
+        }
+
+        viewModel.viewState.test {
+            assertThat(awaitItem()).isInstanceOf<AddPaymentMethod>()
+        }
+
+        viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+        verify(mockConfirmationHandler).start(any())
+
+        val captor = argumentCaptor<ConfirmationHandler.Args>()
+        verify(mockConfirmationHandler).start(captor.capture())
+
+        val capturedArgs = captor.firstValue
+        assertThat(capturedArgs.confirmationOption).isInstanceOf<PaymentMethodConfirmationOption.Saved>()
+
+        val savedOption = capturedArgs.confirmationOption as PaymentMethodConfirmationOption.Saved
+        assertThat(savedOption.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
+    }
+
+    @Test
     fun `When setting up with intent, should call 'IntentConfirmationInterceptor' with expected params`() =
         runTest(testDispatcher) {
             val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
@@ -3258,6 +3344,7 @@ class CustomerSheetViewModelTest {
                     paymentMethod = CARD_PAYMENT_METHOD,
                     shippingValues = null,
                     paymentMethodOptionsParams = null,
+                    hCaptchaToken = null,
                 )
             )
 
@@ -3270,7 +3357,7 @@ class CustomerSheetViewModelTest {
             workContext = testDispatcher,
             customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
             customerPermissions = CustomerPermissions(
-                canRemovePaymentMethods = true,
+                removePaymentMethod = PaymentMethodRemovePermission.Full,
                 canRemoveLastPaymentMethod = true,
                 canUpdateFullPaymentMethodDetails = true,
             ),
@@ -3289,7 +3376,7 @@ class CustomerSheetViewModelTest {
             workContext = testDispatcher,
             customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
             customerPermissions = CustomerPermissions(
-                canRemovePaymentMethods = false,
+                removePaymentMethod = PaymentMethodRemovePermission.None,
                 canRemoveLastPaymentMethod = false,
                 canUpdateFullPaymentMethodDetails = false
             ),
@@ -3303,6 +3390,25 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
+    fun `If has partial remove permissions, can remove should be true in state`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
+            customerPermissions = CustomerPermissions(
+                removePaymentMethod = PaymentMethodRemovePermission.Partial,
+                canRemoveLastPaymentMethod = true,
+                canUpdateFullPaymentMethodDetails = true,
+            ),
+        )
+
+        val selectState = viewModel.viewState.value.asSelectState()
+
+        assertThat(selectState.canRemovePaymentMethods).isTrue()
+        assertThat(selectState.canEdit).isTrue()
+        assertThat(selectState.topBarState {}.showEditMenu).isTrue()
+    }
+
+    @Test
     fun `If has no remove permissions but is CBC eligible, can remove is false but can edit is true`() =
         runTest(testDispatcher) {
             val viewModel = createViewModel(
@@ -3312,7 +3418,7 @@ class CustomerSheetViewModelTest {
                     preferredNetworks = listOf(CardBrand.CartesBancaires),
                 ),
                 customerPermissions = CustomerPermissions(
-                    canRemovePaymentMethods = false,
+                    removePaymentMethod = PaymentMethodRemovePermission.None,
                     canRemoveLastPaymentMethod = false,
                     canUpdateFullPaymentMethodDetails = true,
                 ),
@@ -3332,7 +3438,7 @@ class CustomerSheetViewModelTest {
                 workContext = testDispatcher,
                 customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
                 customerPermissions = CustomerPermissions(
-                    canRemovePaymentMethods = true,
+                    removePaymentMethod = PaymentMethodRemovePermission.Full,
                     canRemoveLastPaymentMethod = false,
                     canUpdateFullPaymentMethodDetails = false,
                 ),
@@ -3355,7 +3461,7 @@ class CustomerSheetViewModelTest {
                     preferredNetworks = listOf(CardBrand.CartesBancaires),
                 ),
                 customerPermissions = CustomerPermissions(
-                    canRemovePaymentMethods = true,
+                    removePaymentMethod = PaymentMethodRemovePermission.Full,
                     canRemoveLastPaymentMethod = false,
                     canUpdateFullPaymentMethodDetails = true,
                 ),
@@ -3508,6 +3614,230 @@ class CustomerSheetViewModelTest {
             }
         }
 
+    @Test
+    fun `init emits CustomerSheetViewState#AddPaymentMethod shouldAutomaticallyLaunchCardScan true when no payment methods available`() = runTest(testDispatcher) {
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
+                opensCardScannerAutomatically = true,
+            ),
+            customerSheetLoader = FakeCustomerSheetLoader(
+                isGooglePayAvailable = false,
+                customerPaymentMethods = listOf()
+            ),
+        )
+        viewModel.viewState.test {
+            val state = awaitItem()
+
+            assertThat(state).isInstanceOf<AddPaymentMethod>()
+            val formElements = state.asAddState().formElements
+
+            assertThat(formElements[0]).isInstanceOf<CardDetailsSectionElement>()
+
+            val controller = (formElements[0] as CardDetailsSectionElement).controller
+            assertThat(controller.shouldAutomaticallyLaunchCardScan()).isTrue()
+        }
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
+    }
+
+    @Test
+    fun `When CustomerViewAction#OnAddCardPressed, shouldAutomaticallyLaunchCardScan true`() = runTest(testDispatcher) {
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
+                opensCardScannerAutomatically = true,
+            ),
+        )
+
+        viewModel.viewState.test {
+            assertThat(awaitItem())
+                .isInstanceOf<SelectPaymentMethod>()
+            viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+
+            val item = awaitItem()
+            assertThat(item).isInstanceOf<AddPaymentMethod>()
+
+            val formElements = item.asAddState().formElements
+            assertThat(formElements[0]).isInstanceOf<CardDetailsSectionElement>()
+            val controller = (formElements[0] as CardDetailsSectionElement).controller
+            assertThat(controller.shouldAutomaticallyLaunchCardScan()).isTrue()
+        }
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
+    }
+
+    @Test
+    fun `When switching payment methods, don't show card scan more than once`() = runTest(testDispatcher) {
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            customerPaymentMethods = listOf(),
+            isGooglePayAvailable = false,
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
+                opensCardScannerAutomatically = true,
+            ),
+        )
+
+        viewModel.viewState.test {
+            var viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.paymentMethodCode)
+                .isEqualTo("card")
+
+            val firstCardFormController = getAddPaymentMethodCardDetailsSectionController(viewState)
+            assertThat(firstCardFormController).isNotNull()
+            assertThat(firstCardFormController!!.shouldAutomaticallyLaunchCardScan()).isTrue()
+            firstCardFormController.setHasAutomaticallyLaunchedCardScan()
+            assertThat(firstCardFormController.shouldAutomaticallyLaunchCardScan()).isFalse()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
+                    LpmRepositoryTestHelpers.usBankAccount
+                )
+            )
+
+            viewState = awaitViewState()
+            assertThat(viewState.paymentMethodCode)
+                .isEqualTo("us_bank_account")
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
+                    LpmRepositoryTestHelpers.card
+                )
+            )
+            viewState = awaitViewState()
+            assertThat(viewState.paymentMethodCode)
+                .isEqualTo("card")
+            val secondCardFormController = getAddPaymentMethodCardDetailsSectionController(viewState)
+            assertThat(secondCardFormController).isNotNull()
+            assertThat(secondCardFormController!!.shouldAutomaticallyLaunchCardScan()).isFalse()
+        }
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
+    }
+
+    @Test
+    fun `After confirming a card, the card scan should be shown when trying to add another card`() = runTest(testDispatcher) {
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            intentDataSource = FakeCustomerSheetIntentDataSource(
+                canCreateSetupIntents = false,
+            ),
+            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
+                onAttachPaymentMethod = {
+                    CustomerSheetDataResult.success(CARD_PAYMENT_METHOD)
+                }
+            ),
+            stripeRepository = FakeStripeRepository(
+                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
+            ),
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
+                opensCardScannerAutomatically = true,
+            ),
+        )
+
+        viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+
+        viewModel.viewState.test {
+            var viewState = awaitViewState<AddPaymentMethod>()
+
+            val firstCardFormController = getAddPaymentMethodCardDetailsSectionController(viewState)
+            assertThat(firstCardFormController).isNotNull()
+            assertThat(firstCardFormController!!.shouldAutomaticallyLaunchCardScan()).isTrue()
+            firstCardFormController.setHasAutomaticallyLaunchedCardScan()
+            assertThat(firstCardFormController.shouldAutomaticallyLaunchCardScan()).isFalse()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnFormFieldValuesCompleted(
+                    formFieldValues = FormFieldValues(
+                        fieldValuePairs = mapOf(
+                            IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
+                        ),
+                        userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
+                    )
+                )
+            )
+            assertThat(awaitViewState<AddPaymentMethod>().formFieldValues).isNotNull()
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            assertThat(awaitItem()).isInstanceOf<AddPaymentMethod>()
+            assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+
+            val newViewState = awaitViewState<AddPaymentMethod>()
+            assertThat(newViewState.formFieldValues).isNull()
+
+            val secondCardFormController = getAddPaymentMethodCardDetailsSectionController(viewState)
+            assertThat(secondCardFormController).isNotNull()
+            assertThat(secondCardFormController!!.shouldAutomaticallyLaunchCardScan()).isTrue()
+        }
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
+    }
+
+    @Test
+    fun `After leaving card form, the card scan should be shown when trying to add another card`() = runTest(testDispatcher) {
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            intentDataSource = FakeCustomerSheetIntentDataSource(
+                canCreateSetupIntents = false,
+            ),
+            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
+                onAttachPaymentMethod = {
+                    CustomerSheetDataResult.success(CARD_PAYMENT_METHOD)
+                }
+            ),
+            stripeRepository = FakeStripeRepository(
+                createPaymentMethodResult = Result.success(CARD_PAYMENT_METHOD),
+            ),
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
+                opensCardScannerAutomatically = true,
+            ),
+        )
+
+        viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+
+        viewModel.viewState.test {
+            var viewState = awaitViewState<AddPaymentMethod>()
+
+            val firstCardFormController = getAddPaymentMethodCardDetailsSectionController(viewState)
+            assertThat(firstCardFormController).isNotNull()
+            assertThat(firstCardFormController!!.shouldAutomaticallyLaunchCardScan()).isTrue()
+            firstCardFormController.setHasAutomaticallyLaunchedCardScan()
+            assertThat(firstCardFormController.shouldAutomaticallyLaunchCardScan()).isFalse()
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnBackPressed)
+
+            assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+
+            val newViewState = awaitViewState<AddPaymentMethod>()
+            assertThat(newViewState.formFieldValues).isNull()
+
+            val secondCardFormController = getAddPaymentMethodCardDetailsSectionController(viewState)
+            assertThat(secondCardFormController).isNotNull()
+            assertThat(secondCardFormController!!.shouldAutomaticallyLaunchCardScan()).isTrue()
+        }
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
+    }
+
+    private fun getAddPaymentMethodCardDetailsSectionController(
+        addState: AddPaymentMethod
+    ): CardDetailsSectionController? {
+        return addState.formElements[0].controller as? CardDetailsSectionController
+    }
+
     private fun mockUSBankAccountPaymentSelection(): PaymentSelection.New.USBankAccount {
         return PaymentSelection.New.USBankAccount(
             label = "Test",
@@ -3600,7 +3930,7 @@ class CustomerSheetViewModelTest {
         originalSelection: PaymentSelection.Saved,
         paymentMethodToRemove: PaymentMethod,
         permissions: CustomerPermissions = CustomerPermissions(
-            canRemovePaymentMethods = true,
+            removePaymentMethod = PaymentMethodRemovePermission.Full,
             canRemoveLastPaymentMethod = true,
             canUpdateFullPaymentMethodDetails = true,
         )

@@ -67,7 +67,7 @@ constructor(
      */
     val paymentMethodOptions: PaymentMethodOptionsParams? = null,
 
-    internal val radarOptions: RadarOptions? = null
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val radarOptions: RadarOptions? = null
 ) : ConfirmStripeIntentParams {
 
     override fun shouldUseStripeSdk(): Boolean {

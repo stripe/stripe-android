@@ -50,7 +50,10 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
                         onCreatePaymentMethodClick = viewModel::onCreatePaymentMethodClick,
                         onLookupClick = viewModel::onLookupClick,
                         onAuthenticationClick = viewModel::onAuthenticateClick,
+                        onAuthorizeClick = viewModel::onAuthorizeClick,
                         onRegisterConsumerClick = viewModel::onRegisterConsumerClick,
+                        onUpdatePhoneNumberClick = viewModel::onUpdatePhoneNumberClick,
+                        onLogOutClick = viewModel::onLogOutClick,
                         onErrorMessage = { viewModel.status.value = StatusMessage(it) },
                     )
                 }

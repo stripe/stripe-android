@@ -81,6 +81,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        hCaptchaToken: String?,
     ): IntentConfirmationInterceptor.NextStep {
         _calls.add(
             InterceptCall.WithExistingPaymentMethod(
@@ -88,6 +89,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
                 paymentMethod = paymentMethod,
                 paymentMethodOptionsParams = paymentMethodOptionsParams,
                 shippingValues = shippingValues,
+                hCaptchaToken = hCaptchaToken,
             )
         )
 
@@ -109,6 +111,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
             val paymentMethod: PaymentMethod,
             val paymentMethodOptionsParams: PaymentMethodOptionsParams?,
             val shippingValues: ConfirmPaymentIntentParams.Shipping?,
+            val hCaptchaToken: String?,
         ) : InterceptCall
     }
 }

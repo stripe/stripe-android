@@ -190,13 +190,13 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         shippingValuesMap = args.formArgs.shippingDetails?.toIdentifierMap(args.formArgs.billingDetails),
     )
 
-    // AddressElement generates a default address if the initial value is null, so we can't rely
-    // on the value produced by the controller in that case.
-    val address: StateFlow<Address?> = if (defaultAddress == null) {
-        MutableStateFlow(null)
-    } else {
-        addressElement.getFormFieldValueFlow().mapAsStateFlow { formFieldValues ->
-            val rawMap = formFieldValues.associate { it.first to it.second.value }
+    val address: StateFlow<Address?> = addressElement.getFormFieldValueFlow().mapAsStateFlow { formFieldValues ->
+        formFieldValues.takeIf {
+            it.all { value ->
+                value.second.isComplete
+            }
+        }?.let { values ->
+            val rawMap = values.associate { it.first to it.second.value }
             Address.fromFormFieldValues(rawMap)
         }
     }
@@ -493,9 +493,14 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
     }
 
+    fun validate() {
+        setValidationState(true)
+    }
+
     fun reset(error: ResolvableString? = null) {
         hasLaunched = false
         shouldReset = false
+        setValidationState(false)
         screenStateWithoutSaveForFutureUse.value = args.toInitialState(error = error)
         saveForFutureUseElement.controller.onValueChange(true)
     }
@@ -503,6 +508,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     fun onDestroy() {
         if (shouldReset) {
             reset()
+        } else {
+            setValidationState(false)
         }
         collectBankAccountLauncher?.unregister()
         collectBankAccountLauncher = null
@@ -590,10 +597,29 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             amount = args.formArgs.amount?.value,
             currency = args.formArgs.amount?.currencyCode,
             linkMode = args.linkMode,
+            allowRedisplay = makeElementsSessionAllowRedisplay(),
             billingDetails = makeElementsSessionContextBillingDetails(),
             prefillDetails = makePrefillDetails(),
             incentiveEligibilitySession = incentiveEligibilitySession,
         )
+    }
+
+    private fun setValidationState(isValidating: Boolean) {
+        nameController.onValidationStateChanged(isValidating)
+        phoneController.onValidationStateChanged(isValidating)
+        emailController.onValidationStateChanged(isValidating)
+        addressElement.onValidationStateChanged(isValidating)
+    }
+
+    private fun makeElementsSessionAllowRedisplay(): ElementsSessionContext.AllowRedisplay {
+        val customerRequestedSave = createCustomerRequestedSave()
+        val allowRedisplay = createAllowRedisplay(customerRequestedSave)
+
+        return when (allowRedisplay) {
+            PaymentMethod.AllowRedisplay.UNSPECIFIED -> ElementsSessionContext.AllowRedisplay.Unspecified
+            PaymentMethod.AllowRedisplay.LIMITED -> ElementsSessionContext.AllowRedisplay.Limited
+            PaymentMethod.AllowRedisplay.ALWAYS -> ElementsSessionContext.AllowRedisplay.Always
+        }
     }
 
     private fun makeElementsSessionContextBillingDetails(): ElementsSessionContext.BillingDetails {
@@ -667,20 +693,15 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         bankName: String?,
         billingDetails: PaymentMethod.BillingDetails,
     ): PaymentSelection.New.USBankAccount {
-        val customerRequestedSave = customerRequestedSave(
-            showCheckbox = args.showCheckbox,
-            saveForFutureUse = saveForFutureUseCheckedFlow.value
-        )
+        val customerRequestedSave = createCustomerRequestedSave()
+        val allowRedisplay = createAllowRedisplay(customerRequestedSave)
 
         val paymentMethodCreateParams = when (resultIdentifier) {
             is ResultIdentifier.PaymentMethod -> {
                 PaymentMethodCreateParams.createInstantDebits(
                     requiresMandate = true,
                     productUsage = setOf("PaymentSheet"),
-                    allowRedisplay = args.formArgs.paymentMethodSaveConsentBehavior.allowRedisplay(
-                        isSetupIntent = args.formArgs.hasIntentToSetup,
-                        customerRequestedSave = customerRequestedSave,
-                    ),
+                    allowRedisplay = allowRedisplay,
                 )
             }
             is ResultIdentifier.Session -> {
@@ -689,10 +710,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                         linkAccountSessionId = resultIdentifier.id,
                     ),
                     billingDetails = billingDetails,
-                    allowRedisplay = args.formArgs.paymentMethodSaveConsentBehavior.allowRedisplay(
-                        isSetupIntent = args.formArgs.hasIntentToSetup,
-                        customerRequestedSave = customerRequestedSave,
-                    ),
+                    allowRedisplay = allowRedisplay,
                 )
             }
         }
@@ -743,6 +761,22 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             } else {
                 null
             }
+        )
+    }
+
+    private fun createCustomerRequestedSave() = customerRequestedSave(
+        showCheckbox = args.showCheckbox,
+        saveForFutureUse = saveForFutureUseCheckedFlow.value
+    )
+
+    private fun createAllowRedisplay(
+        customerRequestedSave: PaymentSelection.CustomerRequestedSave
+    ): PaymentMethod.AllowRedisplay {
+        val formArgs = args.formArgs
+
+        return formArgs.paymentMethodSaveConsentBehavior.allowRedisplay(
+            isSetupIntent = formArgs.hasIntentToSetup,
+            customerRequestedSave = customerRequestedSave,
         )
     }
 

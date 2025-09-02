@@ -488,6 +488,7 @@ class PaymentSheetEventTest {
                 "fc_sdk_availability" to "FULL",
                 "payment_method_options_setup_future_usage" to false,
                 "setup_future_usage" to null,
+                "open_card_scan_automatically" to false,
             )
         )
     }
@@ -654,6 +655,18 @@ class PaymentSheetEventTest {
         assertThat(event.params).containsEntry(
             "setup_future_usage",
             "off_session"
+        )
+    }
+
+    @Test
+    fun `LoadSucceeded with openCardScanAutomatically should return expected params`() {
+        val event = createLoadSucceededEvent(
+            openCardScanAutomatically = true
+        )
+
+        assertThat(event.params).containsEntry(
+            "open_card_scan_automatically",
+            true
         )
     }
 
@@ -1969,7 +1982,8 @@ class PaymentSheetEventTest {
         financialConnectionsAvailability: FinancialConnectionsAvailability = FinancialConnectionsAvailability.Full,
         linkDisplay: PaymentSheet.LinkConfiguration.Display = PaymentSheet.LinkConfiguration.Display.Automatic,
         paymentMethodOptionsSetupfutureUsage: Boolean = false,
-        setupFutureUsage: StripeIntent.Usage? = null
+        setupFutureUsage: StripeIntent.Usage? = null,
+        openCardScanAutomatically: Boolean = false,
     ): PaymentSheetEvent.LoadSucceeded {
         return PaymentSheetEvent.LoadSucceeded(
             isDeferred = isDeferred,
@@ -1986,7 +2000,8 @@ class PaymentSheetEventTest {
             linkDisplay = linkDisplay,
             financialConnectionsAvailability = financialConnectionsAvailability,
             paymentMethodOptionsSetupFutureUsage = paymentMethodOptionsSetupfutureUsage,
-            setupFutureUsage = setupFutureUsage
+            setupFutureUsage = setupFutureUsage,
+            openCardScanAutomatically = openCardScanAutomatically
         )
     }
 

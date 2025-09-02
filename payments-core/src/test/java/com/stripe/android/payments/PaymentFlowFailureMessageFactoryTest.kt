@@ -3,15 +3,12 @@ package com.stripe.android.payments
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
-import java.util.Locale
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -79,56 +76,5 @@ class PaymentFlowFailureMessageFactoryTest {
         ).isEqualTo(
             "Timed out authenticating your payment method -- try again"
         )
-    }
-
-    @Test
-    fun `Uses error message from backend if using suitable locale`() = withLocale(Locale.US) {
-        val intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-            lastPaymentError = PaymentIntent.Error(
-                code = "card_declined",
-                message = "this is a message that should be shown",
-                paymentMethod = mock(),
-                type = PaymentIntent.Error.Type.CardError,
-                charge = null,
-                declineCode = null,
-                docUrl = null,
-                param = null,
-            )
-        )
-
-        val result = factory.create(intent, StripeIntentResult.Outcome.FAILED)
-        assertThat(result).isEqualTo("this is a message that should be shown")
-    }
-
-    @Test
-    fun `Uses local error message if using locale that we can't properly handle`() = withLocale(
-        locale = Locale("es", "ar"),
-    ) {
-        val intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-            lastPaymentError = PaymentIntent.Error(
-                code = "card_declined",
-                message = "this is a message that shouldn't be shown",
-                paymentMethod = mock(),
-                type = PaymentIntent.Error.Type.CardError,
-                charge = null,
-                declineCode = null,
-                docUrl = null,
-                param = null,
-            )
-        )
-
-        val result = factory.create(intent, StripeIntentResult.Outcome.FAILED)
-        assertThat(result).isEqualTo("Your card was declined")
-    }
-}
-
-private fun withLocale(locale: Locale, block: () -> Unit) {
-    val original = Locale.getDefault()
-    Locale.setDefault(locale)
-
-    try {
-        block()
-    } finally {
-        Locale.setDefault(original)
     }
 }

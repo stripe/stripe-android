@@ -11,6 +11,7 @@ import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import com.stripe.android.core.R as CoreR
 
@@ -36,6 +37,7 @@ class AddressElement(
     override val allowsUserInteraction: Boolean = true
     override val mandateText: ResolvableString? = null
 
+    private val isValidating = MutableStateFlow(false)
     private val emailElement = EmailElement(
         initialValue = rawValuesMap[IdentifierSpec.Email]
     )
@@ -53,7 +55,7 @@ class AddressElement(
 
     private val addressAutoCompleteElement = AddressTextFieldElement(
         identifier = IdentifierSpec.OneLineAddress,
-        config = SimpleTextFieldConfig(label = resolvableString(R.string.stripe_address_label_address)),
+        label = resolvableString(R.string.stripe_address_label_address),
         onNavigation = (addressInputMode as? AddressInputMode.AutocompleteCondensed)?.onNavigation
     )
 
@@ -162,8 +164,9 @@ class AddressElement(
         countryElement.controller.rawFieldValue,
         otherFields,
         sameAsShippingUpdatedFlow,
-        fieldsUpdatedFlow
-    ) { country, otherFields, _, _ ->
+        fieldsUpdatedFlow,
+        isValidating,
+    ) { country, otherFields, _, _, isValidating ->
         val hideName = addressInputMode.nameConfig == AddressFieldConfiguration.HIDDEN
 
         val condensed = listOfNotNull(
@@ -200,7 +203,11 @@ class AddressElement(
             baseElements = baseElements,
             inputMode = addressInputMode,
             country = country
-        )
+        ).apply {
+            onEach {
+                it.onValidationStateChanged(isValidating)
+            }
+        }
     }
 
     private val controller = AddressController(fields)
@@ -237,6 +244,10 @@ class AddressElement(
 
     override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
         this.rawValuesMap = rawValuesMap
+    }
+
+    override fun onValidationStateChanged(isValidating: Boolean) {
+        this.isValidating.value = isValidating
     }
 
     /**

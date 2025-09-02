@@ -6,6 +6,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
@@ -65,6 +66,20 @@ internal class PaymentSheetScreenAddFirstPaymentMethodScreenshotTest {
     }
 
     @Test
+    fun displaysCardWithValidation() {
+        val metadata = PaymentMethodMetadataFactory.create()
+        val interactor = FakeAddPaymentMethodInteractor(initialState = createState(isValidating = true))
+        val initialScreen = AddFirstPaymentMethod(interactor)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = true)
+
+        paparazziRule.snapshot {
+            ViewModelStoreOwnerContext {
+                PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+            }
+        }
+    }
+
+    @Test
     fun displaysError() {
         val metadata = PaymentMethodMetadataFactory.create()
         val interactor = FakeAddPaymentMethodInteractor(initialState = createState())
@@ -96,6 +111,7 @@ internal class PaymentSheetScreenAddFirstPaymentMethodScreenshotTest {
             dividerTextResource = com.stripe.android.paymentsheet.R.string.stripe_paymentsheet_or_pay_with_card,
             onLinkPressed = {},
             onGooglePayPressed = {},
+            walletsAllowedInHeader = WalletType.entries,
         )
 
         customPrimaryButtonHeightPaparazziRule.snapshot {

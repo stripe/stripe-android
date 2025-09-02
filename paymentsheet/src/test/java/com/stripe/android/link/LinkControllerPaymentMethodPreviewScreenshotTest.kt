@@ -10,16 +10,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.stripe.android.model.CardBrand
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
-import com.stripe.android.uicore.image.StripeImageLoader
 import org.junit.Rule
 import org.junit.Test
 
@@ -31,12 +28,6 @@ class LinkControllerPaymentMethodPreviewScreenshotTest {
     fun testPreview() {
         paparazziRule.snapshot {
             val context = LocalContext.current
-            val iconLoader = remember(context) {
-                PaymentSelection.IconLoader(
-                    resources = context.resources,
-                    imageLoader = StripeImageLoader(context),
-                )
-            }
             val cases = listOf(
                 TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
                     .copy(brand = CardBrand.Visa),
@@ -56,7 +47,7 @@ class LinkControllerPaymentMethodPreviewScreenshotTest {
             MaterialTheme {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     cases.forEach { details ->
-                        PaymentMethodPreview(details.toPreview(context, iconLoader))
+                        PaymentMethodPreview(details.toPreview(context))
                     }
                 }
             }

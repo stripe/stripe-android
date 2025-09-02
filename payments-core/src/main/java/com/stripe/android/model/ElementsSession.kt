@@ -166,7 +166,7 @@ data class ElementsSession(
                 @Parcelize
                 data class Enabled(
                     val isPaymentMethodSaveEnabled: Boolean,
-                    val isPaymentMethodRemoveEnabled: Boolean,
+                    val paymentMethodRemove: PaymentMethodRemoveFeature,
                     val canRemoveLastPaymentMethod: Boolean,
                     val allowRedisplayOverride: PaymentMethod.AllowRedisplay?,
                     val isPaymentMethodSetAsDefaultEnabled: Boolean,
@@ -182,10 +182,17 @@ data class ElementsSession(
                 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 @Parcelize
                 data class Enabled(
-                    val isPaymentMethodRemoveEnabled: Boolean,
+                    val paymentMethodRemove: PaymentMethodRemoveFeature,
                     val canRemoveLastPaymentMethod: Boolean,
                     val isPaymentMethodSyncDefaultEnabled: Boolean,
                 ) : CustomerSheet
+            }
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            enum class PaymentMethodRemoveFeature {
+                Enabled,
+                Partial,
+                Disabled,
             }
         }
     }

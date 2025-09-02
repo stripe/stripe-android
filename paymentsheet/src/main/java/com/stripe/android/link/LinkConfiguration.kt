@@ -37,6 +37,7 @@ internal data class LinkConfiguration(
     val googlePlacesApiKey: String? = null,
     val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
     val allowUserEmailEdits: Boolean,
+    val allowLogOut: Boolean,
     val enableDisplayableDefaultValuesInEce: Boolean,
     val skipWalletInFlowController: Boolean,
     val linkAppearance: LinkAppearance?,

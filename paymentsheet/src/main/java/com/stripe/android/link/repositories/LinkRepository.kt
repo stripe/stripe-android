@@ -70,6 +70,7 @@ internal interface LinkRepository {
         email: String,
         phone: String?,
         country: String?,
+        countryInferringMethod: String,
         name: String?,
         consentAction: ConsumerSignUpConsentAction
     ): Result<ConsumerSessionSignup>
@@ -79,6 +80,7 @@ internal interface LinkRepository {
         email: String,
         phoneNumber: String,
         country: String,
+        countryInferringMethod: String,
         consentAction: ConsumerSignUpConsentAction,
         amount: Long?,
         currency: String?,
@@ -117,6 +119,7 @@ internal interface LinkRepository {
         billingPhone: String?,
         cvc: String?,
         allowRedisplay: String?,
+        apiKey: String?
     ): Result<SharePaymentDetails>
 
     suspend fun createPaymentMethod(
@@ -150,7 +153,7 @@ internal interface LinkRepository {
     /**
      * Update consent status for the signed in consumer.
      */
-    suspend fun consentUpdate(
+    suspend fun postConsentUpdate(
         consumerSessionClientSecret: String,
         consentGranted: Boolean,
         consumerPublishableKey: String?
@@ -197,4 +200,13 @@ internal interface LinkRepository {
         linkMode: LinkMode?,
         consumerPublishableKey: String?
     ): Result<LinkAccountSession>
+
+    /**
+     * Update the phone number for the signed in consumer.
+     */
+    suspend fun updatePhoneNumber(
+        consumerSessionClientSecret: String,
+        phoneNumber: String,
+        consumerPublishableKey: String?
+    ): Result<ConsumerSession>
 }

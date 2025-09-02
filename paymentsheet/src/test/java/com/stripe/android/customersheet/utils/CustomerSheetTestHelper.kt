@@ -7,6 +7,7 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.Logger
 import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
@@ -30,6 +31,7 @@ import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.createTestConfirmationHandlerFactory
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -61,7 +63,7 @@ internal object CustomerSheetTestHelper {
         isGooglePayAvailable: Boolean = true,
         customerPaymentMethods: List<PaymentMethod> = listOf(CARD_PAYMENT_METHOD),
         customerPermissions: CustomerPermissions = CustomerPermissions(
-            canRemovePaymentMethods = true,
+            removePaymentMethod = PaymentMethodRemovePermission.Full,
             canRemoveLastPaymentMethod = true,
             canUpdateFullPaymentMethodDetails = true,
         ),
@@ -78,7 +80,7 @@ internal object CustomerSheetTestHelper {
         ),
         configuration: CustomerSheet.Configuration = CustomerSheet.Configuration(
             merchantDisplayName = "Example",
-            googlePayEnabled = isGooglePayAvailable
+            googlePayEnabled = isGooglePayAvailable,
         ),
         eventReporter: CustomerSheetEventReporter = mock(),
         intentConfirmationInterceptor: IntentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
@@ -98,7 +100,9 @@ internal object CustomerSheetTestHelper {
             permissions = customerPermissions,
         ),
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        confirmationHandlerFactory: ConfirmationHandler.Factory? = null,
     ): CustomerSheetViewModel {
+        val savedStateHandle = SavedStateHandle()
         return CustomerSheetViewModel(
             application = application,
             workContext = workContext,
@@ -113,7 +117,7 @@ internal object CustomerSheetTestHelper {
             isLiveModeProvider = { isLiveMode },
             logger = Logger.noop(),
             productUsage = emptySet(),
-            confirmationHandlerFactory = createTestConfirmationHandlerFactory(
+            confirmationHandlerFactory = confirmationHandlerFactory ?: createTestConfirmationHandlerFactory(
                 paymentElementCallbackIdentifier = "CustomerSheetTestIdentifier",
                 intentConfirmationInterceptor = intentConfirmationInterceptor,
                 paymentConfiguration = paymentConfiguration,
@@ -142,7 +146,7 @@ internal object CustomerSheetTestHelper {
                     ): GooglePayPaymentMethodLauncher = mock()
                 },
                 statusBarColor = null,
-                savedStateHandle = SavedStateHandle(),
+                savedStateHandle = savedStateHandle,
                 errorReporter = FakeErrorReporter(),
                 linkLauncher = RecordingLinkPaymentLauncher.noOp(),
                 linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
@@ -151,6 +155,7 @@ internal object CustomerSheetTestHelper {
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,
             errorReporter = errorReporter,
+            savedStateHandle = savedStateHandle,
         ).apply {
             registerFromActivity(DummyActivityResultCaller.noOp(), TestLifecycleOwner())
         }

@@ -16,6 +16,7 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 internal data class WalletUiState(
     val paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails>,
     val email: String,
+    val allowLogOut: Boolean,
     val cardBrandFilter: CardBrandFilter,
     val selectedItemId: String?,
     val isProcessing: Boolean,

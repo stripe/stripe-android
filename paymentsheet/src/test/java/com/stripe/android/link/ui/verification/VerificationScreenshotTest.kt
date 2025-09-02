@@ -2,6 +2,7 @@ package com.stripe.android.link.ui.verification
 
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.LinkScreenshotSurface
+import com.stripe.android.model.ConsentUi
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.uicore.elements.OTPElement
@@ -27,6 +28,30 @@ internal class VerificationScreenshotTest(
                     otpElement = testCase.content.otpElement,
                     onBack = {},
                     onResendCodeClick = {},
+                    onConsentShown = {},
+                    onChangeEmailClick = {},
+                    didShowCodeSentNotification = {},
+                    onFocusRequested = {},
+                )
+            }
+        }
+    }
+
+    @Test
+    fun testContentWithConsent() {
+        paparazziRule.snapshot {
+            LinkScreenshotSurface {
+                val state = testCase.content.state.copy(
+                    consentSection = ConsentUi.ConsentSection(
+                        "By continuing, you’ll be remembered next time on <a href=''>Powdur</a>"
+                    )
+                )
+                VerificationBody(
+                    state = state,
+                    otpElement = testCase.content.otpElement,
+                    onBack = {},
+                    onResendCodeClick = {},
+                    onConsentShown = {},
                     onChangeEmailClick = {},
                     didShowCodeSentNotification = {},
                     onFocusRequested = {},

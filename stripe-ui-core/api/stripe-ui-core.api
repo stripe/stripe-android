@@ -133,6 +133,7 @@ public final class com/stripe/android/uicore/elements/IdentifierSpec$Companion {
 	public final fun getName ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getOneLineAddress ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getPhone ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
+	public final fun getPhoneNumberCountry ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getPostalCode ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getPreferredCardBrand ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getSameAsShipping ()Lcom/stripe/android/uicore/elements/IdentifierSpec;

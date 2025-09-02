@@ -12,8 +12,11 @@ import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.injection.NativeLinkComponent
+import com.stripe.android.link.ui.oauth.OAuthConsentViewModelComponent
 import com.stripe.android.link.ui.wallet.AddPaymentMethodOptions
 import com.stripe.android.link.utils.TestNavigationManager
+import com.stripe.android.model.PassiveCaptchaParams
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.addresselement.AutocompleteLauncher
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteLauncher
@@ -46,4 +49,6 @@ internal class FakeNativeLinkComponent(
     override val linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full,
     override val autocompleteLauncher: AutocompleteLauncher = TestAutocompleteLauncher.noOp(),
     override val addPaymentMethodOptionsFactory: AddPaymentMethodOptions.Factory = mock(),
+    override val oAuthConsentViewModelComponentFactory: OAuthConsentViewModelComponent.Factory = mock(),
+    override val passiveCaptchaParams: PassiveCaptchaParams? = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
 ) : NativeLinkComponent

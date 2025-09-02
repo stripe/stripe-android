@@ -17,6 +17,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.AffirmDefinit
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.PassiveCaptchaParams
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -1152,6 +1154,8 @@ internal class PaymentMethodMetadataTest {
             shopPayConfiguration = null,
             termsDisplay = emptyMap(),
             forceSetupFutureUseBehaviorAndNewMandate = false,
+            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+            openCardScanAutomatically = false,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1228,6 +1232,8 @@ internal class PaymentMethodMetadataTest {
             shopPayConfiguration = null,
             termsDisplay = emptyMap(),
             forceSetupFutureUseBehaviorAndNewMandate = false,
+            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+            openCardScanAutomatically = false,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -1237,7 +1243,7 @@ internal class PaymentMethodMetadataTest {
         val metadata = createPaymentMethodMetadataForPaymentSheet(
             mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                 isPaymentMethodSaveEnabled = true,
-                isPaymentMethodRemoveEnabled = true,
+                paymentMethodRemove = ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
                 canRemoveLastPaymentMethod = true,
                 allowRedisplayOverride = null,
                 isPaymentMethodSetAsDefaultEnabled = false,
@@ -1252,7 +1258,7 @@ internal class PaymentMethodMetadataTest {
         val metadata = createPaymentMethodMetadataForPaymentSheet(
             mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                 isPaymentMethodSaveEnabled = false,
-                isPaymentMethodRemoveEnabled = true,
+                paymentMethodRemove = ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
                 canRemoveLastPaymentMethod = true,
                 allowRedisplayOverride = null,
                 isPaymentMethodSetAsDefaultEnabled = false,
@@ -1309,7 +1315,8 @@ internal class PaymentMethodMetadataTest {
         ),
         orderedPaymentMethodTypesAndWallets: List<String> = intent.paymentMethodTypes,
         customPaymentMethods: List<ElementsSession.CustomPaymentMethod> = emptyList(),
-        mobilePaymentElementComponent: ElementsSession.Customer.Components.MobilePaymentElement? = null
+        mobilePaymentElementComponent: ElementsSession.Customer.Components.MobilePaymentElement? = null,
+        passiveCaptchaParams: PassiveCaptchaParams? = PassiveCaptchaParamsFactory.passiveCaptchaParams()
     ): ElementsSession {
         return ElementsSession(
             stripeIntent = intent,
@@ -1338,11 +1345,13 @@ internal class PaymentMethodMetadataTest {
             externalPaymentMethodData = null,
             paymentMethodSpecs = null,
             elementsSessionId = "session_1234",
-            flags = emptyMap(),
+            flags = mapOf(
+                ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA to true
+            ),
             orderedPaymentMethodTypesAndWallets = orderedPaymentMethodTypesAndWallets,
             experimentsData = null,
-            passiveCaptcha = null,
-            merchantLogoUrl = null
+            merchantLogoUrl = null,
+            passiveCaptcha = passiveCaptchaParams
         )
     }
 
@@ -1706,7 +1715,8 @@ internal class PaymentMethodMetadataTest {
 
         val metadata = PaymentMethodMetadata.createForNativeLink(
             configuration = linkConfiguration,
-            linkAccount = linkAccount()
+            linkAccount = linkAccount(),
+            passiveCaptchaParams = null
         )
 
         assertThat(metadata.cbcEligibility).isEqualTo(
@@ -1727,7 +1737,8 @@ internal class PaymentMethodMetadataTest {
 
         val metadata = PaymentMethodMetadata.createForNativeLink(
             configuration = linkConfiguration,
-            linkAccount = linkAccount()
+            linkAccount = linkAccount(),
+            passiveCaptchaParams = null
         )
 
         assertThat(metadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
@@ -2047,10 +2058,26 @@ internal class PaymentMethodMetadataTest {
 
         val metadata = PaymentMethodMetadata.createForNativeLink(
             configuration = linkConfiguration,
-            linkAccount = linkAccount()
+            linkAccount = linkAccount(),
+            passiveCaptchaParams = null
         )
 
         assertThat(metadata.cardBrandFilter).isEqualTo(linkConfiguration.cardBrandFilter)
+    }
+
+    fun `Passes passiveCaptchaParams along to Link`() {
+        val linkConfiguration = LinkTestUtils.createLinkConfiguration(
+            cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all())
+        )
+
+        val metadata = PaymentMethodMetadata.createForNativeLink(
+            configuration = linkConfiguration,
+            linkAccount = linkAccount(),
+            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+        )
+
+        assertThat(metadata.passiveCaptchaParams)
+            .isEqualTo(PassiveCaptchaParamsFactory.passiveCaptchaParams())
     }
 
     private fun createLinkConfiguration(): LinkConfiguration {
@@ -2086,6 +2113,7 @@ internal class PaymentMethodMetadataTest {
             defaultBillingDetails = null,
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             allowUserEmailEdits = true,
+            allowLogOut = true,
             enableDisplayableDefaultValuesInEce = false,
             skipWalletInFlowController = false,
             linkAppearance = null,

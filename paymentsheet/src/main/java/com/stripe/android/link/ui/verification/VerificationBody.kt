@@ -36,7 +36,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
@@ -46,6 +46,7 @@ import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkSpinner
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
+import com.stripe.android.model.ConsentUi
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.SectionStyle
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -53,12 +54,14 @@ import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.elements.OTPElementColors
 import com.stripe.android.uicore.elements.OTPElementUI
+import com.stripe.android.uicore.text.Html
 import kotlinx.coroutines.delay
 
 /**
  * Common verification body content used in [VerificationScreen] and [VerificationDialog].
  */
 @Composable
+@Suppress("LongMethod")
 internal fun VerificationBody(
     state: VerificationViewState,
     otpElement: OTPElement,
@@ -67,6 +70,7 @@ internal fun VerificationBody(
     didShowCodeSentNotification: () -> Unit,
     onChangeEmailClick: () -> Unit,
     onResendCodeClick: () -> Unit,
+    onConsentShown: () -> Unit,
 ) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
@@ -142,12 +146,19 @@ internal fun VerificationBody(
             )
         }
 
-        Spacer(modifier = Modifier.size(36.dp))
+        Spacer(modifier = Modifier.size(24.dp))
         ResendCodeButton(
             isProcessing = state.isProcessing,
             isSendingNewCode = state.isSendingNewCode,
             onClick = onResendCodeClick,
         )
+
+        state.consentSection?.let { consentSection ->
+            ConsentSection(consentSection)
+            LaunchedEffect(consentSection) {
+                onConsentShown()
+            }
+        }
 
         if (state.allowLogout) {
             Spacer(modifier = Modifier.size(24.dp))
@@ -353,7 +364,19 @@ internal fun ResendCodeButton(
     }
 }
 
-@Preview
+@Composable
+private fun ConsentSection(
+    consentSection: ConsentUi.ConsentSection,
+) {
+    Html(
+        modifier = Modifier.padding(top = 8.dp),
+        html = consentSection.disclaimer,
+        style = LinkTheme.typography.caption.copy(textAlign = TextAlign.Center),
+        color = LinkTheme.colors.textTertiary,
+    )
+}
+
+@PreviewLightDark
 @Composable
 private fun Preview() {
     DefaultLinkTheme {
@@ -374,7 +397,10 @@ private fun Preview() {
                         email = "email@email.com",
                         defaultPayment = null,
                         isDialog = true,
-                        allowLogout = true,
+                        allowLogout = false,
+                        consentSection = ConsentUi.ConsentSection(
+                            disclaimer = "By continuing you’ll share your name, email, and phone with [Merchant]"
+                        )
                     ),
                     otpElement = OTPElement(
                         identifier = IdentifierSpec.Generic("otp"),
@@ -385,6 +411,7 @@ private fun Preview() {
                     didShowCodeSentNotification = {},
                     onChangeEmailClick = {},
                     onResendCodeClick = {},
+                    onConsentShown = {}
                 )
             }
         }

@@ -391,6 +391,7 @@ private fun PaymentMethodSection(
         expanded = isExpanded,
         selectedItem = state.selectedItem,
         emailLabel = emailLabel,
+        showAccountMenu = state.allowLogOut,
         labelMaxWidth = labelMaxWidthDp,
         onAccountMenuClicked = {
             showBottomSheetContent {
@@ -467,6 +468,7 @@ private fun computeMaxLabelWidth(vararg labels: String): Dp {
 private fun PaymentMethodPicker(
     email: String,
     emailLabel: String,
+    showAccountMenu: Boolean,
     labelMaxWidth: Dp,
     expanded: Boolean,
     selectedItem: ConsumerPaymentDetails.PaymentDetails?,
@@ -488,6 +490,7 @@ private fun PaymentMethodPicker(
             email = email,
             label = emailLabel,
             labelMaxWidth = labelMaxWidth,
+            showMenu = showAccountMenu,
             onMenuClicked = onAccountMenuClicked,
         )
 
@@ -565,6 +568,7 @@ private fun EmailDetails(
     email: String,
     label: String,
     labelMaxWidth: Dp,
+    showMenu: Boolean,
     onMenuClicked: () -> Unit,
 ) {
     Row(
@@ -595,15 +599,17 @@ private fun EmailDetails(
             modifier = Modifier.weight(1f),
         )
 
-        Icon(
-            imageVector = Icons.Default.MoreVert,
-            contentDescription = stringResource(R.string.stripe_show_menu),
-            tint = LinkTheme.colors.iconSecondary,
-            modifier = Modifier
-                .clip(CircleShape)
-                .clickable(onClick = onMenuClicked)
-                .padding(4.dp),
-        )
+        if (showMenu) {
+            Icon(
+                imageVector = Icons.Default.MoreVert,
+                contentDescription = stringResource(R.string.stripe_show_menu),
+                tint = LinkTheme.colors.iconSecondary,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .clickable(onClick = onMenuClicked)
+                    .padding(4.dp),
+            )
+        }
     }
 }
 

@@ -82,7 +82,7 @@ class CustomerStateTest {
                 ),
                 mobilePaymentElementComponent = createEnabledMobilePaymentElement(
                     isPaymentMethodSaveEnabled = false,
-                    isPaymentMethodRemoveEnabled = false,
+                    paymentMethodRemove = ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled,
                     canRemoveLastPaymentMethod = false,
                     allowRedisplayOverride = null,
                 ),
@@ -99,14 +99,15 @@ class CustomerStateTest {
 
     private fun createEnabledMobilePaymentElement(
         isPaymentMethodSaveEnabled: Boolean = true,
-        isPaymentMethodRemoveEnabled: Boolean = false,
+        paymentMethodRemove: ElementsSession.Customer.Components.PaymentMethodRemoveFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled,
         canRemoveLastPaymentMethod: Boolean = false,
         allowRedisplayOverride: PaymentMethod.AllowRedisplay? = null,
         isPaymentMethodSetAsDefaultEnabled: Boolean = false,
     ): ElementsSession.Customer.Components.MobilePaymentElement {
         return ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
             isPaymentMethodSaveEnabled = isPaymentMethodSaveEnabled,
-            isPaymentMethodRemoveEnabled = isPaymentMethodRemoveEnabled,
+            paymentMethodRemove = paymentMethodRemove,
             canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
             allowRedisplayOverride = allowRedisplayOverride,
             isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,

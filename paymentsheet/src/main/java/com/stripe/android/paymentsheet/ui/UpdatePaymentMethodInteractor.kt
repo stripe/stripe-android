@@ -29,6 +29,7 @@ internal interface UpdatePaymentMethodInteractor {
     val topBarState: PaymentSheetTopBarState
     val canRemove: Boolean
     val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod
+    val removeMessage: ResolvableString?
     val screenTitle: ResolvableString?
     val cardBrandFilter: CardBrandFilter
     val isExpiredCard: Boolean
@@ -62,6 +63,7 @@ internal interface UpdatePaymentMethodInteractor {
     sealed class ViewAction {
         data object RemovePaymentMethod : ViewAction()
         data object SaveButtonPressed : ViewAction()
+        data object DisabledSaveButtonPressed : ViewAction()
         data class SetAsDefaultCheckboxChanged(val isChecked: Boolean) : ViewAction()
         data class CardUpdateParamsChanged(val cardUpdateParams: CardUpdateParams?) : ViewAction()
     }
@@ -109,6 +111,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     override val addressCollectionMode: AddressCollectionMode,
     override val allowedBillingCountries: Set<String>,
     override val canUpdateFullPaymentMethodDetails: Boolean,
+    override val removeMessage: ResolvableString?,
     val isDefaultPaymentMethod: Boolean,
     override val shouldShowSetAsDefaultCheckbox: Boolean,
     private val removeExecutor: PaymentMethodRemoveOperation,
@@ -253,6 +256,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
         when (viewAction) {
             UpdatePaymentMethodInteractor.ViewAction.RemovePaymentMethod -> removePaymentMethod()
             UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed -> savePaymentMethod()
+            UpdatePaymentMethodInteractor.ViewAction.DisabledSaveButtonPressed -> validate()
             is UpdatePaymentMethodInteractor.ViewAction.SetAsDefaultCheckboxChanged -> onSetAsDefaultCheckboxChanged(
                 isChecked = viewAction.isChecked
             )
@@ -295,6 +299,10 @@ internal class DefaultUpdatePaymentMethodInteractor(
 
             status.emit(UpdatePaymentMethodInteractor.Status.Idle)
         }
+    }
+
+    private fun validate() {
+        editCardDetailsInteractor.handleViewAction(EditCardDetailsInteractor.ViewAction.Validate)
     }
 
     private suspend fun maybeUpdateCard(): Result<PaymentMethod>? {

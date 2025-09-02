@@ -4,6 +4,7 @@ import android.os.SystemClock
 import androidx.annotation.RestrictTo
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.DurationUnit
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface DurationProvider {
@@ -16,7 +17,8 @@ interface DurationProvider {
         Checkout,
         LinkSignup,
         ConfirmButtonClicked,
-        CardScan
+        CardScan,
+        Captcha
     }
 }
 
@@ -42,4 +44,11 @@ class DefaultDurationProvider private constructor() : DurationProvider {
     companion object {
         val instance = DefaultDurationProvider()
     }
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun Duration?.mapOfDurationInSeconds(): Map<String, Float> {
+    return this?.let {
+        mapOf("duration" to it.toDouble(DurationUnit.SECONDS).toFloat())
+    } ?: emptyMap()
 }

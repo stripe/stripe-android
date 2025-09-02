@@ -33,7 +33,7 @@ internal open class FakeLinkAccountManager(
 ) : LinkAccountManager {
     override val linkAccountInfo: StateFlow<LinkAccountUpdate.Value> = linkAccountHolder.linkAccountInfo
 
-    private val _accountStatus = MutableStateFlow(AccountStatus.SignedOut)
+    private val _accountStatus = MutableStateFlow<AccountStatus>(AccountStatus.SignedOut)
     override val accountStatus: Flow<AccountStatus> = accountStatusOverride ?: _accountStatus
 
     private val _consumerState =
@@ -48,9 +48,11 @@ internal open class FakeLinkAccountManager(
 
     var lookupConsumerResult: Result<LinkAccount?> = Result.success(null)
     var mobileLookupConsumerResult: Result<LinkAccount?> = Result.success(TestFactory.LINK_ACCOUNT)
+    var lookupConsumerByAuthIntentResult: Result<LinkAccount?> = Result.success(TestFactory.LINK_ACCOUNT)
+    var mobileLookupConsumerByAuthIntentResult: Result<LinkAccount?> = Result.success(TestFactory.LINK_ACCOUNT)
     var startVerificationResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
     var confirmVerificationResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
-    var consentUpdateResult: Result<Unit> = Result.success(Unit)
+    var postConsentUpdateResult: Result<Unit> = Result.success(Unit)
     var signUpResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
     var mobileSignUpResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
     var signInWithUserInputResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
@@ -72,6 +74,7 @@ internal open class FakeLinkAccountManager(
     )
     var sharePaymentDetails: Result<SharePaymentDetails> = Result.success(TestFactory.LINK_SHARE_PAYMENT_DETAILS)
     var updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
+    var updatePhoneNumberResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
     var deletePaymentDetailsResult: Result<Unit> = Result.success(Unit)
     var listPaymentDetailsResult: Result<ConsumerPaymentDetails> = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
         set(value) {
@@ -88,6 +91,8 @@ internal open class FakeLinkAccountManager(
 
     private val lookupTurbine = Turbine<LookupCall>()
     private val mobileLookupTurbine = Turbine<MobileLookupCall>()
+    private val lookupByAuthIntentTurbine = Turbine<LookupCallByAuthIntent>()
+    private val mobileLookupByAuthIntentTurbine = Turbine<MobileLookupCallByAuthIntent>()
 
     private val signupTurbine = Turbine<SignUpCall>()
     private val mobileSignUpTurbine = Turbine<MobileSignUpCall>()
@@ -114,14 +119,13 @@ internal open class FakeLinkAccountManager(
 
     override suspend fun lookupConsumer(
         email: String?,
-        linkAuthIntentId: String?,
         startSession: Boolean,
         customerId: String?
     ): Result<LinkAccount?> {
         lookupTurbine.add(
             item = LookupCall(
                 email = email,
-                linkAuthIntentId = linkAuthIntentId,
+                linkAuthIntentId = null,
                 startSession = startSession
             )
         )
@@ -131,7 +135,6 @@ internal open class FakeLinkAccountManager(
     override suspend fun mobileLookupConsumer(
         email: String?,
         emailSource: EmailSource?,
-        linkAuthIntentId: String?,
         verificationToken: String,
         appId: String,
         startSession: Boolean,
@@ -141,7 +144,6 @@ internal open class FakeLinkAccountManager(
             item = MobileLookupCall(
                 email = email,
                 emailSource = emailSource,
-                linkAuthIntentId = linkAuthIntentId,
                 verificationToken = verificationToken,
                 appId = appId,
                 startSession = startSession
@@ -150,10 +152,39 @@ internal open class FakeLinkAccountManager(
         return mobileLookupConsumerResult
     }
 
+    override suspend fun lookupConsumerByAuthIntent(
+        linkAuthIntentId: String?,
+        customerId: String?
+    ): Result<LinkAccount?> {
+        lookupByAuthIntentTurbine.add(
+            item = LookupCallByAuthIntent(
+                linkAuthIntentId = linkAuthIntentId
+            )
+        )
+        return lookupConsumerByAuthIntentResult
+    }
+
+    override suspend fun mobileLookupConsumerByAuthIntent(
+        linkAuthIntentId: String?,
+        verificationToken: String,
+        appId: String,
+        customerId: String?
+    ): Result<LinkAccount?> {
+        mobileLookupByAuthIntentTurbine.add(
+            item = MobileLookupCallByAuthIntent(
+                linkAuthIntentId = linkAuthIntentId,
+                verificationToken = verificationToken,
+                appId = appId
+            )
+        )
+        return mobileLookupConsumerByAuthIntentResult
+    }
+
     override suspend fun signUp(
         email: String,
         phone: String?,
         country: String?,
+        countryInferringMethod: String,
         name: String?,
         consentAction: SignUpConsentAction
     ): Result<LinkAccount> {
@@ -173,6 +204,7 @@ internal open class FakeLinkAccountManager(
         email: String,
         phone: String,
         country: String,
+        countryInferringMethod: String,
         name: String?,
         verificationToken: String,
         appId: String,
@@ -223,9 +255,10 @@ internal open class FakeLinkAccountManager(
     override suspend fun sharePaymentDetails(
         paymentDetailsId: String,
         expectedPaymentMethodType: String,
-        cvc: String?,
         billingPhone: String?,
+        cvc: String?,
         allowRedisplay: String?,
+        apiKey: String?
     ): Result<SharePaymentDetails> {
         return sharePaymentDetails
     }
@@ -251,8 +284,8 @@ internal open class FakeLinkAccountManager(
         return confirmVerificationResult
     }
 
-    override suspend fun consentUpdate(consentGranted: Boolean): Result<Unit> {
-        return consentUpdateResult
+    override suspend fun postConsentUpdate(consentGranted: Boolean): Result<Unit> {
+        return postConsentUpdateResult
     }
 
     override suspend fun listPaymentDetails(paymentMethodTypes: Set<String>): Result<ConsumerPaymentDetails> {
@@ -275,6 +308,10 @@ internal open class FakeLinkAccountManager(
         return updatePaymentDetailsResult
     }
 
+    override suspend fun updatePhoneNumber(phoneNumber: String): Result<LinkAccount> {
+        return updatePhoneNumberResult
+    }
+
     suspend fun awaitMobileSignUpCall(): MobileSignUpCall {
         return mobileSignUpTurbine.awaitItem()
     }
@@ -295,6 +332,14 @@ internal open class FakeLinkAccountManager(
         return lookupTurbine.awaitItem()
     }
 
+    suspend fun awaitLookupByAuthIntentCall(): LookupCallByAuthIntent {
+        return lookupByAuthIntentTurbine.awaitItem()
+    }
+
+    suspend fun awaitMobileLookupByAuthIntentCall(): MobileLookupCallByAuthIntent {
+        return mobileLookupByAuthIntentTurbine.awaitItem()
+    }
+
     suspend fun awaitStartVerificationCall() {
         return startVerificationTurbine.awaitItem()
     }
@@ -310,6 +355,8 @@ internal open class FakeLinkAccountManager(
     fun ensureAllEventsConsumed() {
         lookupTurbine.ensureAllEventsConsumed()
         mobileLookupTurbine.ensureAllEventsConsumed()
+        lookupByAuthIntentTurbine.ensureAllEventsConsumed()
+        mobileLookupByAuthIntentTurbine.ensureAllEventsConsumed()
         signupTurbine.ensureAllEventsConsumed()
         mobileSignUpTurbine.ensureAllEventsConsumed()
     }
@@ -332,10 +379,19 @@ internal open class FakeLinkAccountManager(
     data class MobileLookupCall(
         val email: String?,
         val emailSource: EmailSource?,
-        val linkAuthIntentId: String?,
         val verificationToken: String,
         val appId: String,
         val startSession: Boolean
+    )
+
+    data class LookupCallByAuthIntent(
+        val linkAuthIntentId: String?,
+    )
+
+    data class MobileLookupCallByAuthIntent(
+        val linkAuthIntentId: String?,
+        val verificationToken: String,
+        val appId: String,
     )
 
     data class SignUpCall(

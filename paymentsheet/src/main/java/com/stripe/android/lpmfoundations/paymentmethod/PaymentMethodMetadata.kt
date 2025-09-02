@@ -17,6 +17,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -73,6 +74,8 @@ internal data class PaymentMethodMetadata(
     val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
     val termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay>,
     val forceSetupFutureUseBehaviorAndNewMandate: Boolean,
+    val passiveCaptchaParams: PassiveCaptchaParams?,
+    val openCardScanAutomatically: Boolean,
 ) : Parcelable {
 
     fun hasIntentToSetup(code: PaymentMethodCode): Boolean {
@@ -349,6 +352,8 @@ internal data class PaymentMethodMetadata(
                 termsDisplay = configuration.termsDisplay,
                 forceSetupFutureUseBehaviorAndNewMandate = elementsSession
                     .flags[ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT] == true,
+                passiveCaptchaParams = elementsSession.passiveCaptchaParams,
+                openCardScanAutomatically = configuration.opensCardScannerAutomatically,
             )
         }
 
@@ -398,12 +403,15 @@ internal data class PaymentMethodMetadata(
                 termsDisplay = emptyMap(),
                 forceSetupFutureUseBehaviorAndNewMandate = elementsSession
                     .flags[ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT] == true,
+                passiveCaptchaParams = elementsSession.passiveCaptchaParams,
+                openCardScanAutomatically = configuration.opensCardScannerAutomatically,
             )
         }
 
         internal fun createForNativeLink(
             configuration: LinkConfiguration,
             linkAccount: LinkAccount,
+            passiveCaptchaParams: PassiveCaptchaParams?
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
                 stripeIntent = configuration.stripeIntent,
@@ -450,7 +458,9 @@ internal data class PaymentMethodMetadata(
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),
                 shopPayConfiguration = null,
                 termsDisplay = emptyMap(),
-                forceSetupFutureUseBehaviorAndNewMandate = configuration.forceSetupFutureUseBehaviorAndNewMandate
+                forceSetupFutureUseBehaviorAndNewMandate = configuration.forceSetupFutureUseBehaviorAndNewMandate,
+                passiveCaptchaParams = passiveCaptchaParams,
+                openCardScanAutomatically = false,
             )
         }
     }

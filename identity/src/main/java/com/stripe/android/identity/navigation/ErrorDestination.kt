@@ -6,6 +6,7 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.stripe.android.identity.R
 import com.stripe.android.identity.networking.models.Requirement
+import com.stripe.android.core.R as stripeCoreR
 
 internal class ErrorDestination(
     errorTitle: String,
@@ -119,7 +120,7 @@ internal class ErrorDestination(
 internal fun Context.finalErrorDestination(): ErrorDestination =
     ErrorDestination(
         errorTitle = getString(R.string.stripe_error),
-        errorContent = getString(R.string.stripe_unexpected_error_try_again),
+        errorContent = getString(stripeCoreR.string.stripe_unexpected_error_try_again),
         backButtonText = getString(R.string.stripe_go_back),
         shouldFail = true
     )

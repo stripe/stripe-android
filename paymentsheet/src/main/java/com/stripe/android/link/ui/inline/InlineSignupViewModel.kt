@@ -43,11 +43,13 @@ internal class InlineSignupViewModel(
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger,
     private val lookupDelay: Long = LOOKUP_DEBOUNCE_MS,
+    private val previousLinkSignupCheckboxSelection: Boolean?
 ) : ViewModel() {
     @AssistedInject
     constructor(
         @Assisted initialUserInput: UserInput?,
         @Assisted signupMode: LinkSignupMode,
+        @Assisted previousLinkSignupCheckboxSelection: Boolean?,
         config: LinkConfiguration,
         linkAccountManager: LinkAccountManager,
         linkEventsReporter: LinkEventsReporter,
@@ -60,6 +62,7 @@ internal class InlineSignupViewModel(
         linkEventsReporter = linkEventsReporter,
         logger = logger,
         lookupDelay = LOOKUP_DEBOUNCE_MS,
+        previousLinkSignupCheckboxSelection = previousLinkSignupCheckboxSelection,
     )
 
     private val hasInitialUserInput = initialUserInput != null
@@ -75,10 +78,11 @@ internal class InlineSignupViewModel(
         initialEmail = initialEmail,
         initialPhone = initialPhone,
         isExpanded = if (config.linkSignUpOptInFeatureEnabled) {
-            config.linkSignUpOptInInitialValue
+            previousLinkSignupCheckboxSelection ?: config.linkSignUpOptInInitialValue
         } else {
             hasInitialUserInput
         },
+        userHasInteracted = previousLinkSignupCheckboxSelection != null
     )
     private val _viewState = MutableStateFlow(initialViewState)
     val viewState: StateFlow<InlineSignupViewState> = _viewState
@@ -139,7 +143,7 @@ internal class InlineSignupViewModel(
         get() = Name in initialViewState.fields
 
     private var hasExpanded = if (config.linkSignUpOptInFeatureEnabled) {
-        config.linkSignUpOptInInitialValue
+        previousLinkSignupCheckboxSelection ?: config.linkSignUpOptInInitialValue
     } else {
         hasInitialUserInput
     }
@@ -269,7 +273,6 @@ internal class InlineSignupViewModel(
         clearError()
         linkAccountManager.lookupConsumer(
             email = email,
-            linkAuthIntentId = null,
             startSession = false,
             customerId = null
         ).fold(
@@ -393,11 +396,16 @@ internal class InlineSignupViewModel(
     internal class Factory(
         private val signupMode: LinkSignupMode,
         private val initialUserInput: UserInput?,
+        private val previousLinkSignupCheckboxSelection: Boolean?,
         private val linkComponent: LinkComponent
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return linkComponent.inlineSignupViewModelFactory.create(signupMode, initialUserInput) as T
+            return linkComponent.inlineSignupViewModelFactory.create(
+                signupMode = signupMode,
+                initialUserInput = initialUserInput,
+                previousLinkSignupCheckboxSelection = previousLinkSignupCheckboxSelection
+            ) as T
         }
     }
 }

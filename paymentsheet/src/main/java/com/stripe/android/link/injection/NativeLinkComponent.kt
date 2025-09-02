@@ -19,7 +19,9 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
+import com.stripe.android.link.ui.oauth.OAuthConsentViewModelComponent
 import com.stripe.android.link.ui.wallet.AddPaymentMethodOptions
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
@@ -52,6 +54,7 @@ internal annotation class NativeLinkScope
 internal interface NativeLinkComponent {
     val linkAccountManager: LinkAccountManager
     val configuration: LinkConfiguration
+    val passiveCaptchaParams: PassiveCaptchaParams?
     val linkEventsReporter: LinkEventsReporter
     val errorReporter: ErrorReporter
     val logger: Logger
@@ -67,11 +70,15 @@ internal interface NativeLinkComponent {
     val linkLaunchMode: LinkLaunchMode
     val autocompleteLauncher: AutocompleteLauncher
     val addPaymentMethodOptionsFactory: AddPaymentMethodOptions.Factory
+    val oAuthConsentViewModelComponentFactory: OAuthConsentViewModelComponent.Factory
 
     @Component.Builder
     interface Builder {
         @BindsInstance
         fun configuration(configuration: LinkConfiguration): Builder
+
+        @BindsInstance
+        fun passiveCaptchaParams(passiveCaptchaParams: PassiveCaptchaParams?): Builder
 
         @BindsInstance
         fun publishableKeyProvider(@Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String): Builder

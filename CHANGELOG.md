@@ -2,6 +2,32 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.24.4 - 2025-08-29
+
+### CryptoOnramp
+[Added] Additional APIs and improvements to support the development of the React Native CryptoOnramp SDK.
+
+## 21.24.3 - 2025-08-27
+
+Bug fixes and improvements.
+
+## 21.24.2 - 2025-08-26
+
+Bug fixes and improvements.
+
+## 21.24.1 - 2025-08-25
+
+Bug fixes and improvements.
+
+## 21.24.0 - 2025-08-25
+
+### CardScan
+* [DEPRECATED][11419](https://github.com/stripe/stripe-android/pull/11419) Deprecated stripecardscan Module Public APIs.
+
+### PaymentSheet
+* [ADDED][11398](https://github.com/stripe/stripe-android/pull/11398) Added form validation when adding payment methods in PaymentSheet & Link
+* [ADDED][11437](https://github.com/stripe/stripe-android/pull/11437) Added form validation when updating payment methods in PaymentSheet & Link
+
 ## 21.23.1 - 2025-08-18
 
 ### PaymentSheet

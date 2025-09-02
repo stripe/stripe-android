@@ -27,4 +27,5 @@ interface SectionFieldElement {
     fun sectionFieldErrorController(): SectionFieldErrorController
     fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>)
     fun getTextFieldIdentifiers(): StateFlow<List<IdentifierSpec>>
+    fun onValidationStateChanged(isValidating: Boolean) {}
 }

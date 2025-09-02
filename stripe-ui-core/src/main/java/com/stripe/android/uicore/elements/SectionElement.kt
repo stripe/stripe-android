@@ -37,6 +37,12 @@ data class SectionElement(
             it.toList().flatten()
         }
 
+    override fun onValidationStateChanged(isValidating: Boolean) {
+        fields.forEach { field ->
+            field.onValidationStateChanged(isValidating)
+        }
+    }
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
 

@@ -94,6 +94,7 @@ internal object LinkTestUtils {
             defaultBillingDetails = null,
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             allowUserEmailEdits = true,
+            allowLogOut = true,
             enableDisplayableDefaultValuesInEce = false,
             linkAppearance = null,
             linkSignUpOptInFeatureEnabled = false,

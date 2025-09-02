@@ -107,7 +107,7 @@ apiValidation {
             "3ds2playground",
             "dokka-stripe",
             "stripe-test-e2e",
-            "stripe-crypto-onramp-example",
+            "crypto-onramp-example",
     ]
     nonPublicMarkers.add("androidx.annotation.RestrictTo")
     nonPublicMarkers.add("dagger.internal.DaggerGenerated")
@@ -128,6 +128,14 @@ subprojects {
                     because("LayoutLib and sdk-common depend on Guava's -jre published variant." +
                             "See https://github.com/cashapp/paparazzi/issues/906.")
                 }
+            }
+        }
+    }
+    // Auto-add kotlin-parcelize-runtime when parcelize plugin is applied
+    plugins.withId("org.jetbrains.kotlin.plugin.parcelize") {
+        afterEvaluate {
+            dependencies {
+                implementation libs.kotlin.parcelizeRuntimePlugin
             }
         }
     }

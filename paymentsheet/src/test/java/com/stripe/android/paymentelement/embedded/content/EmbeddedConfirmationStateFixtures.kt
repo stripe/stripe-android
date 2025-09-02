@@ -19,4 +19,19 @@ internal object EmbeddedConfirmationStateFixtures {
             .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
             .build()
     )
+
+    fun defaultStateWithOpenCardScanAutomatically(): EmbeddedConfirmationStateHolder.State =
+        EmbeddedConfirmationStateHolder.State(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            selection = null,
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(amount = 5000, currency = "USD"),
+                )
+            ),
+            configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+                .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
+                .opensCardScannerAutomatically(true)
+                .build()
+        )
 }

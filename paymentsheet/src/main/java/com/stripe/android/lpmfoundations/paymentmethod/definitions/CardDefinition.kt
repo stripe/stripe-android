@@ -95,7 +95,8 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                     collectName = billingDetailsCollectionConfiguration.collectsName,
                     cbcEligibility = arguments.cbcEligibility,
                     cardBrandFilter = arguments.cardBrandFilter,
-                    elementsSessionId = metadata.elementsSessionId
+                    elementsSessionId = metadata.elementsSessionId,
+                    automaticallyLaunchedCardScanFormDataHelper = arguments.automaticallyLaunchedCardScanFormDataHelper,
                 )
             )
 
@@ -126,6 +127,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                         linkConfigurationCoordinator = arguments.linkConfigurationCoordinator,
                         initialLinkUserInput = arguments.initialLinkUserInput,
                         onLinkInlineSignupStateChanged = arguments.onLinkInlineSignupStateChanged,
+                        previousLinkSignupCheckboxSelection = arguments.previousLinkSignupCheckboxSelection,
                     )
                 )
 

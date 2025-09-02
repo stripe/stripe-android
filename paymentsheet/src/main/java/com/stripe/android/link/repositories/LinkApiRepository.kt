@@ -132,6 +132,7 @@ internal class LinkApiRepository @Inject constructor(
         email: String,
         phone: String?,
         country: String?,
+        countryInferringMethod: String,
         name: String?,
         consentAction: ConsumerSignUpConsentAction
     ): Result<ConsumerSessionSignup> = withContext(workContext) {
@@ -140,6 +141,7 @@ internal class LinkApiRepository @Inject constructor(
                 email = email,
                 phoneNumber = phone,
                 country = country,
+                countryInferringMethod = countryInferringMethod,
                 name = name,
                 locale = locale,
                 amount = null,
@@ -157,6 +159,7 @@ internal class LinkApiRepository @Inject constructor(
         email: String,
         phoneNumber: String,
         country: String,
+        countryInferringMethod: String,
         consentAction: ConsumerSignUpConsentAction,
         amount: Long?,
         currency: String?,
@@ -169,6 +172,7 @@ internal class LinkApiRepository @Inject constructor(
                 email = email,
                 phoneNumber = phoneNumber,
                 country = country,
+                countryInferringMethod = countryInferringMethod,
                 name = name,
                 locale = locale,
                 amount = amount,
@@ -296,6 +300,7 @@ internal class LinkApiRepository @Inject constructor(
         billingPhone: String?,
         cvc: String?,
         allowRedisplay: String?,
+        apiKey: String?
     ): Result<SharePaymentDetails> = withContext(workContext) {
         val fraudParams = fraudDetectionDataRepository.getCached()?.params.orEmpty()
         val paymentMethodParams = mapOf("expand" to listOf("payment_method"))
@@ -310,7 +315,7 @@ internal class LinkApiRepository @Inject constructor(
             consumerSessionClientSecret = consumerSessionClientSecret,
             paymentDetailsId = paymentDetailsId,
             expectedPaymentMethodType = expectedPaymentMethodType,
-            requestOptions = buildRequestOptions(),
+            requestOptions = buildRequestOptions(apiKey),
             requestSurface = requestSurface.value,
             extraParams = paymentMethodParams + fraudParams + optionsParams + allowRedisplayParams,
             billingPhone = billingPhone,
@@ -396,12 +401,12 @@ internal class LinkApiRepository @Inject constructor(
         }
     }
 
-    override suspend fun consentUpdate(
+    override suspend fun postConsentUpdate(
         consumerSessionClientSecret: String,
         consentGranted: Boolean,
         consumerPublishableKey: String?
     ): Result<Unit> = withContext(workContext) {
-        consumersApiService.consentUpdate(
+        consumersApiService.postConsentUpdate(
             consumerSessionClientSecret = consumerSessionClientSecret,
             consentGranted = consentGranted,
             requestSurface = requestSurface.value,
@@ -495,12 +500,25 @@ internal class LinkApiRepository @Inject constructor(
         )
     }
 
+    override suspend fun updatePhoneNumber(
+        consumerSessionClientSecret: String,
+        phoneNumber: String,
+        consumerPublishableKey: String?
+    ): Result<ConsumerSession> = withContext(workContext) {
+        consumersApiService.updatePhoneNumber(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            phoneNumber = phoneNumber,
+            requestSurface = requestSurface.value,
+            requestOptions = buildRequestOptions(consumerPublishableKey),
+        )
+    }
+
     private fun buildRequestOptions(
-        consumerAccountPublishableKey: String? = null,
+        apiKey: String? = null,
     ): ApiRequest.Options {
         return ApiRequest.Options(
-            apiKey = consumerAccountPublishableKey ?: publishableKeyProvider(),
-            stripeAccount = stripeAccountIdProvider().takeUnless { consumerAccountPublishableKey != null },
+            apiKey = apiKey ?: publishableKeyProvider(),
+            stripeAccount = stripeAccountIdProvider().takeUnless { apiKey != null },
         )
     }
 

@@ -22,6 +22,7 @@ import com.stripe.android.model.EmailSource
 import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -59,6 +60,7 @@ internal object TestFactory {
     const val AMOUNT = 100L
     const val CURRENCY = "USD"
     const val COUNTRY = "US"
+    const val COUNTRY_INFERRING_METHOD = "PHONE_NUMBER"
 
     val VERIFIED_SESSION = ConsumerSession.VerificationSession(
         type = ConsumerSession.VerificationSession.SessionType.Sms,
@@ -227,6 +229,7 @@ internal object TestFactory {
         disableRuxInFlowController = false,
         collectMissingBillingDetailsForExistingPaymentMethods = true,
         allowUserEmailEdits = true,
+        allowLogOut = true,
         enableDisplayableDefaultValuesInEce = false,
         skipWalletInFlowController = false,
         linkAppearance = null,
@@ -275,6 +278,7 @@ internal object TestFactory {
         linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
         paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
         launchMode = LinkLaunchMode.Full,
+        passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
     )
 
     val FINANCIAL_CONNECTIONS_CHECKING_ACCOUNT = FinancialConnectionsAccount(

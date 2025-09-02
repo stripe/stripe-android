@@ -10,6 +10,7 @@ import com.stripe.android.link.analytics.LinkAnalyticsHelper
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
@@ -83,10 +84,10 @@ internal class LinkInlineSignupConfirmationDefinition(
         linkInlineSignupConfirmationOption: LinkInlineSignupConfirmationOption,
     ): PaymentMethodConfirmationOption {
         val configuration = linkInlineSignupConfirmationOption.linkConfiguration
-        val userInput = linkInlineSignupConfirmationOption.userInput
+        val userInput = linkInlineSignupConfirmationOption.sanitizedUserInput
 
         return when (linkConfigurationCoordinator.getAccountStatusFlow(configuration).first()) {
-            AccountStatus.Verified -> createOptionAfterAttachingToLink(linkInlineSignupConfirmationOption, userInput)
+            is AccountStatus.Verified -> createOptionAfterAttachingToLink(linkInlineSignupConfirmationOption, userInput)
             AccountStatus.VerificationStarted,
             AccountStatus.NeedsVerification -> {
                 linkAnalyticsHelper.onLinkPopupSkipped()
@@ -122,6 +123,7 @@ internal class LinkInlineSignupConfirmationDefinition(
         val saveOption = linkInlineSignupConfirmationOption.saveOption
         val extraParams = linkInlineSignupConfirmationOption.extraParams
         val configuration = linkInlineSignupConfirmationOption.linkConfiguration
+        val passiveCaptchaParams = linkInlineSignupConfirmationOption.passiveCaptchaParams
 
         val linkPaymentDetails = linkConfigurationCoordinator.attachNewCardToAccount(
             configuration,
@@ -132,12 +134,12 @@ internal class LinkInlineSignupConfirmationDefinition(
             is LinkPaymentDetails.New -> {
                 linkStore.markLinkAsUsed()
 
-                linkPaymentDetails.toNewOption(saveOption, configuration, extraParams)
+                linkPaymentDetails.toNewOption(saveOption, configuration, extraParams, passiveCaptchaParams)
             }
             is LinkPaymentDetails.Saved -> {
                 linkStore.markLinkAsUsed()
 
-                linkPaymentDetails.toSavedOption(createParams, saveOption)
+                linkPaymentDetails.toSavedOption(createParams, saveOption, passiveCaptchaParams)
             }
             null -> linkInlineSignupConfirmationOption.toNewOption()
         }
@@ -146,6 +148,7 @@ internal class LinkInlineSignupConfirmationDefinition(
     private fun LinkPaymentDetails.Saved.toSavedOption(
         createParams: PaymentMethodCreateParams,
         saveOption: LinkInlineSignupConfirmationOption.PaymentMethodSaveOption,
+        passiveCaptchaParams: PassiveCaptchaParams?
     ): PaymentMethodConfirmationOption.Saved {
         val last4 = paymentDetails.last4
 
@@ -167,6 +170,7 @@ internal class LinkInlineSignupConfirmationDefinition(
                 } ?: ConfirmPaymentIntentParams.SetupFutureUsage.Blank
             ),
             originatedFromWallet = true,
+            passiveCaptchaParams = passiveCaptchaParams
         )
     }
 
@@ -174,6 +178,7 @@ internal class LinkInlineSignupConfirmationDefinition(
         saveOption: LinkInlineSignupConfirmationOption.PaymentMethodSaveOption,
         configuration: LinkConfiguration,
         extraParams: PaymentMethodExtraParams?,
+        passiveCaptchaParams: PassiveCaptchaParams?
     ): PaymentMethodConfirmationOption.New {
         val passthroughMode = configuration.passthroughModeEnabled
 
@@ -188,6 +193,7 @@ internal class LinkInlineSignupConfirmationDefinition(
             optionsParams = optionsParams,
             extraParams = extraParams,
             shouldSave = saveOption.shouldSave(),
+            passiveCaptchaParams = passiveCaptchaParams
         )
     }
 
@@ -197,6 +203,7 @@ internal class LinkInlineSignupConfirmationDefinition(
             optionsParams = optionsParams,
             extraParams = extraParams,
             shouldSave = saveOption.shouldSave(),
+            passiveCaptchaParams = passiveCaptchaParams
         )
     }
 

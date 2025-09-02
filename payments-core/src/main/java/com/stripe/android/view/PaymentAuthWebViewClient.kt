@@ -6,12 +6,14 @@ import android.webkit.URLUtil
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.Logger
 import com.stripe.android.payments.DefaultReturnUrl
 import kotlinx.coroutines.flow.MutableStateFlow
 
-internal class PaymentAuthWebViewClient(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class PaymentAuthWebViewClient(
     private val logger: Logger,
     private val isPageLoaded: MutableStateFlow<Boolean>,
     private val clientSecret: String,

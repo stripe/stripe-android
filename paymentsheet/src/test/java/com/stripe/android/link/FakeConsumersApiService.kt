@@ -125,7 +125,7 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         TODO("Not yet implemented")
     }
 
-    override suspend fun consentUpdate(
+    override suspend fun postConsentUpdate(
         consumerSessionClientSecret: String,
         consentGranted: Boolean,
         requestSurface: String,
@@ -181,6 +181,15 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         requestSurface: String,
         requestOptions: ApiRequest.Options
     ): Result<LinkAccountSession> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun updatePhoneNumber(
+        consumerSessionClientSecret: String,
+        phoneNumber: String,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options
+    ): Result<ConsumerSession> {
         TODO("Not yet implemented")
     }
 

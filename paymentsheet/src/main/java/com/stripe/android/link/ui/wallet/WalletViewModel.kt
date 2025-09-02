@@ -75,6 +75,7 @@ internal class WalletViewModel(
         value = WalletUiState(
             paymentDetailsList = emptyList(),
             email = linkAccount.email,
+            allowLogOut = configuration.allowLogOut,
             isSettingUp = stripeIntent.isSetupForFutureUsage(configuration.passthroughModeEnabled),
             merchantName = configuration.merchantName,
             sellerBusinessName = configuration.sellerBusinessName,
@@ -102,6 +103,7 @@ internal class WalletViewModel(
             is LinkLaunchMode.Confirmation -> null
             is LinkLaunchMode.PaymentMethodSelection -> selectedPayment?.id
             is LinkLaunchMode.Authentication -> null
+            is LinkLaunchMode.Authorization -> null
         }
 
     private val paymentMethodFilter
@@ -119,6 +121,8 @@ internal class WalletViewModel(
             ?.resolvableString
 
     val uiState: StateFlow<WalletUiState> = _uiState.asStateFlow()
+
+    val allowLogOut: Boolean = configuration.allowLogOut
 
     val expiryDateController = SimpleTextFieldController(
         textFieldConfig = DateConfig()
@@ -682,6 +686,8 @@ private fun StripeIntent.secondaryButtonLabel(linkLaunchMode: LinkLaunchMode): R
                 null
             }
         }
-        is LinkLaunchMode.Authentication -> null
+        is LinkLaunchMode.Authentication,
+        is LinkLaunchMode.Authorization ->
+            R.string.stripe_wallet_continue_another_way.resolvableString
     }
 }

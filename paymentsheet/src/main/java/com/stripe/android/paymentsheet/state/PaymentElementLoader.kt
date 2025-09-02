@@ -633,6 +633,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             collectMissingBillingDetailsForExistingPaymentMethods = configuration.link
                 .collectMissingBillingDetailsForExistingPaymentMethods,
             allowUserEmailEdits = configuration.link.allowUserEmailEdits,
+            allowLogOut = configuration.link.allowLogOut,
             skipWalletInFlowController = elementsSession.linkMobileSkipWalletInFlowController,
             linkMobileDisableLinkOnAttestationFailure = elementsSession.linkMobileDisableLinkOnAttestationFailure,
             customerId = elementsSession.customer?.session?.customerId,
@@ -865,7 +866,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 setAsDefaultEnabled = setAsDefaultEnabled,
                 setupFutureUsage = elementsSession.stripeIntent.setupFutureUsage(),
                 paymentMethodOptionsSetupFutureUsage = elementsSession.stripeIntent
-                    .paymentMethodOptionsSetupFutureUsageMap()
+                    .paymentMethodOptionsSetupFutureUsageMap(),
+                openCardScanAutomatically = state.paymentMethodMetadata.openCardScanAutomatically
             )
         }
     }

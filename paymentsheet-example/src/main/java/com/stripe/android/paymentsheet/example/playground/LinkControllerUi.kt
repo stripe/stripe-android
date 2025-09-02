@@ -50,14 +50,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import com.stripe.android.link.LinkController
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 import com.stripe.android.ui.core.R
@@ -71,15 +69,20 @@ internal fun LinkControllerUi(
     onCreatePaymentMethodClick: () -> Unit,
     onLookupClick: (email: String) -> Unit,
     onAuthenticationClick: (email: String, existingOnly: Boolean) -> Unit,
+    onAuthorizeClick: (linkAuthIntentId: String) -> Unit,
     onRegisterConsumerClick: (email: String, phone: String, country: String, name: String?) -> Unit,
+    onUpdatePhoneNumberClick: (phoneNumber: String) -> Unit,
+    onLogOutClick: () -> Unit,
     onErrorMessage: (message: String) -> Unit,
 ) {
     var email by rememberSaveable { mutableStateOf("") }
+    var linkAuthIntentId by rememberSaveable { mutableStateOf("") }
     var existingOnly by rememberSaveable { mutableStateOf(false) }
     var showRegistrationForm by rememberSaveable { mutableStateOf(false) }
     var registrationPhone by rememberSaveable { mutableStateOf("") }
     var registrationCountry by rememberSaveable { mutableStateOf("US") }
     var registrationName by rememberSaveable { mutableStateOf("") }
+    var updatePhoneNumber by rememberSaveable { mutableStateOf("") }
     var paymentMethodFilter by remember { mutableStateOf<LinkController.PaymentMethodType?>(null) }
     val errorToPresent = playgroundState.linkControllerError()
 
@@ -188,6 +191,22 @@ internal fun LinkControllerUi(
                 ) {
                     Text("Register")
                 }
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = updatePhoneNumber,
+                    label = { Text(text = "New phone number") },
+                    onValueChange = { updatePhoneNumber = it }
+                )
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        onUpdatePhoneNumberClick(updatePhoneNumber.trim())
+                    },
+                    enabled = updatePhoneNumber.isNotBlank()
+                ) {
+                    Text("Update Phone Number")
+                }
+                Divider(Modifier.padding(top = 10.dp, bottom = 10.dp))
             }
         }
         Divider(Modifier.padding(bottom = 10.dp))
@@ -212,6 +231,19 @@ internal fun LinkControllerUi(
         )
         Divider(Modifier.padding(top = 10.dp, bottom = 20.dp))
 
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = linkAuthIntentId,
+            label = { Text(text = "LinkAuthIntent ID") },
+            onValueChange = { linkAuthIntentId = it }
+        )
+        AuthorizeButton(
+            modifier = Modifier.fillMaxWidth(),
+            linkAuthIntentId = linkAuthIntentId,
+            onClick = { onAuthorizeClick(linkAuthIntentId) },
+        )
+        Divider(Modifier.padding(top = 10.dp, bottom = 20.dp))
+
         PaymentMethodTypeSelector(
             modifier = Modifier.fillMaxWidth(),
             selectedPaymentMethodType = paymentMethodFilter,
@@ -229,9 +261,16 @@ internal fun LinkControllerUi(
             onClick = onCreatePaymentMethodClick,
             enabled = controllerState.selectedPaymentMethodPreview != null,
         )
+        Spacer(Modifier.height(16.dp))
+
+        LogOutButton(
+            onClick = onLogOutClick,
+            enabled = controllerState.isConsumerVerified == true,
+        )
     }
 }
 
+@Suppress("CyclomaticComplexMethod")
 @Composable
 private fun StatusBox(
     controllerState: LinkController.State,
@@ -257,7 +296,10 @@ private fun StatusBox(
         add("Consumer verified" to (controllerState.isConsumerVerified?.toString() ?: ""))
         add("Payment Method created" to (controllerState.createdPaymentMethod?.id ?: ""))
         add("Authentication result" to (playgroundState.authenticationResult?.toString() ?: ""))
+        add("Authorize result" to (playgroundState.authorizeResult?.toString() ?: ""))
         add("Register result" to (playgroundState.registerConsumerResult?.toString() ?: ""))
+        add("Update phone result" to (playgroundState.updatePhoneNumberResult?.toString() ?: ""))
+        add("Logout result" to (playgroundState.logOutResult?.toString() ?: ""))
     }
 
     if (statusItems.isNotEmpty()) {
@@ -302,10 +344,12 @@ private fun LinkControllerPlaygroundState.linkControllerError(): Throwable? = li
     (lookupConsumerResult as? LinkController.LookupConsumerResult.Failed)?.error,
     (createPaymentMethodResult as? LinkController.CreatePaymentMethodResult.Failed)?.error,
     (authenticationResult as? LinkController.AuthenticationResult.Failed)?.error,
+    (authorizeResult as? LinkController.AuthorizeResult.Failed)?.error,
+    (logOutResult as? LinkController.LogOutResult.Failed)?.error,
 ).firstOrNull { it != null }
 
 @Composable
-@Preview(showBackground = true)
+@Preview(showBackground = true, heightDp = 1_200)
 private fun LinkControllerUiPreview() {
     PaymentSheetExampleTheme {
         LinkControllerUi(
@@ -316,7 +360,10 @@ private fun LinkControllerUiPreview() {
             onCreatePaymentMethodClick = {},
             onLookupClick = {},
             onAuthenticationClick = { _, _ -> },
+            onAuthorizeClick = {},
             onRegisterConsumerClick = { _, _, _, _ -> },
+            onUpdatePhoneNumberClick = {},
+            onLogOutClick = {},
             onErrorMessage = {},
         )
     }
@@ -435,7 +482,6 @@ private fun PaymentMethodButton(
 @PreviewLightDark
 @Composable
 private fun PaymentMethodButtonPreview() {
-    val context = LocalContext.current
     PaymentSheetExampleTheme {
         Column {
             PaymentMethodButton(
@@ -446,16 +492,28 @@ private fun PaymentMethodButtonPreview() {
             PaymentMethodButton(
                 modifier = Modifier.padding(16.dp),
                 preview = LinkController.PaymentMethodPreview(
-                    icon = ContextCompat.getDrawable(
-                        context,
-                        com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_link_arrow,
-                    )!!,
+                    iconRes = com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_link_arrow,
                     label = "Link",
                     sublabel = "Visa (Personal) •••• 4242",
                 ),
                 onClick = {},
             )
         }
+    }
+}
+
+@Composable
+private fun LogOutButton(
+    onClick: () -> Unit,
+    enabled: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        Text("Log Out")
     }
 }
 
@@ -522,6 +580,29 @@ private fun AuthenticateButton(
                 append("Authenticate")
                 if (email.isNotBlank()) {
                     append(" ${email.trim()}")
+                }
+            },
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
+private fun AuthorizeButton(
+    linkAuthIntentId: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier,
+    ) {
+        Text(
+            text = buildString {
+                append("Authorize")
+                if (linkAuthIntentId.isNotBlank()) {
+                    append(" ${linkAuthIntentId.trim()}")
                 }
             },
             maxLines = 1,

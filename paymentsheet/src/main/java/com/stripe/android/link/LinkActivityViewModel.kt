@@ -27,6 +27,7 @@ import com.stripe.android.link.injection.LINK_EXPRESS_MODE
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.injection.NativeLinkScope
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.ConsentPresentation
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.link.ui.signup.SignUpViewModel
@@ -106,7 +107,7 @@ internal class LinkActivityViewModel @Inject constructor(
 
     fun onVerificationSucceeded() {
         viewModelScope.launch {
-            _linkScreenState.value = buildFullScreenState()
+            updateScreenState(withAnimationDelay = false)
         }
     }
 
@@ -170,6 +171,12 @@ internal class LinkActivityViewModel @Inject constructor(
             is LinkLaunchMode.Authentication -> dismissWithResult(
                 LinkActivityResult.Failed(
                     error = error,
+                    linkAccountUpdate = LinkAccountUpdate.None
+                )
+            )
+            is LinkLaunchMode.Authorization -> dismissWithResult(
+                LinkActivityResult.Failed(
+                    error = IllegalStateException("Authorization mode is not supported in web"),
                     linkAccountUpdate = LinkAccountUpdate.None
                 )
             )
@@ -245,8 +252,11 @@ internal class LinkActivityViewModel @Inject constructor(
             when (linkLaunchMode) {
                 is LinkLaunchMode.Full,
                 is LinkLaunchMode.PaymentMethodSelection,
-                is LinkLaunchMode.Authentication -> loadLink()
-                is LinkLaunchMode.Confirmation -> confirmLinkPayment(linkLaunchMode.selectedPayment)
+                is LinkLaunchMode.Authentication,
+                is LinkLaunchMode.Authorization ->
+                    loadLink()
+                is LinkLaunchMode.Confirmation ->
+                    confirmLinkPayment(linkLaunchMode.selectedPayment)
             }
         }
     }
@@ -258,11 +268,11 @@ internal class LinkActivityViewModel @Inject constructor(
                 when (linkExpressMode) {
                     LinkExpressMode.DISABLED,
                     LinkExpressMode.ENABLED -> moveToWeb(attestationCheckResult.error)
-                    LinkExpressMode.ENABLED_NO_WEB_FALLBACK -> updateScreenState()
+                    LinkExpressMode.ENABLED_NO_WEB_FALLBACK -> updateScreenState(withAnimationDelay = true)
                 }
             }
             LinkAttestationCheck.Result.Successful -> {
-                updateScreenState()
+                updateScreenState(withAnimationDelay = true)
             }
             is LinkAttestationCheck.Result.Error,
             is LinkAttestationCheck.Result.AccountError -> {
@@ -316,13 +326,19 @@ internal class LinkActivityViewModel @Inject constructor(
         )
     }
 
-    private suspend fun updateScreenState() {
+    @Suppress("CyclomaticComplexMethod", "ComplexCondition")
+    private suspend fun updateScreenState(withAnimationDelay: Boolean) {
         val accountStatus = linkAccountManager.accountStatus.first()
 
+        // Get linkAccount after getting `accountStatus` because account may be updated.
+        val linkAccount = this.linkAccount
+
         val authenticatingExistingAccount = (linkLaunchMode as? LinkLaunchMode.Authentication)?.existingOnly == true
+        val authorizingAuthIntent = linkLaunchMode is LinkLaunchMode.Authorization
         val cannotChangeEmails = !linkConfiguration.allowUserEmailEdits
         val accountNotFound = accountStatus == AccountStatus.SignedOut || accountStatus == AccountStatus.Error
-        if (accountNotFound && (authenticatingExistingAccount || cannotChangeEmails)) {
+        val accountRequired = authorizingAuthIntent || authenticatingExistingAccount || cannotChangeEmails
+        if (accountNotFound && accountRequired) {
             dismissWithResult(
                 LinkActivityResult.Failed(
                     error = NoLinkAccountFoundException(),
@@ -332,37 +348,60 @@ internal class LinkActivityViewModel @Inject constructor(
             return
         }
 
-        val linkAccount = linkAccountManager.linkAccountInfo.value.account
+        if (authenticatingExistingAccount &&
+            accountStatus is AccountStatus.Verified &&
+            !accountStatus.hasVerifiedSMSSession &&
+            linkAccount != null // Should always be non-null.
+        ) {
+            // Handle edge case where status is "verified" but don't have a verified SMS session.
+            // This can happen after registering a new user without verifying their phone number.
+            _linkScreenState.value = ScreenState.VerificationDialog(linkAccount)
+            return
+        }
+
+        if (authorizingAuthIntent &&
+            accountStatus is AccountStatus.Verified &&
+            accountStatus.consentPresentation is ConsentPresentation.Inline
+        ) {
+            // Already completed verification with inline consent.
+            dismissWithResult(LinkActivityResult.Completed(linkAccountManager.linkAccountUpdate))
+            return
+        }
+
         when (accountStatus) {
-            AccountStatus.Verified,
+            is AccountStatus.Verified,
             AccountStatus.SignedOut,
             AccountStatus.Error -> {
-                _linkScreenState.value = buildFullScreenState()
+                _linkScreenState.value = buildFullScreenState(withAnimationDelay)
             }
             AccountStatus.NeedsVerification,
             AccountStatus.VerificationStarted -> {
                 if (linkAccount != null && linkExpressMode != LinkExpressMode.DISABLED) {
                     _linkScreenState.value = ScreenState.VerificationDialog(linkAccount)
                 } else {
-                    _linkScreenState.value = buildFullScreenState()
+                    _linkScreenState.value = buildFullScreenState(withAnimationDelay)
                 }
             }
         }
     }
 
-    private suspend fun buildFullScreenState(): ScreenState.FullScreen {
+    private suspend fun buildFullScreenState(withAnimationDelay: Boolean): ScreenState.FullScreen {
         val accountStatus = linkAccountManager.accountStatus.first()
 
         // We add a tiny delay, which gives the loading screen a chance to fully inflate.
         // Otherwise, we get a weird scaling animation when we display the first non-loading screen.
-        delay(LINK_DEFAULT_ANIMATION_DELAY_MILLIS)
+        if (withAnimationDelay) {
+            delay(LINK_DEFAULT_ANIMATION_DELAY_MILLIS)
+        }
 
         val linkAccount = this.linkAccount
 
         return ScreenState.FullScreen(
             initialDestination = when (accountStatus) {
-                AccountStatus.Verified -> {
-                    if (linkAccount?.completedSignup == true && linkLaunchMode.selectedPayment() == null) {
+                is AccountStatus.Verified -> {
+                    if (linkLaunchMode is LinkLaunchMode.Authorization) {
+                        LinkScreen.OAuthConsent
+                    } else if (linkAccount?.completedSignup == true && linkLaunchMode.selectedPayment() == null) {
                         // We just completed signup, but haven't added a payment method yet.
                         when (addPaymentMethodOptionsFactory.create(linkAccount).default) {
                             is AddPaymentMethodOption.Bank -> LinkScreen.Wallet
@@ -375,10 +414,12 @@ internal class LinkActivityViewModel @Inject constructor(
                         LinkScreen.Wallet
                     }
                 }
-                AccountStatus.NeedsVerification, AccountStatus.VerificationStarted -> {
+                AccountStatus.NeedsVerification,
+                AccountStatus.VerificationStarted -> {
                     LinkScreen.Verification
                 }
-                AccountStatus.SignedOut, AccountStatus.Error -> {
+                AccountStatus.SignedOut,
+                AccountStatus.Error -> {
                     LinkScreen.SignUp
                 }
             }
@@ -388,7 +429,7 @@ internal class LinkActivityViewModel @Inject constructor(
     private suspend fun handleAccountError() {
         linkAccountManager.logOut()
         linkAccountHolder.set(LinkAccountUpdate.Value(account = null, lastUpdateReason = LoggedOut))
-        updateScreenState()
+        updateScreenState(withAnimationDelay = true)
     }
 
     private fun dismissWithResult(result: LinkActivityResult) {
@@ -406,6 +447,7 @@ internal class LinkActivityViewModel @Inject constructor(
                 DaggerNativeLinkComponent
                     .builder()
                     .configuration(args.configuration)
+                    .passiveCaptchaParams(args.passiveCaptchaParams)
                     .requestSurface(args.requestSurface)
                     .publishableKeyProvider { args.publishableKey }
                     .stripeAccountIdProvider { args.stripeAccountId }

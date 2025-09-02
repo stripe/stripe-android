@@ -95,7 +95,7 @@ private val LinkButtonTheme.logoRes: Int
     @Composable
     @DrawableRes
     get() = when (this) {
-        LinkButtonTheme.WHITE -> R.drawable.stripe_link_logo
+        LinkButtonTheme.WHITE -> R.drawable.stripe_link_logo_light
         LinkButtonTheme.DEFAULT -> com.stripe.android.uicore.R.drawable.stripe_link_logo_bw
     }
 
@@ -113,8 +113,10 @@ private fun LinkButtonTheme.buttonColors(): ButtonColors = when (this) {
         disabledBackgroundColor = EceLinkWhiteBackground,
     )
     LinkButtonTheme.DEFAULT -> ButtonDefaults.buttonColors(
-        backgroundColor = LinkTheme.colors.buttonBrand,
-        disabledBackgroundColor = LinkTheme.colors.buttonBrand,
+        backgroundColor = LinkTheme.colors.buttonLinkBrand,
+        contentColor = LinkTheme.colors.onButtonLinkBrand,
+        disabledBackgroundColor = LinkTheme.colors.buttonLinkBrand,
+        disabledContentColor = LinkTheme.colors.onButtonLinkBrand.copy(alpha = ContentAlpha.disabled)
     )
 }
 

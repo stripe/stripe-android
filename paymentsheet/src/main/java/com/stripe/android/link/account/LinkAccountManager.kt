@@ -48,7 +48,6 @@ internal interface LinkAccountManager {
      */
     suspend fun lookupConsumer(
         email: String?,
-        linkAuthIntentId: String?,
         startSession: Boolean = true,
         customerId: String?
     ): Result<LinkAccount?>
@@ -65,10 +64,38 @@ internal interface LinkAccountManager {
     suspend fun mobileLookupConsumer(
         email: String?,
         emailSource: EmailSource?,
-        linkAuthIntentId: String?,
         verificationToken: String,
         appId: String,
         startSession: Boolean,
+        customerId: String?
+    ): Result<LinkAccount?>
+
+    /**
+     * Retrieves the Link account associated with the LinkAuthIntent if it exists.
+     *
+     * @param linkAuthIntentId The ID of the LinkAuthIntent.
+     * @param customerId Optional customer ID to associate with the lookup. When provided, enables
+     *                   retrieval of displayable payment details.
+     */
+    suspend fun lookupConsumerByAuthIntent(
+        linkAuthIntentId: String?,
+        customerId: String?
+    ): Result<LinkAccount?>
+
+    /**
+     * Retrieves the Link account associated with the email if it exists
+     *
+     * Optionally starts a user session, by storing the cookie for the account and starting a
+     * verification if needed.
+     *
+     * @param linkAuthIntentId The ID of the LinkAuthIntent.
+     * @param customerId Optional customer ID to associate with the lookup. When provided, enables
+     *                   retrieval of displayable payment details.
+     */
+    suspend fun mobileLookupConsumerByAuthIntent(
+        linkAuthIntentId: String?,
+        verificationToken: String,
+        appId: String,
         customerId: String?
     ): Result<LinkAccount?>
 
@@ -79,6 +106,7 @@ internal interface LinkAccountManager {
         email: String,
         phone: String?,
         country: String?,
+        countryInferringMethod: String,
         name: String?,
         consentAction: SignUpConsentAction
     ): Result<LinkAccount>
@@ -90,6 +118,7 @@ internal interface LinkAccountManager {
         email: String,
         phone: String,
         country: String,
+        countryInferringMethod: String,
         name: String?,
         verificationToken: String,
         appId: String,
@@ -128,6 +157,7 @@ internal interface LinkAccountManager {
         billingPhone: String?,
         cvc: String?,
         allowRedisplay: String? = null,
+        apiKey: String? = null,
     ): Result<SharePaymentDetails>
 
     suspend fun createLinkAccountSession(): Result<LinkAccountSession>
@@ -145,7 +175,7 @@ internal interface LinkAccountManager {
     /**
      * Update consent status for the current Link account.
      */
-    suspend fun consentUpdate(consentGranted: Boolean): Result<Unit>
+    suspend fun postConsentUpdate(consentGranted: Boolean): Result<Unit>
 
     /**
      * Fetch all saved payment methods for the signed in consumer.
@@ -169,6 +199,11 @@ internal interface LinkAccountManager {
         updateParams: ConsumerPaymentDetailsUpdateParams,
         phone: String? = null
     ): Result<ConsumerPaymentDetails>
+
+    /**
+     * Update the phone number for the signed in consumer.
+     */
+    suspend fun updatePhoneNumber(phoneNumber: String): Result<LinkAccount>
 }
 
 internal val LinkAccountManager.consumerPublishableKey: String?
