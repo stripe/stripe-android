@@ -1684,6 +1684,13 @@ internal class PaymentMethodMetadataTest {
                 paymentMethodTypes = listOf("card"),
             ),
             linkMode = LinkMode.LinkCardBrand,
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION.copy(
+                    linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD", "INSTANT_DEBITS"),
+                ),
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
         )
 
         val displayedPaymentMethodTypes = metadata.supportedPaymentMethodTypes()
@@ -1698,6 +1705,13 @@ internal class PaymentMethodMetadataTest {
                 paymentMethodTypes = listOf("card"),
             ),
             linkMode = LinkMode.Passthrough,
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION.copy(
+                    linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+                ),
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
         )
 
         val displayedPaymentMethodTypes = metadata.supportedPaymentMethodTypes()
@@ -2122,6 +2136,7 @@ internal class PaymentMethodMetadataTest {
             customerId = null,
             saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             forceSetupFutureUseBehaviorAndNewMandate = false,
+            linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
         )
     }
 
