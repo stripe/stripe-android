@@ -8,7 +8,6 @@ import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.TestParameters
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -27,14 +26,12 @@ internal class TestGrabPay : BasePlaygroundTest() {
         testDriver.confirmNewOrGuestComplete(testParameters)
     }
 
-    @Ignore("shape-together")
     @Test
     fun testGrabPayFailure() {
         testDriver.confirmNewOrGuestComplete(
             testParameters.copy(
                 authorizationAction = AuthorizeAction.Fail(
-                    expectedError = "We are unable to authenticate your payment method. Please " +
-                        "choose a different payment method and try again.",
+                    expectedError = "Your payment method was declined.",
                 ),
             )
         )
