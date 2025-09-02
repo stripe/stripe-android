@@ -10,39 +10,46 @@ import com.stripe.hcaptcha.config.HCaptchaConfig
 import com.stripe.hcaptcha.config.HCaptchaSize
 import com.stripe.hcaptcha.task.OnFailureListener
 import com.stripe.hcaptcha.task.OnSuccessListener
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeout
 import kotlin.coroutines.resume
+import kotlin.time.Duration.Companion.seconds
 
 internal class DefaultHCaptchaService(
     private val hCaptchaProvider: HCaptchaProvider,
     private val captchaEventsReporter: CaptchaEventsReporter
 ) : HCaptchaService {
+    private val cachedResult = MutableStateFlow<CachedResult>(CachedResult.Idle)
+
+    override suspend fun warmUp(activity: FragmentActivity, siteKey: String, rqData: String?) {
+        if (cachedResult.value.canWarmUp.not()) return
+        cachedResult.emit(CachedResult.Loading)
+        val update = when (val result = performPassiveHCaptchaHelper(activity, siteKey, rqData)) {
+            is HCaptchaService.Result.Failure -> {
+                CachedResult.Failure(result.error)
+            }
+            is HCaptchaService.Result.Success -> {
+                CachedResult.Success(result.token)
+            }
+        }
+        cachedResult.emit(update)
+    }
+
     override suspend fun performPassiveHCaptcha(
         activity: FragmentActivity,
         siteKey: String,
         rqData: String?
     ): HCaptchaService.Result {
-        val hCaptcha = hCaptchaProvider.get()
-        captchaEventsReporter.init(siteKey)
         val result = runCatching {
-            startVerification(
-                activity = activity,
-                siteKey = siteKey,
-                rqData = rqData,
-                hCaptcha = hCaptcha
-            )
+            withTimeout(TIMEOUT) {
+                transformCachedResult(activity, siteKey, rqData)
+            }
         }.getOrElse { e ->
             HCaptchaService.Result.Failure(e)
         }
-        when (result) {
-            is HCaptchaService.Result.Failure -> {
-                captchaEventsReporter.error(result.error, siteKey)
-            }
-            is HCaptchaService.Result.Success -> {
-                captchaEventsReporter.success(siteKey)
-            }
-        }
-        hCaptcha.reset()
         return result
     }
 
@@ -80,5 +87,72 @@ internal class DefaultHCaptchaService(
             hCaptcha.setup(activity, config).verifyWithHCaptcha(activity)
             captchaEventsReporter.execute(siteKey)
         }
+    }
+
+    private suspend fun performPassiveHCaptchaHelper(
+        activity: FragmentActivity,
+        siteKey: String,
+        rqData: String?
+    ): HCaptchaService.Result {
+        val hCaptcha = hCaptchaProvider.get()
+        captchaEventsReporter.init(siteKey)
+        val result = runCatching {
+            startVerification(
+                activity = activity,
+                siteKey = siteKey,
+                rqData = rqData,
+                hCaptcha = hCaptcha
+            )
+        }.getOrElse { e ->
+            HCaptchaService.Result.Failure(e)
+        }
+        when (result) {
+            is HCaptchaService.Result.Failure -> {
+                captchaEventsReporter.error(result.error, siteKey)
+            }
+            is HCaptchaService.Result.Success -> {
+                captchaEventsReporter.success(siteKey)
+            }
+        }
+        hCaptcha.reset()
+        return result
+    }
+
+    private suspend fun transformCachedResult(
+        activity: FragmentActivity,
+        siteKey: String,
+        rqData: String?
+    ): HCaptchaService.Result {
+        return cachedResult.mapNotNull { cachedResult ->
+            when (cachedResult) {
+                CachedResult.Idle -> {
+                    performPassiveHCaptchaHelper(activity, siteKey, rqData)
+                }
+                CachedResult.Loading -> {
+                    null
+                }
+                is CachedResult.Success -> HCaptchaService.Result.Success(cachedResult.token)
+                is CachedResult.Failure -> HCaptchaService.Result.Failure(cachedResult.error)
+            }
+        }.first()
+    }
+
+    sealed interface CachedResult {
+        data object Idle : CachedResult
+        data object Loading : CachedResult
+        data class Success(val token: String) : CachedResult
+        data class Failure(val error: Throwable) : CachedResult
+
+        val canWarmUp: Boolean
+            get() {
+                return when (this) {
+                    is Failure, Idle -> true
+                    Loading, is Success -> false
+                }
+            }
+    }
+
+    companion object {
+        internal val TIMEOUT = 6.seconds
     }
 }

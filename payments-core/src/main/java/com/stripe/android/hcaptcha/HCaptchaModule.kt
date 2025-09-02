@@ -13,6 +13,9 @@ import dagger.Provides
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Module
 object HCaptchaModule {
+    @Volatile
+    private var hCaptchaService: HCaptchaService? = null
+
     @Provides
     internal fun provideHCaptchaProvider(): HCaptchaProvider {
         return DefaultHCaptchaProvider()
@@ -23,7 +26,10 @@ object HCaptchaModule {
         hCaptchaProvider: HCaptchaProvider,
         captchaEventsReporter: CaptchaEventsReporter
     ): HCaptchaService {
-        return DefaultHCaptchaService(hCaptchaProvider, captchaEventsReporter)
+        return hCaptchaService ?: synchronized(this) {
+            hCaptchaService ?: DefaultHCaptchaService(hCaptchaProvider, captchaEventsReporter)
+                .also { hCaptchaService = it }
+        }
     }
 
     @Provides
