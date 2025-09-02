@@ -317,6 +317,9 @@ sealed interface StripeIntent : StripeModel {
                     val keyId: String?
                 ) : Parcelable
             }
+
+            @Parcelize
+            data object IntentConfirmationChallenge : SdkData()
         }
 
         @Parcelize
