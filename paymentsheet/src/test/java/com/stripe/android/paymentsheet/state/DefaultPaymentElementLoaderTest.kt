@@ -3178,6 +3178,7 @@ internal class DefaultPaymentElementLoaderTest {
     fun `Allows Link if Link display is set to 'automatic'`() = runTest {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            linkSettings = createLinkSettings(passthroughModeEnabled = false),
         )
 
         val config = PaymentSheet.Configuration(
@@ -3725,7 +3726,7 @@ internal class DefaultPaymentElementLoaderTest {
             linkMobileSkipWalletInFlowController = false,
             linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
             linkSignUpOptInInitialValue = false,
-            linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+            linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD", "INSTANT_DEBITS"),
         )
     }
 

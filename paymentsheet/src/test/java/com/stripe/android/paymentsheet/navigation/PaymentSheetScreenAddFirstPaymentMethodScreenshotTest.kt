@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
@@ -11,6 +12,7 @@ import com.stripe.android.payments.financialconnections.FinancialConnectionsAvai
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.parseAppearance
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor.Companion.createState
@@ -96,7 +98,13 @@ internal class PaymentSheetScreenAddFirstPaymentMethodScreenshotTest {
 
     @Test
     fun displaysWithExpandedPrimaryButtonHeight() {
-        val metadata = PaymentMethodMetadataFactory.create()
+        val metadata = PaymentMethodMetadataFactory.create(
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
+        )
         val interactor = FakeAddPaymentMethodInteractor(initialState = createState(metadata))
         val initialScreen = AddFirstPaymentMethod(interactor)
 
