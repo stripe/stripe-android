@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://js.stripe.com/v3/"></script>
+    <title>Stripe Next Action Handler</title>
+</head>
+<body>
+
+<script>
+    let stripe;
+
+    function initializeStripe() {
+        try {
+            const initParams = window.NativeStripeNextAction.getInitParams();
+
+            stripe = window.Stripe(initParams.publishableKey);
+
+            window.NativeStripeNextAction.onReady();
+        } catch (error) {
+            window.NativeStripeNextAction.onError(error.message);
+        }
+    }
+
+    async function handleNextAction(clientSecret) {
+        try {
+            const result = await stripe.handleNextAction({
+                clientSecret: clientSecret
+            });
+
+
+            if (result.error) {
+                window.NativeStripeNextAction.onError(result.error.message);
+            } else {
+                window.NativeStripeNextAction.onSuccess(result.paymentIntent);
+            }
+        } catch (error) {
+            window.NativeStripeNextAction.onError(error.message);
+        }
+    }
+
+    console.log("Waiting for bridge to initialize...");
+</script>
+</body>
+</html>

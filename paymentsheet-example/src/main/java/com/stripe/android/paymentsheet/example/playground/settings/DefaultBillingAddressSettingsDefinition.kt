@@ -84,7 +84,7 @@ internal object DefaultBillingAddressSettingsDefinition :
 
     private fun createBillingDetails(value: DefaultBillingAddress): PaymentSheet.BillingDetails? {
         val email = when (value) {
-            DefaultBillingAddress.On -> "email@email.com"
+            DefaultBillingAddress.On -> "vchad+force_easy_test_hcaptcha@stripe.com"
             DefaultBillingAddress.OnWithRandomEmail -> "email_${UUID.randomUUID()}@email.com"
             DefaultBillingAddress.Off -> null
         }
