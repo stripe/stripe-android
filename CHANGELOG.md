@@ -2,6 +2,10 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.24.5 - 2025-09-02
+
+Bug fixes and improvements.
+
 ## 21.24.4 - 2025-08-29
 
 ### CryptoOnramp
