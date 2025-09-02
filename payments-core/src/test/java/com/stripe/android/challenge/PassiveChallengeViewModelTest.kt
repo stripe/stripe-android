@@ -1,6 +1,7 @@
 package com.stripe.android.challenge
 
-import androidx.fragment.app.FragmentActivity
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.hcaptcha.HCaptchaService
@@ -20,7 +21,6 @@ internal class PassiveChallengeViewModelTest {
     val coroutineTestRule = CoroutineTestRule()
 
     private val fakeHCaptchaService = FakeHCaptchaService()
-    private val fakeActivity = object : FragmentActivity() {}
 
     private val testPassiveCaptchaParams = PassiveCaptchaParams(
         siteKey = "test_site_key",
@@ -34,7 +34,7 @@ internal class PassiveChallengeViewModelTest {
 
         val viewModel = createViewModel()
 
-        viewModel.startPassiveChallenge(fakeActivity)
+        viewModel.startPassiveChallenge()
 
         viewModel.result.test {
             val result = awaitItem()
@@ -53,7 +53,7 @@ internal class PassiveChallengeViewModelTest {
 
         val viewModel = createViewModel()
 
-        viewModel.startPassiveChallenge(fakeActivity)
+        viewModel.startPassiveChallenge()
 
         viewModel.result.test {
             val result = awaitItem()
@@ -69,25 +69,28 @@ internal class PassiveChallengeViewModelTest {
     fun `startPassiveChallenge should pass correct parameters to HCaptchaService`() = runTest {
         val hCaptchaService = FakeHCaptchaService()
         hCaptchaService.result = HCaptchaService.Result.Success("token")
+        val context: Context = ApplicationProvider.getApplicationContext()
 
         val viewModel = createViewModel(
             passiveCaptchaParams = testPassiveCaptchaParams,
             hCaptchaService = hCaptchaService
         )
 
-        viewModel.startPassiveChallenge(fakeActivity)
+        viewModel.startPassiveChallenge()
 
         val passiveCaptcha = hCaptchaService.awaitCall()
         assertThat(passiveCaptcha.siteKey).isEqualTo(passiveCaptcha.siteKey)
         assertThat(passiveCaptcha.rqData).isEqualTo(passiveCaptcha.rqData)
-        assertThat(passiveCaptcha.activity).isEqualTo(fakeActivity)
+        assertThat(passiveCaptcha.context).isEqualTo(context)
     }
 
     private fun createViewModel(
         passiveCaptchaParams: PassiveCaptchaParams = testPassiveCaptchaParams,
-        hCaptchaService: HCaptchaService = fakeHCaptchaService
+        hCaptchaService: HCaptchaService = fakeHCaptchaService,
+        context: Context = ApplicationProvider.getApplicationContext()
     ) = PassiveChallengeViewModel(
         passiveCaptchaParams = passiveCaptchaParams,
-        hCaptchaService = hCaptchaService
+        hCaptchaService = hCaptchaService,
+        context = context
     )
 }
