@@ -11,6 +11,12 @@ interface HCaptchaService {
         rqData: String?
     )
 
+    suspend fun performActiveHCaptcha(
+        activity: FragmentActivity,
+        siteKey: String,
+        rqData: String?
+    ): Result
+
     suspend fun performPassiveHCaptcha(
         activity: FragmentActivity,
         siteKey: String,

@@ -49,6 +49,11 @@
             android:exported="false" />
 
         <activity
+            android:name=".payments.core.authentication.stripejs.StripeJsNextActionActivity"
+            android:theme="@style/StripePaymentSheetBaseTheme"
+            android:exported="false" />
+
+        <activity
             android:name=".googlepaylauncher.GooglePayLauncherActivity"
             android:theme="@style/StripeGooglePayDefaultTheme"
             android:exported="false" />
@@ -74,6 +79,11 @@
 
         <activity
             android:name=".challenge.warmer.activity.PassiveChallengeWarmerActivity"
+            android:theme="@style/StripeTransparentTheme"
+            android:exported="false" />
+
+        <activity
+            android:name=".payments.core.authentication.challenge.IntentConfirmationChallengeActivity"
             android:theme="@style/StripeTransparentTheme"
             android:exported="false" />
     </application>

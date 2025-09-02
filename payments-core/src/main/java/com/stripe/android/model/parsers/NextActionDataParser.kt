@@ -172,7 +172,46 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
                     optString(json, FIELD_THREE_D_SECURE_2_INTENT),
                     optString(json, FIELD_PUBLISHABLE_KEY)
                 )
+                TYPE_INTENT_CONFIRMATION_CHALLENGE -> parseIntentConfirmationChallenge(json)
                 else -> null
+            }
+        }
+
+        private fun parseIntentConfirmationChallenge(
+            json: JSONObject
+        ): StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge {
+            return StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge(
+                verificationUrl = json.optString(FIELD_VERIFICATION_URL),
+                vendorData = parseVendorData(json)
+            )
+        }
+
+        private fun parseVendorData(
+            json: JSONObject
+        ): StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.VendorData {
+            val vendorName = optString(json, FIELD_CAPTCHA_VENDOR_NAME)
+            val vendorDataJson = json.optJSONObject(FIELD_CAPTCHA_VENDOR_DATA)
+
+            if (vendorDataJson == null) {
+                return StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.VendorData.HCaptchaVendorData(
+                    siteKey = json.optString(FIELD_SITE_KEY),
+                    rqData = optString(json, FIELD_RQDATA)
+                )
+            }
+
+            return when (vendorName) {
+                "human_security" -> StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.VendorData.HumanSecurityVendorData(
+                    uuid = vendorDataJson.optString("uuid"),
+                    vid = vendorDataJson.optString("vid"),
+                    appId = vendorDataJson.optString("app_id")
+                )
+                "arkose" -> StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.VendorData.ArkoseVendorData(
+                    blob = vendorDataJson.optString("blob")
+                )
+                else -> StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.VendorData.HCaptchaVendorData(
+                    siteKey = json.optString(FIELD_SITE_KEY),
+                    rqData = optString(json, FIELD_RQDATA)
+                )
             }
         }
 
@@ -202,6 +241,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
 
             private const val TYPE_3DS2 = "stripe_3ds2_fingerprint"
             private const val TYPE_3DS1 = "three_d_secure_redirect"
+            private const val TYPE_INTENT_CONFIRMATION_CHALLENGE = "intent_confirmation_challenge"
 
             private const val FIELD_THREE_D_SECURE_2_SOURCE = "three_d_secure_2_source"
             private const val FIELD_DIRECTORY_SERVER_NAME = "directory_server_name"
@@ -217,6 +257,13 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             private const val FIELD_PUBLISHABLE_KEY = "publishable_key"
 
             private const val FIELD_STRIPE_JS = "stripe_js"
+
+            // IntentConfirmationChallenge fields
+            private const val FIELD_VERIFICATION_URL = "verification_url"
+            private const val FIELD_SITE_KEY = "site_key"
+            private const val FIELD_RQDATA = "rqdata"
+            private const val FIELD_CAPTCHA_VENDOR_NAME = "captcha_vendor_name"
+            private const val FIELD_CAPTCHA_VENDOR_DATA = "captcha_vendor_data"
         }
     }
 

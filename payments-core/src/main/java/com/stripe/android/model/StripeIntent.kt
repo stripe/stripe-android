@@ -320,6 +320,30 @@ sealed interface StripeIntent : StripeModel {
                     val keyId: String?
                 ) : Parcelable
             }
+
+            @Parcelize
+            data class IntentConfirmationChallenge(
+                val verificationUrl: String,
+                val vendorData: VendorData,
+            ) : SdkData() {
+                sealed interface VendorData : Parcelable {
+                    @Parcelize
+                    data class HumanSecurityVendorData(
+                        val uuid: String,
+                        val vid: String,
+                        val appId: String
+                    ) : VendorData
+
+                    @Parcelize
+                    data class ArkoseVendorData(val blob: String) : VendorData
+
+                    @Parcelize
+                    data class HCaptchaVendorData(
+                        val siteKey: String,
+                        val rqData: String?
+                    ) : VendorData
+                }
+            }
         }
 
         @Parcelize
