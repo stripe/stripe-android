@@ -1533,6 +1533,25 @@ internal class PlaygroundTestDriver(
                             isDisplayed()
                         }
                     }
+                    is AuthorizeAction.ShowQrCodeThenPoll -> {
+                        val simulateScanText = UiAutomatorText(
+                            "Simulate scan",
+                            labelMatchesExactly = true,
+                            device = device
+                        )
+                        simulateScanText.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
+                        simulateScanText.click()
+
+                        val authorizeTestPaymentText = UiAutomatorText(
+                            "AUTHORIZE TEST PAYMENT",
+                            labelMatchesExactly = true,
+                            device = device
+                        )
+                        authorizeTestPaymentText.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
+                        authorizeTestPaymentText.click()
+
+                        waitForPollingToFinish()
+                    }
                     null -> {}
                 }
             } else {
