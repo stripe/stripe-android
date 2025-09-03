@@ -1112,6 +1112,22 @@ class LinkControllerInteractorTest {
     }
 
     @Test
+    fun `clearLinkAccount() clears account from holder`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+        signIn()
+
+        // Verify account is initially present
+        assertThat(linkAccountHolder.linkAccountInfo.value.account).isNotNull()
+
+        // Clear the account
+        interactor.clearLinkAccount()
+
+        // Verify account is cleared
+        assertThat(linkAccountHolder.linkAccountInfo.value.account).isNull()
+    }
+
+    @Test
     fun `logOut() succeeds and clears account even when request fails`() = runTest {
         val interactor = createInteractor()
         configure(interactor)
