@@ -3,7 +3,7 @@
 ## XX.XX.XX - 20XX-XX-XX
 
 ### Payments
-* [ADDED][]() Added support for PayNow to API bindings.
+* [ADDED][11520](https://github.com/stripe/stripe-android/pull/11520) Added support for PayNow to API bindings.
 
 ## 21.25.0 - 2025-09-02
 
