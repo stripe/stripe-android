@@ -84,7 +84,7 @@ internal class CryptoApiRepository @Inject constructor(
     ): Result<Unit> {
         val apiRequest = KycCollectionRequest.fromKycInfo(
             kycInfo = kycInfo,
-            credentials = CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret + "1234")
+            credentials = CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret)
         )
 
         return execute(
