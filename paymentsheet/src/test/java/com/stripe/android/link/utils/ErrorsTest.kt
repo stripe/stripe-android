@@ -52,14 +52,14 @@ internal class ErrorsTest {
     }
 
     @Test
-    fun `isLinkAuthorizationError returns false for non-APIException`() {
+    fun `isLinkAuthorizationError returns true for non-API exception`() {
         val stripeError = StripeError(
             code = "consumer_session_credentials_invalid",
             message = "Consumer session credentials are invalid"
         )
         val invalidRequestException = InvalidRequestException(stripeError, requestId = null)
 
-        assertThat(invalidRequestException.isLinkAuthorizationError()).isFalse()
+        assertThat(invalidRequestException.isLinkAuthorizationError()).isTrue()
     }
 
     @Test
