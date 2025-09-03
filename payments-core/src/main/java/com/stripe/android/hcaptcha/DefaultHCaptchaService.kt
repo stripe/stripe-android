@@ -81,6 +81,7 @@ internal class DefaultHCaptchaService(
                 loading = false,
                 hideDialog = true,
                 disableHardwareAcceleration = true,
+                host = "stripecdn.com",
                 retryPredicate = { _, exception -> exception.hCaptchaError == HCaptchaError.SESSION_TIMEOUT }
             )
 

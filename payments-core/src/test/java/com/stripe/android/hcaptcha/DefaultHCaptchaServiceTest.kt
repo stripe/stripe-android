@@ -66,6 +66,7 @@ internal class DefaultHCaptchaServiceTest {
                 assertThat(loading).isFalse()
                 assertThat(hideDialog).isTrue()
                 assertThat(disableHardwareAcceleration).isTrue()
+                assertThat(host).isEqualTo("stripecdn.com")
             }
         }
     }
