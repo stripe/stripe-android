@@ -7,13 +7,24 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.os.bundleOf
 import androidx.core.os.BundleCompat
+import androidx.core.view.postDelayed
 import androidx.lifecycle.SavedStateHandle
 import androidx.webkit.WebViewAssetLoader
 import com.stripe.android.core.Logger
@@ -21,6 +32,8 @@ import com.stripe.android.BuildConfig
 import java.io.BufferedReader
 
 internal class StripeJsNextActionActivity : AppCompatActivity() {
+
+    private var showWebView = mutableStateOf(false)
 
     private lateinit var webView: WebView
     private lateinit var args: StripeJsNextActionArgs
@@ -38,6 +51,38 @@ internal class StripeJsNextActionActivity : AppCompatActivity() {
         args = intentArgs
         Logger.getInstance(BuildConfig.DEBUG).info("StripeJsNextActionActivity created with publishableKey: ${args.publishableKey}")
         Logger.getInstance(BuildConfig.DEBUG).info("StripeJsNextActionActivity created with intent id: ${args.intent.id}")
+
+
+        setContent {
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                if (showWebView.value.not()) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                    )
+                }
+
+                AnimatedVisibility(
+                    visible = showWebView.value,
+                    modifier = Modifier
+                        .fillMaxSize(),
+                ) {
+                    AndroidView(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        factory = {
+                            webView
+                        },
+                        update = { view ->
+                            view.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT,  LayoutParams.MATCH_PARENT)
+                        }
+                    )
+                }
+            }
+        }
+
         setupWebView()
         loadHtmlPage()
     }
@@ -90,11 +135,14 @@ internal class StripeJsNextActionActivity : AppCompatActivity() {
 
                     view.evaluateJavascript(jsBridge) { result ->
                         Logger.getInstance(BuildConfig.DEBUG).info("native.js loaded: $result")
-                        
+
                         // After native.js loads, call initializeStripe if this is the right URL
                         if (url.contains("pay.stripe.com")) {
                             view.evaluateJavascript("initializeStripe()") {
                                 Logger.getInstance(BuildConfig.DEBUG).info("initializeStripe() => $it")
+                                postDelayed(1000) {
+                                    showWebView.value = true
+                                }.run()
                             }
                         }
                     }
@@ -115,8 +163,6 @@ internal class StripeJsNextActionActivity : AppCompatActivity() {
             
             addJavascriptInterface(NextActionBridge(), "androidBridge")
         }
-        
-        setContentView(webView)
     }
 
     private fun loadHtmlPage() {

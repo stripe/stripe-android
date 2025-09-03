@@ -50,7 +50,7 @@
 
         <activity
             android:name=".payments.core.authentication.stripejs.StripeJsNextActionActivity"
-            android:theme="@style/StripeDefaultTheme"
+            android:theme="@style/StripePayLauncherDefaultTheme"
             android:exported="false" />
 
         <activity
