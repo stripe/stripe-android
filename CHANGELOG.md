@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### Payments
+* [ADDED][]() Added support for PayNow to API bindings.
+
 ## 21.25.0 - 2025-09-02
 
 ### Payments
