@@ -2,7 +2,6 @@ package com.stripe.android.crypto.onramp.repositories
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.AppInfo
-import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
@@ -25,6 +24,7 @@ import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationRequest
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
 import com.stripe.android.link.LinkController
+import com.stripe.android.link.utils.isLinkAuthorizationError
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.utils.filterNotNullValues
@@ -255,15 +255,10 @@ internal class CryptoApiRepository @Inject constructor(
             request = request,
             responseSerializer = responseSerializer
         ).also {
-            if (it.exceptionOrNull()?.isAuthenticationError() == true) {
+            if (it.exceptionOrNull()?.isLinkAuthorizationError() == true) {
                 linkController.clearLinkAccount()
             }
         }
-    }
-
-    private fun Throwable.isAuthenticationError() = when (this) {
-        is APIException -> statusCode == 401 || statusCode == 403
-        else -> false
     }
 
     internal companion object {

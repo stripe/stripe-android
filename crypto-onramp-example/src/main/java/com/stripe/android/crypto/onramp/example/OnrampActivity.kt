@@ -103,16 +103,6 @@ internal class OnrampActivity : ComponentActivity() {
             }
         }
 
-        // ViewModel notifies UI to trigger reauthorization on session expiry
-        lifecycleScope.launch {
-            viewModel.authorizeEvent.collect { event ->
-                event?.let {
-                    onrampPresenter.authorize(event.linkAuthIntentId)
-                    viewModel.clearAuthorizeEvent()
-                }
-            }
-        }
-
         setContent {
             OnrampExampleTheme {
                 Scaffold(

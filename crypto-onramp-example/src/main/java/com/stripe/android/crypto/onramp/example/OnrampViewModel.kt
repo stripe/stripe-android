@@ -10,7 +10,6 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.github.kittinunf.result.Result
-import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
@@ -60,36 +59,6 @@ internal class OnrampViewModel(
 
     private val _checkoutEvent = MutableStateFlow<CheckoutEvent?>(null)
     val checkoutEvent: StateFlow<CheckoutEvent?> = _checkoutEvent.asStateFlow()
-
-    private val _authorizeEvent = MutableStateFlow<AuthorizeEvent?>(null)
-    val authorizeEvent: StateFlow<AuthorizeEvent?> = _authorizeEvent.asStateFlow()
-
-    /**
-     * Handles errors from operations, signaling UI to retrigger authorization for 401/403 errors.
-     */
-    private fun handleError(error: Throwable, onNonAuthError: () -> Unit = {}) {
-        if (error is APIException && (error.statusCode == 401 || error.statusCode == 403)) {
-            _message.value = "Session expired. Reauthorizing..."
-            _uiState.update { it.copy(screen = Screen.Authentication) }
-
-            // Use the existing consented link auth intent ID to retrigger authorization
-            val currentState = _uiState.value
-            val linkAuthIntentId = currentState.consentedLinkAuthIntentIds.firstOrNull()
-
-            if (linkAuthIntentId != null) {
-                _authorizeEvent.value = AuthorizeEvent(linkAuthIntentId, forceReauthentication = true)
-            } else {
-                // Fallback: navigate to auth screen for fresh authentication
-                _message.value = "Session expired. Please reauthenticate."
-            }
-        } else {
-            onNonAuthError()
-        }
-    }
-
-    fun clearAuthorizeEvent() {
-        _authorizeEvent.value = null
-    }
 
     init {
         viewModelScope.launch {
@@ -328,10 +297,8 @@ internal class OnrampViewModel(
                     }
                 }
                 is OnrampRegisterWalletAddressResult.Failed -> {
-                    handleError(result.error) {
-                        _message.value = "Failed to register wallet address: ${result.error.message}"
-                        _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
-                    }
+                    _message.value = "Failed to register wallet address: ${result.error.message}"
+                    _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
                 }
             }
         }
@@ -349,10 +316,8 @@ internal class OnrampViewModel(
                     _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
                 }
                 is OnrampAttachKycInfoResult.Failed -> {
-                    handleError(result.error) {
-                        _message.value = "KYC Collection failed: ${result.error.message}"
-                        _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
-                    }
+                    _message.value = "KYC Collection failed: ${result.error.message}"
+                    _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
                 }
             }
         }
@@ -375,10 +340,8 @@ internal class OnrampViewModel(
                     _uiState.update { it.copy(screen = currentScreen) }
                 }
                 is OnrampUpdatePhoneNumberResult.Failed -> {
-                    handleError(result.error) {
-                        _message.value = "Failed to update phone number: ${result.error.message}"
-                        _uiState.update { it.copy(screen = currentScreen) }
-                    }
+                    _message.value = "Failed to update phone number: ${result.error.message}"
+                    _uiState.update { it.copy(screen = currentScreen) }
                 }
             }
         }
@@ -401,10 +364,8 @@ internal class OnrampViewModel(
                     }
                 }
                 is OnrampCreateCryptoPaymentTokenResult.Failed -> {
-                    handleError(result.error) {
-                        _message.value = "Failed to create crypto payment token: ${result.error.message}"
-                        _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
-                    }
+                    _message.value = "Failed to create crypto payment token: ${result.error.message}"
+                    _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
                 }
             }
         }
@@ -596,9 +557,4 @@ data class CheckoutEvent(
     val cryptoPaymentToken: String,
     val sessionId: String,
     val sessionClientSecret: String
-)
-
-data class AuthorizeEvent(
-    val linkAuthIntentId: String,
-    val forceReauthentication: Boolean = false
 )
