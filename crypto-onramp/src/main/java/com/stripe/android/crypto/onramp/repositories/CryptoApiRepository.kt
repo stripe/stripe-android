@@ -2,14 +2,13 @@ package com.stripe.android.crypto.onramp.repositories
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.AppInfo
-import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
-import com.stripe.android.core.networking.responseJson
+import com.stripe.android.core.networking.executeRequestWithKSerializerParser
 import com.stripe.android.core.networking.toMap
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenRequest
@@ -247,24 +246,12 @@ internal class CryptoApiRepository @Inject constructor(
         request: StripeRequest,
         responseSerializer: KSerializer<Response>,
     ): Result<Response> {
-        return runCatching {
-            val response = stripeNetworkClient.executeRequest(request)
-            if (response.isError) {
-                val error = StripeErrorJsonParser().parse(response.responseJson())
-                throw APIException(error)
-            }
-            @Suppress("TooGenericExceptionCaught")
-            try {
-                val body = requireNotNull(response.body) { "No response body found" }
-                val json = Json { ignoreUnknownKeys = true }
-                json.decodeFromString(responseSerializer, body)
-            } catch (e: Exception) {
-                throw APIException(
-                    message = "Unable to parse response with ${responseSerializer::class.java.simpleName}",
-                    cause = e,
-                )
-            }
-        }
+        return executeRequestWithKSerializerParser(
+            stripeNetworkClient = stripeNetworkClient,
+            stripeErrorJsonParser = StripeErrorJsonParser(),
+            request = request,
+            responseSerializer = responseSerializer
+        )
     }
 
     internal companion object {
