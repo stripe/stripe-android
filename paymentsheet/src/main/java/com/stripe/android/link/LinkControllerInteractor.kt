@@ -559,6 +559,10 @@ internal class LinkControllerInteractor @Inject constructor(
         _state.update(block)
     }
 
+    fun clearLinkAccount() {
+        updateStateOnAccountUpdate(LinkAccountUpdate.Value(account = null))
+    }
+
     internal data class State(
         val linkComponent: LinkComponent? = null,
         val emailInput: String? = null,

@@ -150,6 +150,14 @@ class LinkController @Inject internal constructor(
     }
 
     /**
+     * [CRYPTO ONRAMP ONLY] Clear the Link account from local storage.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun clearLinkAccount() {
+        return interactor.clearLinkAccount()
+    }
+
+    /**
      * Configuration for [LinkController].
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

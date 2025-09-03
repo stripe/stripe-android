@@ -2,6 +2,7 @@ package com.stripe.android.crypto.onramp.repositories
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.AppInfo
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
@@ -23,6 +24,7 @@ import com.stripe.android.crypto.onramp.model.KycCollectionRequest
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationRequest
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
+import com.stripe.android.link.LinkController
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.utils.filterNotNullValues
@@ -44,6 +46,7 @@ import javax.inject.Singleton
 internal class CryptoApiRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
     private val stripeRepository: StripeRepository,
+    private val linkController: LinkController,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
     apiVersion: String,
@@ -251,7 +254,16 @@ internal class CryptoApiRepository @Inject constructor(
             stripeErrorJsonParser = StripeErrorJsonParser(),
             request = request,
             responseSerializer = responseSerializer
-        )
+        ).also {
+            if (it.exceptionOrNull()?.isAuthenticationError() == true) {
+                linkController.clearLinkAccount()
+            }
+        }
+    }
+
+    private fun Throwable.isAuthenticationError() = when (this) {
+        is APIException -> statusCode == 401 || statusCode == 403
+        else -> false
     }
 
     internal companion object {
