@@ -1,5 +1,6 @@
 package com.stripe.android.model.parsers
 
+import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.PassiveCaptchaParams
 import org.json.JSONObject
@@ -11,9 +12,7 @@ internal class PassiveCaptchaJsonParser : ModelJsonParser<PassiveCaptchaParams> 
         }
         return PassiveCaptchaParams(
             siteKey = json.getString(FIELD_SITE_KEY),
-            rqData = json.optString(FIELD_RQ_DATA).takeIf {
-                it.isNotBlank()
-            }
+            rqData = StripeJsonUtils.optString(json, FIELD_RQ_DATA)
         )
     }
 
