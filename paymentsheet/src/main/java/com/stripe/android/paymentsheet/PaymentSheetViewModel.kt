@@ -78,7 +78,7 @@ import kotlin.coroutines.CoroutineContext
 
 internal class PaymentSheetViewModel @Inject internal constructor(
     // Properties provided through PaymentSheetViewModelComponent.Builder
-    internal val args: PaymentSheetContractV2.Args,
+    internal val args: PaymentSheetContract.Args,
     eventReporter: EventReporter,
     private val paymentElementLoader: PaymentElementLoader,
     customerRepository: CustomerRepository,
@@ -606,10 +606,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         inProgressSelection = null
 
         if (finishImmediately) {
-            _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
+            _paymentSheetResult.tryEmit(PaymentSheetResult.Completed())
         } else {
             viewState.value = PaymentSheetViewState.FinishProcessing {
-                _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
+                _paymentSheetResult.tryEmit(PaymentSheetResult.Completed())
             }
         }
     }
@@ -654,7 +654,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     override fun onUserCancel() {
         eventReporter.onDismiss()
-        _paymentSheetResult.tryEmit(PaymentSheetResult.Canceled)
+        _paymentSheetResult.tryEmit(PaymentSheetResult.Canceled())
     }
 
     override fun onError(error: ResolvableString?) = resetViewState(error)
@@ -716,7 +716,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     internal class Factory(
-        private val starterArgsSupplier: () -> PaymentSheetContractV2.Args,
+        private val starterArgsSupplier: () -> PaymentSheetContract.Args,
     ) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
