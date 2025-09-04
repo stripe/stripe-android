@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
 import android.webkit.JavascriptInterface
@@ -22,13 +21,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.os.bundleOf
 import androidx.core.os.BundleCompat
+import androidx.core.os.bundleOf
 import androidx.core.view.postDelayed
 import androidx.lifecycle.SavedStateHandle
 import androidx.webkit.WebViewAssetLoader
-import com.stripe.android.core.Logger
 import com.stripe.android.BuildConfig
+import com.stripe.android.core.Logger
 import java.io.BufferedReader
 
 internal class StripeJsNextActionActivity : AppCompatActivity() {
@@ -37,7 +36,7 @@ internal class StripeJsNextActionActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
     private lateinit var args: StripeJsNextActionArgs
-    
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -47,11 +46,10 @@ internal class StripeJsNextActionActivity : AppCompatActivity() {
             finishWithResult(StripeJsNextActionActivityResult.Failed(IllegalArgumentException("Missing arguments")))
             return
         }
-        
+
         args = intentArgs
         Logger.getInstance(BuildConfig.DEBUG).info("StripeJsNextActionActivity created with publishableKey: ${args.publishableKey}")
         Logger.getInstance(BuildConfig.DEBUG).info("StripeJsNextActionActivity created with intent id: ${args.intent.id}")
-
 
         setContent {
             Box(
@@ -76,7 +74,7 @@ internal class StripeJsNextActionActivity : AppCompatActivity() {
                             webView
                         },
                         update = { view ->
-                            view.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT,  LayoutParams.MATCH_PARENT)
+                            view.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
                         }
                     )
                 }
@@ -90,16 +88,16 @@ internal class StripeJsNextActionActivity : AppCompatActivity() {
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebView() {
         val assetLoader = createAssetLoader()
-        
+
         webView = WebView(this).apply {
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
-            
+
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
-            
+
             webViewClient = object : WebViewClient() {
                 override fun shouldInterceptRequest(
                     view: WebView,
@@ -107,7 +105,7 @@ internal class StripeJsNextActionActivity : AppCompatActivity() {
                 ): android.webkit.WebResourceResponse? {
                     return assetLoader.shouldInterceptRequest(request.url)
                 }
-                
+
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
                     view ?: return
@@ -148,19 +146,19 @@ internal class StripeJsNextActionActivity : AppCompatActivity() {
                     }
                 }
             }
-            
+
             webChromeClient = object : WebChromeClient() {
                 override fun onConsoleMessage(consoleMessage: android.webkit.ConsoleMessage?): Boolean {
                     consoleMessage?.let { message ->
                         Logger.getInstance(BuildConfig.DEBUG).info(
                             "WebView Console [${message.messageLevel()}]: ${message.message()} " +
-                            "at line ${message.lineNumber()} of ${message.sourceId()}"
+                                "at line ${message.lineNumber()} of ${message.sourceId()}"
                         )
                     }
                     return true
                 }
             }
-            
+
             addJavascriptInterface(NextActionBridge(), "androidBridge")
         }
     }
@@ -172,7 +170,7 @@ internal class StripeJsNextActionActivity : AppCompatActivity() {
 //        webView.loadDataWithBaseURL(null, htmlPage, "text/html", "UTF-8", null)
         webView.loadUrl("https://pay.stripe.com/assets/www/stripejs_index.html")
     }
-    
+
     private fun createAssetLoader(): WebViewAssetLoader {
         return WebViewAssetLoader.Builder()
             .setDomain("pay.stripe.com")
@@ -204,14 +202,14 @@ internal class StripeJsNextActionActivity : AppCompatActivity() {
     }
 
     inner class NextActionBridge {
-        
+
         @JavascriptInterface
         fun getInitParams(): String {
             val result = """{"publishableKey":"${args.publishableKey}"}"""
             Logger.getInstance(BuildConfig.DEBUG).info("getInitParams() returning: $result")
             return result
         }
-        
+
         @JavascriptInterface
         fun onReady() {
             runOnUiThread {
@@ -219,7 +217,7 @@ internal class StripeJsNextActionActivity : AppCompatActivity() {
                 handleNextAction()
             }
         }
-        
+
         @JavascriptInterface
         fun onSuccess(paymentIntentJson: String) {
             runOnUiThread {
@@ -227,7 +225,7 @@ internal class StripeJsNextActionActivity : AppCompatActivity() {
 //                finishWithResult(StripeJsNextActionActivityResult.Completed())
             }
         }
-        
+
         @JavascriptInterface
         fun onError(errorMessage: String) {
             runOnUiThread {
@@ -235,7 +233,7 @@ internal class StripeJsNextActionActivity : AppCompatActivity() {
                 finishWithResult(StripeJsNextActionActivityResult.Failed(Exception(errorMessage)))
             }
         }
-        
+
         @JavascriptInterface
         fun logConsole(logData: String) {
             runOnUiThread {
@@ -246,10 +244,10 @@ internal class StripeJsNextActionActivity : AppCompatActivity() {
                     val message = logEntry.optString("message", "")
                     val timestamp = logEntry.optLong("timestamp", System.currentTimeMillis())
                     val stackTrace = logEntry.optString("stackTrace")
-                    
+
                     val logMessage = "JS [$level]: $message"
                     val logger = Logger.getInstance(BuildConfig.DEBUG)
-                    
+
                     when (level) {
                         "error" -> {
                             if (stackTrace.isNotEmpty()) {
@@ -268,7 +266,7 @@ internal class StripeJsNextActionActivity : AppCompatActivity() {
                 }
             }
         }
-        
+
         @JavascriptInterface
         fun ready(message: String) {
             runOnUiThread {

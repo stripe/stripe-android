@@ -81,6 +81,11 @@
             android:name=".challenge.warmer.activity.PassiveChallengeWarmerActivity"
             android:theme="@style/StripeTransparentTheme"
             android:exported="false" />
+
+        <activity
+            android:name=".payments.core.authentication.challenge.IntentConfirmationChallengeActivity"
+            android:theme="@style/StripeTransparentTheme"
+            android:exported="false" />
     </application>
 
     <!--

@@ -8,7 +8,7 @@ import androidx.core.os.BundleCompat
 import com.stripe.android.model.StripeIntent
 import kotlinx.parcelize.Parcelize
 
-internal class StripeJsNextActionContract: ActivityResultContract<StripeJsNextActionContract.Args, StripeJsNextActionActivityResult>() {
+internal class StripeJsNextActionContract : ActivityResultContract<StripeJsNextActionContract.Args, StripeJsNextActionActivityResult>() {
 
     override fun createIntent(context: Context, input: Args): Intent {
         return StripeJsNextActionActivity.createIntent(
@@ -35,8 +35,8 @@ internal class StripeJsNextActionContract: ActivityResultContract<StripeJsNextAc
     data class Args(
         val publishableKey: String,
         val intent: StripeIntent,
-    ): Parcelable
-    
+    ) : Parcelable
+
     companion object {
         internal const val EXTRA_RESULT = "stripe_js_next_action_result"
     }

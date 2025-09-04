@@ -8,4 +8,4 @@ import kotlinx.parcelize.Parcelize
 data class StripeJsNextActionArgs(
     val publishableKey: String,
     val intent: StripeIntent,
-): Parcelable
+) : Parcelable
