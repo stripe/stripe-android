@@ -56,7 +56,7 @@ internal class CryptoApiRepository @Inject constructor(
         sdkVersion = sdkVersion
     )
 
-    val json = Json {
+    private val json = Json {
         ignoreUnknownKeys = true
         encodeDefaults = true
     }
