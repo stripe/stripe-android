@@ -22,7 +22,7 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 /**
- * [PaymentNextActionHandler] for handling [StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge] 
+ * [PaymentNextActionHandler] for handling [StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge]
  * through a JavaScript-based WebView implementation.
  */
 @Singleton
@@ -30,7 +30,7 @@ internal class StripeJSNextActionHandler @Inject constructor(
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @UIContext private val uiContext: CoroutineContext
-): PaymentNextActionHandler<StripeIntent>() {
+) : PaymentNextActionHandler<StripeIntent>() {
 
     /**
      * [stripeJsNextActionLauncher] is mutable and might be updated during
@@ -38,7 +38,7 @@ internal class StripeJSNextActionHandler @Inject constructor(
      */
     @VisibleForTesting
     internal var stripeJsNextActionLauncher: ActivityResultLauncher<StripeJsNextActionContract.Args>? = null
-    
+
     private val stripeJsNextActionStarterFactory = { host: AuthActivityStarterHost ->
         stripeJsNextActionLauncher?.let {
             StripeJsNextActionStarter.Modern(it)

@@ -58,7 +58,9 @@ internal class DefaultHCaptchaService(
         activity: FragmentActivity,
         siteKey: String,
         rqData: String?,
-        hCaptcha: HCaptcha
+        hCaptcha: HCaptcha,
+        size: HCaptchaSize,
+        hideDialog: Boolean
     ): HCaptchaService.Result {
         return suspendCancellableCoroutine { continuation ->
             continuation.invokeOnCancellation {
@@ -77,10 +79,10 @@ internal class DefaultHCaptchaService(
 
             val config = HCaptchaConfig(
                 siteKey = siteKey,
-                size = HCaptchaSize.INVISIBLE,
+                size = size,
                 rqdata = rqData,
                 loading = false,
-                hideDialog = true,
+                hideDialog = hideDialog,
                 disableHardwareAcceleration = true,
                 host = "stripecdn.com",
                 retryPredicate = { _, exception -> exception.hCaptchaError == HCaptchaError.SESSION_TIMEOUT }
