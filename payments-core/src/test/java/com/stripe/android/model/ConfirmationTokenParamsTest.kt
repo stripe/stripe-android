@@ -212,7 +212,7 @@ class ConfirmationTokenParamsTest {
         val expectedShippingMap = mapOf(
             "address" to AddressFixtures.ADDRESS.toParamMap(),
             "name" to "Jenny Rosen",
-            "carrier" to "FedEx", 
+            "carrier" to "FedEx",
             "phone" to "555-123-4567",
             "tracking_number" to "1234567890"
         )
