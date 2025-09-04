@@ -2,7 +2,6 @@ package com.stripe.android.payments.core.authentication.stripejs
 
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.StripePaymentController
-import com.stripe.android.payments.core.authentication.threeds2.Stripe3ds2TransactionActivity
 import com.stripe.android.view.AuthActivityStarterHost
 
 internal interface StripeJsNextActionStarter {

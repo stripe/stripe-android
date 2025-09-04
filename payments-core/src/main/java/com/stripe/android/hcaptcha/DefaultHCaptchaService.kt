@@ -17,6 +17,26 @@ internal class DefaultHCaptchaService(
     private val hCaptchaProvider: HCaptchaProvider,
     private val captchaEventsReporter: CaptchaEventsReporter
 ) : HCaptchaService {
+    override suspend fun performActiveHCaptcha(
+        activity: FragmentActivity,
+        siteKey: String,
+        rqData: String?
+    ): HCaptchaService.Result {
+        val hCaptcha = hCaptchaProvider.get()
+        return runCatching {
+            startVerification(
+                activity = activity,
+                siteKey = siteKey,
+                rqData = rqData,
+                hCaptcha = hCaptcha,
+                size = HCaptchaSize.NORMAL,
+                hideDialog = false
+            )
+        }.getOrElse { e ->
+            HCaptchaService.Result.Failure(e)
+        }
+    }
+
     override suspend fun performPassiveHCaptcha(
         activity: FragmentActivity,
         siteKey: String,
@@ -29,7 +49,9 @@ internal class DefaultHCaptchaService(
                 activity = activity,
                 siteKey = siteKey,
                 rqData = rqData,
-                hCaptcha = hCaptcha
+                hCaptcha = hCaptcha,
+                size = HCaptchaSize.INVISIBLE,
+                hideDialog = true
             )
         }.getOrElse { e ->
             HCaptchaService.Result.Failure(e)
@@ -50,7 +72,9 @@ internal class DefaultHCaptchaService(
         activity: FragmentActivity,
         siteKey: String,
         rqData: String?,
-        hCaptcha: HCaptcha
+        hCaptcha: HCaptcha,
+        size: HCaptchaSize,
+        hideDialog: Boolean
     ): HCaptchaService.Result {
         return suspendCancellableCoroutine { continuation ->
             continuation.invokeOnCancellation {
@@ -69,11 +93,12 @@ internal class DefaultHCaptchaService(
 
             val config = HCaptchaConfig(
                 siteKey = siteKey,
-                size = HCaptchaSize.INVISIBLE,
+                size = size,
                 rqdata = rqData,
                 loading = false,
-                hideDialog = true,
+                hideDialog = hideDialog,
                 disableHardwareAcceleration = true,
+                host = "stripecdn.com",
                 retryPredicate = { _, exception -> exception.hCaptchaError == HCaptchaError.SESSION_TIMEOUT }
             )
 
