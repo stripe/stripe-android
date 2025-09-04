@@ -32,6 +32,7 @@ import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.LinkController.ConfigureResult
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -465,7 +466,16 @@ internal class OnrampInteractor @Inject constructor(
      */
     private fun PaymentIntent.toCheckoutResult(): OnrampCheckoutResult? {
         return when (status) {
-            StripeIntent.Status.Succeeded -> OnrampCheckoutResult.Completed()
+            StripeIntent.Status.Succeeded, StripeIntent.Status.RequiresCapture -> {
+                OnrampCheckoutResult.Completed()
+            }
+            StripeIntent.Status.Processing -> {
+                if (paymentMethod?.type == PaymentMethod.Type.USBankAccount) {
+                    OnrampCheckoutResult.Completed()
+                } else {
+                    OnrampCheckoutResult.Failed(PaymentFailedException())
+                }
+            }
             StripeIntent.Status.RequiresPaymentMethod -> OnrampCheckoutResult.Failed(PaymentFailedException())
             StripeIntent.Status.RequiresAction -> null // More handling needed
             else -> OnrampCheckoutResult.Failed(PaymentFailedException())
