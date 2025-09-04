@@ -27,8 +27,7 @@ data class ConfirmationTokenParams(
         }
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    companion object {
+    private companion object {
         const val PARAM_PAYMENT_METHOD = "payment_method"
         const val PARAM_PAYMENT_METHOD_DATA = "payment_method_data"
         const val PARAM_RETURN_URL = "return_url"
