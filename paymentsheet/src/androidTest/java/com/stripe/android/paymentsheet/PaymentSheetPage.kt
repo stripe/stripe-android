@@ -109,8 +109,8 @@ internal class PaymentSheetPage(
     }
 
     fun fillOutLink() {
-        waitForText("Save your info for secure 1-click checkout with Link")
-        clickViewWithText("Save your info for secure 1-click checkout with Link")
+        waitForText("Save my info for faster checkout with Link")
+        clickViewWithText("Save my info for faster checkout with Link")
     }
 
     fun fillOutFieldWithLabel(label: String, text: String) {
@@ -152,8 +152,8 @@ internal class PaymentSheetPage(
     }
 
     fun clickOnLinkCheckbox() {
-        waitForText("Save your info for secure 1-click checkout with Link")
-        clickViewWithText("Save your info for secure 1-click checkout with Link")
+        waitForText("Save my info for faster checkout with Link")
+        clickViewWithText("Save my info for faster checkout with Link")
     }
 
     fun fillOutLinkEmail(optionalLabel: Boolean = false) {
