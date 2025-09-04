@@ -63,7 +63,6 @@ internal class DefaultHCaptchaService(
                 captchaEventsReporter.success(siteKey, resultImmediatelyAvailable, duration)
             }
         }
-        cachedResult.emit(CachedResult.Idle)
         return result
     }
 
