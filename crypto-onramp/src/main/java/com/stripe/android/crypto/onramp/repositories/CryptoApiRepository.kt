@@ -56,6 +56,11 @@ internal class CryptoApiRepository @Inject constructor(
         sdkVersion = sdkVersion
     )
 
+    val json = Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = true
+    }
+
     /**
      * Grants the provided session merchant permissions.
      *
@@ -250,7 +255,8 @@ internal class CryptoApiRepository @Inject constructor(
             stripeNetworkClient = stripeNetworkClient,
             stripeErrorJsonParser = StripeErrorJsonParser(),
             request = request,
-            responseSerializer = responseSerializer
+            responseSerializer = responseSerializer,
+            json = json
         )
     }
 
