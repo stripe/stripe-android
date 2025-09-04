@@ -2352,6 +2352,15 @@ internal object ElementsSessionFixtures {
         """.trimIndent()
     )
 
+    val PASSIVE_CAPTCHA_JSON_WITH_NULL_RQ_DATA = JSONObject(
+        """
+        {
+          "site_key": "test_site_key",
+          "rqdata": "null"
+        }
+        """.trimIndent()
+    )
+
     val PASSIVE_CAPTCHA_JSON_MISSING_SITE_KEY = JSONObject(
         """
         {
