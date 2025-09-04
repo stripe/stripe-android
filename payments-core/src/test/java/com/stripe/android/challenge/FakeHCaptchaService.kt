@@ -28,6 +28,10 @@ internal class FakeHCaptchaService : HCaptchaService {
         return performPassiveHCaptchaCalls.awaitItem()
     }
 
+    suspend fun awaitWarmUpCall(): Call {
+        return warmUpCalls.awaitItem()
+    }
+
     data class Call(
         val activity: FragmentActivity,
         val siteKey: String,

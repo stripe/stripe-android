@@ -71,6 +71,11 @@
             android:name=".challenge.PassiveChallengeActivity"
             android:theme="@style/StripeTransparentTheme"
             android:exported="false" />
+
+        <activity
+            android:name=".challenge.PassiveChallengeWarmerActivity"
+            android:theme="@style/StripeTransparentTheme"
+            android:exported="false" />
     </application>
 
     <!--
