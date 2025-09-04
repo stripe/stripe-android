@@ -15,18 +15,27 @@ internal sealed interface CaptchaAnalyticsEvent : AnalyticsEvent {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Error(
         error: Throwable?,
+        resultImmediatelyAvailable: Boolean,
         override val siteKey: String
     ) : CaptchaAnalyticsEvent {
         override val eventName = "elements.captcha.passive.error"
 
         override val additionalParams = mapOf(
-            FIELD_ERROR_MESSAGE to error?.message
+            FIELD_ERROR_MESSAGE to error?.message,
+            FIELD_RESULT_IMMEDIATELY_AVAILABLE to resultImmediatelyAvailable
         )
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    class Success(override val siteKey: String) : CaptchaAnalyticsEvent {
+    class Success(
+        resultImmediatelyAvailable: Boolean,
+        override val siteKey: String,
+    ) : CaptchaAnalyticsEvent {
         override val eventName = "elements.captcha.passive.success"
+
+        override val additionalParams = mapOf(
+            FIELD_RESULT_IMMEDIATELY_AVAILABLE to resultImmediatelyAvailable
+        )
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -42,5 +51,6 @@ internal sealed interface CaptchaAnalyticsEvent : AnalyticsEvent {
     companion object {
         internal const val FIELD_ERROR_MESSAGE = "error_message"
         internal const val FIELD_SITE_KEY = "site_key"
+        internal const val FIELD_RESULT_IMMEDIATELY_AVAILABLE = "result_immediately_available"
     }
 }

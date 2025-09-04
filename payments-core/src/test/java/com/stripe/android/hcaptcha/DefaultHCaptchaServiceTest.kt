@@ -4,6 +4,8 @@ import android.os.Handler
 import androidx.fragment.app.FragmentActivity
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.utils.DefaultDurationProvider
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.hcaptcha.DefaultHCaptchaServiceTest.FakeHCaptchaProvider.HCaptchaHandler
 import com.stripe.android.hcaptcha.analytics.CaptchaEventsReporter
 import com.stripe.hcaptcha.HCaptcha
@@ -27,6 +29,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
+import kotlin.time.Duration
 
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultHCaptchaServiceTest {
@@ -89,8 +92,12 @@ internal class DefaultHCaptchaServiceTest {
                 .isEqualTo(FakeCaptchaEventsReporter.Call.Init(TEST_SITE_KEY))
             assertThat(captchaEventsReporter.awaitCall())
                 .isEqualTo(FakeCaptchaEventsReporter.Call.Execute(TEST_SITE_KEY))
-            assertThat(captchaEventsReporter.awaitCall())
-                .isEqualTo(FakeCaptchaEventsReporter.Call.Success(TEST_SITE_KEY))
+            with(captchaEventsReporter.awaitCall()) {
+                this as FakeCaptchaEventsReporter.Call.Success
+                assertThat(siteKey).isEqualTo(TEST_SITE_KEY)
+                assertThat(resultImmediatelyAvailable).isFalse()
+                assertThat(duration).isNotNull()
+            }
             captchaEventsReporter.ensureAllEventsConsumed()
         }
     }
@@ -115,8 +122,13 @@ internal class DefaultHCaptchaServiceTest {
                 .isEqualTo(FakeCaptchaEventsReporter.Call.Init(TEST_SITE_KEY))
             assertThat(captchaEventsReporter.awaitCall())
                 .isEqualTo(FakeCaptchaEventsReporter.Call.Execute(TEST_SITE_KEY))
-            assertThat(captchaEventsReporter.awaitCall())
-                .isEqualTo(FakeCaptchaEventsReporter.Call.Error(exception, TEST_SITE_KEY))
+            with(captchaEventsReporter.awaitCall()) {
+                this as FakeCaptchaEventsReporter.Call.Error
+                assertThat(error).isEqualTo(exception)
+                assertThat(siteKey).isEqualTo(TEST_SITE_KEY)
+                assertThat(resultImmediatelyAvailable).isFalse()
+                assertThat(duration).isNotNull()
+            }
             captchaEventsReporter.ensureAllEventsConsumed()
         }
     }
@@ -191,8 +203,12 @@ internal class DefaultHCaptchaServiceTest {
             // Verify analytics calls - setup failure happens before execute
             assertThat(captchaEventsReporter.awaitCall())
                 .isEqualTo(FakeCaptchaEventsReporter.Call.Init(TEST_SITE_KEY))
-            assertThat(captchaEventsReporter.awaitCall())
-                .isEqualTo(FakeCaptchaEventsReporter.Call.Error(expectedException, TEST_SITE_KEY))
+            with(captchaEventsReporter.awaitCall()) {
+                this as FakeCaptchaEventsReporter.Call.Error
+                assertThat(error).isEqualTo(expectedException)
+                assertThat(resultImmediatelyAvailable).isFalse()
+                assertThat(siteKey).isEqualTo(TEST_SITE_KEY)
+            }
             captchaEventsReporter.ensureAllEventsConsumed()
         }
     }
@@ -393,9 +409,10 @@ internal class DefaultHCaptchaServiceTest {
                 activity: FragmentActivity = mock(),
                 hCaptchaProvider: FakeHCaptchaProvider = FakeHCaptchaProvider(),
                 captchaEventsReporter: FakeCaptchaEventsReporter = FakeCaptchaEventsReporter(),
-                service: DefaultHCaptchaService = DefaultHCaptchaService(hCaptchaProvider, captchaEventsReporter),
+                durationProvider: DurationProvider = DefaultDurationProvider.instance,
                 block: suspend TestContext.() -> Unit
             ) {
+                val service = DefaultHCaptchaService(hCaptchaProvider, captchaEventsReporter, durationProvider)
                 TestContext(
                     activity = activity,
                     hCaptchaProvider = hCaptchaProvider,
@@ -440,12 +457,21 @@ internal class DefaultHCaptchaServiceTest {
             calls.add(Call.Execute(siteKey))
         }
 
-        override fun success(siteKey: String) {
-            calls.add(Call.Success(siteKey))
+        override fun success(
+            siteKey: String,
+            resultImmediatelyAvailable: Boolean,
+            duration: Duration?
+        ) {
+            calls.add(Call.Success(siteKey, resultImmediatelyAvailable, duration))
         }
 
-        override fun error(error: Throwable?, siteKey: String) {
-            calls.add(Call.Error(error, siteKey))
+        override fun error(
+            error: Throwable?,
+            siteKey: String,
+            resultImmediatelyAvailable: Boolean,
+            duration: Duration?
+        ) {
+            calls.add(Call.Error(error, siteKey, resultImmediatelyAvailable, duration))
         }
 
         suspend fun awaitCall(): Call = calls.awaitItem()
@@ -458,9 +484,21 @@ internal class DefaultHCaptchaServiceTest {
             val siteKey: String
 
             data class Init(override val siteKey: String) : Call
+
             data class Execute(override val siteKey: String) : Call
-            data class Success(override val siteKey: String) : Call
-            data class Error(val error: Throwable?, override val siteKey: String) : Call
+
+            data class Success(
+                override val siteKey: String,
+                val resultImmediatelyAvailable: Boolean,
+                val duration: Duration?
+            ) : Call
+
+            data class Error(
+                val error: Throwable?,
+                override val siteKey: String,
+                val resultImmediatelyAvailable: Boolean,
+                val duration: Duration?
+            ) : Call
         }
     }
 

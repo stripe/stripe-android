@@ -24,10 +24,11 @@ object HCaptchaModule {
     @Provides
     fun provideHCaptchaService(
         hCaptchaProvider: HCaptchaProvider,
-        captchaEventsReporter: CaptchaEventsReporter
+        captchaEventsReporter: CaptchaEventsReporter,
+        durationProvider: DurationProvider
     ): HCaptchaService {
         return hCaptchaService ?: synchronized(this) {
-            hCaptchaService ?: DefaultHCaptchaService(hCaptchaProvider, captchaEventsReporter)
+            hCaptchaService ?: DefaultHCaptchaService(hCaptchaProvider, captchaEventsReporter, durationProvider)
                 .also { hCaptchaService = it }
         }
     }
@@ -36,13 +37,11 @@ object HCaptchaModule {
     internal fun provideChallengeEventsReporter(
         analyticsRequestExecutor: AnalyticsRequestExecutor,
         analyticsRequestFactory: AnalyticsRequestFactory,
-        durationProvider: DurationProvider,
         errorReporter: ErrorReporter
     ): CaptchaEventsReporter {
         return DefaultCaptchaEventsReporter(
             analyticsRequestExecutor,
             analyticsRequestFactory,
-            durationProvider,
             errorReporter
         )
     }

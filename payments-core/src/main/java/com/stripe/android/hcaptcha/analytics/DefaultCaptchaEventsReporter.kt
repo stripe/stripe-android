@@ -2,7 +2,6 @@ package com.stripe.android.hcaptcha.analytics
 
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
-import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.hcaptcha.HCaptchaException
 import javax.inject.Inject
@@ -12,12 +11,10 @@ import kotlin.time.DurationUnit
 internal class DefaultCaptchaEventsReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
-    private val durationProvider: DurationProvider,
     private val errorReporter: ErrorReporter
 ) : CaptchaEventsReporter {
 
     override fun init(siteKey: String) {
-        durationProvider.start(DurationProvider.Key.Captcha)
         fireEvent(CaptchaAnalyticsEvent.Init(siteKey))
     }
 
@@ -25,17 +22,23 @@ internal class DefaultCaptchaEventsReporter @Inject constructor(
         fireEvent(CaptchaAnalyticsEvent.Execute(siteKey))
     }
 
-    override fun success(siteKey: String) {
-        val duration = durationProvider.end(DurationProvider.Key.Captcha)
+    override fun success(
+        siteKey: String,
+        resultImmediatelyAvailable: Boolean,
+        duration: Duration?
+    ) {
         fireEvent(
-            event = CaptchaAnalyticsEvent.Success(siteKey),
+            event = CaptchaAnalyticsEvent.Success(resultImmediatelyAvailable, siteKey),
             additionalParams = durationInSecondsFromStart(duration)
         )
     }
 
-    override fun error(error: Throwable?, siteKey: String) {
-        val duration = durationProvider.end(DurationProvider.Key.Captcha)
-
+    override fun error(
+        error: Throwable?,
+        siteKey: String,
+        resultImmediatelyAvailable: Boolean,
+        duration: Duration?
+    ) {
         when (error) {
             is HCaptchaException -> {
                 errorReporter.report(ErrorReporter.ExpectedErrorEvent.HCAPTCHA_FAILURE)
@@ -46,7 +49,7 @@ internal class DefaultCaptchaEventsReporter @Inject constructor(
         }
 
         fireEvent(
-            event = CaptchaAnalyticsEvent.Error(error, siteKey),
+            event = CaptchaAnalyticsEvent.Error(error, resultImmediatelyAvailable, siteKey),
             additionalParams = durationInSecondsFromStart(duration)
         )
     }
@@ -65,7 +68,7 @@ internal class DefaultCaptchaEventsReporter @Inject constructor(
 
     private fun durationInSecondsFromStart(duration: Duration?): Map<String, Float> {
         return duration?.let {
-            mapOf("duration" to it.toDouble(DurationUnit.SECONDS).toFloat())
+            mapOf("duration" to it.toDouble(DurationUnit.MILLISECONDS).toFloat())
         } ?: emptyMap()
     }
 }
