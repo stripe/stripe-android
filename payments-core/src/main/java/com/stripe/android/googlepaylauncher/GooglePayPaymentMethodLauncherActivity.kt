@@ -26,7 +26,7 @@ import kotlinx.coroutines.withContext
  * 2. Create a [PaymentDataRequest](https://developers.google.com/pay/api/web/reference/request-objects#PaymentDataRequest)
  * 3. Create a [PaymentMethod] using the Google Pay token
  *
- * Use [GooglePayPaymentMethodLauncherContract] to start [GooglePayPaymentMethodLauncherActivity].
+ * Use [GooglePayPaymentMethodLauncherContractV2] to start [GooglePayPaymentMethodLauncherActivity].
  *
  * See [Troubleshooting](https://developers.google.com/pay/api/android/support/troubleshooting)
  * for a guide to troubleshooting Google Pay issues.
@@ -165,7 +165,7 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
             RESULT_OK,
             Intent()
                 .putExtras(
-                    bundleOf(GooglePayPaymentMethodLauncherContract.EXTRA_RESULT to result)
+                    bundleOf(GooglePayPaymentMethodLauncherContractV2.EXTRA_RESULT to result)
                 )
         )
         finish()
