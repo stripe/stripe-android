@@ -164,6 +164,45 @@ internal class DefaultHCaptchaServiceTest {
     }
 
     @Test
+    fun `performPassiveHCaptcha resets cache after completion`() = runTest {
+        TestContext.test {
+            // First, warm up the cache with a successful result
+            val warmUpToken = "warm-up-token"
+            hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha(warmUpToken)
+            
+            service.warmUp(
+                activity,
+                siteKey = TEST_SITE_KEY,
+                rqData = null
+            )
+            
+            val firstCall = hCaptchaProvider.awaitCall()
+            
+            // Verify warmUp populated the cache by checking performPassiveHCaptcha returns cached result
+            val cachedResult = service.performPassiveHCaptcha(
+                activity,
+                siteKey = TEST_SITE_KEY,
+                rqData = null
+            )
+            assertThat(cachedResult).isInstanceOf(HCaptchaService.Result.Success::class.java)
+            assertThat((cachedResult as HCaptchaService.Result.Success).token).isEqualTo(warmUpToken)
+            
+            // Verify the cache was reset after performPassiveHCaptcha by checking warmUp can execute again
+            val newToken = "new-warm-up-token"
+            hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha(newToken)
+            
+            service.warmUp(
+                activity,
+                siteKey = TEST_SITE_KEY,
+                rqData = null
+            )
+            
+            val secondCall = hCaptchaProvider.awaitCall()
+            verify(secondCall).verifyWithHCaptcha(any())
+        }
+    }
+
+    @Test
     fun `performPassiveHCaptcha calls reset on coroutine cancellation`() = runTest {
         TestContext.test {
             hCaptchaProvider.hCaptchaHandler = SetupHangingHCaptcha
