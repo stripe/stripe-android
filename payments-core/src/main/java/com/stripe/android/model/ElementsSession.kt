@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.PaymentMethod.Type.Link
 import kotlinx.parcelize.Parcelize
 import java.util.UUID
@@ -67,7 +68,12 @@ data class ElementsSession(
         get() = linkSettings?.linkMobileSkipWalletInFlowController ?: false
 
     val passiveCaptchaParams: PassiveCaptchaParams?
-        get() = passiveCaptcha.takeIf { flags[Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA] == true }
+        get() {
+            return passiveCaptcha.takeIf {
+                flags[Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA] == true &&
+                    FeatureFlags.enablePassiveCaptcha.isEnabled
+            }
+        }
 
     val linkSignUpOptInFeatureEnabled: Boolean
         get() = linkSettings?.linkSignUpOptInFeatureEnabled ?: false

@@ -1,9 +1,18 @@
 package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.testing.FeatureFlagTestRule
+import org.junit.Rule
 import org.junit.Test
 
 class ElementsSessionTest {
+
+    @get:Rule
+    val enablePassiveCaptchaRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.enablePassiveCaptcha,
+        isEnabled = true
+    )
 
     @Test
     fun `passiveCaptchaParams returns passiveCaptcha when flag is enabled`() {
@@ -21,7 +30,7 @@ class ElementsSessionTest {
     }
 
     @Test
-    fun `passiveCaptchaParams returns null when flag is disabled`() {
+    fun `passiveCaptchaParams returns null when elements flag is disabled`() {
         val passiveCaptcha = PassiveCaptchaParams(
             siteKey = "test_site_key",
             rqData = "test_rq_data"
@@ -36,7 +45,7 @@ class ElementsSessionTest {
     }
 
     @Test
-    fun `passiveCaptchaParams returns null when flag is missing`() {
+    fun `passiveCaptchaParams returns null when elements flag is missing`() {
         val passiveCaptcha = PassiveCaptchaParams(
             siteKey = "test_site_key",
             rqData = "test_rq_data"
@@ -45,6 +54,22 @@ class ElementsSessionTest {
         val session = createElementsSession(
             passiveCaptcha = passiveCaptcha,
             flags = emptyMap()
+        )
+
+        assertThat(session.passiveCaptchaParams).isNull()
+    }
+
+    @Test
+    fun `passiveCaptchaParams returns null when feature flag is disabled`() {
+        enablePassiveCaptchaRule.setEnabled(false)
+        val passiveCaptcha = PassiveCaptchaParams(
+            siteKey = "test_site_key",
+            rqData = "test_rq_data"
+        )
+
+        val session = createElementsSession(
+            passiveCaptcha = passiveCaptcha,
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA to true)
         )
 
         assertThat(session.passiveCaptchaParams).isNull()
