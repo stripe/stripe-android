@@ -55,7 +55,6 @@ import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.allowedWalletTypes
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentOption
@@ -321,13 +320,7 @@ internal class DefaultFlowController @Inject internal constructor(
             enableLogging = enableLogging,
             productUsage = productUsage,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
-            walletsToShow = if (viewModel.walletButtonsRendered) {
-                WalletType.entries.filterNot {
-                    state.config.walletButtons.allowedWalletTypes.contains(it)
-                }
-            } else {
-                state.config.walletButtons.allowedWalletTypes
-            },
+            walletButtonsRendered = viewModel.walletButtonsRendered,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier
         )
 

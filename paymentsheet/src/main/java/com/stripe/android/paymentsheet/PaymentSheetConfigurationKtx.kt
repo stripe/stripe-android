@@ -121,13 +121,11 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
     }
 }
 
-internal val PaymentSheet.WalletButtonsConfiguration.allowedWalletTypes: List<WalletType>
-    get() = if (walletsToShow.isEmpty()) {
-        WalletType.entries
-    } else {
-        WalletType.entries.filter { type ->
-            walletsToShow.contains(type.code)
-        }
+internal val WalletType.configType: PaymentSheet.WalletButtonsConfiguration.Wallet
+    get() = when (this) {
+        WalletType.Link -> PaymentSheet.WalletButtonsConfiguration.Wallet.Link
+        WalletType.GooglePay -> PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay
+        WalletType.ShopPay -> PaymentSheet.WalletButtonsConfiguration.Wallet.ShopPay
     }
 
 @OptIn(AppearanceAPIAdditionsPreview::class)

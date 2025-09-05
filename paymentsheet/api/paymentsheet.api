@@ -3037,12 +3037,12 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$WalletButtonsCon
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> ()V
-	public fun <init> (ZLjava/util/List;Lcom/stripe/android/paymentsheet/PaymentSheet$ButtonThemes;)V
-	public synthetic fun <init> (ZLjava/util/List;Lcom/stripe/android/paymentsheet/PaymentSheet$ButtonThemes;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZLcom/stripe/android/paymentsheet/PaymentSheet$WalletButtonsConfiguration$Visibility;Lcom/stripe/android/paymentsheet/PaymentSheet$ButtonThemes;)V
+	public synthetic fun <init> (ZLcom/stripe/android/paymentsheet/PaymentSheet$WalletButtonsConfiguration$Visibility;Lcom/stripe/android/paymentsheet/PaymentSheet$ButtonThemes;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getButtonThemes ()Lcom/stripe/android/paymentsheet/PaymentSheet$ButtonThemes;
-	public final fun getWalletsToShow ()Ljava/util/List;
+	public final fun getVisibility ()Lcom/stripe/android/paymentsheet/PaymentSheet$WalletButtonsConfiguration$Visibility;
 	public final fun getWillDisplayExternally ()Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -3055,6 +3055,55 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$WalletButtonsCon
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheet$WalletButtonsConfiguration;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$WalletButtonsConfiguration$PaymentElementVisibility : java/lang/Enum {
+	public static final field Always Lcom/stripe/android/paymentsheet/PaymentSheet$WalletButtonsConfiguration$PaymentElementVisibility;
+	public static final field Automatic Lcom/stripe/android/paymentsheet/PaymentSheet$WalletButtonsConfiguration$PaymentElementVisibility;
+	public static final field Never Lcom/stripe/android/paymentsheet/PaymentSheet$WalletButtonsConfiguration$PaymentElementVisibility;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$WalletButtonsConfiguration$PaymentElementVisibility;
+	public static fun values ()[Lcom/stripe/android/paymentsheet/PaymentSheet$WalletButtonsConfiguration$PaymentElementVisibility;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$WalletButtonsConfiguration$Visibility : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/Map;Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/util/Map;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPaymentElement ()Ljava/util/Map;
+	public final fun getWalletButtonsView ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$WalletButtonsConfiguration$Visibility$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheet$WalletButtonsConfiguration$Visibility;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheet$WalletButtonsConfiguration$Visibility;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$WalletButtonsConfiguration$Wallet : java/lang/Enum {
+	public static final field GooglePay Lcom/stripe/android/paymentsheet/PaymentSheet$WalletButtonsConfiguration$Wallet;
+	public static final field Link Lcom/stripe/android/paymentsheet/PaymentSheet$WalletButtonsConfiguration$Wallet;
+	public static final field ShopPay Lcom/stripe/android/paymentsheet/PaymentSheet$WalletButtonsConfiguration$Wallet;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$WalletButtonsConfiguration$Wallet;
+	public static fun values ()[Lcom/stripe/android/paymentsheet/PaymentSheet$WalletButtonsConfiguration$Wallet;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$WalletButtonsConfiguration$WalletButtonsViewVisibility : java/lang/Enum {
+	public static final field Always Lcom/stripe/android/paymentsheet/PaymentSheet$WalletButtonsConfiguration$WalletButtonsViewVisibility;
+	public static final field Never Lcom/stripe/android/paymentsheet/PaymentSheet$WalletButtonsConfiguration$WalletButtonsViewVisibility;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$WalletButtonsConfiguration$WalletButtonsViewVisibility;
+	public static fun values ()[Lcom/stripe/android/paymentsheet/PaymentSheet$WalletButtonsConfiguration$WalletButtonsViewVisibility;
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheetComposeKt {
