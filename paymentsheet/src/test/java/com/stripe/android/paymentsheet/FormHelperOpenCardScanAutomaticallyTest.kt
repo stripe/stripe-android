@@ -12,7 +12,6 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -229,6 +228,6 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
             account = null,
             lastUpdateReason = null
         ),
-        walletsToShow = WalletType.entries,
+        walletButtonsRendered = false,
     )
 }

@@ -5,7 +5,7 @@ import com.stripe.android.common.model.containsVolatileDifferences
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.allowedWalletTypes
+import com.stripe.android.paymentsheet.configType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import javax.inject.Inject
@@ -99,7 +99,8 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
             return true
         }
 
-        val walletTypesDisplayedExternally = configuration.walletButtons.allowedWalletTypes
+        val walletButtonsViewVisibility = configuration.walletButtons.visibility.walletButtonsView
+        val walletTypesDisplayedExternally = visibleWallets(walletButtonsViewVisibility)
 
         val walletType = when (potentialSelection) {
             is PaymentSelection.GooglePay -> WalletType.GooglePay
@@ -108,10 +109,11 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
         }
 
         // If this selection is the existing selection (likely selected externally)
-        // AND specific wallets are configured externally, preserve it
-        if (potentialSelection == selection &&
+        // AND specific wallets are hidden externally, preserve it
+        if (
+            potentialSelection == selection &&
             walletType in walletTypesDisplayedExternally &&
-            configuration.walletButtons.walletsToShow.isNotEmpty()
+            hasHiddenWallets(walletButtonsViewVisibility)
         ) {
             return true
         }
@@ -133,6 +135,31 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
             !currentSelection.customerAcknowledgedMandate
         } else {
             false
+        }
+    }
+
+    private fun hasHiddenWallets(
+        walletButtonsViewVisibility: Map<
+            PaymentSheet.WalletButtonsConfiguration.Wallet,
+            PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility
+            >
+    ): Boolean {
+        return walletButtonsViewVisibility.isNotEmpty() && walletButtonsViewVisibility.any { (_, visibility) ->
+            visibility == PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Never
+        }
+    }
+
+    private fun visibleWallets(
+        visibility: Map<
+            PaymentSheet.WalletButtonsConfiguration.Wallet,
+            PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility
+            >
+    ): List<WalletType> {
+        return WalletType.entries.filter { walletType ->
+            val configuredVisibility = visibility[walletType.configType]
+
+            configuredVisibility == null || configuredVisibility ==
+                PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always
         }
     }
 }
