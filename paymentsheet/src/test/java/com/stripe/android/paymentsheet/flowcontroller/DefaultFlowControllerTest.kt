@@ -2756,6 +2756,7 @@ internal class DefaultFlowControllerTest {
         return PaymentSelection.New.GenericPaymentMethod(
             label = "Test".resolvableString,
             iconResource = 0,
+            iconResourceNight = null,
             paymentMethodCreateParams = PaymentMethodCreateParams.Companion.create(
                 bacsDebit = PaymentMethodCreateParams.BacsDebit(
                     accountNumber = BACS_ACCOUNT_NUMBER,
@@ -2780,6 +2781,7 @@ internal class DefaultFlowControllerTest {
         )
         private val GENERIC_PAYMENT_SELECTION = PaymentSelection.New.GenericPaymentMethod(
             iconResource = R.drawable.stripe_ic_paymentsheet_card_visa_ref,
+            iconResourceNight = null,
             label = "Bancontact".resolvableString,
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.BANCONTACT,
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,

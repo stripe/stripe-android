@@ -20,6 +20,7 @@ internal class PaymentOptionFactory @Inject constructor(
             imageLoader = {
                 iconLoader.load(
                     drawableResourceId = selection.drawableResourceId,
+                    drawableResourceIdNight = selection.drawableResourceId,
                     lightThemeIconUrl = selection.lightThemeIconUrl,
                     darkThemeIconUrl = selection.darkThemeIconUrl,
                 )

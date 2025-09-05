@@ -720,6 +720,7 @@ internal class PaymentOptionsViewModelTest {
             viewModel.updateSelection(
                 PaymentSelection.New.GenericPaymentMethod(
                     iconResource = 0,
+                    iconResourceNight = null,
                     label = "".resolvableString,
                     paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT,
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
