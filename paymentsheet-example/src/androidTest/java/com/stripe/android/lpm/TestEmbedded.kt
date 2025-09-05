@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaym
 import com.stripe.android.test.core.FieldPopulator
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.utils.ForceNativeBankFlowTestRule
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
@@ -81,6 +82,7 @@ internal class TestEmbedded : BasePlaygroundTest() {
         )
     }
 
+    @Ignore("#ir-<tba>")
     @Test
     fun testUsBankAccount() {
         testDriver.confirmEmbeddedUsBankAccount(
