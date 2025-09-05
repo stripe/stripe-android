@@ -17,6 +17,8 @@ internal val Throwable.errorMessage: ResolvableString
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Throwable.isLinkAuthorizationError(): Boolean = when (this) {
-    is StripeException -> stripeError?.code == "consumer_session_credentials_invalid"
+    is StripeException ->
+        stripeError?.code == "consumer_session_credentials_invalid" ||
+            stripeError?.code == "consumer_session_expired"
     else -> false
 }
