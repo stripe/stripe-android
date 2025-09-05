@@ -39,13 +39,28 @@ open class AnalyticsRequestFactory(
     }
 
     private fun createParams(
-        event: AnalyticsEvent
+        event: AnalyticsEvent,
     ): Map<String, Any> {
-        return standardParams() + appDataParams() + event.params()
+        return standardParams() + appDataParams() + event.params() + event.clientAttributionMetadata()
     }
 
     private fun AnalyticsEvent.params(): Map<String, String> {
         return mapOf(AnalyticsFields.EVENT to this.eventName)
+    }
+
+    private fun AnalyticsEvent.clientAttributionMetadata(): Map<String, Any> {
+        val specificMetadata = this.clientAttributionMetadata?.toParamsMap()
+        val generalMetadata: Map<String, Any> = mapOf(
+            "merchant_integration_source" to "elements",
+            "merchant_integration_subtype" to "mobile",
+            "merchant_integration_source" to "25.0.5", // TODO: set SDK version
+            "client_session_id" to sessionId.toString(),
+        )
+        return if (specificMetadata != null) {
+            return mapOf("client_attribution_metadata" to (specificMetadata + generalMetadata))
+        } else {
+            emptyMap()
+        }
     }
 
     private fun standardParams(): Map<String, Any> = mapOf(
@@ -59,7 +74,7 @@ open class AnalyticsRequestFactory(
         AnalyticsFields.DEVICE_TYPE to DEVICE_TYPE,
         AnalyticsFields.BINDINGS_VERSION to StripeSdkVersion.VERSION_NAME,
         AnalyticsFields.IS_DEVELOPMENT to BuildConfig.DEBUG,
-        AnalyticsFields.SESSION_ID to sessionId,
+        AnalyticsFields.SESSION_ID to sessionId, // client_session_id in client_attribution_metadata
         AnalyticsFields.LOCALE to Locale.getDefault().toString(),
     ) + networkType() + pluginType()
 
@@ -125,4 +140,30 @@ interface AnalyticsEvent {
      * value that will be sent as [AnalyticsFields.EVENT] param.
      */
     val eventName: String
+
+    val clientAttributionMetadata: EventSpecificClientAttributionMetadata?
+        get() = null
+}
+
+data class EventSpecificClientAttributionMetadata(
+    val elementsSessionConfigId: String?,
+    val paymentIntentCreationFlow: PaymentIntentCreationFlow,
+    val paymentMethodSelectionFlow: PaymentMethodSelectionFlow,
+) {
+    fun toParamsMap(): Map<String, String?> {
+        return mapOf(
+            "elements_session_config_id" to elementsSessionConfigId,
+            // TODO: does name give the right value for these?
+            "payment_intent_creation_flow" to paymentIntentCreationFlow.name,
+            "payment_method_selection_flow" to paymentMethodSelectionFlow.name,
+        )
+    }
+}
+
+enum class PaymentIntentCreationFlow {
+    Standard, Deferred;
+}
+
+enum class PaymentMethodSelectionFlow {
+    Automatic, MerchantSpecified;
 }

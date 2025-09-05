@@ -55,6 +55,7 @@ internal interface EventReporter : CardScanEventsReporter {
         paymentMethodOptionsSetupFutureUsage: Boolean,
         setupFutureUsage: StripeIntent.Usage?,
         openCardScanAutomatically: Boolean,
+        elementsSessionConfigId: String,
     )
 
     /**
@@ -142,6 +143,7 @@ internal interface EventReporter : CardScanEventsReporter {
     fun onPaymentSuccess(
         paymentSelection: PaymentSelection,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        usesAutomaticPaymentMethodSelectionFlow: Boolean,
     )
 
     /**

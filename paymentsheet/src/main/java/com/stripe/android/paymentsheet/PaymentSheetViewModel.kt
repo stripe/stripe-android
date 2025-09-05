@@ -579,6 +579,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             eventReporter.onPaymentSuccess(
                 paymentSelection = paymentSelection,
                 deferredIntentConfirmationType = deferredIntentConfirmationType,
+                usesAutomaticPaymentMethodSelectionFlow = intent.automaticPaymentMethods?.enabled == true,
             )
         }
 

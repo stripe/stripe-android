@@ -1929,15 +1929,17 @@ class PaymentSheetEventTest {
     ): PaymentSheetEvent.Payment {
         return PaymentSheetEvent.Payment(
             mode = EventReporter.Mode.Complete,
-            paymentSelection = paymentSelection,
-            duration = 1.milliseconds,
             result = result,
+            duration = 1.milliseconds,
+            paymentSelection = paymentSelection,
             currency = "usd",
             isDeferred = false,
             isSpt = false,
             linkEnabled = false,
             googlePaySupported = false,
             deferredIntentConfirmationType = null,
+            usesAutomaticPaymentMethodSelectionFlow = false,
+            elementsSessionConfigId = "",
         )
     }
 

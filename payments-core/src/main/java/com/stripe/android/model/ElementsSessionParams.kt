@@ -13,7 +13,7 @@ sealed interface ElementsSessionParams : Parcelable {
     val clientSecret: String?
     val customerSessionClientSecret: String?
     val legacyCustomerEphemeralKey: String?
-    val mobileSessionId: String?
+    val mobileSessionId: String? // elements_session_config_id in client_attribution_metadata
     val locale: String?
     val expandFields: List<String>
     val savedPaymentMethodSelectionId: String?

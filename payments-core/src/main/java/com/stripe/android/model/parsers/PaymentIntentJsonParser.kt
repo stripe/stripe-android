@@ -101,7 +101,8 @@ class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
             unactivatedPaymentMethods = unactivatedPaymentMethods,
             linkFundingSources = linkFundingSources,
             nextActionData = nextActionData,
-            paymentMethodOptionsJsonString = paymentMethodOptions
+            paymentMethodOptionsJsonString = paymentMethodOptions,
+            automaticPaymentMethods = null, // TODO: parse automatic payment methods here.
         )
     }
 

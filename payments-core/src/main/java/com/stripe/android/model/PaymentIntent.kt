@@ -154,6 +154,7 @@ constructor(
 
     private val paymentMethodOptionsJsonString: String? = null,
 
+    override val automaticPaymentMethods: StripeIntent.AutomaticPaymentMethods?,
 ) : StripeIntent {
 
     override fun getPaymentMethodOptions() = paymentMethodOptionsJsonString?.let {
@@ -267,7 +268,8 @@ constructor(
             unactivatedPaymentMethods = unactivatedPaymentMethods,
             linkFundingSources = linkFundingSources,
             nextActionData = nextActionData,
-            paymentMethodOptionsJsonString = paymentMethodOptionsJsonString
+            paymentMethodOptionsJsonString = paymentMethodOptionsJsonString,
+            automaticPaymentMethods = automaticPaymentMethods,
         )
     }
 

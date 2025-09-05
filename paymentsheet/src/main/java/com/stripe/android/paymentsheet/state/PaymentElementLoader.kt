@@ -860,12 +860,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             eventReporter.onLoadFailed(state.validationError)
         } else {
             eventReporter.onLoadSucceeded(
+                paymentSelection = state.paymentSelection,
                 linkEnabled = state.paymentMethodMetadata.linkState != null,
                 linkMode = elementsSession.linkSettings?.linkMode,
                 googlePaySupported = isGooglePaySupported,
                 linkDisplay = linkDisplay,
                 currency = elementsSession.stripeIntent.currency,
-                paymentSelection = state.paymentSelection,
                 initializationMode = initializationMode,
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession),
                 orderedLpms = state.paymentMethodMetadata.sortedSupportedPaymentMethods().map { it.code },
@@ -875,10 +875,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 ),
                 hasDefaultPaymentMethod = hasDefaultPaymentMethod,
                 setAsDefaultEnabled = setAsDefaultEnabled,
-                setupFutureUsage = elementsSession.stripeIntent.setupFutureUsage(),
                 paymentMethodOptionsSetupFutureUsage = elementsSession.stripeIntent
                     .paymentMethodOptionsSetupFutureUsageMap(),
-                openCardScanAutomatically = state.paymentMethodMetadata.openCardScanAutomatically
+                setupFutureUsage = elementsSession.stripeIntent.setupFutureUsage(),
+                openCardScanAutomatically = state.paymentMethodMetadata.openCardScanAutomatically,
+                elementsSessionConfigId = elementsSession.elementsSessionId
             )
         }
     }

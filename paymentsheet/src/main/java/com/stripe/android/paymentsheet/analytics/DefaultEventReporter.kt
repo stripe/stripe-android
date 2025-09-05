@@ -56,6 +56,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     private var googlePaySupported: Boolean = false
     private var currency: String? = null
     private var financialConnectionsAvailability: FinancialConnectionsAvailability? = null
+    private var elementsSessionConfigId: String? = null
 
     private val analyticsRequestV2Factory = AnalyticsRequestV2Factory(
         context,
@@ -118,6 +119,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         paymentMethodOptionsSetupFutureUsage: Boolean,
         setupFutureUsage: StripeIntent.Usage?,
         openCardScanAutomatically: Boolean,
+        elementsSessionConfigId: String,
     ) {
         this.currency = currency
         this.linkEnabled = linkEnabled
@@ -127,6 +129,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken
         this.googlePaySupported = googlePaySupported
         this.financialConnectionsAvailability = financialConnectionsAvailability
+        this.elementsSessionConfigId = elementsSessionConfigId
 
         durationProvider.start(DurationProvider.Key.Checkout)
 
@@ -379,6 +382,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onPaymentSuccess(
         paymentSelection: PaymentSelection,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        usesAutomaticPaymentMethodSelectionFlow: Boolean,
     ) {
         // Wallets are treated as a saved payment method after confirmation, so we need
         // to "reset" to the correct PaymentSelection for accurate reporting.
@@ -390,15 +394,17 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.Payment(
                 mode = mode,
-                paymentSelection = realSelection,
-                duration = duration,
                 result = PaymentSheetEvent.Payment.Result.Success,
+                duration = duration,
+                paymentSelection = realSelection,
                 currency = currency,
                 isDeferred = deferredIntentConfirmationType != null,
                 isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
                 deferredIntentConfirmationType = deferredIntentConfirmationType,
+                usesAutomaticPaymentMethodSelectionFlow = usesAutomaticPaymentMethodSelectionFlow,
+                elementsSessionConfigId = this.elementsSessionConfigId,
             )
         )
     }
@@ -412,15 +418,17 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.Payment(
                 mode = mode,
-                paymentSelection = paymentSelection,
-                duration = duration,
                 result = PaymentSheetEvent.Payment.Result.Failure(error),
+                duration = duration,
+                paymentSelection = paymentSelection,
                 currency = currency,
                 isDeferred = isDeferred,
                 isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
                 deferredIntentConfirmationType = null,
+                usesAutomaticPaymentMethodSelectionFlow = false,
+                elementsSessionConfigId = this.elementsSessionConfigId,
             )
         )
     }

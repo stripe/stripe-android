@@ -622,6 +622,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     eventReporter.onPaymentSuccess(
                         paymentSelection = paymentSelection,
                         deferredIntentConfirmationType = result.deferredIntentConfirmationType,
+                        usesAutomaticPaymentMethodSelectionFlow = result.intent.automaticPaymentMethods?.enabled == true,
                     )
                 }
 
@@ -714,6 +715,8 @@ internal class DefaultFlowController @Inject internal constructor(
         shouldResetOnCompleted: Boolean = true,
     ) {
         if (shouldLog) {
+            viewModel.state?.paymentSheetState?.stripeIntent?.automaticPaymentMethods?.enabled
+            // TODO: get a reference to the stripe intent for this result.
             logPaymentResult(paymentResult, deferredIntentConfirmationType)
         }
 
@@ -762,12 +765,15 @@ internal class DefaultFlowController @Inject internal constructor(
         paymentResult: PaymentResult?,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?
     ) {
+        // TODO: does this work for deferred?
+        val usesAutomaticPaymentMethodSelectionFlow = viewModel.state?.paymentSheetState?.stripeIntent?.automaticPaymentMethods?.enabled == true
         when (paymentResult) {
             is PaymentResult.Completed -> {
                 viewModel.paymentSelection?.let { paymentSelection ->
                     eventReporter.onPaymentSuccess(
                         paymentSelection = paymentSelection,
                         deferredIntentConfirmationType = deferredIntentConfirmationType,
+                        usesAutomaticPaymentMethodSelectionFlow = usesAutomaticPaymentMethodSelectionFlow,
                     )
                 }
             }

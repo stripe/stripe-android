@@ -7,6 +7,9 @@ import com.stripe.android.common.analytics.toAnalyticsMap
 import com.stripe.android.common.analytics.toAnalyticsValue
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
+import com.stripe.android.core.networking.EventSpecificClientAttributionMetadata
+import com.stripe.android.core.networking.PaymentIntentCreationFlow
+import com.stripe.android.core.networking.PaymentMethodSelectionFlow
 import com.stripe.android.core.utils.mapOfDurationInSeconds
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
@@ -432,6 +435,8 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
         private val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        usesAutomaticPaymentMethodSelectionFlow: Boolean,
+        elementsSessionConfigId: String?,
     ) : PaymentSheetEvent() {
 
         override val eventName: String =
@@ -461,6 +466,12 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                 put(FIELD_SET_AS_DEFAULT, setAsDefault)
             }
         }
+
+        override val clientAttributionMetadata = EventSpecificClientAttributionMetadata(
+            elementsSessionConfigId = elementsSessionConfigId,
+            paymentIntentCreationFlow = if (isDeferred) {  PaymentIntentCreationFlow.Deferred } else { PaymentIntentCreationFlow.Standard },
+            paymentMethodSelectionFlow = if (usesAutomaticPaymentMethodSelectionFlow)  { PaymentMethodSelectionFlow.Automatic } else { PaymentMethodSelectionFlow.MerchantSpecified },
+        )
 
         sealed interface Result {
             data object Success : Result

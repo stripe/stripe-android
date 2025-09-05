@@ -280,6 +280,7 @@ class DefaultEventReporterTest {
         completeEventReporter.onPaymentSuccess(
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
             deferredIntentConfirmationType = null,
+            usesAutomaticPaymentMethodSelectionFlow = false,
         )
 
         verify(analyticsRequestExecutor).executeAsync(
@@ -310,6 +311,7 @@ class DefaultEventReporterTest {
                     walletType = PaymentSelection.Saved.WalletType.GooglePay,
                 ),
                 deferredIntentConfirmationType = null,
+                usesAutomaticPaymentMethodSelectionFlow = false,
             )
 
             analyticEventCallbackRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
@@ -340,6 +342,7 @@ class DefaultEventReporterTest {
                     walletType = PaymentSelection.Saved.WalletType.Link,
                 ),
                 deferredIntentConfirmationType = null,
+                usesAutomaticPaymentMethodSelectionFlow = false,
             )
 
             verify(analyticsRequestExecutor).executeAsync(
@@ -977,7 +980,7 @@ class DefaultEventReporterTest {
         }
 
         val selection = mockUSBankAccountPaymentSelection(linkMode = LinkMode.LinkPaymentMethod)
-        completeEventReporter.onPaymentSuccess(selection, deferredIntentConfirmationType = null)
+        completeEventReporter.onPaymentSuccess(selection, deferredIntentConfirmationType = null, false)
 
         val argumentCaptor = argumentCaptor<AnalyticsRequest>()
         verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
@@ -993,7 +996,7 @@ class DefaultEventReporterTest {
         }
 
         val selection = mockUSBankAccountPaymentSelection(linkMode = LinkMode.LinkCardBrand)
-        completeEventReporter.onPaymentSuccess(selection, deferredIntentConfirmationType = null)
+        completeEventReporter.onPaymentSuccess(selection, deferredIntentConfirmationType = null, false)
 
         val argumentCaptor = argumentCaptor<AnalyticsRequest>()
         verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
@@ -1009,7 +1012,7 @@ class DefaultEventReporterTest {
         }
 
         val selection = mockUSBankAccountPaymentSelection(linkMode = null)
-        completeEventReporter.onPaymentSuccess(selection, deferredIntentConfirmationType = null)
+        completeEventReporter.onPaymentSuccess(selection, deferredIntentConfirmationType = null, false)
 
         val argumentCaptor = argumentCaptor<AnalyticsRequest>()
         verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
@@ -1462,20 +1465,21 @@ class DefaultEventReporterTest {
         onLoadStarted(initializedViaCompose = false)
         onLoadSucceeded(
             paymentSelection = paymentSelection,
-            googlePaySupported = googlePayReady,
             linkEnabled = linkEnabled,
             linkMode = linkMode,
+            googlePaySupported = googlePayReady,
+            linkDisplay = linkDisplay,
             currency = currency,
             initializationMode = initializationMode,
+            financialConnectionsAvailability = financialConnectionsAvailability,
             orderedLpms = listOf("card", "klarna"),
             requireCvcRecollection = requireCvcRecollection,
             hasDefaultPaymentMethod = hasDefaultPaymentMethod,
             setAsDefaultEnabled = setAsDefaultEnabled,
-            financialConnectionsAvailability = financialConnectionsAvailability,
-            linkDisplay = linkDisplay,
             paymentMethodOptionsSetupFutureUsage = paymentMethodOptionsSetupFutureUsage,
             setupFutureUsage = setupFutureUsage,
             openCardScanAutomatically = openCardScanAutomatically,
+            elementsSessionConfigId = "",
         )
     }
 

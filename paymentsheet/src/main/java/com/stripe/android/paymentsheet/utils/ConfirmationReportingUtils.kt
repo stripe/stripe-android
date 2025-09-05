@@ -27,7 +27,8 @@ internal fun EventReporter.reportPaymentResult(
         when (result) {
             is ConfirmationHandler.Result.Succeeded -> onPaymentSuccess(
                 selection,
-                result.deferredIntentConfirmationType
+                result.deferredIntentConfirmationType,
+                usesAutomaticPaymentMethodSelectionFlow = result.intent.automaticPaymentMethods?.enabled == true,
             )
             is ConfirmationHandler.Result.Failed -> {
                 result.toConfirmationError()?.let { confirmationError ->

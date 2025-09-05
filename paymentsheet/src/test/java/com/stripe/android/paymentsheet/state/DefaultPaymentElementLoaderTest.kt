@@ -1334,17 +1334,18 @@ internal class DefaultPaymentElementLoaderTest {
             linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
             googlePaySupported = true,
+            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
             currency = "usd",
             initializationMode = initializationMode,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             orderedLpms = listOf("card", "link"),
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
-            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
-            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null,
             openCardScanAutomatically = false,
+            elementsSessionConfigId = "",
         )
     }
 
@@ -1399,17 +1400,18 @@ internal class DefaultPaymentElementLoaderTest {
             linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
             googlePaySupported = true,
+            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
             currency = "usd",
             initializationMode = initializationMode,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             orderedLpms = listOf("card", "link"),
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
-            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
-            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null,
             openCardScanAutomatically = false,
+            elementsSessionConfigId = "",
         )
     }
 
@@ -2892,17 +2894,18 @@ internal class DefaultPaymentElementLoaderTest {
             linkEnabled = false,
             linkMode = null,
             googlePaySupported = true,
+            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
             currency = "usd",
             initializationMode = DEFAULT_INITIALIZATION_MODE,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             orderedLpms = listOf("card"),
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
-            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
-            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null,
             openCardScanAutomatically = false,
+            elementsSessionConfigId = "",
         )
     }
 
@@ -2928,17 +2931,18 @@ internal class DefaultPaymentElementLoaderTest {
             linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
             googlePaySupported = true,
+            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
             currency = "usd",
             initializationMode = DEFAULT_INITIALIZATION_MODE,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             orderedLpms = listOf("card", "link"),
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
-            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
-            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null,
             openCardScanAutomatically = false,
+            elementsSessionConfigId = "",
         )
     }
 
@@ -2964,17 +2968,18 @@ internal class DefaultPaymentElementLoaderTest {
             linkEnabled = true,
             linkMode = LinkMode.Passthrough,
             googlePaySupported = true,
+            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
             currency = "usd",
             initializationMode = DEFAULT_INITIALIZATION_MODE,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             orderedLpms = listOf("card", "link"),
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
-            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
-            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null,
             openCardScanAutomatically = false,
+            elementsSessionConfigId = "",
         )
     }
 
@@ -2998,17 +3003,18 @@ internal class DefaultPaymentElementLoaderTest {
             linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
             googlePaySupported = true,
+            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
             currency = "usd",
             initializationMode = DEFAULT_INITIALIZATION_MODE,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             orderedLpms = listOf("card", "link"),
             requireCvcRecollection = true,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
-            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
-            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null,
             openCardScanAutomatically = false,
+            elementsSessionConfigId = "",
         )
     }
 
@@ -3042,17 +3048,18 @@ internal class DefaultPaymentElementLoaderTest {
             linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
             googlePaySupported = true,
+            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
             currency = "usd",
             initializationMode = initializationMode,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             orderedLpms = listOf("card", "link"),
             requireCvcRecollection = true,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
-            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
-            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null,
             openCardScanAutomatically = false,
+            elementsSessionConfigId = "",
         )
     }
 
@@ -3086,17 +3093,18 @@ internal class DefaultPaymentElementLoaderTest {
             linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
             googlePaySupported = true,
+            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
             currency = "usd",
             initializationMode = initializationMode,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             orderedLpms = listOf("card", "link"),
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
-            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
-            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null,
             openCardScanAutomatically = false,
+            elementsSessionConfigId = "",
         )
     }
 
@@ -3241,6 +3249,7 @@ internal class DefaultPaymentElementLoaderTest {
             paymentMethodOptionsSetupFutureUsage = anyOrNull(),
             setupFutureUsage = anyOrNull(),
             openCardScanAutomatically = anyOrNull(),
+            elementsSessionConfigId = "",
         )
     }
 
@@ -3310,6 +3319,7 @@ internal class DefaultPaymentElementLoaderTest {
             paymentMethodOptionsSetupFutureUsage = anyOrNull(),
             setupFutureUsage = anyOrNull(),
             openCardScanAutomatically = anyOrNull(),
+            elementsSessionConfigId = "",
         )
     }
 
@@ -3347,6 +3357,7 @@ internal class DefaultPaymentElementLoaderTest {
             paymentMethodOptionsSetupFutureUsage = eq(true),
             setupFutureUsage = anyOrNull(),
             openCardScanAutomatically = anyOrNull(),
+            elementsSessionConfigId = "",
         )
     }
 
@@ -3471,6 +3482,7 @@ internal class DefaultPaymentElementLoaderTest {
             paymentMethodOptionsSetupFutureUsage = anyOrNull(),
             setupFutureUsage = eq(StripeIntent.Usage.OffSession),
             openCardScanAutomatically = anyOrNull(),
+            elementsSessionConfigId = "",
         )
     }
 
@@ -3509,6 +3521,7 @@ internal class DefaultPaymentElementLoaderTest {
             paymentMethodOptionsSetupFutureUsage = anyOrNull(),
             setupFutureUsage = anyOrNull(),
             openCardScanAutomatically = eq(true),
+            elementsSessionConfigId = "",
         )
     }
 
@@ -3694,17 +3707,18 @@ internal class DefaultPaymentElementLoaderTest {
             linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
             googlePaySupported = true,
+            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
             currency = "usd",
             initializationMode = initializationMode,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             orderedLpms = listOf("card", "link"),
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
-            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
-            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null,
             openCardScanAutomatically = false,
+            elementsSessionConfigId = "",
         )
     }
 

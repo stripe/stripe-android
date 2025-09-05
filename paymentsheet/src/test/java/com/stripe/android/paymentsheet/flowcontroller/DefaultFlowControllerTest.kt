@@ -197,6 +197,7 @@ internal class DefaultFlowControllerTest {
             .onPaymentSuccess(
                 paymentSelection = isA<PaymentSelection.New>(),
                 deferredIntentConfirmationType = isNull(),
+                usesAutomaticPaymentMethodSelectionFlow = false,
             )
     }
 
@@ -1489,7 +1490,9 @@ internal class DefaultFlowControllerTest {
             val flowController = createFlowController()
             val errorMessage = "Original error message"
 
-            flowController.onPaymentResult(PaymentResult.Failed(Throwable(errorMessage)))
+            flowController.onPaymentResult(
+                PaymentResult.Failed(Throwable(errorMessage))
+            )
 
             verify(paymentResultCallback).onPaymentSheetResult(
                 argWhere { paymentResult ->
@@ -1977,6 +1980,7 @@ internal class DefaultFlowControllerTest {
         verify(eventReporter).onPaymentSuccess(
             paymentSelection = eq(savedSelection),
             deferredIntentConfirmationType = isNull(),
+            usesAutomaticPaymentMethodSelectionFlow = false,
         )
     }
 
@@ -2007,6 +2011,7 @@ internal class DefaultFlowControllerTest {
             verify(eventReporter).onPaymentSuccess(
                 paymentSelection = eq(savedSelection),
                 deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.Client),
+                usesAutomaticPaymentMethodSelectionFlow = false,
             )
         }
 
@@ -2037,6 +2042,7 @@ internal class DefaultFlowControllerTest {
             verify(eventReporter).onPaymentSuccess(
                 paymentSelection = eq(savedSelection),
                 deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.Server),
+                usesAutomaticPaymentMethodSelectionFlow = false,
             )
         }
 

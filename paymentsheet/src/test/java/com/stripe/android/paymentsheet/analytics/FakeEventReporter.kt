@@ -119,6 +119,7 @@ internal class FakeEventReporter : EventReporter {
         paymentMethodOptionsSetupFutureUsage: Boolean,
         setupFutureUsage: StripeIntent.Usage?,
         openCardScanAutomatically: Boolean,
+        elementsSessionConfigId: String,
     ) {
     }
 
@@ -175,7 +176,8 @@ internal class FakeEventReporter : EventReporter {
 
     override fun onPaymentSuccess(
         paymentSelection: PaymentSelection,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?
+        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        usesAutomaticPaymentMethodSelectionFlow: Boolean
     ) {
         _paymentSuccessCalls.add(
             PaymentSuccessCall(

@@ -70,6 +70,8 @@ sealed interface StripeIntent : StripeModel {
      */
     val linkFundingSources: List<String>
 
+    val automaticPaymentMethods: AutomaticPaymentMethods?
+
     /**
      * Country code of the user.
      */
@@ -171,6 +173,9 @@ sealed interface StripeIntent : StripeModel {
             }
         }
     }
+
+    @Parcelize
+    data class AutomaticPaymentMethods(val enabled: Boolean) : StripeModel
 
     sealed class NextActionData : StripeModel {
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

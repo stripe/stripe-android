@@ -1047,6 +1047,7 @@ internal class PaymentSheetViewModelTest {
                 .onPaymentSuccess(
                     paymentSelection = selection,
                     deferredIntentConfirmationType = null,
+                    usesAutomaticPaymentMethodSelectionFlow = false,
                 )
             assertThat(prefsRepository.paymentSelectionArgs)
                 .containsExactly(selection)
@@ -1116,6 +1117,7 @@ internal class PaymentSheetViewModelTest {
                 .onPaymentSuccess(
                     paymentSelection = selection,
                     deferredIntentConfirmationType = null,
+                    usesAutomaticPaymentMethodSelectionFlow = false,
                 )
 
             assertThat(prefsRepository.paymentSelectionArgs).isEmpty()
@@ -2282,6 +2284,7 @@ internal class PaymentSheetViewModelTest {
         verify(eventReporter).onPaymentSuccess(
             paymentSelection = eq(savedSelection),
             deferredIntentConfirmationType = isNull(),
+            usesAutomaticPaymentMethodSelectionFlow = false,
         )
     }
 
@@ -2317,6 +2320,7 @@ internal class PaymentSheetViewModelTest {
             verify(eventReporter).onPaymentSuccess(
                 paymentSelection = eq(savedSelection),
                 deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.None),
+                usesAutomaticPaymentMethodSelectionFlow = false,
             )
         }
 
@@ -2352,6 +2356,7 @@ internal class PaymentSheetViewModelTest {
             verify(eventReporter).onPaymentSuccess(
                 paymentSelection = eq(savedSelection),
                 deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.Client),
+                usesAutomaticPaymentMethodSelectionFlow = false,
             )
         }
 
@@ -2387,6 +2392,7 @@ internal class PaymentSheetViewModelTest {
             verify(eventReporter).onPaymentSuccess(
                 paymentSelection = eq(savedSelection),
                 deferredIntentConfirmationType = eq(DeferredIntentConfirmationType.Server),
+                usesAutomaticPaymentMethodSelectionFlow = false,
             )
         }
 
