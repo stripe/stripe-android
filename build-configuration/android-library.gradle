@@ -47,6 +47,18 @@ android {
         testInstrumentationRunnerArguments clearPackageData: 'true'
     }
 
+    testOptions {
+        managedDevices {
+            localDevices {
+                register("pixel2api33") {
+                    device = "Pixel 2"
+                    apiLevel = 33
+                    systemImageSource = "aosp-atd"
+                }
+            }
+        }
+    }
+
     sourceSets {
         main {
             res.srcDirs = ['res']
