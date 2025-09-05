@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [ADDED][11539](https://github.com/stripe/stripe-android/pull/11539) - Added support for [PayNow](https://stripe.com/payment-method/paynow) to PaymentSheet.
+
 ## 21.25.0 - 2025-09-02
 
 ### Payments

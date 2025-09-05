@@ -7,7 +7,6 @@ import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.EnablePayNowSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.TestParameters
@@ -22,7 +21,6 @@ internal class TestPayNow : BasePlaygroundTest() {
     ) { settings ->
         settings[CountrySettingsDefinition] = Country.SG
         settings[CurrencySettingsDefinition] = Currency.SGD
-        settings[EnablePayNowSettingsDefinition] = true
         settings[SupportedPaymentMethodsSettingsDefinition] = listOf(
             PaymentMethod.Type.Card,
             PaymentMethod.Type.PayNow

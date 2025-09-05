@@ -14,7 +14,6 @@ object FeatureFlags {
     val showInlineOtpInWalletButtons = FeatureFlag("Show Inline Signup in Wallet Buttons")
     val forceEnableLinkPaymentSelectionHint = FeatureFlag("Force enable payment selection hint")
     val cardScanGooglePayMigration = FeatureFlag("Use Google Payment Card Recognition API for Card Scan")
-    val enablePayNow = FeatureFlag("Enable PayNow")
     val enablePassiveCaptcha = FeatureFlag("Enable Passive Captcha")
 }
 

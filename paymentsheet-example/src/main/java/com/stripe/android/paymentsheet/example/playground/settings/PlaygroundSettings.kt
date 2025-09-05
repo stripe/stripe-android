@@ -557,7 +557,6 @@ internal class PlaygroundSettings private constructor(
                     PlaygroundConfigurationData.IntegrationType.CustomerSheet,
                 )
             ),
-            EnablePayNowSettingsDefinition,
             PassiveCaptchaDefinition,
         )
 
