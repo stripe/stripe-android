@@ -1199,7 +1199,14 @@ internal class FlowControllerTest {
                     .walletButtons(
                         PaymentSheet.WalletButtonsConfiguration(
                             willDisplayExternally = true,
-                            walletsToShow = listOf("link"),
+                            visibility = PaymentSheet.WalletButtonsConfiguration.Visibility(
+                                walletButtonsView = mapOf(
+                                    PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                                        PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Never,
+                                    PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                                        PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always,
+                                ),
+                            )
                         )
                     )
                     .build(),

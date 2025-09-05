@@ -3328,13 +3328,78 @@ class PaymentSheet internal constructor(
          * are identified by their wallet identifier (google_pay, link, shop_pay). An
          * empty list means all wallets will be shown.
          */
-        val walletsToShow: List<String> = emptyList(),
+        val visibility: Visibility = Visibility(),
 
         /**
          * Theme configuration for wallet buttons
          */
         val buttonThemes: ButtonThemes = ButtonThemes(),
-    ) : Parcelable
+    ) : Parcelable {
+        @Poko
+        @Parcelize
+        class Visibility(
+            /**
+             * Configures how wallets are shown in Payment Element. Wallets that don't have a provided visibility will
+             * have theirs automatically determined.
+             *
+             * Defaults to an empty map.
+             */
+            val paymentElement: Map<Wallet, PaymentElementVisibility> = emptyMap(),
+
+            /**
+             * Configures how wallets are shown in the wallet buttons view. Wallets that don't have a provided
+             * visibility will have theirs automatically determined.
+             *
+             * Defaults to an empty map.
+             */
+            val walletButtonsView: Map<Wallet, WalletButtonsViewVisibility> = emptyMap(),
+        ) : Parcelable
+
+        /**
+         * Available visibility options within the wallet buttons view
+         */
+        enum class WalletButtonsViewVisibility {
+            /**
+             * Wallet is always shown when the wallet buttons view is rendered.
+             */
+            Always,
+
+            /**
+             * Visibility is never shown when the wallet buttons view is rendered.
+             */
+            Never,
+        }
+
+        /**
+         * Available visibility options for a wallet within Payment Element
+         */
+        enum class PaymentElementVisibility {
+            /**
+             * Visibility is automatically determined based on if the wallet buttons view is rendered.
+             */
+            Automatic,
+
+            /**
+             * Wallet is always shown regardless of if the wallet buttons view is rendered.
+             */
+            Always,
+
+            /**
+             * Visibility is never shown regardless of if the wallet buttons view is rendered.
+             */
+            Never,
+        }
+
+        /**
+         * Definition for a wallet available for use in either the wallet buttons view, payment element,
+         * or both.
+         */
+        enum class Wallet {
+            Link,
+            GooglePay,
+            ShopPay
+        }
+    }
 
     /**
      * Configuration related to Shop Pay, which only applies when using wallet buttons.

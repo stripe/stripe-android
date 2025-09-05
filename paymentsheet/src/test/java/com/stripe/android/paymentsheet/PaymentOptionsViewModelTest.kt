@@ -28,7 +28,6 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -38,6 +37,7 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
+import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.addresselement.AutocompleteContract
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -932,73 +932,158 @@ internal class PaymentOptionsViewModelTest {
     }
 
     @Test
-    fun `Link but not Google Pay should be available if only Link allowed in wallets`() = runTest {
-        val viewModel = createViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-                linkState = LinkState(
-                    configuration = mock(),
-                    signupMode = null,
-                    loginState = LinkState.LoginState.NeedsVerification,
+    fun `Wallets should not be available if visible but not available`() =
+        testWalletVisibility(
+            linkState = null,
+            isGooglePayReady = false,
+            visibility = PaymentSheet.WalletButtonsConfiguration.Visibility(
+                paymentElement = mapOf(
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                        PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Always,
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                        PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Always,
                 ),
-                isGooglePayReady = true,
-            ).copy(
-                walletsToShow = listOf(WalletType.Link)
-            )
-        )
-
-        viewModel.walletsState.test {
-            val item = awaitItem()
-
-            assertThat(item?.googlePay(WalletLocation.HEADER)).isNull()
-            assertThat(item?.link(WalletLocation.HEADER)).isNotNull()
+            ),
+            walletButtonsRendered = true,
+        ) { walletsState ->
+            assertThat(walletsState?.googlePay(WalletLocation.HEADER)).isNull()
+            assertThat(walletsState?.link(WalletLocation.HEADER)).isNull()
         }
+
+    @Test
+    fun `Link but not Google Pay should be available if only Link can be visible when buttons not rendered`() =
+        testWalletVisibility(
+            linkState = AVAILABLE_LINK_STATE,
+            isGooglePayReady = true,
+            visibility = PaymentSheet.WalletButtonsConfiguration.Visibility(
+                paymentElement = mapOf(
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                        PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Never,
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                        PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Automatic,
+                ),
+            ),
+            walletButtonsRendered = false,
+        ) { walletsState ->
+            assertThat(walletsState?.googlePay(WalletLocation.HEADER)).isNull()
+            assertThat(walletsState?.link(WalletLocation.HEADER)).isNotNull()
+        }
+
+    @Test
+    fun `Google Pay but not Link should be available if only Google Pay can be visible when buttons not rendered`() =
+        testWalletVisibility(
+            linkState = AVAILABLE_LINK_STATE,
+            isGooglePayReady = true,
+            visibility = PaymentSheet.WalletButtonsConfiguration.Visibility(
+                paymentElement = mapOf(
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                        PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Automatic,
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                        PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Never,
+                ),
+            ),
+            walletButtonsRendered = false,
+        ) { walletsState ->
+            assertThat(walletsState?.googlePay(WalletLocation.HEADER)).isNotNull()
+            assertThat(walletsState?.link(WalletLocation.HEADER)).isNull()
+        }
+
+    @Test
+    fun `All wallets should be available if wallet buttons not rendered & automatic`() = testWalletVisibility(
+        linkState = AVAILABLE_LINK_STATE,
+        isGooglePayReady = true,
+        visibility = PaymentSheet.WalletButtonsConfiguration.Visibility(
+            paymentElement = mapOf(
+                PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                    PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Automatic,
+                PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                    PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Automatic,
+            ),
+        ),
+        walletButtonsRendered = false,
+    ) { walletsState ->
+        assertThat(walletsState?.googlePay(WalletLocation.HEADER)).isNotNull()
+        assertThat(walletsState?.link(WalletLocation.HEADER)).isNotNull()
     }
 
     @Test
-    fun `Google Pay but not Link should be available if only Link allowed in wallets`() = runTest {
-        val viewModel = createViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-                linkState = LinkState(
-                    configuration = mock(),
-                    signupMode = null,
-                    loginState = LinkState.LoginState.NeedsVerification,
-                ),
-                isGooglePayReady = true,
-            ).copy(
-                walletsToShow = listOf(WalletType.GooglePay)
-            )
-        )
-
-        viewModel.walletsState.test {
-            val item = awaitItem()
-
-            assertThat(item?.googlePay(WalletLocation.HEADER)).isNotNull()
-            assertThat(item?.link(WalletLocation.HEADER)).isNull()
-        }
+    fun `Wallets should not be available if wallet buttons not rendered & never`() = testWalletVisibility(
+        linkState = AVAILABLE_LINK_STATE,
+        isGooglePayReady = true,
+        visibility = PaymentSheet.WalletButtonsConfiguration.Visibility(
+            paymentElement = mapOf(
+                PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                    PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Never,
+                PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                    PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Never,
+            ),
+        ),
+        walletButtonsRendered = false,
+    ) { walletsState ->
+        assertThat(walletsState?.googlePay(WalletLocation.HEADER)).isNull()
+        assertThat(walletsState?.link(WalletLocation.HEADER)).isNull()
     }
 
     @Test
-    fun `All wallets should be available if allowed in wallets`() = runTest {
-        val viewModel = createViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-                linkState = LinkState(
-                    configuration = mock(),
-                    signupMode = null,
-                    loginState = LinkState.LoginState.NeedsVerification,
-                ),
-                isGooglePayReady = true,
-            ).copy(
-                walletsToShow = WalletType.entries
-            )
-        )
-
-        viewModel.walletsState.test {
-            val item = awaitItem()
-
-            assertThat(item?.googlePay(WalletLocation.HEADER)).isNotNull()
-            assertThat(item?.link(WalletLocation.HEADER)).isNotNull()
-        }
+    fun `Wallets should not be available if wallet buttons rendered & automatic`() = testWalletVisibility(
+        linkState = AVAILABLE_LINK_STATE,
+        isGooglePayReady = true,
+        visibility = PaymentSheet.WalletButtonsConfiguration.Visibility(
+            paymentElement = mapOf(
+                PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                    PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Automatic,
+                PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                    PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Automatic,
+            ),
+        ),
+        walletButtonsRendered = true,
+    ) { walletsState ->
+        assertThat(walletsState?.googlePay(WalletLocation.HEADER)).isNull()
+        assertThat(walletsState?.link(WalletLocation.HEADER)).isNull()
     }
+
+    @Test
+    fun `Wallets should be available if wallet buttons rendered & always`() = testWalletVisibility(
+        linkState = AVAILABLE_LINK_STATE,
+        isGooglePayReady = true,
+        visibility = PaymentSheet.WalletButtonsConfiguration.Visibility(
+            paymentElement = mapOf(
+                PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                    PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Always,
+                PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                    PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Always,
+            ),
+        ),
+        walletButtonsRendered = true,
+    ) { walletsState ->
+        assertThat(walletsState?.googlePay(WalletLocation.HEADER)).isNotNull()
+        assertThat(walletsState?.link(WalletLocation.HEADER)).isNotNull()
+    }
+
+    @Test
+    fun `Wallets should be available if wallet buttons rendered but visibility for wallets is set to never`() =
+        testWalletVisibility(
+            linkState = AVAILABLE_LINK_STATE,
+            isGooglePayReady = true,
+            visibility = PaymentSheet.WalletButtonsConfiguration.Visibility(
+                paymentElement = mapOf(
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                        PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Automatic,
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                        PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Automatic,
+                ),
+                walletButtonsView = mapOf(
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                        PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Never,
+                    PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                        PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Never,
+                ),
+            ),
+            walletButtonsRendered = true,
+        ) { walletsState ->
+            assertThat(walletsState?.googlePay(WalletLocation.HEADER)).isNotNull()
+            assertThat(walletsState?.link(WalletLocation.HEADER)).isNotNull()
+        }
 
     @Test
     fun `On register for activity result, should register link launcher & autocomplete launcher`() = runTest {
@@ -1013,8 +1098,6 @@ internal class PaymentOptionsViewModelTest {
                         loginState = LinkState.LoginState.NeedsVerification,
                     ),
                     isGooglePayReady = true,
-                ).copy(
-                    walletsToShow = WalletType.entries
                 )
             )
 
@@ -1058,6 +1141,35 @@ internal class PaymentOptionsViewModelTest {
                 assertThat(awaitItem()).isNotNull()
             }
         }
+
+    @OptIn(WalletButtonsPreview::class)
+    private fun testWalletVisibility(
+        linkState: LinkState?,
+        isGooglePayReady: Boolean,
+        walletButtonsRendered: Boolean,
+        visibility: PaymentSheet.WalletButtonsConfiguration.Visibility,
+        test: (WalletsState?) -> Unit
+    ) = runTest {
+        val viewModel = createViewModel(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                linkState = linkState,
+                isGooglePayReady = isGooglePayReady,
+                config = PAYMENT_OPTION_CONTRACT_ARGS.configuration.newBuilder()
+                    .walletButtons(
+                        PaymentSheet.WalletButtonsConfiguration(
+                            visibility = visibility,
+                        )
+                    )
+                    .build()
+            ).copy(
+                walletButtonsRendered = walletButtonsRendered
+            )
+        )
+
+        viewModel.walletsState.test {
+            test(awaitItem())
+        }
+    }
 
     /**
      * Helper function to test user cancellation scenarios
@@ -1241,7 +1353,12 @@ internal class PaymentOptionsViewModelTest {
                 account = null,
                 lastUpdateReason = null
             ),
-            walletsToShow = WalletType.entries,
+            walletButtonsRendered = false,
+        )
+        private val AVAILABLE_LINK_STATE = LinkState(
+            configuration = TestFactory.LINK_CONFIGURATION,
+            signupMode = null,
+            loginState = LinkState.LoginState.NeedsVerification,
         )
     }
 
