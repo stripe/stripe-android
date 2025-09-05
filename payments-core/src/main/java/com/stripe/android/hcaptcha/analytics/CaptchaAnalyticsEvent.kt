@@ -39,8 +39,21 @@ internal sealed interface CaptchaAnalyticsEvent : AnalyticsEvent {
         override val eventName = "elements.captcha.passive.execute"
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    class Attach(
+        val isReady: Boolean,
+        override val siteKey: String
+    ) : CaptchaAnalyticsEvent {
+        override val eventName = "elements.captcha.passive.attach"
+
+        override val additionalParams = mapOf(
+            FIELD_IS_READY to isReady
+        )
+    }
+
     companion object {
         internal const val FIELD_ERROR_MESSAGE = "error_message"
         internal const val FIELD_SITE_KEY = "site_key"
+        internal const val FIELD_IS_READY = "is_ready"
     }
 }
