@@ -1,4 +1,4 @@
-package com.stripe.android.challenge
+package com.stripe.android.challenge.warmer.activity
 
 import android.app.Application
 import androidx.fragment.app.FragmentActivity
@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.stripe.android.challenge.PassiveChallengeWarmerActivity.Companion.getArgs
+import com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerActivity.Companion.getArgs
 import com.stripe.android.hcaptcha.HCaptchaService
 import com.stripe.android.model.PassiveCaptchaParams
 import kotlinx.coroutines.flow.Flow
@@ -16,22 +16,18 @@ import javax.inject.Inject
 
 internal class PassiveChallengeWarmerViewModel @Inject constructor(
     private val passiveCaptchaParams: PassiveCaptchaParams,
-    private val hCaptchaService: HCaptchaService
+    private val hCaptchaService: HCaptchaService,
 ) : ViewModel() {
     private val _result = MutableSharedFlow<PassiveChallengeWarmerResult>(replay = 1)
     val result: Flow<PassiveChallengeWarmerResult> = _result
 
     suspend fun warmUpPassiveChallenge(activity: FragmentActivity) {
-        runCatching {
-            hCaptchaService.warmUp(
-                activity = activity,
-                siteKey = passiveCaptchaParams.siteKey,
-                rqData = passiveCaptchaParams.rqData
-            )
-            _result.emit(PassiveChallengeWarmerResult.Success)
-        }.getOrElse { error ->
-            _result.emit(PassiveChallengeWarmerResult.Failed(error))
-        }
+        hCaptchaService.warmUp(
+            activity = activity,
+            siteKey = passiveCaptchaParams.siteKey,
+            rqData = passiveCaptchaParams.rqData
+        )
+        _result.emit(PassiveChallengeWarmerResult)
     }
 
     class NoArgsException : IllegalArgumentException("No args found")
@@ -42,8 +38,7 @@ internal class PassiveChallengeWarmerViewModel @Inject constructor(
                 val args: PassiveChallengeWarmerArgs = getArgs(createSavedStateHandle())
                     ?: throw NoArgsException()
                 val app = this[APPLICATION_KEY] as Application
-                DaggerPassiveChallengeWarmerComponent
-                    .builder()
+                DaggerPassiveChallengeWarmerActivityComponent.builder()
                     .passiveCaptchaParams(args.passiveCaptchaParams)
                     .context(app)
                     .publishableKeyProvider { args.publishableKey }

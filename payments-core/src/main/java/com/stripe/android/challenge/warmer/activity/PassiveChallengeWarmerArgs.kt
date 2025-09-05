@@ -1,4 +1,4 @@
-package com.stripe.android.challenge
+package com.stripe.android.challenge.warmer.activity
 
 import android.os.Parcelable
 import com.stripe.android.model.PassiveCaptchaParams

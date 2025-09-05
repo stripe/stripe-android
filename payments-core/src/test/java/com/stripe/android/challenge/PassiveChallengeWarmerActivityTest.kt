@@ -8,6 +8,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerActivity
+import com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerArgs
+import com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerContract
+import com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerResult
+import com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerViewModel
 import com.stripe.android.hcaptcha.HCaptchaService
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PassiveCaptchaParams
@@ -28,7 +33,7 @@ internal class PassiveChallengeWarmerActivityTest {
     val coroutineTestRule = CoroutineTestRule()
 
     @Test
-    fun `activity should dismiss with success result when warmUp succeeds`() = runTest {
+    fun `activity should dismiss result after warmUp`() = runTest {
         val hCaptchaService = FakeHCaptchaService().apply {
             warmUpResult = { }
         }
@@ -39,27 +44,7 @@ internal class PassiveChallengeWarmerActivityTest {
         assertThat(scenario.getResult().resultCode).isEqualTo(PassiveChallengeWarmerActivity.RESULT_COMPLETE)
 
         val result = extractActivityResult(scenario)
-        assertThat(result).isInstanceOf<PassiveChallengeWarmerResult.Success>()
-
-        scenario.close()
-    }
-
-    @Test
-    fun `activity should dismiss with failed result when warmUp fails`() = runTest {
-        val testError = Exception("WarmUp failed")
-        val hCaptchaService = FakeHCaptchaService().apply {
-            warmUpResult = { throw testError }
-        }
-
-        val scenario = launchActivityForResult(hCaptchaService)
-        advanceUntilIdle()
-
-        assertThat(scenario.getResult().resultCode).isEqualTo(PassiveChallengeWarmerActivity.RESULT_COMPLETE)
-
-        val result = extractActivityResult(scenario)
-        assertThat(result).isInstanceOf<PassiveChallengeWarmerResult.Failed>()
-        val failedResult = result as PassiveChallengeWarmerResult.Failed
-        assertThat(failedResult.error).isEqualTo(testError)
+        assertThat(result).isInstanceOf<PassiveChallengeWarmerResult>()
 
         scenario.close()
     }

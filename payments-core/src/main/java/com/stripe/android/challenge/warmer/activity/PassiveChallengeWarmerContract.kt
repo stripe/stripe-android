@@ -1,4 +1,4 @@
-package com.stripe.android.challenge
+package com.stripe.android.challenge.warmer.activity
 
 import android.content.Context
 import android.content.Intent
@@ -18,12 +18,7 @@ class PassiveChallengeWarmerContract :
         )
     }
 
-    override fun parseResult(resultCode: Int, intent: Intent?): PassiveChallengeWarmerResult {
-        val result = intent?.extras?.let {
-            BundleCompat.getParcelable(it, EXTRA_RESULT, PassiveChallengeWarmerResult::class.java)
-        }
-        return result ?: PassiveChallengeWarmerResult.Failed(Throwable("No result"))
-    }
+    override fun parseResult(resultCode: Int, intent: Intent?) = PassiveChallengeWarmerResult
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Args(
@@ -34,6 +29,6 @@ class PassiveChallengeWarmerContract :
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
-        const val EXTRA_RESULT = "com.stripe.android.challenge.PassiveChallengeWarmerContract.extra_result"
+        const val EXTRA_RESULT = "com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerContract.extra_result"
     }
 }
