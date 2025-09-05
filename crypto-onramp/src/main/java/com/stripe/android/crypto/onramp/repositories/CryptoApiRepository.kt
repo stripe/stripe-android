@@ -261,6 +261,7 @@ internal class CryptoApiRepository @Inject constructor(
             responseSerializer = responseSerializer,
             json = json
         ).also {
+            // If we get an authorization error, clear the Link account to force a re-authentication
             if (it.exceptionOrNull()?.isLinkAuthorizationError() == true) {
                 linkController.clearLinkAccount()
             }
