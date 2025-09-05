@@ -103,6 +103,15 @@ internal class OnrampActivity : ComponentActivity() {
             }
         }
 
+        lifecycleScope.launch {
+            viewModel.authorizeEvent.collect { event ->
+                event?.let {
+                    onrampPresenter.authorize(event.linkAuthIntentId)
+                    viewModel.clearAuthorizeEvent()
+                }
+            }
+        }
+
         setContent {
             OnrampExampleTheme {
                 Scaffold(

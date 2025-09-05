@@ -23,6 +23,8 @@ import com.stripe.android.crypto.onramp.model.KycCollectionRequest
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationRequest
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
+import com.stripe.android.link.LinkController
+import com.stripe.android.link.utils.isLinkAuthorizationError
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.utils.filterNotNullValues
@@ -44,6 +46,7 @@ import javax.inject.Singleton
 internal class CryptoApiRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
     private val stripeRepository: StripeRepository,
+    private val linkController: LinkController,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
     apiVersion: String,
@@ -257,7 +260,12 @@ internal class CryptoApiRepository @Inject constructor(
             request = request,
             responseSerializer = responseSerializer,
             json = json
-        )
+        ).also {
+            // If we get an authorization error, clear the Link account to force a re-authentication
+            if (it.exceptionOrNull()?.isLinkAuthorizationError() == true) {
+                linkController.clearLinkAccount()
+            }
+        }
     }
 
     internal companion object {

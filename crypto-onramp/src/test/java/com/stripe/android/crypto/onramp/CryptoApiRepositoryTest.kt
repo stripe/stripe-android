@@ -9,6 +9,7 @@ import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.crypto.onramp.model.DateOfBirth
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
+import com.stripe.android.link.LinkController
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.test.runTest
@@ -25,8 +26,8 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class CryptoApiRepositoryTest {
     private val stripeNetworkClient: StripeNetworkClient = mock()
-
     private val stripeRepository = mock<StripeRepository>()
+    private val linkController = mock<LinkController>()
 
     private val cryptoApiRepository = CryptoApiRepository(
         stripeNetworkClient = stripeNetworkClient,
@@ -35,7 +36,8 @@ class CryptoApiRepositoryTest {
         stripeAccountIdProvider = { "TestAccountId" },
         apiVersion = ApiVersion(betas = emptySet()).code,
         sdkVersion = StripeSdkVersion.VERSION,
-        appInfo = null
+        appInfo = null,
+        linkController = linkController
     )
 
     private val apiRequestArgumentCaptor: KArgumentCaptor<ApiRequest> = argumentCaptor()

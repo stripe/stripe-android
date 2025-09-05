@@ -19,6 +19,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.wallet.displayName
+import com.stripe.android.link.utils.isLinkAuthorizationError
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentMethod
@@ -213,7 +214,7 @@ internal class LinkControllerInteractor @Inject constructor(
     fun onLinkActivityResult(result: LinkActivityResult) {
         val currentLaunchMode = _state.value.currentLaunchMode
         updateState { it.copy(currentLaunchMode = null) }
-        updateStateOnAccountUpdate(result.linkAccountUpdate)
+        updateLinkAccountOnLinkResult(result)
 
         when (currentLaunchMode) {
             is LinkLaunchMode.PaymentMethodSelection ->
@@ -225,6 +226,16 @@ internal class LinkControllerInteractor @Inject constructor(
             else ->
                 logger.warning("$tag: unexpected result for launch mode: $currentLaunchMode")
         }
+    }
+
+    private fun updateLinkAccountOnLinkResult(result: LinkActivityResult) {
+        val error: Throwable? = (result as? LinkActivityResult.Failed)?.error
+        val linkAccountUpdate = when {
+            // Clear Link account if we got a Link auth error during any flow.
+            error?.isLinkAuthorizationError() == true -> LinkAccountUpdate.Value(null)
+            else -> result.linkAccountUpdate
+        }
+        updateStateOnAccountUpdate(update = linkAccountUpdate)
     }
 
     private fun updateStateOnNewEmail(email: String?) {
@@ -557,6 +568,10 @@ internal class LinkControllerInteractor @Inject constructor(
     @VisibleForTesting
     internal fun updateState(block: (State) -> State) {
         _state.update(block)
+    }
+
+    fun clearLinkAccount() {
+        updateStateOnAccountUpdate(LinkAccountUpdate.Value(account = null))
     }
 
     internal data class State(
