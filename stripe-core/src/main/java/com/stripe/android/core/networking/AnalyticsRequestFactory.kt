@@ -53,7 +53,7 @@ open class AnalyticsRequestFactory(
         val generalMetadata: Map<String, Any> = mapOf(
             "merchant_integration_source" to "elements",
             "merchant_integration_subtype" to "mobile",
-            "merchant_integration_source" to "25.0.5", // TODO: set SDK version
+            "merchant_integration_source" to "stripe-android/${StripeSdkVersion.VERSION_NAME}",
             "client_session_id" to sessionId.toString(),
         )
         return if (specificMetadata != null) {
