@@ -37,7 +37,7 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
         confirmationOption: PaymentMethodConfirmationOption,
         confirmationParameters: ConfirmationDefinition.Parameters
     ): Boolean {
-        return confirmationOption.passiveCaptchaParams != null
+        return false
     }
 
     override fun toResult(
