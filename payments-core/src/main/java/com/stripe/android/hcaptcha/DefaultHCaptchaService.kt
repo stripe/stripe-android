@@ -43,6 +43,7 @@ internal class DefaultHCaptchaService(
         siteKey: String,
         rqData: String?
     ): HCaptchaService.Result {
+        val isReady = cachedResult.value.isReady
         val result = runCatching {
             withTimeout(TIMEOUT) {
                 transformCachedResult(activity, siteKey, rqData)
@@ -50,6 +51,7 @@ internal class DefaultHCaptchaService(
         }.getOrElse { e ->
             HCaptchaService.Result.Failure(e)
         }
+        captchaEventsReporter.attach(siteKey, isReady)
         return result
     }
 
@@ -149,6 +151,14 @@ internal class DefaultHCaptchaService(
                 return when (this) {
                     is Failure, Idle -> true
                     Loading, is Success -> false
+                }
+            }
+
+        val isReady: Boolean
+            get() {
+                return when (this) {
+                    Loading, Idle -> false
+                    is Failure, is Success -> true
                 }
             }
     }

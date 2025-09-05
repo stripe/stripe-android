@@ -51,6 +51,10 @@ internal class DefaultCaptchaEventsReporter @Inject constructor(
         )
     }
 
+    override fun attach(siteKey: String, isReady: Boolean) {
+        fireEvent(CaptchaAnalyticsEvent.Attach(isReady, siteKey))
+    }
+
     private fun fireEvent(
         event: CaptchaAnalyticsEvent,
         additionalParams: Map<String, Any> = emptyMap()
@@ -65,7 +69,7 @@ internal class DefaultCaptchaEventsReporter @Inject constructor(
 
     private fun durationInSecondsFromStart(duration: Duration?): Map<String, Float> {
         return duration?.let {
-            mapOf("duration" to it.toDouble(DurationUnit.SECONDS).toFloat())
+            mapOf("duration" to it.toDouble(DurationUnit.MILLISECONDS).toFloat())
         } ?: emptyMap()
     }
 }

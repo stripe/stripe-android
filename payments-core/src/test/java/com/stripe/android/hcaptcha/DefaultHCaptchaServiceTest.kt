@@ -92,6 +92,8 @@ internal class DefaultHCaptchaServiceTest {
                 .isEqualTo(FakeCaptchaEventsReporter.Call.Execute(TEST_SITE_KEY))
             assertThat(captchaEventsReporter.awaitCall())
                 .isEqualTo(FakeCaptchaEventsReporter.Call.Success(TEST_SITE_KEY))
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.Attach(isReady = false, TEST_SITE_KEY))
             captchaEventsReporter.ensureAllEventsConsumed()
         }
     }
@@ -118,6 +120,8 @@ internal class DefaultHCaptchaServiceTest {
                 .isEqualTo(FakeCaptchaEventsReporter.Call.Execute(TEST_SITE_KEY))
             assertThat(captchaEventsReporter.awaitCall())
                 .isEqualTo(FakeCaptchaEventsReporter.Call.Error(exception, TEST_SITE_KEY))
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.Attach(isReady = false, TEST_SITE_KEY))
             captchaEventsReporter.ensureAllEventsConsumed()
         }
     }
@@ -194,6 +198,8 @@ internal class DefaultHCaptchaServiceTest {
                 .isEqualTo(FakeCaptchaEventsReporter.Call.Init(TEST_SITE_KEY))
             assertThat(captchaEventsReporter.awaitCall())
                 .isEqualTo(FakeCaptchaEventsReporter.Call.Error(expectedException, TEST_SITE_KEY))
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.Attach(isReady = false, TEST_SITE_KEY))
             captchaEventsReporter.ensureAllEventsConsumed()
         }
     }
@@ -219,6 +225,16 @@ internal class DefaultHCaptchaServiceTest {
             )
             assertThat(result).isInstanceOf(HCaptchaService.Result.Success::class.java)
             assertThat((result as HCaptchaService.Result.Success).token).isEqualTo(expectedToken)
+
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.Init(TEST_SITE_KEY))
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.Execute(TEST_SITE_KEY))
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.Success(TEST_SITE_KEY))
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.Attach(isReady = true, TEST_SITE_KEY))
+            captchaEventsReporter.ensureAllEventsConsumed()
         }
     }
 
@@ -244,6 +260,15 @@ internal class DefaultHCaptchaServiceTest {
 
             assertThat(result).isInstanceOf(HCaptchaService.Result.Failure::class.java)
             assertThat((result as HCaptchaService.Result.Failure).error).isEqualTo(expectedException)
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.Init(TEST_SITE_KEY))
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.Execute(TEST_SITE_KEY))
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.Error(expectedException, TEST_SITE_KEY))
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.Attach(isReady = true, TEST_SITE_KEY))
+            captchaEventsReporter.ensureAllEventsConsumed()
         }
     }
 
@@ -449,6 +474,10 @@ internal class DefaultHCaptchaServiceTest {
             calls.add(Call.Error(error, siteKey))
         }
 
+        override fun attach(siteKey: String, isReady: Boolean) {
+            calls.add(Call.Attach(isReady, siteKey))
+        }
+
         suspend fun awaitCall(): Call = calls.awaitItem()
 
         fun ensureAllEventsConsumed() {
@@ -462,6 +491,7 @@ internal class DefaultHCaptchaServiceTest {
             data class Execute(override val siteKey: String) : Call
             data class Success(override val siteKey: String) : Call
             data class Error(val error: Throwable?, override val siteKey: String) : Call
+            data class Attach(val isReady: Boolean, override val siteKey: String) : Call
         }
     }
 
