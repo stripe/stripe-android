@@ -41,18 +41,12 @@
 // Initialize bridge communication for StripeJS Next Action
 window.NativeStripeNextAction = {
     getInitParams: function() {
-        console.log('getInitParams called');
         if (window.androidBridge && typeof window.androidBridge.getInitParams === 'function') {
             const result = window.androidBridge.getInitParams();
-            console.log('Raw getInitParams result:', result);
-            console.log('Type of result:', typeof result);
             try {
                 const parsed = JSON.parse(result);
-                console.log('Parsed init params:', parsed);
                 return parsed;
             } catch (e) {
-                console.error('Failed to parse init params:', e);
-                console.error('Raw result was:', result);
                 return result;
             }
         } else {
