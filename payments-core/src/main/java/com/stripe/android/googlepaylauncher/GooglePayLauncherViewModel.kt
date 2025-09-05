@@ -308,7 +308,8 @@ internal class GooglePayLauncherViewModel(
                 existingPaymentMethodRequired = args.config.existingPaymentMethodRequired,
                 allowCreditCards = args.config.allowCreditCards,
                 errorReporter = errorReporter,
-                logger = logger
+                logger = logger,
+                cardBrandFilter = args.config.cardBrandFilter
             )
 
             return GooglePayLauncherViewModel(
@@ -328,7 +329,8 @@ internal class GooglePayLauncherViewModel(
                 ),
                 googlePayJsonFactory = GooglePayJsonFactory(
                     googlePayConfig = GooglePayConfig(publishableKey, stripeAccountId),
-                    isJcbEnabled = args.config.isJcbEnabled
+                    isJcbEnabled = args.config.isJcbEnabled,
+                    cardBrandFilter = args.config.cardBrandFilter
                 ),
                 googlePayRepository = googlePayRepository,
                 savedStateHandle = extras.createSavedStateHandle(),
