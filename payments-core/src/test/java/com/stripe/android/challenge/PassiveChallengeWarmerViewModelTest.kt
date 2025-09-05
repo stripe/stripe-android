@@ -3,7 +3,7 @@ package com.stripe.android.challenge
 import androidx.fragment.app.FragmentActivity
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerResult
+import com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerCompleted
 import com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerViewModel
 import com.stripe.android.hcaptcha.HCaptchaService
 import com.stripe.android.model.PassiveCaptchaParams
@@ -38,7 +38,7 @@ internal class PassiveChallengeWarmerViewModelTest {
 
         viewModel.result.test {
             val result = awaitItem()
-            assertThat(result).isEqualTo(PassiveChallengeWarmerResult)
+            assertThat(result).isEqualTo(PassiveChallengeWarmerCompleted)
 
             expectNoEvents()
         }

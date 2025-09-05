@@ -8,7 +8,7 @@ import com.stripe.android.model.PassiveCaptchaParams
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PassiveChallengeWarmerContract :
-    ActivityResultContract<PassiveChallengeWarmerContract.Args, PassiveChallengeWarmerResult>() {
+    ActivityResultContract<PassiveChallengeWarmerContract.Args, PassiveChallengeWarmerCompleted>() {
 
     override fun createIntent(context: Context, input: Args): Intent {
         return PassiveChallengeWarmerActivity.createIntent(
@@ -17,7 +17,7 @@ class PassiveChallengeWarmerContract :
         )
     }
 
-    override fun parseResult(resultCode: Int, intent: Intent?) = PassiveChallengeWarmerResult
+    override fun parseResult(resultCode: Int, intent: Intent?) = PassiveChallengeWarmerCompleted
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Args(

@@ -6,4 +6,4 @@ import kotlinx.parcelize.Parcelize
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
-data object PassiveChallengeWarmerResult : Parcelable
+data object PassiveChallengeWarmerCompleted : Parcelable

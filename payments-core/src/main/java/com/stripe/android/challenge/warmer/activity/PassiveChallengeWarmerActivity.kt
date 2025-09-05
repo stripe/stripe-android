@@ -34,7 +34,7 @@ internal class PassiveChallengeWarmerActivity : AppCompatActivity() {
         }
     }
 
-    private fun dismissWithResult(result: PassiveChallengeWarmerResult) {
+    private fun dismissWithResult(result: PassiveChallengeWarmerCompleted) {
         val bundle = bundleOf(
             PassiveChallengeWarmerContract.EXTRA_RESULT to result
         )

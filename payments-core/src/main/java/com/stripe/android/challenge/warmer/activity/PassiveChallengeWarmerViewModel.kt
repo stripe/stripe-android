@@ -18,8 +18,8 @@ internal class PassiveChallengeWarmerViewModel @Inject constructor(
     private val passiveCaptchaParams: PassiveCaptchaParams,
     private val hCaptchaService: HCaptchaService,
 ) : ViewModel() {
-    private val _result = MutableSharedFlow<PassiveChallengeWarmerResult>(replay = 1)
-    val result: Flow<PassiveChallengeWarmerResult> = _result
+    private val _result = MutableSharedFlow<PassiveChallengeWarmerCompleted>(replay = 1)
+    val result: Flow<PassiveChallengeWarmerCompleted> = _result
 
     suspend fun warmUpPassiveChallenge(activity: FragmentActivity) {
         hCaptchaService.warmUp(
@@ -27,7 +27,7 @@ internal class PassiveChallengeWarmerViewModel @Inject constructor(
             siteKey = passiveCaptchaParams.siteKey,
             rqData = passiveCaptchaParams.rqData
         )
-        _result.emit(PassiveChallengeWarmerResult)
+        _result.emit(PassiveChallengeWarmerCompleted)
     }
 
     class NoArgsException : IllegalArgumentException("No args found")

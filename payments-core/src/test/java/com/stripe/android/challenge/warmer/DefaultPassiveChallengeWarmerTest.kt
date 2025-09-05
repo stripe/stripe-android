@@ -6,8 +6,8 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerCompleted
 import com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerContract
-import com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerResult
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -44,7 +44,7 @@ internal class DefaultPassiveChallengeWarmerTest {
         whenever(
             mockActivityResultCaller.registerForActivityResult(
                 any<PassiveChallengeWarmerContract>(),
-                any<ActivityResultCallback<PassiveChallengeWarmerResult>>()
+                any<ActivityResultCallback<PassiveChallengeWarmerCompleted>>()
             )
         ).thenReturn(mockLauncher)
 
@@ -55,7 +55,7 @@ internal class DefaultPassiveChallengeWarmerTest {
 
         verify(mockActivityResultCaller).registerForActivityResult(
             any<PassiveChallengeWarmerContract>(),
-            any<ActivityResultCallback<PassiveChallengeWarmerResult>>()
+            any<ActivityResultCallback<PassiveChallengeWarmerCompleted>>()
         )
     }
 
@@ -68,7 +68,7 @@ internal class DefaultPassiveChallengeWarmerTest {
         whenever(
             mockActivityResultCaller.registerForActivityResult(
                 any<PassiveChallengeWarmerContract>(),
-                any<ActivityResultCallback<PassiveChallengeWarmerResult>>()
+                any<ActivityResultCallback<PassiveChallengeWarmerCompleted>>()
             )
         ).thenReturn(mockLauncher)
 
@@ -98,7 +98,7 @@ internal class DefaultPassiveChallengeWarmerTest {
         whenever(
             mockActivityResultCaller.registerForActivityResult(
                 any<PassiveChallengeWarmerContract>(),
-                any<ActivityResultCallback<PassiveChallengeWarmerResult>>()
+                any<ActivityResultCallback<PassiveChallengeWarmerCompleted>>()
             )
         ).thenReturn(mockLauncher)
 
@@ -135,7 +135,7 @@ internal class DefaultPassiveChallengeWarmerTest {
         whenever(
             mockActivityResultCaller.registerForActivityResult(
                 any<PassiveChallengeWarmerContract>(),
-                any<ActivityResultCallback<PassiveChallengeWarmerResult>>()
+                any<ActivityResultCallback<PassiveChallengeWarmerCompleted>>()
             )
         ).thenReturn(firstMockLauncher, secondMockLauncher)
 

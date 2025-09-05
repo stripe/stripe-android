@@ -6,7 +6,7 @@ import com.stripe.android.hcaptcha.HCaptchaService
 
 internal class FakeHCaptchaService : HCaptchaService {
     var result: HCaptchaService.Result? = null
-    var warmUpResult: () -> Unit = {}
+    var warmUpResult: suspend () -> Unit = {}
     private val performPassiveHCaptchaCalls = Turbine<Call>()
     private val warmUpCalls = Turbine<Call>()
 
@@ -30,6 +30,11 @@ internal class FakeHCaptchaService : HCaptchaService {
 
     suspend fun awaitWarmUpCall(): Call {
         return warmUpCalls.awaitItem()
+    }
+
+    fun ensureAllEventsConsumed() {
+        performPassiveHCaptchaCalls.ensureAllEventsConsumed()
+        warmUpCalls.ensureAllEventsConsumed()
     }
 
     data class Call(
