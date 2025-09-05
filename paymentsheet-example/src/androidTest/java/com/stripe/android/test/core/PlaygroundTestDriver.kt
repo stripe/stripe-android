@@ -1262,6 +1262,7 @@ internal class PlaygroundTestDriver(
      */
     private fun waitForPlaygroundActivity() {
         while (currentActivity !is PaymentSheetPlaygroundActivity) {
+            composeTestRule.waitForIdle()
             TimeUnit.MILLISECONDS.sleep(250)
         }
         Espresso.onIdle()
