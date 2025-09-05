@@ -22,7 +22,7 @@ internal class PassiveChallengeViewModel @Inject constructor(
     val result: Flow<PassiveChallengeActivityResult> = _result
 
     suspend fun startPassiveChallenge(activity: FragmentActivity) {
-        val result = hCaptchaService.performActiveHCaptcha(
+        val result = hCaptchaService.performPassiveHCaptcha(
             activity = activity,
             siteKey = passiveCaptchaParams.siteKey,
             rqData = passiveCaptchaParams.rqData
