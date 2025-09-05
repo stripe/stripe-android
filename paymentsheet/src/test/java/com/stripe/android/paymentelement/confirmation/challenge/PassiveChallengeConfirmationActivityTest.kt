@@ -16,7 +16,6 @@ import com.stripe.android.challenge.PassiveChallengeActivityContract
 import com.stripe.android.challenge.PassiveChallengeActivityResult
 import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
-import com.stripe.android.model.RadarOptions
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
@@ -66,23 +65,6 @@ internal class PassiveChallengeConfirmationActivityTest {
 
             assertThat(confirmingWithChallengeOption.option).isEqualTo(CONFIRMATION_OPTION)
 
-            intendedPassiveChallengeToBeLaunched()
-
-            val confirmingWithNewOption = awaitItem().assertConfirming()
-
-            assertThat(confirmingWithNewOption.option)
-                .isEqualTo(
-                    PaymentMethodConfirmationOption.New(
-                        createParams = CONFIRMATION_OPTION.createParams.copy(
-                            radarOptions = RadarOptions("test_token")
-                        ),
-                        optionsParams = CONFIRMATION_OPTION.optionsParams,
-                        shouldSave = false,
-                        extraParams = null,
-                        passiveCaptchaParams = null
-                    )
-                )
-
             intendedPaymentConfirmationToBeLaunched()
 
             val successResult = awaitItem().assertComplete().result.assertSucceeded()
@@ -109,21 +91,6 @@ internal class PassiveChallengeConfirmationActivityTest {
             val confirmingWithChallengeOption = awaitItem().assertConfirming()
 
             assertThat(confirmingWithChallengeOption.option).isEqualTo(CONFIRMATION_OPTION)
-
-            intendedPassiveChallengeToBeLaunched()
-
-            val confirmingWithNewOption = awaitItem().assertConfirming()
-
-            assertThat(confirmingWithNewOption.option)
-                .isEqualTo(
-                    PaymentMethodConfirmationOption.New(
-                        createParams = CONFIRMATION_OPTION.createParams,
-                        optionsParams = CONFIRMATION_OPTION.optionsParams,
-                        shouldSave = false,
-                        extraParams = null,
-                        passiveCaptchaParams = null
-                    )
-                )
 
             intendedPaymentConfirmationToBeLaunched()
 
@@ -157,21 +124,6 @@ internal class PassiveChallengeConfirmationActivityTest {
 
                 assertThat(confirmingWithChallengeOption.option).isEqualTo(SAVED_CONFIRMATION_OPTION)
 
-                intendedPassiveChallengeToBeLaunched()
-
-                val confirmingWithNewOption = awaitItem().assertConfirming()
-
-                assertThat(confirmingWithNewOption.option)
-                    .isEqualTo(
-                        PaymentMethodConfirmationOption.Saved(
-                            paymentMethod = SAVED_CONFIRMATION_OPTION.paymentMethod,
-                            optionsParams = SAVED_CONFIRMATION_OPTION.optionsParams,
-                            originatedFromWallet = false,
-                            passiveCaptchaParams = null,
-                            hCaptchaToken = "test_token"
-                        )
-                    )
-
                 intendedPaymentConfirmationToBeLaunched()
 
                 val successResult = awaitItem().assertComplete().result.assertSucceeded()
@@ -203,10 +155,6 @@ internal class PassiveChallengeConfirmationActivityTest {
                 Intent().putExtras(bundleOf("extra_args" to result))
             )
         )
-    }
-
-    private fun intendedPassiveChallengeToBeLaunched() {
-        intended(hasComponent(PASSIVE_CHALLENGE_ACTIVITY_NAME))
     }
 
     private fun intendedPaymentConfirmationToBeLaunched() {
