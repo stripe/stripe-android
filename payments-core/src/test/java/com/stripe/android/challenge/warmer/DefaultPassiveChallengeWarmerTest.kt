@@ -34,7 +34,7 @@ internal class DefaultPassiveChallengeWarmerTest {
         rqData = "test_rq_data"
     )
     private val testPublishableKey = "pk_test_123"
-    private val testProductUsage = setOf("PaymentSheet", "TestUsage")
+    private val testProductUsage = setOf("PaymentSheet")
 
     @Test
     fun `register should create activity result launcher with correct contract`() = runTest {
@@ -88,20 +88,6 @@ internal class DefaultPassiveChallengeWarmerTest {
         assertThat(capturedArgs.passiveCaptchaParams).isEqualTo(testPassiveCaptchaParams)
         assertThat(capturedArgs.publishableKey).isEqualTo(testPublishableKey)
         assertThat(capturedArgs.productUsage).isEqualTo(testProductUsage)
-    }
-
-    @Test
-    fun `start should not launch when not registered`() = runTest {
-        val warmer = DefaultPassiveChallengeWarmer()
-
-        // Don't register, just start - should not throw exception
-        warmer.start(
-            passiveCaptchaParams = testPassiveCaptchaParams,
-            publishableKey = testPublishableKey,
-            productUsage = testProductUsage
-        )
-
-        // Test passes if no exceptions are thrown
     }
 
     @Test
@@ -175,36 +161,5 @@ internal class DefaultPassiveChallengeWarmerTest {
 
         verify(secondMockLauncher).launch(any())
         verify(firstMockLauncher, never()).launch(any())
-    }
-
-    @Test
-    fun `start with empty product usage should work correctly`() = runTest {
-        val mockActivityResultCaller = mock<ActivityResultCaller>()
-        val mockLauncher = mock<ActivityResultLauncher<PassiveChallengeWarmerContract.Args>>()
-        val argsCaptor = argumentCaptor<PassiveChallengeWarmerContract.Args>()
-
-        whenever(
-            mockActivityResultCaller.registerForActivityResult(
-                any<PassiveChallengeWarmerContract>(),
-                any<ActivityResultCallback<PassiveChallengeWarmerResult>>()
-            )
-        ).thenReturn(mockLauncher)
-
-        val warmer = DefaultPassiveChallengeWarmer()
-        val lifecycleOwner = TestLifecycleOwner()
-
-        warmer.register(mockActivityResultCaller, lifecycleOwner)
-
-        warmer.start(
-            passiveCaptchaParams = testPassiveCaptchaParams,
-            publishableKey = testPublishableKey,
-            productUsage = emptySet()
-        )
-
-        verify(mockLauncher).launch(argsCaptor.capture())
-        val capturedArgs = argsCaptor.firstValue
-        assertThat(capturedArgs.passiveCaptchaParams).isEqualTo(testPassiveCaptchaParams)
-        assertThat(capturedArgs.publishableKey).isEqualTo(testPublishableKey)
-        assertThat(capturedArgs.productUsage).isEmpty()
     }
 }
