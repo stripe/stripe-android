@@ -27,7 +27,10 @@ data class AppearanceInfo(
         OceanBreeze(R.string.appearance_ocean_breeze),
         Link(R.string.appearance_link),
         Dynamic(R.string.appearance_dynamic),
-        CustomFont(R.string.custom_font)
+        CustomFont(R.string.custom_font),
+        Retro(R.string.appearance_retro),
+        Forest(R.string.appearance_forest),
+        DarkMode(R.string.appearance_dark_mode)
     }
 
     companion object {
@@ -40,6 +43,9 @@ data class AppearanceInfo(
                 AppearanceId.Link -> linkAppearance(context)
                 AppearanceId.Dynamic -> dynamicAppearance(context)
                 AppearanceId.CustomFont -> customFont()
+                AppearanceId.Retro -> retroAppearance(context)
+                AppearanceId.Forest -> forestAppearance(context)
+                AppearanceId.DarkMode -> darkModeAppearance(context)
             }
         }
 
@@ -263,6 +269,178 @@ data class AppearanceInfo(
                             24f
                         )
                         .build()
+                )
+                .build()
+        )
+
+        @Suppress("LongMethod")
+        private fun retroAppearance(context: Context) = AppearanceInfo(
+            appearanceId = AppearanceId.Retro,
+            appearance = Appearance.Builder()
+                .colors(
+                    Colors.Builder()
+                        .primary(context.getColorCompat(R.color.retro_primary))
+                        .text(context.getColorCompat(R.color.retro_text))
+                        .background(context.getColorCompat(R.color.retro_background))
+                        .secondaryText(context.getColorCompat(R.color.retro_secondary_text))
+                        .actionSecondaryText(context.getColorCompat(R.color.retro_action_secondary_text))
+                        .border(context.getColorCompat(R.color.retro_border))
+                        .offsetBackground(context.getColorCompat(R.color.retro_offset_background))
+                        .build()
+                )
+                .buttonSecondary(
+                    Button(
+                        colorBackground = context.getColorCompat(R.color.retro_button_secondary_background),
+                        colorText = context.getColorCompat(R.color.retro_button_secondary_text)
+                    )
+                )
+                .badgeNeutral(
+                    Badge(
+                        colorBackground = context.getColorCompat(R.color.retro_badge_neutral_background),
+                        colorBorder = context.getColorCompat(R.color.retro_badge_neutral_border),
+                        colorText = context.getColorCompat(R.color.retro_badge_neutral_text)
+                    )
+                )
+                .badgeSuccess(
+                    Badge(
+                        colorBackground = context.getColorCompat(R.color.retro_badge_success_background),
+                        colorBorder = context.getColorCompat(R.color.retro_badge_success_border),
+                        colorText = context.getColorCompat(R.color.retro_badge_success_text)
+                    )
+                )
+                .badgeWarning(
+                    Badge(
+                        colorBackground = context.getColorCompat(R.color.retro_badge_warning_background),
+                        colorBorder = context.getColorCompat(R.color.retro_badge_warning_border),
+                        colorText = context.getColorCompat(R.color.retro_badge_warning_text)
+                    )
+                )
+                .badgeDanger(
+                    Badge(
+                        colorBackground = context.getColorCompat(R.color.retro_badge_danger_background),
+                        colorBorder = context.getColorCompat(R.color.retro_badge_danger_border),
+                        colorText = context.getColorCompat(R.color.retro_badge_danger_text)
+                    )
+                )
+                .cornerRadius(
+                    @Suppress("MagicNumber")
+                    CornerRadius.Builder()
+                        .base(0f)
+                        .build()
+                )
+                .typography(
+                    Typography.Builder()
+                        .fontFamily("courier")
+                        .build()
+                )
+                .build()
+        )
+
+        @Suppress("LongMethod")
+        private fun forestAppearance(context: Context) = AppearanceInfo(
+            appearanceId = AppearanceId.Forest,
+            appearance = Appearance.Builder()
+                .colors(
+                    Colors.Builder()
+                        .primary(context.getColorCompat(R.color.forest_primary))
+                        .background(context.getColorCompat(R.color.forest_background))
+                        .secondaryText(context.getColorCompat(R.color.forest_secondary_text))
+                        .border(context.getColorCompat(R.color.forest_border))
+                        .danger(context.getColorCompat(R.color.forest_danger))
+                        .offsetBackground(context.getColorCompat(R.color.forest_offset_background))
+                        .build()
+                )
+                .buttonSecondary(
+                    Button(
+                        colorBackground = context.getColorCompat(R.color.forest_button_secondary_background),
+                        colorText = context.getColorCompat(R.color.forest_button_secondary_text)
+                    )
+                )
+                .badgeNeutral(
+                    Badge(
+                        colorBackground = context.getColorCompat(R.color.forest_badge_neutral_background),
+                        colorBorder = context.getColorCompat(R.color.forest_badge_neutral_border)
+                    )
+                )
+                .badgeSuccess(
+                    Badge(
+                        colorBackground = context.getColorCompat(R.color.forest_badge_success_background),
+                        colorBorder = context.getColorCompat(R.color.forest_badge_success_border),
+                        colorText = context.getColorCompat(R.color.forest_badge_success_text)
+                    )
+                )
+                .badgeWarning(
+                    Badge(
+                        colorBackground = context.getColorCompat(R.color.forest_badge_warning_background),
+                        colorBorder = context.getColorCompat(R.color.forest_badge_warning_border),
+                        colorText = context.getColorCompat(R.color.forest_badge_warning_text)
+                    )
+                )
+                .badgeDanger(
+                    Badge(
+                        colorBackground = context.getColorCompat(R.color.forest_badge_danger_background),
+                        colorBorder = context.getColorCompat(R.color.forest_badge_danger_border),
+                        colorText = context.getColorCompat(R.color.forest_badge_danger_text)
+                    )
+                )
+                .cornerRadius(
+                    @Suppress("MagicNumber")
+                    CornerRadius.Builder()
+                        .base(24f)
+                        .build()
+                )
+                .build()
+        )
+
+        @Suppress("LongMethod")
+        private fun darkModeAppearance(context: Context) = AppearanceInfo(
+            appearanceId = AppearanceId.DarkMode,
+            appearance = Appearance.Builder()
+                .colors(
+                    Colors.Builder()
+                        .primary(context.getColorCompat(R.color.dark_mode_primary))
+                        .text(context.getColorCompat(R.color.dark_mode_text))
+                        .background(context.getColorCompat(R.color.dark_mode_background))
+                        .secondaryText(context.getColorCompat(R.color.dark_mode_secondary_text))
+                        .actionSecondaryText(context.getColorCompat(R.color.dark_mode_action_secondary_text))
+                        .border(context.getColorCompat(R.color.dark_mode_border))
+                        .danger(context.getColorCompat(R.color.dark_mode_danger))
+                        .offsetBackground(context.getColorCompat(R.color.dark_mode_offset_background))
+                        .build()
+                )
+                .buttonSecondary(
+                    Button(
+                        colorBackground = context.getColorCompat(R.color.dark_mode_button_secondary_background),
+                        colorText = context.getColorCompat(R.color.dark_mode_button_secondary_text)
+                    )
+                )
+                .badgeNeutral(
+                    Badge(
+                        colorBackground = context.getColorCompat(R.color.dark_mode_badge_neutral_background),
+                        colorBorder = context.getColorCompat(R.color.dark_mode_badge_neutral_border),
+                        colorText = context.getColorCompat(R.color.dark_mode_badge_neutral_text)
+                    )
+                )
+                .badgeSuccess(
+                    Badge(
+                        colorBackground = context.getColorCompat(R.color.dark_mode_badge_success_background),
+                        colorBorder = context.getColorCompat(R.color.dark_mode_badge_success_border),
+                        colorText = context.getColorCompat(R.color.dark_mode_badge_success_text)
+                    )
+                )
+                .badgeWarning(
+                    Badge(
+                        colorBackground = context.getColorCompat(R.color.dark_mode_badge_warning_background),
+                        colorBorder = context.getColorCompat(R.color.dark_mode_badge_warning_border),
+                        colorText = context.getColorCompat(R.color.dark_mode_badge_warning_text)
+                    )
+                )
+                .badgeDanger(
+                    Badge(
+                        colorBackground = context.getColorCompat(R.color.dark_mode_badge_danger_background),
+                        colorBorder = context.getColorCompat(R.color.dark_mode_badge_danger_border),
+                        colorText = context.getColorCompat(R.color.dark_mode_badge_danger_text)
+                    )
                 )
                 .build()
         )
