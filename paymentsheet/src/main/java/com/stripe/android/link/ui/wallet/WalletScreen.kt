@@ -84,7 +84,6 @@ import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.text.Html
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
-import com.stripe.android.ui.core.R as PaymentsUiCoreR
 import com.stripe.android.uicore.R as StripeUiCoreR
 
 @Composable
@@ -351,7 +350,6 @@ private fun ActionSection(
             label = state.primaryButtonLabel.resolve(),
             state = state.primaryButtonState,
             onButtonClick = onPrimaryButtonClick,
-            iconEnd = PaymentsUiCoreR.drawable.stripe_ic_lock
         )
         state.secondaryButtonLabel?.let { secondaryButtonLabel ->
             SecondaryButton(
