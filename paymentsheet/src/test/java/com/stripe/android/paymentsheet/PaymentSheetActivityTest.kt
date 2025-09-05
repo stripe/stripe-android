@@ -95,6 +95,7 @@ import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import com.stripe.android.utils.FakePassiveChallengeWarmer
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
@@ -1278,7 +1279,10 @@ internal class PaymentSheetActivityTest {
                         return FakeCvcRecollectionInteractor()
                     }
                 },
-                isLiveModeProvider = { false }
+                isLiveModeProvider = { false },
+                passiveChallengeWarmer = FakePassiveChallengeWarmer(),
+                publishableKeyProvider = { "pk_test_1234" },
+                productUsage = setOf("PaymentSheet")
             )
         }
     }

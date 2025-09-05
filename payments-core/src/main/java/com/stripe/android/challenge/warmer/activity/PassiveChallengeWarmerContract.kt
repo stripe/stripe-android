@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.RestrictTo
-import androidx.core.os.BundleCompat
 import com.stripe.android.model.PassiveCaptchaParams
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -29,6 +28,7 @@ class PassiveChallengeWarmerContract :
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
-        const val EXTRA_RESULT = "com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerContract.extra_result"
+        const val EXTRA_RESULT =
+            "com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerContract.extra_result"
     }
 }
