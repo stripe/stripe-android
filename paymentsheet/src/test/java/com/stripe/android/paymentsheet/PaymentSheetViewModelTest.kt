@@ -1503,6 +1503,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.updateSelection(
             PaymentSelection.New.GenericPaymentMethod(
                 iconResource = 0,
+                iconResourceNight = null,
                 label = "".resolvableString,
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT,
                 customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
@@ -3924,6 +3925,7 @@ internal class PaymentSheetViewModelTest {
         return PaymentSelection.New.GenericPaymentMethod(
             label = "Test".resolvableString,
             iconResource = 0,
+            iconResourceNight = null,
             paymentMethodCreateParams = PaymentMethodCreateParams.create(
                 bacsDebit = PaymentMethodCreateParams.BacsDebit(
                     accountNumber = BACS_ACCOUNT_NUMBER,

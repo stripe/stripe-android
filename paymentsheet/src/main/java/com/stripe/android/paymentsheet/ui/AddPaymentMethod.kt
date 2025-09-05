@@ -134,6 +134,7 @@ internal fun FormFieldValues.transformToPaymentSelection(
         PaymentSelection.New.GenericPaymentMethod(
             label = paymentMethod.displayName,
             iconResource = paymentMethod.iconResource,
+            iconResourceNight = paymentMethod.iconResourceNight,
             lightThemeIconUrl = paymentMethod.lightThemeIconUrl,
             darkThemeIconUrl = paymentMethod.darkThemeIconUrl,
             paymentMethodCreateParams = params,

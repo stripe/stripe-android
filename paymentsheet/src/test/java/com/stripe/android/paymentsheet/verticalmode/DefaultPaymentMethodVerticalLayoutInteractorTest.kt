@@ -76,6 +76,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             selectionSource.value = PaymentSelection.New.GenericPaymentMethod(
                 label = "CashApp".resolvableString,
                 iconResource = 0,
+                iconResourceNight = null,
                 lightThemeIconUrl = null,
                 darkThemeIconUrl = null,
                 paymentMethodCreateParams = PaymentMethodCreateParams.createCashAppPay(),
