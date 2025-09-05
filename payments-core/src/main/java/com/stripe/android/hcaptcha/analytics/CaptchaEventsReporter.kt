@@ -11,4 +11,6 @@ interface CaptchaEventsReporter {
     fun success(siteKey: String)
 
     fun error(error: Throwable?, siteKey: String)
+
+    fun attach(siteKey: String, isReady: Boolean)
 }
