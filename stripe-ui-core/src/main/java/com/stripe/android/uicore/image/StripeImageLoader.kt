@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap
  * @param memoryCache, memory cache to be used, or null if no memory cache is desired.
  * @param diskCache, memory cache to be used, or null if no memory cache is desired.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+//@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class StripeImageLoader(
     context: Context,
     private val logger: Logger = Logger.getInstance(context.isDebuggable()),
