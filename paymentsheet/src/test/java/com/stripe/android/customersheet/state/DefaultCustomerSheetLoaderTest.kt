@@ -700,7 +700,8 @@ internal class DefaultCustomerSheetLoaderTest {
                         customerSheet = ElementsSession.Customer.Components.CustomerSheet.Enabled(
                             paymentMethodRemove =
                             ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled,
-                            canRemoveLastPaymentMethod = true,
+                            paymentMethodRemoveLast =
+                            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided,
                             isPaymentMethodSyncDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
                         ),
                     )

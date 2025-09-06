@@ -30,7 +30,7 @@
           "enabled": true,
           "features": {
             "payment_method_remove": "PAYMENT_METHOD_REMOVE_FEATURE",
-            "payment_method_remove_last": "PAYMENT_METHOD_REMOVE_LAST_FEATURE"
+            "payment_method_remove_last": PAYMENT_METHOD_REMOVE_LAST_FEATURE
           }
         }
       }
