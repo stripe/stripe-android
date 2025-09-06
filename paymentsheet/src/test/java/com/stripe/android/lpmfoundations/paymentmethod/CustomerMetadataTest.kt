@@ -33,7 +33,7 @@ internal class CustomerMetadataTest {
     fun `Should create 'Permissions' for customer session properly with remove permissions enabled`() {
         customerSessionPermissionsTest(
             canRemoveLastPaymentMethodConfigValue = true,
-            canRemoveLastPaymentMethod = true,
+            paymentMethodRemoveLast = ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
             paymentMethodRemove = ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
         ) { permissions ->
             assertThat(permissions.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.Full)
@@ -48,7 +48,7 @@ internal class CustomerMetadataTest {
     fun `Should create 'Permissions' for customer session properly with partial remove permissions`() {
         customerSessionPermissionsTest(
             canRemoveLastPaymentMethodConfigValue = true,
-            canRemoveLastPaymentMethod = true,
+            paymentMethodRemoveLast = ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
             paymentMethodRemove = ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Partial,
         ) { permissions ->
             assertThat(permissions.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.Partial)
@@ -63,7 +63,7 @@ internal class CustomerMetadataTest {
     fun `Should create 'Permissions' for customer session properly with disabled remove permissions`() {
         customerSessionPermissionsTest(
             canRemoveLastPaymentMethodConfigValue = true,
-            canRemoveLastPaymentMethod = true,
+            paymentMethodRemoveLast = ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
             paymentMethodRemove = ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled
         ) { permissions ->
             assertThat(permissions.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.None)
@@ -95,7 +95,7 @@ internal class CustomerMetadataTest {
     @Test
     fun `Should set 'canRemoveLastPaymentMethod' to false if config value & server value are false`() =
         customerSessionPermissionsTest(
-            canRemoveLastPaymentMethod = false,
+            paymentMethodRemoveLast = ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Disabled,
             canRemoveLastPaymentMethodConfigValue = false,
         ) { permissions ->
             assertThat(permissions.canRemoveLastPaymentMethod).isFalse()
@@ -122,8 +122,17 @@ internal class CustomerMetadataTest {
     @Test
     fun `Should set 'canRemoveLastPaymentMethod' to false if config value is true but server value is false`() =
         customerSessionPermissionsTest(
-            canRemoveLastPaymentMethod = false,
+            paymentMethodRemoveLast = ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Disabled,
             canRemoveLastPaymentMethodConfigValue = true,
+        ) { permissions ->
+            assertThat(permissions.canRemoveLastPaymentMethod).isFalse()
+        }
+
+    @Test
+    fun `Should set 'canRemoveLastPaymentMethod' to false if config value is false & server value is not provided`() =
+        customerSessionPermissionsTest(
+            paymentMethodRemoveLast = ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided,
+            canRemoveLastPaymentMethodConfigValue = false,
         ) { permissions ->
             assertThat(permissions.canRemoveLastPaymentMethod).isFalse()
         }
@@ -131,16 +140,25 @@ internal class CustomerMetadataTest {
     @Test
     fun `Should set 'canRemoveLastPaymentMethod' to false if config value is false but server value is true`() =
         customerSessionPermissionsTest(
-            canRemoveLastPaymentMethod = true,
+            paymentMethodRemoveLast = ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
             canRemoveLastPaymentMethodConfigValue = false,
         ) { permissions ->
             assertThat(permissions.canRemoveLastPaymentMethod).isFalse()
         }
 
     @Test
+    fun `Should set 'canRemoveLastPaymentMethod' to true if config value is true & server value is not provided`() =
+        customerSessionPermissionsTest(
+            paymentMethodRemoveLast = ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided,
+            canRemoveLastPaymentMethodConfigValue = true,
+        ) { permissions ->
+            assertThat(permissions.canRemoveLastPaymentMethod).isTrue()
+        }
+
+    @Test
     fun `Should set 'canRemoveLastPaymentMethod' to true if config value & server value are true`() =
         customerSessionPermissionsTest(
-            canRemoveLastPaymentMethod = true,
+            paymentMethodRemoveLast = ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
             canRemoveLastPaymentMethodConfigValue = true,
         ) { permissions ->
             assertThat(permissions.canRemoveLastPaymentMethod).isTrue()
@@ -188,13 +206,14 @@ internal class CustomerMetadataTest {
     private fun createEnabledMobilePaymentElement(
         paymentMethodRemove: ElementsSession.Customer.Components.PaymentMethodRemoveFeature =
             ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
-        canRemoveLastPaymentMethod: Boolean = true,
+        paymentMethodRemoveLast: ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
         isPaymentMethodSetAsDefaultEnabled: Boolean = true,
     ): ElementsSession.Customer.Components.MobilePaymentElement.Enabled {
         return ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
             isPaymentMethodSaveEnabled = true,
             paymentMethodRemove = paymentMethodRemove,
-            canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+            paymentMethodRemoveLast = paymentMethodRemoveLast,
             allowRedisplayOverride = null,
             isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled
         )
@@ -255,7 +274,8 @@ internal class CustomerMetadataTest {
     private fun customerSessionPermissionsTest(
         paymentElementDisabled: Boolean = false,
         canRemoveLastPaymentMethodConfigValue: Boolean = true,
-        canRemoveLastPaymentMethod: Boolean = true,
+        paymentMethodRemoveLast: ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
         paymentMethodRemove: ElementsSession.Customer.Components.PaymentMethodRemoveFeature =
             ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
         block: (CustomerMetadata.Permissions) -> Unit
@@ -265,7 +285,7 @@ internal class CustomerMetadataTest {
         } else {
             createEnabledMobilePaymentElement(
                 paymentMethodRemove = paymentMethodRemove,
-                canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+                paymentMethodRemoveLast = paymentMethodRemoveLast,
             )
         }
 

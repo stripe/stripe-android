@@ -13,6 +13,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.host
@@ -175,7 +176,31 @@ class CustomerSessionCustomerSheetActivityTest {
                 PaymentMethodFactory.card(last4 = "4242", addCbcNetworks = true),
             ),
             isPaymentMethodRemoveEnabled = true,
-            isCanRemoveLastPaymentMethodEnabled = true,
+            paymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
+            allowsRemovalOfLastSavedPaymentMethod = true,
+        ) {
+            savedPaymentMethodsPage.onEditButton().performClick()
+
+            val cbcCard = savedPaymentMethodsPage.onSavedPaymentMethod(last4 = "4242")
+
+            cbcCard.assertIsEnabled()
+            cbcCard.assertHasModifyBadge()
+
+            savedPaymentMethodsPage.onModifyBadgeFor(last4 = "4242").performClick()
+
+            editPage.onRemoveButton().assertIsEnabled()
+        }
+
+    @Test
+    fun `When single CBC card, has remove permissions, and only config can remove last PM provided, can remove`() =
+        runTest(
+            cards = listOf(
+                PaymentMethodFactory.card(last4 = "4242", addCbcNetworks = true),
+            ),
+            isPaymentMethodRemoveEnabled = true,
+            paymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided,
             allowsRemovalOfLastSavedPaymentMethod = true,
         ) {
             savedPaymentMethodsPage.onEditButton().performClick()
@@ -197,7 +222,8 @@ class CustomerSessionCustomerSheetActivityTest {
                 PaymentMethodFactory.card(last4 = "4242", addCbcNetworks = true),
             ),
             isPaymentMethodRemoveEnabled = false,
-            isCanRemoveLastPaymentMethodEnabled = true,
+            paymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
             allowsRemovalOfLastSavedPaymentMethod = true,
         ) {
             savedPaymentMethodsPage.onEditButton().performClick()
@@ -219,7 +245,8 @@ class CustomerSessionCustomerSheetActivityTest {
                 PaymentMethodFactory.card(last4 = "4242", addCbcNetworks = true),
             ),
             isPaymentMethodRemoveEnabled = true,
-            isCanRemoveLastPaymentMethodEnabled = true,
+            paymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
             allowsRemovalOfLastSavedPaymentMethod = false,
         ) {
             savedPaymentMethodsPage.onEditButton().performClick()
@@ -241,7 +268,8 @@ class CustomerSessionCustomerSheetActivityTest {
                 PaymentMethodFactory.card(last4 = "4242", addCbcNetworks = true),
             ),
             isPaymentMethodRemoveEnabled = true,
-            isCanRemoveLastPaymentMethodEnabled = false,
+            paymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Disabled,
             allowsRemovalOfLastSavedPaymentMethod = true,
         ) {
             savedPaymentMethodsPage.onEditButton().performClick()
@@ -347,7 +375,8 @@ class CustomerSessionCustomerSheetActivityTest {
     private fun runTest(
         cards: List<PaymentMethod> = listOf(),
         isPaymentMethodRemoveEnabled: Boolean = true,
-        isCanRemoveLastPaymentMethodEnabled: Boolean = true,
+        paymentMethodRemoveLastFeature: ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
         allowsRemovalOfLastSavedPaymentMethod: Boolean = true,
         addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Automatic,
         test: (CustomerSheetActivity) -> Unit,
@@ -388,7 +417,7 @@ class CustomerSessionCustomerSheetActivityTest {
         enqueueElementsSession(
             savedCards = cards,
             isPaymentMethodRemoveEnabled = isPaymentMethodRemoveEnabled,
-            isCanRemoveLastPaymentMethodEnabled = isCanRemoveLastPaymentMethodEnabled,
+            paymentMethodRemoveLastFeature = paymentMethodRemoveLastFeature,
         )
 
         ActivityScenario.launch<CustomerSheetActivity>(
@@ -432,7 +461,7 @@ class CustomerSessionCustomerSheetActivityTest {
     private fun enqueueElementsSession(
         savedCards: List<PaymentMethod> = listOf(),
         isPaymentMethodRemoveEnabled: Boolean,
-        isCanRemoveLastPaymentMethodEnabled: Boolean,
+        paymentMethodRemoveLastFeature: ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature,
     ) {
         networkRule.enqueue(
             host("api.stripe.com"),
@@ -448,7 +477,7 @@ class CustomerSessionCustomerSheetActivityTest {
             response.createElementsSessionResponse(
                 cards = savedCards,
                 isPaymentMethodRemoveEnabled = isPaymentMethodRemoveEnabled,
-                isCanRemoveLastPaymentMethodEnabled = isCanRemoveLastPaymentMethodEnabled,
+                paymentMethodRemoveLastFeature = paymentMethodRemoveLastFeature,
             )
         }
     }
@@ -549,7 +578,7 @@ class CustomerSessionCustomerSheetActivityTest {
     private fun MockResponse.createElementsSessionResponse(
         cards: List<PaymentMethod>,
         isPaymentMethodRemoveEnabled: Boolean,
-        isCanRemoveLastPaymentMethodEnabled: Boolean,
+        paymentMethodRemoveLastFeature: ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature,
     ): MockResponse {
         val removeFeature = if (isPaymentMethodRemoveEnabled) {
             "enabled"
@@ -557,10 +586,10 @@ class CustomerSessionCustomerSheetActivityTest {
             "disabled"
         }
 
-        val removeLastFeature = if (isCanRemoveLastPaymentMethodEnabled) {
-            "enabled"
-        } else {
-            "disabled"
+        val removeLastFeature = when (paymentMethodRemoveLastFeature) {
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled -> "\"enabled\""
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Disabled -> "\"disabled\""
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided -> "null"
         }
 
         val cardsArray = JSONArray()

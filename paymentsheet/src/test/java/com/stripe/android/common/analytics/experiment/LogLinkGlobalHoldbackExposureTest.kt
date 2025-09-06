@@ -364,7 +364,7 @@ class LogLinkGlobalHoldbackExposureTest {
                 MobilePaymentElement.Enabled(
                     isPaymentMethodSaveEnabled = true,
                     paymentMethodRemove = Components.PaymentMethodRemoveFeature.Enabled,
-                    canRemoveLastPaymentMethod = true,
+                    paymentMethodRemoveLast = Components.PaymentMethodRemoveLastFeature.Enabled,
                     isPaymentMethodSetAsDefaultEnabled = true,
                     allowRedisplayOverride = null
                 )

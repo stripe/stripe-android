@@ -16,6 +16,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers
@@ -59,7 +60,8 @@ internal class CustomerSessionPaymentSheetActivityTest {
             ),
             isPaymentMethodRemoveEnabled = true,
             canRemoveLastPaymentMethodConfig = true,
-            canRemoveLastPaymentMethodServer = true,
+            paymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
         ) {
             composeTestRule.onEditButton().performClick()
 
@@ -75,7 +77,24 @@ internal class CustomerSessionPaymentSheetActivityTest {
             ),
             isPaymentMethodRemoveEnabled = true,
             canRemoveLastPaymentMethodConfig = true,
-            canRemoveLastPaymentMethodServer = true,
+            paymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
+        ) {
+            composeTestRule.onEditButton().performClick()
+
+            composeTestRule.onSavedPaymentMethod(last4 = "4242").assertIsDisplayed()
+        }
+
+    @Test
+    fun `When single PM with remove permissions, can remove last from config with no server value, can remove`() =
+        runTest(
+            cards = listOf(
+                PaymentMethodFactory.card(last4 = "4242"),
+            ),
+            isPaymentMethodRemoveEnabled = true,
+            canRemoveLastPaymentMethodConfig = true,
+            paymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided,
         ) {
             composeTestRule.onEditButton().performClick()
 
@@ -90,7 +109,8 @@ internal class CustomerSessionPaymentSheetActivityTest {
             ),
             isPaymentMethodRemoveEnabled = true,
             canRemoveLastPaymentMethodConfig = true,
-            canRemoveLastPaymentMethodServer = false,
+            paymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Disabled,
         ) {
             composeTestRule.onEditButton().assertIsDisplayed()
         }
@@ -103,7 +123,8 @@ internal class CustomerSessionPaymentSheetActivityTest {
             ),
             isPaymentMethodRemoveEnabled = true,
             canRemoveLastPaymentMethodConfig = false,
-            canRemoveLastPaymentMethodServer = true,
+            paymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
         ) {
             composeTestRule.onEditButton().assertIsDisplayed()
         }
@@ -116,7 +137,8 @@ internal class CustomerSessionPaymentSheetActivityTest {
             ),
             isPaymentMethodRemoveEnabled = true,
             canRemoveLastPaymentMethodConfig = false,
-            canRemoveLastPaymentMethodServer = false,
+            paymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Disabled,
         ) {
             composeTestRule.onEditButton().assertExists()
         }
@@ -130,7 +152,8 @@ internal class CustomerSessionPaymentSheetActivityTest {
             ),
             isPaymentMethodRemoveEnabled = false,
             canRemoveLastPaymentMethodConfig = true,
-            canRemoveLastPaymentMethodServer = false,
+            paymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Disabled,
         ) {
             composeTestRule.onEditButton().assertIsDisplayed()
         }
@@ -144,7 +167,8 @@ internal class CustomerSessionPaymentSheetActivityTest {
             ),
             isPaymentMethodRemoveEnabled = false,
             canRemoveLastPaymentMethodConfig = true,
-            canRemoveLastPaymentMethodServer = false,
+            paymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Disabled,
         ) {
             composeTestRule.onEditButton().performClick()
 
@@ -167,7 +191,8 @@ internal class CustomerSessionPaymentSheetActivityTest {
             ),
             isPaymentMethodRemoveEnabled = true,
             canRemoveLastPaymentMethodConfig = true,
-            canRemoveLastPaymentMethodServer = false,
+            paymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Disabled,
         ) {
             composeTestRule.onEditButton().performClick()
 
@@ -191,7 +216,8 @@ internal class CustomerSessionPaymentSheetActivityTest {
             ),
             isPaymentMethodRemoveEnabled = true,
             canRemoveLastPaymentMethodConfig = true,
-            canRemoveLastPaymentMethodServer = false,
+            paymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Disabled,
         ) {
             composeTestRule.onEditButton().performClick()
 
@@ -213,7 +239,8 @@ internal class CustomerSessionPaymentSheetActivityTest {
             ),
             isPaymentMethodRemoveEnabled = true,
             canRemoveLastPaymentMethodConfig = false,
-            canRemoveLastPaymentMethodServer = true,
+            paymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
         ) {
             composeTestRule.onEditButton().performClick()
 
@@ -235,7 +262,8 @@ internal class CustomerSessionPaymentSheetActivityTest {
             ),
             isPaymentMethodRemoveEnabled = true,
             canRemoveLastPaymentMethodConfig = true,
-            canRemoveLastPaymentMethodServer = true,
+            paymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
         ) {
             composeTestRule.onEditButton().performClick()
 
@@ -257,7 +285,8 @@ internal class CustomerSessionPaymentSheetActivityTest {
             ),
             isPaymentMethodRemoveEnabled = false,
             canRemoveLastPaymentMethodConfig = true,
-            canRemoveLastPaymentMethodServer = false,
+            paymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Disabled,
         ) {
             composeTestRule.onEditButton().performClick()
 
@@ -279,7 +308,8 @@ internal class CustomerSessionPaymentSheetActivityTest {
             ),
             isPaymentMethodRemoveEnabled = true,
             canRemoveLastPaymentMethodConfig = false,
-            canRemoveLastPaymentMethodServer = false,
+            paymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Disabled,
         ) {
             composeTestRule.onEditButton().performClick()
 
@@ -297,7 +327,8 @@ internal class CustomerSessionPaymentSheetActivityTest {
         cards: List<PaymentMethod>,
         isPaymentMethodRemoveEnabled: Boolean = true,
         canRemoveLastPaymentMethodConfig: Boolean = true,
-        canRemoveLastPaymentMethodServer: Boolean = true,
+        paymentMethodRemoveLastFeature: ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
         defaultPaymentMethod: String? = null,
         test: (PaymentSheetActivity) -> Unit,
     ) {
@@ -310,7 +341,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
                 createElementsSessionResponse(
                     cards = cards,
                     isPaymentMethodRemoveEnabled = isPaymentMethodRemoveEnabled,
-                    canRemoveLastPaymentMethod = canRemoveLastPaymentMethodServer,
+                    paymentMethodRemoveLastFeature = paymentMethodRemoveLastFeature,
                     defaultPaymentMethod = defaultPaymentMethod,
                 )
             )
@@ -393,7 +424,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
         fun createElementsSessionResponse(
             cards: List<PaymentMethod>,
             isPaymentMethodRemoveEnabled: Boolean,
-            canRemoveLastPaymentMethod: Boolean,
+            paymentMethodRemoveLastFeature: ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature,
             defaultPaymentMethod: String?,
         ): String {
             val cardsArray = JSONArray()
@@ -405,7 +436,11 @@ internal class CustomerSessionPaymentSheetActivityTest {
             val cardsStringified = cardsArray.toString(2)
 
             val isPaymentMethodRemoveStringified = isPaymentMethodRemoveEnabled.toFeatureState()
-            val canRemoveLastPaymentMethodStringified = canRemoveLastPaymentMethod.toFeatureState()
+            val canRemoveLastPaymentMethodStringified = when (paymentMethodRemoveLastFeature) {
+                ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled -> "enabled"
+                ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Disabled -> "disabled"
+                ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided -> null
+            }
 
             return """
                 {
