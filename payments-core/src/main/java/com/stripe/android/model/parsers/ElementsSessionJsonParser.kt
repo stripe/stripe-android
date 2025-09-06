@@ -334,7 +334,7 @@ internal class ElementsSessionJsonParser(
 
             val paymentMethodSaveFeature = paymentSheetFeatures.optString(FIELD_PAYMENT_METHOD_SAVE)
             val paymentMethodRemoveFeature = paymentSheetFeatures.optString(FIELD_PAYMENT_METHOD_REMOVE)
-            val paymentMethodRemoveLastFeature = paymentSheetFeatures.optString(FIELD_PAYMENT_METHOD_REMOVE_LAST)
+            val paymentMethodRemoveLastFeature = parsePaymentMethodRemoveLastFeatures(paymentSheetFeatures)
             val paymentMethodSetAsDefaultFeature = paymentSheetFeatures.optString(FIELD_PAYMENT_METHOD_SET_AS_DEFAULT)
             val allowRedisplayOverrideValue = paymentSheetFeatures
                 .optString(FIELD_PAYMENT_METHOD_ALLOW_REDISPLAY_OVERRIDE)
@@ -350,7 +350,7 @@ internal class ElementsSessionJsonParser(
                     VALUE_PARTIAL -> ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Partial
                     else -> ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled
                 },
-                canRemoveLastPaymentMethod = paymentMethodRemoveLastFeature == VALUE_ENABLED,
+                paymentMethodRemoveLast = paymentMethodRemoveLastFeature,
                 isPaymentMethodSetAsDefaultEnabled = paymentMethodSetAsDefaultFeature == VALUE_ENABLED,
                 allowRedisplayOverride = allowRedisplayOverride,
             )
@@ -371,7 +371,7 @@ internal class ElementsSessionJsonParser(
                 ?: return ElementsSession.Customer.Components.CustomerSheet.Disabled
 
             val paymentMethodRemoveFeature = customerSheetFeatures.optString(FIELD_PAYMENT_METHOD_REMOVE)
-            val paymentMethodRemoveLastFeature = customerSheetFeatures.optString(FIELD_PAYMENT_METHOD_REMOVE_LAST)
+            val paymentMethodRemoveLastFeature = parsePaymentMethodRemoveLastFeatures(customerSheetFeatures)
             val paymentMethodSyncDefaultFeature = customerSheetFeatures.optString(FIELD_PAYMENT_METHOD_SYNC_DEFAULT)
 
             ElementsSession.Customer.Components.CustomerSheet.Enabled(
@@ -380,7 +380,7 @@ internal class ElementsSessionJsonParser(
                     VALUE_PARTIAL -> ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Partial
                     else -> ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled
                 },
-                canRemoveLastPaymentMethod = paymentMethodRemoveLastFeature == VALUE_ENABLED,
+                paymentMethodRemoveLast = paymentMethodRemoveLastFeature,
                 isPaymentMethodSyncDefaultEnabled = paymentMethodSyncDefaultFeature == VALUE_ENABLED,
             )
         } else {
@@ -418,6 +418,21 @@ internal class ElementsSessionJsonParser(
         }
 
         return flags.toMap()
+    }
+
+    private fun parsePaymentMethodRemoveLastFeatures(
+        json: JSONObject
+    ): ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature {
+        val paymentMethodRemoveLastFeature = StripeJsonUtils.optString(
+            jsonObject = json,
+            fieldName = FIELD_PAYMENT_METHOD_REMOVE_LAST
+        )
+
+        return when (paymentMethodRemoveLastFeature) {
+            null -> ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided
+            VALUE_ENABLED -> ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled
+            else -> ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Disabled
+        }
     }
 
     /**
