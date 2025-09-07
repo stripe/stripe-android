@@ -247,27 +247,17 @@ workflows:
             - integration_key: $AUX_PAGERDUTY_INTEGRATION_KEY
   run-instrumentation-tests:
     before_run:
-      - start_emulator
       - prepare_all
     after_run:
       - conclude_all
     steps:
       - script@1:
-          title: Assemble Instrumentation tests
-          timeout: 600
-          inputs:
-            - content: ./gradlew assembleAndroidTest -x :paymentsheet-example:assembleAndroidTest -x :paymentsheet:assembleAndroidTest -x :example:assembleAndroidTest -x :financial-connections:assembleAndroidTest -x :financial-connections-example:assembleAndroidTest -x :camera-core:assembleAndroidTest -x :stripecardscan:assembleAndroidTest -x :stripecardscan-example:assembleAndroidTest
-      - wait-for-android-emulator@1:
-          inputs:
-            - boot_timeout: 600
-      - script@1:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew connectedAndroidTest -x :paymentsheet-example:connectedAndroidTest -x :paymentsheet:connectedAndroidTest -x :example:connectedAndroidTest -x :financial-connections:connectedAndroidTest -x :financial-connections-example:connectedAndroidTest -x :camera-core:connectedAndroidTest -x :stripecardscan:connectedAndroidTest -x :stripecardscan-example:connectedAndroidTest
+            - content: ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=1 pixel2api33DebugAndroidTest -x :paymentsheet-example:pixel2api33DebugAndroidTest -x :paymentsheet:pixel2api33DebugAndroidTest -x :example:pixel2api33DebugAndroidTest -x :financial-connections:pixel2api33DebugAndroidTest -x :financial-connections-example:pixel2api33DebugAndroidTest -x :camera-core:pixel2api33DebugAndroidTest -x :stripecardscan:pixel2api33DebugAndroidTest -x :stripecardscan-example:pixel2api33DebugAndroidTest
   run-paymentsheet-instrumentation-tests:
     before_run:
-      - start_emulator
       - prepare_all
     after_run:
       - conclude_all
@@ -276,7 +266,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./scripts/retry.sh 3 ./gradlew :paymentsheet:pixel2api33DebugAndroidTest
+            - content: ./scripts/retry.sh 3 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 :paymentsheet:pixel2api33DebugAndroidTest
     meta:
       bitrise.io:
         stack: linux-docker-android-22.04
