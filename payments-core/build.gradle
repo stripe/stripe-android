@@ -2,6 +2,7 @@ apply from: configs.androidLibrary
 
 apply plugin: 'com.google.devtools.ksp'
 apply plugin: 'checkstyle'
+apply plugin: 'dev.drewhamilton.poko'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
