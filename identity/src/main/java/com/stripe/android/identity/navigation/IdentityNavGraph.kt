@@ -61,7 +61,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 @ExperimentalMaterialApi
-@Suppress("CyclomaticComplexMethod")
+@Suppress("CyclomaticComplexMethod", "LongMethod")
 internal fun IdentityNavGraph(
     navController: NavHostController = rememberNavController(),
     identityViewModel: IdentityViewModel,
