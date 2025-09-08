@@ -693,7 +693,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
         confirmationTokenParams: ConfirmationTokenParams,
         options: ApiRequest.Options
     ): Result<ConfirmationToken> {
-
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 confirmationTokensUrl,
