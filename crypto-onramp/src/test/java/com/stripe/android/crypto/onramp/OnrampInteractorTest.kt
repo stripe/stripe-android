@@ -90,10 +90,12 @@ class OnrampInteractorTest {
         whenever(linkController.registerConsumer(any(), any(), any(), any())).thenReturn(
             LinkController.RegisterConsumerResult.Success
         )
-
-        val mockLinkAccount = mock<LinkController.LinkAccount> {
-            on { consumerSessionClientSecret } doReturn "secret_123"
-        }
+        val mockLinkAccount = LinkController.LinkAccount(
+            email = "email",
+            redactedPhoneNumber = "***-***-1234",
+            sessionState = LinkController.SessionState.LoggedIn,
+            consumerSessionClientSecret = "secret_123"
+        )
         val mockState = LinkController.State(
             internalLinkAccount = mockLinkAccount,
             merchantLogoUrl = null,
@@ -101,13 +103,9 @@ class OnrampInteractorTest {
             createdPaymentMethod = null
         )
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockState))
-
-        val mockPermissionsResult = mock<CryptoCustomerResponse> {
-            on { id } doReturn "customer_123"
-        }
+        val permissionsResult = CryptoCustomerResponse(id = "customer_123")
         whenever(cryptoApiRepository.grantPartnerMerchantPermissions(any()))
-            .thenReturn(Result.success(mockPermissionsResult))
-
+            .thenReturn(Result.success(permissionsResult))
         val result = interactor.registerLinkUser(
             LinkUserInfo(
                 email = "email",
@@ -116,7 +114,6 @@ class OnrampInteractorTest {
                 fullName = "Test User"
             )
         )
-
         assert(result is OnrampRegisterLinkUserResult.Completed)
         verify(linkController).registerConsumer("email", "phone", "US", "Test User")
     }
@@ -155,9 +152,12 @@ class OnrampInteractorTest {
 
     @Test
     fun testAttachKycInfoIsSuccessful() = runTest {
-        val mockLinkAccount = mock<LinkController.LinkAccount> {
-            on { consumerSessionClientSecret } doReturn "secret_123"
-        }
+        val mockLinkAccount = LinkController.LinkAccount(
+            email = "email",
+            redactedPhoneNumber = "***-***-1234",
+            sessionState = LinkController.SessionState.LoggedIn,
+            consumerSessionClientSecret = "secret_123"
+        )
         val mockState = LinkController.State(
             internalLinkAccount = mockLinkAccount,
             merchantLogoUrl = null,
@@ -167,18 +167,25 @@ class OnrampInteractorTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockState))
         whenever(cryptoApiRepository.collectKycData(any(), any()))
             .thenReturn(Result.success(Unit))
-
-        val kycInfo = mock<KycInfo>()
+        val kycInfo = KycInfo(
+            firstName = "Test",
+            lastName = "User",
+            idNumber = "999-88-7777",
+            dateOfBirth = com.stripe.android.crypto.onramp.model.DateOfBirth(day = 1, month = 3, year = 1975),
+            address = com.stripe.android.paymentsheet.PaymentSheet.Address(city = "Orlando", state = "FL")
+        )
         val result = interactor.attachKycInfo(kycInfo)
-
         assert(result is OnrampAttachKycInfoResult.Completed)
     }
 
     @Test
     fun testStartIdentityVerificationIsSuccessful() = runTest {
-        val mockLinkAccount = mock<LinkController.LinkAccount> {
-            on { consumerSessionClientSecret } doReturn "secret_123"
-        }
+        val mockLinkAccount = LinkController.LinkAccount(
+            email = "email",
+            redactedPhoneNumber = "***-***-1234",
+            sessionState = LinkController.SessionState.LoggedIn,
+            consumerSessionClientSecret = "secret_123"
+        )
         val mockState = LinkController.State(
             internalLinkAccount = mockLinkAccount,
             merchantLogoUrl = null,
@@ -186,10 +193,13 @@ class OnrampInteractorTest {
             createdPaymentMethod = null
         )
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockState))
-        val mockResponse = mock<StartIdentityVerificationResponse>()
+        val response = StartIdentityVerificationResponse(
+            id = "id_123",
+            url = "https://stripe.com",
+            ephemeralKey = "ek_test"
+        )
         whenever(cryptoApiRepository.startIdentityVerification(any()))
-            .thenReturn(Result.success(mockResponse))
-
+            .thenReturn(Result.success(response))
         val result = interactor.startIdentityVerification()
         assert(result is OnrampStartVerificationResult.Completed)
     }
@@ -220,12 +230,10 @@ class OnrampInteractorTest {
         }
         whenever(linkController.createPaymentMethodForOnramp(any())).thenReturn(mockResult)
 
-        val mockCreatePaymentResult = mock<CreatePaymentTokenResponse> {
-            on { id } doReturn "crypto_token_123"
-        }
+        val createPaymentTokenResponse = CreatePaymentTokenResponse(id = "crypto_token_123")
         whenever(
             cryptoApiRepository.createPaymentToken(any(), any())
-        ).thenReturn(Result.success(mockCreatePaymentResult))
+        ).thenReturn(Result.success(createPaymentTokenResponse))
 
         val result = interactor.createCryptoPaymentToken()
         println("createCryptoPaymentToken result: $result")
@@ -253,11 +261,9 @@ class OnrampInteractorTest {
             createdPaymentMethod = null
         )
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockState))
-        val mockPermissionsResult = mock<CryptoCustomerResponse> {
-            on { id } doReturn "customer_123"
-        }
+        val permissionsResult = CryptoCustomerResponse(id = "customer_123")
         whenever(cryptoApiRepository.grantPartnerMerchantPermissions(any()))
-            .thenReturn(Result.success(mockPermissionsResult))
+            .thenReturn(Result.success(permissionsResult))
 
         val result = interactor.handleAuthenticationResult(LinkController.AuthenticationResult.Success)
         assert(result is OnrampAuthenticateResult.Completed)
@@ -275,11 +281,9 @@ class OnrampInteractorTest {
             createdPaymentMethod = null
         )
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockState))
-        val mockPermissionsResult = mock<CryptoCustomerResponse> {
-            on { id } doReturn "customer_123"
-        }
+        val permissionsResult = CryptoCustomerResponse(id = "customer_123")
         whenever(cryptoApiRepository.grantPartnerMerchantPermissions(any()))
-            .thenReturn(Result.success(mockPermissionsResult))
+            .thenReturn(Result.success(permissionsResult))
 
         val result = interactor.handleAuthorizeResult(LinkController.AuthorizeResult.Consented)
         assert(result is OnrampAuthorizeResult.Consented)
