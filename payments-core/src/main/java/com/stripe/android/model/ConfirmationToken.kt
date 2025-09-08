@@ -1,6 +1,5 @@
 package com.stripe.android.model
 
-import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import dev.drewhamilton.poko.Poko
@@ -38,7 +37,7 @@ data class ConfirmationToken internal constructor(
     /**
      * Time at which this ConfirmationToken expires and can no longer be used to confirm a PaymentIntent or SetupIntent.
      */
-    @JvmField val expireAt: Long?,
+    @JvmField val expiresAt: Long?,
 
     /**
      * Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode.
@@ -67,7 +66,7 @@ data class ConfirmationToken internal constructor(
      * Payment method data collected from Elements. This represents the transactional checkout state,
      * not a reusable PaymentMethod object.
      */
-    @JvmField val paymentMethodPreview: PaymentMethodPreview?,
+    @JvmField val paymentMethodPreview: PaymentMethod?,
 
     /**
      * Return URL used to confirm the intent for redirect-based methods.
@@ -91,85 +90,4 @@ data class ConfirmationToken internal constructor(
      */
     @JvmField val shipping: ShippingInformation?,
 
-    ) : StripeModel {
-
-    /**
-     * Preview of the payment method data collected from Elements.
-     * This represents the transactional checkout state, not a reusable PaymentMethod object.
-     */
-    @Parcelize
-    @Poko
-    class PaymentMethodPreview internal constructor(
-        /**
-         *  This field indicates whether this payment method can be shown again to its customer in a checkout flow.
-         *  Stripe products such as Checkout and Elements use this field to determine
-         *  whether a payment method can be shown as a saved payment method in a checkout flow.
-         *  The field defaults to “unspecified”.
-         */
-        @JvmField val allowRedisplay: PaymentMethod.AllowRedisplay? = null,
-
-        /**
-         *  If this is an AU BECS Debit PaymentMethod, this contains additional details.
-         */
-        @JvmField val auBecsDebit: PaymentMethod.AuBecsDebit? = null,
-
-        /**
-         *  If this is a Bacs Debit PaymentMethod, this contains additional details.
-         */
-        @JvmField val bacsDebit: PaymentMethod.BacsDebit? = null,
-
-        /**
-         *  Billing information associated with the PaymentMethod that may be used or required by
-         *  particular types of payment methods.
-         */
-        @JvmField val billingDetails: PaymentMethod.BillingDetails? = null,
-
-        /**
-         *  If this is a Card PaymentMethod, this contains additional details.
-         */
-        @JvmField val card: PaymentMethod.Card? = null,
-
-        /**
-         *  If this is a Card Present PaymentMethod, this contains additional details.
-         */
-        @JvmField val cardPresent: PaymentMethod.CardPresent? = null,
-
-        /**
-         *  The ID of the Customer to which this PaymentMethod is saved.
-         *  This will not be set when the PaymentMethod has not been saved to a Customer.
-         */
-        @JvmField val customerId: String? = null,
-
-        /**
-         * If this is an FPX PaymentMethod, this contains additional details.
-         */
-        @JvmField val fpx: PaymentMethod.Fpx? = null,
-
-        /**
-         * If this is an IDEAL PaymentMethod, this contains additional details.
-         */
-        @JvmField val ideal: PaymentMethod.Ideal? = null,
-
-        /**
-         * If this is a SEPA debit PaymentMethod, this contains additional details.
-         */
-        @JvmField val sepaDebit: PaymentMethod.SepaDebit? = null,
-
-        /**
-         * If this is a Sofort PaymentMethod, this contains additional details.
-         */
-        @JvmField val sofort: PaymentMethod.Sofort? = null,
-
-        /**
-         * The type of the PaymentMethod.
-         * An additional hash is included on the PaymentMethod with a name matching this value.
-         */
-        @JvmField val type: PaymentMethod.Type? = null,
-
-        /**
-         * If this is a US Bank Account PaymentMethod, this contains additional details.
-         */
-        @JvmField val usBankAccount: PaymentMethod.USBankAccount? = null,
-
-        ) : Parcelable
-}
+    ) : StripeModel

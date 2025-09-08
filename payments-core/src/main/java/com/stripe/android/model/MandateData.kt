@@ -55,5 +55,4 @@ data class MandateData internal constructor(
         ) : Parcelable
 
     }
-
 }
