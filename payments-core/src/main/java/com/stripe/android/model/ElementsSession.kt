@@ -170,10 +170,13 @@ data class ElementsSession(
                 data class Enabled(
                     val isPaymentMethodSaveEnabled: Boolean,
                     val paymentMethodRemove: PaymentMethodRemoveFeature,
-                    val canRemoveLastPaymentMethod: Boolean,
+                    val paymentMethodRemoveLast: PaymentMethodRemoveLastFeature,
                     val allowRedisplayOverride: PaymentMethod.AllowRedisplay?,
                     val isPaymentMethodSetAsDefaultEnabled: Boolean,
-                ) : MobilePaymentElement
+                ) : MobilePaymentElement {
+                    val canRemoveLastPaymentMethod: Boolean
+                        get() = paymentMethodRemoveLast.canRemoveLastPaymentMethod
+                }
             }
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -186,9 +189,12 @@ data class ElementsSession(
                 @Parcelize
                 data class Enabled(
                     val paymentMethodRemove: PaymentMethodRemoveFeature,
-                    val canRemoveLastPaymentMethod: Boolean,
+                    val paymentMethodRemoveLast: PaymentMethodRemoveLastFeature,
                     val isPaymentMethodSyncDefaultEnabled: Boolean,
-                ) : CustomerSheet
+                ) : CustomerSheet {
+                    val canRemoveLastPaymentMethod: Boolean
+                        get() = paymentMethodRemoveLast.canRemoveLastPaymentMethod
+                }
             }
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -196,6 +202,16 @@ data class ElementsSession(
                 Enabled,
                 Partial,
                 Disabled,
+            }
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            enum class PaymentMethodRemoveLastFeature {
+                Enabled,
+                Disabled,
+                NotProvided;
+
+                val canRemoveLastPaymentMethod: Boolean
+                    get() = this == Enabled || this == NotProvided
             }
         }
     }

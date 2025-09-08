@@ -22,7 +22,8 @@ internal class FakeCustomerSessionElementsSessionManager(
         ElementsSession.Customer.Components.CustomerSheet.Enabled(
             paymentMethodRemove =
             ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
-            canRemoveLastPaymentMethod = true,
+            paymentMethodRemoveLast =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided,
             isPaymentMethodSyncDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
         ),
     private val customer: ElementsSession.Customer = ElementsSession.Customer(
