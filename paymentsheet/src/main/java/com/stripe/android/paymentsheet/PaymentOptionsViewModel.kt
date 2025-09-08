@@ -104,6 +104,28 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     override val walletsProcessingState: StateFlow<WalletsProcessingState?> = MutableStateFlow(null).asStateFlow()
 
+    private val visibleWallets by lazy {
+        val visibility = config.walletButtons.visibility
+
+        WalletType.entries.filter { walletType ->
+            val configuredVisibility = visibility.paymentElement[walletType.configType]
+
+            when (configuredVisibility) {
+                null,
+                PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Automatic -> {
+                    if (!args.walletButtonsRendered) {
+                        true
+                    } else {
+                        visibility.walletButtonsView[walletType.configType] ==
+                            PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Never
+                    }
+                }
+                PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Always -> true
+                PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Never -> false
+            }
+        }
+    }
+
     override val walletsState: StateFlow<WalletsState?> = combineAsStateFlow(
         linkHandler.isLinkEnabled,
         linkHandler.linkConfigurationCoordinator.emailFlow,
@@ -116,11 +138,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
         val linkConfiguration = paymentMethodMetadata.linkState?.configuration
         val hasLinkWithSelectedPayment = currentSelection is Link && currentSelection.selectedPayment != null
         WalletsState.create(
-            isLinkAvailable = isLinkAvailable == true &&
-                args.walletsToShow.contains(WalletType.Link),
+            isLinkAvailable = isLinkAvailable == true && visibleWallets.contains(WalletType.Link),
             linkEmail = linkEmail,
-            isGooglePayReady = paymentMethodMetadata.isGooglePayReady &&
-                args.walletsToShow.contains(WalletType.GooglePay),
+            isGooglePayReady = paymentMethodMetadata.isGooglePayReady && visibleWallets.contains(WalletType.GooglePay),
             buttonsEnabled = buttonsEnabled,
             paymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes(),
             googlePayLauncherConfig = null,
