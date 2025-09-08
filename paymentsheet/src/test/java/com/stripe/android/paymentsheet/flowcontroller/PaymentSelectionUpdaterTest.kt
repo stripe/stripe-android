@@ -53,6 +53,7 @@ class PaymentSelectionUpdaterTest {
         val existingSelection = PaymentSelection.New.GenericPaymentMethod(
             label = "Sofort".resolvableString,
             iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_klarna,
+            iconResourceNight = null,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.SOFORT,
@@ -244,6 +245,7 @@ class PaymentSelectionUpdaterTest {
         val existingSelection = PaymentSelection.New.GenericPaymentMethod(
             label = "paypal".resolvableString,
             iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_paypal,
+            iconResourceNight = null,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.P24,
@@ -274,6 +276,7 @@ class PaymentSelectionUpdaterTest {
         val existingSelection = PaymentSelection.New.GenericPaymentMethod(
             label = "paypal".resolvableString,
             iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_paypal,
+            iconResourceNight = null,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.PAYPAL.copy(
@@ -306,6 +309,7 @@ class PaymentSelectionUpdaterTest {
         val existingSelection = PaymentSelection.New.GenericPaymentMethod(
             label = "paypal".resolvableString,
             iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_paypal,
+            iconResourceNight = null,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.PAYPAL.copy(

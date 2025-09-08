@@ -8,7 +8,7 @@ import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.LocalIconStyle
 import com.stripe.android.uicore.stripeColors
 
-private const val MIN_LUMINANCE_FOR_LIGHT_ICON = 0.5
+internal const val MIN_LUMINANCE_FOR_LIGHT_ICON = 0.5
 
 internal object IconHelper {
     @Composable

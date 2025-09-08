@@ -734,6 +734,7 @@ class DefaultEventReporterTest {
             PaymentSelection.New.GenericPaymentMethod(
                 label = "Cash App Pay".resolvableString,
                 iconResource = 0,
+                iconResourceNight = null,
                 lightThemeIconUrl = null,
                 darkThemeIconUrl = null,
                 paymentMethodCreateParams = PaymentMethodCreateParams.createCashAppPay(),
