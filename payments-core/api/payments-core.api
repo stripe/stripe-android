@@ -691,6 +691,8 @@ public final class com/stripe/android/Stripe {
 	public final fun createCardTokenSynchronous (Lcom/stripe/android/model/CardParams;Ljava/lang/String;)Lcom/stripe/android/model/Token;
 	public final fun createCardTokenSynchronous (Lcom/stripe/android/model/CardParams;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/Token;
 	public static synthetic fun createCardTokenSynchronous$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/CardParams;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/Token;
+	public final fun createConfirmationToken$payments_core_release (Lcom/stripe/android/model/ConfirmationTokenParams;Lcom/stripe/android/ApiResultCallback;)V
+	public final fun createConfirmationToken$payments_core_release (Lcom/stripe/android/model/ConfirmationTokenParams;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
 	public final fun createCvcUpdateToken (Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
 	public final fun createCvcUpdateToken (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
 	public final fun createCvcUpdateToken (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
