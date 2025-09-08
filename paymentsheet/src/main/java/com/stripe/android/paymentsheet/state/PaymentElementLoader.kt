@@ -527,6 +527,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             linkConfiguration = linkConfig,
             elementsSession = elementsSession,
             linkSignUpDisabled = elementsSession.disableLinkSignup,
+            isLiveMode = elementsSession.stripeIntent.isLiveMode,
         )
     }
 
@@ -535,6 +536,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         linkConfiguration: LinkConfiguration,
         elementsSession: ElementsSession,
         linkSignUpDisabled: Boolean,
+        isLiveMode: Boolean,
     ): LinkState {
         val accountStatus = accountStatusProvider(linkConfiguration)
 
@@ -546,7 +548,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
             hasCustomerConfiguration = configuration.customer != null,
         )
-        val hasUsedLink = linkStore.hasUsedLink()
+
+        // In live mode, we only show the signup if the customer hasn't used Link in the merchant app before.
+        // In test mode, we continue to show it to make testing easier.
+        val hasUsedLink = linkStore.hasUsedLink() && isLiveMode
         val signupToggleEnabled = elementsSession.linkSignUpOptInFeatureEnabled
 
         val linkSignupMode = when {

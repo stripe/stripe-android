@@ -1540,9 +1540,14 @@ internal class DefaultPaymentElementLoaderTest {
             on { hasUsedLink() } doReturn true
         }
 
+        val stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            isLiveMode = true,
+        )
+
         val loader = createPaymentElementLoader(
             linkAccountState = AccountStatus.SignedOut,
             linkStore = linkStore,
+            stripeIntent = stripeIntent,
         )
 
         val result = loader.load(
@@ -1745,9 +1750,14 @@ internal class DefaultPaymentElementLoaderTest {
         val linkStore = mock<LinkStore>()
         whenever(linkStore.hasUsedLink()).thenReturn(true)
 
+        val stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            isLiveMode = true,
+        )
+
         val loader = createPaymentElementLoader(
             linkAccountState = AccountStatus.SignedOut,
             linkStore = linkStore,
+            stripeIntent = stripeIntent,
             linkSettings = createLinkSettings(
                 passthroughModeEnabled = false,
                 linkSignUpOptInFeatureEnabled = true
