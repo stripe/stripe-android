@@ -34,6 +34,7 @@ import com.stripe.android.ui.core.elements.CardDetailsSectionController
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import com.stripe.android.utils.FakePassiveChallengeWarmer
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.CoroutineScope
@@ -204,14 +205,17 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                         return FakeCvcRecollectionInteractor()
                     }
                 },
-                isLiveModeProvider = { false }
+                isLiveModeProvider = { false },
+                passiveChallengeWarmer = FakePassiveChallengeWarmer(),
+                publishableKeyProvider = { "pk_test_1234" },
+                productUsage = setOf("PaymentSheet")
             )
         }
     }
 
     private val PAYMENT_OPTION_CONTRACT_ARGS = PaymentOptionContract.Args(
         state = PaymentSheetState.Full(
-            customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
+            customer = EMPTY_CUSTOMER_STATE,
             config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.asCommonConfiguration(),
             paymentSelection = null,
             validationError = null,
