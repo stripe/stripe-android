@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import dev.drewhamilton.poko.Poko
