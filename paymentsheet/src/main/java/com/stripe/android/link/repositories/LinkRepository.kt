@@ -64,6 +64,14 @@ internal interface LinkRepository {
     ): Result<ConsumerSessionLookup>
 
     /**
+     * Refresh the mobile consumer session.
+     */
+    suspend fun refreshConsumer(
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
+    ): Result<ConsumerSessionLookup>
+
+    /**
      * Sign up for a new Link account.
      */
     suspend fun consumerSignUp(
