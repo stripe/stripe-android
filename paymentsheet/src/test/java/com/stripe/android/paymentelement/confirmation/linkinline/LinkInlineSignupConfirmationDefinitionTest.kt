@@ -115,7 +115,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
     @Test
     fun `'action' should skip signup and return 'Launch' on 'NeedsVerification' account status`() =
         testSkippedLinkSignupOnAccountStatus(
-            accountStatus = AccountStatus.NeedsVerification,
+            accountStatus = AccountStatus.NeedsVerification(),
         )
 
     @Test

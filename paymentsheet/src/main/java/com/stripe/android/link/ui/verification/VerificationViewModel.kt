@@ -43,6 +43,7 @@ internal class VerificationViewModel @Inject constructor(
 
     private val _viewState = MutableStateFlow(
         value = VerificationViewState(
+            isWeb = (linkAccount.accountStatus as? AccountStatus.NeedsVerification)?.webviewOpenUrl != null,
             redactedPhoneNumber = linkAccount.redactedPhoneNumber,
             email = linkAccount.email,
             isProcessing = false,
@@ -70,6 +71,10 @@ internal class VerificationViewModel @Inject constructor(
     }
 
     private fun setUp() {
+        if (_viewState.value.isWeb) {
+            return
+        }
+
         if (linkAccount.accountStatus != AccountStatus.VerificationStarted) {
             startVerification()
         }

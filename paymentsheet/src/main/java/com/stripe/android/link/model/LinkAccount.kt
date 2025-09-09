@@ -64,7 +64,9 @@ internal data class LinkAccount(
             AccountStatus.VerificationStarted
         }
         else -> {
-            AccountStatus.NeedsVerification
+            AccountStatus.NeedsVerification(
+                webviewOpenUrl = consumerSession.mobileFallbackWebviewParams?.webviewOpenUrl
+            )
         }
     }
 

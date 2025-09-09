@@ -43,6 +43,7 @@ import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.AppBarIcon
 import com.stripe.android.link.ui.ErrorText
+import com.stripe.android.link.ui.LinkLoadingScreen
 import com.stripe.android.link.ui.LinkSpinner
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
@@ -77,15 +78,17 @@ internal fun VerificationBody(
     val focusRequester: FocusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    LaunchedEffects(
-        state = state,
-        focusManager = focusManager,
-        keyboardController = keyboardController,
-        focusRequester = focusRequester,
-        onFocusRequested = onFocusRequested,
-        context = context,
-        didShowCodeSentNotification = didShowCodeSentNotification
-    )
+    if (!state.isWeb) {
+        LaunchedEffects(
+            state = state,
+            focusManager = focusManager,
+            keyboardController = keyboardController,
+            focusRequester = focusRequester,
+            onFocusRequested = onFocusRequested,
+            context = context,
+            didShowCodeSentNotification = didShowCodeSentNotification
+        )
+    }
 
     VerificationBodyContainer(
         isDialog = state.isDialog,
@@ -94,6 +97,11 @@ internal fun VerificationBody(
             onBack()
         }
     ) {
+        if (state.isWeb) {
+            LinkLoadingScreen()
+            return@VerificationBodyContainer
+        }
+
         Title(
             isDialog = state.isDialog
         )
@@ -388,6 +396,7 @@ private fun Preview() {
             ) {
                 VerificationBody(
                     state = VerificationViewState(
+                        isWeb = false,
                         isProcessing = false,
                         requestFocus = false,
                         errorMessage = null,

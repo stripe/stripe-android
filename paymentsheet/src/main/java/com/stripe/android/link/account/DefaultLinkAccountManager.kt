@@ -158,7 +158,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     )
                 )
             }
-            AccountStatus.NeedsVerification,
+            is AccountStatus.NeedsVerification,
             AccountStatus.VerificationStarted -> {
                 linkEventsReporter.onInvalidSessionState(LinkEventsReporter.SessionState.RequiresVerification)
 

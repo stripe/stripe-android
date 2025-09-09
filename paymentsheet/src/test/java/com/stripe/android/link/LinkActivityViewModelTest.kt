@@ -314,7 +314,7 @@ internal class LinkActivityViewModelTest {
         val linkAccountManager = FakeLinkAccountManager()
 
         val vm = createViewModel(linkAccountManager = linkAccountManager)
-        linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
+        linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification())
 
         vm.onCreate(mock())
 
@@ -551,7 +551,7 @@ internal class LinkActivityViewModelTest {
             linkAttestationCheck = linkAttestationCheck,
             linkExpressMode = LinkExpressMode.ENABLED
         )
-        linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
+        linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification())
 
         vm.onCreate(mock())
 
@@ -569,7 +569,7 @@ internal class LinkActivityViewModelTest {
             linkAccountManager = linkAccountManager,
             linkExpressMode = LinkExpressMode.ENABLED
         )
-        linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
+        linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification())
 
         vm.linkScreenState.test {
             assertThat(awaitItem()).isEqualTo(ScreenState.Loading)
@@ -593,7 +593,7 @@ internal class LinkActivityViewModelTest {
         )
 
         vm.result.test {
-            linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
+            linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification())
 
             vm.onCreate(mock())
 

@@ -52,7 +52,7 @@ internal fun LinkScreenContent(
             onBackPressed = viewModel::goBack,
             navigate = viewModel::navigate,
             dismiss = viewModel::dismissSheet,
-            dismissWithResult = viewModel::handleResult,
+            dismissWithResult = viewModel::handleWebActivityResult,
             getLinkAccount = {
                 viewModel.linkAccount
             },
