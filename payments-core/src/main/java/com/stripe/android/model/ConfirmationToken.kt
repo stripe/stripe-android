@@ -87,5 +87,4 @@ data class ConfirmationToken internal constructor(
      * Shipping information collected on this ConfirmationToken.
      */
     @JvmField val shipping: ShippingInformation?,
-
-    ) : StripeModel
+) : StripeModel

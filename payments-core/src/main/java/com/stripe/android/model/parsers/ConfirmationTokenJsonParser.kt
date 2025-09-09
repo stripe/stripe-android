@@ -5,7 +5,13 @@ import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmationToken
 
-class ConfirmationTokenJsonParser : ModelJsonParser<ConfirmationToken> {
+/**
+ * Parser for [ConfirmationToken] JSON objects from the Stripe API.
+ *
+ * Handles parsing of confirmation token data including payment method previews,
+ * mandate data, and shipping information.
+ */
+internal class ConfirmationTokenJsonParser : ModelJsonParser<ConfirmationToken> {
     override fun parse(json: org.json.JSONObject): ConfirmationToken? {
         val id = StripeJsonUtils.optString(json, FIELD_ID)
             ?: return null
@@ -21,7 +27,10 @@ class ConfirmationTokenJsonParser : ModelJsonParser<ConfirmationToken> {
             },
             paymentIntentId = StripeJsonUtils.optString(json, FIELD_PAYMENT_INTENT_ID),
             paymentMethodPreview = json.optJSONObject(FIELD_PAYMENT_METHOD_PREVIEW)?.let {
-                PaymentMethodJsonParser().parse(it)
+                PaymentMethodJsonParser().parse(it).takeIf { paymentMethod ->
+                    // Return null if essential fields are missing (indicates invalid data)
+                    paymentMethod.type != null
+                }
             },
             paymentMethodOptions = json.optJSONObject(FIELD_PAYMENT_METHOD_OPTIONS)?.let {
                 PaymentMethodOptionsJsonParser().parse(it)
@@ -54,5 +63,4 @@ class ConfirmationTokenJsonParser : ModelJsonParser<ConfirmationToken> {
         const val FIELD_SETUP_INTENT_ID = "setup_intent_id"
         const val FIELD_SHIPPING = "shipping"
     }
-
 }

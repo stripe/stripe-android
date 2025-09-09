@@ -17,8 +17,7 @@ data class PaymentMethodOptions internal constructor(
      * Card-specific options.
      */
     @JvmField val card: Card?,
-
-    ) : StripeModel {
+) : StripeModel {
 
     @Parcelize
     @Poko
@@ -27,7 +26,5 @@ data class PaymentMethodOptions internal constructor(
          * CVC token for the card.
          */
         @JvmField val cvcToken: String?,
-
-        ) : Parcelable
-
+    ) : Parcelable
 }
