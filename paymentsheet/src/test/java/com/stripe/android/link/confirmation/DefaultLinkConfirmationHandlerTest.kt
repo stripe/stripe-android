@@ -11,6 +11,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -514,6 +515,83 @@ internal class DefaultLinkConfirmationHandlerTest {
             )
         }
 
+    @Test
+    fun `handler without passive captcha params does not include params in confirmation args - new payment method`() =
+        runTest(dispatcher) {
+            val configuration = TestFactory.LINK_CONFIGURATION
+            val confirmationHandler = FakeConfirmationHandler()
+            val handler = createHandler(
+                confirmationHandler = confirmationHandler,
+                configuration = configuration,
+                passiveCaptchaParams = null
+            )
+
+            confirmationHandler.awaitResultTurbine.add(
+                item = ConfirmationHandler.Result.Succeeded(
+                    intent = configuration.stripeIntent,
+                    deferredIntentConfirmationType = null
+                )
+            )
+
+            val result = handler.confirm(
+                paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+                linkAccount = TestFactory.LINK_ACCOUNT,
+                cvc = CVC,
+                billingPhone = null
+            )
+
+            assertThat(result).isEqualTo(Result.Succeeded)
+            confirmationHandler.startTurbine.awaitItem().assertConfirmationArgs(
+                configuration = configuration,
+                linkAccount = TestFactory.LINK_ACCOUNT,
+                paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+                cvc = CVC,
+                billingDetails = PaymentMethod.BillingDetails(
+                    address = Address(
+                        postalCode = "12312",
+                        country = "US",
+                    ),
+                ),
+                allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+                passiveCaptchaParams = null
+            )
+        }
+
+    @Test
+    fun `handler without passive captcha params does not include params in confirmation args - saved payment method`() =
+        runTest(dispatcher) {
+            val configuration = TestFactory.LINK_CONFIGURATION
+            val confirmationHandler = FakeConfirmationHandler()
+            val handler = createHandler(
+                confirmationHandler = confirmationHandler,
+                configuration = configuration,
+                passiveCaptchaParams = null
+            )
+
+            confirmationHandler.awaitResultTurbine.add(
+                item = ConfirmationHandler.Result.Succeeded(
+                    intent = configuration.stripeIntent,
+                    deferredIntentConfirmationType = null
+                )
+            )
+
+            val savedPaymentDetails = TestFactory.LINK_SAVED_PAYMENT_DETAILS
+            val result = handler.confirm(
+                paymentDetails = savedPaymentDetails,
+                linkAccount = TestFactory.LINK_ACCOUNT,
+                cvc = CVC,
+                billingPhone = null
+            )
+
+            assertThat(result).isEqualTo(Result.Succeeded)
+            confirmationHandler.startTurbine.awaitItem().assertSavedConfirmationArgs(
+                configuration = configuration,
+                paymentDetails = TestFactory.LINK_SAVED_PAYMENT_DETAILS,
+                cvc = CVC,
+                passiveCaptchaParams = null
+            )
+        }
+
     private fun ConfirmationHandler.Args.assertConfirmationArgs(
         configuration: LinkConfiguration,
         paymentDetails: ConsumerPaymentDetails.PaymentDetails,
@@ -521,6 +599,7 @@ internal class DefaultLinkConfirmationHandlerTest {
         cvc: String?,
         billingDetails: PaymentMethod.BillingDetails?,
         allowRedisplay: PaymentMethod.AllowRedisplay?,
+        passiveCaptchaParams: PassiveCaptchaParams? = PASSIVE_CAPTCHA_PARAMS
     ) {
         assertThat(intent).isEqualTo(configuration.stripeIntent)
         val option = confirmationOption as PaymentMethodConfirmationOption.New
@@ -533,6 +612,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                 allowRedisplay = allowRedisplay,
             )
         )
+        assertThat(option.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
         assertThat(shippingDetails).isEqualTo(configuration.shippingDetails)
         assertThat(initializationMode).isEqualTo(configuration.initializationMode)
     }
@@ -541,10 +621,12 @@ internal class DefaultLinkConfirmationHandlerTest {
         configuration: LinkConfiguration,
         paymentDetails: LinkPaymentDetails.Saved,
         cvc: String?,
+        passiveCaptchaParams: PassiveCaptchaParams? = PASSIVE_CAPTCHA_PARAMS
     ) {
         assertThat(intent).isEqualTo(configuration.stripeIntent)
         val option = confirmationOption as PaymentMethodConfirmationOption.Saved
         assertThat(option.paymentMethod.id).isEqualTo(paymentDetails.paymentDetails.paymentMethodId)
+        assertThat(option.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
 
         val optionsCard = option.optionsParams as? PaymentMethodOptionsParams.Card
         assertThat(optionsCard?.cvc).isEqualTo(cvc)
@@ -555,13 +637,14 @@ internal class DefaultLinkConfirmationHandlerTest {
     private fun createHandler(
         configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
         logger: Logger = FakeLogger(),
-        confirmationHandler: FakeConfirmationHandler = FakeConfirmationHandler()
+        confirmationHandler: FakeConfirmationHandler = FakeConfirmationHandler(),
+        passiveCaptchaParams: PassiveCaptchaParams? = PASSIVE_CAPTCHA_PARAMS
     ): DefaultLinkConfirmationHandler {
         val handler = DefaultLinkConfirmationHandler(
             confirmationHandler = confirmationHandler,
             configuration = configuration,
             logger = logger,
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            passiveCaptchaParams = passiveCaptchaParams
         )
         confirmationHandler.validate()
         return handler
@@ -569,5 +652,6 @@ internal class DefaultLinkConfirmationHandlerTest {
 
     companion object {
         private const val CVC = "333"
+        private val PASSIVE_CAPTCHA_PARAMS = PassiveCaptchaParamsFactory.passiveCaptchaParams()
     }
 }
