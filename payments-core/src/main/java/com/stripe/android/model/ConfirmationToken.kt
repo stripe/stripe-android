@@ -2,7 +2,6 @@ package com.stripe.android.model
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
-import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -20,9 +19,8 @@ import kotlinx.parcelize.Parcelize
  * Related guides: [Confirmation Tokens](https://stripe.com/docs/api/confirmation_tokens)
  */
 @Parcelize
-@Poko
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-// TODO(cttsai-stripe): should make the data class a normal class in next major release
+// TODO(cttsai-stripe): should convert this data class to @Poko class in next major release
 data class ConfirmationToken internal constructor(
     /**
      * Unique identifier for the object.
