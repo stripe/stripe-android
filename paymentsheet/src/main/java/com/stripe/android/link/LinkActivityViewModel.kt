@@ -14,6 +14,8 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.NavHost
+import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.LoggedOut
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.PaymentConfirmed
 import com.stripe.android.link.LinkActivity.Companion.getArgs
@@ -34,7 +36,9 @@ import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.wallet.AddPaymentMethodOption
 import com.stripe.android.link.ui.wallet.AddPaymentMethodOptions
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.addresselement.AutocompleteActivityLauncher
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
@@ -73,6 +77,10 @@ internal class LinkActivityViewModel @Inject constructor(
     val linkLaunchMode: LinkLaunchMode,
     private val autocompleteLauncher: AutocompleteActivityLauncher,
     private val addPaymentMethodOptionsFactory: AddPaymentMethodOptions.Factory,
+    private val passiveChallengeWarmer: PassiveChallengeWarmer,
+    private val passiveCaptchaParams: PassiveCaptchaParams?,
+    @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
+    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
     val linkConfirmationHandler = linkConfirmationHandlerFactory.create(confirmationHandler)
@@ -215,6 +223,14 @@ internal class LinkActivityViewModel @Inject constructor(
     ) {
         autocompleteLauncher.register(activityResultCaller, lifecycleOwner)
         confirmationHandler.register(activityResultCaller, lifecycleOwner)
+        passiveCaptchaParams?.let {
+            passiveChallengeWarmer.register(activityResultCaller, lifecycleOwner)
+            passiveChallengeWarmer.start(
+                passiveCaptchaParams = passiveCaptchaParams,
+                publishableKey = publishableKeyProvider(),
+                productUsage = productUsage
+            )
+        }
     }
 
     fun navigate(screen: LinkScreen, clearStack: Boolean, launchSingleTop: Boolean = false) {

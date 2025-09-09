@@ -1,6 +1,7 @@
 package com.stripe.android.link
 
 import android.app.Application
+import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SAVED_STATE_REGISTRY_OWNER_KEY
@@ -18,6 +19,7 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.LoggedOut
 import com.stripe.android.link.account.FakeLinkAccountManager
@@ -35,6 +37,7 @@ import com.stripe.android.link.model.LinkAuthIntentInfo
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.wallet.AddPaymentMethodOptions
 import com.stripe.android.link.utils.TestNavigationManager
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -48,6 +51,7 @@ import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
 import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.navigation.PopUpToBehavior
 import com.stripe.android.utils.DummyActivityResultCaller
+import com.stripe.android.utils.FakePassiveChallengeWarmer
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -120,6 +124,26 @@ internal class LinkActivityViewModelTest {
                 assertThat(autocompleteRegisterCall.activityResultCaller).isEqualTo(activityResultCaller)
                 assertThat(confirmationHandlerRegisterCall.activityResultCaller).isEqualTo(activityResultCaller)
             }
+        }
+
+    @Test
+    fun `PassiveChallengeWarmer should be registered and started when passive captcha params are available`() =
+        testPassiveChallengeWarmer(withPassiveCaptchaParams = true) {
+            val registerCall = passiveChallengeWarmer.awaitRegisterCall()
+            assertThat(registerCall.activityResultCaller).isEqualTo(activityResultCaller)
+            assertThat(registerCall.lifecycleOwner).isEqualTo(lifecycleOwner)
+
+            val startCall = passiveChallengeWarmer.awaitStartCall()
+            assertThat(startCall.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
+            assertThat(startCall.publishableKey).isEqualTo(PUBLISHABLE_KEY)
+            assertThat(startCall.productUsage).containsExactlyElementsIn(PRODUCT_USAGE)
+        }
+
+    @Test
+    fun `PassiveChallengeWarmer should not be started when passive captcha params are not available`() =
+        testPassiveChallengeWarmer(withPassiveCaptchaParams = false) {
+            // When passiveCaptchaParams is null, the warmer should not be registered or started at all
+            // So we expect no calls to the FakePassiveChallengeWarmer
         }
 
     @Test
@@ -866,6 +890,51 @@ internal class LinkActivityViewModelTest {
         }
     }
 
+    private fun testPassiveChallengeWarmer(
+        withPassiveCaptchaParams: Boolean = false,
+        testBody: suspend PassiveChallengeWarmerTestScope.() -> Unit
+    ) = runTest(dispatcher) {
+        DummyActivityResultCaller.test {
+            val passiveChallengeWarmer = FakePassiveChallengeWarmer()
+            val passiveCaptchaParams = if (withPassiveCaptchaParams) {
+                PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            } else {
+                null
+            }
+            val lifecycleOwner = object : LifecycleOwner {
+                override val lifecycle: Lifecycle = mock()
+            }
+
+            val viewModel = createViewModel(
+                passiveChallengeWarmer = passiveChallengeWarmer,
+                passiveCaptchaParams = passiveCaptchaParams
+            )
+
+            viewModel.registerForActivityResult(
+                activityResultCaller = activityResultCaller,
+                lifecycleOwner = lifecycleOwner,
+            )
+
+            val testScope = PassiveChallengeWarmerTestScope(
+                passiveChallengeWarmer = passiveChallengeWarmer,
+                passiveCaptchaParams = passiveCaptchaParams,
+                lifecycleOwner = lifecycleOwner,
+                activityResultCaller = activityResultCaller
+            )
+
+            testScope.testBody()
+
+            passiveChallengeWarmer.ensureAllEventsConsumed()
+        }
+    }
+
+    private data class PassiveChallengeWarmerTestScope(
+        val passiveChallengeWarmer: FakePassiveChallengeWarmer,
+        val passiveCaptchaParams: PassiveCaptchaParams?,
+        val lifecycleOwner: LifecycleOwner,
+        val activityResultCaller: ActivityResultCaller
+    )
+
     private fun createViewModel(
         activityRetainedComponent: NativeLinkComponent = FakeNativeLinkComponent(),
         linkAccountManager: FakeLinkAccountManager = FakeLinkAccountManager(),
@@ -882,6 +951,8 @@ internal class LinkActivityViewModelTest {
         autocompleteLauncher: AutocompleteActivityLauncher = TestAutocompleteLauncher.noOp(),
         linkConfiguration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
         addPaymentMethodOptionsFactory: AddPaymentMethodOptions.Factory = mock(),
+        passiveChallengeWarmer: PassiveChallengeWarmer = FakePassiveChallengeWarmer(),
+        passiveCaptchaParams: PassiveCaptchaParams? = null
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
             linkAccountManager = linkAccountManager,
@@ -898,6 +969,10 @@ internal class LinkActivityViewModelTest {
             linkConfirmationHandlerFactory = { linkConfirmationHandler },
             autocompleteLauncher = autocompleteLauncher,
             addPaymentMethodOptionsFactory = addPaymentMethodOptionsFactory,
+            passiveChallengeWarmer = passiveChallengeWarmer,
+            passiveCaptchaParams = passiveCaptchaParams,
+            productUsage = PRODUCT_USAGE,
+            publishableKeyProvider = { PUBLISHABLE_KEY },
         ).apply {
             this.launchWebFlow = launchWeb
         }
@@ -913,5 +988,10 @@ internal class LinkActivityViewModelTest {
             set(VIEW_MODEL_STORE_OWNER_KEY, mockViewModelStoreOwner)
             set(VIEW_MODEL_KEY, LinkActivityViewModel::class.java.name)
         }
+    }
+
+    companion object {
+        private val PRODUCT_USAGE = setOf("PaymentSheet")
+        private const val PUBLISHABLE_KEY = "pk_test_123"
     }
 }

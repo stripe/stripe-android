@@ -27,6 +27,7 @@ import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteLauncher
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.utils.FakePassiveChallengeWarmer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -161,6 +162,10 @@ internal class LinkActivityTest {
                 linkConfirmationHandlerFactory = { FakeLinkConfirmationHandler() },
                 autocompleteLauncher = TestAutocompleteLauncher.noOp(),
                 addPaymentMethodOptionsFactory = mock(),
+                passiveChallengeWarmer = FakePassiveChallengeWarmer(),
+                passiveCaptchaParams = null,
+                productUsage = setOf("PaymentSheet"),
+                publishableKeyProvider = { "pk_test_123" },
             )
         }
     }

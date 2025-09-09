@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.challenge.warmer.PassiveChallengeWarmerModule
 import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
@@ -48,7 +49,8 @@ internal annotation class NativeLinkScope
         ApplicationIdModule::class,
         DefaultConfirmationModule::class,
         LinkPassthroughConfirmationModule::class,
-        CardScanModule::class
+        CardScanModule::class,
+        PassiveChallengeWarmerModule::class
     ]
 )
 internal interface NativeLinkComponent {
