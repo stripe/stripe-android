@@ -6,10 +6,7 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
-import com.stripe.android.link.account.FakeLinkAuth
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.account.LinkAuth
-import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -83,13 +80,13 @@ internal class DefaultLinkAttestationCheckTest {
     fun `attestation check should return AttestationFailed when lookup returns AttestationFailed`() = runTest {
         val error = Throwable("oops")
         val linkGate = FakeLinkGate()
-        val linkAuth = FakeLinkAuth()
+        val linkAccountManager = FakeLinkAccountManager()
 
-        linkAuth.lookupResult = LinkAuthResult.AttestationFailed(error)
+        linkAccountManager.lookupResult = Result.failure(Exception(error))
 
         val attestationCheck = attestationCheck(
             linkGate = linkGate,
-            linkAuth = linkAuth,
+            linkAccountManager = linkAccountManager,
         )
 
         assertThat(attestationCheck.invoke())
@@ -100,10 +97,10 @@ internal class DefaultLinkAttestationCheckTest {
     fun `attestation check should return AccountError when lookup returns AccountError`() = runTest {
         val error = Throwable("oops")
         val linkGate = FakeLinkGate()
-        val linkAuth = FakeLinkAuth()
-        linkAuth.lookupResult = LinkAuthResult.AccountError(error)
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.lookupResult = Result.failure(Exception(error))
 
-        val attestationCheck = attestationCheck(linkGate = linkGate, linkAuth = linkAuth)
+        val attestationCheck = attestationCheck(linkGate = linkGate, linkAccountManager = linkAccountManager)
 
         assertThat(attestationCheck.invoke())
             .isEqualTo(LinkAttestationCheck.Result.AccountError(error))
@@ -112,10 +109,10 @@ internal class DefaultLinkAttestationCheckTest {
     @Test
     fun `attestation check should return Successful when lookup returns NoLinkAccountFound`() = runTest {
         val linkGate = FakeLinkGate()
-        val linkAuth = FakeLinkAuth()
-        linkAuth.lookupResult = LinkAuthResult.NoLinkAccountFound
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.lookupResult = Result.success(null)
 
-        val attestationCheck = attestationCheck(linkGate = linkGate, linkAuth = linkAuth)
+        val attestationCheck = attestationCheck(linkGate = linkGate, linkAccountManager = linkAccountManager)
 
         assertThat(attestationCheck.invoke())
             .isEqualTo(LinkAttestationCheck.Result.Successful)
@@ -124,10 +121,10 @@ internal class DefaultLinkAttestationCheckTest {
     @Test
     fun `attestation check should return Successful when lookup returns success`() = runTest {
         val linkGate = FakeLinkGate()
-        val linkAuth = FakeLinkAuth()
-        linkAuth.lookupResult = LinkAuthResult.Success(TestFactory.LINK_ACCOUNT)
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.lookupResult = Result.success(TestFactory.LINK_ACCOUNT)
 
-        val attestationCheck = attestationCheck(linkGate = linkGate, linkAuth = linkAuth)
+        val attestationCheck = attestationCheck(linkGate = linkGate, linkAccountManager = linkAccountManager)
 
         assertThat(attestationCheck.invoke())
             .isEqualTo(LinkAttestationCheck.Result.Successful)
@@ -137,10 +134,10 @@ internal class DefaultLinkAttestationCheckTest {
     fun `attestation check should return Error when lookup returns error`() = runTest {
         val error = Throwable("oops")
         val linkGate = FakeLinkGate()
-        val linkAuth = FakeLinkAuth()
-        linkAuth.lookupResult = LinkAuthResult.Error(error)
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.lookupResult = Result.failure(Exception(error))
 
-        val attestationCheck = attestationCheck(linkGate = linkGate, linkAuth = linkAuth)
+        val attestationCheck = attestationCheck(linkGate = linkGate, linkAccountManager = linkAccountManager)
 
         assertThat(attestationCheck.invoke())
             .isEqualTo(LinkAttestationCheck.Result.Error(error))
@@ -148,7 +145,6 @@ internal class DefaultLinkAttestationCheckTest {
 
     private fun attestationCheck(
         linkGate: LinkGate = FakeLinkGate(),
-        linkAuth: LinkAuth = FakeLinkAuth(),
         integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
@@ -156,9 +152,8 @@ internal class DefaultLinkAttestationCheckTest {
     ): DefaultLinkAttestationCheck {
         return DefaultLinkAttestationCheck(
             linkGate = linkGate,
-            linkAuth = linkAuth,
-            integrityRequestManager = integrityRequestManager,
             linkAccountManager = linkAccountManager,
+            integrityRequestManager = integrityRequestManager,
             linkConfiguration = linkConfiguration,
             errorReporter = errorReporter,
             workContext = dispatcher.scheduler

@@ -4,9 +4,8 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.account.LinkAuth
-import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.gate.LinkGate
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.EmailSource
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.attestation.IntegrityRequestManager
@@ -16,7 +15,6 @@ import kotlin.coroutines.CoroutineContext
 
 internal class DefaultLinkAttestationCheck @Inject constructor(
     private val linkGate: LinkGate,
-    private val linkAuth: LinkAuth,
     private val integrityRequestManager: IntegrityRequestManager,
     private val linkAccountManager: LinkAccountManager,
     private val linkConfiguration: LinkConfiguration,
@@ -32,7 +30,7 @@ internal class DefaultLinkAttestationCheck @Inject constructor(
                     val email = linkAccountManager.linkAccountInfo.value.account?.email
                         ?: linkConfiguration.customerInfo.email
                     if (email == null) return@fold LinkAttestationCheck.Result.Successful
-                    val lookupResult = linkAuth.lookUp(
+                    val lookupResult = linkAccountManager.lookupByEmail(
                         email = email,
                         emailSource = EmailSource.CUSTOMER_OBJECT,
                         startSession = false,
@@ -51,21 +49,39 @@ internal class DefaultLinkAttestationCheck @Inject constructor(
         }
     }
 
-    private fun handleLookupResult(lookupResult: LinkAuthResult): LinkAttestationCheck.Result {
-        return when (lookupResult) {
-            is LinkAuthResult.AttestationFailed -> {
-                LinkAttestationCheck.Result.AttestationFailed(lookupResult.error)
-            }
-            is LinkAuthResult.Error -> {
-                LinkAttestationCheck.Result.Error(lookupResult.error)
-            }
-            is LinkAuthResult.AccountError -> {
-                LinkAttestationCheck.Result.AccountError(lookupResult.error)
-            }
-            LinkAuthResult.NoLinkAccountFound,
-            is LinkAuthResult.Success -> {
+    private fun handleLookupResult(lookupResult: Result<LinkAccount?>): LinkAttestationCheck.Result {
+        return lookupResult.fold(
+            onSuccess = {
+                // Both successful lookup (with account) and no account found are considered successful
                 LinkAttestationCheck.Result.Successful
+            },
+            onFailure = { error ->
+                // Map error types based on the original LinkAuth error handling logic
+                when {
+                    isAttestationError(error) -> {
+                        LinkAttestationCheck.Result.AttestationFailed(error)
+                    }
+                    isAccountError(error) -> {
+                        LinkAttestationCheck.Result.AccountError(error)
+                    }
+                    else -> {
+                        LinkAttestationCheck.Result.Error(error)
+                    }
+                }
             }
-        }
+        )
+    }
+
+    private fun isAttestationError(error: Throwable): Boolean {
+        return error is com.stripe.attestation.AttestationError ||
+            (
+                error is com.stripe.android.core.exception.APIException &&
+                    error.stripeError?.code == "link_failed_to_attest_request"
+                )
+    }
+
+    private fun isAccountError(error: Throwable): Boolean {
+        return error is com.stripe.android.core.exception.APIException &&
+            error.stripeError?.code == "link_consumer_details_not_available"
     }
 }

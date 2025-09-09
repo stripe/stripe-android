@@ -16,9 +16,7 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkScreen
-import com.stripe.android.link.NoLinkAccountFoundException
-import com.stripe.android.link.account.LinkAuth
-import com.stripe.android.link.account.LinkAuthResult
+import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
@@ -46,7 +44,7 @@ internal class SignUpViewModel @Inject constructor(
     private val configuration: LinkConfiguration,
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger,
-    private val linkAuth: LinkAuth,
+    private val linkAccountManager: LinkAccountManager,
     private val savedStateHandle: SavedStateHandle,
     private val dismissalCoordinator: LinkDismissalCoordinator,
     private val navigateAndClearStack: (LinkScreen) -> Unit,
@@ -127,7 +125,7 @@ internal class SignUpViewModel @Inject constructor(
     private suspend fun lookupEmail(email: String) {
         updateSignUpState(SignUpState.VerifyingEmail)
 
-        val lookupResult = linkAuth.lookUp(
+        val lookupResult = linkAccountManager.lookupByEmail(
             email = email,
             emailSource = EmailSource.USER_ACTION,
             startSession = true,
@@ -154,7 +152,7 @@ internal class SignUpViewModel @Inject constructor(
             }
             val email = emailController.fieldValue.value
             val lookupResult = dismissalCoordinator.withDismissalDisabled {
-                linkAuth.lookUp(
+                linkAccountManager.lookupByEmail(
                     email = email,
                     emailSource = EmailSource.USER_ACTION,
                     startSession = true,
@@ -174,7 +172,7 @@ internal class SignUpViewModel @Inject constructor(
 
     private suspend fun performSignup() {
         val signupResult = dismissalCoordinator.withDismissalDisabled {
-            linkAuth.signUp(
+            linkAccountManager.signUp(
                 email = emailController.fieldValue.value,
                 phoneNumber = phoneNumberController.getE164PhoneNumber(phoneNumberController.fieldValue.value),
                 country = phoneNumberController.getCountryCode(),
@@ -184,52 +182,82 @@ internal class SignUpViewModel @Inject constructor(
             )
         }
 
-        when (signupResult) {
-            is LinkAuthResult.AttestationFailed -> {
-                moveToWeb(signupResult.error)
-            }
-            is LinkAuthResult.Error -> {
-                onError(signupResult.error)
-                linkEventsReporter.onSignupFailure(error = signupResult.error)
-            }
-            is LinkAuthResult.Success -> {
-                onAccountFetched(signupResult.account)
+        signupResult.fold(
+            onSuccess = { account ->
+                onAccountFetched(account)
                 linkEventsReporter.onSignupCompleted()
+            },
+            onFailure = { error ->
+                when {
+                    isAttestationError(error) -> {
+                        moveToWeb(error)
+                    }
+                    isAccountError(error) -> {
+                        handleAccountError(error)
+                    }
+                    else -> {
+                        onError(error)
+                        linkEventsReporter.onSignupFailure(error = error)
+                    }
+                }
             }
-            LinkAuthResult.NoLinkAccountFound -> {
-                onError(NoLinkAccountFoundException())
-                linkEventsReporter.onSignupFailure(error = NoLinkAccountFoundException())
-            }
-            is LinkAuthResult.AccountError -> {
-                signupResult.handle()
-            }
-        }
+        )
     }
 
     // Extracted common result handling with custom handler for NoLinkAccountFound
     private suspend fun handleLookupResult(
-        lookupResult: LinkAuthResult,
+        lookupResult: Result<LinkAccount?>,
         onNoLinkAccountFound: suspend () -> Unit
     ) {
-        when (lookupResult) {
-            is LinkAuthResult.AttestationFailed -> {
-                moveToWeb(lookupResult.error)
+        lookupResult.fold(
+            onSuccess = { account ->
+                if (account != null) {
+                    onAccountFetched(account)
+                    linkEventsReporter.onSignupCompleted()
+                } else {
+                    // No account found case
+                    updateSignUpState(SignUpState.InputtingRemainingFields)
+                    onNoLinkAccountFound()
+                }
+            },
+            onFailure = { error ->
+                when {
+                    isAttestationError(error) -> {
+                        moveToWeb(error)
+                    }
+                    isAccountError(error) -> {
+                        handleAccountError(error)
+                    }
+                    else -> {
+                        updateSignUpState(SignUpState.InputtingRemainingFields)
+                        onError(error)
+                    }
+                }
             }
-            is LinkAuthResult.Error -> {
-                updateSignUpState(SignUpState.InputtingRemainingFields)
-                onError(lookupResult.error)
-            }
-            is LinkAuthResult.Success -> {
-                onAccountFetched(lookupResult.account)
-                linkEventsReporter.onSignupCompleted()
-            }
-            LinkAuthResult.NoLinkAccountFound -> {
-                onNoLinkAccountFound()
-            }
-            is LinkAuthResult.AccountError -> {
-                lookupResult.handle()
-            }
-        }
+        )
+    }
+
+    private fun isAttestationError(error: Throwable): Boolean {
+        return error is com.stripe.attestation.AttestationError ||
+            (
+                error is com.stripe.android.core.exception.APIException &&
+                    error.stripeError?.code == "link_failed_to_attest_request"
+                )
+    }
+
+    private fun isAccountError(error: Throwable): Boolean {
+        return error is com.stripe.android.core.exception.APIException &&
+            error.stripeError?.code == "link_consumer_details_not_available"
+    }
+
+    private suspend fun handleAccountError(error: Throwable) {
+        // Handle account error - logic from the original LinkAuthResult.AccountError.handle()
+        updateSignUpState(SignUpState.InputtingPrimaryField)
+        onError(
+            error = error,
+            errorMessage = R.string.stripe_signup_deactivated_account_message.resolvableString
+        )
+        linkEventsReporter.onSignupFailure(error = error)
     }
 
     private fun onAccountFetched(linkAccount: LinkAccount?) {
@@ -250,14 +278,6 @@ internal class SignUpViewModel @Inject constructor(
         } else {
             navigateAndClearStack(targetScreen)
         }
-    }
-
-    private fun LinkAuthResult.AccountError.handle() {
-        updateSignUpState(SignUpState.InputtingPrimaryField)
-        onError(
-            error = error,
-            errorMessage = R.string.stripe_signup_deactivated_account_message.resolvableString
-        )
     }
 
     private fun onError(
@@ -305,7 +325,7 @@ internal class SignUpViewModel @Inject constructor(
                         configuration = parentComponent.configuration,
                         linkEventsReporter = parentComponent.linkEventsReporter,
                         logger = parentComponent.logger,
-                        linkAuth = parentComponent.linkAuth,
+                        linkAccountManager = parentComponent.linkAccountManager,
                         savedStateHandle = parentComponent.savedStateHandle,
                         dismissalCoordinator = parentComponent.dismissalCoordinator,
                         navigateAndClearStack = navigateAndClearStack,

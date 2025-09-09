@@ -9,7 +9,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.flatMapCatching
 import com.stripe.android.link.account.LinkAccountHolder
-import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.confirmation.computeExpectedPaymentMethodType
 import com.stripe.android.link.exceptions.AppAttestationException
@@ -361,13 +360,12 @@ internal class LinkControllerInteractor @Inject constructor(
     suspend fun lookupConsumer(email: String): LinkController.LookupConsumerResult {
         return requireLinkComponent()
             .flatMapCatching { component ->
-                component.linkAuth.lookUp(
+                component.linkAccountManager.lookupByEmail(
                     email = email,
                     emailSource = EmailSource.USER_ACTION,
                     startSession = true,
-                    customerId = null,
+                    customerId = null
                 )
-                    .toResult()
             }
             .fold(
                 onSuccess = { account ->
@@ -414,14 +412,14 @@ internal class LinkControllerInteractor @Inject constructor(
     ): LinkController.RegisterConsumerResult {
         return requireLinkComponent()
             .flatMapCatching {
-                it.linkAuth.signUp(
+                it.linkAccountManager.signUp(
                     email = email,
                     phoneNumber = phone,
                     country = country,
                     countryInferringMethod = "PHONE_NUMBER",
                     name = name,
                     consentAction = SignUpConsentAction.Implied
-                ).toResult()
+                )
             }
             .fold(
                 onSuccess = { account ->
@@ -549,20 +547,6 @@ internal class LinkControllerInteractor @Inject constructor(
                 Result.failure(error)
             LinkAttestationCheck.Result.Successful ->
                 Result.success(Unit)
-        }
-
-    private fun LinkAuthResult.toResult(): Result<LinkAccount?> =
-        when (this) {
-            is LinkAuthResult.AccountError ->
-                Result.failure(error)
-            is LinkAuthResult.AttestationFailed ->
-                Result.failure(AppAttestationException(error))
-            is LinkAuthResult.Error ->
-                Result.failure(error)
-            LinkAuthResult.NoLinkAccountFound ->
-                Result.success(null)
-            is LinkAuthResult.Success ->
-                Result.success(account)
         }
 
     @VisibleForTesting
