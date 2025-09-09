@@ -11,33 +11,46 @@ internal sealed interface LinkAuthResult {
 }
 
 internal fun Result<LinkAccount?>.toLinkAuthResult(): LinkAuthResult {
-    return fold(
-        onSuccess = { account ->
-            if (account != null) {
-                LinkAuthResult.Success(account)
-            } else {
-                LinkAuthResult.NoLinkAccountFound
-            }
-        },
-        onFailure = { error ->
-            when {
-                isAttestationError(error) -> LinkAuthResult.AttestationFailed(error)
-                isAccountError(error) -> LinkAuthResult.AccountError(error)
-                else -> LinkAuthResult.Error(error)
-            }
+    return runCatching {
+        val linkAccount = getOrThrow()
+        return if (linkAccount != null) {
+            LinkAuthResult.Success(linkAccount)
+        } else {
+            LinkAuthResult.NoLinkAccountFound
         }
-    )
+    }.getOrElse { error ->
+        error.toLinkAuthResult()
+    }
 }
 
-private fun isAttestationError(error: Throwable): Boolean {
-    return error is com.stripe.attestation.AttestationError ||
-        (
-            error is com.stripe.android.core.exception.APIException &&
-                error.stripeError?.code == "link_failed_to_attest_request"
-            )
+private fun Throwable.toLinkAuthResult(): LinkAuthResult {
+    return when {
+        isAttestationError -> {
+            LinkAuthResult.AttestationFailed(this)
+        }
+        isAccountError -> {
+            LinkAuthResult.AccountError(this)
+        }
+        else -> {
+            LinkAuthResult.Error(this)
+        }
+    }
 }
 
-private fun isAccountError(error: Throwable): Boolean {
-    return error is com.stripe.android.core.exception.APIException &&
-        error.stripeError?.code == "link_consumer_details_not_available"
-}
+private val Throwable.isAttestationError: Boolean
+    get() = isIntegrityManagerError || isBackendAttestationError
+
+// Interaction with Integrity API to generate tokens resulted in a failure
+private val Throwable.isIntegrityManagerError: Boolean
+    get() = this is com.stripe.attestation.AttestationError
+
+// Stripe backend could not verify the integrity of the request
+private val Throwable.isBackendAttestationError: Boolean
+    get() = this is com.stripe.android.core.exception.APIException && stripeError?.code == "link_failed_to_attest_request"
+
+private val Throwable.isAccountError: Boolean
+    get() = when (this) {
+        // This happens when account is suspended or banned
+        is com.stripe.android.core.exception.APIException -> stripeError?.code == "link_consumer_details_not_available"
+        else -> false
+    }

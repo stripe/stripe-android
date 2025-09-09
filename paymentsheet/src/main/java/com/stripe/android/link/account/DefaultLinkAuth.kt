@@ -34,25 +34,22 @@ internal class DefaultLinkAuth @Inject constructor(
         customerId: String?
     ): Result<ConsumerSessionLookup> {
         return if (linkGate.useAttestationEndpoints) {
-            when {
-                email != null && emailSource != null -> {
-                    mobileLookupWithAttestation(
-                        email = email,
-                        emailSource = emailSource,
-                        linkAuthIntentId = null,
-                        customerId = customerId
-                    )
-                }
-                linkAuthIntentId != null -> {
-                    mobileLookupWithAttestation(
-                        email = null,
-                        emailSource = null,
-                        linkAuthIntentId = linkAuthIntentId,
-                        customerId = customerId
-                    )
-                }
-                else -> Result.failure(IllegalArgumentException("Either email or linkAuthIntentId must be provided"))
+            // Validate that we have either email+emailSource or linkAuthIntentId
+            if (email != null && emailSource != null) {
+                // Has email and emailSource - proceed
+            } else if (linkAuthIntentId != null) {
+                // Has linkAuthIntentId - proceed  
+            } else {
+                return Result.failure(IllegalArgumentException("Either email or linkAuthIntentId must be provided"))
             }
+            
+            // Single call passing all parameters
+            mobileLookupWithAttestation(
+                email = email,
+                emailSource = emailSource,
+                linkAuthIntentId = linkAuthIntentId,
+                customerId = customerId
+            )
         } else {
             linkRepository.lookupConsumer(
                 email = email,

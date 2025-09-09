@@ -16,6 +16,7 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkScreen
+import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.account.toLinkAuthResult
@@ -137,7 +138,7 @@ internal class SignUpViewModel @Inject constructor(
         updateSignUpState(SignUpState.InputtingPrimaryField)
 
         handleLookupResult(
-            lookupResult = lookupResult,
+            lookupResult = lookupResult.toLinkAuthResult(),
             onNoLinkAccountFound = {
                 // No Link account found -> display remaining fields for signup.
                 updateSignUpState(SignUpState.InputtingRemainingFields)
@@ -162,7 +163,7 @@ internal class SignUpViewModel @Inject constructor(
                 )
             }
             handleLookupResult(
-                lookupResult = lookupResult,
+                lookupResult = lookupResult.toLinkAuthResult(),
                 onNoLinkAccountFound = { performSignup() }
             )
         }
@@ -185,63 +186,51 @@ internal class SignUpViewModel @Inject constructor(
         }
 
         when (val result = signupResult.toLinkAuthResult()) {
-            is LinkAuthResult.Success -> {
-                onAccountFetched(result.account)
-                linkEventsReporter.onSignupCompleted()
-            }
-            is LinkAuthResult.NoLinkAccountFound -> {
-                // This shouldn't happen during signup, but handle gracefully
-                onError(RuntimeException("Unexpected no account found during signup"))
-                linkEventsReporter.onSignupFailure(error = RuntimeException("No account found during signup"))
-            }
             is LinkAuthResult.AttestationFailed -> {
                 moveToWeb(result.error)
-            }
-            is LinkAuthResult.AccountError -> {
-                handleAccountError(result.error)
             }
             is LinkAuthResult.Error -> {
                 onError(result.error)
                 linkEventsReporter.onSignupFailure(error = result.error)
+            }
+            is LinkAuthResult.Success -> {
+                onAccountFetched(result.account)
+                linkEventsReporter.onSignupCompleted()
+            }
+            LinkAuthResult.NoLinkAccountFound -> {
+                onError(NoLinkAccountFoundException())
+                linkEventsReporter.onSignupFailure(error = NoLinkAccountFoundException())
+            }
+            is LinkAuthResult.AccountError -> {
+                result.handle()
             }
         }
     }
 
     // Extracted common result handling with custom handler for NoLinkAccountFound
     private suspend fun handleLookupResult(
-        lookupResult: Result<LinkAccount?>,
+        lookupResult: LinkAuthResult,
         onNoLinkAccountFound: suspend () -> Unit
     ) {
-        when (val result = lookupResult.toLinkAuthResult()) {
-            is LinkAuthResult.Success -> {
-                onAccountFetched(result.account)
-                linkEventsReporter.onSignupCompleted()
-            }
-            is LinkAuthResult.NoLinkAccountFound -> {
-                updateSignUpState(SignUpState.InputtingRemainingFields)
-                onNoLinkAccountFound()
-            }
+        when (lookupResult) {
             is LinkAuthResult.AttestationFailed -> {
-                moveToWeb(result.error)
-            }
-            is LinkAuthResult.AccountError -> {
-                handleAccountError(result.error)
+                moveToWeb(lookupResult.error)
             }
             is LinkAuthResult.Error -> {
                 updateSignUpState(SignUpState.InputtingRemainingFields)
-                onError(result.error)
+                onError(lookupResult.error)
+            }
+            is LinkAuthResult.Success -> {
+                onAccountFetched(lookupResult.account)
+                linkEventsReporter.onSignupCompleted()
+            }
+            LinkAuthResult.NoLinkAccountFound -> {
+                onNoLinkAccountFound()
+            }
+            is LinkAuthResult.AccountError -> {
+                lookupResult.handle()
             }
         }
-    }
-
-    private suspend fun handleAccountError(error: Throwable) {
-        // Handle account error - logic from the original LinkAuthResult.AccountError.handle()
-        updateSignUpState(SignUpState.InputtingPrimaryField)
-        onError(
-            error = error,
-            errorMessage = R.string.stripe_signup_deactivated_account_message.resolvableString
-        )
-        linkEventsReporter.onSignupFailure(error = error)
     }
 
     private fun onAccountFetched(linkAccount: LinkAccount?) {
@@ -262,6 +251,14 @@ internal class SignUpViewModel @Inject constructor(
         } else {
             navigateAndClearStack(targetScreen)
         }
+    }
+
+    private fun LinkAuthResult.AccountError.handle() {
+        updateSignUpState(SignUpState.InputtingPrimaryField)
+        onError(
+            error = error,
+            errorMessage = R.string.stripe_signup_deactivated_account_message.resolvableString
+        )
     }
 
     private fun onError(

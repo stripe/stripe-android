@@ -466,10 +466,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
-    /**
-     * Unified signup method that decides between regular and mobile signup based on attestation settings.
-     * Registers the user for a new Link account.
-     */
     override suspend fun signUp(
         email: String,
         phoneNumber: String?,
@@ -514,8 +510,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
                             email?.let {
                                 lookupByEmail(
                                     email = it,
-                                    emailSource = EmailSource.CUSTOMER_OBJECT,
                                     startSession = false,
+                                    emailSource = EmailSource.CUSTOMER_OBJECT,
                                     customerId = config.customerIdForEceDefaultValues
                                 )
                             }
