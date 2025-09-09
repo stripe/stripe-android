@@ -52,7 +52,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
     private val selectionHolder: EmbeddedSelectionHolder,
     paymentOptionDisplayDataHolder: PaymentOptionDisplayDataHolder,
     private val configurationCoordinator: EmbeddedConfigurationCoordinator,
-    stateHelper: EmbeddedStateHelper,
+    stateHelper: EmbeddedStateHelper
 ) {
 
     /**

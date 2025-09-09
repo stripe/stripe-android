@@ -1,12 +1,14 @@
 package com.stripe.android.paymentelement.embedded.content
 
 import android.os.Bundle
+import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -21,6 +23,7 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.utils.FakePassiveChallengeWarmer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -120,6 +123,43 @@ internal class DefaultEmbeddedConfirmationHelperTest {
         assertThat(callbackHelper.stateHelper.stateTurbine.awaitItem()).isNotNull()
     }
 
+    @Test
+    fun `On helper creation, should register PassiveChallengeWarmer`() = testScenario {
+        val registerCall = passiveChallengeWarmer.awaitRegisterCall()
+
+        assertThat(registerCall.activityResultCaller).isEqualTo(activityResultCaller)
+        assertThat(registerCall.lifecycleOwner).isEqualTo(lifecycleOwner)
+
+        passiveChallengeWarmer.ensureAllEventsConsumed()
+        assertThat(callbackHelper.stateHelper.stateTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `PassiveChallengeWarmer should be started when passive captcha params are available`() = testScenario(
+        loadedState = defaultLoadedState().copy(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            )
+        ),
+    ) {
+        passiveChallengeWarmer.awaitRegisterCall()
+
+        val startCall = passiveChallengeWarmer.awaitStartCall()
+        assertThat(startCall.passiveCaptchaParams).isEqualTo(PassiveCaptchaParamsFactory.passiveCaptchaParams())
+        assertThat(startCall.publishableKey).isEqualTo("pk_test_embedded_12345")
+        assertThat(startCall.productUsage).containsExactlyElementsIn(setOf("EmbeddedPaymentElement"))
+
+        passiveChallengeWarmer.ensureAllEventsConsumed()
+        assertThat(callbackHelper.stateHelper.stateTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `PassiveChallengeWarmer should not be started when passive captcha params are not available`() = testScenario {
+        passiveChallengeWarmer.awaitRegisterCall()
+        passiveChallengeWarmer.ensureAllEventsConsumed()
+        assertThat(callbackHelper.stateHelper.stateTurbine.awaitItem()).isNotNull()
+    }
+
     private fun defaultLoadedState(): EmbeddedConfirmationStateHolder.State {
         return EmbeddedConfirmationStateHolder.State(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
@@ -145,6 +185,9 @@ internal class DefaultEmbeddedConfirmationHelperTest {
 
     private fun testScenario(
         loadedState: EmbeddedConfirmationStateHolder.State? = defaultLoadedState(),
+        passiveChallengeWarmer: FakePassiveChallengeWarmer = FakePassiveChallengeWarmer(),
+        productUsage: Set<String> = setOf("EmbeddedPaymentElement"),
+        publishableKeyProvider: () -> String = { "pk_test_embedded_12345" },
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val confirmationHandler = FakeConfirmationHandler()
@@ -162,16 +205,21 @@ internal class DefaultEmbeddedConfirmationHelperTest {
         val callbackHelper = FakeEmbeddedResultCallbackHelper(
             stateHelper = stateHelper
         )
+        val activityResultCaller = mock<ActivityResultCaller>()
+        val lifecycleOwner = TestLifecycleOwner(coroutineDispatcher = Dispatchers.Unconfined)
         val confirmationHelper = DefaultEmbeddedConfirmationHelper(
             confirmationStarter = EmbeddedConfirmationStarter(
                 confirmationHandler = confirmationHandler,
                 coroutineScope = backgroundScope,
             ),
-            activityResultCaller = mock(),
-            lifecycleOwner = TestLifecycleOwner(coroutineDispatcher = Dispatchers.Unconfined),
+            activityResultCaller = activityResultCaller,
+            lifecycleOwner = lifecycleOwner,
             confirmationStateHolder = confirmationStateHolder,
             eventReporter = FakeEventReporter(),
-            embeddedResultCallbackHelper = callbackHelper
+            embeddedResultCallbackHelper = callbackHelper,
+            passiveChallengeWarmer = passiveChallengeWarmer,
+            productUsage = productUsage,
+            publishableKeyProvider = publishableKeyProvider
         )
         assertThat(confirmationHandler.registerTurbine.awaitItem()).isNotNull()
         Scenario(
@@ -179,6 +227,9 @@ internal class DefaultEmbeddedConfirmationHelperTest {
             confirmationHandler = confirmationHandler,
             confirmationStateHolder = confirmationStateHolder,
             callbackHelper = callbackHelper,
+            passiveChallengeWarmer = passiveChallengeWarmer,
+            activityResultCaller = activityResultCaller,
+            lifecycleOwner = lifecycleOwner,
         ).block()
         callbackHelper.validate()
         confirmationHandler.validate()
@@ -188,6 +239,9 @@ internal class DefaultEmbeddedConfirmationHelperTest {
         val confirmationHelper: EmbeddedConfirmationHelper,
         val confirmationHandler: FakeConfirmationHandler,
         val confirmationStateHolder: EmbeddedConfirmationStateHolder,
-        val callbackHelper: FakeEmbeddedResultCallbackHelper
+        val callbackHelper: FakeEmbeddedResultCallbackHelper,
+        val passiveChallengeWarmer: FakePassiveChallengeWarmer,
+        val activityResultCaller: ActivityResultCaller,
+        val lifecycleOwner: TestLifecycleOwner,
     )
 }
