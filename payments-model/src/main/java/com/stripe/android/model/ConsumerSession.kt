@@ -25,6 +25,8 @@ data class ConsumerSession(
     val phoneNumberCountry: String? = null,
     @SerialName("verification_sessions")
     val verificationSessions: List<VerificationSession> = emptyList(),
+    @SerialName("mobile_fallback_webview_params")
+    val mobileFallbackWebviewParams: MobileFallbackWebviewParams? = null,
 ) : StripeModel {
 
     @Parcelize
