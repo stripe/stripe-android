@@ -226,6 +226,8 @@ internal class DefaultHCaptchaServiceTest {
                 rqData = null
             )
             hCaptchaProvider.awaitCall() // This would not be called if cache wasn't cleared
+
+            hCaptchaProvider.ensureAllEventsConsumed()
         }
     }
 
@@ -258,6 +260,8 @@ internal class DefaultHCaptchaServiceTest {
                 rqData = null
             )
             hCaptchaProvider.awaitCall() // This would not be called if cache wasn't cleared
+
+            hCaptchaProvider.ensureAllEventsConsumed()
         }
     }
 
