@@ -43,6 +43,7 @@ internal class DefaultHCaptchaService(
         siteKey: String,
         rqData: String?
     ): HCaptchaService.Result {
+        captchaEventsReporter.attachStart()
         val isReady = cachedResult.value.isReady
         val result = runCatching {
             withTimeout(TIMEOUT) {
@@ -52,7 +53,7 @@ internal class DefaultHCaptchaService(
             HCaptchaService.Result.Failure(e)
         }
         cachedResult.emit(CachedResult.Idle)
-        captchaEventsReporter.attach(siteKey, isReady)
+        captchaEventsReporter.attachEnd(siteKey, isReady)
         return result
     }
 

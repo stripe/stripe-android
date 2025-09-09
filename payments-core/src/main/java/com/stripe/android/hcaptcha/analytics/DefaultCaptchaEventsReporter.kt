@@ -51,8 +51,16 @@ internal class DefaultCaptchaEventsReporter @Inject constructor(
         )
     }
 
-    override fun attach(siteKey: String, isReady: Boolean) {
-        fireEvent(CaptchaAnalyticsEvent.Attach(isReady, siteKey))
+    override fun attachStart() {
+        durationProvider.start(DurationProvider.Key.CaptchaAttach)
+    }
+
+    override fun attachEnd(siteKey: String, isReady: Boolean) {
+        val duration = durationProvider.end(DurationProvider.Key.CaptchaAttach)
+        fireEvent(
+            event = CaptchaAnalyticsEvent.Attach(isReady, siteKey),
+            additionalParams = durationInSecondsFromStart(duration)
+        )
     }
 
     private fun fireEvent(
