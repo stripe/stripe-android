@@ -25,6 +25,7 @@ data class MandateData internal constructor(
      */
     @Parcelize
     @Poko
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class CustomerAcceptance internal constructor(
         /**
          * If this is a Mandate accepted online, this hash contains details about the online acceptance.
@@ -42,6 +43,7 @@ data class MandateData internal constructor(
          */
         @Parcelize
         @Poko
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Online internal constructor(
             /**
              * The IP address from which the Mandate was accepted by the customer.

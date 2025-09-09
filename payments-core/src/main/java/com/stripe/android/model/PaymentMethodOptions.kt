@@ -21,6 +21,7 @@ data class PaymentMethodOptions internal constructor(
 
     @Parcelize
     @Poko
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Card internal constructor(
         /**
          * CVC token for the card.
