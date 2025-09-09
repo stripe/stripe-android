@@ -173,8 +173,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
             AccountStatus.Error -> {
                 signUp(
                     email = email,
-                    phoneNumber = phone ?: "",
-                    country = country ?: "",
+                    phoneNumber = phone,
+                    country = country,
                     countryInferringMethod = countryInferringMethod,
                     name = name,
                     consentAction = consentAction
@@ -573,7 +573,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             setLinkAccountFromLookupResult(
                 lookup = consumerSessionLookup,
                 startSession = true,
-                linkAuthIntentId = null,
+                linkAuthIntentId = linkAuthIntentId,
             )
         }
     }
