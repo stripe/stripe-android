@@ -61,6 +61,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 @ExperimentalMaterialApi
+@Suppress("CyclomaticComplexMethod", "LongMethod")
 internal fun IdentityNavGraph(
     navController: NavHostController = rememberNavController(),
     identityViewModel: IdentityViewModel,
@@ -230,18 +231,21 @@ internal fun IdentityNavGraph(
             }
             screen(CouldNotCaptureDestination.ROUTE) {
                 val fromSelfie = CouldNotCaptureDestination.fromSelfie(it)
+                val requireLiveCapture =
+                    identityViewModel.verificationPage.value?.data?.documentCapture?.requireLiveCapture ?: false
+
                 ErrorScreen(
                     identityViewModel = identityViewModel,
                     title = stringResource(id = R.string.stripe_could_not_capture_title),
                     message1 = stringResource(id = R.string.stripe_could_not_capture_body1),
                     message2 = if (fromSelfie) {
                         null
+                    } else if (!requireLiveCapture) {
+                        stringResource(R.string.stripe_could_not_capture_body2)
                     } else {
-                        stringResource(
-                            R.string.stripe_could_not_capture_body2
-                        )
+                        null
                     },
-                    topButton = if (fromSelfie) {
+                    topButton = if (fromSelfie || requireLiveCapture) {
                         null
                     } else {
                         ErrorScreenButton(
