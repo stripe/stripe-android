@@ -123,8 +123,8 @@ internal open class FakeLinkAccountManager(
 
     override suspend fun signUp(
         email: String,
-        phoneNumber: String,
-        country: String,
+        phoneNumber: String?,
+        country: String?,
         countryInferringMethod: String,
         name: String?,
         consentAction: SignUpConsentAction

@@ -22,8 +22,10 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.account.DefaultLinkAccountManager
+import com.stripe.android.link.account.DefaultLinkAuth
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.analytics.DefaultLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.attestation.DefaultLinkAttestationCheck
@@ -114,6 +116,10 @@ internal interface NativeLinkModule {
     @Binds
     @NativeLinkScope
     fun bindsLinkAttestationCheck(linkAttestationCheck: DefaultLinkAttestationCheck): LinkAttestationCheck
+
+    @Binds
+    @NativeLinkScope
+    fun bindLinkAuth(linkAuth: DefaultLinkAuth): LinkAuth
 
     @Binds
     fun bindsUserFacingLogger(impl: RealUserFacingLogger): UserFacingLogger

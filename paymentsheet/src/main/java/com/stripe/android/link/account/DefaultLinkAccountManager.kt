@@ -171,10 +171,10 @@ internal class DefaultLinkAccountManager @Inject constructor(
             }
             AccountStatus.SignedOut,
             AccountStatus.Error -> {
-                signup(
+                signUp(
                     email = email,
-                    phoneNumber = phone,
-                    country = country,
+                    phoneNumber = phone ?: "",
+                    country = country ?: "",
                     countryInferringMethod = countryInferringMethod,
                     name = name,
                     consentAction = consentAction
@@ -470,7 +470,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
      * Unified signup method that decides between regular and mobile signup based on attestation settings.
      * Registers the user for a new Link account.
      */
-    override suspend fun signup(
+    override suspend fun signUp(
         email: String,
         phoneNumber: String?,
         country: String?,
