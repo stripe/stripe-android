@@ -70,6 +70,8 @@ constructor(
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val radarOptions: RadarOptions? = null
 ) : ConfirmStripeIntentParams {
 
+    val posSessionToken: String? = paymentMethodCreateParams?.cardPresent?.posSessionToken
+
     override fun shouldUseStripeSdk(): Boolean {
         return useStripeSdk
     }
@@ -79,30 +81,34 @@ constructor(
     }
 
     override fun toParamMap(): Map<String, Any> {
-        return mapOf(
-            PARAM_CLIENT_SECRET to clientSecret,
-            PARAM_USE_STRIPE_SDK to useStripeSdk
-        ).plus(
-            returnUrl?.let {
-                mapOf(PARAM_RETURN_URL to it)
-            }.orEmpty()
-        ).plus(
-            mandateId?.let {
-                mapOf(PARAM_MANDATE_ID to it)
-            }.orEmpty()
-        ).plus(
-            mandateDataParams?.let {
-                mapOf(PARAM_MANDATE_DATA to it)
-            }.orEmpty()
-        ).plus(
-            setAsDefaultPaymentMethod?.let {
-                mapOf(PARAM_SET_AS_DEFAULT_PAYMENT_METHOD to it)
-            }.orEmpty()
-        ).plus(
-            radarOptions?.let {
-                mapOf(PARAM_RADAR_OPTIONS to it.toParamMap())
-            }.orEmpty()
-        ).plus(paymentMethodParamMap)
+        return posSessionToken?.let {
+            paymentMethodParamMap.plus(mapOf(PARAM_RETURN_URL to "stripejs://use_stripe_sdk/return_url"))
+        } ?: run {
+            mapOf(
+                PARAM_CLIENT_SECRET to clientSecret,
+                PARAM_USE_STRIPE_SDK to useStripeSdk
+            ).plus(
+                returnUrl?.let {
+                    mapOf(PARAM_RETURN_URL to it)
+                }.orEmpty()
+            ).plus(
+                mandateId?.let {
+                    mapOf(PARAM_MANDATE_ID to it)
+                }.orEmpty()
+            ).plus(
+                mandateDataParams?.let {
+                    mapOf(PARAM_MANDATE_DATA to it)
+                }.orEmpty()
+            ).plus(
+                setAsDefaultPaymentMethod?.let {
+                    mapOf(PARAM_SET_AS_DEFAULT_PAYMENT_METHOD to it)
+                }.orEmpty()
+            ).plus(
+                radarOptions?.let {
+                    mapOf(PARAM_RADAR_OPTIONS to it.toParamMap())
+                }.orEmpty()
+            ).plus(paymentMethodParamMap)
+        }
     }
 
     private val paymentMethodParamMap: Map<String, Any>

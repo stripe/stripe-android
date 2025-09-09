@@ -8,11 +8,18 @@ apply plugin: 'app.cash.paparazzi'
 apply plugin: 'dev.drewhamilton.poko'
 
 dependencies {
+    implementation("com.stripe:stripe-java:29.5.0")
+    implementation("com.scottyab:rootbeer-lib:0.1.1")
+    implementation("com.squareup.wire:wire-runtime:5.4.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
     api project(":payments-core")
     implementation project(':payments-ui-core')
     implementation project(':stripe-ui-core')
     compileOnly project(':financial-connections')
     implementation project(":stripe-attestation")
+    implementation("com.stripe:stripeterminal-internal-common:4.7.0")
+    implementation("com.stripe:stripeterminal-taptopay:4.7.0")
+    implementation("com.stripe:stripeterminal-core:4.7.0")
 
     // Kotlin
     api libs.kotlin.coroutines
