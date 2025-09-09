@@ -199,6 +199,99 @@ internal class DefaultHCaptchaServiceTest {
     }
 
     @Test
+    fun `performPassiveHCaptcha clears cache to Idle state after successful completion`() = runTest {
+        TestContext.test {
+            hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha()
+
+            // First warmUp to populate cache with Success state
+            service.warmUp(
+                activity,
+                siteKey = TEST_SITE_KEY,
+                rqData = null
+            )
+            hCaptchaProvider.awaitCall()
+
+            // Perform the passive hCaptcha which should clear cache
+            service.performPassiveHCaptcha(
+                activity,
+                siteKey = TEST_SITE_KEY,
+                rqData = null
+            )
+
+            // Verify a subsequent warmUp call goes through (would be skipped if cache wasn't cleared)
+            hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha("new-token")
+            service.warmUp(
+                activity,
+                siteKey = TEST_SITE_KEY,
+                rqData = null
+            )
+            hCaptchaProvider.awaitCall() // This would not be called if cache wasn't cleared
+
+            hCaptchaProvider.ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun `performPassiveHCaptcha clears cache to Idle state after failed completion`() = runTest {
+        TestContext.test {
+            val exception = HCaptchaException(HCaptchaError.NETWORK_ERROR)
+            hCaptchaProvider.hCaptchaHandler = SetupFailedHCaptcha(exception)
+
+            // First warmUp to populate cache with Failure state
+            service.warmUp(
+                activity,
+                siteKey = TEST_SITE_KEY,
+                rqData = null
+            )
+            hCaptchaProvider.awaitCall()
+
+            // Perform the passive hCaptcha which should clear cache
+            service.performPassiveHCaptcha(
+                activity,
+                siteKey = TEST_SITE_KEY,
+                rqData = null
+            )
+
+            // Verify a subsequent warmUp call goes through (would be skipped if cache wasn't cleared)
+            hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha("recovery-token")
+            service.warmUp(
+                activity,
+                siteKey = TEST_SITE_KEY,
+                rqData = null
+            )
+            hCaptchaProvider.awaitCall() // This would not be called if cache wasn't cleared
+
+            hCaptchaProvider.ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun `performPassiveHCaptcha clears cache to Idle state after timeout exception`() = runTest {
+        TestContext.test {
+            // Setup hCaptcha that will hang (causing timeout)
+            hCaptchaProvider.hCaptchaHandler = SetupHangingHCaptcha
+
+            // Perform passive hCaptcha that should timeout and clear cache
+            val result = service.performPassiveHCaptcha(
+                activity,
+                siteKey = TEST_SITE_KEY,
+                rqData = null
+            )
+
+            assertThat(result).isInstanceOf(HCaptchaService.Result.Failure::class.java)
+
+            // Verify a subsequent warmUp call goes through (would be skipped if cache wasn't cleared)
+            hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha("recovery-token")
+            service.warmUp(
+                activity,
+                siteKey = TEST_SITE_KEY,
+                rqData = null
+            )
+            hCaptchaProvider.awaitCall() // This would not be called if cache wasn't cleared
+        }
+    }
+
+    @Test
     fun `warmUp calls hCaptchaProvider and updates cache on success`() = runTest {
         TestContext.test {
             val expectedToken = "warm-up-token"
