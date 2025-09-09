@@ -115,11 +115,11 @@ internal interface NativeLinkModule {
 
     @Binds
     @NativeLinkScope
-    fun bindsLinkAttestationCheck(linkAttestationCheck: DefaultLinkAttestationCheck): LinkAttestationCheck
+    fun bindsLinkAuth(linkGate: DefaultLinkAuth): LinkAuth
 
     @Binds
     @NativeLinkScope
-    fun bindLinkAuth(linkAuth: DefaultLinkAuth): LinkAuth
+    fun bindsLinkAttestationCheck(linkAttestationCheck: DefaultLinkAttestationCheck): LinkAttestationCheck
 
     @Binds
     fun bindsUserFacingLogger(impl: RealUserFacingLogger): UserFacingLogger

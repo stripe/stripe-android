@@ -25,11 +25,11 @@ internal interface LinkModule {
 
     @Binds
     @LinkScope
-    fun bindsLinkAttestationCheck(linkAttestationCheck: DefaultLinkAttestationCheck): LinkAttestationCheck
+    fun bindsLinkAuth(linkGate: DefaultLinkAuth): LinkAuth
 
     @Binds
     @LinkScope
-    fun bindLinkAuth(linkAuth: DefaultLinkAuth): LinkAuth
+    fun bindsLinkAttestationCheck(linkAttestationCheck: DefaultLinkAttestationCheck): LinkAttestationCheck
 
     companion object {
         @Provides
