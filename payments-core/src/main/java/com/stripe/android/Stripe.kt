@@ -10,6 +10,7 @@ import androidx.annotation.WorkerThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.Stripe.Companion.advancedFraudSignalsEnabled
 import com.stripe.android.core.ApiKeyValidator
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.AppInfo
@@ -33,6 +34,8 @@ import com.stripe.android.model.Card
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.ConfirmationToken
+import com.stripe.android.model.ConfirmationTokenParams
 import com.stripe.android.model.CvcTokenParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -1552,6 +1555,26 @@ class Stripe internal constructor(
         executeAsyncForResult(callback) {
             stripeRepository.createToken(
                 tokenParams,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId,
+                    idempotencyKey = idempotencyKey
+                )
+            )
+        }
+    }
+
+    @UiThread
+    @JvmOverloads
+    internal fun createConfirmationToken(
+        confirmationTokenParams: ConfirmationTokenParams,
+        idempotencyKey: String? = null,
+        stripeAccountId: String? = this.stripeAccountId,
+        callback: ApiResultCallback<ConfirmationToken>
+    ) {
+        executeAsyncForResult(callback) {
+            stripeRepository.createConfirmationToken(
+                confirmationTokenParams,
                 ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId,
