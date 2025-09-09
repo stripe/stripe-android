@@ -10,9 +10,8 @@ import kotlinx.parcelize.Parcelize
  * Payment method options containing configuration and collected data.
  */
 @Parcelize
-@Poko
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-// TODO(cttsai-stripe): should make the data class a normal class in next major release
+// TODO(cttsai-stripe): should convert this data class to @Poko class in next major release
 data class PaymentMethodOptions internal constructor(
     /**
      * Card-specific options.

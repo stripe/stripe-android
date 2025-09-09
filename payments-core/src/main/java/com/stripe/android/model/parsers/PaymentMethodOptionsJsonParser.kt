@@ -7,17 +7,16 @@ import org.json.JSONObject
 
 class PaymentMethodOptionsJsonParser : ModelJsonParser<PaymentMethodOptions> {
     override fun parse(json: JSONObject): PaymentMethodOptions? {
-        json.optJSONObject(
-            FIELD_CARD
-        )?.let { cardJson ->
+        val card = json.optJSONObject(FIELD_CARD)?.let { cardJson ->
             val cvcToken = StripeJsonUtils.optString(cardJson, FIELD_CVC_TOKEN)
-            return PaymentMethodOptions(
-                card = PaymentMethodOptions.Card(
-                    cvcToken = cvcToken
-                )
+            PaymentMethodOptions.Card(
+                cvcToken = cvcToken
             )
         }
-        return null
+        
+        return PaymentMethodOptions(
+            card = card
+        )
     }
 
     private companion object {
