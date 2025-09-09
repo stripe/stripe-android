@@ -1,5 +1,6 @@
 package com.stripe.android.hcaptcha
 
+import android.util.Log
 import androidx.fragment.app.FragmentActivity
 import com.stripe.android.hcaptcha.analytics.CaptchaEventsReporter
 import com.stripe.hcaptcha.HCaptcha
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
 import kotlin.coroutines.resume
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 internal class DefaultHCaptchaService(
@@ -36,6 +38,14 @@ internal class DefaultHCaptchaService(
             }
         }
         cachedResult.emit(update)
+    }
+
+    override suspend fun performActiveHCaptcha(
+        activity: FragmentActivity,
+        siteKey: String,
+        rqData: String?
+    ): HCaptchaService.Result {
+        return HCaptchaService.Result.Failure(IllegalStateException("Active HCaptcha is not supported"))
     }
 
     override suspend fun performPassiveHCaptcha(
@@ -105,7 +115,9 @@ internal class DefaultHCaptchaService(
                 activity = activity,
                 siteKey = siteKey,
                 rqData = rqData,
-                hCaptcha = hCaptcha
+                hCaptcha = hCaptcha,
+                size = HCaptchaSize.INVISIBLE,
+                hideDialog = true
             )
         }.getOrElse { e ->
             HCaptchaService.Result.Failure(e)
