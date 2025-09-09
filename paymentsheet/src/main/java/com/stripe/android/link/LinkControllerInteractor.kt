@@ -9,6 +9,8 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.flatMapCatching
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.account.LinkAuthResult
+import com.stripe.android.link.account.toLinkAuthResult
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.confirmation.computeExpectedPaymentMethodType
 import com.stripe.android.link.exceptions.AppAttestationException
@@ -364,8 +366,8 @@ internal class LinkControllerInteractor @Inject constructor(
                     email = email,
                     emailSource = EmailSource.USER_ACTION,
                     startSession = true,
-                    customerId = null
-                )
+                    customerId = null,
+                ).toResult()
             }
             .fold(
                 onSuccess = { account ->
@@ -419,7 +421,7 @@ internal class LinkControllerInteractor @Inject constructor(
                     countryInferringMethod = "PHONE_NUMBER",
                     name = name,
                     consentAction = SignUpConsentAction.Implied
-                )
+                ).toResult()
             }
             .fold(
                 onSuccess = { account ->
@@ -547,6 +549,20 @@ internal class LinkControllerInteractor @Inject constructor(
                 Result.failure(error)
             LinkAttestationCheck.Result.Successful ->
                 Result.success(Unit)
+        }
+
+    private fun Result<LinkAccount?>.toResult(): Result<LinkAccount?> =
+        when (val linkAuthResult = this.toLinkAuthResult()) {
+            is LinkAuthResult.AccountError ->
+                Result.failure(linkAuthResult.error)
+            is LinkAuthResult.AttestationFailed ->
+                Result.failure(AppAttestationException(linkAuthResult.error))
+            is LinkAuthResult.Error ->
+                Result.failure(linkAuthResult.error)
+            LinkAuthResult.NoLinkAccountFound ->
+                Result.success(null)
+            is LinkAuthResult.Success ->
+                Result.success(linkAuthResult.account)
         }
 
     @VisibleForTesting
