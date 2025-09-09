@@ -89,7 +89,7 @@ internal class LinkInlineSignupConfirmationDefinition(
         return when (linkConfigurationCoordinator.getAccountStatusFlow(configuration).first()) {
             is AccountStatus.Verified -> createOptionAfterAttachingToLink(linkInlineSignupConfirmationOption, userInput)
             AccountStatus.VerificationStarted,
-            AccountStatus.NeedsVerification -> {
+            is AccountStatus.NeedsVerification -> {
                 linkAnalyticsHelper.onLinkPopupSkipped()
 
                 linkInlineSignupConfirmationOption.toNewOption()

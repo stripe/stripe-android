@@ -221,8 +221,7 @@ class ConsumersApiServiceImpl(
                     "session_id" to sessionId,
                     "email_address" to email?.lowercase(),
                     "link_auth_intent_id" to linkAuthIntentId,
-                    "customer_id" to customerId,
-                    "supported_verification_types" to supportedVerificationTypes
+                    "customer_id" to customerId
                 ).filterValues { it != null } + avoidConsumerLoggingParams
             ),
             responseJsonParser = ConsumerSessionLookupJsonParser()

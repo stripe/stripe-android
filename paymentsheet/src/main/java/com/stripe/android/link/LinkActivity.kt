@@ -26,6 +26,7 @@ internal class LinkActivity : ComponentActivity() {
     internal var viewModel: LinkActivityViewModel? = null
 
     private var webLauncher: ActivityResultLauncher<LinkActivityContract.Args>? = null
+    private var webAuthLauncher: ActivityResultLauncher<String>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,10 +49,15 @@ internal class LinkActivity : ComponentActivity() {
         )
 
         webLauncher = registerForActivityResult(vm.activityRetainedComponent.webLinkActivityContract) { result ->
-            vm.handleResult(result)
+            vm.handleWebActivityResult(result)
+        }
+
+        webAuthLauncher = registerForActivityResult(WebLinkAuthActivityContract) { result ->
+            vm.handleWebAuthActivityResult(result)
         }
 
         vm.launchWebFlow = ::launchWebFlow
+        vm.launchWebAuthFlow = ::launchWebAuthFlow
         lifecycle.addObserver(vm)
         observeBackPress()
 
@@ -108,6 +114,8 @@ internal class LinkActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         viewModel?.unregisterActivity()
+        viewModel?.launchWebFlow = null
+        viewModel?.launchWebAuthFlow = null
     }
 
     override fun finish() {
@@ -128,6 +136,10 @@ internal class LinkActivity : ComponentActivity() {
                 passiveCaptchaParams = null,
             )
         )
+    }
+
+    fun launchWebAuthFlow(url: String) {
+        webAuthLauncher?.launch(url)
     }
 
     companion object {

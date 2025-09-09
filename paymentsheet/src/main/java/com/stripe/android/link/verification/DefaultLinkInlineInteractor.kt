@@ -67,7 +67,7 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
         val linkAccountManager = linkConfigurationCoordinator
             .getComponent(linkConfiguration).linkAccountManager
         val linkAccount = linkAccountManager.linkAccountInfo.value.account
-        if (linkAccount == null || linkAccount.accountStatus != AccountStatus.NeedsVerification) {
+        if (linkAccount == null || linkAccount.accountStatus !is AccountStatus.NeedsVerification) {
             // If there is no Link account or verification is not needed, don't start verification.
             updateState { it.copy(verificationState = VerificationState.RenderButton) }
             return
@@ -128,6 +128,7 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
     ) = Render2FA(
         linkConfiguration = linkConfiguration,
         viewState = VerificationViewState(
+            isWeb = false,
             email = email,
             redactedPhoneNumber = redactedPhoneNumber,
             isProcessing = false,
