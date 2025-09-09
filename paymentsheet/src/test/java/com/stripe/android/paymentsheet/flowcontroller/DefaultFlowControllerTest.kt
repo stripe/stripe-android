@@ -13,6 +13,7 @@ import app.cash.turbine.plusAssign
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
@@ -88,6 +89,7 @@ import com.stripe.android.paymentsheet.ui.SepaMandateResult
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.utils.FakePassiveChallengeWarmer
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.PaymentElementCallbackTestRule
 import com.stripe.android.utils.RelayingPaymentElementLoader
@@ -2494,6 +2496,55 @@ internal class DefaultFlowControllerTest {
         }
     }
 
+    @Test
+    fun `On flow controller creation, should register PassiveChallengeWarmer`() = runTest {
+        val passiveChallengeWarmer = FakePassiveChallengeWarmer()
+        createFlowController(passiveChallengeWarmer = passiveChallengeWarmer)
+
+        val registerCall = passiveChallengeWarmer.awaitRegisterCall()
+        assertThat(registerCall.activityResultCaller).isEqualTo(activityResultCaller)
+        assertThat(registerCall.lifecycleOwner).isEqualTo(lifecycleOwner)
+
+        passiveChallengeWarmer.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `PassiveChallengeWarmer should be started when passive captcha params are available`() = runTest {
+        val passiveChallengeWarmer = FakePassiveChallengeWarmer()
+        val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+
+        val flowController = createFlowController(
+            passiveChallengeWarmer = passiveChallengeWarmer,
+            passiveCaptchaParams = passiveCaptchaParams
+        )
+
+        passiveChallengeWarmer.awaitRegisterCall()
+
+        flowController.configureExpectingSuccess()
+
+        val startCall = passiveChallengeWarmer.awaitStartCall()
+        assertThat(startCall.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
+        assertThat(startCall.publishableKey).isNotEmpty()
+        assertThat(startCall.productUsage).containsExactlyElementsIn(PRODUCT_USAGE)
+
+        passiveChallengeWarmer.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `PassiveChallengeWarmer should not be started when passive captcha params are not available`() = runTest {
+        val passiveChallengeWarmer = FakePassiveChallengeWarmer()
+
+        val flowController = createFlowController(
+            passiveChallengeWarmer = passiveChallengeWarmer,
+            passiveCaptchaParams = null
+        )
+
+        passiveChallengeWarmer.awaitRegisterCall()
+        flowController.configureExpectingSuccess()
+
+        passiveChallengeWarmer.ensureAllEventsConsumed()
+    }
+
     private suspend fun FakeConfirmationHandler.Scenario.createAndConfigureFlowControllerForDeferredIntent(
         paymentIntent: PaymentIntent = PaymentIntentFixtures.PI_SUCCEEDED,
         intentConfiguration: PaymentSheet.IntentConfiguration = PaymentSheet.IntentConfiguration(
@@ -2541,19 +2592,21 @@ internal class DefaultFlowControllerTest {
         errorReporter: ErrorReporter = FakeErrorReporter(),
         eventReporter: EventReporter = this@DefaultFlowControllerTest.eventReporter,
         passiveCaptchaParams: PassiveCaptchaParams? = null,
+        passiveChallengeWarmer: PassiveChallengeWarmer = FakePassiveChallengeWarmer(),
     ): DefaultFlowController {
         return createFlowController(
-            FakePaymentElementLoader(
+            paymentElementLoader = FakePaymentElementLoader(
                 customer = customer,
                 stripeIntent = stripeIntent,
                 paymentSelection = paymentSelection,
                 linkState = linkState,
                 passiveCaptchaParams = passiveCaptchaParams,
             ),
-            viewModel,
-            errorReporter,
-            eventReporter,
-            handler,
+            viewModel = viewModel,
+            errorReporter = errorReporter,
+            eventReporter = eventReporter,
+            confirmationHandler = handler,
+            passiveChallengeWarmer = passiveChallengeWarmer
         ).also {
             val registerCall = registerTurbine.awaitItem()
 
@@ -2576,7 +2629,8 @@ internal class DefaultFlowControllerTest {
         eventReporter: EventReporter = this.eventReporter,
         confirmationHandler: ConfirmationHandler? = null,
         linkHandler: LinkHandler? = null,
-        passiveCaptchaParams: PassiveCaptchaParams? = null
+        passiveCaptchaParams: PassiveCaptchaParams? = null,
+        passiveChallengeWarmer: PassiveChallengeWarmer = FakePassiveChallengeWarmer(),
     ): DefaultFlowController {
         return createFlowController(
             FakePaymentElementLoader(
@@ -2591,6 +2645,7 @@ internal class DefaultFlowControllerTest {
             eventReporter,
             confirmationHandler,
             linkHandler,
+            passiveChallengeWarmer
         )
     }
 
@@ -2601,6 +2656,7 @@ internal class DefaultFlowControllerTest {
         eventReporter: EventReporter = this.eventReporter,
         confirmationHandler: ConfirmationHandler? = null,
         linkHandler: LinkHandler? = null,
+        passiveChallengeWarmer: PassiveChallengeWarmer = FakePassiveChallengeWarmer(),
     ): DefaultFlowController {
         return DefaultFlowController(
             viewModelScope = testScope,
@@ -2639,6 +2695,8 @@ internal class DefaultFlowControllerTest {
             activityResultRegistryOwner = mock(),
             linkGateFactory = { linkGate },
             confirmationHandler = confirmationHandler ?: FakeConfirmationHandler(),
+            passiveChallengeWarmer = passiveChallengeWarmer,
+            publishableKey = { PUBLISHABLE_KEY }
         )
     }
 
@@ -2656,7 +2714,7 @@ internal class DefaultFlowControllerTest {
             label = "Test".resolvableString,
             iconResource = 0,
             iconResourceNight = null,
-            paymentMethodCreateParams = PaymentMethodCreateParams.Companion.create(
+            paymentMethodCreateParams = PaymentMethodCreateParams.create(
                 bacsDebit = PaymentMethodCreateParams.BacsDebit(
                     accountNumber = BACS_ACCOUNT_NUMBER,
                     sortCode = BACS_SORT_CODE
@@ -2720,6 +2778,7 @@ internal class DefaultFlowControllerTest {
 
         private const val ENABLE_LOGGING = false
         private val PRODUCT_USAGE = setOf("TestProductUsage")
+        private const val PUBLISHABLE_KEY = "pk_test_123"
 
         private val STATUS_BAR_COLOR = Color.GREEN
 
