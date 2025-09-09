@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.IntDef
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -191,8 +192,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         amount: Int,
         transactionId: String? = null
     ) {
-        // TODO Define whether this should set `isElements` to `true or `false`
-        present(currencyCode, amount.toLong(), transactionId, isElements = true)
+        present(currencyCode, amount.toLong(), transactionId)
     }
 
     /**
@@ -212,6 +212,22 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
      * provided.
      */
     @JvmOverloads
+    fun present(
+        currencyCode: String,
+        amount: Long = 0L,
+        transactionId: String? = null,
+        label: String? = null,
+    ) {
+        present(
+            currencyCode = currencyCode,
+            amount = amount,
+            transactionId = transactionId,
+            label = label,
+            isElements = false,
+        )
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun present(
         currencyCode: String,
         amount: Long = 0L,

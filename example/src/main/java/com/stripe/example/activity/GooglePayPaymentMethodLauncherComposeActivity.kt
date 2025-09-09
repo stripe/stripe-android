@@ -86,7 +86,6 @@ class GooglePayPaymentMethodLauncherComposeActivity : AppCompatActivity() {
                 googlePayLauncher.present(
                     currencyCode = "EUR",
                     amount = 2500L,
-                    isElements = true, // TODO Define whether this should set `isElements` to `true or `false`
                 )
             }
         )

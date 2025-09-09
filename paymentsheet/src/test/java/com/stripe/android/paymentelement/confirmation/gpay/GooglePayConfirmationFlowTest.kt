@@ -72,6 +72,7 @@ class GooglePayConfirmationFlowTest {
                     amount = 1000L,
                     transactionId = "pi_12345",
                     label = null,
+                    isElements = true,
                 )
             }
         }

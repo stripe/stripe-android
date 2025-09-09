@@ -443,7 +443,8 @@ class GooglePayConfirmationDefinitionTest {
                 currencyCode = "CAD",
                 amount = 1000L,
                 transactionId = "pi_12345",
-                label = null
+                label = null,
+                isElements = true,
             )
         }
     }
@@ -476,7 +477,8 @@ class GooglePayConfirmationDefinitionTest {
                 currencyCode = "CAD",
                 amount = 1000L,
                 transactionId = "pi_12345",
-                label = "Merchant Inc."
+                label = "Merchant Inc.",
+                isElements = true,
             )
         }
     }
@@ -510,7 +512,8 @@ class GooglePayConfirmationDefinitionTest {
                 currencyCode = "USD",
                 amount = 2099L,
                 transactionId = "pi_12345",
-                label = "Merchant Inc."
+                label = "Merchant Inc.",
+                isElements = true,
             )
         }
     }
