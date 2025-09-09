@@ -132,7 +132,6 @@ internal open class FakeLinkAccountManager(
         return signupResult
     }
 
-
     override suspend fun lookupByLinkAuthIntent(
         linkAuthIntentId: String?,
         customerId: String?
@@ -144,7 +143,6 @@ internal open class FakeLinkAccountManager(
         )
         return lookupConsumerByAuthIntentResult
     }
-
 
     override suspend fun signInWithUserInput(userInput: UserInput): Result<LinkAccount> {
         return signInWithUserInputResult
@@ -241,7 +239,6 @@ internal open class FakeLinkAccountManager(
     suspend fun awaitLookupByAuthIntentCall(): LookupCallByAuthIntent {
         return lookupByAuthIntentTurbine.awaitItem()
     }
-
 
     suspend fun awaitStartVerificationCall() {
         return startVerificationTurbine.awaitItem()

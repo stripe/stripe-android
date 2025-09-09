@@ -7,12 +7,6 @@ import com.stripe.android.model.EmailSource
 
 /**
  * Interface for low-level Link authentication operations including attestation logic.
- * 
- * WARNING: Do not use this interface directly in your code. Use LinkAccountManager instead.
- * LinkAccountManager is the single source of truth for Link account operations and
- * provides proper session management and LinkAccount creation.
- * 
- * This interface should only be used internally by LinkAccountManager for raw API calls.
  */
 internal interface LinkAuth {
     suspend fun lookup(

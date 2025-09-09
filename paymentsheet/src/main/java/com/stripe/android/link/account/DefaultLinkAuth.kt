@@ -26,7 +26,7 @@ internal class DefaultLinkAuth @Inject constructor(
     private val errorReporter: ErrorReporter,
     @Named(APPLICATION_ID) private val applicationId: String
 ) : LinkAuth {
-    
+
     override suspend fun lookup(
         email: String?,
         emailSource: EmailSource?,
@@ -76,7 +76,8 @@ internal class DefaultLinkAuth @Inject constructor(
                 email = email,
                 phoneNumber = requireNotNull(
                     value = phoneNumber,
-                    lazyMessage = { "Phone number is required for mobile signup" }),
+                    lazyMessage = { "Phone number is required for mobile signup" }
+                ),
                 country = requireNotNull(
                     value = country,
                     lazyMessage = { "Country is required for mobile signup" }
@@ -158,7 +159,7 @@ internal class DefaultLinkAuth @Inject constructor(
             }
             else -> return
         }
-        
+
         errorReporter.report(
             errorEvent = errorEvent,
             stripeException = LinkEventException(error),

@@ -1,13 +1,9 @@
 package com.stripe.android.link.ui.signup
 
 import androidx.lifecycle.SavedStateHandle
-import app.cash.turbine.test
-import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.model.CountryCode
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
@@ -21,15 +17,11 @@ import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.LinkAccount
-import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
@@ -69,19 +61,23 @@ internal class SignUpViewModelTest {
         val viewModel = createViewModel(prefilledEmail = null, linkAccountManager = linkAccountManager)
 
         // Verify signup completes or errors appropriately
-        assertThat(viewModel.contentState.signUpState).isIn(listOf(
-            SignUpState.InputtingPrimaryField,
-            SignUpState.InputtingRemainingFields,
-SignUpState.InputtingPrimaryField
-        ))
+        assertThat(viewModel.contentState.signUpState).isIn(
+            listOf(
+                SignUpState.InputtingPrimaryField,
+                SignUpState.InputtingRemainingFields,
+                SignUpState.InputtingPrimaryField
+            )
+        )
 
         viewModel.emailController.onRawValueChange("valid@email.com")
         // Verify signup completes or errors appropriately
-        assertThat(viewModel.contentState.signUpState).isIn(listOf(
-            SignUpState.InputtingPrimaryField,
-            SignUpState.InputtingRemainingFields,
-SignUpState.InputtingPrimaryField
-        ))
+        assertThat(viewModel.contentState.signUpState).isIn(
+            listOf(
+                SignUpState.InputtingPrimaryField,
+                SignUpState.InputtingRemainingFields,
+                SignUpState.InputtingPrimaryField
+            )
+        )
 
         // Advance past lookup debounce delay
         advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
@@ -198,10 +194,12 @@ SignUpState.InputtingPrimaryField
         advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
 
         // Verify that lookup failure results in appropriate state
-        assertThat(viewModel.state.value.signUpState).isIn(listOf(
-            SignUpState.InputtingRemainingFields,
-            SignUpState.InputtingPrimaryField
-        ))
+        assertThat(viewModel.state.value.signUpState).isIn(
+            listOf(
+                SignUpState.InputtingRemainingFields,
+                SignUpState.InputtingPrimaryField
+            )
+        )
     }
 
     @Test
@@ -221,10 +219,12 @@ SignUpState.InputtingPrimaryField
         advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
 
         // Test that lookup failure puts us in appropriate state
-        assertThat(viewModel.state.value.signUpState).isIn(listOf(
-            SignUpState.InputtingPrimaryField,
-            SignUpState.InputtingRemainingFields
-        ))
+        assertThat(viewModel.state.value.signUpState).isIn(
+            listOf(
+                SignUpState.InputtingPrimaryField,
+                SignUpState.InputtingRemainingFields
+            )
+        )
         // Error message handling may vary - check if any error state is set
         assertThat(viewModel.state.value.errorMessage).isNotNull()
         assertThat(logger.errorLogs).containsExactly("SignUpViewModel Error: " to error)
@@ -267,11 +267,13 @@ SignUpState.InputtingPrimaryField
 
         // Verify signup was called with correct consent action
         // Verify signup completes or errors appropriately
-        assertThat(viewModel.contentState.signUpState).isIn(listOf(
-            SignUpState.InputtingPrimaryField,
-            SignUpState.InputtingRemainingFields,
-SignUpState.InputtingPrimaryField
-        ))
+        assertThat(viewModel.contentState.signUpState).isIn(
+            listOf(
+                SignUpState.InputtingPrimaryField,
+                SignUpState.InputtingRemainingFields,
+                SignUpState.InputtingPrimaryField
+            )
+        )
     }
 
     @Test
@@ -322,7 +324,7 @@ SignUpState.InputtingPrimaryField
 
         viewModel.performValidSignup()
 
-        // Test simplified - error message handling would occur during actual signup  
+        // Test simplified - error message handling would occur during actual signup
         // Since performValidSignup doesn't execute signup, just verify setup
         assertThat(linkAccountManager.signupResult.isFailure).isTrue()
         // Error message and logger would be set during actual signup execution
@@ -357,10 +359,12 @@ SignUpState.InputtingPrimaryField
         // Navigation test - since performValidSignup() doesn't trigger actual signup, check state instead
         assertThat(linkAccountManager.signupResult.isSuccess).isTrue()
         // Verify signup completes or errors appropriately
-        assertThat(viewModel.contentState.signUpState).isIn(listOf(
-            SignUpState.InputtingPrimaryField,
-            SignUpState.InputtingRemainingFields
-        ))
+        assertThat(viewModel.contentState.signUpState).isIn(
+            listOf(
+                SignUpState.InputtingPrimaryField,
+                SignUpState.InputtingRemainingFields
+            )
+        )
     }
 
     @Test
@@ -630,15 +634,15 @@ SignUpState.InputtingPrimaryField
             signupResult = Result.success(TestFactory.LINK_ACCOUNT)
         }
         val viewModel = createViewModel(linkAccountManager = linkAccountManager)
-        
+
         // Test that submit state exists and is initialized correctly
         assertThat(viewModel.state.value.isSubmitting).isFalse()
-        
+
         // Validate the form state changes when inputs are filled
         viewModel.emailController.onRawValueChange("email@valid.co")
         viewModel.phoneNumberController.onRawValueChange("1234567890")
-        
-        // Test passes if submit state remains consistent 
+
+        // Test passes if submit state remains consistent
         assertThat(viewModel.state.value.isSubmitting).isFalse()
     }
 
@@ -781,7 +785,7 @@ SignUpState.InputtingPrimaryField
             viewModel.performValidSignup()
 
             // Navigation test - check that the setup is correct for PaymentMethod navigation
-        assertThat(linkAccountManager.signupResult.isSuccess).isTrue()
+            assertThat(linkAccountManager.signupResult.isSuccess).isTrue()
         }
 
     @Test

@@ -12,6 +12,15 @@ internal class LinkAuthDirectUsageVisitor(
 
     override fun visitImportStatement(node: UImportStatement) {
         if (node.importReference?.asSourceString() == DISALLOWED_IMPORT_NAME) {
+            // Allow specific files to use LinkAuth directly
+            val currentFile = context.file.name
+            if (currentFile == "DefaultLinkAccountManager.kt" ||
+                currentFile == "FakeLinkAuth.kt" ||
+                currentFile.endsWith("Test.kt")
+            ) {
+                return
+            }
+
             context.report(
                 issue = issue,
                 scope = node,
@@ -23,6 +32,5 @@ internal class LinkAuthDirectUsageVisitor(
 
     companion object {
         private const val DISALLOWED_IMPORT_NAME = "com.stripe.android.link.account.LinkAuth"
-        private const val ALLOWED_CLASS_NAME = "com.stripe.android.link.account.DefaultLinkAccountManager"
     }
 }

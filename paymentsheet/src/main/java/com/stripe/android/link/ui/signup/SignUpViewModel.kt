@@ -234,7 +234,6 @@ internal class SignUpViewModel @Inject constructor(
         }
     }
 
-
     private suspend fun handleAccountError(error: Throwable) {
         // Handle account error - logic from the original LinkAuthResult.AccountError.handle()
         updateSignUpState(SignUpState.InputtingPrimaryField)

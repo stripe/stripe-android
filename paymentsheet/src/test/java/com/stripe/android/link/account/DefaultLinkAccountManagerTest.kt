@@ -25,8 +25,6 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
-import com.stripe.android.model.ConsumerSessionSignup
-import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.LinkMode
@@ -240,7 +238,8 @@ class DefaultLinkAccountManagerTest {
             )
 
             assertThat(fakeLinkAuth.signupCalls).hasSize(1)
-            assertThat(fakeLinkAuth.signupCalls[0].consentAction).isEqualTo(SignUpConsentAction.CheckboxWithPrefilledEmail)
+            assertThat(fakeLinkAuth.signupCalls[0].consentAction)
+                .isEqualTo(SignUpConsentAction.CheckboxWithPrefilledEmail)
         }
 
     @Test
@@ -254,7 +253,8 @@ class DefaultLinkAccountManagerTest {
             )
 
             assertThat(fakeLinkAuth.signupCalls).hasSize(1)
-            assertThat(fakeLinkAuth.signupCalls[0].consentAction).isEqualTo(SignUpConsentAction.CheckboxWithPrefilledEmailAndPhone)
+            assertThat(fakeLinkAuth.signupCalls[0].consentAction)
+                .isEqualTo(SignUpConsentAction.CheckboxWithPrefilledEmailAndPhone)
         }
 
     @Test
@@ -281,7 +281,8 @@ class DefaultLinkAccountManagerTest {
             )
 
             assertThat(fakeLinkAuth.signupCalls).hasSize(1)
-            assertThat(fakeLinkAuth.signupCalls[0].consentAction).isEqualTo(SignUpConsentAction.ImpliedWithPrefilledEmail)
+            assertThat(fakeLinkAuth.signupCalls[0].consentAction)
+                .isEqualTo(SignUpConsentAction.ImpliedWithPrefilledEmail)
         }
 
     @Test
