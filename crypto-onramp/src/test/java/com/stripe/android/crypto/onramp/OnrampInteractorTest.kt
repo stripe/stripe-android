@@ -182,7 +182,6 @@ class OnrampInteractorTest {
         ).thenReturn(Result.success(createPaymentTokenResponse))
 
         val result = interactor.createCryptoPaymentToken()
-        println("createCryptoPaymentToken result: $result")
         assert(result is OnrampCreateCryptoPaymentTokenResult.Completed)
     }
 
