@@ -948,6 +948,9 @@
 |    |    |    \--- com.google.android.gms:play-services-basement:18.0.0 -> 18.4.0 (*)
 |    |    \--- com.google.android.gms:play-services-tasks:18.2.0 (*)
 |    +--- com.google.android.instantapps:instantapps:1.1.0
+|    +--- dev.drewhamilton.poko:poko-annotations:0.18.2
+|    |    \--- dev.drewhamilton.poko:poko-annotations-jvm:0.18.2
+|    |         \--- org.jetbrains.kotlin:kotlin-stdlib:2.1.0 -> 2.1.10 (*)
 |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.1.10 (*)
 +--- project :paymentsheet
 |    +--- project :payments-core (*)
@@ -1036,9 +1039,7 @@
 |    +--- com.google.android.material:material:1.12.0 (*)
 |    +--- androidx.compose.ui:ui-tooling-preview:1.7.8 (*)
 |    +--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.1.10 (*)
-|    \--- dev.drewhamilton.poko:poko-annotations:0.18.2
-|         \--- dev.drewhamilton.poko:poko-annotations-jvm:0.18.2
-|              \--- org.jetbrains.kotlin:kotlin-stdlib:2.1.0 -> 2.1.10 (*)
+|    \--- dev.drewhamilton.poko:poko-annotations:0.18.2 (*)
 +--- androidx.activity:activity-ktx:1.9.3 (*)
 +--- androidx.appcompat:appcompat:1.7.0 (*)
 +--- androidx.browser:browser:1.8.0 (*)
