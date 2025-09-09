@@ -16,9 +16,9 @@ internal class DefaultPassiveChallengeWarmer : PassiveChallengeWarmer {
         launcher = activityResultCaller.registerForActivityResult(contract) {}
         lifecycleOwner.lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onDestroy(owner: LifecycleOwner) {
-                super.onDestroy(owner)
                 launcher?.unregister()
                 launcher = null
+                super.onDestroy(owner)
             }
         })
     }
