@@ -3624,34 +3624,6 @@ internal class StripeApiRepositoryTest {
         assertThat(exception).isInstanceOf(APIConnectionException::class.java)
     }
 
-    @Test
-    fun createConfirmationToken_sendsAnalyticsEvent() = runTest {
-        val stripeResponse = StripeResponse(
-            200,
-            ConfirmationTokenFixtures.DEFAULT_JSON.toString(),
-            emptyMap()
-        )
-        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-            .thenReturn(stripeResponse)
-
-        val productUsage = "TestProductUsage"
-        val confirmationTokenParams = ConfirmationTokenParams(
-            paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD.copy(
-                productUsage = setOf(productUsage)
-            ),
-            returnUrl = "https://example.com/return"
-        )
-
-        create().createConfirmationToken(
-            confirmationTokenParams,
-            DEFAULT_OPTIONS
-        )
-
-        // Note: Analytics for confirmation token creation would be added when the analytics event is defined
-        // For now we just verify the network request was made successfully
-        verify(stripeNetworkClient).executeRequest(any<ApiRequest>())
-    }
-
     /**
      * Helper DSL to validate nested params.
      */

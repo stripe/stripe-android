@@ -704,14 +704,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 )
             ),
             ConfirmationTokenJsonParser()
-        ) {
-//            fireAnalyticsRequest(
-//                paymentAnalyticsRequestFactory.createRequest(
-//                    PaymentAnalyticsEvent.ConfirmationTokenCreate,
-//                    productUsageTokens = confirmationTokenCreateParams.productUsageTokens
-//                )
-//            )
-        }
+        )
     }
 
     /**
