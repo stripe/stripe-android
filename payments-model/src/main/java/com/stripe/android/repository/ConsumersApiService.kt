@@ -221,7 +221,8 @@ class ConsumersApiServiceImpl(
                     "session_id" to sessionId,
                     "email_address" to email?.lowercase(),
                     "link_auth_intent_id" to linkAuthIntentId,
-                    "customer_id" to customerId
+                    "customer_id" to customerId,
+                    "supported_verification_types" to supportedVerificationTypes
                 ).filterValues { it != null } + avoidConsumerLoggingParams
             ),
             responseJsonParser = ConsumerSessionLookupJsonParser()
@@ -256,7 +257,8 @@ class ConsumersApiServiceImpl(
                     "session_id" to sessionId,
                     "email_source" to emailSource?.backendValue,
                     "app_id" to appId,
-                    "customer_id" to customerId
+                    "customer_id" to customerId,
+                    "supported_verification_types" to supportedVerificationTypes
                 ).filterValues { it != null }
             ),
             responseJsonParser = ConsumerSessionLookupJsonParser()
@@ -503,6 +505,7 @@ class ConsumersApiServiceImpl(
     }
 
     internal companion object {
+        private val supportedVerificationTypes = listOf(VerificationType.SMS.value)
 
         /**
          * @return `https://api.stripe.com/v1/consumers/accounts/sign_up`
