@@ -224,6 +224,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
             transactionId = transactionId,
             label = label,
             clientAttributionMetadata = null,
+            isElements = false,
         )
     }
 
