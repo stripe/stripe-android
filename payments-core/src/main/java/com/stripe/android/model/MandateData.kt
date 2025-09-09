@@ -52,6 +52,5 @@ data class MandateData internal constructor(
              */
             val userAgent: String?,
         ) : Parcelable
-
     }
 }

@@ -5,6 +5,12 @@ import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.MandateData
 import org.json.JSONObject
 
+/**
+ * Parser for [MandateData] JSON objects from the Stripe API.
+ *
+ * Handles parsing of mandate customer acceptance information including
+ * online acceptance details and verification data.
+ */
 internal class MandateDataJsonParser : ModelJsonParser<MandateData> {
     override fun parse(json: JSONObject): MandateData? {
         json.optJSONObject(
@@ -17,7 +23,7 @@ internal class MandateDataJsonParser : ModelJsonParser<MandateData> {
                     userAgent = StripeJsonUtils.optString(it, FIELD_USER_AGENT)
                 )
             }
-            if (type != null) {
+            if (!type.isNullOrBlank()) {
                 return MandateData(
                     MandateData.CustomerAcceptance(
                         online = online,
@@ -36,5 +42,4 @@ internal class MandateDataJsonParser : ModelJsonParser<MandateData> {
         const val FIELD_IP_ADDRESS = "ip_address"
         const val FIELD_USER_AGENT = "user_agent"
     }
-
 }

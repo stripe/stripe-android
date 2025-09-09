@@ -1,7 +1,6 @@
 package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.MandateData
 import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner

@@ -3,8 +3,8 @@ package com.stripe.android.model.parsers
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.ConfirmationTokenFixtures
+import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -39,11 +39,11 @@ class ConfirmationTokenJsonParserTest {
 
         val paymentMethod = requireNotNull(confirmationToken.paymentMethodPreview)
         assertThat(paymentMethod.type).isEqualTo(com.stripe.android.model.PaymentMethod.Type.Card)
-        
+
         val billingDetails = requireNotNull(paymentMethod.billingDetails)
         assertThat(billingDetails.name).isEqualTo("Jenny Rosen")
         assertThat(billingDetails.email).isEqualTo("jennyrosen@stripe.com")
-        
+
         val address = requireNotNull(billingDetails.address)
         assertThat(address.line1).isEqualTo("50 Sprague St")
         assertThat(address.city).isEqualTo("Hyde Park")
@@ -69,7 +69,7 @@ class ConfirmationTokenJsonParserTest {
         val shipping = requireNotNull(confirmationToken.shipping)
         assertThat(shipping.name).isEqualTo("Jenny Rosen")
         assertThat(shipping.phone).isNull()
-        
+
         val address = requireNotNull(shipping.address)
         assertThat(address.line1).isEqualTo("50 Sprague St")
         assertThat(address.city).isEqualTo("Hyde Park")
@@ -115,7 +115,29 @@ class ConfirmationTokenJsonParserTest {
         val confirmationToken = requireNotNull(
             parser.parse(ConfirmationTokenFixtures.CONFIRMATION_TOKEN_WITH_INVALID_SETUP_FUTURE_USAGE_JSON)
         )
-        
+
         assertThat(confirmationToken.setupFutureUsage).isNull()
+    }
+
+    @Test
+    fun parse_withEmptyStringId_shouldReturnNull() {
+        val jsonWithEmptyId = JSONObject("""{"id": "", "created": 1694025025}""")
+        val result = parser.parse(jsonWithEmptyId)
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun parse_withInvalidPaymentMethodPreview_shouldHandleGracefully() {
+        val invalidPaymentMethodJson = JSONObject(
+            """
+            {
+                "id": "ctoken_test", 
+                "created": 1694025025,
+                "payment_method_preview": {"invalid": "data"}
+            }
+            """.trimIndent()
+        )
+        val result = parser.parse(invalidPaymentMethodJson)
+        assertThat(result?.paymentMethodPreview).isNull()
     }
 }
