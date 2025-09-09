@@ -578,4 +578,23 @@ internal class DefaultLinkAccountManager @Inject constructor(
             )
         }
     }
+
+    override suspend fun refreshConsumer(): Result<LinkAccount?> {
+        val linkAccount = linkAccountHolder.linkAccountInfo.value.account
+            ?: return Result.failure(NoLinkAccountFoundException())
+        return linkRepository.refreshConsumer(
+            consumerSessionClientSecret = linkAccount.clientSecret,
+            consumerPublishableKey = linkAccount.consumerPublishableKey
+        )
+            .onFailure { error ->
+                linkEventsReporter.onAccountLookupFailure(error)
+            }.map { consumerSessionLookup ->
+                setLinkAccountFromLookupResult(
+                    lookup = consumerSessionLookup,
+                    startSession = true,
+                    // Use previous LAI ID if it exists.
+                    linkAuthIntentId = linkAccount.linkAuthIntentInfo?.linkAuthIntentId,
+                )
+            }
+    }
 }

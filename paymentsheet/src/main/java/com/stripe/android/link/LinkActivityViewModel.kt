@@ -1,7 +1,6 @@
 package com.stripe.android.link
 
 import android.app.Application
-import android.util.Log
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -50,10 +49,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -99,31 +95,9 @@ internal class LinkActivityViewModel @Inject constructor(
 
     var launchWebFlow: ((LinkConfiguration) -> Unit)? = null
     var launchWebAuthFlow: ((String) -> Unit)? = null
-        set(value) {
-            field = value
-            tryLaunchWebAuth()
-        }
 
     val canDismissSheet: Boolean
         get() = activityRetainedComponent.dismissalCoordinator.canDismiss
-
-    init {
-        viewModelScope.launch {
-            linkAccountManager.accountStatus
-                .map { (it as? AccountStatus.NeedsVerification)?.webviewOpenUrl }
-                .distinctUntilChanged()
-                .collectLatest { tryLaunchWebAuth() }
-        }
-    }
-
-    private fun tryLaunchWebAuth() {
-        viewModelScope.launch {
-            val accountStatus = linkAccountManager.accountStatus.first()
-            (accountStatus as? AccountStatus.NeedsVerification)?.webviewOpenUrl?.let {
-                launchWebAuthFlow?.invoke(it)
-            }
-        }
-    }
 
     fun handleViewAction(action: LinkAction) {
         when (action) {
@@ -151,7 +125,41 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     fun handleWebAuthActivityResult(result: WebLinkAuthResult) {
-        Log.i("WTF", "WebLinkAuthResult: $result")
+        viewModelScope.launch {
+            when (result) {
+                WebLinkAuthResult.Completed -> {
+                    linkAccountManager.refreshConsumer().fold(
+                        onSuccess = {
+                            updateScreenState(true)
+                        },
+                        onFailure = {
+                            dismissWithResult(
+                                LinkActivityResult.Failed(
+                                    error = it,
+                                    linkAccountUpdate = LinkAccountUpdate.None,
+                                )
+                            )
+                        }
+                    )
+                }
+                WebLinkAuthResult.Canceled -> {
+                    dismissWithResult(
+                        LinkActivityResult.Canceled(
+                            reason = LinkActivityResult.Canceled.Reason.BackPressed,
+                            linkAccountUpdate = LinkAccountUpdate.None,
+                        )
+                    )
+                }
+                is WebLinkAuthResult.Failure -> {
+                    dismissWithResult(
+                        LinkActivityResult.Failed(
+                            error = result.error,
+                            linkAccountUpdate = LinkAccountUpdate.None,
+                        )
+                    )
+                }
+            }
+        }
     }
 
     fun dismissSheet() {
@@ -364,6 +372,7 @@ internal class LinkActivityViewModel @Inject constructor(
         // Get linkAccount after getting `accountStatus` because account may be updated.
         val linkAccount = this.linkAccount
 
+        val authenticating = linkLaunchMode is LinkLaunchMode.Authentication
         val authenticatingExistingAccount = (linkLaunchMode as? LinkLaunchMode.Authentication)?.existingOnly == true
         val authorizingAuthIntent = linkLaunchMode is LinkLaunchMode.Authorization
         val cannotChangeEmails = !linkConfiguration.allowUserEmailEdits
@@ -379,15 +388,17 @@ internal class LinkActivityViewModel @Inject constructor(
             return
         }
 
-        if (authenticatingExistingAccount &&
-            accountStatus is AccountStatus.Verified &&
-            !accountStatus.hasVerifiedSMSSession &&
-            linkAccount != null // Should always be non-null.
-        ) {
-            // Handle edge case where status is "verified" but don't have a verified SMS session.
-            // This can happen after registering a new user without verifying their phone number.
-            _linkScreenState.value = ScreenState.VerificationDialog(linkAccount)
-            return
+        if (authenticating && accountStatus is AccountStatus.Verified) {
+            if (accountStatus.hasVerifiedSMSSession) {
+                dismissWithResult(LinkActivityResult.Completed(linkAccountManager.linkAccountUpdate))
+                return
+            }
+            if (authenticatingExistingAccount) {
+                // Handle edge case where status is "verified" but don't have a verified SMS session.
+                // This can happen after registering a new user without verifying their phone number.
+                _linkScreenState.value = ScreenState.VerificationDialog(linkAccount!!)
+                return
+            }
         }
 
         if (authorizingAuthIntent &&
@@ -396,6 +407,12 @@ internal class LinkActivityViewModel @Inject constructor(
         ) {
             // Already completed verification with inline consent.
             dismissWithResult(LinkActivityResult.Completed(linkAccountManager.linkAccountUpdate))
+            return
+        }
+
+        val webviewOpenUrl = (accountStatus as? AccountStatus.NeedsVerification)?.webviewOpenUrl
+        if (authenticating && webviewOpenUrl != null) {
+            launchWebAuthFlow?.invoke(webviewOpenUrl)
             return
         }
 

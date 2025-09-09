@@ -68,6 +68,12 @@ interface ConsumersApiService {
         customerId: String?
     ): ConsumerSessionLookup
 
+    suspend fun refreshConsumerSession(
+        consumerSessionClientSecret: String,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSessionLookup
+
     suspend fun startConsumerVerification(
         consumerSessionClientSecret: String,
         locale: Locale,
@@ -259,6 +265,28 @@ class ConsumersApiServiceImpl(
                     "customer_id" to customerId,
                     "supported_verification_types" to supportedVerificationTypes
                 ).filterValues { it != null }
+            ),
+            responseJsonParser = ConsumerSessionLookupJsonParser()
+        )
+    }
+
+    override suspend fun refreshConsumerSession(
+        consumerSessionClientSecret: String,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSessionLookup {
+        return executeRequestWithModelJsonParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createPost(
+                url = consumerSessionRefreshUrl,
+                options = requestOptions,
+                params = mapOf(
+                    "request_surface" to requestSurface,
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    ),
+                ),
             ),
             responseJsonParser = ConsumerSessionLookupJsonParser()
         )
@@ -529,6 +557,12 @@ class ConsumersApiServiceImpl(
          */
         internal val mobileConsumerSessionLookupUrl: String =
             getApiUrl("consumers/mobile/sessions/lookup")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/sessions/refresh`
+         */
+        internal val consumerSessionRefreshUrl: String =
+            getApiUrl("consumers/sessions/refresh")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/sessions/start_verification`
