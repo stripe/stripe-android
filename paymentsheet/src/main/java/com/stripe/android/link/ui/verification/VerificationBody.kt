@@ -43,7 +43,6 @@ import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.AppBarIcon
 import com.stripe.android.link.ui.ErrorText
-import com.stripe.android.link.ui.LinkLoadingScreen
 import com.stripe.android.link.ui.LinkSpinner
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
