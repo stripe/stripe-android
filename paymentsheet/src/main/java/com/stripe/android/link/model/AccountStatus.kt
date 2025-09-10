@@ -12,7 +12,7 @@ internal sealed interface AccountStatus {
     ) : AccountStatus // Customer needs to authenticate
     data object VerificationStarted : AccountStatus // Customer has started OTP verification
     data object SignedOut : AccountStatus // Customer is signed out
-    data object Error : AccountStatus // Account status could not be determined
+    data class Error(val error: Throwable) : AccountStatus // Account status could not be determined
 }
 
 internal fun AccountStatus.toLoginState(): LinkState.LoginState {
@@ -23,7 +23,7 @@ internal fun AccountStatus.toLoginState(): LinkState.LoginState {
         AccountStatus.VerificationStarted ->
             LinkState.LoginState.NeedsVerification
         AccountStatus.SignedOut,
-        AccountStatus.Error ->
+        is AccountStatus.Error ->
             LinkState.LoginState.LoggedOut
     }
 }

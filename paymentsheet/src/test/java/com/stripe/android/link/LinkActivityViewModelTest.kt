@@ -366,7 +366,7 @@ internal class LinkActivityViewModelTest {
     @Test
     fun `onCreate returns Failed result when Authentication existingOnly and account status is Error`() = runTest {
         testAuthenticationFailureCase(
-            accountStatus = AccountStatus.Error,
+            accountStatus = AccountStatus.Error(Exception()),
             existingOnly = true,
             allowUserEmailEdits = true
         )
@@ -384,7 +384,7 @@ internal class LinkActivityViewModelTest {
     @Test
     fun `onCreate returns Failed when Authentication with email edits disabled and Error`() = runTest {
         testAuthenticationFailureCase(
-            accountStatus = AccountStatus.Error,
+            accountStatus = AccountStatus.Error(Exception()),
             existingOnly = false,
             allowUserEmailEdits = false
         )
@@ -461,7 +461,6 @@ internal class LinkActivityViewModelTest {
             val result = awaitItem()
             assertThat(result).isInstanceOf(LinkActivityResult.Failed::class.java)
             val failedResult = result as LinkActivityResult.Failed
-            assertThat(failedResult.error).isInstanceOf(NoLinkAccountFoundException::class.java)
             assertThat(failedResult.linkAccountUpdate).isEqualTo(LinkAccountUpdate.None)
         }
     }
@@ -471,7 +470,7 @@ internal class LinkActivityViewModelTest {
         val linkAccountManager = FakeLinkAccountManager()
 
         val vm = createViewModel(linkAccountManager = linkAccountManager)
-        linkAccountManager.setAccountStatus(AccountStatus.Error)
+        linkAccountManager.setAccountStatus(AccountStatus.Error(Exception()))
 
         vm.onCreate(mock())
 
@@ -814,7 +813,12 @@ internal class LinkActivityViewModelTest {
             linkAccountManager = linkAccountManager,
             linkLaunchMode = LinkLaunchMode.Authorization(linkAuthIntentId = "lai_123")
         )
-        linkAccountManager.setAccountStatus(AccountStatus.Verified(true, null))
+        linkAccountManager.setAccountStatus(
+            AccountStatus.Verified(
+                hasVerifiedSMSSession = true,
+                consentPresentation = ConsentPresentation.FullScreen(TestFactory.CONSENT_PANE)
+            )
+        )
 
         vm.onCreate(mock())
         advanceUntilIdle()

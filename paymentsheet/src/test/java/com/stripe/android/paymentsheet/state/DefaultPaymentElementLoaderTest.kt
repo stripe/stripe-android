@@ -1117,7 +1117,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `Disables Link inline signup if there is an account error`() = runTest {
         val loader = createPaymentElementLoader(
-            linkAccountState = AccountStatus.Error,
+            linkAccountState = AccountStatus.Error(Exception()),
         )
 
         val result = loader.load(

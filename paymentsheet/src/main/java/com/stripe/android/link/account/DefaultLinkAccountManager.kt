@@ -170,7 +170,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 )
             }
             AccountStatus.SignedOut,
-            AccountStatus.Error -> {
+            is AccountStatus.Error -> {
                 signUp(
                     email = email,
                     phoneNumber = phone,
@@ -512,7 +512,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             }
         return linkAccountResult
             ?.map { it?.accountStatus }
-            ?.getOrElse { AccountStatus.Error }
+            ?.getOrElse { error -> AccountStatus.Error(error) }
             ?: AccountStatus.SignedOut
     }
 

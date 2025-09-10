@@ -95,7 +95,7 @@ internal class LinkInlineSignupConfirmationDefinition(
                 linkInlineSignupConfirmationOption.toNewOption()
             }
             AccountStatus.SignedOut,
-            AccountStatus.Error -> {
+            is AccountStatus.Error -> {
                 linkConfigurationCoordinator.signInWithUserInput(configuration, userInput).fold(
                     onSuccess = {
                         // If successful, the account was fetched or created, so try again
