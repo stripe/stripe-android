@@ -10,7 +10,6 @@ import kotlinx.parcelize.Parcelize
 @Immutable
 @Parcelize
 internal data class VerificationViewState(
-    val isWeb: Boolean,
     val isProcessing: Boolean,
     val requestFocus: Boolean,
     val errorMessage: ResolvableString?,

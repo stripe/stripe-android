@@ -222,7 +222,6 @@ private fun LinkEmbeddedOtpSectionDefaultPreview() {
     )
 
     val verificationState = VerificationViewState(
-        isWeb = false,
         isProcessing = false,
         requestFocus = true,
         errorMessage = null,
@@ -251,7 +250,6 @@ private fun LinkEmbeddedOtpSectionDefaultCardPreview() {
     )
 
     val verificationState = VerificationViewState(
-        isWeb = false,
         isProcessing = false,
         requestFocus = true,
         errorMessage = null,
@@ -284,7 +282,6 @@ private fun LinkEmbeddedOtpSectionDefaultBankPreview() {
     )
 
     val verificationState = VerificationViewState(
-        isWeb = false,
         isProcessing = false,
         requestFocus = true,
         errorMessage = null,
@@ -319,7 +316,6 @@ private fun LinkEmbeddedOtpSectionProcessingPreview() {
     )
 
     val verificationState = VerificationViewState(
-        isWeb = false,
         isProcessing = true,
         requestFocus = false,
         errorMessage = null,
@@ -354,7 +350,6 @@ private fun LinkEmbeddedOtpSectionErrorPreview() {
     )
 
     val verificationState = VerificationViewState(
-        isWeb = false,
         isProcessing = false,
         requestFocus = false,
         errorMessage = resolvableString("Invalid verification code. Please try again."),

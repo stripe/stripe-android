@@ -36,7 +36,6 @@ fun VerificationPreview() {
         Box(modifier = Modifier.fillMaxSize()) {
             VerificationBody(
                 state = VerificationViewState(
-                    isWeb = false,
                     isProcessing = false,
                     isSendingNewCode = false,
                     errorMessage = resolvableString("Test error message"),
