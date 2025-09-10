@@ -50,6 +50,7 @@ internal class DefaultHCaptchaService(
         }.getOrElse { e ->
             HCaptchaService.Result.Failure(e)
         }
+        cachedResult.emit(CachedResult.Idle)
         return result
     }
 

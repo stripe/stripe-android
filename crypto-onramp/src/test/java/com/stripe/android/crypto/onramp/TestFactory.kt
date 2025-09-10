@@ -32,7 +32,7 @@ fun paymentIntent(
     linkFundingSources = linkFundingSources,
 )
 
-private fun createCardPaymentMethod(): PaymentMethod = PaymentMethod(
+fun createCardPaymentMethod(): PaymentMethod = PaymentMethod(
     id = "12",
     created = 123456789L,
     liveMode = false,

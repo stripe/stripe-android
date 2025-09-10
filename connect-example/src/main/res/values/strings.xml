@@ -49,4 +49,7 @@
     <string name="appearance_link">Link</string>
     <string name="appearance_dynamic">Dynamic</string>
     <string name="custom_font">Custom Font</string>
+    <string name="appearance_retro">Retro</string>
+    <string name="appearance_forest">Forest</string>
+    <string name="appearance_dark_mode">Dark Mode</string>
 </resources>
