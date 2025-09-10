@@ -20,6 +20,10 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
                         .mapNotNull { parseVerificationSession(it) }
                 } ?: emptyList()
 
+        val mobileFallbackWebviewParams =
+            consumerSessionJson.optJSONObject(FIELD_MOBILE_FALLBACK_WEBVIEW_PARAMS)
+                ?.let { parseMobileFallbackWebviewParams(it) }
+
         return ConsumerSession(
             clientSecret = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_SECRET),
             emailAddress = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_EMAIL),
@@ -28,8 +32,7 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
             unredactedPhoneNumber = optString(consumerSessionJson, FIELD_CONSUMER_SESSION_UNREDACTED_PHONE),
             phoneNumberCountry = optString(consumerSessionJson, FIELD_CONSUMER_SESSION_PHONE_COUNTRY),
             verificationSessions = verificationSession,
-            mobileFallbackWebviewParams = consumerSessionJson.optJSONObject(FIELD_MOBILE_FALLBACK_WEBVIEW_PARAMS)
-                ?.let { parseMobileFallbackWebviewParams(it) },
+            mobileFallbackWebviewParams = mobileFallbackWebviewParams,
         )
     }
 
