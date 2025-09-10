@@ -1,5 +1,7 @@
 package com.stripe.android.hcaptcha
 
+import android.util.Log
+import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
 import com.stripe.android.hcaptcha.analytics.CaptchaEventsReporter
 import com.stripe.hcaptcha.HCaptcha
@@ -113,9 +115,11 @@ internal class DefaultHCaptchaService(
         }
         when (result) {
             is HCaptchaService.Result.Failure -> {
+                Toast.makeText(activity, "hCaptcha failed 😞", Toast.LENGTH_LONG).show()
                 captchaEventsReporter.error(result.error, siteKey)
             }
             is HCaptchaService.Result.Success -> {
+                Toast.makeText(activity, "hCaptcha succeeded 🥳", Toast.LENGTH_LONG).show()
                 captchaEventsReporter.success(siteKey)
             }
         }

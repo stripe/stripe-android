@@ -1,5 +1,6 @@
 package com.stripe.android.hcaptcha.analytics
 
+import android.util.Log
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
@@ -67,6 +68,7 @@ internal class DefaultCaptchaEventsReporter @Inject constructor(
         event: CaptchaAnalyticsEvent,
         additionalParams: Map<String, Any> = emptyMap()
     ) {
+        Log.d("hcaptcha_bugbash", "${event.eventName} => ${event.params + additionalParams}")
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.createRequest(
                 event = event,

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
+import android.util.Log
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.coroutines.runCatching
@@ -245,6 +246,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         val stripeIntent = elementsSession.stripeIntent
         val pmMetadata = paymentMethodMetadata.await()
+
+        Log.d("hcaptcha_bugbash", "INTENT ID => ${stripeIntent.id}")
 
         warnUnactivatedIfNeeded(stripeIntent)
 
