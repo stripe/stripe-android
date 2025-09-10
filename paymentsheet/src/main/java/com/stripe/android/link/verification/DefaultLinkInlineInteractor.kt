@@ -128,7 +128,6 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
     ) = Render2FA(
         linkConfiguration = linkConfiguration,
         viewState = VerificationViewState(
-            isWeb = false,
             email = email,
             redactedPhoneNumber = redactedPhoneNumber,
             isProcessing = false,

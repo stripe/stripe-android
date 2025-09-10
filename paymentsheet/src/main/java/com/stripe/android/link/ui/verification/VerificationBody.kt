@@ -78,17 +78,15 @@ internal fun VerificationBody(
     val focusRequester: FocusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    if (!state.isWeb) {
-        LaunchedEffects(
-            state = state,
-            focusManager = focusManager,
-            keyboardController = keyboardController,
-            focusRequester = focusRequester,
-            onFocusRequested = onFocusRequested,
-            context = context,
-            didShowCodeSentNotification = didShowCodeSentNotification
-        )
-    }
+    LaunchedEffects(
+        state = state,
+        focusManager = focusManager,
+        keyboardController = keyboardController,
+        focusRequester = focusRequester,
+        onFocusRequested = onFocusRequested,
+        context = context,
+        didShowCodeSentNotification = didShowCodeSentNotification
+    )
 
     VerificationBodyContainer(
         isDialog = state.isDialog,
@@ -97,11 +95,6 @@ internal fun VerificationBody(
             onBack()
         }
     ) {
-        if (state.isWeb) {
-            LinkLoadingScreen()
-            return@VerificationBodyContainer
-        }
-
         Title(
             isDialog = state.isDialog
         )
@@ -396,7 +389,6 @@ private fun Preview() {
             ) {
                 VerificationBody(
                     state = VerificationViewState(
-                        isWeb = false,
                         isProcessing = false,
                         requestFocus = false,
                         errorMessage = null,

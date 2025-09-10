@@ -122,7 +122,6 @@ fun VerificationDialogPreview() {
         ) {
             VerificationDialogBody(
                 state = VerificationViewState(
-                    isWeb = false,
                     isProcessing = false,
                     isSendingNewCode = false,
                     errorMessage = resolvableString("Test error message"),
