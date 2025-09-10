@@ -410,9 +410,9 @@ internal class LinkActivityViewModel @Inject constructor(
             return
         }
 
-        val webviewOpenUrl = (accountStatus as? AccountStatus.NeedsVerification)?.webviewOpenUrl
-        if (authenticating && webviewOpenUrl != null) {
-            launchWebAuthFlow?.invoke(webviewOpenUrl)
+        val verificationUrl = (accountStatus as? AccountStatus.NeedsVerification)?.webviewOpenUrl
+        if (verificationUrl != null) {
+            launchWebAuthFlow?.invoke(verificationUrl)
             return
         }
 

@@ -131,7 +131,7 @@ internal class LinkApiRepository @Inject constructor(
     override suspend fun refreshConsumer(
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?
-    ): Result<ConsumerSessionLookup> = withContext(workContext) {
+    ): Result<ConsumerSession> = withContext(workContext) {
         runCatching {
             consumersApiService.refreshConsumerSession(
                 consumerSessionClientSecret = consumerSessionClientSecret,
