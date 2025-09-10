@@ -2,6 +2,7 @@ package com.stripe.android.link.account
 
 import com.stripe.android.common.di.APPLICATION_ID
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkEventException
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.repositories.LinkRepository
@@ -11,6 +12,8 @@ import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.EmailSource
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.model.amount
+import com.stripe.android.paymentsheet.model.currency
 import com.stripe.attestation.AttestationError
 import com.stripe.attestation.IntegrityRequestManager
 import javax.inject.Inject
@@ -24,6 +27,7 @@ internal class DefaultLinkAuth @Inject constructor(
     private val linkRepository: LinkRepository,
     private val integrityRequestManager: IntegrityRequestManager,
     private val errorReporter: ErrorReporter,
+    private val config: LinkConfiguration,
     @Named(APPLICATION_ID) private val applicationId: String
 ) : LinkAuth {
 
@@ -141,8 +145,8 @@ internal class DefaultLinkAuth @Inject constructor(
                 consentAction = consentAction.consumerAction,
                 verificationToken = verificationToken,
                 appId = applicationId,
-                amount = null,
-                currency = null,
+                amount = config.stripeIntent.amount,
+                currency = config.stripeIntent.currency,
                 incentiveEligibilitySession = null,
             ).getOrThrow()
         }.onFailure { error ->
