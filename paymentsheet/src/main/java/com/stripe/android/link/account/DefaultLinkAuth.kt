@@ -38,7 +38,6 @@ internal class DefaultLinkAuth @Inject constructor(
         customerId: String?,
         sessionId: String
     ): Result<ConsumerSessionLookup> {
-        // Validate required parameters
         val hasEmailAndSource = email != null && emailSource != null
         val hasAuthIntent = linkAuthIntentId != null
 
@@ -76,16 +75,20 @@ internal class DefaultLinkAuth @Inject constructor(
         consentAction: SignUpConsentAction
     ): Result<ConsumerSessionSignup> {
         return if (linkGate.useAttestationEndpoints) {
+            if (phoneNumber == null) {
+                return Result.failure(
+                    IllegalArgumentException("Phone number is required for mobile signup")
+                )
+            }
+            if (country == null) {
+                return Result.failure(
+                    IllegalArgumentException("Country is required for mobile signup")
+                )
+            }
             mobileSignUpWithAttestation(
                 email = email,
-                phoneNumber = requireNotNull(
-                    value = phoneNumber,
-                    lazyMessage = { "Phone number is required for mobile signup" }
-                ),
-                country = requireNotNull(
-                    value = country,
-                    lazyMessage = { "Country is required for mobile signup" }
-                ),
+                phoneNumber = phoneNumber,
+                country = country,
                 countryInferringMethod = countryInferringMethod,
                 name = name,
                 consentAction = consentAction
