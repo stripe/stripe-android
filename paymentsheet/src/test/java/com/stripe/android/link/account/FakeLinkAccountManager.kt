@@ -32,9 +32,28 @@ internal open class FakeLinkAccountManager(
     accountStatusOverride: Flow<AccountStatus>? = null
 ) : LinkAccountManager {
 
-    // Unified API results
     var lookupResult: Result<LinkAccount?> = Result.success(null)
     var signupResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
+    
+    data class SignUpCall(
+        val email: String,
+        val phoneNumber: String?,
+        val country: String?,
+        val countryInferringMethod: String,
+        val name: String?,
+        val consentAction: SignUpConsentAction
+    )
+    
+    data class LookupCall(
+        val email: String,
+        val emailSource: EmailSource,
+        val startSession: Boolean,
+        val customerId: String?
+    )
+    
+    val signUpCalls = mutableListOf<SignUpCall>()
+    val lookupCalls = mutableListOf<LookupCall>()
+
     override val linkAccountInfo: StateFlow<LinkAccountUpdate.Value> = linkAccountHolder.linkAccountInfo
 
     private val _accountStatus = MutableStateFlow<AccountStatus>(AccountStatus.SignedOut)
@@ -118,6 +137,7 @@ internal open class FakeLinkAccountManager(
         startSession: Boolean,
         customerId: String?
     ): Result<LinkAccount?> {
+        lookupCalls.add(LookupCall(email, emailSource, startSession, customerId))
         return lookupResult
     }
 
@@ -129,6 +149,7 @@ internal open class FakeLinkAccountManager(
         name: String?,
         consentAction: SignUpConsentAction
     ): Result<LinkAccount> {
+        signUpCalls.add(SignUpCall(email, phoneNumber, country, countryInferringMethod, name, consentAction))
         return signupResult
     }
 
