@@ -34,6 +34,7 @@ import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.wallet.AddPaymentMethodOption
 import com.stripe.android.link.ui.wallet.AddPaymentMethodOptions
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.addresselement.AutocompleteActivityLauncher
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -50,6 +51,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -73,6 +75,7 @@ internal class LinkActivityViewModel @Inject constructor(
     val linkLaunchMode: LinkLaunchMode,
     private val autocompleteLauncher: AutocompleteActivityLauncher,
     private val addPaymentMethodOptionsFactory: AddPaymentMethodOptions.Factory,
+    private val passiveCaptchaParams: PassiveCaptchaParams?
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
     val linkConfirmationHandler = linkConfirmationHandlerFactory.create(confirmationHandler)
@@ -214,7 +217,11 @@ internal class LinkActivityViewModel @Inject constructor(
         lifecycleOwner: LifecycleOwner,
     ) {
         autocompleteLauncher.register(activityResultCaller, lifecycleOwner)
-        confirmationHandler.register(activityResultCaller, lifecycleOwner)
+        confirmationHandler.register(
+            activityResultCaller = activityResultCaller,
+            lifecycleOwner = lifecycleOwner,
+            passiveCaptchaParamsFlow = flowOf(passiveCaptchaParams)
+        )
     }
 
     fun navigate(screen: LinkScreen, clearStack: Boolean, launchSingleTop: Boolean = false) {

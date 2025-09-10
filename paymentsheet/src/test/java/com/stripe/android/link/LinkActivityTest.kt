@@ -161,6 +161,7 @@ internal class LinkActivityTest {
                 linkConfirmationHandlerFactory = { FakeLinkConfirmationHandler() },
                 autocompleteLauncher = TestAutocompleteLauncher.noOp(),
                 addPaymentMethodOptionsFactory = mock(),
+                passiveCaptchaParams = null
             )
         }
     }

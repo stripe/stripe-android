@@ -34,7 +34,6 @@ import com.stripe.android.ui.core.elements.CardDetailsSectionController
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
-import com.stripe.android.utils.FakePassiveChallengeWarmer
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.CoroutineScope
@@ -205,10 +204,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                         return FakeCvcRecollectionInteractor()
                     }
                 },
-                isLiveModeProvider = { false },
-                passiveChallengeWarmer = FakePassiveChallengeWarmer(),
-                publishableKeyProvider = { "pk_test_1234" },
-                productUsage = setOf("PaymentSheet")
+                isLiveModeProvider = { false }
             )
         }
     }

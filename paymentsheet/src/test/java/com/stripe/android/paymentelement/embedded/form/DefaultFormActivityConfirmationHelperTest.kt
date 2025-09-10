@@ -4,10 +4,12 @@ package com.stripe.android.paymentelement.embedded.form
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.Turbine
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -103,7 +105,10 @@ class DefaultFormActivityConfirmationHelperTest {
             .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
             .configurationModifier()
             .build()
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
+        val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            passiveCaptchaParams = passiveCaptchaParams
+        )
         val stateHelper = FakeFormActivityStateHelper()
         val onClickDelegate = OnClickDelegateOverrideImpl()
         val eventReporter = FakeEventReporter()
@@ -124,7 +129,12 @@ class DefaultFormActivityConfirmationHelperTest {
             activityResultCaller = mock(),
             coroutineScope = this,
         )
-        assertThat(confirmationHandler.registerTurbine.awaitItem()).isNotNull()
+        val registerCall = confirmationHandler.registerTurbine.awaitItem()
+        assertThat(registerCall).isNotNull()
+        registerCall.passiveCaptchaParamsFlow.test {
+            assertThat(awaitItem()).isEqualTo(passiveCaptchaParams)
+            awaitComplete()
+        }
         assertThat(stateHelper.updateTurbine.awaitItem()).isEqualTo(ConfirmationHandler.State.Idle)
         Scenario(
             confirmationHelper = confirmationHelper,

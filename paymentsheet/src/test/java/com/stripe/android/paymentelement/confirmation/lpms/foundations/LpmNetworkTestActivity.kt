@@ -36,6 +36,7 @@ import dagger.BindsInstance
 import dagger.Component
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
@@ -61,7 +62,11 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        confirmationHandler.register(activityResultCaller = this, lifecycleOwner = this)
+        confirmationHandler.register(
+            activityResultCaller = this,
+            lifecycleOwner = this,
+            passiveCaptchaParamsFlow = flowOf()
+        )
     }
 
     class TestViewModel @Inject constructor(

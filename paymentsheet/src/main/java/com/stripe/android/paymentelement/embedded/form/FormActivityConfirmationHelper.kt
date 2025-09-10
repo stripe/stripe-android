@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -37,7 +38,11 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
 ) : FormActivityConfirmationHelper {
 
     init {
-        confirmationHandler.register(activityResultCaller, lifecycleOwner)
+        confirmationHandler.register(
+            activityResultCaller = activityResultCaller,
+            lifecycleOwner = lifecycleOwner,
+            passiveCaptchaParamsFlow = flowOf(paymentMethodMetadata.passiveCaptchaParams)
+        )
         lifecycleOwner.lifecycleScope.launch {
             confirmationHandler.state.collectLatest {
                 stateHelper.updateConfirmationState(it)

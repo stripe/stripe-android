@@ -11,14 +11,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
-import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.IS_LIVE_MODE
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
@@ -35,7 +33,6 @@ import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfi
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
@@ -73,7 +70,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -96,10 +93,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val errorReporter: ErrorReporter,
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
-    private val passiveChallengeWarmer: PassiveChallengeWarmer,
     @Named(IS_LIVE_MODE) val isLiveModeProvider: () -> Boolean,
-    @Named(PUBLISHABLE_KEY) val publishableKeyProvider: () -> String,
-    @Named(PRODUCT_USAGE) val productUsage: Set<String>,
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -479,23 +473,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         activityResultCaller: ActivityResultCaller,
         lifecycleOwner: LifecycleOwner,
     ) {
-        confirmationHandler.register(activityResultCaller, lifecycleOwner)
-        passiveChallengeWarmer.register(activityResultCaller, lifecycleOwner)
-        warmUpPassiveChallenge()
-    }
-
-    private fun warmUpPassiveChallenge() {
-        viewModelScope.launch {
-            paymentMethodMetadata
-                .mapNotNull { it?.passiveCaptchaParams }
-                .collectLatest { passiveCaptchaParams ->
-                    passiveChallengeWarmer.start(
-                        passiveCaptchaParams = passiveCaptchaParams,
-                        publishableKey = publishableKeyProvider(),
-                        productUsage = productUsage
-                    )
-                }
-        }
+        confirmationHandler.register(
+            activityResultCaller = activityResultCaller,
+            lifecycleOwner = lifecycleOwner,
+            passiveCaptchaParamsFlow = paymentMethodMetadata.map { it?.passiveCaptchaParams }
+        )
     }
 
     @Suppress("ComplexCondition")

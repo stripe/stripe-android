@@ -35,6 +35,7 @@ import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentM
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -4035,6 +4036,32 @@ class CustomerSheetViewModelTest {
     private suspend inline fun <R> ReceiveTurbine<*>.awaitViewState(): R {
         return awaitItem() as R
     }
+
+    @Test
+    fun `When registerFromActivity is called, should pass passiveCaptchaParamsFlow to ConfirmationHandler`() =
+        runTest(testDispatcher) {
+            val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            val fakeConfirmationHandler = FakeConfirmationHandler()
+            val confirmationHandlerFactory = ConfirmationHandler.Factory { fakeConfirmationHandler }
+
+            createViewModel(
+                workContext = testDispatcher,
+                confirmationHandlerFactory = confirmationHandlerFactory,
+                customerSheetLoader = FakeCustomerSheetLoader(
+                    customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
+                    isGooglePayAvailable = false,
+                    passiveCaptchaParams = passiveCaptchaParams
+                ),
+            )
+
+            val registerCall = fakeConfirmationHandler.registerTurbine.awaitItem()
+
+            assertThat(registerCall.passiveCaptchaParamsFlow).isNotNull()
+
+            registerCall.passiveCaptchaParamsFlow.test {
+                assertThat(awaitItem()).isEqualTo(passiveCaptchaParams)
+            }
+        }
 
     private companion object {
         val TEST_FORM_VALUES = FormFieldValues(

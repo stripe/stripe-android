@@ -6,6 +6,7 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -14,6 +15,7 @@ import javax.inject.Singleton
 @Singleton
 internal class EmbeddedConfirmationStarter @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
+    private val confirmationStateHolder: EmbeddedConfirmationStateHolder,
     @ViewModelScope private val coroutineScope: CoroutineScope,
 ) {
     init {
@@ -40,6 +42,9 @@ internal class EmbeddedConfirmationStarter @Inject constructor(
         confirmationHandler.register(
             activityResultCaller = activityResultCaller,
             lifecycleOwner = lifecycleOwner,
+            passiveCaptchaParamsFlow = confirmationStateHolder.stateFlow.map {
+                it?.paymentMethodMetadata?.passiveCaptchaParams
+            },
         )
     }
 
