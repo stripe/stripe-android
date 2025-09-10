@@ -14,6 +14,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.stripe.android.core.StripeError
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
@@ -137,7 +139,9 @@ internal class SignUpScreenTest {
     @Test
     fun `secondary fields hidden, error is displayed on account error after signup`() =
         runTest(dispatcher) {
-            val error = Throwable("oops")
+            val stripeError =
+                StripeError(code = "link_consumer_details_not_available", message = "Consumer details not available")
+            val error = APIException(stripeError = stripeError)
             val linkAccountManager = FakeLinkAccountManager()
             linkAccountManager.lookupResult = Result.success(null)
             linkAccountManager.signupResult = Result.failure(error)
@@ -176,7 +180,9 @@ internal class SignUpScreenTest {
     @Test
     fun `secondary fields hidden, error is displayed on account error after lookup`() =
         runTest(dispatcher) {
-            val error = Throwable("oops")
+            val stripeError =
+                StripeError(code = "link_consumer_details_not_available", message = "Consumer details not available")
+            val error = APIException(stripeError = stripeError)
             val linkAccountManager = FakeLinkAccountManager()
             linkAccountManager.lookupResult = Result.failure(error)
 

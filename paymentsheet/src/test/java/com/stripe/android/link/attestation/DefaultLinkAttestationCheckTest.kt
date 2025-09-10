@@ -1,6 +1,8 @@
 package com.stripe.android.link.attestation
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.StripeError
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.link.FakeIntegrityRequestManager
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkConfiguration
@@ -12,6 +14,7 @@ import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.attestation.AttestationError
 import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -77,12 +80,12 @@ internal class DefaultLinkAttestationCheckTest {
     }
 
     @Test
-    fun `attestation check should return AttestationFailed when lookup returns AttestationFailed`() = runTest {
-        val error = Throwable("oops")
+    fun `attestation check should return AttestationFailed when lookup returns AttestationError`() = runTest {
+        val error = AttestationError(AttestationError.ErrorType.NETWORK_ERROR, "Device not recognized")
         val linkGate = FakeLinkGate()
         val linkAccountManager = FakeLinkAccountManager()
 
-        linkAccountManager.lookupResult = Result.failure(Exception(error))
+        linkAccountManager.lookupResult = Result.failure(error)
 
         val attestationCheck = attestationCheck(
             linkGate = linkGate,
@@ -94,16 +97,49 @@ internal class DefaultLinkAttestationCheckTest {
     }
 
     @Test
-    fun `attestation check should return AccountError when lookup returns AccountError`() = runTest {
-        val error = Throwable("oops")
+    fun `attestation check should return AttestationFailed when lookup returns backend attestation error`() = runTest {
+        val stripeError = StripeError(code = "link_failed_to_attest_request", message = "Failed to attest request")
+        val error = APIException(stripeError = stripeError)
         val linkGate = FakeLinkGate()
         val linkAccountManager = FakeLinkAccountManager()
-        linkAccountManager.lookupResult = Result.failure(Exception(error))
+
+        linkAccountManager.lookupResult = Result.failure(error)
+
+        val attestationCheck = attestationCheck(
+            linkGate = linkGate,
+            linkAccountManager = linkAccountManager,
+        )
+
+        assertThat(attestationCheck.invoke())
+            .isEqualTo(LinkAttestationCheck.Result.AttestationFailed(error))
+    }
+
+    @Test
+    fun `attestation check should return AccountError when lookup returns account error`() = runTest {
+        val stripeError =
+            StripeError(code = "link_consumer_details_not_available", message = "Consumer details not available")
+        val error = APIException(stripeError = stripeError)
+        val linkGate = FakeLinkGate()
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.lookupResult = Result.failure(error)
 
         val attestationCheck = attestationCheck(linkGate = linkGate, linkAccountManager = linkAccountManager)
 
         assertThat(attestationCheck.invoke())
             .isEqualTo(LinkAttestationCheck.Result.AccountError(error))
+    }
+
+    @Test
+    fun `attestation check should return Error when lookup returns generic error`() = runTest {
+        val error = RuntimeException("Generic network error")
+        val linkGate = FakeLinkGate()
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.lookupResult = Result.failure(error)
+
+        val attestationCheck = attestationCheck(linkGate = linkGate, linkAccountManager = linkAccountManager)
+
+        assertThat(attestationCheck.invoke())
+            .isEqualTo(LinkAttestationCheck.Result.Error(error))
     }
 
     @Test
@@ -128,19 +164,6 @@ internal class DefaultLinkAttestationCheckTest {
 
         assertThat(attestationCheck.invoke())
             .isEqualTo(LinkAttestationCheck.Result.Successful)
-    }
-
-    @Test
-    fun `attestation check should return Error when lookup returns error`() = runTest {
-        val error = Throwable("oops")
-        val linkGate = FakeLinkGate()
-        val linkAccountManager = FakeLinkAccountManager()
-        linkAccountManager.lookupResult = Result.failure(Exception(error))
-
-        val attestationCheck = attestationCheck(linkGate = linkGate, linkAccountManager = linkAccountManager)
-
-        assertThat(attestationCheck.invoke())
-            .isEqualTo(LinkAttestationCheck.Result.Error(error))
     }
 
     private fun attestationCheck(

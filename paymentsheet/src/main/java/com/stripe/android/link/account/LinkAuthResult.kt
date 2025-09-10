@@ -46,7 +46,8 @@ private val Throwable.isIntegrityManagerError: Boolean
 
 // Stripe backend could not verify the integrity of the request
 private val Throwable.isBackendAttestationError: Boolean
-    get() = this is com.stripe.android.core.exception.APIException && stripeError?.code == "link_failed_to_attest_request"
+    get() = this is com.stripe.android.core.exception.APIException &&
+        stripeError?.code == "link_failed_to_attest_request"
 
 private val Throwable.isAccountError: Boolean
     get() = when (this) {
