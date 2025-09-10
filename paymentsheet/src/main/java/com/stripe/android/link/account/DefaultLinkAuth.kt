@@ -34,19 +34,18 @@ internal class DefaultLinkAuth @Inject constructor(
         customerId: String?,
         sessionId: String
     ): Result<ConsumerSessionLookup> {
-        return if (linkGate.useAttestationEndpoints) {
-            // Validate required parameters
-            val hasEmailAndSource = email != null && emailSource != null
-            val hasAuthIntent = linkAuthIntentId != null
+        // Validate required parameters
+        val hasEmailAndSource = email != null && emailSource != null
+        val hasAuthIntent = linkAuthIntentId != null
 
-            if (!hasEmailAndSource && !hasAuthIntent) {
-                return Result.failure(
-                    IllegalArgumentException(
-                        "Either email+emailSource or linkAuthIntentId must be provided"
-                    )
+        if (!hasEmailAndSource && !hasAuthIntent) {
+            return Result.failure(
+                IllegalArgumentException(
+                    "Either email+emailSource or linkAuthIntentId must be provided"
                 )
-            }
-
+            )
+        }
+        return if (linkGate.useAttestationEndpoints) {
             mobileLookupWithAttestation(
                 email = email,
                 emailSource = emailSource,

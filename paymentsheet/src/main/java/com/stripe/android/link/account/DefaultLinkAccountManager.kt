@@ -510,7 +510,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                             email?.let {
                                 lookupByEmail(
                                     email = it,
-                                    startSession = false,
+                                    startSession = true,
                                     emailSource = EmailSource.CUSTOMER_OBJECT,
                                     customerId = config.customerIdForEceDefaultValues
                                 )
