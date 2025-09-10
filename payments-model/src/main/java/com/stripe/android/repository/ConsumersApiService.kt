@@ -72,7 +72,7 @@ interface ConsumersApiService {
         consumerSessionClientSecret: String,
         requestSurface: String,
         requestOptions: ApiRequest.Options
-    ): ConsumerSessionLookup
+    ): ConsumerSession
 
     suspend fun startConsumerVerification(
         consumerSessionClientSecret: String,
@@ -274,7 +274,7 @@ class ConsumersApiServiceImpl(
         consumerSessionClientSecret: String,
         requestSurface: String,
         requestOptions: ApiRequest.Options
-    ): ConsumerSessionLookup {
+    ): ConsumerSession {
         return executeRequestWithModelJsonParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
             stripeNetworkClient = stripeNetworkClient,
@@ -288,7 +288,7 @@ class ConsumersApiServiceImpl(
                     ),
                 ),
             ),
-            responseJsonParser = ConsumerSessionLookupJsonParser()
+            responseJsonParser = ConsumerSessionJsonParser()
         )
     }
 
@@ -532,7 +532,8 @@ class ConsumersApiServiceImpl(
     }
 
     internal companion object {
-        private val supportedVerificationTypes = listOf(VerificationType.SMS.value)
+        private val supportedVerificationTypes: List<VerificationType> =
+            listOf(VerificationType.SMS)
 
         /**
          * @return `https://api.stripe.com/v1/consumers/accounts/sign_up`

@@ -69,7 +69,7 @@ internal interface LinkRepository {
     suspend fun refreshConsumer(
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?
-    ): Result<ConsumerSessionLookup>
+    ): Result<ConsumerSession>
 
     /**
      * Sign up for a new Link account.

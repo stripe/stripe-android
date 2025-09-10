@@ -281,20 +281,18 @@ internal class DefaultLinkAccountManager @Inject constructor(
 
     private suspend fun setAccount(
         consumerSession: ConsumerSession,
-        publishableKey: String?,
-        displayablePaymentDetails: DisplayablePaymentDetails?,
-        linkAuthIntentInfo: LinkAuthIntentInfo?,
+        publishableKey: String? = null,
+        displayablePaymentDetails: DisplayablePaymentDetails? = null,
+        linkAuthIntentInfo: LinkAuthIntentInfo? = null,
     ): LinkAccount {
         val currentAccount = linkAccountHolder.linkAccountInfo.value.account
+        val isSameUser = currentAccount?.email == consumerSession.emailAddress
         val newConsumerPublishableKey = publishableKey
-            ?: currentAccount?.consumerPublishableKey
-                ?.takeIf { currentAccount.email == consumerSession.emailAddress }
+            ?: currentAccount?.consumerPublishableKey?.takeIf { isSameUser }
         val newPaymentDetails = displayablePaymentDetails
-            ?: currentAccount?.displayablePaymentDetails
-                ?.takeIf { currentAccount.email == consumerSession.emailAddress }
+            ?: currentAccount?.displayablePaymentDetails?.takeIf { isSameUser }
         val newLaiInfo = linkAuthIntentInfo
-            ?: currentAccount?.linkAuthIntentInfo
-                ?.takeIf { currentAccount.email == consumerSession.emailAddress }
+            ?: currentAccount?.linkAuthIntentInfo?.takeIf { isSameUser }
 
         val newAccount = LinkAccount(
             consumerSession = consumerSession,
@@ -350,12 +348,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             .onFailure {
                 linkEventsReporter.on2FAStartFailure()
             }.map { consumerSession ->
-                setAccount(
-                    consumerSession = consumerSession,
-                    publishableKey = null,
-                    displayablePaymentDetails = null,
-                    linkAuthIntentInfo = linkAccount.linkAuthIntentInfo, // Keep LAI info.
-                )
+                setAccount(consumerSession = consumerSession)
             }
     }
 
@@ -376,12 +369,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             }.onFailure {
                 linkEventsReporter.on2FAFailure()
             }.map { consumerSession ->
-                setAccount(
-                    consumerSession = consumerSession,
-                    publishableKey = null,
-                    displayablePaymentDetails = null,
-                    linkAuthIntentInfo = linkAccount.linkAuthIntentInfo, // Keep LAI info.
-                )
+                setAccount(consumerSession = consumerSession)
             }
     }
 
@@ -457,12 +445,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             phoneNumber = phoneNumber,
             consumerPublishableKey = linkAccount.consumerPublishableKey
         ).map { consumerSession ->
-            setAccount(
-                consumerSession = consumerSession,
-                publishableKey = null,
-                displayablePaymentDetails = null,
-                linkAuthIntentInfo = linkAccount.linkAuthIntentInfo,
-            )
+            setAccount(consumerSession = consumerSession)
         }
     }
 
@@ -485,8 +468,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
             setAccount(
                 consumerSession = consumerSessionSignUp.consumerSession,
                 publishableKey = consumerSessionSignUp.publishableKey,
-                displayablePaymentDetails = null,
-                linkAuthIntentInfo = null,
             )
         }
     }
@@ -588,13 +569,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
         )
             .onFailure { error ->
                 linkEventsReporter.onAccountLookupFailure(error)
-            }.map { consumerSessionLookup ->
-                setLinkAccountFromLookupResult(
-                    lookup = consumerSessionLookup,
-                    startSession = true,
-                    // Use previous LAI ID if it exists.
-                    linkAuthIntentId = linkAccount.linkAuthIntentInfo?.linkAuthIntentId,
-                )
+            }.map { consumerSession ->
+                setAccount(consumerSession = consumerSession)
             }
     }
 }
