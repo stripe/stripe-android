@@ -177,12 +177,6 @@ internal class DefaultLinkAuth @Inject constructor(
         )
     }
 
-    private val Throwable.isIntegrityManagerError: Boolean
-        get() = this is AttestationError
-
-    private val Throwable.isBackendAttestationError: Boolean
-        get() = this is APIException && stripeError?.code == "link_failed_to_attest_request"
-
     private val SignUpConsentAction.consumerAction: ConsumerSignUpConsentAction
         get() = when (this) {
             SignUpConsentAction.Checkbox ->

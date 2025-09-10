@@ -41,11 +41,11 @@ private val Throwable.isAttestationError: Boolean
     get() = isIntegrityManagerError || isBackendAttestationError
 
 // Interaction with Integrity API to generate tokens resulted in a failure
-private val Throwable.isIntegrityManagerError: Boolean
+internal val Throwable.isIntegrityManagerError: Boolean
     get() = this is com.stripe.attestation.AttestationError
 
 // Stripe backend could not verify the integrity of the request
-private val Throwable.isBackendAttestationError: Boolean
+internal val Throwable.isBackendAttestationError: Boolean
     get() = this is com.stripe.android.core.exception.APIException &&
         stripeError?.code == "link_failed_to_attest_request"
 
