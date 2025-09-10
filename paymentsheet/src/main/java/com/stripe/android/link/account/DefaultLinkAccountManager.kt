@@ -544,7 +544,9 @@ internal class DefaultLinkAccountManager @Inject constructor(
         return linkAuth.lookup(
             email = email,
             emailSource = emailSource,
-            customerId = customerId
+            sessionId = config.elementsSessionId,
+            customerId = customerId,
+            linkAuthIntentId = null
         ).onFailure { error ->
             linkEventsReporter.onAccountLookupFailure(error)
         }.map { consumerSessionLookup ->
@@ -562,7 +564,10 @@ internal class DefaultLinkAccountManager @Inject constructor(
     ): Result<LinkAccount?> {
         return linkAuth.lookup(
             linkAuthIntentId = linkAuthIntentId,
-            customerId = customerId
+            sessionId = config.elementsSessionId,
+            customerId = customerId,
+            email = null,
+            emailSource = null,
         ).onFailure { error ->
             linkEventsReporter.onAccountLookupFailure(error)
         }.map { consumerSessionLookup ->

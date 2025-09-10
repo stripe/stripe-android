@@ -31,22 +31,22 @@ internal class DefaultLinkAuth @Inject constructor(
         email: String?,
         emailSource: EmailSource?,
         linkAuthIntentId: String?,
-        customerId: String?
+        customerId: String?,
+        sessionId: String
     ): Result<ConsumerSessionLookup> {
         return if (linkGate.useAttestationEndpoints) {
-            // Validate that we have either email+emailSource or linkAuthIntentId
-            if (email != null && emailSource != null) {
-                // Has email and emailSource - proceed
-            } else if (linkAuthIntentId != null) {
-                // Has linkAuthIntentId - proceed  
-            } else {
-                return Result.failure(IllegalArgumentException("Either email or linkAuthIntentId must be provided"))
+            // Validate required parameters
+            val hasEmailAndSource = email != null && emailSource != null
+            val hasAuthIntent = linkAuthIntentId != null
+            
+            if (!hasEmailAndSource && !hasAuthIntent) {
+                return Result.failure(IllegalArgumentException("Either email+emailSource or linkAuthIntentId must be provided"))
             }
             
-            // Single call passing all parameters
             mobileLookupWithAttestation(
                 email = email,
                 emailSource = emailSource,
+                sessionId = sessionId,
                 linkAuthIntentId = linkAuthIntentId,
                 customerId = customerId
             )
@@ -54,7 +54,7 @@ internal class DefaultLinkAuth @Inject constructor(
             linkRepository.lookupConsumer(
                 email = email,
                 linkAuthIntentId = linkAuthIntentId,
-                sessionId = "",
+                sessionId = sessionId,
                 customerId = customerId
             )
         }
@@ -99,7 +99,8 @@ internal class DefaultLinkAuth @Inject constructor(
         email: String?,
         emailSource: EmailSource?,
         linkAuthIntentId: String?,
-        customerId: String?
+        customerId: String?,
+        sessionId: String
     ): Result<ConsumerSessionLookup> {
         return runCatching {
             val verificationToken = integrityRequestManager.requestToken().getOrThrow()
@@ -108,7 +109,7 @@ internal class DefaultLinkAuth @Inject constructor(
                 appId = applicationId,
                 email = email,
                 linkAuthIntentId = linkAuthIntentId,
-                sessionId = "",
+                sessionId = sessionId,
                 emailSource = emailSource,
                 customerId = customerId
             ).getOrThrow()

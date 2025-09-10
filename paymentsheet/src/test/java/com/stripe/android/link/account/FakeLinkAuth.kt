@@ -18,7 +18,8 @@ internal class FakeLinkAuth : LinkAuth {
         val email: String?,
         val emailSource: EmailSource?,
         val linkAuthIntentId: String?,
-        val customerId: String?
+        val customerId: String?,
+        val sessionId: String
     )
 
     data class SignupCall(
@@ -34,9 +35,10 @@ internal class FakeLinkAuth : LinkAuth {
         email: String?,
         emailSource: EmailSource?,
         linkAuthIntentId: String?,
-        customerId: String?
+        customerId: String?,
+        sessionId: String
     ): Result<ConsumerSessionLookup> {
-        lookupCalls.add(LookupCall(email, emailSource, linkAuthIntentId, customerId))
+        lookupCalls.add(LookupCall(email, emailSource, linkAuthIntentId, customerId, sessionId))
         return lookupResult
     }
 

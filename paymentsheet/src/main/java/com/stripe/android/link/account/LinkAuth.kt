@@ -10,10 +10,11 @@ import com.stripe.android.model.EmailSource
  */
 internal interface LinkAuth {
     suspend fun lookup(
-        email: String? = null,
-        emailSource: EmailSource? = null,
-        linkAuthIntentId: String? = null,
-        customerId: String? = null
+        email: String?,
+        emailSource: EmailSource?,
+        linkAuthIntentId: String?,
+        customerId: String?,
+        sessionId: String
     ): Result<ConsumerSessionLookup>
 
     suspend fun signup(
