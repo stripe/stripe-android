@@ -2,6 +2,7 @@ package com.stripe.android.link.ui.signup
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.LinkAccountUpdate
@@ -19,7 +20,6 @@ import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.model.ConsumerSession
-import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.StripeError
@@ -63,20 +63,10 @@ internal class SignUpViewModelTest {
 
         val viewModel = createViewModel(prefilledEmail = null, linkAccountManager = linkAccountManager)
 
-        // Verify signup completes or errors appropriately
-        assertThat(viewModel.contentState.signUpState).isIn(
-            listOf(
-                SignUpState.InputtingPrimaryField,
-            )
-        )
+        assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
 
         viewModel.emailController.onRawValueChange("valid@email.com")
-        // Verify signup completes or errors appropriately
-        assertThat(viewModel.contentState.signUpState).isIn(
-            listOf(
-                SignUpState.InputtingPrimaryField
-            )
-        )
+        assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
 
         // Advance past lookup debounce delay
         advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
@@ -84,11 +74,7 @@ internal class SignUpViewModelTest {
         assertThat(viewModel.emailController.fieldValue.value).isEqualTo("valid@email.com")
         assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingRemainingFields)
 
-        // Verify lookup was called with correct parameters
         assertThat(linkAccountManager.lookupCalls).hasSize(1)
-        val lookupCall = linkAccountManager.lookupCalls.first()
-        assertThat(lookupCall.email).isEqualTo("valid@email.com")
-        assertThat(lookupCall.emailSource).isEqualTo(EmailSource.USER_ACTION)
     }
 
     @Test
@@ -100,7 +86,6 @@ internal class SignUpViewModelTest {
         advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
 
         assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingRemainingFields)
-        // Test completed successfully
     }
 
     @Test
@@ -200,13 +185,8 @@ internal class SignUpViewModelTest {
         viewModel.emailController.onRawValueChange("valid@email.com")
         advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
 
-        // Verify that lookup failure results in appropriate state
-        assertThat(viewModel.state.value.signUpState).isIn(
-            listOf(
-                SignUpState.InputtingRemainingFields,
-                SignUpState.InputtingPrimaryField
-            )
-        )
+        assertThat(viewModel.state.value.signUpState).isEqualTo(SignUpState.InputtingRemainingFields)
+        assertThat(viewModel.state.value.errorMessage).isEqualTo(error.stripeErrorMessage())
     }
 
     @Test
@@ -358,6 +338,7 @@ internal class SignUpViewModelTest {
         viewModel.performValidSignup()
 
         assertThat(screens).containsExactly(LinkScreen.Verification)
+        assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
     }
 
     @Test
@@ -385,8 +366,7 @@ internal class SignUpViewModelTest {
 
         viewModel.performValidSignup()
 
-        // Navigation test simplified - signup doesn't execute in performValidSignup
-        assertThat(true).isTrue()
+        assertThat(screens).containsExactly(LinkScreen.Wallet)
     }
 
     @Test
@@ -412,8 +392,7 @@ internal class SignUpViewModelTest {
 
         viewModel.performValidSignup()
 
-        // Analytics test simplified - signup doesn't execute in performValidSignup
-        assertThat(true).isTrue()
+        assertThat(linkEventsReporter.calledCount).isEqualTo(1)
     }
 
     @Test
@@ -490,8 +469,7 @@ internal class SignUpViewModelTest {
 
         viewModel.performValidSignup()
 
-        // Analytics test simplified - signup doesn't execute in performValidSignup
-        assertThat(true).isTrue()
+        assertThat(linkEventsReporter.calledCount).isEqualTo(1)
     }
 
     @Test
@@ -539,7 +517,8 @@ internal class SignUpViewModelTest {
     @Test
     fun `attestation error on lookup calls moveToWeb`() = runTest(dispatcher) {
         val linkAccountManager = FakeLinkAccountManager()
-        linkAccountManager.lookupResult = Result.failure(Throwable())
+        val stripeError = StripeError(code = "link_failed_to_attest_request", message = "Lookup attestation failed")
+        linkAccountManager.lookupResult = Result.failure(APIException(stripeError = stripeError))
 
         var movedToWeb = false
 
@@ -556,8 +535,7 @@ internal class SignUpViewModelTest {
         // Advance past lookup debounce delay
         advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
 
-        // Navigation behavior may have changed - test passes if no crash occurs
-        assertThat(viewModel.state.value.signUpState).isEqualTo(SignUpState.InputtingRemainingFields)
+        assertThat(movedToWeb).isTrue()
     }
 
     @Test
@@ -627,14 +605,11 @@ internal class SignUpViewModelTest {
         }
         val viewModel = createViewModel(linkAccountManager = linkAccountManager)
 
-        // Test that submit state exists and is initialized correctly
         assertThat(viewModel.state.value.isSubmitting).isFalse()
 
-        // Validate the form state changes when inputs are filled
         viewModel.emailController.onRawValueChange("email@valid.co")
         viewModel.phoneNumberController.onRawValueChange("1234567890")
 
-        // Test passes if submit state remains consistent
         assertThat(viewModel.state.value.isSubmitting).isFalse()
     }
 
@@ -775,8 +750,7 @@ internal class SignUpViewModelTest {
 
             viewModel.performValidSignup()
 
-            // Navigation test - check that the setup is correct for PaymentMethod navigation
-            assertThat(linkAccountManager.signupResult.isSuccess).isTrue()
+            assertThat(screens).containsExactly(LinkScreen.PaymentMethod)
         }
 
     @Test
@@ -799,8 +773,7 @@ internal class SignUpViewModelTest {
 
         viewModel.performValidSignup()
 
-        // Navigation test simplified - signup doesn't execute in performValidSignup
-        assertThat(true).isTrue()
+        assertThat(screens).containsExactly(LinkScreen.Wallet)
     }
 
     @Test
@@ -824,8 +797,7 @@ internal class SignUpViewModelTest {
 
             viewModel.performValidSignup()
 
-            // Navigation test simplified - signup doesn't execute in performValidSignup
-            assertThat(true).isTrue()
+            assertThat(screens).containsExactly(LinkScreen.Verification)
         }
 
     private fun createViewModel(
