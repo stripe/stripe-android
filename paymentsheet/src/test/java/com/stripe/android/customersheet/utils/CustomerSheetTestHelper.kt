@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
@@ -47,6 +48,7 @@ import com.stripe.android.utils.CompletableSingle
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import com.stripe.android.utils.FakePassiveChallengeWarmer
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import kotlinx.coroutines.CoroutineScope
 import org.mockito.kotlin.mock
@@ -151,6 +153,9 @@ internal object CustomerSheetTestHelper {
                 linkLauncher = RecordingLinkPaymentLauncher.noOp(),
                 linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
                 cvcRecollectionLauncherFactory = RecordingCvcRecollectionLauncherFactory.noOp(),
+                passiveChallengeWarmer = FakePassiveChallengeWarmer(),
+                publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+                productUsage = setOf("CustomerSheet"),
             ),
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,

@@ -5,10 +5,15 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.lifecycleScope
+import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -17,10 +22,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
+import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.seconds
 
@@ -30,6 +38,9 @@ internal class DefaultConfirmationHandler(
     private val savedStateHandle: SavedStateHandle,
     private val errorReporter: ErrorReporter,
     private val ioContext: CoroutineContext,
+    private val passiveChallengeWarmer: PassiveChallengeWarmer,
+    private val publishableKeyProvider: () -> String,
+    private val productUsage: Set<String>
 ) : ConfirmationHandler {
     private val isInitiallyAwaitingForResultData = retrieveIsAwaitingForResultData()
 
@@ -64,10 +75,16 @@ internal class DefaultConfirmationHandler(
         }
     }
 
-    override fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
+    override fun register(
+        activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
+        passiveCaptchaParamsFlow: Flow<PassiveCaptchaParams?>
+    ) {
         mediators.forEach { mediator ->
             mediator.register(activityResultCaller, ::onResult)
         }
+        passiveChallengeWarmer.register(activityResultCaller, lifecycleOwner)
+        startPassiveChallengeWarmer(lifecycleOwner, passiveCaptchaParamsFlow)
 
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
@@ -104,6 +121,24 @@ internal class DefaultConfirmationHandler(
 
                 complete.result
             }
+        }
+    }
+
+    private fun startPassiveChallengeWarmer(
+        lifecycleOwner: LifecycleOwner,
+        passiveCaptchaParamsFlow: Flow<PassiveCaptchaParams?>
+    ) {
+        lifecycleOwner.lifecycleScope.launch {
+            passiveCaptchaParamsFlow
+                .mapNotNull { it }
+                .take(1)
+                .collect { passiveCaptchaParams ->
+                    passiveChallengeWarmer.start(
+                        passiveCaptchaParams = passiveCaptchaParams,
+                        publishableKey = publishableKeyProvider(),
+                        productUsage = productUsage,
+                    )
+                }
         }
     }
 
@@ -283,6 +318,9 @@ internal class DefaultConfirmationHandler(
         private val savedStateHandle: SavedStateHandle,
         private val errorReporter: ErrorReporter,
         @IOContext private val ioContext: CoroutineContext,
+        private val passiveChallengeWarmer: PassiveChallengeWarmer,
+        @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
+        @Named(PRODUCT_USAGE) private val productUsage: Set<String>
     ) : ConfirmationHandler.Factory {
         override fun create(scope: CoroutineScope): ConfirmationHandler {
             return DefaultConfirmationHandler(
@@ -291,6 +329,9 @@ internal class DefaultConfirmationHandler(
                 errorReporter = errorReporter,
                 savedStateHandle = savedStateHandle,
                 ioContext = ioContext,
+                passiveChallengeWarmer = passiveChallengeWarmer,
+                publishableKeyProvider = publishableKeyProvider,
+                productUsage = productUsage
             )
         }
     }

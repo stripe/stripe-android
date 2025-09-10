@@ -4,12 +4,14 @@ import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
 
@@ -34,8 +36,13 @@ internal interface ConfirmationHandler {
      *
      * @param activityResultCaller a caller class that can start confirmation activity flows
      * @param lifecycleOwner The owner of an observable lifecycle to attach the handlers to
+     * @param passiveCaptchaParamsFlow A flow that emits passive captcha parameters when available
      */
-    fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner)
+    fun register(
+        activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
+        passiveCaptchaParamsFlow: Flow<PassiveCaptchaParams?>
+    )
 
     /**
      * Starts the confirmation process. Results can be received through [state] or through [awaitResult].

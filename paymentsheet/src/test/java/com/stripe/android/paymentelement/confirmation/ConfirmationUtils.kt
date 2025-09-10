@@ -25,6 +25,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateCon
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.utils.FakePassiveChallengeWarmer
 import com.stripe.android.utils.RecordingLinkStore
 import kotlinx.coroutines.Dispatchers
 
@@ -41,6 +42,9 @@ internal fun createTestConfirmationHandlerFactory(
     paymentConfiguration: PaymentConfiguration,
     statusBarColor: Int?,
     errorReporter: ErrorReporter,
+    passiveChallengeWarmer: FakePassiveChallengeWarmer,
+    publishableKeyProvider: () -> String,
+    productUsage: Set<String>
 ): ConfirmationHandler.Factory {
     return DefaultConfirmationHandler.Factory(
         registry = ConfirmationRegistry(
@@ -91,6 +95,9 @@ internal fun createTestConfirmationHandlerFactory(
         savedStateHandle = savedStateHandle,
         errorReporter = FakeErrorReporter(),
         ioContext = Dispatchers.Unconfined,
+        passiveChallengeWarmer = passiveChallengeWarmer,
+        publishableKeyProvider = publishableKeyProvider,
+        productUsage = productUsage
     )
 }
 

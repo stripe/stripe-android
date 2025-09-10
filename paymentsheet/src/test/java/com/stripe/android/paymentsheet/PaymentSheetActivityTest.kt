@@ -1266,6 +1266,9 @@ internal class PaymentSheetActivityTest {
                     errorReporter = FakeErrorReporter(),
                     linkConfigurationCoordinator = coordinator,
                     cvcRecollectionLauncherFactory = RecordingCvcRecollectionLauncherFactory.noOp(),
+                    publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+                    passiveChallengeWarmer = FakePassiveChallengeWarmer(),
+                    productUsage = setOf("PaymentSheet")
                 ),
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 errorReporter = FakeErrorReporter(),
@@ -1279,10 +1282,7 @@ internal class PaymentSheetActivityTest {
                         return FakeCvcRecollectionInteractor()
                     }
                 },
-                isLiveModeProvider = { false },
-                passiveChallengeWarmer = FakePassiveChallengeWarmer(),
-                publishableKeyProvider = { "pk_test_1234" },
-                productUsage = setOf("PaymentSheet")
+                isLiveModeProvider = { false }
             )
         }
     }

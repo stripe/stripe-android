@@ -84,6 +84,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -345,6 +346,7 @@ internal class CustomerSheetViewModel(
         confirmationHandler.register(
             activityResultCaller = activityResultCaller,
             lifecycleOwner = lifecycleOwner,
+            passiveCaptchaParamsFlow = customerState.map { it.metadata?.passiveCaptchaParams }
         )
     }
 

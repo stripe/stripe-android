@@ -7,6 +7,7 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.challenge.PassiveChallengeActivityContract
+import com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerContract
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkActivityContract
@@ -16,6 +17,7 @@ import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
 import com.stripe.android.shoppay.ShopPayActivityContract
 import com.stripe.android.utils.DummyActivityResultCaller
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,7 +39,8 @@ class PaymentElementConfirmationOrderTest {
 
             viewModel.confirmationHandler.register(
                 activityResultCaller = activityResultCaller,
-                lifecycleOwner = TestLifecycleOwner()
+                lifecycleOwner = TestLifecycleOwner(),
+                passiveCaptchaParamsFlow = flowOf()
             )
 
             assertThat(awaitRegisterCall().contract).isInstanceOf<BacsMandateConfirmationContract>()
@@ -62,6 +65,9 @@ class PaymentElementConfirmationOrderTest {
             assertThat(awaitNextRegisteredLauncher()).isInstanceOf<ActivityResultLauncher<*>>()
 
             assertThat(awaitRegisterCall().contract).isInstanceOf<ShopPayActivityContract>()
+            assertThat(awaitNextRegisteredLauncher()).isInstanceOf<ActivityResultLauncher<*>>()
+
+            assertThat(awaitRegisterCall().contract).isInstanceOf<PassiveChallengeWarmerContract>()
             assertThat(awaitNextRegisteredLauncher()).isInstanceOf<ActivityResultLauncher<*>>()
         }
     }

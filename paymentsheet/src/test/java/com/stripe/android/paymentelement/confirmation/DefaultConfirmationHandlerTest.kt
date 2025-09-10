@@ -8,8 +8,12 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.model.PassiveCaptchaParams
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -21,8 +25,11 @@ import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.DummyActivityResultCaller
+import com.stripe.android.utils.FakePassiveChallengeWarmer
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -48,6 +55,7 @@ class DefaultConfirmationHandlerTest {
         confirmationHandler.register(
             activityResultCaller = activityResultCaller,
             lifecycleOwner = TestLifecycleOwner(),
+            passiveCaptchaParamsFlow = flowOf()
         )
 
         val someDefinitionCreateLauncherCall = someDefinitionScenario.createLauncherCalls.awaitItem()
@@ -79,6 +87,7 @@ class DefaultConfirmationHandlerTest {
         confirmationHandler.register(
             activityResultCaller = activityResultCaller,
             lifecycleOwner = lifecycleOwner,
+            passiveCaptchaParamsFlow = flowOf()
         )
 
         assertThat(someDefinitionScenario.createLauncherCalls.awaitItem()).isNotNull()
@@ -582,6 +591,71 @@ class DefaultConfirmationHandlerTest {
     }
 
     @Test
+    fun `On register, should register passive challenge warmer`() = test(shouldRegister = false) {
+        val fakePassiveChallengeWarmer = FakePassiveChallengeWarmer()
+        val confirmationHandler = createDefaultConfirmationHandler(
+            dispatcher = StandardTestDispatcher(),
+            passiveChallengeWarmer = fakePassiveChallengeWarmer
+        )
+
+        val activityResultCaller = DummyActivityResultCaller.noOp()
+        val lifecycleOwner = TestLifecycleOwner()
+
+        confirmationHandler.register(
+            activityResultCaller = activityResultCaller,
+            lifecycleOwner = lifecycleOwner,
+            passiveCaptchaParamsFlow = flowOf()
+        )
+
+        val registerCall = fakePassiveChallengeWarmer.awaitRegisterCall()
+
+        assertThat(registerCall.activityResultCaller).isEqualTo(activityResultCaller)
+        assertThat(registerCall.lifecycleOwner).isEqualTo(lifecycleOwner)
+    }
+
+    @Test
+    fun `On register with passiveCaptchaParams flow, should start warmer when params become available`() = runTest {
+        val fakePassiveChallengeWarmer = FakePassiveChallengeWarmer()
+        val confirmationHandler = createDefaultConfirmationHandler(
+            dispatcher = StandardTestDispatcher(),
+            passiveChallengeWarmer = fakePassiveChallengeWarmer
+        )
+
+        val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+
+        val passiveCaptchaParamsFlow = MutableSharedFlow<PassiveCaptchaParams?>()
+
+        confirmationHandler.register(
+            activityResultCaller = DummyActivityResultCaller.noOp(),
+            lifecycleOwner = TestLifecycleOwner(),
+            passiveCaptchaParamsFlow = passiveCaptchaParamsFlow
+        )
+
+        fakePassiveChallengeWarmer.awaitRegisterCall()
+        fakePassiveChallengeWarmer.ensureAllEventsConsumed()
+
+        passiveCaptchaParamsFlow.test {
+            passiveCaptchaParamsFlow.emit(null)
+            awaitItem()
+
+            fakePassiveChallengeWarmer.ensureAllEventsConsumed()
+
+            passiveCaptchaParamsFlow.emit(passiveCaptchaParams)
+            awaitItem()
+
+            val firstStartCall = fakePassiveChallengeWarmer.awaitStartCall()
+            assertThat(firstStartCall.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
+            assertThat(firstStartCall.publishableKey).isEqualTo(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+            assertThat(firstStartCall.productUsage).isEqualTo(setOf("PaymentSheet"))
+
+            passiveCaptchaParamsFlow.emit(passiveCaptchaParams)
+            awaitItem()
+
+            fakePassiveChallengeWarmer.ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
     fun `On 'awaitResult', should wait until result is received if confirmation process was started`() {
         val dispatcher = StandardTestDispatcher()
 
@@ -769,6 +843,7 @@ class DefaultConfirmationHandlerTest {
                         register(
                             activityResultCaller = activityResultCaller,
                             lifecycleOwner = TestLifecycleOwner(),
+                            passiveCaptchaParamsFlow = flowOf()
                         )
 
                         val someDefinitionCreateLauncherCall = someDefinitionScenario
@@ -813,6 +888,7 @@ class DefaultConfirmationHandlerTest {
             )
         ),
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        passiveChallengeWarmer: PassiveChallengeWarmer = FakePassiveChallengeWarmer()
     ): DefaultConfirmationHandler {
         return DefaultConfirmationHandler(
             mediators = mediators,
@@ -820,6 +896,9 @@ class DefaultConfirmationHandlerTest {
             errorReporter = errorReporter,
             savedStateHandle = savedStateHandle,
             ioContext = dispatcher,
+            passiveChallengeWarmer = passiveChallengeWarmer,
+            publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+            productUsage = setOf("PaymentSheet"),
         )
     }
 

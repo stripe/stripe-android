@@ -3,6 +3,8 @@ package com.stripe.android.paymentelement.confirmation
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import app.cash.turbine.Turbine
+import com.stripe.android.model.PassiveCaptchaParams
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 internal class FakeConfirmationHandler(
@@ -15,12 +17,14 @@ internal class FakeConfirmationHandler(
 
     override fun register(
         activityResultCaller: ActivityResultCaller,
-        lifecycleOwner: LifecycleOwner
+        lifecycleOwner: LifecycleOwner,
+        passiveCaptchaParamsFlow: Flow<PassiveCaptchaParams?>
     ) {
         registerTurbine.add(
             RegisterCall(
                 activityResultCaller = activityResultCaller,
                 lifecycleOwner = lifecycleOwner,
+                passiveCaptchaParamsFlow = passiveCaptchaParamsFlow
             )
         )
     }
@@ -42,6 +46,7 @@ internal class FakeConfirmationHandler(
     data class RegisterCall(
         val activityResultCaller: ActivityResultCaller,
         val lifecycleOwner: LifecycleOwner,
+        val passiveCaptchaParamsFlow: Flow<PassiveCaptchaParams?>
     )
 
     class Scenario(
