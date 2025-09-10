@@ -4,6 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
+import com.stripe.android.core.StripeError
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
@@ -21,8 +23,6 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.core.exception.APIException
-import com.stripe.android.core.StripeError
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
@@ -227,7 +227,7 @@ internal class SignUpViewModelTest {
             advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
 
             assertThat(viewModel.state.value.signUpState).isEqualTo(SignUpState.InputtingRemainingFields)
-            // Verify no lookup was called since email was prefilled  
+            // Verify no lookup was called since email was prefilled
             assertThat(linkAccountManager.lookupCalls).isEmpty()
         }
 
@@ -255,7 +255,7 @@ internal class SignUpViewModelTest {
 
         viewModel.performValidSignup()
 
-        // Verify signup was called with correct consent action  
+        // Verify signup was called with correct consent action
         assertThat(linkAccountManager.signUpCalls).hasSize(1)
         val call = linkAccountManager.signUpCalls.first()
         assertThat(call.consentAction).isEqualTo(SignUpConsentAction.Implied)

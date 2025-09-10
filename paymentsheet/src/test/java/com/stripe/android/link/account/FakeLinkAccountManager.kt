@@ -34,7 +34,7 @@ internal open class FakeLinkAccountManager(
 
     var lookupResult: Result<LinkAccount?> = Result.success(null)
     var signupResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
-    
+
     data class SignUpCall(
         val email: String,
         val phoneNumber: String?,
@@ -43,14 +43,14 @@ internal open class FakeLinkAccountManager(
         val name: String?,
         val consentAction: SignUpConsentAction
     )
-    
+
     data class LookupCall(
         val email: String,
         val emailSource: EmailSource,
         val startSession: Boolean,
         val customerId: String?
     )
-    
+
     val signUpCalls = mutableListOf<SignUpCall>()
     val lookupCalls = mutableListOf<LookupCall>()
 
