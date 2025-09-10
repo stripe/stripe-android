@@ -560,7 +560,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
-    override suspend fun refreshConsumer(): Result<LinkAccount?> {
+    override suspend fun refreshConsumer(): Result<LinkAccount> {
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
             ?: return Result.failure(NoLinkAccountFoundException())
         return linkRepository.refreshConsumer(

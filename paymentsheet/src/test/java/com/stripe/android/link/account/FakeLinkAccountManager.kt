@@ -33,6 +33,7 @@ internal open class FakeLinkAccountManager(
 ) : LinkAccountManager {
 
     var lookupResult: Result<LinkAccount?> = Result.success(null)
+    var refreshConsumerResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
     var signupResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
 
     data class SignUpCall(
@@ -163,6 +164,10 @@ internal open class FakeLinkAccountManager(
             )
         )
         return lookupConsumerByAuthIntentResult
+    }
+
+    override suspend fun refreshConsumer(): Result<LinkAccount> {
+        return refreshConsumerResult
     }
 
     override suspend fun signInWithUserInput(userInput: UserInput): Result<LinkAccount> {

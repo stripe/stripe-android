@@ -23,6 +23,7 @@ internal open class FakeConsumersApiService : ConsumersApiService {
     var mobileSignUpResult = Result.success(TestFactory.CONSUMER_SESSION_SIGN_UP)
     var lookupConsumerSessionResult = TestFactory.CONSUMER_SESSION_LOOKUP
     var mobileLookupConsumerSessionResult = TestFactory.CONSUMER_SESSION_LOOKUP
+    var refreshConsumerSessionResult = TestFactory.CONSUMER_SESSION
 
     val signUpCalls = arrayListOf<SignUpCall>()
     val mobileSignUpCalls = arrayListOf<SignUpCall>()
@@ -183,6 +184,12 @@ internal open class FakeConsumersApiService : ConsumersApiService {
     ): Result<LinkAccountSession> {
         TODO("Not yet implemented")
     }
+
+    override suspend fun refreshConsumerSession(
+        consumerSessionClientSecret: String,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession = refreshConsumerSessionResult
 
     override suspend fun updatePhoneNumber(
         consumerSessionClientSecret: String,

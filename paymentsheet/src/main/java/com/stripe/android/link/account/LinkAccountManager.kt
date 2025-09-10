@@ -67,7 +67,7 @@ internal interface LinkAccountManager {
     /**
      * Refresh the mobile consumer session.
      */
-    suspend fun refreshConsumer(): Result<LinkAccount?>
+    suspend fun refreshConsumer(): Result<LinkAccount>
 
     /**
      * Registers the user for a new Link account.
