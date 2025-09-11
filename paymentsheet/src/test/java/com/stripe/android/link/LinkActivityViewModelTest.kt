@@ -16,6 +16,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
@@ -35,6 +36,8 @@ import com.stripe.android.link.model.LinkAuthIntentInfo
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.wallet.AddPaymentMethodOptions
 import com.stripe.android.link.utils.TestNavigationManager
+import com.stripe.android.model.ConsumerSessionRefresh
+import com.stripe.android.model.LinkAuthIntent
 import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -827,6 +830,116 @@ internal class LinkActivityViewModelTest {
         val state = vm.linkScreenState.value as ScreenState.FullScreen
         assertEquals(state.initialDestination, LinkScreen.OAuthConsent)
     }
+
+    @Test
+    fun `getScreenStateForAuthorizationAfterRefresh should complete with consent granted when status is Consented`() =
+        testGetScreenStateForAuthorizationAfterRefresh(
+            linkAuthIntentStatus = LinkAuthIntent.Status.Consented,
+            assertionBlock = {
+                val activityResult = awaitItem() as LinkActivityResult.Completed
+                assertThat(activityResult.authorizationConsentGranted).isTrue()
+            }
+        )
+
+    @Test
+    fun `getScreenStateForAuthorizationAfterRefresh should complete with consent rejected when status is Rejected`() =
+        testGetScreenStateForAuthorizationAfterRefresh(
+            linkAuthIntentStatus = LinkAuthIntent.Status.Rejected,
+            assertionBlock = {
+                val activityResult = awaitItem() as LinkActivityResult.Completed
+                assertThat(activityResult.authorizationConsentGranted).isFalse()
+            }
+        )
+
+    @Test
+    fun `getScreenStateForAuthorizationAfterRefresh should fail when status is Created`() =
+        testGetScreenStateForAuthorizationAfterRefresh(
+            linkAuthIntentStatus = LinkAuthIntent.Status.Created,
+            assertionBlock = {
+                val activityResult = awaitItem() as LinkActivityResult.Failed
+                assertThat(activityResult.error.message).contains("Unexpected LAI status when account is verified: Created")
+            }
+        )
+
+    @Test
+    fun `getScreenStateForAuthorizationAfterRefresh should fail when status is Expired`() =
+        testGetScreenStateForAuthorizationAfterRefresh(
+            linkAuthIntentStatus = LinkAuthIntent.Status.Expired,
+            assertionBlock = {
+                val activityResult = awaitItem() as LinkActivityResult.Failed
+                assertThat(activityResult.error.message).contains("Unexpected LAI status when account is verified: Expired")
+            }
+        )
+
+    @Test
+    fun `getScreenStateForAuthorizationAfterRefresh should navigate to OAuthConsent when status is Authenticated with FullScreen consent`() =
+        testGetScreenStateForAuthorizationAfterRefresh(
+            linkAuthIntentStatus = LinkAuthIntent.Status.Authenticated,
+            consentPresentation = ConsentPresentation.FullScreen(TestFactory.CONSENT_PANE),
+            expectedScreenState = ScreenState.FullScreen(LinkScreen.OAuthConsent)
+        )
+
+    @Test
+    fun `getScreenStateForAuthorizationAfterRefresh should complete when status is Authenticated with non-FullScreen consent`() =
+        testGetScreenStateForAuthorizationAfterRefresh(
+            linkAuthIntentStatus = LinkAuthIntent.Status.Authenticated,
+            consentPresentation = mock<ConsentPresentation.Inline>(),
+            assertionBlock = {
+                val activityResult = awaitItem() as LinkActivityResult.Completed
+                assertThat(activityResult.linkAccountUpdate).isNotNull()
+            }
+        )
+
+    @Test
+    fun `getScreenStateForAuthorizationAfterRefresh should navigate to OAuthConsent when linkAuthIntent is null with FullScreen consent`() =
+        testGetScreenStateForAuthorizationAfterRefresh(
+            linkAuthIntentStatus = null,
+            consentPresentation = ConsentPresentation.FullScreen(TestFactory.CONSENT_PANE),
+            expectedScreenState = ScreenState.FullScreen(LinkScreen.OAuthConsent)
+        )
+
+    @Test
+    fun `getScreenStateForAuthorizationAfterRefresh should complete when linkAuthIntent is null with non-FullScreen consent`() =
+        testGetScreenStateForAuthorizationAfterRefresh(
+            linkAuthIntentStatus = null,
+            consentPresentation = mock<ConsentPresentation.Inline>(),
+            assertionBlock = {
+                assertThat(awaitItem()).isInstanceOf(LinkActivityResult.Completed::class.java)
+            }
+        )
+
+    private fun testGetScreenStateForAuthorizationAfterRefresh(
+        linkAuthIntentStatus: LinkAuthIntent.Status?,
+        consentPresentation: ConsentPresentation? = null,
+        expectedScreenState: ScreenState? = null,
+        assertionBlock: (suspend TurbineTestContext<LinkActivityResult>.() -> Unit)? = null
+    ) = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+
+        val vm = createViewModel(linkAccountManager = linkAccountManager)
+
+        val accountStatus = AccountStatus.Verified(true, consentPresentation)
+        val consumerSessionRefresh = ConsumerSessionRefresh(
+            consumerSession = TestFactory.CONSUMER_SESSION,
+            linkAuthIntent = linkAuthIntentStatus?.let { LinkAuthIntent(it) }
+        )
+
+        if (expectedScreenState != null) {
+            // Test case expecting a specific ScreenState return value
+            val result = vm.getScreenStateForAuthorizationAfterRefresh(accountStatus, consumerSessionRefresh)
+            assertThat(result).isEqualTo(expectedScreenState)
+        }
+        if (assertionBlock != null) {
+            // Test case expecting null return with result emissions
+            vm.result.test {
+                val result = vm.getScreenStateForAuthorizationAfterRefresh(accountStatus, consumerSessionRefresh)
+                assertThat(result).isNull()
+                assertionBlock()
+            }
+        }
+    }
+
 
     private fun testAttestationCheckError(
         attestationCheckResult: LinkAttestationCheck.Result,
