@@ -14,6 +14,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.CustomEmailType
 import com.stripe.android.model.EmailSource
@@ -27,6 +28,7 @@ import com.stripe.android.model.parsers.AttachConsumerToLinkAccountSessionJsonPa
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionLookupJsonParser
+import com.stripe.android.model.parsers.ConsumerSessionRefreshJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionSignupJsonParser
 import com.stripe.android.model.parsers.LinkAccountSessionJsonParser
 import com.stripe.android.model.parsers.SharePaymentDetailsJsonParser
@@ -72,7 +74,7 @@ interface ConsumersApiService {
         consumerSessionClientSecret: String,
         requestSurface: String,
         requestOptions: ApiRequest.Options
-    ): ConsumerSession
+    ): ConsumerSessionRefresh
 
     suspend fun startConsumerVerification(
         consumerSessionClientSecret: String,
@@ -274,7 +276,7 @@ class ConsumersApiServiceImpl(
         consumerSessionClientSecret: String,
         requestSurface: String,
         requestOptions: ApiRequest.Options
-    ): ConsumerSession {
+    ): ConsumerSessionRefresh {
         return executeRequestWithModelJsonParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
             stripeNetworkClient = stripeNetworkClient,
@@ -288,7 +290,7 @@ class ConsumersApiServiceImpl(
                     ),
                 ),
             ),
-            responseJsonParser = ConsumerSessionJsonParser()
+            responseJsonParser = ConsumerSessionRefreshJsonParser()
         )
     }
 

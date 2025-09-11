@@ -24,6 +24,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.model.EmailSource
@@ -560,7 +561,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
-    override suspend fun refreshConsumer(): Result<LinkAccount> {
+    override suspend fun refreshConsumer(): Result<ConsumerSessionRefresh> {
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
             ?: return Result.failure(NoLinkAccountFoundException())
         return linkRepository.refreshConsumer(
@@ -569,8 +570,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
         )
             .onFailure { error ->
                 linkEventsReporter.onAccountLookupFailure(error)
-            }.map { consumerSession ->
-                setAccount(consumerSession = consumerSession)
+            }.onSuccess {
+                setAccount(consumerSession = it.consumerSession)
             }
     }
 }

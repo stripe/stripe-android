@@ -18,6 +18,7 @@ import com.stripe.android.model.ConsumerPaymentDetailsCreateParams.Card.Companio
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.ConsumerSignUpConsentAction
@@ -131,7 +132,7 @@ internal class LinkApiRepository @Inject constructor(
     override suspend fun refreshConsumer(
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?
-    ): Result<ConsumerSession> = withContext(workContext) {
+    ): Result<ConsumerSessionRefresh> = withContext(workContext) {
         runCatching {
             consumersApiService.refreshConsumerSession(
                 consumerSessionClientSecret = consumerSessionClientSecret,
