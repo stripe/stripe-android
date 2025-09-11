@@ -12,12 +12,22 @@ import kotlinx.coroutines.launch
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
-internal class OnrampAnalyticsService @AssistedInject constructor(
+internal interface OnrampAnalyticsService {
+    val elementsSessionId: String
+
+    fun track(event: OnrampAnalyticsEvent)
+
+    interface Factory {
+        fun create(elementsSessionId: String): OnrampAnalyticsService
+    }
+}
+
+internal class OnrampAnalyticsServiceImpl @AssistedInject constructor(
     context: Context,
+    @Assisted override val elementsSessionId: String,
     private val requestExecutor: AnalyticsRequestV2Executor,
     @IOContext private val workContext: CoroutineContext,
-    @Assisted val elementsSessionId: String,
-) {
+) : OnrampAnalyticsService {
 
     private val requestFactory = AnalyticsRequestV2Factory(
         context,
@@ -25,7 +35,7 @@ internal class OnrampAnalyticsService @AssistedInject constructor(
         origin = ORIGIN,
     )
 
-    fun track(event: OnrampAnalyticsEvent) {
+    override fun track(event: OnrampAnalyticsEvent) {
         CoroutineScope(workContext).launch {
             val request = requestFactory.createRequest(
                 eventName = event.eventName,
@@ -41,8 +51,8 @@ internal class OnrampAnalyticsService @AssistedInject constructor(
 
     @Singleton
     @AssistedFactory
-    interface Factory {
-        fun create(elementsSessionId: String): OnrampAnalyticsService
+    interface Factory : OnrampAnalyticsService.Factory {
+        override fun create(elementsSessionId: String): OnrampAnalyticsServiceImpl
     }
 
     companion object {
