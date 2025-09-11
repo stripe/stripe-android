@@ -154,7 +154,7 @@ internal class DefaultPaymentElementLoaderTest {
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
-                    allowsDelayedPaymentMethods = false,
+                    allowsDelayedPaymentMethods = true,
                     sharedDataSpecs = emptyList(),
                     isGooglePayReady = true,
                     linkMode = null,
@@ -544,7 +544,7 @@ internal class DefaultPaymentElementLoaderTest {
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
-                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(allowsDelayedPaymentMethods = false),
                 metadata = PaymentElementLoader.Metadata(
                     initializedViaCompose = false,
                 ),
