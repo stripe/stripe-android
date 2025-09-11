@@ -10,7 +10,6 @@ internal class StripeIssueRegistry : IssueRegistry() {
         ComposeCollectAsStateUsageDetector.ISSUE,
         DangerousManifestConfigurationDetector.ISSUE,
         ComposeCleanupRuleUsageDetector.ISSUE,
-        LinkAuthDirectUsageDetector.ISSUE,
     )
 
     override val vendor = Vendor(
