@@ -55,7 +55,6 @@ internal class PaymentLauncherViewModel @Inject constructor(
     private val nextActionHandlerRegistry: PaymentNextActionHandlerRegistry,
     private val defaultReturnUrl: DefaultReturnUrl,
     private val apiRequestOptionsProvider: Provider<ApiRequest.Options>,
-    private val threeDs1IntentReturnUrlMap: MutableMap<String, String>,
     private val lazyPaymentIntentFlowResultProcessor: Lazy<PaymentIntentFlowResultProcessor>,
     private val lazySetupIntentFlowResultProcessor: Lazy<SetupIntentFlowResultProcessor>,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
@@ -127,13 +126,6 @@ internal class PaymentLauncherViewModel @Inject constructor(
 
             confirmIntent(confirmStripeIntentParams, returnUrl).fold(
                 onSuccess = { intent ->
-                    intent.nextActionData?.let {
-                        if (it is StripeIntent.NextActionData.SdkData.Use3DS1) {
-                            intent.id?.let { intentId ->
-                                threeDs1IntentReturnUrlMap[intentId] = returnUrl.orEmpty()
-                            }
-                        }
-                    }
                     if (!intent.requiresAction()) {
                         withContext(uiContext) {
                             postInternalResult(
