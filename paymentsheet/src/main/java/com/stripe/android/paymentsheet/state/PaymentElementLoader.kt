@@ -583,8 +583,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             return null
         }
 
-        if (!elementsSession.useAttestationEndpointsForLink
-            && configuration.billingDetailsCollectionConfiguration.collectsAnything) {
+        val usesWebFlow = !elementsSession.useAttestationEndpointsForLink
+        val collectsExtraBillingDetails = configuration.billingDetailsCollectionConfiguration.collectsAnything
+        if (usesWebFlow && collectsExtraBillingDetails) {
             // We don't support billing details collection in the web flow
             return null
         }
