@@ -444,8 +444,10 @@ class ConfirmationMediatorTest {
     ) {
         val waitForResultLatch = CountDownLatch(1)
 
+        val savedStateHandle = SavedStateHandle()
+
         val mediator = ConfirmationMediator(
-            savedStateHandle = SavedStateHandle(),
+            savedStateHandle = savedStateHandle,
             definition = definition,
         )
 
@@ -505,6 +507,9 @@ class ConfirmationMediatorTest {
 
         assertThat(successResult.intent).isEqualTo(INTENT)
         assertThat(successResult.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
+
+        // The params should be cleared to avoid keeping the PAN around in memory longer than necessary.
+        assertThat(savedStateHandle.get<Any>(mediator.key + ConfirmationMediator.PARAMETERS_POSTFIX_KEY)).isNull()
     }
 
     @Test

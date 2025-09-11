@@ -49,6 +49,7 @@ internal class ConfirmationMediator<
             activityResultCaller
         ) { result ->
             val confirmationResult = persistedParameters?.let { params ->
+                persistedParameters = null
                 definition.toResult(
                     confirmationOption = params.confirmationOption,
                     confirmationParameters = params.confirmationParameters,
@@ -170,7 +171,7 @@ internal class ConfirmationMediator<
         val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
     ) : Parcelable
 
-    private companion object {
-        private const val PARAMETERS_POSTFIX_KEY = "Parameters"
+    companion object {
+        const val PARAMETERS_POSTFIX_KEY = "Parameters"
     }
 }
