@@ -78,6 +78,7 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
         embeddedContentHelper.clearEmbeddedContent()
         confirmationStateHolder.state = null
         selectionHolder.set(null)
+        selectionHolder.previousNewSelections.clear()
         customerStateHolder.setCustomerState(null)
     }
 }
