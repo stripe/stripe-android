@@ -242,10 +242,12 @@ internal class DefaultLinkAuthTest {
     }
 
     @Test
-    fun `signup with attestation validates phone number`() = runTest(dispatcher) {
+    fun `signup with attestation handles null phone number`() = runTest(dispatcher) {
         val linkAuth = createDefaultLinkAuth()
+        val verificationToken = "verification_token_123"
 
         fakeLinkGate.setUseAttestationEndpoints(true)
+        fakeIntegrityRequestManager.requestResult = Result.success(verificationToken)
 
         val result = linkAuth.signup(
             email = "test@example.com",
@@ -256,16 +258,20 @@ internal class DefaultLinkAuthTest {
             consentAction = SignUpConsentAction.Implied
         )
 
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalArgumentException::class.java)
-        assertThat(result.exceptionOrNull()?.message).contains("Phone number is required for mobile signup")
+        assertThat(result.isSuccess).isTrue()
+
+        val mobileSignupCall = fakeLinkRepository.awaitMobileSignup()
+        assertThat(mobileSignupCall.phoneNumber).isNull()
+        assertThat(mobileSignupCall.country).isEqualTo("US")
     }
 
     @Test
-    fun `signup with attestation validates country`() = runTest(dispatcher) {
+    fun `signup with attestation handles null country`() = runTest(dispatcher) {
         val linkAuth = createDefaultLinkAuth()
+        val verificationToken = "verification_token_123"
 
         fakeLinkGate.setUseAttestationEndpoints(true)
+        fakeIntegrityRequestManager.requestResult = Result.success(verificationToken)
 
         val result = linkAuth.signup(
             email = "test@example.com",
@@ -276,9 +282,11 @@ internal class DefaultLinkAuthTest {
             consentAction = SignUpConsentAction.Implied
         )
 
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalArgumentException::class.java)
-        assertThat(result.exceptionOrNull()?.message).contains("Country is required for mobile signup")
+        assertThat(result.isSuccess).isTrue()
+
+        val mobileSignupCall = fakeLinkRepository.awaitMobileSignup()
+        assertThat(mobileSignupCall.phoneNumber).isEqualTo("1234567890")
+        assertThat(mobileSignupCall.country).isNull()
     }
 
     @Test

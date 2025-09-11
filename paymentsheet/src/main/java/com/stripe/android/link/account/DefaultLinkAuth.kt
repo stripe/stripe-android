@@ -73,16 +73,6 @@ internal class DefaultLinkAuth @Inject constructor(
         consentAction: SignUpConsentAction
     ): Result<ConsumerSessionSignup> {
         return if (linkGate.useAttestationEndpoints) {
-            if (phoneNumber == null) {
-                return Result.failure(
-                    IllegalArgumentException("Phone number is required for mobile signup")
-                )
-            }
-            if (country == null) {
-                return Result.failure(
-                    IllegalArgumentException("Country is required for mobile signup")
-                )
-            }
             mobileSignUpWithAttestation(
                 email = email,
                 phoneNumber = phoneNumber,
@@ -129,8 +119,8 @@ internal class DefaultLinkAuth @Inject constructor(
 
     private suspend fun mobileSignUpWithAttestation(
         email: String,
-        phoneNumber: String,
-        country: String,
+        phoneNumber: String?,
+        country: String?,
         countryInferringMethod: String,
         name: String?,
         consentAction: SignUpConsentAction
