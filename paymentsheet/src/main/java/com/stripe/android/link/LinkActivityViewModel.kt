@@ -2,6 +2,7 @@ package com.stripe.android.link
 
 import android.app.Application
 import androidx.activity.result.ActivityResultCaller
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
@@ -481,7 +482,8 @@ internal class LinkActivityViewModel @Inject constructor(
         }
     }
 
-    private fun getScreenStateForAuthorizationAfterRefresh(
+    @VisibleForTesting
+    internal fun getScreenStateForAuthorizationAfterRefresh(
         accountStatus: AccountStatus.Verified,
         refresh: ConsumerSessionRefresh,
     ): ScreenState? {
