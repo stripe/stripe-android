@@ -8,6 +8,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.ConsumerSignUpConsentAction
@@ -24,7 +25,12 @@ internal open class FakeLinkRepository : LinkRepository {
     var lookupConsumerResult = Result.success(TestFactory.CONSUMER_SESSION_LOOKUP)
     var lookupConsumerWithoutBackendLoggingResult = Result.success(TestFactory.CONSUMER_SESSION_LOOKUP)
     var mobileLookupConsumerResult = Result.success(TestFactory.CONSUMER_SESSION_LOOKUP)
-    var refreshConsumerResult = Result.success(TestFactory.CONSUMER_SESSION)
+    var refreshConsumerResult = Result.success(
+        ConsumerSessionRefresh(
+            consumerSession = TestFactory.CONSUMER_SESSION,
+            linkAuthIntent = null
+        )
+    )
     var consumerSignUpResult = Result.success(TestFactory.CONSUMER_SESSION_SIGN_UP)
     var mobileConsumerSignUpResult = Result.success(TestFactory.CONSUMER_SESSION_SIGN_UP)
     var createLinkAccountSessionResult = Result.success(TestFactory.LINK_ACCOUNT_SESSION)
@@ -101,7 +107,7 @@ internal open class FakeLinkRepository : LinkRepository {
     override suspend fun refreshConsumer(
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?
-    ): Result<ConsumerSession> = refreshConsumerResult
+    ): Result<ConsumerSessionRefresh> = refreshConsumerResult
 
     override suspend fun consumerSignUp(
         email: String,
