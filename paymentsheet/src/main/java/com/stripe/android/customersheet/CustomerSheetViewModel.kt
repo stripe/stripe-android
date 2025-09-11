@@ -897,7 +897,7 @@ internal class CustomerSheetViewModel(
             autocompleteAddressInteractorFactory = null,
             termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
             sellerBusinessName = null,
-            linkSignUpOptInFeatureEnabled = false,
+            forceSetupFutureUseBehavior = false,
         )
     }
 

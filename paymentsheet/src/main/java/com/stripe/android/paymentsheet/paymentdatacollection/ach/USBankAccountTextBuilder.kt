@@ -15,7 +15,7 @@ internal object USBankAccountTextBuilder {
     fun buildMandateAndMicrodepositsText(
         merchantName: String,
         sellerBusinessName: String?,
-        linkSignUpOptInFeatureEnabled: Boolean,
+        forceSetupFutureUseBehavior: Boolean,
         isVerifyingMicrodeposits: Boolean,
         isSaveForFutureUseSelected: Boolean,
         isInstantDebits: Boolean,
@@ -24,7 +24,7 @@ internal object USBankAccountTextBuilder {
         val mandateText = buildMandateText(
             merchantName = merchantName,
             sellerBusinessName = sellerBusinessName,
-            linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
+            forceSetupFutureUseBehavior = forceSetupFutureUseBehavior,
             isSaveForFutureUseSelected = isSaveForFutureUseSelected,
             isInstantDebits = isInstantDebits,
             isSetupFlow = isSetupFlow,
@@ -47,7 +47,7 @@ internal object USBankAccountTextBuilder {
     fun buildMandateText(
         merchantName: String,
         sellerBusinessName: String?,
-        linkSignUpOptInFeatureEnabled: Boolean,
+        forceSetupFutureUseBehavior: Boolean,
         isSaveForFutureUseSelected: Boolean,
         isInstantDebits: Boolean,
         isSetupFlow: Boolean,
@@ -63,7 +63,7 @@ internal object USBankAccountTextBuilder {
             ),
         )
 
-        val text = if (linkSignUpOptInFeatureEnabled && sellerBusinessName != null) {
+        val text = if (forceSetupFutureUseBehavior && sellerBusinessName != null) {
             // Use alternative terms for signup-opt-in merchant, including seller details.
             resolvableString(
                 R.string.stripe_wallet_bank_account_terms_merchant_and_seller,

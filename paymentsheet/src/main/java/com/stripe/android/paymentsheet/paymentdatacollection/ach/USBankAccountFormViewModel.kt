@@ -790,7 +790,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         return USBankAccountTextBuilder.buildMandateAndMicrodepositsText(
             merchantName = formattedMerchantName(),
             sellerBusinessName = args.sellerBusinessName,
-            linkSignUpOptInFeatureEnabled = args.linkSignUpOptInFeatureEnabled,
+            forceSetupFutureUseBehavior = args.forceSetupFutureUseBehavior,
             isVerifyingMicrodeposits = isVerifyWithMicrodeposits,
             isSaveForFutureUseSelected = isSaveForFutureUseSelected,
             isInstantDebits = args.instantDebits,
@@ -858,7 +858,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val setAsDefaultMatchesSaveForFutureUse: Boolean,
         val termsDisplay: PaymentSheet.TermsDisplay,
         val sellerBusinessName: String?,
-        val linkSignUpOptInFeatureEnabled: Boolean,
+        val forceSetupFutureUseBehavior: Boolean,
     )
 
     private companion object {

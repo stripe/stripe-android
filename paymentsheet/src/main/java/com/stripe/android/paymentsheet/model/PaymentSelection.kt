@@ -188,7 +188,7 @@ internal sealed class PaymentSelection : Parcelable {
                         isSaveForFutureUseSelected = false,
                         isInstantDebits = false,
                         isSetupFlow = isSetupFlow,
-                        linkSignUpOptInFeatureEnabled = false,
+                        forceSetupFutureUseBehavior = false,
                         sellerBusinessName = null,
                     )
                 }
