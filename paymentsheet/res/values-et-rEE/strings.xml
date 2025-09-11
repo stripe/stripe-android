@@ -275,6 +275,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">Kuva rohkem</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Jätkates nõustute maksete autoriseerimisega vastavalt nendele <terms>tingimustele</terms>.]]></string>
+  <!-- Text providing link to terms for bank payments when seller information is provided -->
+  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[Esitades oma tellimuse %1$s ja %2$s, nõustute salvestama oma andmed %3$s-ga tulevaste ostude jaoks ja nõustute autoriseerima makseid vastavalt <terms>nendele tingimustele</terms>.]]></string>
   <!-- Text providing link to terms for bank payments -->
   <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Esitades oma tellimuse aadressile %s, nõustute autoriseerima makseid vastavalt <terms>nendele tingimustele</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
