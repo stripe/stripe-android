@@ -66,8 +66,10 @@ internal object USBankAccountTextBuilder {
         val text = if (linkSignUpOptInFeatureEnabled && sellerBusinessName != null) {
             // Use alternative terms for signup-opt-in merchant, including seller details.
             resolvableString(
-                R.string.stripe_wallet_bank_account_terms_seller,
+                R.string.stripe_wallet_bank_account_terms_merchant_and_seller,
+                merchantName,
                 sellerBusinessName,
+                merchantName,
                 transformations = transforms
             )
         } else if (isSaveForFutureUseSelected || isSetupFlow) {
