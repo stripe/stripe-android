@@ -583,6 +583,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             return null
         }
 
+        if (!elementsSession.useAttestationEndpointsForLink
+            && configuration.billingDetailsCollectionConfiguration.collectsAnything) {
+            // We don't support billing details collection in the web flow
+            return null
+        }
+
         val isCardBrandFilteringRequired =
             elementsSession.linkPassthroughModeEnabled &&
                 configuration.cardBrandAcceptance != PaymentSheet.CardBrandAcceptance.All
