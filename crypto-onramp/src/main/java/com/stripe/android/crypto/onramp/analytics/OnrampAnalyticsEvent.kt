@@ -1,6 +1,7 @@
 package com.stripe.android.crypto.onramp.analytics
 
 import com.stripe.android.core.exception.safeAnalyticsMessage
+import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 
 /**
@@ -69,11 +70,11 @@ internal sealed class OnrampAnalyticsEvent(
     )
 
     class WalletRegistered(
-        network: String
+        network: CryptoNetwork
     ) : OnrampAnalyticsEvent(
         name = "wallet_registered",
         params = mapOf(
-            "network" to network
+            "network" to network.value
         )
     )
 
@@ -106,24 +107,24 @@ internal sealed class OnrampAnalyticsEvent(
 
     class CheckoutStarted(
         onrampSessionId: String,
-        paymentMethodType: String
+        paymentMethodType: PaymentMethodType?
     ) : OnrampAnalyticsEvent(
         name = "checkout_started",
         params = mapOf(
             "onramp_session_id" to onrampSessionId,
-            "payment_method_type" to paymentMethodType
+            "payment_method_type" to (paymentMethodType?.value ?: "")
         )
     )
 
     class CheckoutCompleted(
         onrampSessionId: String,
-        paymentMethodType: String,
+        paymentMethodType: PaymentMethodType?,
         requiredAction: Boolean
     ) : OnrampAnalyticsEvent(
         name = "checkout_completed",
         params = mapOf(
             "onramp_session_id" to onrampSessionId,
-            "payment_method_type" to paymentMethodType,
+            "payment_method_type" to (paymentMethodType?.value ?: ""),
             "required_action" to requiredAction.toString()
         )
     )
