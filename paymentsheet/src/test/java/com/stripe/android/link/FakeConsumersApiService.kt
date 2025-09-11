@@ -6,6 +6,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.CustomEmailType
 import com.stripe.android.model.EmailSource
@@ -23,7 +24,10 @@ internal open class FakeConsumersApiService : ConsumersApiService {
     var mobileSignUpResult = Result.success(TestFactory.CONSUMER_SESSION_SIGN_UP)
     var lookupConsumerSessionResult = TestFactory.CONSUMER_SESSION_LOOKUP
     var mobileLookupConsumerSessionResult = TestFactory.CONSUMER_SESSION_LOOKUP
-    var refreshConsumerSessionResult = TestFactory.CONSUMER_SESSION
+    var refreshConsumerSessionResult = ConsumerSessionRefresh(
+        consumerSession = TestFactory.CONSUMER_SESSION,
+        linkAuthIntent = null
+    )
 
     val signUpCalls = arrayListOf<SignUpCall>()
     val mobileSignUpCalls = arrayListOf<SignUpCall>()
@@ -189,7 +193,7 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         consumerSessionClientSecret: String,
         requestSurface: String,
         requestOptions: ApiRequest.Options
-    ): ConsumerSession = refreshConsumerSessionResult
+    ): ConsumerSessionRefresh = refreshConsumerSessionResult
 
     override suspend fun updatePhoneNumber(
         consumerSessionClientSecret: String,

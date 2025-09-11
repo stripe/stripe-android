@@ -297,9 +297,10 @@ internal class LinkActivityViewModelTest {
     @Test
     fun `onCreate should start with Wallet screen account status is Verified`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+        linkAccountManager.setAccountStatus(AccountStatus.Verified(true, null))
 
         val vm = createViewModel(linkAccountManager = linkAccountManager)
-        linkAccountManager.setAccountStatus(AccountStatus.Verified(true, null))
 
         vm.onCreate(mock())
 
