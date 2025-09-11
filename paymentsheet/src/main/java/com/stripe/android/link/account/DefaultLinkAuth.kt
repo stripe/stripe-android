@@ -1,7 +1,6 @@
 package com.stripe.android.link.account
 
 import com.stripe.android.common.di.APPLICATION_ID
-import com.stripe.android.core.exception.APIException
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkEventException
 import com.stripe.android.link.gate.LinkGate
@@ -14,7 +13,6 @@ import com.stripe.android.model.EmailSource
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.amount
 import com.stripe.android.paymentsheet.model.currency
-import com.stripe.attestation.AttestationError
 import com.stripe.attestation.IntegrityRequestManager
 import javax.inject.Inject
 import javax.inject.Named
