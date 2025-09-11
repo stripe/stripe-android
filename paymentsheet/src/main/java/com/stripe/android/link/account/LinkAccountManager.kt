@@ -46,82 +46,40 @@ internal interface LinkAccountManager {
      * @param customerId Optional customer ID to associate with the lookup. When provided, enables
      *                   retrieval of displayable payment details.
      */
-    suspend fun lookupConsumer(
-        email: String?,
+    suspend fun lookupByEmail(
+        email: String,
+        emailSource: EmailSource,
         startSession: Boolean = true,
         customerId: String?
     ): Result<LinkAccount?>
 
     /**
-     * Retrieves the Link account associated with the email if it exists
-     *
-     * Optionally starts a user session, by storing the cookie for the account and starting a
-     * verification if needed.
+     * Lookup consumer by auth intent ID.
      *
      * @param customerId Optional customer ID to associate with the lookup. When provided, enables
      *                   retrieval of displayable payment details.
      */
-    suspend fun mobileLookupConsumer(
-        email: String?,
-        emailSource: EmailSource?,
-        verificationToken: String,
-        appId: String,
-        startSession: Boolean,
-        customerId: String?
-    ): Result<LinkAccount?>
-
-    /**
-     * Retrieves the Link account associated with the LinkAuthIntent if it exists.
-     *
-     * @param linkAuthIntentId The ID of the LinkAuthIntent.
-     * @param customerId Optional customer ID to associate with the lookup. When provided, enables
-     *                   retrieval of displayable payment details.
-     */
-    suspend fun lookupConsumerByAuthIntent(
+    suspend fun lookupByLinkAuthIntent(
         linkAuthIntentId: String?,
-        customerId: String?
-    ): Result<LinkAccount?>
-
-    /**
-     * Retrieves the Link account associated with the email if it exists
-     *
-     * Optionally starts a user session, by storing the cookie for the account and starting a
-     * verification if needed.
-     *
-     * @param linkAuthIntentId The ID of the LinkAuthIntent.
-     * @param customerId Optional customer ID to associate with the lookup. When provided, enables
-     *                   retrieval of displayable payment details.
-     */
-    suspend fun mobileLookupConsumerByAuthIntent(
-        linkAuthIntentId: String?,
-        verificationToken: String,
-        appId: String,
         customerId: String?
     ): Result<LinkAccount?>
 
     /**
      * Registers the user for a new Link account.
+     *
+     * @param email The email for the new account
+     * @param phoneNumber The phone number for the new account
+     * @param country The country code
+     * @param countryInferringMethod The method used to infer the country
+     * @param name Optional name for the new account
+     * @param consentAction The consent action taken by the user
      */
     suspend fun signUp(
         email: String,
-        phone: String?,
+        phoneNumber: String?,
         country: String?,
         countryInferringMethod: String,
         name: String?,
-        consentAction: SignUpConsentAction
-    ): Result<LinkAccount>
-
-    /**
-     * Registers the user for a new Link account.
-     */
-    suspend fun mobileSignUp(
-        email: String,
-        phone: String,
-        country: String,
-        countryInferringMethod: String,
-        name: String?,
-        verificationToken: String,
-        appId: String,
         consentAction: SignUpConsentAction
     ): Result<LinkAccount>
 

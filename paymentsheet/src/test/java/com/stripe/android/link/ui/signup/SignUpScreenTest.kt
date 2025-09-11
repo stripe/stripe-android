@@ -14,14 +14,14 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.stripe.android.core.StripeError
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
-import com.stripe.android.link.account.FakeLinkAuth
-import com.stripe.android.link.account.LinkAuth
-import com.stripe.android.link.account.LinkAuthResult
+import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.testing.CoroutineTestRule
@@ -119,8 +119,8 @@ internal class SignUpScreenTest {
     fun `field displayed, sign up enabled and error displayed when controllers are filled and sign up fails`() =
         runTest(dispatcher) {
             val error = Throwable("oops")
-            val linkAuth = FakeLinkAuth()
-            val viewModel = viewModel(linkAuth = linkAuth)
+            val linkAccountManager = FakeLinkAccountManager()
+            val viewModel = viewModel(linkAccountManager = linkAccountManager)
 
             composeTestRule.setContent {
                 DefaultLinkTheme {
@@ -128,8 +128,8 @@ internal class SignUpScreenTest {
                 }
             }
 
-            linkAuth.lookupResult = LinkAuthResult.NoLinkAccountFound
-            linkAuth.signupResult = LinkAuthResult.Error(error)
+            linkAccountManager.lookupResult = Result.success(null)
+            linkAccountManager.signupResult = Result.failure(error)
             viewModel.onSignUpClick()
 
             dispatcher.scheduler.advanceTimeBy(1001)
@@ -139,12 +139,14 @@ internal class SignUpScreenTest {
     @Test
     fun `secondary fields hidden, error is displayed on account error after signup`() =
         runTest(dispatcher) {
-            val error = Throwable("oops")
-            val linkAuth = FakeLinkAuth()
-            linkAuth.lookupResult = LinkAuthResult.NoLinkAccountFound
-            linkAuth.signupResult = LinkAuthResult.AccountError(error)
+            val stripeError =
+                StripeError(code = "link_consumer_details_not_available", message = "Consumer details not available")
+            val error = APIException(stripeError = stripeError)
+            val linkAccountManager = FakeLinkAccountManager()
+            linkAccountManager.lookupResult = Result.success(null)
+            linkAccountManager.signupResult = Result.failure(error)
 
-            val viewModel = viewModel(linkAuth = linkAuth)
+            val viewModel = viewModel(linkAccountManager = linkAccountManager)
 
             composeTestRule.setContent {
                 DefaultLinkTheme {
@@ -178,11 +180,13 @@ internal class SignUpScreenTest {
     @Test
     fun `secondary fields hidden, error is displayed on account error after lookup`() =
         runTest(dispatcher) {
-            val error = Throwable("oops")
-            val linkAuth = FakeLinkAuth()
-            linkAuth.lookupResult = LinkAuthResult.AccountError(error)
+            val stripeError =
+                StripeError(code = "link_consumer_details_not_available", message = "Consumer details not available")
+            val error = APIException(stripeError = stripeError)
+            val linkAccountManager = FakeLinkAccountManager()
+            linkAccountManager.lookupResult = Result.failure(error)
 
-            val viewModel = viewModel(linkAuth = linkAuth)
+            val viewModel = viewModel(linkAccountManager = linkAccountManager)
 
             composeTestRule.setContent {
                 DefaultLinkTheme {
@@ -205,8 +209,8 @@ internal class SignUpScreenTest {
     fun `error is displayed on lookup failure after email entry`() =
         runTest(dispatcher) {
             val error = Throwable("oops")
-            val linkAuth = FakeLinkAuth()
-            val viewModel = viewModel(linkAuth = linkAuth)
+            val linkAccountManager = FakeLinkAccountManager()
+            val viewModel = viewModel(linkAccountManager = linkAccountManager)
 
             composeTestRule.setContent {
                 DefaultLinkTheme {
@@ -214,7 +218,7 @@ internal class SignUpScreenTest {
                 }
             }
 
-            linkAuth.lookupResult = LinkAuthResult.Error(error)
+            linkAccountManager.lookupResult = Result.failure(error)
 
             viewModel.emailController.onRawValueChange("a@b.com")
             composeTestRule.waitForIdle()
@@ -242,7 +246,7 @@ internal class SignUpScreenTest {
     }
 
     private fun viewModel(
-        linkAuth: LinkAuth = FakeLinkAuth(),
+        linkAccountManager: FakeLinkAccountManager = FakeLinkAccountManager(),
         dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
         customerInfo: LinkConfiguration.CustomerInfo = TestFactory.LINK_CUSTOMER_INFO,
         moveToWeb: (Throwable) -> Unit = {}
@@ -251,7 +255,7 @@ internal class SignUpScreenTest {
             configuration = TestFactory.LINK_CONFIGURATION.copy(
                 customerInfo = customerInfo
             ),
-            linkAuth = linkAuth,
+            linkAccountManager = linkAccountManager,
             linkEventsReporter = linkEventsReporter,
             logger = logger,
             savedStateHandle = SavedStateHandle(),
