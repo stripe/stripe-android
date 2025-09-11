@@ -91,11 +91,7 @@ internal class ExtendedPaymentElementConfirmationTestActivity : AppCompatActivit
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        confirmationHandler.register(
-            activityResultCaller = this,
-            lifecycleOwner = this,
-            passiveCaptchaParamsFlow = flowOf()
-        )
+        confirmationHandler.register(activityResultCaller = this, lifecycleOwner = this)
     }
 
     class TestViewModel @Inject constructor(

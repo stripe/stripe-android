@@ -55,6 +55,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
+import com.stripe.android.paymentelement.confirmation.BootstrapKey
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -3572,8 +3573,7 @@ internal class PaymentSheetViewModelTest {
         confirmationTest {
             DummyActivityResultCaller.test {
                 val lifecycleOwner = TestLifecycleOwner()
-                val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
-                val viewModel = createViewModel(passiveCaptchaParams = passiveCaptchaParams)
+                val viewModel = createViewModel()
 
                 viewModel.registerForActivityResult(
                     activityResultCaller = activityResultCaller,
@@ -3588,13 +3588,45 @@ internal class PaymentSheetViewModelTest {
 
                 assertThat(confirmationRegisterCall.activityResultCaller).isEqualTo(activityResultCaller)
                 assertThat(confirmationRegisterCall.lifecycleOwner).isEqualTo(lifecycleOwner)
-                confirmationRegisterCall.passiveCaptchaParamsFlow.test {
-                    assertThat(awaitItem()).isEqualTo(passiveCaptchaParams)
-                }
+
+                // Verify bootstrap is called
+                val bootstrapCall = bootstrapTurbine.awaitItem()
+                assertThat(bootstrapCall.lifecycleOwner).isEqualTo(lifecycleOwner)
 
                 lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
                 assertThat(awaitNextUnregisteredLauncher()).isEqualTo(autocompleteLauncher)
+            }
+        }
+
+    @Test
+    fun `On register for activity result with passiveCaptchaParams, should bootstrap confirmation handler`() =
+        confirmationTest {
+            val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            val viewModel = createViewModel(
+                paymentElementLoader = FakePaymentElementLoader(
+                    stripeIntent = PAYMENT_INTENT,
+                    passiveCaptchaParams = passiveCaptchaParams
+                )
+            )
+
+            DummyActivityResultCaller.test {
+                val lifecycleOwner = TestLifecycleOwner()
+
+                viewModel.registerForActivityResult(
+                    activityResultCaller = activityResultCaller,
+                    lifecycleOwner = lifecycleOwner,
+                )
+
+                // Skip the autocomplete and register calls
+                awaitRegisterCall()
+                awaitNextRegisteredLauncher()
+                registerTurbine.awaitItem()
+
+                // Verify bootstrap is called with passiveCaptchaParams
+                val bootstrapCall = bootstrapTurbine.awaitItem()
+                assertThat(bootstrapCall.lifecycleOwner).isEqualTo(lifecycleOwner)
+                assertThat(bootstrapCall.metadata).containsExactly(BootstrapKey.PassiveCaptcha, passiveCaptchaParams)
             }
         }
 
@@ -3804,7 +3836,7 @@ internal class PaymentSheetViewModelTest {
         eventReporter: EventReporter = this.eventReporter,
         cvcRecollectionHandler: CvcRecollectionHandler = this.cvcRecollectionHandler,
         cvcRecollectionInteractor: FakeCvcRecollectionInteractor = FakeCvcRecollectionInteractor(),
-        confirmationHandlerFactory: ConfirmationHandler.Factory? = null,
+        confirmationHandlerFactory: ConfirmationHandler.Factory? = null
     ): PaymentSheetViewModel {
         return TestViewModelFactory.create(
             linkConfigurationCoordinator = linkConfigurationCoordinator,

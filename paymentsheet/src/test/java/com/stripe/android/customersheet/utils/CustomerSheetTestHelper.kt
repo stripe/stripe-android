@@ -5,7 +5,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
-import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
@@ -153,9 +152,7 @@ internal object CustomerSheetTestHelper {
                 linkLauncher = RecordingLinkPaymentLauncher.noOp(),
                 linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
                 cvcRecollectionLauncherFactory = RecordingCvcRecollectionLauncherFactory.noOp(),
-                passiveChallengeWarmer = FakePassiveChallengeWarmer(),
-                publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
-                productUsage = setOf("CustomerSheet"),
+                passiveChallengeWarmer = FakePassiveChallengeWarmer()
             ),
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,
