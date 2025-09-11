@@ -3293,6 +3293,36 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
+    fun `Hides Link if using web flow and collecting extra billing details`() = runTest {
+        val loader = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            linkSettings = createLinkSettings(
+                passthroughModeEnabled = false,
+                useAttestationEndpoints = false,
+            ),
+        )
+
+        val config = PaymentSheet.Configuration(
+            merchantDisplayName = MERCHANT_DISPLAY_NAME,
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            ),
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = config,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        ).getOrThrow()
+
+        assertThat(result.paymentMethodMetadata.linkState).isNull()
+    }
+
+    @Test
     fun `Emits correct load event if Link display is set to 'never'`() = runTest {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
@@ -3732,7 +3762,8 @@ internal class DefaultPaymentElementLoaderTest {
 
     private fun createLinkSettings(
         passthroughModeEnabled: Boolean,
-        linkSignUpOptInFeatureEnabled: Boolean = false
+        linkSignUpOptInFeatureEnabled: Boolean = false,
+        useAttestationEndpoints: Boolean = false,
     ): ElementsSession.LinkSettings {
         return ElementsSession.LinkSettings(
             linkFundingSources = listOf("card", "bank"),
@@ -3741,7 +3772,7 @@ internal class DefaultPaymentElementLoaderTest {
             linkFlags = mapOf(),
             disableLinkSignup = false,
             linkConsumerIncentive = null,
-            useAttestationEndpoints = false,
+            useAttestationEndpoints = useAttestationEndpoints,
             suppress2faModal = false,
             disableLinkRuxInFlowController = false,
             linkEnableDisplayableDefaultValuesInEce = false,
