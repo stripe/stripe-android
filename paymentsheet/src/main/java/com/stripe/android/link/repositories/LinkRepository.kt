@@ -6,6 +6,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.ConsumerSignUpConsentAction
@@ -69,7 +70,7 @@ internal interface LinkRepository {
     suspend fun refreshConsumer(
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?
-    ): Result<ConsumerSession>
+    ): Result<ConsumerSessionRefresh>
 
     /**
      * Sign up for a new Link account.
