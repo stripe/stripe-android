@@ -78,29 +78,29 @@ internal sealed class OnrampAnalyticsEvent(
     )
 
     class CollectPaymentMethodStarted(
-        paymentMethodType: PaymentMethodType,
+        paymentMethodType: PaymentMethodType?,
     ) : OnrampAnalyticsEvent(
         name = "collect_payment_method_started",
         params = mapOf(
-            "payment_method_type" to paymentMethodType.value
+            "payment_method_type" to (paymentMethodType?.value ?: "")
         )
     )
 
     class CollectPaymentMethodCompleted(
-        paymentMethodType: PaymentMethodType
+        paymentMethodType: PaymentMethodType?
     ) : OnrampAnalyticsEvent(
         name = "collect_payment_method_completed",
         params = mapOf(
-            "payment_method_type" to paymentMethodType.value
+            "payment_method_type" to (paymentMethodType?.value ?: "")
         )
     )
 
     class CryptoPaymentTokenCreated(
-        paymentMethodType: PaymentMethodType
+        paymentMethodType: PaymentMethodType?
     ) : OnrampAnalyticsEvent(
         name = "crypto_payment_token_created",
         params = mapOf(
-            "payment_method_type" to paymentMethodType.value
+            "payment_method_type" to (paymentMethodType?.value ?: "")
         )
     )
 
@@ -149,6 +149,7 @@ internal sealed class OnrampAnalyticsEvent(
             UpdatePhoneNumber("update_phone_number"),
             AuthenticateUser("authenticate_user"),
             Authorize("authorize"),
+            CollectPaymentMethod("collect_payment_method"),
             AttachKycInfo("attach_kyc_info"),
             VerifyIdentity("verify_identity"),
             RegisterWalletAddress("register_wallet_address"),

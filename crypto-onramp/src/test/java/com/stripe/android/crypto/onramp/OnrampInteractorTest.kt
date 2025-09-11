@@ -226,7 +226,7 @@ class OnrampInteractorTest {
     }
 
     @Test
-    fun testHandleSelectPaymentResultSuccess() {
+    fun testHandlePresentPaymentMethodsResultSuccess() {
         val context = RuntimeEnvironment.getApplication()
         val paymentMethodPreview = LinkController.PaymentMethodPreview(
             iconRes = 1,
@@ -241,7 +241,7 @@ class OnrampInteractorTest {
         )
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockState))
 
-        val result = interactor.handleSelectPaymentResult(
+        val result = interactor.handlePresentPaymentMethodsResult(
             LinkController.PresentPaymentMethodsResult.Success,
             context
         )

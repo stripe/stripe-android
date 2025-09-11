@@ -29,6 +29,7 @@ import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
+import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
@@ -292,11 +293,23 @@ internal class OnrampInteractor @Inject constructor(
             OnrampVerifyIdentityResult.Cancelled()
     }
 
-    fun handleSelectPaymentResult(
+    fun onCollectPaymentMethod(type: PaymentMethodType) {
+        _state.update { it.copy(collectingPaymentMethodType = type) }
+        analyticsService?.track(
+            OnrampAnalyticsEvent.CollectPaymentMethodStarted(type)
+        )
+    }
+
+    fun handlePresentPaymentMethodsResult(
         result: LinkController.PresentPaymentMethodsResult,
         context: Context,
     ): OnrampCollectPaymentMethodResult = when (result) {
         is LinkController.PresentPaymentMethodsResult.Success -> {
+            analyticsService?.track(
+                OnrampAnalyticsEvent.CollectPaymentMethodCompleted(
+                    paymentMethodType = _state.value.collectingPaymentMethodType
+                )
+            )
             linkController.state(context).value.selectedPaymentMethodPreview?.let {
                 OnrampCollectPaymentMethodResult.Completed(
                     displayData = PaymentMethodDisplayData(
@@ -309,8 +322,15 @@ internal class OnrampInteractor @Inject constructor(
                 OnrampCollectPaymentMethodResult.Failed(MissingPaymentMethodException())
             }
         }
-        is LinkController.PresentPaymentMethodsResult.Failed ->
+        is LinkController.PresentPaymentMethodsResult.Failed -> {
+            analyticsService?.track(
+                OnrampAnalyticsEvent.ErrorOccurred(
+                    operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.CollectPaymentMethod,
+                    error = result.error,
+                )
+            )
             OnrampCollectPaymentMethodResult.Failed(result.error)
+        }
         is LinkController.PresentPaymentMethodsResult.Canceled ->
             OnrampCollectPaymentMethodResult.Cancelled()
     }
@@ -548,6 +568,7 @@ internal class OnrampInteractor @Inject constructor(
 internal data class OnrampState(
     val configuration: OnrampConfiguration? = null,
     val linkControllerState: LinkController.State? = null,
+    val collectingPaymentMethodType: PaymentMethodType? = null,
     val checkoutState: CheckoutState? = null,
     val platformKeyCache: PlatformKeyCache? = null,
 )

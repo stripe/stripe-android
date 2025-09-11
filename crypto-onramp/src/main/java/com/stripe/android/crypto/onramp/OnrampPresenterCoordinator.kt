@@ -40,7 +40,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     private val linkPresenter = linkController.createPresenter(
         activity = activity,
-        presentPaymentMethodsCallback = ::handleSelectPaymentResult,
+        presentPaymentMethodsCallback = ::handlePresentPaymentResult,
         authenticationCallback = ::handleAuthenticationResult,
         authorizeCallback = ::handleAuthorizeResult
     )
@@ -116,6 +116,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     }
 
     fun collectPaymentMethod(type: PaymentMethodType) {
+        interactor.onCollectPaymentMethod(type)
         linkPresenter.presentPaymentMethods(
             email = clientEmail(),
             paymentMethodType = type.toLinkType()
@@ -230,10 +231,10 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
-    private fun handleSelectPaymentResult(result: LinkController.PresentPaymentMethodsResult) {
+    private fun handlePresentPaymentResult(result: LinkController.PresentPaymentMethodsResult) {
         coroutineScope.launch {
             onrampCallbacks.collectPaymentCallback.onResult(
-                interactor.handleSelectPaymentResult(result, activity)
+                interactor.handlePresentPaymentMethodsResult(result, activity)
             )
         }
     }
