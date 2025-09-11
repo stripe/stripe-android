@@ -80,12 +80,27 @@ internal class OnrampInteractor @Inject constructor(
 
     suspend fun hasLinkAccount(email: String): OnrampHasLinkAccountResult {
         return when (val result = linkController.lookupConsumer(email)) {
-            is LinkController.LookupConsumerResult.Success -> OnrampHasLinkAccountResult.Completed(
-                hasLinkAccount = result.isConsumer
-            )
-            is LinkController.LookupConsumerResult.Failed -> OnrampHasLinkAccountResult.Failed(
-                error = result.error
-            )
+            is LinkController.LookupConsumerResult.Success -> {
+                analyticsService?.track(
+                    OnrampAnalyticsEvent.LinkAccountLookupCompleted(
+                        hasLinkAccount = result.isConsumer
+                    )
+                )
+                OnrampHasLinkAccountResult.Completed(
+                    hasLinkAccount = result.isConsumer
+                )
+            }
+            is LinkController.LookupConsumerResult.Failed -> {
+                analyticsService?.track(
+                    OnrampAnalyticsEvent.ErrorOccurred(
+                        operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.HasLinkAccount,
+                        error = result.error,
+                    )
+                )
+                OnrampHasLinkAccountResult.Failed(
+                    error = result.error
+                )
+            }
         }
     }
 

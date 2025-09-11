@@ -1,5 +1,8 @@
 package com.stripe.android.crypto.onramp.analytics
 
+import com.stripe.android.core.exception.safeAnalyticsMessage
+import com.stripe.android.crypto.onramp.model.PaymentMethodType
+
 /**
  * Event definitions for Crypto Onramp.
  */
@@ -75,29 +78,29 @@ internal sealed class OnrampAnalyticsEvent(
     )
 
     class CollectPaymentMethodStarted(
-        paymentMethodType: String
+        paymentMethodType: PaymentMethodType,
     ) : OnrampAnalyticsEvent(
         name = "collect_payment_method_started",
         params = mapOf(
-            "payment_method_type" to paymentMethodType
+            "payment_method_type" to paymentMethodType.value
         )
     )
 
     class CollectPaymentMethodCompleted(
-        paymentMethodType: String
+        paymentMethodType: PaymentMethodType
     ) : OnrampAnalyticsEvent(
         name = "collect_payment_method_completed",
         params = mapOf(
-            "payment_method_type" to paymentMethodType
+            "payment_method_type" to paymentMethodType.value
         )
     )
 
     class CryptoPaymentTokenCreated(
-        paymentMethodType: String
+        paymentMethodType: PaymentMethodType
     ) : OnrampAnalyticsEvent(
         name = "crypto_payment_token_created",
         params = mapOf(
-            "payment_method_type" to paymentMethodType
+            "payment_method_type" to paymentMethodType.value
         )
     )
 
@@ -130,13 +133,13 @@ internal sealed class OnrampAnalyticsEvent(
     )
 
     class ErrorOccurred(
-        operationName: Operation,
-        errorMessage: String
+        operation: Operation,
+        error: Throwable
     ) : OnrampAnalyticsEvent(
-        name = "error_occured",
+        name = "error_occurred",
         params = mapOf(
-            "operation_name" to operationName.value,
-            "error_message" to errorMessage
+            "operation_name" to operation.value,
+            "error_message" to error.safeAnalyticsMessage
         )
     ) {
         enum class Operation(val value: String) {
