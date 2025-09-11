@@ -4,6 +4,8 @@ import android.app.Application
 import android.content.Context
 import com.stripe.android.core.utils.flatMapCatching
 import com.stripe.android.crypto.onramp.CheckoutState.Status
+import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
+import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
 import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
 import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
 import com.stripe.android.crypto.onramp.exception.MissingPlatformSettingsException
@@ -47,9 +49,12 @@ internal class OnrampInteractor @Inject constructor(
     private val application: Application,
     private val linkController: LinkController,
     private val cryptoApiRepository: CryptoApiRepository,
+    private val analyticsServiceFactory: OnrampAnalyticsService.Factory,
 ) {
     private val _state = MutableStateFlow(OnrampState())
     val state: StateFlow<OnrampState> = _state.asStateFlow()
+
+    private var analyticsService: OnrampAnalyticsService? = null
 
     suspend fun configure(configuration: OnrampConfiguration): OnrampConfigurationResult {
         _state.value = _state.value.copy(configuration = configuration)
@@ -300,6 +305,11 @@ internal class OnrampInteractor @Inject constructor(
             ?: linkController.state(application).value.internalLinkAccount?.consumerSessionClientSecret
 
     fun onLinkControllerState(linkState: LinkController.State) {
+        if (analyticsService?.elementsSessionId != linkState.elementsSessionId) {
+            analyticsService = linkState.elementsSessionId
+                ?.let { analyticsServiceFactory.create(it) }
+            analyticsService?.track(OnrampAnalyticsEvent.SessionCreated)
+        }
         _state.value = _state.value.copy(linkControllerState = linkState)
     }
 
