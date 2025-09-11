@@ -1266,9 +1266,7 @@ internal class PaymentSheetActivityTest {
                     errorReporter = FakeErrorReporter(),
                     linkConfigurationCoordinator = coordinator,
                     cvcRecollectionLauncherFactory = RecordingCvcRecollectionLauncherFactory.noOp(),
-                    publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
-                    passiveChallengeWarmer = FakePassiveChallengeWarmer(),
-                    productUsage = setOf("PaymentSheet")
+                    passiveChallengeWarmer = FakePassiveChallengeWarmer()
                 ),
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 errorReporter = FakeErrorReporter(),

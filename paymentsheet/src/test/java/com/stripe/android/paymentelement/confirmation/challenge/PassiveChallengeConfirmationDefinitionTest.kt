@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation.challenge
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.challenge.PassiveChallengeActivityContract
 import com.stripe.android.challenge.PassiveChallengeActivityResult
+import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PassiveCaptchaParams
@@ -24,6 +25,7 @@ import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeActivityResultLauncher
+import com.stripe.android.utils.FakePassiveChallengeWarmer
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
@@ -383,10 +385,16 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
     private fun createPassiveChallengeConfirmationDefinition(
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        passiveChallengeWarmer: PassiveChallengeWarmer = FakePassiveChallengeWarmer(),
         publishableKey: String = launcherArgs.publishableKey,
         productUsage: Set<String> = launcherArgs.productUsage
     ): PassiveChallengeConfirmationDefinition {
-        return PassiveChallengeConfirmationDefinition(errorReporter, { publishableKey }, productUsage)
+        return PassiveChallengeConfirmationDefinition(
+            errorReporter = errorReporter,
+            publishableKeyProvider = { publishableKey },
+            productUsage = productUsage,
+            passiveChallengeWarmer = passiveChallengeWarmer
+        )
     }
 
     private companion object {

@@ -4,7 +4,6 @@ package com.stripe.android.paymentelement.embedded.form
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.Turbine
-import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
@@ -12,6 +11,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.confirmation.BootstrapKey
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -112,6 +112,7 @@ class DefaultFormActivityConfirmationHelperTest {
         val stateHelper = FakeFormActivityStateHelper()
         val onClickDelegate = OnClickDelegateOverrideImpl()
         val eventReporter = FakeEventReporter()
+        val testLifecycleOwner = TestLifecycleOwner(coroutineDispatcher = Dispatchers.Unconfined)
         val confirmationHelper = DefaultFormActivityConfirmationHelper(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
@@ -125,17 +126,16 @@ class DefaultFormActivityConfirmationHelperTest {
             stateHelper = stateHelper,
             onClickDelegate = onClickDelegate,
             eventReporter = eventReporter,
-            lifecycleOwner = TestLifecycleOwner(coroutineDispatcher = Dispatchers.Unconfined),
+            lifecycleOwner = testLifecycleOwner,
             activityResultCaller = mock(),
             coroutineScope = this,
         )
-        val registerCall = confirmationHandler.registerTurbine.awaitItem()
-        assertThat(registerCall).isNotNull()
-        registerCall.passiveCaptchaParamsFlow.test {
-            assertThat(awaitItem()).isEqualTo(passiveCaptchaParams)
-            awaitComplete()
-        }
+        assertThat(confirmationHandler.registerTurbine.awaitItem()).isNotNull()
         assertThat(stateHelper.updateTurbine.awaitItem()).isEqualTo(ConfirmationHandler.State.Idle)
+        with(confirmationHandler.bootstrapTurbine.awaitItem()) {
+            assertThat(metadata).containsExactly(BootstrapKey.PassiveCaptcha, passiveCaptchaParams)
+            assertThat(lifecycleOwner).isEqualTo(testLifecycleOwner)
+        }
         Scenario(
             confirmationHelper = confirmationHelper,
             confirmationHandler = confirmationHandler,

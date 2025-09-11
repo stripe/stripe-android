@@ -38,6 +38,7 @@ import com.stripe.android.link.utils.TestNavigationManager
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.networking.RequestSurface
+import com.stripe.android.paymentelement.confirmation.BootstrapKey
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentsheet.addresselement.AutocompleteActivityLauncher
@@ -124,11 +125,32 @@ internal class LinkActivityViewModelTest {
                 assertThat(autocompleteRegisterCall.activityResultCaller).isEqualTo(activityResultCaller)
                 assertThat(confirmationHandlerRegisterCall.activityResultCaller).isEqualTo(activityResultCaller)
                 assertThat(confirmationHandlerRegisterCall.lifecycleOwner).isEqualTo(lifecycleOwner)
-                confirmationHandlerRegisterCall.passiveCaptchaParamsFlow.test {
-                    assertThat(awaitItem()).isEqualTo(passiveCaptchaParams)
-                    awaitComplete()
-                }
             }
+        }
+
+    @Test
+    fun `test that registerForActivityResult bootstraps confirmation handler with passiveCaptchaParams`() =
+        runTest(dispatcher) {
+            val confirmationHandler = FakeConfirmationHandler()
+            val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            val vm = createViewModel(
+                confirmationHandler = confirmationHandler,
+                passiveCaptchaParams = passiveCaptchaParams
+            )
+
+            val activityResultCaller = DummyActivityResultCaller.noOp()
+            val lifecycleOwner = object : LifecycleOwner {
+                override val lifecycle: Lifecycle = mock()
+            }
+
+            vm.registerForActivityResult(
+                activityResultCaller = activityResultCaller,
+                lifecycleOwner = lifecycleOwner
+            )
+
+            val bootstrapCall = confirmationHandler.bootstrapTurbine.awaitItem()
+            assertThat(bootstrapCall.lifecycleOwner).isEqualTo(lifecycleOwner)
+            assertThat(bootstrapCall.metadata).containsExactly(BootstrapKey.PassiveCaptcha, passiveCaptchaParams)
         }
 
     @Test

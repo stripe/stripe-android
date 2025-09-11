@@ -1,13 +1,16 @@
 package com.stripe.android.paymentelement.confirmation.challenge
 
+import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.challenge.PassiveChallengeActivityContract
 import com.stripe.android.challenge.PassiveChallengeActivityResult
+import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.RadarOptions
+import com.stripe.android.paymentelement.confirmation.BootstrapKey
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -19,6 +22,7 @@ import javax.inject.Named
 
 internal class PassiveChallengeConfirmationDefinition @Inject constructor(
     private val errorReporter: ErrorReporter,
+    private val passiveChallengeWarmer: PassiveChallengeWarmer,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>
 ) : ConfirmationDefinition<
@@ -31,6 +35,15 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
 
     override fun option(confirmationOption: ConfirmationHandler.Option): PaymentMethodConfirmationOption? {
         return confirmationOption as? PaymentMethodConfirmationOption
+    }
+
+    override fun bootstrap(metadata: Map<BootstrapKey<*>, Parcelable>) {
+        val passiveCaptchaParams = BootstrapKey.PassiveCaptcha.toValue(metadata) ?: return
+        passiveChallengeWarmer.start(
+            passiveCaptchaParams = passiveCaptchaParams,
+            publishableKey = publishableKeyProvider(),
+            productUsage = productUsage
+        )
     }
 
     override fun canConfirm(

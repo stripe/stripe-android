@@ -72,6 +72,10 @@ internal class ConfirmationMediator<
         }
     }
 
+    fun bootstrap(metadata: Map<BootstrapKey<*>, Parcelable>) {
+        definition.bootstrap(metadata)
+    }
+
     fun unregister() {
         launcher?.let {
             definition.unregister(it)

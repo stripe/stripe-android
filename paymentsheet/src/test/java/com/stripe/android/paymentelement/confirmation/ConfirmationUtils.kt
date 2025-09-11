@@ -42,9 +42,7 @@ internal fun createTestConfirmationHandlerFactory(
     paymentConfiguration: PaymentConfiguration,
     statusBarColor: Int?,
     errorReporter: ErrorReporter,
-    passiveChallengeWarmer: FakePassiveChallengeWarmer,
-    publishableKeyProvider: () -> String,
-    productUsage: Set<String>
+    passiveChallengeWarmer: FakePassiveChallengeWarmer
 ): ConfirmationHandler.Factory {
     return DefaultConfirmationHandler.Factory(
         registry = ConfirmationRegistry(
@@ -95,9 +93,7 @@ internal fun createTestConfirmationHandlerFactory(
         savedStateHandle = savedStateHandle,
         errorReporter = FakeErrorReporter(),
         ioContext = Dispatchers.Unconfined,
-        passiveChallengeWarmer = passiveChallengeWarmer,
-        publishableKeyProvider = publishableKeyProvider,
-        productUsage = productUsage
+        passiveChallengeWarmer = passiveChallengeWarmer
     )
 }
 

@@ -38,6 +38,7 @@ import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.bootstrap
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -132,12 +133,12 @@ internal class DefaultFlowController @Inject internal constructor(
         }
 
     init {
-        confirmationHandler.register(
-            activityResultCaller = activityResultCaller,
-            lifecycleOwner = lifecycleOwner,
+        confirmationHandler.register(activityResultCaller, lifecycleOwner)
+        confirmationHandler.bootstrap(
             passiveCaptchaParamsFlow = viewModel.stateFlow.map {
                 it?.paymentSheetState?.paymentMethodMetadata?.passiveCaptchaParams
-            }
+            },
+            lifecycleOwner = lifecycleOwner
         )
 
         paymentOptionActivityLauncher = activityResultCaller.registerForActivityResult(

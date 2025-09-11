@@ -10,7 +10,6 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import app.cash.turbine.plusAssign
-import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
@@ -49,10 +48,10 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
+import com.stripe.android.paymentelement.confirmation.BootstrapKey
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
-import com.stripe.android.paymentelement.confirmation.asOption
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
@@ -2367,6 +2366,19 @@ internal class DefaultFlowControllerTest {
         assertThat(arguments.shippingDetails).isNull()
     }
 
+    @Test
+    fun `on init, bootstrap is called when passive captcha params is available`() = confirmationTest {
+        val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+        val viewModel = createViewModel()
+        val flowController = createFlowController(viewModel = viewModel, passiveCaptchaParams = passiveCaptchaParams)
+        flowController.configureExpectingSuccess()
+
+        with(bootstrapTurbine.awaitItem()) {
+            assertThat(metadata).containsExactly(BootstrapKey.PassiveCaptcha, passiveCaptchaParams)
+            assertThat(this.lifecycleOwner).isEqualTo(lifecycleOwner)
+        }
+    }
+
     private fun selectionSavedTest(
         customerRequestedSave: PaymentSelection.CustomerRequestedSave =
             PaymentSelection.CustomerRequestedSave.NoRequest,
@@ -2439,99 +2451,6 @@ internal class DefaultFlowControllerTest {
         }
     }
 
-    private suspend fun FakeConfirmationHandler.Scenario.testPassiveCaptchaParams(
-        paymentSelection: PaymentSelection,
-        linkState: LinkState? = null,
-        paymentMethodTypes: List<String> = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.paymentMethodTypes,
-        assertionBlock: (ConfirmationHandler.Args, PassiveCaptchaParams) -> Unit
-    ) {
-        val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
-        val flowController = createFlowController(
-            paymentSelection = paymentSelection,
-            linkState = linkState,
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = paymentMethodTypes
-            ),
-            passiveCaptchaParams = passiveCaptchaParams,
-        )
-
-        flowController.configureExpectingSuccess(
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-        )
-
-        flowController.confirm()
-
-        val arguments = startTurbine.awaitItem()
-
-        assertionBlock(arguments, passiveCaptchaParams)
-    }
-
-    @Test
-    fun `confirm Link should pass passive captcha params when available in PaymentMethodMetadata`() = confirmationTest {
-        testPassiveCaptchaParams(
-            paymentSelection = PaymentSelection.Link(),
-            linkState = LinkState(
-                configuration = TestFactory.LINK_CONFIGURATION,
-                loginState = LinkState.LoginState.LoggedOut,
-                signupMode = null,
-            ),
-            paymentMethodTypes = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.paymentMethodTypes.plus("link")
-        ) { arguments, passiveCaptchaParams ->
-            assertThat(arguments.confirmationOption.asOption<LinkConfirmationOption>().passiveCaptchaParams)
-                .isEqualTo(passiveCaptchaParams)
-        }
-    }
-
-    @Test
-    fun `confirm should pass passive captcha params when available in PaymentMethodMetadata`() = confirmationTest {
-        testPassiveCaptchaParams(
-            paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
-        ) { arguments, passiveCaptchaParams ->
-            assertThat(
-                arguments.confirmationOption
-                    .asOption<PaymentMethodConfirmationOption.New>()
-                    .passiveCaptchaParams
-            ).isEqualTo(passiveCaptchaParams)
-        }
-    }
-
-    @Test
-    fun `confirmation handler is registered on configuration`() = confirmationTest {
-        createFlowController(
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
-            awaitConfirmationHandlerRegistration = false
-        )
-
-        val registerCall = registerTurbine.awaitItem()
-
-        assertThat(registerCall.activityResultCaller).isEqualTo(activityResultCaller)
-        assertThat(registerCall.lifecycleOwner).isEqualTo(lifecycleOwner)
-        registerCall.passiveCaptchaParamsFlow.test {
-            // passive captcha params only available on intent configuration
-            assertThat(awaitItem()).isEqualTo(null)
-        }
-    }
-
-    @Test
-    fun `passiveCaptchaParamsFlow contains correct values on intent configuration`() = confirmationTest {
-        val expectedPassiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
-
-        val flowController = createFlowController(
-            passiveCaptchaParams = expectedPassiveCaptchaParams,
-            awaitConfirmationHandlerRegistration = false
-        )
-
-        val registerCall = registerTurbine.awaitItem()
-
-        assertThat(registerCall.activityResultCaller).isEqualTo(activityResultCaller)
-        assertThat(registerCall.lifecycleOwner).isEqualTo(lifecycleOwner)
-        registerCall.passiveCaptchaParamsFlow.test {
-            assertThat(awaitItem()).isEqualTo(null)
-            flowController.configureExpectingSuccess()
-            assertThat(awaitItem()).isEqualTo(expectedPassiveCaptchaParams)
-        }
-    }
-
     private suspend fun FakeConfirmationHandler.Scenario.createAndConfigureFlowControllerForDeferredIntent(
         paymentIntent: PaymentIntent = PaymentIntentFixtures.PI_SUCCEEDED,
         intentConfiguration: PaymentSheet.IntentConfiguration = PaymentSheet.IntentConfiguration(
@@ -2579,22 +2498,20 @@ internal class DefaultFlowControllerTest {
         errorReporter: ErrorReporter = FakeErrorReporter(),
         eventReporter: EventReporter = this@DefaultFlowControllerTest.eventReporter,
         passiveCaptchaParams: PassiveCaptchaParams? = null,
-        awaitConfirmationHandlerRegistration: Boolean = true
     ): DefaultFlowController {
         return createFlowController(
-            paymentElementLoader = FakePaymentElementLoader(
+            FakePaymentElementLoader(
                 customer = customer,
                 stripeIntent = stripeIntent,
                 paymentSelection = paymentSelection,
                 linkState = linkState,
                 passiveCaptchaParams = passiveCaptchaParams,
             ),
-            viewModel = viewModel,
-            errorReporter = errorReporter,
-            eventReporter = eventReporter,
-            confirmationHandler = handler
+            viewModel,
+            errorReporter,
+            eventReporter,
+            handler,
         ).also {
-            if (awaitConfirmationHandlerRegistration.not()) return@also
             val registerCall = registerTurbine.awaitItem()
 
             assertThat(registerCall.activityResultCaller).isEqualTo(activityResultCaller)
@@ -2616,7 +2533,7 @@ internal class DefaultFlowControllerTest {
         eventReporter: EventReporter = this.eventReporter,
         confirmationHandler: ConfirmationHandler? = null,
         linkHandler: LinkHandler? = null,
-        passiveCaptchaParams: PassiveCaptchaParams? = null,
+        passiveCaptchaParams: PassiveCaptchaParams? = null
     ): DefaultFlowController {
         return createFlowController(
             FakePaymentElementLoader(
@@ -2678,7 +2595,7 @@ internal class DefaultFlowControllerTest {
             walletsButtonLinkLauncher = walletsButtonLinkPaymentLauncher,
             activityResultRegistryOwner = mock(),
             linkGateFactory = { linkGate },
-            confirmationHandler = confirmationHandler ?: FakeConfirmationHandler()
+            confirmationHandler = confirmationHandler ?: FakeConfirmationHandler(),
         )
     }
 
@@ -2696,7 +2613,7 @@ internal class DefaultFlowControllerTest {
             label = "Test".resolvableString,
             iconResource = 0,
             iconResourceNight = null,
-            paymentMethodCreateParams = PaymentMethodCreateParams.create(
+            paymentMethodCreateParams = PaymentMethodCreateParams.Companion.create(
                 bacsDebit = PaymentMethodCreateParams.BacsDebit(
                     accountNumber = BACS_ACCOUNT_NUMBER,
                     sortCode = BACS_SORT_CODE

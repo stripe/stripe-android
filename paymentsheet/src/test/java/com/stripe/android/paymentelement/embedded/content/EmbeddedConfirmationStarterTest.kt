@@ -5,8 +5,10 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.confirmation.BootstrapKey
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
@@ -14,6 +16,7 @@ import com.stripe.android.paymentelement.confirmation.assertSucceeded
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.DummyActivityResultCaller
@@ -22,34 +25,50 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import kotlin.test.Test
 
 class EmbeddedConfirmationStarterTest {
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
+
     @Test
-    fun `on register, should call 'register' on confirmation handler`() {
-        val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+    fun `on register, should call 'register' on confirmation handler`() = test {
+        val activityResultCaller = DummyActivityResultCaller.noOp()
+        val lifecycleOwner = TestLifecycleOwner(
+            coroutineDispatcher = Dispatchers.Unconfined,
+        )
 
-        testWithState(
-            passiveCaptchaParams = passiveCaptchaParams
-        ) {
-            val activityResultCaller = DummyActivityResultCaller.noOp()
-            val lifecycleOwner = TestLifecycleOwner(
-                coroutineDispatcher = Dispatchers.Unconfined,
-            )
+        confirmationStarter.register(
+            activityResultCaller = activityResultCaller,
+            lifecycleOwner = lifecycleOwner
+        )
 
-            confirmationStarter.register(
-                activityResultCaller = activityResultCaller,
-                lifecycleOwner = lifecycleOwner
-            )
+        val registerCall = confirmationHandler.registerTurbine.awaitItem()
 
-            val registerCall = confirmationHandler.registerTurbine.awaitItem()
+        assertThat(registerCall.activityResultCaller).isEqualTo(activityResultCaller)
+        assertThat(registerCall.lifecycleOwner).isEqualTo(lifecycleOwner)
+    }
 
-            assertThat(registerCall.activityResultCaller).isEqualTo(activityResultCaller)
-            assertThat(registerCall.lifecycleOwner).isEqualTo(lifecycleOwner)
-            registerCall.passiveCaptchaParamsFlow.test {
-                assertThat(awaitItem()).isEqualTo(passiveCaptchaParams)
-            }
-        }
+    @Test
+    fun `on register, should bootstrap confirmation handler`() = test(
+        passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+    ) {
+        val activityResultCaller = DummyActivityResultCaller.noOp()
+        val lifecycleOwner = TestLifecycleOwner()
+
+        confirmationStarter.register(
+            activityResultCaller = activityResultCaller,
+            lifecycleOwner = lifecycleOwner
+        )
+
+        // Skip the register call
+        confirmationHandler.registerTurbine.awaitItem()
+
+        val bootstrapCall = confirmationHandler.bootstrapTurbine.awaitItem()
+        assertThat(bootstrapCall.lifecycleOwner).isEqualTo(lifecycleOwner)
+        assertThat(bootstrapCall.metadata)
+            .containsExactly(BootstrapKey.PassiveCaptcha, PassiveCaptchaParamsFactory.passiveCaptchaParams())
     }
 
     @Test
@@ -131,16 +150,17 @@ class EmbeddedConfirmationStarterTest {
 
     private fun test(
         confirmationState: ConfirmationHandler.State = ConfirmationHandler.State.Idle,
+        passiveCaptchaParams: PassiveCaptchaParams? = null,
         block: suspend Scenario.() -> Unit,
     ) = testWithState(
         confirmationState = confirmationState,
-        passiveCaptchaParams = null,
+        passiveCaptchaParams = passiveCaptchaParams,
         block = block
     )
 
     private fun testWithState(
         confirmationState: ConfirmationHandler.State = ConfirmationHandler.State.Idle,
-        passiveCaptchaParams: com.stripe.android.model.PassiveCaptchaParams? = null,
+        passiveCaptchaParams: PassiveCaptchaParams? = null,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val confirmationHandler = FakeConfirmationHandler(

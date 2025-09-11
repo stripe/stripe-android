@@ -36,6 +36,7 @@ import com.stripe.android.link.ui.wallet.AddPaymentMethodOptions
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.bootstrap
 import com.stripe.android.paymentsheet.addresselement.AutocompleteActivityLauncher
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
@@ -51,7 +52,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -217,11 +217,10 @@ internal class LinkActivityViewModel @Inject constructor(
         lifecycleOwner: LifecycleOwner,
     ) {
         autocompleteLauncher.register(activityResultCaller, lifecycleOwner)
-        confirmationHandler.register(
-            activityResultCaller = activityResultCaller,
-            lifecycleOwner = lifecycleOwner,
-            passiveCaptchaParamsFlow = flowOf(passiveCaptchaParams)
-        )
+        confirmationHandler.register(activityResultCaller, lifecycleOwner)
+        if (passiveCaptchaParams != null) {
+            confirmationHandler.bootstrap(passiveCaptchaParams, lifecycleOwner)
+        }
     }
 
     fun navigate(screen: LinkScreen, clearStack: Boolean, launchSingleTop: Boolean = false) {

@@ -18,7 +18,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateCon
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionContract
 import com.stripe.android.shoppay.ShopPayActivityContract
 import com.stripe.android.utils.DummyActivityResultCaller
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -40,8 +39,7 @@ class ExtendedPaymentElementConfirmationOrderTest {
 
             viewModel.confirmationHandler.register(
                 activityResultCaller = activityResultCaller,
-                lifecycleOwner = TestLifecycleOwner(),
-                passiveCaptchaParamsFlow = flowOf()
+                lifecycleOwner = TestLifecycleOwner()
             )
 
             assertThat(awaitRegisterCall().contract).isInstanceOf<BacsMandateConfirmationContract>()
