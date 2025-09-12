@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.resolvableString
@@ -30,6 +31,7 @@ internal class DefaultConfirmationHandler(
     private val savedStateHandle: SavedStateHandle,
     private val errorReporter: ErrorReporter,
     private val ioContext: CoroutineContext,
+    private val passiveChallengeWarmer: PassiveChallengeWarmer
 ) : ConfirmationHandler {
     private val isInitiallyAwaitingForResultData = retrieveIsAwaitingForResultData()
 
@@ -64,10 +66,14 @@ internal class DefaultConfirmationHandler(
         }
     }
 
-    override fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
+    override fun register(
+        activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
+    ) {
         mediators.forEach { mediator ->
             mediator.register(activityResultCaller, ::onResult)
         }
+        passiveChallengeWarmer.register(activityResultCaller, lifecycleOwner)
 
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
@@ -79,6 +85,17 @@ internal class DefaultConfirmationHandler(
                 }
             }
         )
+    }
+
+    override fun bootstrap(
+        metadata: Map<BootstrapKey<*>, Parcelable>,
+        lifecycleOwner: LifecycleOwner
+    ) {
+//        lifecycleOwner.lifecycleScope.launch {
+        mediators.forEach { mediator ->
+            mediator.bootstrap(metadata)
+        }
+//        }
     }
 
     override suspend fun start(
@@ -283,6 +300,7 @@ internal class DefaultConfirmationHandler(
         private val savedStateHandle: SavedStateHandle,
         private val errorReporter: ErrorReporter,
         @IOContext private val ioContext: CoroutineContext,
+        private val passiveChallengeWarmer: PassiveChallengeWarmer
     ) : ConfirmationHandler.Factory {
         override fun create(scope: CoroutineScope): ConfirmationHandler {
             return DefaultConfirmationHandler(
@@ -291,6 +309,7 @@ internal class DefaultConfirmationHandler(
                 errorReporter = errorReporter,
                 savedStateHandle = savedStateHandle,
                 ioContext = ioContext,
+                passiveChallengeWarmer = passiveChallengeWarmer
             )
         }
     }

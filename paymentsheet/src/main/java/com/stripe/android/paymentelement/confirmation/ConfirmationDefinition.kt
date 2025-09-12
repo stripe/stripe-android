@@ -118,6 +118,8 @@ internal interface ConfirmationDefinition<
         result: TLauncherResult,
     ): Result
 
+    fun bootstrap(metadata: Map<BootstrapKey<*>, Parcelable>) {}
+
     /**
      * A set of general parameters that can be used to make confirmation decisions
      */

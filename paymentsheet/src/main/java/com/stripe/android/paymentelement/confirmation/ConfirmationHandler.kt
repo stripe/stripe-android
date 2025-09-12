@@ -37,6 +37,11 @@ internal interface ConfirmationHandler {
      */
     fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner)
 
+    fun bootstrap(
+        metadata: Map<BootstrapKey<*>, Parcelable>,
+        lifecycleOwner: LifecycleOwner
+    )
+
     /**
      * Starts the confirmation process. Results can be received through [state] or through [awaitResult].
      *

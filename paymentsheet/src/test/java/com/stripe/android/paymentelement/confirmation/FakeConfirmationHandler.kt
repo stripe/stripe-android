@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation
 
+import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import app.cash.turbine.Turbine
@@ -12,17 +13,22 @@ internal class FakeConfirmationHandler(
     val registerTurbine: Turbine<RegisterCall> = Turbine()
     val startTurbine: Turbine<ConfirmationHandler.Args> = Turbine()
     val awaitResultTurbine: Turbine<ConfirmationHandler.Result?> = Turbine(null)
+    val bootstrapTurbine: Turbine<BootstrapCall> = Turbine()
 
-    override fun register(
-        activityResultCaller: ActivityResultCaller,
-        lifecycleOwner: LifecycleOwner
-    ) {
+    override fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
         registerTurbine.add(
             RegisterCall(
                 activityResultCaller = activityResultCaller,
-                lifecycleOwner = lifecycleOwner,
+                lifecycleOwner = lifecycleOwner
             )
         )
+    }
+
+    override fun bootstrap(
+        metadata: Map<BootstrapKey<*>, Parcelable>,
+        lifecycleOwner: LifecycleOwner
+    ) {
+        bootstrapTurbine.add(BootstrapCall(metadata, lifecycleOwner))
     }
 
     override suspend fun start(arguments: ConfirmationHandler.Args) {
@@ -36,12 +42,18 @@ internal class FakeConfirmationHandler(
     fun validate() {
         registerTurbine.ensureAllEventsConsumed()
         startTurbine.ensureAllEventsConsumed()
+        bootstrapTurbine.ensureAllEventsConsumed()
         awaitResultTurbine.ensureAllEventsConsumed()
     }
 
     data class RegisterCall(
         val activityResultCaller: ActivityResultCaller,
-        val lifecycleOwner: LifecycleOwner,
+        val lifecycleOwner: LifecycleOwner
+    )
+
+    data class BootstrapCall(
+        val metadata: Map<BootstrapKey<*>, Parcelable>,
+        val lifecycleOwner: LifecycleOwner
     )
 
     class Scenario(
@@ -50,6 +62,7 @@ internal class FakeConfirmationHandler(
         val registerTurbine: Turbine<RegisterCall>,
         val startTurbine: Turbine<ConfirmationHandler.Args>,
         val awaitResultTurbine: Turbine<ConfirmationHandler.Result?>,
+        val bootstrapTurbine: Turbine<BootstrapCall>
     )
 
     companion object {
@@ -72,6 +85,7 @@ internal class FakeConfirmationHandler(
                     registerTurbine = handler.registerTurbine,
                     startTurbine = handler.startTurbine,
                     awaitResultTurbine = handler.awaitResultTurbine,
+                    bootstrapTurbine = handler.bootstrapTurbine
                 )
             )
 

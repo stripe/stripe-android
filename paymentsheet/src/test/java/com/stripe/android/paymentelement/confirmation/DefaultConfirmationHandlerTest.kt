@@ -8,6 +8,7 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
@@ -21,6 +22,7 @@ import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.DummyActivityResultCaller
+import com.stripe.android.utils.FakePassiveChallengeWarmer
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -582,6 +584,28 @@ class DefaultConfirmationHandlerTest {
     }
 
     @Test
+    fun `On register, should register passive challenge warmer`() = test(shouldRegister = false) {
+        val fakePassiveChallengeWarmer = FakePassiveChallengeWarmer()
+        val confirmationHandler = createDefaultConfirmationHandler(
+            dispatcher = StandardTestDispatcher(),
+            passiveChallengeWarmer = fakePassiveChallengeWarmer
+        )
+
+        val activityResultCaller = DummyActivityResultCaller.noOp()
+        val lifecycleOwner = TestLifecycleOwner()
+
+        confirmationHandler.register(
+            activityResultCaller = activityResultCaller,
+            lifecycleOwner = lifecycleOwner
+        )
+
+        val registerCall = fakePassiveChallengeWarmer.awaitRegisterCall()
+
+        assertThat(registerCall.activityResultCaller).isEqualTo(activityResultCaller)
+        assertThat(registerCall.lifecycleOwner).isEqualTo(lifecycleOwner)
+    }
+
+    @Test
     fun `On 'awaitResult', should wait until result is received if confirmation process was started`() {
         val dispatcher = StandardTestDispatcher()
 
@@ -813,6 +837,7 @@ class DefaultConfirmationHandlerTest {
             )
         ),
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        passiveChallengeWarmer: PassiveChallengeWarmer = FakePassiveChallengeWarmer()
     ): DefaultConfirmationHandler {
         return DefaultConfirmationHandler(
             mediators = mediators,
@@ -820,6 +845,7 @@ class DefaultConfirmationHandlerTest {
             errorReporter = errorReporter,
             savedStateHandle = savedStateHandle,
             ioContext = dispatcher,
+            passiveChallengeWarmer = passiveChallengeWarmer
         )
     }
 
