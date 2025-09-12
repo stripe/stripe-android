@@ -84,7 +84,6 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         },
         config,
         readyCallback,
-        DefaultCardBrandFilter
     )
 
     /**
@@ -113,7 +112,6 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         },
         config,
         readyCallback,
-        DefaultCardBrandFilter
     )
 
     internal constructor(
@@ -122,7 +120,6 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
         config: Config,
         readyCallback: ReadyCallback,
-        cardBrandFilter: CardBrandFilter
     ) : this(
         lifecycleScope,
         config,
@@ -140,10 +137,11 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
                     productUsage = setOf(PRODUCT_USAGE_TOKEN),
-                )
+                ),
+                cardBrandFilter = config.cardBrandFilter
             )
         },
-        cardBrandFilter = cardBrandFilter
+        cardBrandFilter = config.cardBrandFilter
     )
 
     init {
@@ -264,7 +262,13 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
          *
          * Default: The credit card class is supported for the card networks specified.
          */
-        var allowCreditCards: Boolean = true
+        var allowCreditCards: Boolean = true,
+        /**
+         * Allows to filter card brands while saving a payment method
+         *
+         * Default: Accepts all card brands
+         */
+        var cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
     ) : Parcelable {
 
         internal val isJcbEnabled: Boolean
@@ -420,7 +424,6 @@ fun rememberGooglePayPaymentMethodLauncher(
             readyCallback = {
                 currentReadyCallback.onReady(it)
             },
-            cardBrandFilter = DefaultCardBrandFilter
         )
     }
 }
