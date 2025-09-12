@@ -857,7 +857,8 @@ internal class LinkActivityViewModelTest {
             linkAuthIntentStatus = LinkAuthIntent.Status.Created,
             assertionBlock = {
                 val activityResult = awaitItem() as LinkActivityResult.Failed
-                assertThat(activityResult.error.message).contains("Unexpected LAI status when account is verified: Created")
+                assertThat(activityResult.error.message)
+                    .contains("Unexpected LAI status when account is verified: Created")
             }
         )
 
@@ -867,12 +868,13 @@ internal class LinkActivityViewModelTest {
             linkAuthIntentStatus = LinkAuthIntent.Status.Expired,
             assertionBlock = {
                 val activityResult = awaitItem() as LinkActivityResult.Failed
-                assertThat(activityResult.error.message).contains("Unexpected LAI status when account is verified: Expired")
+                assertThat(activityResult.error.message)
+                    .contains("Unexpected LAI status when account is verified: Expired")
             }
         )
 
     @Test
-    fun `getScreenStateForAuthorizationAfterRefresh should navigate to OAuthConsent when status is Authenticated with FullScreen consent`() =
+    fun `getScreenStateForAuthorizationAfterRefresh navigates to OAuthConsent with Authenticated FullScreen consent`() =
         testGetScreenStateForAuthorizationAfterRefresh(
             linkAuthIntentStatus = LinkAuthIntent.Status.Authenticated,
             consentPresentation = ConsentPresentation.FullScreen(TestFactory.CONSENT_PANE),
@@ -880,7 +882,7 @@ internal class LinkActivityViewModelTest {
         )
 
     @Test
-    fun `getScreenStateForAuthorizationAfterRefresh should complete when status is Authenticated with non-FullScreen consent`() =
+    fun `getScreenStateForAuthorizationAfterRefresh completes with Authenticated non-FullScreen consent`() =
         testGetScreenStateForAuthorizationAfterRefresh(
             linkAuthIntentStatus = LinkAuthIntent.Status.Authenticated,
             consentPresentation = mock<ConsentPresentation.Inline>(),
@@ -891,7 +893,7 @@ internal class LinkActivityViewModelTest {
         )
 
     @Test
-    fun `getScreenStateForAuthorizationAfterRefresh should navigate to OAuthConsent when linkAuthIntent is null with FullScreen consent`() =
+    fun `getScreenStateForAuthorizationAfterRefresh navigates to OAuthConsent with null LAI FullScreen consent`() =
         testGetScreenStateForAuthorizationAfterRefresh(
             linkAuthIntentStatus = null,
             consentPresentation = ConsentPresentation.FullScreen(TestFactory.CONSENT_PANE),
@@ -899,7 +901,7 @@ internal class LinkActivityViewModelTest {
         )
 
     @Test
-    fun `getScreenStateForAuthorizationAfterRefresh should complete when linkAuthIntent is null with non-FullScreen consent`() =
+    fun `getScreenStateForAuthorizationAfterRefresh completes with null linkAuthIntent non-FullScreen consent`() =
         testGetScreenStateForAuthorizationAfterRefresh(
             linkAuthIntentStatus = null,
             consentPresentation = mock<ConsentPresentation.Inline>(),
