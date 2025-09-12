@@ -14,11 +14,12 @@ data class LinkAuthIntent(
     val status: Status,
 ) : StripeModel {
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class Status(val value: String) {
         Created("created"),
         Authenticated("authenticated"),
         Consented("consented"),
         Rejected("rejected"),
-        Expired("expired");
+        Expired("expired")
     }
 }

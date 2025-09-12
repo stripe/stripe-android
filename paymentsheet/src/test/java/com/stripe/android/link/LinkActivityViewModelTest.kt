@@ -940,7 +940,6 @@ internal class LinkActivityViewModelTest {
         }
     }
 
-
     private fun testAttestationCheckError(
         attestationCheckResult: LinkAttestationCheck.Result,
     ) = runTest {
