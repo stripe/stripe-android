@@ -21,6 +21,7 @@ import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
+import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
@@ -252,7 +253,7 @@ class OnrampInteractorTest {
         assert(result is OnrampAuthenticateResult.Completed)
 
         testAnalyticsService.assertContainsEvent(
-            OnrampAnalyticsEvent.LinkAuthorizationCompleted(consented = true)
+            OnrampAnalyticsEvent.LinkUserAuthenticationCompleted
         )
     }
 
@@ -319,6 +320,40 @@ class OnrampInteractorTest {
         sessionState = LinkController.SessionState.LoggedIn,
         consumerSessionClientSecret = "secret_123"
     )
+
+    @Test
+    fun testOnAuthorize() {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        interactor.onAuthorize()
+
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.LinkAuthorizationStarted)
+    }
+
+    @Test
+    fun testOnAuthenticateUser() {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        interactor.onAuthenticateUser()
+
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.LinkUserAuthenticationStarted)
+    }
+
+    @Test
+    fun testOnHandleNextActionError() = runTest {
+        val error = RuntimeException("Payment failed")
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        interactor.onHandleNextActionError(error)
+
+        testAnalyticsService.assertContainsEvent(
+            OnrampAnalyticsEvent.ErrorOccurred(
+                operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.PerformCheckout,
+                error = error
+            )
+        )
+    }
+
 
     private fun mockLinkStateWithAccount(): LinkController.State = LinkController.State(
         internalLinkAccount = mockLinkAccount(),
