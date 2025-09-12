@@ -89,13 +89,13 @@ internal class LinkInlineSignupConfirmationDefinition(
         return when (linkConfigurationCoordinator.getAccountStatusFlow(configuration).first()) {
             is AccountStatus.Verified -> createOptionAfterAttachingToLink(linkInlineSignupConfirmationOption, userInput)
             AccountStatus.VerificationStarted,
-            AccountStatus.NeedsVerification -> {
+            is AccountStatus.NeedsVerification -> {
                 linkAnalyticsHelper.onLinkPopupSkipped()
 
                 linkInlineSignupConfirmationOption.toNewOption()
             }
             AccountStatus.SignedOut,
-            AccountStatus.Error -> {
+            is AccountStatus.Error -> {
                 linkConfigurationCoordinator.signInWithUserInput(configuration, userInput).fold(
                     onSuccess = {
                         // If successful, the account was fetched or created, so try again

@@ -10,6 +10,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinitio
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
+import com.stripe.android.model.ConsentUi
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
@@ -300,5 +301,22 @@ internal object TestFactory {
             FinancialConnectionsAccount.SupportedPaymentMethodTypes.US_BANK_ACCOUNT,
             FinancialConnectionsAccount.SupportedPaymentMethodTypes.LINK
         )
+    )
+
+    val CONSENT_PANE = ConsentUi.ConsentPane(
+        title = "Test Consent",
+        scopesSection = ConsentUi.ConsentPane.ScopesSection(
+            header = "Test Header",
+            scopes = listOf(
+                ConsentUi.ConsentPane.ScopesSection.Scope(
+                    icon = ConsentUi.Icon(default = "test_icon"),
+                    header = "Test Scope",
+                    description = "Test scope description"
+                )
+            )
+        ),
+        disclaimer = "Test disclaimer",
+        denyButtonLabel = "Deny",
+        allowButtonLabel = "Allow"
     )
 }

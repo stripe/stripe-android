@@ -24,6 +24,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.model.EmailSource
@@ -158,7 +159,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     )
                 )
             }
-            AccountStatus.NeedsVerification,
+            is AccountStatus.NeedsVerification,
             AccountStatus.VerificationStarted -> {
                 linkEventsReporter.onInvalidSessionState(LinkEventsReporter.SessionState.RequiresVerification)
 
@@ -170,7 +171,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 )
             }
             AccountStatus.SignedOut,
-            AccountStatus.Error -> {
+            is AccountStatus.Error -> {
                 signUp(
                     email = email,
                     phoneNumber = phone,
@@ -281,20 +282,18 @@ internal class DefaultLinkAccountManager @Inject constructor(
 
     private suspend fun setAccount(
         consumerSession: ConsumerSession,
-        publishableKey: String?,
-        displayablePaymentDetails: DisplayablePaymentDetails?,
-        linkAuthIntentInfo: LinkAuthIntentInfo?,
+        publishableKey: String? = null,
+        displayablePaymentDetails: DisplayablePaymentDetails? = null,
+        linkAuthIntentInfo: LinkAuthIntentInfo? = null,
     ): LinkAccount {
         val currentAccount = linkAccountHolder.linkAccountInfo.value.account
+        val isSameUser = currentAccount?.email == consumerSession.emailAddress
         val newConsumerPublishableKey = publishableKey
-            ?: currentAccount?.consumerPublishableKey
-                ?.takeIf { currentAccount.email == consumerSession.emailAddress }
+            ?: currentAccount?.consumerPublishableKey?.takeIf { isSameUser }
         val newPaymentDetails = displayablePaymentDetails
-            ?: currentAccount?.displayablePaymentDetails
-                ?.takeIf { currentAccount.email == consumerSession.emailAddress }
+            ?: currentAccount?.displayablePaymentDetails?.takeIf { isSameUser }
         val newLaiInfo = linkAuthIntentInfo
-            ?: currentAccount?.linkAuthIntentInfo
-                ?.takeIf { currentAccount.email == consumerSession.emailAddress }
+            ?: currentAccount?.linkAuthIntentInfo?.takeIf { isSameUser }
 
         val newAccount = LinkAccount(
             consumerSession = consumerSession,
@@ -350,12 +349,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             .onFailure {
                 linkEventsReporter.on2FAStartFailure()
             }.map { consumerSession ->
-                setAccount(
-                    consumerSession = consumerSession,
-                    publishableKey = null,
-                    displayablePaymentDetails = null,
-                    linkAuthIntentInfo = linkAccount.linkAuthIntentInfo, // Keep LAI info.
-                )
+                setAccount(consumerSession = consumerSession)
             }
     }
 
@@ -376,12 +370,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             }.onFailure {
                 linkEventsReporter.on2FAFailure()
             }.map { consumerSession ->
-                setAccount(
-                    consumerSession = consumerSession,
-                    publishableKey = null,
-                    displayablePaymentDetails = null,
-                    linkAuthIntentInfo = linkAccount.linkAuthIntentInfo, // Keep LAI info.
-                )
+                setAccount(consumerSession = consumerSession)
             }
     }
 
@@ -457,12 +446,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             phoneNumber = phoneNumber,
             consumerPublishableKey = linkAccount.consumerPublishableKey
         ).map { consumerSession ->
-            setAccount(
-                consumerSession = consumerSession,
-                publishableKey = null,
-                displayablePaymentDetails = null,
-                linkAuthIntentInfo = linkAccount.linkAuthIntentInfo,
-            )
+            setAccount(consumerSession = consumerSession)
         }
     }
 
@@ -485,8 +469,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
             setAccount(
                 consumerSession = consumerSessionSignUp.consumerSession,
                 publishableKey = consumerSessionSignUp.publishableKey,
-                displayablePaymentDetails = null,
-                linkAuthIntentInfo = null,
             )
         }
     }
@@ -531,7 +513,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             }
         return linkAccountResult
             ?.map { it?.accountStatus }
-            ?.getOrElse { AccountStatus.Error }
+            ?.getOrElse { error -> AccountStatus.Error(error) }
             ?: AccountStatus.SignedOut
     }
 
@@ -577,5 +559,19 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 linkAuthIntentId = linkAuthIntentId,
             )
         }
+    }
+
+    override suspend fun refreshConsumer(): Result<ConsumerSessionRefresh> {
+        val linkAccount = linkAccountHolder.linkAccountInfo.value.account
+            ?: return Result.failure(NoLinkAccountFoundException())
+        return linkRepository.refreshConsumer(
+            consumerSessionClientSecret = linkAccount.clientSecret,
+            consumerPublishableKey = linkAccount.consumerPublishableKey
+        )
+            .onFailure { error ->
+                linkEventsReporter.onAccountLookupFailure(error)
+            }.onSuccess {
+                setAccount(consumerSession = it.consumerSession)
+            }
     }
 }

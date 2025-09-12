@@ -2,6 +2,7 @@ package com.stripe.android.link
 
 import android.app.Application
 import androidx.activity.result.ActivityResultCaller
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
@@ -34,6 +35,8 @@ import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.wallet.AddPaymentMethodOption
 import com.stripe.android.link.ui.wallet.AddPaymentMethodOptions
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
+import com.stripe.android.model.ConsumerSessionRefresh
+import com.stripe.android.model.LinkAuthIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.addresselement.AutocompleteActivityLauncher
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -94,6 +97,7 @@ internal class LinkActivityViewModel @Inject constructor(
         get() = linkAccountManager.linkAccountInfo.value.account
 
     var launchWebFlow: ((LinkConfiguration) -> Unit)? = null
+    var launchWebAuthFlow: ((String) -> Unit)? = null
 
     val canDismissSheet: Boolean
         get() = activityRetainedComponent.dismissalCoordinator.canDismiss
@@ -119,8 +123,49 @@ internal class LinkActivityViewModel @Inject constructor(
         )
     }
 
-    fun handleResult(result: LinkActivityResult) {
+    fun handleWebActivityResult(result: LinkActivityResult) {
         dismissWithResult(result)
+    }
+
+    fun handleWebAuthActivityResult(result: WebLinkAuthResult) {
+        viewModelScope.launch {
+            when (result) {
+                WebLinkAuthResult.Completed -> {
+                    linkAccountManager.refreshConsumer().fold(
+                        onSuccess = { refresh ->
+                            updateScreenState(
+                                withAnimationDelay = true,
+                                consumerSessionRefresh = refresh
+                            )
+                        },
+                        onFailure = {
+                            dismissWithResult(
+                                LinkActivityResult.Failed(
+                                    error = it,
+                                    linkAccountUpdate = LinkAccountUpdate.None,
+                                )
+                            )
+                        }
+                    )
+                }
+                WebLinkAuthResult.Canceled -> {
+                    dismissWithResult(
+                        LinkActivityResult.Canceled(
+                            reason = LinkActivityResult.Canceled.Reason.BackPressed,
+                            linkAccountUpdate = LinkAccountUpdate.None,
+                        )
+                    )
+                }
+                is WebLinkAuthResult.Failure -> {
+                    dismissWithResult(
+                        LinkActivityResult.Failed(
+                            error = result.error,
+                            linkAccountUpdate = LinkAccountUpdate.None,
+                        )
+                    )
+                }
+            }
+        }
     }
 
     fun dismissSheet() {
@@ -326,82 +371,101 @@ internal class LinkActivityViewModel @Inject constructor(
         )
     }
 
-    @Suppress("CyclomaticComplexMethod", "ComplexCondition")
-    private suspend fun updateScreenState(withAnimationDelay: Boolean) {
+    private suspend fun updateScreenState(
+        withAnimationDelay: Boolean,
+        consumerSessionRefresh: ConsumerSessionRefresh? = null,
+    ) {
         val accountStatus = linkAccountManager.accountStatus.first()
 
         // Get linkAccount after getting `accountStatus` because account may be updated.
         val linkAccount = this.linkAccount
 
-        val authenticatingExistingAccount = (linkLaunchMode as? LinkLaunchMode.Authentication)?.existingOnly == true
-        val authorizingAuthIntent = linkLaunchMode is LinkLaunchMode.Authorization
-        val cannotChangeEmails = !linkConfiguration.allowUserEmailEdits
-        val accountNotFound = accountStatus == AccountStatus.SignedOut || accountStatus == AccountStatus.Error
-        val accountRequired = authorizingAuthIntent || authenticatingExistingAccount || cannotChangeEmails
-        if (accountNotFound && accountRequired) {
-            dismissWithResult(
-                LinkActivityResult.Failed(
-                    error = NoLinkAccountFoundException(),
-                    linkAccountUpdate = LinkAccountUpdate.None
-                )
-            )
-            return
-        }
+        val authorizing = linkLaunchMode is LinkLaunchMode.Authorization
+        val cannotChangeEmails =
+            !linkConfiguration.allowUserEmailEdits
+        val authenticatingExistingAccount =
+            (linkLaunchMode as? LinkLaunchMode.Authentication)?.existingOnly == true
 
-        if (authenticatingExistingAccount &&
-            accountStatus is AccountStatus.Verified &&
-            !accountStatus.hasVerifiedSMSSession &&
-            linkAccount != null // Should always be non-null.
-        ) {
-            // Handle edge case where status is "verified" but don't have a verified SMS session.
-            // This can happen after registering a new user without verifying their phone number.
-            _linkScreenState.value = ScreenState.VerificationDialog(linkAccount)
-            return
-        }
-
-        if (authorizingAuthIntent &&
-            accountStatus is AccountStatus.Verified &&
-            accountStatus.consentPresentation is ConsentPresentation.Inline
-        ) {
-            // Already completed verification with inline consent.
-            dismissWithResult(LinkActivityResult.Completed(linkAccountManager.linkAccountUpdate))
-            return
-        }
-
-        when (accountStatus) {
-            is AccountStatus.Verified,
-            AccountStatus.SignedOut,
-            AccountStatus.Error -> {
-                _linkScreenState.value = buildFullScreenState(withAnimationDelay)
-            }
-            AccountStatus.NeedsVerification,
-            AccountStatus.VerificationStarted -> {
-                if (linkAccount != null && linkExpressMode != LinkExpressMode.DISABLED) {
-                    _linkScreenState.value = ScreenState.VerificationDialog(linkAccount)
-                } else {
-                    _linkScreenState.value = buildFullScreenState(withAnimationDelay)
+        val screenState = when (accountStatus) {
+            is AccountStatus.Error,
+            AccountStatus.SignedOut -> {
+                // Bail if the flow doesn't support the user entering an email.
+                if (cannotChangeEmails || authenticatingExistingAccount || authorizing) {
+                    val error = (accountStatus as? AccountStatus.Error)?.error
+                    dismissWithResult(
+                        LinkActivityResult.Failed(
+                            error = error ?: NoLinkAccountFoundException(),
+                            linkAccountUpdate = LinkAccountUpdate.None
+                        )
+                    )
+                    return
                 }
+                ScreenState.FullScreen(LinkScreen.SignUp)
+            }
+            is AccountStatus.NeedsVerification -> {
+                // Launch web auth flow if web auth URL is available.
+                // Next steps will happen in `handleWebAuthActivityResult`.
+                if (accountStatus.webviewOpenUrl != null) {
+                    launchWebAuthFlow?.invoke(accountStatus.webviewOpenUrl)
+                    return
+                }
+                getVerificationScreenState(linkAccount)
+            }
+            AccountStatus.VerificationStarted -> {
+                getVerificationScreenState(linkAccount)
+            }
+            is AccountStatus.Verified -> {
+                getScreenStateWhenVerified(
+                    accountStatus = accountStatus,
+                    linkAccount = linkAccount!!,
+                    consumerSessionRefresh = consumerSessionRefresh,
+                ) ?: return
             }
         }
-    }
 
-    private suspend fun buildFullScreenState(withAnimationDelay: Boolean): ScreenState.FullScreen {
-        val accountStatus = linkAccountManager.accountStatus.first()
-
-        // We add a tiny delay, which gives the loading screen a chance to fully inflate.
-        // Otherwise, we get a weird scaling animation when we display the first non-loading screen.
-        if (withAnimationDelay) {
+        if (screenState is ScreenState.FullScreen && withAnimationDelay) {
+            // We add a tiny delay, which gives the loading screen a chance to fully inflate.
+            // Otherwise, we get a weird scaling animation when we display the first non-loading screen.
             delay(LINK_DEFAULT_ANIMATION_DELAY_MILLIS)
         }
+        _linkScreenState.value = screenState
+    }
 
-        val linkAccount = this.linkAccount
-
-        return ScreenState.FullScreen(
-            initialDestination = when (accountStatus) {
-                is AccountStatus.Verified -> {
-                    if (linkLaunchMode is LinkLaunchMode.Authorization) {
-                        LinkScreen.OAuthConsent
-                    } else if (linkAccount?.completedSignup == true && linkLaunchMode.selectedPayment() == null) {
+    private fun getScreenStateWhenVerified(
+        accountStatus: AccountStatus.Verified,
+        linkAccount: LinkAccount,
+        consumerSessionRefresh: ConsumerSessionRefresh?,
+    ): ScreenState? {
+        return when (linkLaunchMode) {
+            is LinkLaunchMode.Authentication -> {
+                if (accountStatus.hasVerifiedSMSSession) {
+                    dismissWithResult(LinkActivityResult.Completed(linkAccountManager.linkAccountUpdate))
+                    return null
+                }
+                // Handle edge case where status is "verified" but don't have a verified SMS session.
+                // This can happen after registering a new user without verifying their phone number.
+                ScreenState.VerificationDialog(linkAccount)
+            }
+            is LinkLaunchMode.Authorization -> {
+                if (consumerSessionRefresh == null) {
+                    // Prompting for consent _after verification_ is only supported for full screen consent.
+                    if (accountStatus.consentPresentation !is ConsentPresentation.FullScreen) {
+                        dismissWithResult(LinkActivityResult.Completed(linkAccountManager.linkAccountUpdate))
+                        return null
+                    }
+                    ScreenState.FullScreen(LinkScreen.OAuthConsent)
+                } else {
+                    getScreenStateForAuthorizationAfterRefresh(
+                        accountStatus = accountStatus,
+                        refresh = consumerSessionRefresh
+                    ) ?: return null
+                }
+            }
+            is LinkLaunchMode.Confirmation,
+            LinkLaunchMode.Full,
+            is LinkLaunchMode.PaymentMethodSelection -> {
+                val linkScreen =
+                    if (linkAccount.completedSignup && linkLaunchMode.selectedPayment() == null) {
                         // We just completed signup, but haven't added a payment method yet.
                         when (addPaymentMethodOptionsFactory.create(linkAccount).default) {
                             is AddPaymentMethodOption.Bank -> LinkScreen.Wallet
@@ -409,21 +473,71 @@ internal class LinkActivityViewModel @Inject constructor(
                             else -> LinkScreen.PaymentMethod
                         }
                     } else {
-                        // We have a verified account, or we're relaunching after signing up and adding a payment,
-                        // then show the wallet.
+                        // We have a verified account or we're relaunching after signing up
+                        // and adding a payment then show the wallet.
                         LinkScreen.Wallet
                     }
-                }
-                AccountStatus.NeedsVerification,
-                AccountStatus.VerificationStarted -> {
-                    LinkScreen.Verification
-                }
-                AccountStatus.SignedOut,
-                AccountStatus.Error -> {
-                    LinkScreen.SignUp
+                ScreenState.FullScreen(linkScreen)
+            }
+        }
+    }
+
+    @VisibleForTesting
+    internal fun getScreenStateForAuthorizationAfterRefresh(
+        accountStatus: AccountStatus.Verified,
+        refresh: ConsumerSessionRefresh,
+    ): ScreenState? {
+        return when (val status = refresh.linkAuthIntent?.status) {
+            LinkAuthIntent.Status.Consented -> {
+                dismissWithResult(
+                    LinkActivityResult.Completed(
+                        linkAccountUpdate = linkAccountManager.linkAccountUpdate,
+                        authorizationConsentGranted = true
+                    )
+                )
+                null
+            }
+            LinkAuthIntent.Status.Rejected -> {
+                dismissWithResult(
+                    LinkActivityResult.Completed(
+                        linkAccountUpdate = linkAccountManager.linkAccountUpdate,
+                        authorizationConsentGranted = false
+                    )
+                )
+                null
+            }
+            LinkAuthIntent.Status.Created,
+            LinkAuthIntent.Status.Expired -> {
+                dismissWithResult(
+                    LinkActivityResult.Failed(
+                        linkAccountUpdate = linkAccountManager.linkAccountUpdate,
+                        error = IllegalStateException(
+                            "Unexpected LAI status when account is verified: ${status.name}"
+                        )
+                    )
+                )
+                null
+            }
+            // Assume 'authenticated' when LAI is unavailable because we might not support web consent,
+            // in which case we assume consent wasn't granted.
+            null, LinkAuthIntent.Status.Authenticated -> {
+                // Prompting for consent _after verification_ is only supported for full screen consent.
+                if (accountStatus.consentPresentation !is ConsentPresentation.FullScreen) {
+                    dismissWithResult(LinkActivityResult.Completed(linkAccountManager.linkAccountUpdate))
+                    null
+                } else {
+                    ScreenState.FullScreen(LinkScreen.OAuthConsent)
                 }
             }
-        )
+        }
+    }
+
+    private fun getVerificationScreenState(linkAccount: LinkAccount?): ScreenState {
+        return if (linkAccount != null && linkExpressMode != LinkExpressMode.DISABLED) {
+            ScreenState.VerificationDialog(linkAccount)
+        } else {
+            ScreenState.FullScreen(LinkScreen.Verification)
+        }
     }
 
     private suspend fun handleAccountError() {

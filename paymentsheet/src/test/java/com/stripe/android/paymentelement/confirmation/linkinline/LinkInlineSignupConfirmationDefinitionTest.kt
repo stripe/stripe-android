@@ -103,7 +103,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
     @Test
     fun `'action' should skip signup if signup failed on 'Error' account status`() =
         testSkippedLinkSignupOnSignInError(
-            accountStatus = AccountStatus.Error,
+            accountStatus = AccountStatus.Error(Exception()),
         )
 
     @Test
@@ -115,7 +115,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
     @Test
     fun `'action' should skip signup and return 'Launch' on 'NeedsVerification' account status`() =
         testSkippedLinkSignupOnAccountStatus(
-            accountStatus = AccountStatus.NeedsVerification,
+            accountStatus = AccountStatus.NeedsVerification(),
         )
 
     @Test

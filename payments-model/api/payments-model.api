@@ -485,6 +485,28 @@ public final class com/stripe/android/model/ConsumerSessionLookup$Creator : andr
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public synthetic class com/stripe/android/model/ConsumerSessionRefresh$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/stripe/android/model/ConsumerSessionRefresh$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/model/ConsumerSessionRefresh;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/model/ConsumerSessionRefresh;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+}
+
+public final class com/stripe/android/model/ConsumerSessionRefresh$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/model/ConsumerSessionRefresh$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/ConsumerSessionRefresh;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/ConsumerSessionRefresh;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public synthetic class com/stripe/android/model/ConsumerSessionSignup$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/android/model/ConsumerSessionSignup$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
@@ -585,6 +607,28 @@ public final class com/stripe/android/model/LinkAccountSession$Creator : android
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public synthetic class com/stripe/android/model/LinkAuthIntent$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/stripe/android/model/LinkAuthIntent$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/model/LinkAuthIntent;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/model/LinkAuthIntent;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+}
+
+public final class com/stripe/android/model/LinkAuthIntent$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/model/LinkAuthIntent$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/LinkAuthIntent;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/LinkAuthIntent;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/model/LinkConsumerIncentive$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/LinkConsumerIncentive;
@@ -598,6 +642,28 @@ public final class com/stripe/android/model/LinkConsumerIncentive$IncentiveParam
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/LinkConsumerIncentive$IncentiveParams;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/model/LinkConsumerIncentive$IncentiveParams;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public synthetic class com/stripe/android/model/MobileFallbackWebviewParams$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/stripe/android/model/MobileFallbackWebviewParams$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/model/MobileFallbackWebviewParams;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/model/MobileFallbackWebviewParams;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+}
+
+public final class com/stripe/android/model/MobileFallbackWebviewParams$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/model/MobileFallbackWebviewParams$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/MobileFallbackWebviewParams;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/MobileFallbackWebviewParams;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 

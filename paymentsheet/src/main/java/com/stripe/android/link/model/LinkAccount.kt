@@ -3,6 +3,7 @@ package com.stripe.android.link.model
 import android.os.Parcelable
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.DisplayablePaymentDetails
+import com.stripe.android.model.MobileFallbackWebviewParams
 import com.stripe.android.uicore.elements.convertPhoneNumberToE164
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
@@ -64,7 +65,14 @@ internal data class LinkAccount(
             AccountStatus.VerificationStarted
         }
         else -> {
-            AccountStatus.NeedsVerification
+            val params = consumerSession.mobileFallbackWebviewParams
+            AccountStatus.NeedsVerification(
+                webviewOpenUrl = params
+                    ?.webviewOpenUrl
+                    ?.takeIf {
+                        params.webViewRequirementType == MobileFallbackWebviewParams.WebviewRequirementType.Required
+                    }
+            )
         }
     }
 
