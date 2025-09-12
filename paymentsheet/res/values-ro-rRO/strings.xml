@@ -275,6 +275,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">Vizualizați mai multe</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Continuând, sunteți de acord să autorizați plățile în conformitate cu acești <terms>termeni</terms>.]]></string>
+  <!-- Text providing link to terms for bank payments when seller information is provided -->
+  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[Prin trimiterea comenzii dvs. către %1$s și %2$s, sunteți de acord să salvați informațiile dvs. în %3$s pentru achiziții viitoare și sunteți de acord să autorizați plățile în conformitate cu <terms>acești termeni</terms>.]]></string>
   <!-- Text providing link to terms for bank payments -->
   <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Prin trimiterea comenzii dvs. către %s, sunteți de acord să autorizați plățile în conformitate cu <terms>acești termeni</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->

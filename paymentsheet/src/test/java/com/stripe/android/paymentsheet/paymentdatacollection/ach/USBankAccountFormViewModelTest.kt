@@ -91,7 +91,7 @@ class USBankAccountFormViewModelTest {
         financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
         termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         sellerBusinessName = null,
-        linkSignUpOptInFeatureEnabled = false,
+        forceSetupFutureUseBehavior = false,
     )
 
     private val mockCollectBankAccountLauncher = mock<CollectBankAccountLauncher>()
@@ -515,13 +515,13 @@ class USBankAccountFormViewModelTest {
             isInstantDebits = false,
             isSetupFlow = false,
             sellerBusinessName = null,
-            linkSignUpOptInFeatureEnabled = false,
+            forceSetupFutureUseBehavior = false,
         )
 
         val continueWithMicrodepositsMandate = USBankAccountTextBuilder.buildMandateAndMicrodepositsText(
             merchantName = MERCHANT_NAME,
             sellerBusinessName = null,
-            linkSignUpOptInFeatureEnabled = false,
+            forceSetupFutureUseBehavior = false,
             isVerifyingMicrodeposits = true,
             isSaveForFutureUseSelected = true,
             isInstantDebits = false,
@@ -1179,7 +1179,7 @@ class USBankAccountFormViewModelTest {
             isSetupFlow = false,
             isInstantDebits = false,
             sellerBusinessName = null,
-            linkSignUpOptInFeatureEnabled = false,
+            forceSetupFutureUseBehavior = false,
         )
 
         viewModel.currentScreenState.test {
@@ -1200,7 +1200,7 @@ class USBankAccountFormViewModelTest {
         val expectedResult = USBankAccountTextBuilder.buildMandateAndMicrodepositsText(
             merchantName = MERCHANT_NAME,
             sellerBusinessName = null,
-            linkSignUpOptInFeatureEnabled = false,
+            forceSetupFutureUseBehavior = false,
             isVerifyingMicrodeposits = true,
             isSaveForFutureUseSelected = false,
             isSetupFlow = false,
@@ -1225,7 +1225,7 @@ class USBankAccountFormViewModelTest {
         val expectedResult = USBankAccountTextBuilder.buildMandateAndMicrodepositsText(
             merchantName = MERCHANT_NAME,
             sellerBusinessName = null,
-            linkSignUpOptInFeatureEnabled = false,
+            forceSetupFutureUseBehavior = false,
             isVerifyingMicrodeposits = false,
             isSaveForFutureUseSelected = false,
             isSetupFlow = false,

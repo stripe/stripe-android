@@ -100,7 +100,7 @@ internal fun USBankAccountForm(
                 setAsDefaultMatchesSaveForFutureUse = usBankAccountFormArgs.setAsDefaultMatchesSaveForFutureUse,
                 termsDisplay = usBankAccountFormArgs.termsDisplay,
                 sellerBusinessName = usBankAccountFormArgs.sellerBusinessName,
-                linkSignUpOptInFeatureEnabled = usBankAccountFormArgs.linkSignUpOptInFeatureEnabled,
+                forceSetupFutureUseBehavior = usBankAccountFormArgs.forceSetupFutureUseBehavior,
             )
         },
     )

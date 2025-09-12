@@ -69,7 +69,7 @@ internal class USBankAccountFormArguments(
     val setAsDefaultMatchesSaveForFutureUse: Boolean,
     val termsDisplay: PaymentSheet.TermsDisplay,
     val sellerBusinessName: String?,
-    val linkSignUpOptInFeatureEnabled: Boolean,
+    val forceSetupFutureUseBehavior: Boolean,
 ) {
     companion object {
         fun create(
@@ -125,8 +125,7 @@ internal class USBankAccountFormArguments(
                 setAsDefaultMatchesSaveForFutureUse = viewModel.customerStateHolder.paymentMethods.value.isEmpty(),
                 termsDisplay = paymentMethodMetadata.termsDisplayForCode(selectedPaymentMethodCode),
                 sellerBusinessName = paymentMethodMetadata.sellerBusinessName,
-                linkSignUpOptInFeatureEnabled = paymentMethodMetadata?.linkState?.configuration
-                    ?.linkSignUpOptInFeatureEnabled == true,
+                forceSetupFutureUseBehavior = paymentMethodMetadata.forceSetupFutureUseBehaviorAndNewMandate,
             )
         }
 
@@ -185,8 +184,7 @@ internal class USBankAccountFormArguments(
                 setAsDefaultMatchesSaveForFutureUse = !hasSavedPaymentMethods,
                 termsDisplay = paymentMethodMetadata.termsDisplayForType(PaymentMethod.Type.USBankAccount),
                 sellerBusinessName = paymentMethodMetadata.sellerBusinessName,
-                linkSignUpOptInFeatureEnabled = paymentMethodMetadata?.linkState?.configuration
-                    ?.linkSignUpOptInFeatureEnabled == true,
+                forceSetupFutureUseBehavior = paymentMethodMetadata.forceSetupFutureUseBehaviorAndNewMandate,
             )
         }
     }
