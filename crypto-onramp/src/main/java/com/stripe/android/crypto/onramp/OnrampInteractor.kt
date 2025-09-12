@@ -44,7 +44,7 @@ import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Suppress("TooManyFunctions")
+@Suppress("LargeClass", "TooManyFunctions")
 @Singleton
 internal class OnrampInteractor @Inject constructor(
     private val application: Application,
@@ -284,6 +284,7 @@ internal class OnrampInteractor @Inject constructor(
             )
     }
 
+    @Suppress("LongMethod")
     suspend fun createCryptoPaymentToken(): OnrampCreateCryptoPaymentTokenResult {
         val secret = consumerSessionClientSecret()
         if (secret == null) {
@@ -634,6 +635,7 @@ internal class OnrampInteractor @Inject constructor(
     /**
      * Internal method that performs the actual checkout logic and updates the state accordingly.
      */
+    @Suppress("LongMethod")
     private suspend fun performCheckoutInternal(
         onrampSessionId: String,
         checkoutHandler: suspend () -> String,
