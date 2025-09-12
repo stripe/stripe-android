@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.challenge.warmer.PassiveChallengeWarmerModule
 import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.common.di.MobileSessionIdModule
 import com.stripe.android.core.injection.IOContext
@@ -69,6 +70,7 @@ import kotlin.coroutines.CoroutineContext
         EmbeddedLinkExtrasModule::class,
         PaymentsIntegrityModule::class,
         LinkHoldbackExposureModule::class,
+        PassiveChallengeWarmerModule::class
     ],
 )
 internal interface EmbeddedPaymentElementViewModelComponent {
