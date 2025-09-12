@@ -3294,12 +3294,16 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Hides Link if using web flow and collecting extra billing details`() = runTest {
+        val linkGate = FakeLinkGate()
+        linkGate.setUseNativeLink(false)
+
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             linkSettings = createLinkSettings(
                 passthroughModeEnabled = false,
                 useAttestationEndpoints = false,
             ),
+            linkGate = linkGate,
         )
 
         val config = PaymentSheet.Configuration(

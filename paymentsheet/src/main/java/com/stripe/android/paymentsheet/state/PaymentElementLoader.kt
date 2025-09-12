@@ -583,13 +583,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             return null
         }
 
-        val usesWebFlow = !elementsSession.useAttestationEndpointsForLink
-        val collectsExtraBillingDetails = configuration.billingDetailsCollectionConfiguration.collectsAnything
-        if (usesWebFlow && collectsExtraBillingDetails) {
-            // We don't support billing details collection in the web flow
-            return null
-        }
-
         val isCardBrandFilteringRequired =
             elementsSession.linkPassthroughModeEnabled &&
                 configuration.cardBrandAcceptance != PaymentSheet.CardBrandAcceptance.All
@@ -668,9 +661,16 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             elementsSession.linkSettings?.linkSupportedPaymentMethodsOnboardingEnabled.orEmpty(),
         )
 
-        // CBF isn't currently supported in the web flow.
         val useWebLink = !linkGateFactory.create(linkConfiguration).useNativeLink
+
         if (isCardBrandFilteringRequired && useWebLink) {
+            // CBF isn't currently supported in the web flow.
+            return null
+        }
+
+        val collectsExtraBillingDetails = configuration.billingDetailsCollectionConfiguration.collectsAnything
+        if (collectsExtraBillingDetails && useWebLink) {
+            // Extra billing details collection isn't currently supported in the web flow.
             return null
         }
 
