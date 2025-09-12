@@ -14,6 +14,8 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.StripeNetworkClient
+import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
+import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsServiceImpl
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.link.LinkController
 import com.stripe.android.networking.RequestSurface
@@ -92,5 +94,12 @@ internal class OnrampModule {
             savedStateHandle = savedStateHandle,
             requestSurface = RequestSurface.CryptoOnramp
         )
+    }
+
+    @Provides
+    fun provideOnrampAnalyticsServiceFactory(
+        impl: OnrampAnalyticsServiceImpl.Factory
+    ): OnrampAnalyticsService.Factory {
+        return impl
     }
 }

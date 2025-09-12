@@ -159,8 +159,16 @@ class LinkControllerInteractorTest {
 
         interactor.state(application).test {
             assertThat(awaitItem()).isNotEqualTo(LinkController.State())
+
             assertThat(interactor.configure(createControllerConfig())).isEqualTo(LinkController.ConfigureResult.Success)
+
+            // Initial reset.
             assertThat(awaitItem()).isEqualTo(LinkController.State())
+
+            // After completion.
+            val finalState = awaitItem()
+            assertThat(finalState.elementsSessionId).isEqualTo(loadedConfiguration.elementsSessionId)
+            assertThat(finalState.merchantLogoUrl).isEqualTo(loadedConfiguration.merchantLogoUrl)
         }
     }
 

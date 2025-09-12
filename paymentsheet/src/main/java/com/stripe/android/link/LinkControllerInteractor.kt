@@ -93,6 +93,7 @@ internal class LinkControllerInteractor @Inject constructor(
     fun state(context: Context): StateFlow<LinkController.State> {
         return combineAsStateFlow(_internalLinkAccount, _state) { account, state ->
             LinkController.State(
+                elementsSessionId = state.linkComponent?.configuration?.elementsSessionId,
                 internalLinkAccount = account,
                 merchantLogoUrl = state.linkComponent?.configuration?.merchantLogoUrl,
                 selectedPaymentMethodPreview = state.selectedPaymentMethod?.details?.toPreview(context),
