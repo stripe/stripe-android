@@ -47,7 +47,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     private var identityVerificationSheet: IdentityVerificationSheet? = null
 
-    private val factory: PaymentLauncherFactory = PaymentLauncherFactory(
+    private val paymentLauncherFactory: PaymentLauncherFactory = PaymentLauncherFactory(
         activityResultRegistryOwner = activity,
         lifecycleOwner = lifecycleOwner,
         statusBarColor = StatusBarCompat.color(activity),
@@ -88,6 +88,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             )
             return
         }
+        interactor.onAuthenticateUser()
         linkPresenter.authenticateExistingConsumer(email)
     }
 
@@ -124,6 +125,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     }
 
     fun authorize(linkAuthIntentId: String) {
+        interactor.onAuthorize()
         linkPresenter.authorize(linkAuthIntentId)
     }
 
@@ -172,12 +174,14 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         val clientSecret = intent.clientSecret
         if (clientSecret == null) {
             // No client secret - notify failure immediately
-            onrampCallbacks.checkoutCallback.onResult(OnrampCheckoutResult.Failed(PaymentFailedException()))
+            val error = PaymentFailedException()
+            interactor.onHandleNextActionError(error)
+            onrampCallbacks.checkoutCallback.onResult(OnrampCheckoutResult.Failed(error))
             return
         }
 
         // Launch the next action - result will be handled by handlePaymentLauncherResult
-        factory.create(publishableKey = platformKey).handleNextActionForPaymentIntent(clientSecret)
+        paymentLauncherFactory.create(publishableKey = platformKey).handleNextActionForPaymentIntent(clientSecret)
     }
 
     /**

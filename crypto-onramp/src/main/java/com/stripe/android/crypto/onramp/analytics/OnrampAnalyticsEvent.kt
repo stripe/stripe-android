@@ -36,12 +36,12 @@ internal sealed class OnrampAnalyticsEvent(
         name = "link_phone_number_updated"
     )
 
-    data object LinkVerificationStarted : OnrampAnalyticsEvent(
-        name = "link_verification_started"
+    data object LinkUserAuthenticationStarted : OnrampAnalyticsEvent(
+        name = "link_user_authentication_started"
     )
 
-    data object LinkVerificationCompleted : OnrampAnalyticsEvent(
-        name = "link_verification_completed"
+    data object LinkUserAuthenticationCompleted : OnrampAnalyticsEvent(
+        name = "link_user_authentication_completed"
     )
 
     data object LinkAuthorizationStarted : OnrampAnalyticsEvent(

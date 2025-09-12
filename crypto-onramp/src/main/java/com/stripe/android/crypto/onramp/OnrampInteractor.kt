@@ -376,7 +376,7 @@ internal class OnrampInteractor @Inject constructor(
                     .grantPartnerMerchantPermissions(it)
                 permissionsResult.fold(
                     onSuccess = { result ->
-                        analyticsService?.track(OnrampAnalyticsEvent.LinkAuthorizationCompleted(consented = true))
+                        analyticsService?.track(OnrampAnalyticsEvent.LinkUserAuthenticationCompleted)
                         OnrampAuthenticateResult.Completed(result.id)
                     },
                     onFailure = { error ->
@@ -483,13 +483,6 @@ internal class OnrampInteractor @Inject constructor(
             OnrampVerifyIdentityResult.Cancelled()
     }
 
-    fun onCollectPaymentMethod(type: PaymentMethodType) {
-        _state.update { it.copy(collectingPaymentMethodType = type) }
-        analyticsService?.track(
-            OnrampAnalyticsEvent.CollectPaymentMethodStarted(type)
-        )
-    }
-
     fun handlePresentPaymentMethodsResult(
         result: LinkController.PresentPaymentMethodsResult,
         context: Context,
@@ -538,6 +531,30 @@ internal class OnrampInteractor @Inject constructor(
         _state.value = _state.value.copy(linkControllerState = linkState)
     }
 
+    fun onAuthorize() {
+        analyticsService?.track(OnrampAnalyticsEvent.LinkAuthorizationStarted)
+    }
+
+    fun onAuthenticateUser() {
+        analyticsService?.track(OnrampAnalyticsEvent.LinkUserAuthenticationStarted)
+    }
+
+    fun onCollectPaymentMethod(type: PaymentMethodType) {
+        _state.update { it.copy(collectingPaymentMethodType = type) }
+        analyticsService?.track(
+            OnrampAnalyticsEvent.CollectPaymentMethodStarted(type)
+        )
+    }
+
+    fun onHandleNextActionError(error: Throwable) {
+        analyticsService?.track(
+            OnrampAnalyticsEvent.ErrorOccurred(
+                operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.PerformCheckout,
+                error = error,
+            )
+        )
+    }
+
     /**
      * Starts the checkout flow for a crypto onramp session. The checkout state will be emitted
      * through the state StateFlow. The coordinator should observe the checkoutState and react accordingly.
@@ -563,10 +580,16 @@ internal class OnrampInteractor @Inject constructor(
                 )
             )
         }
-
+        analyticsService?.track(
+            OnrampAnalyticsEvent.CheckoutStarted(
+                onrampSessionId = onrampSessionId,
+                paymentMethodType = _state.value.collectingPaymentMethodType
+            )
+        )
         performCheckoutInternal(
             onrampSessionId = onrampSessionId,
-            checkoutHandler = checkoutHandler
+            checkoutHandler = checkoutHandler,
+            isContinuation = false,
         )
     }
 
@@ -591,7 +614,8 @@ internal class OnrampInteractor @Inject constructor(
                 }
                 performCheckoutInternal(
                     onrampSessionId = status.onrampSessionId,
-                    checkoutHandler = status.checkoutHandler
+                    checkoutHandler = status.checkoutHandler,
+                    isContinuation = true,
                 )
             }
             else -> {
@@ -612,7 +636,8 @@ internal class OnrampInteractor @Inject constructor(
      */
     private suspend fun performCheckoutInternal(
         onrampSessionId: String,
-        checkoutHandler: suspend () -> String
+        checkoutHandler: suspend () -> String,
+        isContinuation: Boolean,
     ) = runCatching {
         val platformApiKey = getOrFetchPlatformKey()
         if (platformApiKey == null) {
@@ -656,6 +681,13 @@ internal class OnrampInteractor @Inject constructor(
             }
         } else {
             // Checkout is complete - emit result
+            analyticsService?.track(
+                OnrampAnalyticsEvent.CheckoutCompleted(
+                    onrampSessionId = onrampSessionId,
+                    paymentMethodType = _state.value.collectingPaymentMethodType,
+                    requiredAction = isContinuation
+                )
+            )
             _state.update {
                 it.copy(
                     checkoutState = CheckoutState(
