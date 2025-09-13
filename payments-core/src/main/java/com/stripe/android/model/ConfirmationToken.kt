@@ -1,0 +1,90 @@
+package com.stripe.android.model
+
+import androidx.annotation.RestrictTo
+import com.stripe.android.core.model.StripeModel
+import kotlinx.parcelize.Parcelize
+
+/**
+ * Confirmation Token objects help transport client-side data collected by Elements to your server
+ * for payment confirmation. They capture payment method information, shipping details, and other
+ * checkout state from Elements, then pass them to your server where you can use them to confirm
+ * a PaymentIntent or SetupIntent.
+ *
+ * Confirmation Tokens are single-use and expire 15 minutes after creation.
+ *
+ * Think of the ConfirmationToken as an immutable bag of data that serves two purposes:
+ * 1. Transport checkout state collected by Elements needed to confirm an Intent
+ * 2. Capture Elements configuration for validation at confirmation time
+ *
+ * Related guides: [Confirmation Tokens](https://stripe.com/docs/api/confirmation_tokens)
+ */
+@Parcelize
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+// TODO(cttsai-stripe): should convert this data class to @Poko class in next major release
+data class ConfirmationToken internal constructor(
+    /**
+     * Unique identifier for the object.
+     */
+    @JvmField val id: String,
+
+    /**
+     * Time at which the object was created. Measured in seconds since the Unix epoch.
+     */
+    @JvmField val created: Long,
+
+    /**
+     * Time at which this ConfirmationToken expires and can no longer be used to confirm a PaymentIntent or SetupIntent.
+     */
+    @JvmField val expiresAt: Long?,
+
+    /**
+     * Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode.
+     */
+    @JvmField val liveMode: Boolean,
+
+    /**
+     * Mandate data for this confirmation token. This is automatically generated based on
+     * the payment method and usage, eliminating the need for manual mandate handling.
+     * Internal field containing auto-generated mandate configuration.
+     */
+    @JvmField val mandateData: MandateData?,
+
+    /**
+     * ID of the PaymentIntent that this ConfirmationToken was used to confirm,
+     * or null if this ConfirmationToken has not yet been used.
+     */
+    @JvmField val paymentIntentId: String?,
+
+    /**
+     * Payment-method-specific configuration captured on the token.
+     */
+    @JvmField val paymentMethodOptions: PaymentMethodOptions?,
+
+    /**
+     * Payment method data collected from Elements. This represents the transactional checkout state,
+     * not a reusable PaymentMethod object.
+     */
+    @JvmField val paymentMethodPreview: PaymentMethod?,
+
+    /**
+     * Return URL used to confirm the intent for redirect-based methods.
+     */
+    @JvmField val returnUrl: String?,
+
+    /**
+     * Indicates how you intend to use the payment method for future payments.
+     * This is automatically determined based on Elements configuration and user input.
+     */
+    @JvmField val setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+
+    /**
+     * ID of the SetupIntent that this ConfirmationToken was used to confirm,
+     * or null if this ConfirmationToken has not yet been used.
+     */
+    @JvmField val setupIntentId: String?,
+
+    /**
+     * Shipping information collected on this ConfirmationToken.
+     */
+    @JvmField val shipping: ShippingInformation?,
+) : StripeModel
