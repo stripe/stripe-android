@@ -51,6 +51,18 @@ internal class DefaultCaptchaEventsReporter @Inject constructor(
         )
     }
 
+    override fun attachStart() {
+        durationProvider.start(DurationProvider.Key.CaptchaAttach)
+    }
+
+    override fun attachEnd(siteKey: String, isReady: Boolean) {
+        val duration = durationProvider.end(DurationProvider.Key.CaptchaAttach)
+        fireEvent(
+            event = CaptchaAnalyticsEvent.Attach(isReady, siteKey),
+            additionalParams = durationInSecondsFromStart(duration)
+        )
+    }
+
     private fun fireEvent(
         event: CaptchaAnalyticsEvent,
         additionalParams: Map<String, Any> = emptyMap()
@@ -65,7 +77,7 @@ internal class DefaultCaptchaEventsReporter @Inject constructor(
 
     private fun durationInSecondsFromStart(duration: Duration?): Map<String, Float> {
         return duration?.let {
-            mapOf("duration" to it.toDouble(DurationUnit.SECONDS).toFloat())
+            mapOf("duration" to it.toDouble(DurationUnit.MILLISECONDS).toFloat())
         } ?: emptyMap()
     }
 }
