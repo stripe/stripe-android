@@ -62,7 +62,14 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
         return googlePayJsonFactory.createPaymentDataRequest(
             transactionInfo = createTransactionInfo(args),
             merchantInfo = GooglePayJsonFactory.MerchantInfo(
-                merchantName = args.config.merchantName
+                merchantName = args.config.merchantName,
+                softwareInfo = GooglePayJsonFactory.SoftwareInfo(
+                    id = if (args.isElements) {
+                        GooglePayJsonFactory.SoftwareInfo.SoftwareId.Elements
+                    } else {
+                        GooglePayJsonFactory.SoftwareInfo.SoftwareId.Launcher
+                    }
+                )
             ),
             billingAddressParameters = args.config.billingAddressConfig.convert(),
             isEmailRequired = args.config.isEmailRequired,
