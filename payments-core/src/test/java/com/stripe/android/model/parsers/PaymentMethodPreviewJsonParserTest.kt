@@ -42,11 +42,11 @@ class PaymentMethodPreviewJsonParserTest {
         assertThat(paymentMethodPreview.type).isEqualTo(PaymentMethod.Type.Card)
         assertThat(paymentMethodPreview.customerId).isEqualTo("cus_test123")
         assertThat(paymentMethodPreview.allowRedisplay).isEqualTo(PaymentMethod.AllowRedisplay.ALWAYS)
-        
+
         val billingDetails = requireNotNull(paymentMethodPreview.billingDetails)
         assertThat(billingDetails.name).isEqualTo("Jenny Rosen")
         assertThat(billingDetails.email).isEqualTo("jennyrosen@stripe.com")
-        
+
         val address = requireNotNull(billingDetails.address)
         assertThat(address.line1).isEqualTo("50 Sprague St")
         assertThat(address.city).isEqualTo("Hyde Park")

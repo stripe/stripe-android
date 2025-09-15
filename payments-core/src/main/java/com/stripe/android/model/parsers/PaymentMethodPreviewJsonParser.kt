@@ -16,7 +16,7 @@ internal class PaymentMethodPreviewJsonParser : ModelJsonParser<ConfirmationToke
         val type = StripeJsonUtils.optString(json, FIELD_TYPE)?.let { code ->
             PaymentMethod.Type.fromCode(code)
         } ?: return null // Return null if type is missing
-        
+
         return ConfirmationToken.PaymentMethodPreview(
             allowRedisplay = StripeJsonUtils.optString(json, FIELD_ALLOW_REDISPLAY)?.let { allowRedisplayRawValue ->
                 PaymentMethod.AllowRedisplay.entries.find { entry ->
