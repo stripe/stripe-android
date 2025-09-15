@@ -2,29 +2,28 @@ package com.stripe.android.paymentelement.confirmation
 
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.model.PassiveCaptchaParams
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 
 internal fun ConfirmationHandler.bootstrapHelper(
-    passiveCaptchaParams: PassiveCaptchaParams,
-    lifecycleOwner: LifecycleOwner
+    paymentMethodMetadata: PaymentMethodMetadata
 ) {
-    bootstrap(mapOf(BootstrapKey.PassiveCaptcha to passiveCaptchaParams), lifecycleOwner)
+    bootstrap(paymentMethodMetadata)
 }
 
 internal fun ConfirmationHandler.bootstrapHelper(
-    passiveCaptchaParamsFlow: Flow<PassiveCaptchaParams?>,
+    paymentMethodMetadataFlow: Flow<PaymentMethodMetadata?>,
     lifecycleOwner: LifecycleOwner
 ) {
     lifecycleOwner.lifecycleScope.launch {
-        passiveCaptchaParamsFlow
+        paymentMethodMetadataFlow
             .mapNotNull { it }
             .take(1)
             .collect {
-                bootstrapHelper(it, lifecycleOwner)
+                bootstrapHelper(it)
             }
     }
 }

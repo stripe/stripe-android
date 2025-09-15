@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.R
@@ -72,8 +73,8 @@ internal class ConfirmationMediator<
         }
     }
 
-    fun bootstrap(metadata: Map<BootstrapKey<*>, Parcelable>) {
-        definition.bootstrap(metadata)
+    fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
+        definition.bootstrap(paymentMethodMetadata)
     }
 
     fun unregister() {

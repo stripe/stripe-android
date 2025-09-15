@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -37,10 +38,7 @@ internal interface ConfirmationHandler {
      */
     fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner)
 
-    fun bootstrap(
-        metadata: Map<BootstrapKey<*>, Parcelable>,
-        lifecycleOwner: LifecycleOwner
-    )
+    fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata)
 
     /**
      * Starts the confirmation process. Results can be received through [state] or through [awaitResult].

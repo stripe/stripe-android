@@ -39,9 +39,7 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
 
     init {
         confirmationHandler.register(activityResultCaller, lifecycleOwner)
-        paymentMethodMetadata.passiveCaptchaParams?.let {
-            confirmationHandler.bootstrapHelper(it, lifecycleOwner)
-        }
+        confirmationHandler.bootstrapHelper(paymentMethodMetadata)
         lifecycleOwner.lifecycleScope.launch {
             confirmationHandler.state.collectLatest {
                 stateHelper.updateConfirmationState(it)

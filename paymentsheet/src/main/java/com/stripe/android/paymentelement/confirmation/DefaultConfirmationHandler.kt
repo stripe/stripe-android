@@ -9,6 +9,7 @@ import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.R
 import kotlinx.coroutines.CoroutineScope
@@ -87,15 +88,10 @@ internal class DefaultConfirmationHandler(
         )
     }
 
-    override fun bootstrap(
-        metadata: Map<BootstrapKey<*>, Parcelable>,
-        lifecycleOwner: LifecycleOwner
-    ) {
-//        lifecycleOwner.lifecycleScope.launch {
+    override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
         mediators.forEach { mediator ->
-            mediator.bootstrap(metadata)
+            mediator.bootstrap(paymentMethodMetadata)
         }
-//        }
     }
 
     override suspend fun start(

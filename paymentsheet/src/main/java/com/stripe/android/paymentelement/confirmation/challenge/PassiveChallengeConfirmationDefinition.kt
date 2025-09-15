@@ -1,6 +1,5 @@
 package com.stripe.android.paymentelement.confirmation.challenge
 
-import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.challenge.PassiveChallengeActivityContract
@@ -9,8 +8,8 @@ import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.RadarOptions
-import com.stripe.android.paymentelement.confirmation.BootstrapKey
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -37,8 +36,8 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
         return confirmationOption as? PaymentMethodConfirmationOption
     }
 
-    override fun bootstrap(metadata: Map<BootstrapKey<*>, Parcelable>) {
-        val passiveCaptchaParams = BootstrapKey.PassiveCaptcha.toValue(metadata) ?: return
+    override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
+        val passiveCaptchaParams = paymentMethodMetadata.passiveCaptchaParams ?: return
         passiveChallengeWarmer.start(
             passiveCaptchaParams = passiveCaptchaParams,
             publishableKey = publishableKeyProvider(),

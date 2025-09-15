@@ -52,7 +52,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
-import com.stripe.android.paymentelement.confirmation.bootstrapHelper
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -85,7 +84,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -345,10 +343,6 @@ internal class CustomerSheetViewModel(
         lifecycleOwner: LifecycleOwner
     ) {
         confirmationHandler.register(activityResultCaller, lifecycleOwner)
-        confirmationHandler.bootstrapHelper(
-            passiveCaptchaParamsFlow = customerState.map { it.metadata?.passiveCaptchaParams },
-            lifecycleOwner = lifecycleOwner
-        )
     }
 
     private suspend fun loadCustomerSheetState() {
@@ -378,6 +372,7 @@ internal class CustomerSheetViewModel(
                             metadata = state.paymentMethodMetadata,
                             permissions = state.customerPermissions,
                         )
+                        confirmationHandler.bootstrap(state.paymentMethodMetadata)
 
                         transitionToInitialScreen()
                     }
