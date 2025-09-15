@@ -32,6 +32,10 @@ internal sealed class LinkEvent : AnalyticsEvent {
         override val eventName = "link.account_lookup.failure"
     }
 
+    object AccountRefreshFailure : LinkEvent() {
+        override val eventName = "link.account_refresh.failure"
+    }
+
     object TwoFAStart : LinkEvent() {
         override val eventName = "link.2fa.start"
     }

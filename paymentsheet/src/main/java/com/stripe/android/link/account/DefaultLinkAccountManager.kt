@@ -570,7 +570,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             consumerPublishableKey = linkAccount.consumerPublishableKey
         )
             .onFailure { error ->
-                linkEventsReporter.onAccountLookupFailure(error)
+                linkEventsReporter.onAccountRefreshFailure(error)
             }.onSuccess {
                 setAccount(consumerSession = it.consumerSession)
             }
