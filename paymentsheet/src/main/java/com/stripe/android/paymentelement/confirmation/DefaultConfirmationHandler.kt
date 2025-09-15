@@ -5,7 +5,6 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.resolvableString
@@ -31,8 +30,7 @@ internal class DefaultConfirmationHandler(
     private val coroutineScope: CoroutineScope,
     private val savedStateHandle: SavedStateHandle,
     private val errorReporter: ErrorReporter,
-    private val ioContext: CoroutineContext,
-    private val passiveChallengeWarmer: PassiveChallengeWarmer
+    private val ioContext: CoroutineContext
 ) : ConfirmationHandler {
     private val isInitiallyAwaitingForResultData = retrieveIsAwaitingForResultData()
 
@@ -74,7 +72,6 @@ internal class DefaultConfirmationHandler(
         mediators.forEach { mediator ->
             mediator.register(activityResultCaller, ::onResult)
         }
-        passiveChallengeWarmer.register(activityResultCaller, lifecycleOwner)
 
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
@@ -296,7 +293,6 @@ internal class DefaultConfirmationHandler(
         private val savedStateHandle: SavedStateHandle,
         private val errorReporter: ErrorReporter,
         @IOContext private val ioContext: CoroutineContext,
-        private val passiveChallengeWarmer: PassiveChallengeWarmer
     ) : ConfirmationHandler.Factory {
         override fun create(scope: CoroutineScope): ConfirmationHandler {
             return DefaultConfirmationHandler(
@@ -304,8 +300,7 @@ internal class DefaultConfirmationHandler(
                 coroutineScope = scope,
                 errorReporter = errorReporter,
                 savedStateHandle = savedStateHandle,
-                ioContext = ioContext,
-                passiveChallengeWarmer = passiveChallengeWarmer
+                ioContext = ioContext
             )
         }
     }

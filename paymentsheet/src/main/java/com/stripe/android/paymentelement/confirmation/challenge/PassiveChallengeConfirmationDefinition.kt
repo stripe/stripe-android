@@ -78,6 +78,7 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
         activityResultCaller: ActivityResultCaller,
         onResult: (PassiveChallengeActivityResult) -> Unit
     ): ActivityResultLauncher<PassiveChallengeActivityContract.Args> {
+        passiveChallengeWarmer.register(activityResultCaller)
         return activityResultCaller.registerForActivityResult(PassiveChallengeActivityContract(), onResult)
     }
 
@@ -139,5 +140,10 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
                 )
             }
         }
+    }
+
+    override fun unregister(launcher: ActivityResultLauncher<PassiveChallengeActivityContract.Args>) {
+        passiveChallengeWarmer.unregister()
+        super.unregister(launcher)
     }
 }

@@ -47,7 +47,6 @@ import com.stripe.android.utils.CompletableSingle
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
-import com.stripe.android.utils.FakePassiveChallengeWarmer
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import kotlinx.coroutines.CoroutineScope
 import org.mockito.kotlin.mock
@@ -151,8 +150,7 @@ internal object CustomerSheetTestHelper {
                 errorReporter = FakeErrorReporter(),
                 linkLauncher = RecordingLinkPaymentLauncher.noOp(),
                 linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-                cvcRecollectionLauncherFactory = RecordingCvcRecollectionLauncherFactory.noOp(),
-                passiveChallengeWarmer = FakePassiveChallengeWarmer()
+                cvcRecollectionLauncherFactory = RecordingCvcRecollectionLauncherFactory.noOp()
             ),
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,

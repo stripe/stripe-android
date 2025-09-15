@@ -1,7 +1,6 @@
 package com.stripe.android.utils
 
 import androidx.activity.result.ActivityResultCaller
-import androidx.lifecycle.LifecycleOwner
 import app.cash.turbine.Turbine
 import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
 import com.stripe.android.model.PassiveCaptchaParams
@@ -9,7 +8,6 @@ import com.stripe.android.model.PassiveCaptchaParams
 class FakePassiveChallengeWarmer : PassiveChallengeWarmer {
     data class RegisterCall(
         val activityResultCaller: ActivityResultCaller,
-        val lifecycleOwner: LifecycleOwner
     )
 
     data class StartCall(
@@ -20,9 +18,10 @@ class FakePassiveChallengeWarmer : PassiveChallengeWarmer {
 
     private val registerCalls = Turbine<RegisterCall>()
     private val startCalls = Turbine<StartCall>()
+    private val unregisterCalls = Turbine<Unit>()
 
-    override fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
-        registerCalls.add(RegisterCall(activityResultCaller, lifecycleOwner))
+    override fun register(activityResultCaller: ActivityResultCaller) {
+        registerCalls.add(RegisterCall(activityResultCaller))
     }
 
     override fun start(
@@ -33,11 +32,17 @@ class FakePassiveChallengeWarmer : PassiveChallengeWarmer {
         startCalls.add(StartCall(passiveCaptchaParams, publishableKey, productUsage))
     }
 
+    override fun unregister() {
+        unregisterCalls.add(Unit)
+    }
+
     suspend fun awaitRegisterCall(): RegisterCall = registerCalls.awaitItem()
     suspend fun awaitStartCall(): StartCall = startCalls.awaitItem()
+    suspend fun awaitUnregisterCall(): Unit = unregisterCalls.awaitItem()
 
     fun ensureAllEventsConsumed() {
         registerCalls.ensureAllEventsConsumed()
         startCalls.ensureAllEventsConsumed()
+        unregisterCalls.ensureAllEventsConsumed()
     }
 }

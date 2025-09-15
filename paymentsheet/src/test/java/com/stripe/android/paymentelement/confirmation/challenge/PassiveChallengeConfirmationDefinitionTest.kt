@@ -144,6 +144,27 @@ internal class PassiveChallengeConfirmationDefinitionTest {
     }
 
     @Test
+    fun `'createLauncher' should call passiveChallengeWarmer register`() = runTest {
+        val fakePassiveChallengeWarmer = FakePassiveChallengeWarmer()
+        val definition = createPassiveChallengeConfirmationDefinition(
+            passiveChallengeWarmer = fakePassiveChallengeWarmer
+        )
+
+        var onResultCalled = false
+        val onResult: (PassiveChallengeActivityResult) -> Unit = { onResultCalled = true }
+
+        DummyActivityResultCaller.test {
+            definition.createLauncher(
+                activityResultCaller = activityResultCaller,
+                onResult = onResult,
+            )
+
+            val registerCall = fakePassiveChallengeWarmer.awaitRegisterCall()
+            assertThat(registerCall.activityResultCaller).isEqualTo(activityResultCaller)
+        }
+    }
+
+    @Test
     fun `'action' should return expected 'Launch' action when passiveCaptchaParams is not null`() = runTest {
         val definition = createPassiveChallengeConfirmationDefinition()
 
@@ -417,6 +438,21 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
         definition.bootstrap(paymentMethodMetadata)
 
+        fakePassiveChallengeWarmer.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `'unregister' should call passiveChallengeWarmer unregister`() = runTest {
+        val fakePassiveChallengeWarmer = FakePassiveChallengeWarmer()
+        val definition = createPassiveChallengeConfirmationDefinition(
+            passiveChallengeWarmer = fakePassiveChallengeWarmer
+        )
+
+        val launcher = FakeActivityResultLauncher<PassiveChallengeActivityContract.Args>()
+
+        definition.unregister(launcher)
+
+        fakePassiveChallengeWarmer.awaitUnregisterCall()
         fakePassiveChallengeWarmer.ensureAllEventsConsumed()
     }
 

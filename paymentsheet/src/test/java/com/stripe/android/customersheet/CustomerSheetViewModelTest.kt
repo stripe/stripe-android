@@ -3834,7 +3834,7 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When registerFromActivity is called, ConfirmationHandler is bootstrapped`() =
+    fun `confirmation handler is bootstrapped after customer sheet is loaded`() =
         runTest(testDispatcher) {
             val fakeConfirmationHandler = FakeConfirmationHandler()
             val confirmationHandlerFactory = ConfirmationHandler.Factory { fakeConfirmationHandler }
