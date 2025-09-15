@@ -314,6 +314,7 @@ internal class SignUpViewModelTest {
     @Test
     fun `When signed up with unverified account then it navigates to Verification screen`() = runTest(dispatcher) {
         val screens = arrayListOf<LinkScreen>()
+        var verifyDuringSignUpCalled = false
         val linkAccountManager = FakeLinkAccountManager()
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
@@ -323,6 +324,9 @@ internal class SignUpViewModelTest {
             navigateAndClearStack = { screen ->
                 screens.add(screen)
             },
+            verifyDuringSignUp = {
+                verifyDuringSignUpCalled = true
+            }
         )
 
         val linkAccount = LinkAccount(
@@ -337,7 +341,8 @@ internal class SignUpViewModelTest {
 
         viewModel.performValidSignup()
 
-        assertThat(screens).containsExactly(LinkScreen.Verification)
+        assertThat(verifyDuringSignUpCalled).isTrue()
+        assertThat(screens).isEmpty()
         assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
     }
 
@@ -432,7 +437,8 @@ internal class SignUpViewModelTest {
             linkLaunchMode = LinkLaunchMode.Authentication(),
             dismissWithResult = { result ->
                 dismissResults.add(result)
-            }
+            },
+            verifyDuringSignUp = {},
         )
 
         authViewModel.emailController.onRawValueChange("test@example.com")
@@ -703,6 +709,7 @@ internal class SignUpViewModelTest {
         runTest(dispatcher) {
             val dismissResults = mutableListOf<LinkActivityResult>()
             val screens = arrayListOf<LinkScreen>()
+            var verifyDuringSignUpCalled = false
             val linkAccountManager = FakeLinkAccountManager()
             val linkAccount = LinkAccount(
                 consumerSession = TestFactory.CONSUMER_SESSION.copy(
@@ -715,13 +722,17 @@ internal class SignUpViewModelTest {
                 linkAccountManager = linkAccountManager,
                 linkLaunchMode = LinkLaunchMode.Authentication(),
                 navigateAndClearStack = { screen -> screens.add(screen) },
-                dismissWithResult = { result -> dismissResults.add(result) }
+                dismissWithResult = { result -> dismissResults.add(result) },
+                verifyDuringSignUp = {
+                    verifyDuringSignUpCalled = true
+                }
             )
 
             viewModel.emailController.onRawValueChange("test@example.com")
             advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
 
-            assertThat(screens).containsExactly(LinkScreen.Verification)
+            assertThat(verifyDuringSignUpCalled).isTrue()
+            assertThat(screens).isEmpty()
             assertThat(dismissResults).isEmpty()
         }
 
@@ -780,6 +791,7 @@ internal class SignUpViewModelTest {
     fun `When signup succeeds with unverified account in Full mode then navigates to Verification`() =
         runTest(dispatcher) {
             val screens = arrayListOf<LinkScreen>()
+            var verifyDuringSignUpCalled = false
             val linkAccountManager = FakeLinkAccountManager()
             val linkAccount = LinkAccount(
                 consumerSession = TestFactory.CONSUMER_SESSION.copy(
@@ -792,12 +804,16 @@ internal class SignUpViewModelTest {
             val viewModel = createViewModel(
                 linkAccountManager = linkAccountManager,
                 linkLaunchMode = LinkLaunchMode.Full,
-                navigateAndClearStack = { screen -> screens.add(screen) }
+                navigateAndClearStack = { screen -> screens.add(screen) },
+                verifyDuringSignUp = {
+                    verifyDuringSignUpCalled = true
+                }
             )
 
             viewModel.performValidSignup()
 
-            assertThat(screens).containsExactly(LinkScreen.Verification)
+            assertThat(verifyDuringSignUpCalled).isTrue()
+            assertThat(screens).isEmpty()
         }
 
     private fun createViewModel(
@@ -814,7 +830,8 @@ internal class SignUpViewModelTest {
         navigateAndClearStack: (LinkScreen) -> Unit = {},
         moveToWeb: (Throwable) -> Unit = {},
         dismissWithResult: (LinkActivityResult) -> Unit = {},
-        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full
+        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full,
+        verifyDuringSignUp: () -> Unit = {},
     ): SignUpViewModel {
         return SignUpViewModel(
             configuration = configuration.copy(
@@ -834,7 +851,8 @@ internal class SignUpViewModelTest {
             moveToWeb = moveToWeb,
             dismissalCoordinator = dismissalCoordinator,
             linkLaunchMode = linkLaunchMode,
-            dismissWithResult = dismissWithResult
+            dismissWithResult = dismissWithResult,
+            verifyDuringSignUp = verifyDuringSignUp,
         )
     }
 

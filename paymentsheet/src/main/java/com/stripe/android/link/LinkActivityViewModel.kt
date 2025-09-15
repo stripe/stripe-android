@@ -168,6 +168,12 @@ internal class LinkActivityViewModel @Inject constructor(
         }
     }
 
+    fun verifyDuringSignUp() {
+        viewModelScope.launch {
+            updateScreenState(withAnimationDelay = false, clearStack = true)
+        }
+    }
+
     fun dismissSheet() {
         if (canDismissSheet) {
             dismissWithResult(
@@ -371,9 +377,11 @@ internal class LinkActivityViewModel @Inject constructor(
         )
     }
 
+    @Suppress("CyclomaticComplexMethod")
     private suspend fun updateScreenState(
         withAnimationDelay: Boolean,
         consumerSessionRefresh: ConsumerSessionRefresh? = null,
+        clearStack: Boolean = false,
     ) {
         val accountStatus = linkAccountManager.accountStatus.first()
 
@@ -429,6 +437,9 @@ internal class LinkActivityViewModel @Inject constructor(
             delay(LINK_DEFAULT_ANIMATION_DELAY_MILLIS)
         }
         _linkScreenState.value = screenState
+        if (clearStack && screenState is ScreenState.FullScreen) {
+            navigate(screenState.initialDestination, clearStack = true)
+        }
     }
 
     private fun getScreenStateWhenVerified(
