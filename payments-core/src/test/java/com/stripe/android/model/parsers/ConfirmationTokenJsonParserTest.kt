@@ -91,7 +91,6 @@ class ConfirmationTokenJsonParserTest {
         assertThat(confirmationToken.mandateData).isNull()
         assertThat(confirmationToken.paymentIntentId).isNull()
         assertThat(confirmationToken.paymentMethodPreview).isNull()
-        assertThat(confirmationToken.paymentMethodOptions).isNull()
         assertThat(confirmationToken.returnUrl).isNull()
         assertThat(confirmationToken.setupFutureUsage).isNull()
         assertThat(confirmationToken.setupIntentId).isNull()

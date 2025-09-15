@@ -56,11 +56,6 @@ data class ConfirmationToken internal constructor(
     @JvmField val paymentIntentId: String?,
 
     /**
-     * Payment-method-specific configuration captured on the token.
-     */
-    @JvmField val paymentMethodOptions: PaymentMethodOptions?,
-
-    /**
      * Payment method data collected from Elements. This represents the transactional checkout state,
      * not a reusable PaymentMethod object.
      */

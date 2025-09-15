@@ -32,9 +32,6 @@ internal class ConfirmationTokenJsonParser : ModelJsonParser<ConfirmationToken> 
                     paymentMethod.type != null
                 }
             },
-            paymentMethodOptions = json.optJSONObject(FIELD_PAYMENT_METHOD_OPTIONS)?.let {
-                PaymentMethodOptionsJsonParser().parse(it)
-            },
             returnUrl = StripeJsonUtils.optString(json, FIELD_RETURN_URL),
             setupFutureUsage = StripeJsonUtils.optString(json, FIELD_SETUP_FUTURE_USAGE)?.let {
                     sfu ->
