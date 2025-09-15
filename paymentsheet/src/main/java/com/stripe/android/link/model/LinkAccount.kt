@@ -17,6 +17,7 @@ internal data class LinkAccount(
     val consumerPublishableKey: String? = null,
     val displayablePaymentDetails: DisplayablePaymentDetails? = null,
     val linkAuthIntentInfo: LinkAuthIntentInfo? = null,
+    val viewedWebviewOpenUrl: Boolean = false,
 ) : Parcelable {
 
     @IgnoredOnParcel

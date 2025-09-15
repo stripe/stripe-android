@@ -28,7 +28,6 @@ import com.stripe.android.link.attestation.FakeLinkAttestationCheck
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
-import com.stripe.android.link.confirmation.Result
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.ConsentPresentation
@@ -64,6 +63,7 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
 @SuppressWarnings("LargeClass")
 @RunWith(RobolectricTestRunner::class)
@@ -252,7 +252,7 @@ internal class LinkActivityViewModelTest {
         linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
 
         val confirmationHandler = FakeLinkConfirmationHandler()
-        confirmationHandler.confirmWithLinkPaymentDetailsResult = Result.Succeeded
+        confirmationHandler.confirmWithLinkPaymentDetailsResult = LinkConfirmationResult.Succeeded
 
         val vm = createViewModel(
             linkLaunchMode = LinkLaunchMode.Confirmation(selectedPayment = selectedPayment),
@@ -280,8 +280,8 @@ internal class LinkActivityViewModelTest {
 
         val linkConfirmationHandler = FakeLinkConfirmationHandler()
         linkConfirmationHandler.confirmWithLinkPaymentDetailsResult =
-            Result.Failed("something went wrong".resolvableString)
-        linkConfirmationHandler.confirmResult = Result.Failed("something went wrong".resolvableString)
+            LinkConfirmationResult.Failed("something went wrong".resolvableString)
+        linkConfirmationHandler.confirmResult = LinkConfirmationResult.Failed("something went wrong".resolvableString)
 
         val vm = createViewModel(
             linkLaunchMode = LinkLaunchMode.Confirmation(selectedPayment = selectedPayment),
@@ -760,6 +760,72 @@ internal class LinkActivityViewModelTest {
                     linkAccountUpdate = LinkAccountUpdate.Value(null)
                 )
             )
+        }
+    }
+
+    @Test
+    fun `handleWebAuthActivityResult marks account as viewed web auth URL on completion`() = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+        val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+        linkAccountHolder.set(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkAccountHolder = linkAccountHolder
+        )
+
+        linkAccountManager.refreshConsumerResult = Result.success(
+            ConsumerSessionRefresh(TestFactory.CONSUMER_SESSION, null)
+        )
+
+        // Test that the completion flow doesn't emit a result (success path calls updateScreenState)
+        viewModel.result.test {
+            viewModel.handleWebAuthActivityResult(WebLinkAuthResult.Completed)
+            advanceUntilIdle()
+
+            // The completion case should not emit any result immediately
+            // (unlike cancellation/failure which emit results)
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `handleWebAuthActivityResult marks account as viewed web auth URL on cancellation`() = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+        val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+        linkAccountHolder.set(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkAccountHolder = linkAccountHolder
+        )
+
+        viewModel.result.test {
+            viewModel.handleWebAuthActivityResult(WebLinkAuthResult.Canceled)
+
+            val result = awaitItem() as LinkActivityResult.Canceled
+            val updatedAccount = (result.linkAccountUpdate as LinkAccountUpdate.Value).account
+            assertThat(updatedAccount?.viewedWebviewOpenUrl).isTrue()
+        }
+    }
+
+    @Test
+    fun `handleWebAuthActivityResult marks account as viewed web auth URL on failure`() = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+        val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+        linkAccountHolder.set(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkAccountHolder = linkAccountHolder
+        )
+
+        val error = RuntimeException("test error")
+
+        viewModel.result.test {
+            viewModel.handleWebAuthActivityResult(WebLinkAuthResult.Failure(error))
+
+            val result = awaitItem() as LinkActivityResult.Failed
+            val updatedAccount = (result.linkAccountUpdate as LinkAccountUpdate.Value).account
+            assertThat(updatedAccount?.viewedWebviewOpenUrl).isTrue()
+            assertThat(result.error).isEqualTo(error)
         }
     }
 

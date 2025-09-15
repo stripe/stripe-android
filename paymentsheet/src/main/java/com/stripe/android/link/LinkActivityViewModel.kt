@@ -129,6 +129,10 @@ internal class LinkActivityViewModel @Inject constructor(
 
     fun handleWebAuthActivityResult(result: WebLinkAuthResult) {
         viewModelScope.launch {
+            val linkAccountUpdate = linkAccountHolder.linkAccountInfo.value.account
+                ?.copy(viewedWebviewOpenUrl = true)
+                ?.let { LinkAccountUpdate.Value(it) }
+                ?: LinkAccountUpdate.None
             when (result) {
                 WebLinkAuthResult.Completed -> {
                     linkAccountManager.refreshConsumer().fold(
@@ -142,7 +146,7 @@ internal class LinkActivityViewModel @Inject constructor(
                             dismissWithResult(
                                 LinkActivityResult.Failed(
                                     error = it,
-                                    linkAccountUpdate = LinkAccountUpdate.None,
+                                    linkAccountUpdate = linkAccountUpdate
                                 )
                             )
                         }
@@ -152,7 +156,7 @@ internal class LinkActivityViewModel @Inject constructor(
                     dismissWithResult(
                         LinkActivityResult.Canceled(
                             reason = LinkActivityResult.Canceled.Reason.BackPressed,
-                            linkAccountUpdate = LinkAccountUpdate.None,
+                            linkAccountUpdate = linkAccountUpdate
                         )
                     )
                 }
@@ -160,7 +164,7 @@ internal class LinkActivityViewModel @Inject constructor(
                     dismissWithResult(
                         LinkActivityResult.Failed(
                             error = result.error,
-                            linkAccountUpdate = LinkAccountUpdate.None,
+                            linkAccountUpdate = linkAccountUpdate
                         )
                     )
                 }

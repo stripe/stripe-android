@@ -477,6 +477,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         linkAccount: LinkAccount?,
         canLookupCustomerEmail: Boolean
     ): AccountStatus {
+        val usableLinkAccount = linkAccount?.takeIf { !it.viewedWebviewOpenUrl }
         val linkAccountResult =
             when (val linkLaunchMode = this.linkLaunchMode) {
                 null,
@@ -484,7 +485,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 is LinkLaunchMode.Confirmation,
                 LinkLaunchMode.Full,
                 is LinkLaunchMode.PaymentMethodSelection -> {
-                    linkAccount
+                    usableLinkAccount
                         // If we already have an account, return it.
                         ?.let { Result.success(it) }
                         ?: run {
@@ -501,7 +502,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 }
                 is LinkLaunchMode.Authorization -> {
                     val linkAuthIntentId = linkLaunchMode.linkAuthIntentId
-                    linkAccount
+                    usableLinkAccount
                         // If we already have an account for the LAI, return it.
                         ?.takeIf { it.linkAuthIntentInfo?.linkAuthIntentId == linkAuthIntentId }
                         ?.let { Result.success(it) }
