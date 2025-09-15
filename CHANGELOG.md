@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.26.1 - 2025-09-15
+
 ### PaymentSheet
 * [FIXED][11568](https://github.com/stripe/stripe-android/pull/11568) Fixed an issue where linking a bank account would fail for Stripe Connect accounts.
 
