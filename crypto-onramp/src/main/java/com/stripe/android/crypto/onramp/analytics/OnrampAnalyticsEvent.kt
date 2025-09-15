@@ -10,10 +10,9 @@ import com.stripe.android.crypto.onramp.model.PaymentMethodType
 internal sealed class OnrampAnalyticsEvent(
     private val name: String,
     val params: Map<String, String>? = null,
-    private val includePrefix: Boolean = true
 ) {
 
-    val eventName = if (includePrefix) "$EVENT_PREFIX.$name" else name
+    val eventName = "$EVENT_PREFIX.$name"
 
     data object SessionCreated : OnrampAnalyticsEvent(
         name = "session_created"
