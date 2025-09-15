@@ -1,7 +1,9 @@
 package com.stripe.android.model
 
+import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -59,7 +61,7 @@ data class ConfirmationToken internal constructor(
      * Payment method data collected from Elements. This represents the transactional checkout state,
      * not a reusable PaymentMethod object.
      */
-    @JvmField val paymentMethodPreview: PaymentMethod?,
+    @JvmField val paymentMethodPreview: PaymentMethodPreview?,
 
     /**
      * Return URL used to confirm the intent for redirect-based methods.
@@ -82,4 +84,40 @@ data class ConfirmationToken internal constructor(
      * Shipping information collected on this ConfirmationToken.
      */
     @JvmField val shipping: ShippingInformation?,
-) : StripeModel
+) : StripeModel {
+    /**
+     * Preview of the payment method data collected from Elements.
+     * This represents the transactional checkout state, not a reusable PaymentMethod object.
+     */
+    @Parcelize
+    @Poko
+    class PaymentMethodPreview internal constructor(
+        /**
+         *  This field indicates whether this payment method can be shown again to its customer in a checkout flow.
+         *  Stripe products such as Checkout and Elements use this field to determine
+         *  whether a payment method can be shown as a saved payment method in a checkout flow.
+         *  The field defaults to “unspecified”.
+         */
+        @JvmField val allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+
+        /**
+         *  Billing information associated with the PaymentMethod that may be used or required by
+         *  particular types of payment methods.
+         */
+        @JvmField val billingDetails: PaymentMethod.BillingDetails? = null,
+
+        /**
+         *  The ID of the Customer to which this PaymentMethod is saved.
+         *  This will not be set when the PaymentMethod has not been saved to a Customer.
+         */
+        @JvmField val customerId: String? = null,
+
+        /**
+         * The type of the PaymentMethod.
+         * An additional hash is included on the PaymentMethod with a name matching this value.
+         */
+        @JvmField val type: PaymentMethod.Type,
+
+        @JvmField val allResponseFields: String
+    ) : Parcelable
+}

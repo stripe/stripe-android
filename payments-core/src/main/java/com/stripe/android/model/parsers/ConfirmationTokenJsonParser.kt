@@ -27,10 +27,7 @@ internal class ConfirmationTokenJsonParser : ModelJsonParser<ConfirmationToken> 
             },
             paymentIntentId = StripeJsonUtils.optString(json, FIELD_PAYMENT_INTENT_ID),
             paymentMethodPreview = json.optJSONObject(FIELD_PAYMENT_METHOD_PREVIEW)?.let {
-                PaymentMethodJsonParser().parse(it).takeIf { paymentMethod ->
-                    // Return null if essential fields are missing (indicates invalid data)
-                    paymentMethod.type != null
-                }
+                PaymentMethodPreviewJsonParser().parse(it)
             },
             returnUrl = StripeJsonUtils.optString(json, FIELD_RETURN_URL),
             setupFutureUsage = StripeJsonUtils.optString(json, FIELD_SETUP_FUTURE_USAGE)?.let {
