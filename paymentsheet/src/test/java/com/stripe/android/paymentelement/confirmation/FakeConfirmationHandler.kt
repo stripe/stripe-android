@@ -1,9 +1,9 @@
 package com.stripe.android.paymentelement.confirmation
 
-import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import app.cash.turbine.Turbine
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import kotlinx.coroutines.flow.MutableStateFlow
 
 internal class FakeConfirmationHandler(
@@ -24,11 +24,8 @@ internal class FakeConfirmationHandler(
         )
     }
 
-    override fun bootstrap(
-        metadata: Map<BootstrapKey<*>, Parcelable>,
-        lifecycleOwner: LifecycleOwner
-    ) {
-        bootstrapTurbine.add(BootstrapCall(metadata, lifecycleOwner))
+    override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
+        bootstrapTurbine.add(BootstrapCall(paymentMethodMetadata))
     }
 
     override suspend fun start(arguments: ConfirmationHandler.Args) {
@@ -52,8 +49,7 @@ internal class FakeConfirmationHandler(
     )
 
     data class BootstrapCall(
-        val metadata: Map<BootstrapKey<*>, Parcelable>,
-        val lifecycleOwner: LifecycleOwner
+        val paymentMethodMetadata: PaymentMethodMetadata,
     )
 
     class Scenario(

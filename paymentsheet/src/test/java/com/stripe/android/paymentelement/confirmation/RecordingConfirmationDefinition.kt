@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 
 internal class RecordingConfirmationDefinition<
@@ -101,10 +102,10 @@ internal class RecordingConfirmationDefinition<
         return definition.action(confirmationOption, confirmationParameters)
     }
 
-    override fun bootstrap(metadata: Map<BootstrapKey<*>, Parcelable>) {
-        bootstrapCalls.add(BootstrapCall(metadata))
+    override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
+        bootstrapCalls.add(BootstrapCall(paymentMethodMetadata))
 
-        definition.bootstrap(metadata)
+        definition.bootstrap(paymentMethodMetadata)
     }
 
     class OptionCall(
@@ -145,7 +146,7 @@ internal class RecordingConfirmationDefinition<
     )
 
     class BootstrapCall(
-        val metadata: Map<BootstrapKey<*>, Parcelable>,
+        val paymentMethodMetadata: PaymentMethodMetadata,
     )
 
     class Scenario<

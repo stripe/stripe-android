@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -554,15 +555,13 @@ class ConfirmationMediatorTest {
             definition = definition,
         )
 
-        val metadata = mapOf<BootstrapKey<*>, Parcelable>(
-            BootstrapKey.PassiveCaptcha to TestParcelableValue
-        )
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
 
-        mediator.bootstrap(metadata)
+        mediator.bootstrap(paymentMethodMetadata)
 
         val bootstrapCall = bootstrapCalls.awaitItem()
 
-        assertThat(bootstrapCall.metadata).isEqualTo(metadata)
+        assertThat(bootstrapCall.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
     }
 
     private fun test(

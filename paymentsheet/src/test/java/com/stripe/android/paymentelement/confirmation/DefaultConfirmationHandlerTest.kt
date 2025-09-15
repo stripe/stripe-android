@@ -11,6 +11,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -656,18 +657,15 @@ class DefaultConfirmationHandlerTest {
 
     @Test
     fun `On bootstrap, should call bootstrap on all mediators`() = test {
-        val metadata = mapOf<BootstrapKey<*>, Parcelable>(
-            BootstrapKey.PassiveCaptcha to TestParcelableValue
-        )
-        val lifecycleOwner = TestLifecycleOwner()
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
 
-        confirmationHandler.bootstrap(metadata, lifecycleOwner)
+        confirmationHandler.bootstrap(paymentMethodMetadata)
 
         val someBootstrapCall = someDefinitionScenario.bootstrapCalls.awaitItem()
         val someOtherBootstrapCall = someOtherDefinitionScenario.bootstrapCalls.awaitItem()
 
-        assertThat(someBootstrapCall.metadata).isEqualTo(metadata)
-        assertThat(someOtherBootstrapCall.metadata).isEqualTo(metadata)
+        assertThat(someBootstrapCall.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
+        assertThat(someOtherBootstrapCall.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
         someDefinitionScenario.bootstrapCalls.ensureAllEventsConsumed()
     }
 

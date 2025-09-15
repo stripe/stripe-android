@@ -1,16 +1,15 @@
 package com.stripe.android.paymentelement.confirmation.challenge
 
-import android.os.Parcelable
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.challenge.PassiveChallengeActivityContract
 import com.stripe.android.challenge.PassiveChallengeActivityResult
 import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.RadarOptions
-import com.stripe.android.paymentelement.confirmation.BootstrapKey
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
@@ -392,11 +391,11 @@ internal class PassiveChallengeConfirmationDefinitionTest {
             passiveChallengeWarmer = fakePassiveChallengeWarmer
         )
 
-        val metadata = mapOf<BootstrapKey<*>, Parcelable>(
-            BootstrapKey.PassiveCaptcha to PASSIVE_CAPTCHA_PARAMS
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            passiveCaptchaParams = PASSIVE_CAPTCHA_PARAMS
         )
 
-        definition.bootstrap(metadata)
+        definition.bootstrap(paymentMethodMetadata)
 
         val startCall = fakePassiveChallengeWarmer.awaitStartCall()
 
@@ -412,9 +411,11 @@ internal class PassiveChallengeConfirmationDefinitionTest {
             passiveChallengeWarmer = fakePassiveChallengeWarmer
         )
 
-        val metadata = emptyMap<BootstrapKey<*>, Parcelable>()
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            passiveCaptchaParams = null
+        )
 
-        definition.bootstrap(metadata)
+        definition.bootstrap(paymentMethodMetadata)
 
         fakePassiveChallengeWarmer.ensureAllEventsConsumed()
     }

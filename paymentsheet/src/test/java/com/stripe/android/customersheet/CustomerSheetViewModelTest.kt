@@ -34,7 +34,6 @@ import com.stripe.android.model.PaymentMethodFixtures.US_BANK_ACCOUNT_VERIFIED
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.networking.PaymentAnalyticsEvent
-import com.stripe.android.paymentelement.confirmation.BootstrapKey
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -3835,25 +3834,24 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When registerFromActivity is called, ConfirmationHandler is bootstrapped with passiveCaptchaParams`() =
+    fun `When registerFromActivity is called, ConfirmationHandler is bootstrapped`() =
         runTest(testDispatcher) {
-            val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             val fakeConfirmationHandler = FakeConfirmationHandler()
             val confirmationHandlerFactory = ConfirmationHandler.Factory { fakeConfirmationHandler }
+            val customerSheetLoader = FakeCustomerSheetLoader()
 
             createViewModel(
                 workContext = testDispatcher,
                 confirmationHandlerFactory = confirmationHandlerFactory,
-                customerSheetLoader = FakeCustomerSheetLoader(
-                    customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
-                    isGooglePayAvailable = false,
-                    passiveCaptchaParams = passiveCaptchaParams
-                ),
+                customerSheetLoader = customerSheetLoader,
             )
 
             val bootstrapCall = fakeConfirmationHandler.bootstrapTurbine.awaitItem()
 
-            assertThat(bootstrapCall.metadata).containsExactly(BootstrapKey.PassiveCaptcha, passiveCaptchaParams)
+            val expectedPaymentMethodMetadata = customerSheetLoader.load(
+                CustomerSheet.Configuration(merchantDisplayName = "Test")
+            ).getOrThrow().paymentMethodMetadata
+            assertThat(bootstrapCall.paymentMethodMetadata).isEqualTo(expectedPaymentMethodMetadata)
         }
 
     private fun getAddPaymentMethodCardDetailsSectionController(

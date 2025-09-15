@@ -10,6 +10,7 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import app.cash.turbine.plusAssign
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
@@ -36,7 +37,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilt
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.PassiveCaptchaParams
-import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -48,7 +48,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
-import com.stripe.android.paymentelement.confirmation.BootstrapKey
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -2367,15 +2366,13 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `on init, bootstrap is called when passive captcha params is available`() = confirmationTest {
-        val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+    fun `on init, bootstrap is called`() = confirmationTest {
         val viewModel = createViewModel()
-        val flowController = createFlowController(viewModel = viewModel, passiveCaptchaParams = passiveCaptchaParams)
+        val flowController = createFlowController(viewModel = viewModel)
         flowController.configureExpectingSuccess()
-
-        with(bootstrapTurbine.awaitItem()) {
-            assertThat(metadata).containsExactly(BootstrapKey.PassiveCaptcha, passiveCaptchaParams)
-            assertThat(this.lifecycleOwner).isEqualTo(lifecycleOwner)
+        viewModel.stateFlow.test {
+            val paymentMethodMetadata = awaitItem()?.paymentSheetState?.paymentMethodMetadata
+            assertThat(bootstrapTurbine.awaitItem().paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
         }
     }
 
@@ -2585,6 +2582,7 @@ internal class DefaultFlowControllerTest {
                 viewModel = viewModel,
                 paymentSelectionUpdater = { _, _, newState, _, _ -> newState.paymentSelection },
                 isLiveModeProvider = { false },
+                confirmationHandler = FakeConfirmationHandler(),
             ),
             errorReporter = errorReporter,
             initializedViaCompose = false,
@@ -2613,7 +2611,7 @@ internal class DefaultFlowControllerTest {
             label = "Test".resolvableString,
             iconResource = 0,
             iconResourceNight = null,
-            paymentMethodCreateParams = PaymentMethodCreateParams.Companion.create(
+            paymentMethodCreateParams = PaymentMethodCreateParams.create(
                 bacsDebit = PaymentMethodCreateParams.BacsDebit(
                     accountNumber = BACS_ACCOUNT_NUMBER,
                     sortCode = BACS_SORT_CODE

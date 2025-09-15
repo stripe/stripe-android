@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.R
 
@@ -59,7 +60,7 @@ internal abstract class FakeConfirmationDefinition<
         return this.result
     }
 
-    override fun bootstrap(metadata: Map<BootstrapKey<*>, Parcelable>) {
+    override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
         // Do nothing
     }
 }

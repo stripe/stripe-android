@@ -55,7 +55,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
-import com.stripe.android.paymentelement.confirmation.BootstrapKey
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -3596,13 +3595,11 @@ internal class PaymentSheetViewModelTest {
         }
 
     @Test
-    fun `On register for activity result with passiveCaptchaParams, should bootstrap confirmation handler`() =
+    fun `On register for activity result, should bootstrap confirmation handler`() =
         confirmationTest {
-            val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             val viewModel = createViewModel(
                 paymentElementLoader = FakePaymentElementLoader(
                     stripeIntent = PAYMENT_INTENT,
-                    passiveCaptchaParams = passiveCaptchaParams
                 )
             )
 
@@ -3621,8 +3618,10 @@ internal class PaymentSheetViewModelTest {
 
                 // Verify bootstrap is called with passiveCaptchaParams
                 val bootstrapCall = bootstrapTurbine.awaitItem()
-                assertThat(bootstrapCall.lifecycleOwner).isEqualTo(lifecycleOwner)
-                assertThat(bootstrapCall.metadata).containsExactly(BootstrapKey.PassiveCaptcha, passiveCaptchaParams)
+                viewModel.paymentMethodMetadata.test {
+                    val paymentMethodMetadata = awaitItem()
+                    assertThat(paymentMethodMetadata).isEqualTo(bootstrapCall.paymentMethodMetadata)
+                }
             }
         }
 

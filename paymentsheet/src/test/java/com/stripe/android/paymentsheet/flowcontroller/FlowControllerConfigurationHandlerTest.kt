@@ -13,6 +13,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
+import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentsheet.FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey
@@ -609,6 +610,7 @@ class FlowControllerConfigurationHandlerTest {
             viewModel = viewModel,
             paymentSelectionUpdater = { _, _, newState, _, _ -> newState.paymentSelection },
             isLiveModeProvider = { false },
+            confirmationHandler = FakeConfirmationHandler(),
         )
     }
 }

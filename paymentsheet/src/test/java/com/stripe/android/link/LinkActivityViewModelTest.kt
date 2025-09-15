@@ -38,7 +38,6 @@ import com.stripe.android.link.utils.TestNavigationManager
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.networking.RequestSurface
-import com.stripe.android.paymentelement.confirmation.BootstrapKey
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentsheet.addresselement.AutocompleteActivityLauncher
@@ -149,8 +148,7 @@ internal class LinkActivityViewModelTest {
             )
 
             val bootstrapCall = confirmationHandler.bootstrapTurbine.awaitItem()
-            assertThat(bootstrapCall.lifecycleOwner).isEqualTo(lifecycleOwner)
-            assertThat(bootstrapCall.metadata).containsExactly(BootstrapKey.PassiveCaptcha, passiveCaptchaParams)
+            assertThat(bootstrapCall.paymentMethodMetadata.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
         }
 
     @Test
