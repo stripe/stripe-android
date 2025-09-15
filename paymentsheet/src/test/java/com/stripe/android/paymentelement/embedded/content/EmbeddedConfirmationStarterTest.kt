@@ -1,6 +1,5 @@
 package com.stripe.android.paymentelement.embedded.content
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
@@ -9,25 +8,17 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
 import com.stripe.android.paymentelement.confirmation.assertSucceeded
-import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.DummyActivityResultCaller
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.Rule
 import kotlin.test.Test
 
 class EmbeddedConfirmationStarterTest {
-    @get:Rule
-    val coroutineTestRule = CoroutineTestRule()
-
     @Test
     fun `on register, should call 'register' on confirmation handler`() = test {
         val activityResultCaller = DummyActivityResultCaller.noOp()
@@ -44,23 +35,6 @@ class EmbeddedConfirmationStarterTest {
 
         assertThat(registerCall.activityResultCaller).isEqualTo(activityResultCaller)
         assertThat(registerCall.lifecycleOwner).isEqualTo(lifecycleOwner)
-    }
-
-    @Test
-    fun `on register, should bootstrap confirmation handler`() = test {
-        val activityResultCaller = DummyActivityResultCaller.noOp()
-        val lifecycleOwner = TestLifecycleOwner()
-
-        confirmationStarter.register(
-            activityResultCaller = activityResultCaller,
-            lifecycleOwner = lifecycleOwner
-        )
-
-        // Skip the register call
-        confirmationHandler.registerTurbine.awaitItem()
-
-        val bootstrapCall = confirmationHandler.bootstrapTurbine.awaitItem()
-        assertThat(bootstrapCall.paymentMethodMetadata).isEqualTo(EmbeddedConfirmationStateFixtures.defaultState())
     }
 
     @Test
@@ -143,32 +117,15 @@ class EmbeddedConfirmationStarterTest {
     private fun test(
         confirmationState: ConfirmationHandler.State = ConfirmationHandler.State.Idle,
         block: suspend Scenario.() -> Unit,
-    ) = testWithState(
-        confirmationState = confirmationState,
-        block = block
-    )
-
-    private fun testWithState(
-        confirmationState: ConfirmationHandler.State = ConfirmationHandler.State.Idle,
-        block: suspend Scenario.() -> Unit,
     ) = runTest {
         val confirmationHandler = FakeConfirmationHandler(
             state = MutableStateFlow(confirmationState)
         )
-        val savedStateHandle = SavedStateHandle()
-        val confirmationStateHolder = EmbeddedConfirmationStateHolder(
-            savedStateHandle = savedStateHandle,
-            selectionHolder = EmbeddedSelectionHolder(savedStateHandle),
-            coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
-        )
-
-        confirmationStateHolder.state = EmbeddedConfirmationStateFixtures.defaultState()
 
         Scenario(
             confirmationStarter = EmbeddedConfirmationStarter(
                 confirmationHandler = confirmationHandler,
                 coroutineScope = backgroundScope,
-                confirmationStateHolder = confirmationStateHolder,
             ),
             confirmationHandler = confirmationHandler,
         ).block()

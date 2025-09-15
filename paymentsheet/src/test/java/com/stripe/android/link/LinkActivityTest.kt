@@ -160,8 +160,7 @@ internal class LinkActivityTest {
                 linkLaunchMode = LinkLaunchMode.Full,
                 linkConfirmationHandlerFactory = { FakeLinkConfirmationHandler() },
                 autocompleteLauncher = TestAutocompleteLauncher.noOp(),
-                addPaymentMethodOptionsFactory = mock(),
-                passiveCaptchaParams = null
+                addPaymentMethodOptionsFactory = mock()
             )
         }
     }

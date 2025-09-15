@@ -35,7 +35,6 @@ import com.stripe.android.link.model.LinkAuthIntentInfo
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.wallet.AddPaymentMethodOptions
 import com.stripe.android.link.utils.TestNavigationManager
-import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -99,11 +98,9 @@ internal class LinkActivityViewModelTest {
         runTest(dispatcher) {
             TestAutocompleteLauncher.test {
                 val confirmationHandler = FakeConfirmationHandler()
-                val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
                 val vm = createViewModel(
                     autocompleteLauncher = launcher,
                     confirmationHandler = confirmationHandler,
-                    passiveCaptchaParams = passiveCaptchaParams
                 )
 
                 val activityResultCaller = DummyActivityResultCaller.noOp()
@@ -125,30 +122,6 @@ internal class LinkActivityViewModelTest {
                 assertThat(confirmationHandlerRegisterCall.activityResultCaller).isEqualTo(activityResultCaller)
                 assertThat(confirmationHandlerRegisterCall.lifecycleOwner).isEqualTo(lifecycleOwner)
             }
-        }
-
-    @Test
-    fun `test that registerForActivityResult bootstraps confirmation handler with passiveCaptchaParams`() =
-        runTest(dispatcher) {
-            val confirmationHandler = FakeConfirmationHandler()
-            val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
-            val vm = createViewModel(
-                confirmationHandler = confirmationHandler,
-                passiveCaptchaParams = passiveCaptchaParams
-            )
-
-            val activityResultCaller = DummyActivityResultCaller.noOp()
-            val lifecycleOwner = object : LifecycleOwner {
-                override val lifecycle: Lifecycle = mock()
-            }
-
-            vm.registerForActivityResult(
-                activityResultCaller = activityResultCaller,
-                lifecycleOwner = lifecycleOwner
-            )
-
-            val bootstrapCall = confirmationHandler.bootstrapTurbine.awaitItem()
-            assertThat(bootstrapCall.paymentMethodMetadata.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
         }
 
     @Test
@@ -911,7 +884,6 @@ internal class LinkActivityViewModelTest {
         autocompleteLauncher: AutocompleteActivityLauncher = TestAutocompleteLauncher.noOp(),
         linkConfiguration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
         addPaymentMethodOptionsFactory: AddPaymentMethodOptions.Factory = mock(),
-        passiveCaptchaParams: PassiveCaptchaParams? = null
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
             linkAccountManager = linkAccountManager,
@@ -928,7 +900,6 @@ internal class LinkActivityViewModelTest {
             linkConfirmationHandlerFactory = { linkConfirmationHandler },
             autocompleteLauncher = autocompleteLauncher,
             addPaymentMethodOptionsFactory = addPaymentMethodOptionsFactory,
-            passiveCaptchaParams = passiveCaptchaParams
         ).apply {
             this.launchWebFlow = launchWeb
         }
