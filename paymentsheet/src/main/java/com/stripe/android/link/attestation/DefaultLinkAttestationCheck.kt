@@ -5,8 +5,8 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.LinkAuthResult
-import com.stripe.android.link.account.toLinkAuthResult
 import com.stripe.android.link.account.LinkStore
+import com.stripe.android.link.account.toLinkAuthResult
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.EmailSource

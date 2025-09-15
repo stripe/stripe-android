@@ -8,10 +8,7 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
-import com.stripe.android.link.account.FakeLinkAuth
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.account.LinkAuth
-import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.gate.LinkGate
@@ -180,18 +177,18 @@ internal class DefaultLinkAttestationCheckTest {
             on { hasPassedAttestationChecksRecently() }.thenReturn(true)
         }
         val mockIntegrityManager = mock<IntegrityRequestManager>()
-        val mockLinkAuth = mock<LinkAuth>()
+        val mockLinkAccountManager = mock<LinkAccountManager>()
 
         val check = attestationCheck(
             linkStore = mockLinkStore,
             integrityRequestManager = mockIntegrityManager,
-            linkAuth = mockLinkAuth
+            linkAccountManager = mockLinkAccountManager
         )
         val result = check.invoke()
 
         assertThat(result).isEqualTo(LinkAttestationCheck.Result.Successful)
         verify(mockIntegrityManager, never()).prepare()
-        verify(mockLinkAuth, never()).lookUp(
+        verify(mockLinkAccountManager, never()).lookupByEmail(
             email = org.mockito.kotlin.any(),
             emailSource = org.mockito.kotlin.any(),
             startSession = org.mockito.kotlin.any(),
@@ -206,14 +203,12 @@ internal class DefaultLinkAttestationCheckTest {
         }
         val fakeIntegrityManager = FakeIntegrityRequestManager()
         val linkAccountManager = FakeLinkAccountManager()
-        val linkAuth = FakeLinkAuth()
-        linkAuth.lookupResult = LinkAuthResult.Success(TestFactory.LINK_ACCOUNT)
+        linkAccountManager.lookupResult = Result.success(TestFactory.LINK_ACCOUNT)
 
         val check = attestationCheck(
             linkStore = mockLinkStore,
             integrityRequestManager = fakeIntegrityManager,
-            linkAccountManager = linkAccountManager,
-            linkAuth = linkAuth
+            linkAccountManager = linkAccountManager
         )
         val result = check.invoke()
 
