@@ -294,15 +294,13 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         state: PaymentElementLoader.State
     ) {
         logLinkHoldbackExperiment(
-            experimentAssignment = ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK,
+            experimentAssignments = listOf(
+                ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK,
+                ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK_AA,
+                ElementsSession.ExperimentAssignment.LINK_AB_TEST
+            ),
             elementsSession = elementsSession,
             state = state
-        )
-
-        logLinkHoldbackExperiment(
-            elementsSession = elementsSession,
-            state = state,
-            experimentAssignment = ElementsSession.ExperimentAssignment.LINK_AB_TEST
         )
     }
 
