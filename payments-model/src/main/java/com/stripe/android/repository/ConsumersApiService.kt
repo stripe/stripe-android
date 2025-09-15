@@ -8,6 +8,7 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithErrorParsing
 import com.stripe.android.core.networking.executeRequestWithModelJsonParser
 import com.stripe.android.core.networking.executeRequestWithResultParser
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.AttachConsumerToLinkAccountSession
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -250,6 +251,12 @@ class ConsumersApiServiceImpl(
         sessionId: String,
         customerId: String?
     ): ConsumerSessionLookup {
+        val supportedVerificationTypes =
+            if (FeatureFlags.forceLinkWebAuth.isEnabled) {
+                listOf("__fake__")
+            } else {
+                ConsumersApiServiceImpl.supportedVerificationTypes.map { it.value }
+            }
         return executeRequestWithModelJsonParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
             stripeNetworkClient = stripeNetworkClient,

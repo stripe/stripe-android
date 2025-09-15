@@ -543,6 +543,7 @@ internal class PlaygroundSettings private constructor(
             ),
             ShopPaySettingsDefinition,
             LinkControllerAllowUserEmailEditsSettingsDefinition,
+            FeatureFlagSettingsDefinition(FeatureFlags.forceLinkWebAuth),
             FeatureFlagSettingsDefinition(
                 FeatureFlags.forceEnableLinkPaymentSelectionHint,
                 listOf(PlaygroundConfigurationData.IntegrationType.LinkController)
