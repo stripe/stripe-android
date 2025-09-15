@@ -681,7 +681,10 @@ class DefaultEventReporterTest {
                 ),
                 spmEnabled = true,
                 integrationShape = "embedded",
-                linkDisplayed = true
+                linkDisplayed = true,
+                elementsSessionId = "test_elements_session_id",
+                mobileSdkVersion = "test_sdk_version",
+                mobileSessionId = "test_mobile_session_id"
             )
             completeEventReporter.onExperimentExposure(experiment)
 
