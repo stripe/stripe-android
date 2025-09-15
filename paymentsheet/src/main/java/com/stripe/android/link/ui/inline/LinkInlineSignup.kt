@@ -243,11 +243,7 @@ private fun LinkCheckbox(
     toggleExpanded: () -> Unit,
     useLinkLogoInCheckboxText: Boolean,
 ) {
-    val label = if (simplifiedCheckbox) {
-        stringResource(id = R.string.stripe_inline_sign_up_header_default_opt_in)
-    } else {
-        stringResource(id = R.string.stripe_inline_sign_up_header)
-    }
+    val label = stringResource(id = R.string.stripe_inline_sign_up_header_default_opt_in)
 
     val sublabel = if (!simplifiedCheckbox) {
         stringResource(R.string.stripe_sign_up_message, merchantName)

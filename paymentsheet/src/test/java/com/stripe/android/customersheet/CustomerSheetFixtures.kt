@@ -85,7 +85,8 @@ internal object CustomerSheetFixtures {
                         customerSheet = ElementsSession.Customer.Components.CustomerSheet.Enabled(
                             paymentMethodRemove =
                             ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled,
-                            canRemoveLastPaymentMethod = true,
+                            paymentMethodRemoveLast =
+                            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
                             isPaymentMethodSyncDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
                         ),
                     )

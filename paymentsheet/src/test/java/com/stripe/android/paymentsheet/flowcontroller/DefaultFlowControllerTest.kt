@@ -13,6 +13,7 @@ import app.cash.turbine.plusAssign
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
@@ -33,7 +34,6 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
-import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.PassiveCaptchaParams
@@ -47,7 +47,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
-import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -90,6 +89,7 @@ import com.stripe.android.paymentsheet.ui.SepaMandateResult
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.utils.FakePassiveChallengeWarmer
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.PaymentElementCallbackTestRule
 import com.stripe.android.utils.RelayingPaymentElementLoader
@@ -464,7 +464,7 @@ internal class DefaultFlowControllerTest {
             productUsage = PRODUCT_USAGE,
             linkAccountInfo = LinkAccountUpdate.Value(null),
             paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
-            walletsToShow = WalletType.entries,
+            walletButtonsRendered = false,
         )
 
         verify(paymentOptionActivityLauncher).launch(eq(expectedArgs), anyOrNull())
@@ -1585,7 +1585,25 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `On wallet buttons rendered and options launched, should show no wallets in options screen`() = runTest {
+    fun `On wallet buttons not rendered and options launched, wallets rendered argument should be false`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.walletButtonsRendered = false
+
+        val flowController = createFlowController(viewModel = viewModel)
+
+        flowController.configureExpectingSuccess()
+
+        flowController.presentPaymentOptions()
+
+        verify(paymentOptionActivityLauncher).launch(
+            argWhere { !it.walletButtonsRendered },
+            anyOrNull(),
+        )
+    }
+
+    @Test
+    fun `On wallet buttons rendered and options launched, wallets rendered argument should be true`() = runTest {
         val viewModel = createViewModel()
 
         viewModel.walletButtonsRendered = true
@@ -1597,124 +1615,7 @@ internal class DefaultFlowControllerTest {
         flowController.presentPaymentOptions()
 
         verify(paymentOptionActivityLauncher).launch(
-            argWhere { it.walletsToShow.isEmpty() },
-            anyOrNull(),
-        )
-    }
-
-    @OptIn(WalletButtonsPreview::class)
-    @Test
-    fun `On wallet buttons rendered and options launched, should show only Link in options screen`() = runTest {
-        val viewModel = createViewModel()
-
-        viewModel.walletButtonsRendered = true
-
-        val flowController = createFlowController(viewModel = viewModel)
-
-        flowController.configureExpectingSuccess(
-            configuration = PaymentSheet.Configuration.Builder(
-                merchantDisplayName = "Example, Inc."
-            )
-                .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                        countryCode = "US",
-                    )
-                )
-                .walletButtons(
-                    PaymentSheet.WalletButtonsConfiguration(
-                        willDisplayExternally = true,
-                        walletsToShow = listOf("google_pay", "shop_pay")
-                    )
-                )
-                .build()
-        )
-
-        flowController.presentPaymentOptions()
-
-        verify(paymentOptionActivityLauncher).launch(
-            argWhere {
-                it.walletsToShow.size == 1 &&
-                    it.walletsToShow.contains(WalletType.Link)
-            },
-            anyOrNull(),
-        )
-    }
-
-    @OptIn(WalletButtonsPreview::class)
-    @Test
-    fun `On wallet buttons rendered and options launched, should show only GPay in options screen`() = runTest {
-        val viewModel = createViewModel()
-
-        viewModel.walletButtonsRendered = true
-
-        val flowController = createFlowController(viewModel = viewModel)
-
-        flowController.configureExpectingSuccess(
-            configuration = PaymentSheet.Configuration.Builder(
-                merchantDisplayName = "Example, Inc."
-            )
-                .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                        countryCode = "US",
-                    )
-                )
-                .walletButtons(
-                    PaymentSheet.WalletButtonsConfiguration(
-                        willDisplayExternally = true,
-                        walletsToShow = listOf("link", "shop_pay")
-                    )
-                )
-                .build()
-        )
-
-        flowController.presentPaymentOptions()
-
-        verify(paymentOptionActivityLauncher).launch(
-            argWhere {
-                it.walletsToShow.size == 1 &&
-                    it.walletsToShow.contains(WalletType.GooglePay)
-            },
-            anyOrNull(),
-        )
-    }
-
-    @OptIn(WalletButtonsPreview::class)
-    @Test
-    fun `On wallet buttons rendered and options launched, should show only Shop Pay in options screen`() = runTest {
-        val viewModel = createViewModel()
-
-        viewModel.walletButtonsRendered = true
-
-        val flowController = createFlowController(viewModel = viewModel)
-
-        flowController.configureExpectingSuccess(
-            configuration = PaymentSheet.Configuration.Builder(
-                merchantDisplayName = "Example, Inc."
-            )
-                .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                        countryCode = "US",
-                    )
-                )
-                .walletButtons(
-                    PaymentSheet.WalletButtonsConfiguration(
-                        willDisplayExternally = true,
-                        walletsToShow = listOf("link", "google_pay")
-                    )
-                )
-                .build()
-        )
-
-        flowController.presentPaymentOptions()
-
-        verify(paymentOptionActivityLauncher).launch(
-            argWhere {
-                it.walletsToShow.size == 1 &&
-                    it.walletsToShow.contains(WalletType.ShopPay)
-            },
+            argWhere { it.walletButtonsRendered },
             anyOrNull(),
         )
     }
@@ -2595,6 +2496,55 @@ internal class DefaultFlowControllerTest {
         }
     }
 
+    @Test
+    fun `On flow controller creation, should register PassiveChallengeWarmer`() = runTest {
+        val passiveChallengeWarmer = FakePassiveChallengeWarmer()
+        createFlowController(passiveChallengeWarmer = passiveChallengeWarmer)
+
+        val registerCall = passiveChallengeWarmer.awaitRegisterCall()
+        assertThat(registerCall.activityResultCaller).isEqualTo(activityResultCaller)
+        assertThat(registerCall.lifecycleOwner).isEqualTo(lifecycleOwner)
+
+        passiveChallengeWarmer.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `PassiveChallengeWarmer should be started when passive captcha params are available`() = runTest {
+        val passiveChallengeWarmer = FakePassiveChallengeWarmer()
+        val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+
+        val flowController = createFlowController(
+            passiveChallengeWarmer = passiveChallengeWarmer,
+            passiveCaptchaParams = passiveCaptchaParams
+        )
+
+        passiveChallengeWarmer.awaitRegisterCall()
+
+        flowController.configureExpectingSuccess()
+
+        val startCall = passiveChallengeWarmer.awaitStartCall()
+        assertThat(startCall.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
+        assertThat(startCall.publishableKey).isNotEmpty()
+        assertThat(startCall.productUsage).containsExactlyElementsIn(PRODUCT_USAGE)
+
+        passiveChallengeWarmer.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `PassiveChallengeWarmer should not be started when passive captcha params are not available`() = runTest {
+        val passiveChallengeWarmer = FakePassiveChallengeWarmer()
+
+        val flowController = createFlowController(
+            passiveChallengeWarmer = passiveChallengeWarmer,
+            passiveCaptchaParams = null
+        )
+
+        passiveChallengeWarmer.awaitRegisterCall()
+        flowController.configureExpectingSuccess()
+
+        passiveChallengeWarmer.ensureAllEventsConsumed()
+    }
+
     private suspend fun FakeConfirmationHandler.Scenario.createAndConfigureFlowControllerForDeferredIntent(
         paymentIntent: PaymentIntent = PaymentIntentFixtures.PI_SUCCEEDED,
         intentConfiguration: PaymentSheet.IntentConfiguration = PaymentSheet.IntentConfiguration(
@@ -2642,19 +2592,21 @@ internal class DefaultFlowControllerTest {
         errorReporter: ErrorReporter = FakeErrorReporter(),
         eventReporter: EventReporter = this@DefaultFlowControllerTest.eventReporter,
         passiveCaptchaParams: PassiveCaptchaParams? = null,
+        passiveChallengeWarmer: PassiveChallengeWarmer = FakePassiveChallengeWarmer(),
     ): DefaultFlowController {
         return createFlowController(
-            FakePaymentElementLoader(
+            paymentElementLoader = FakePaymentElementLoader(
                 customer = customer,
                 stripeIntent = stripeIntent,
                 paymentSelection = paymentSelection,
                 linkState = linkState,
                 passiveCaptchaParams = passiveCaptchaParams,
             ),
-            viewModel,
-            errorReporter,
-            eventReporter,
-            handler,
+            viewModel = viewModel,
+            errorReporter = errorReporter,
+            eventReporter = eventReporter,
+            confirmationHandler = handler,
+            passiveChallengeWarmer = passiveChallengeWarmer
         ).also {
             val registerCall = registerTurbine.awaitItem()
 
@@ -2677,7 +2629,8 @@ internal class DefaultFlowControllerTest {
         eventReporter: EventReporter = this.eventReporter,
         confirmationHandler: ConfirmationHandler? = null,
         linkHandler: LinkHandler? = null,
-        passiveCaptchaParams: PassiveCaptchaParams? = null
+        passiveCaptchaParams: PassiveCaptchaParams? = null,
+        passiveChallengeWarmer: PassiveChallengeWarmer = FakePassiveChallengeWarmer(),
     ): DefaultFlowController {
         return createFlowController(
             FakePaymentElementLoader(
@@ -2692,6 +2645,7 @@ internal class DefaultFlowControllerTest {
             eventReporter,
             confirmationHandler,
             linkHandler,
+            passiveChallengeWarmer
         )
     }
 
@@ -2702,6 +2656,7 @@ internal class DefaultFlowControllerTest {
         eventReporter: EventReporter = this.eventReporter,
         confirmationHandler: ConfirmationHandler? = null,
         linkHandler: LinkHandler? = null,
+        passiveChallengeWarmer: PassiveChallengeWarmer = FakePassiveChallengeWarmer(),
     ): DefaultFlowController {
         return DefaultFlowController(
             viewModelScope = testScope,
@@ -2740,6 +2695,8 @@ internal class DefaultFlowControllerTest {
             activityResultRegistryOwner = mock(),
             linkGateFactory = { linkGate },
             confirmationHandler = confirmationHandler ?: FakeConfirmationHandler(),
+            passiveChallengeWarmer = passiveChallengeWarmer,
+            publishableKey = { PUBLISHABLE_KEY }
         )
     }
 
@@ -2756,7 +2713,8 @@ internal class DefaultFlowControllerTest {
         return PaymentSelection.New.GenericPaymentMethod(
             label = "Test".resolvableString,
             iconResource = 0,
-            paymentMethodCreateParams = PaymentMethodCreateParams.Companion.create(
+            iconResourceNight = null,
+            paymentMethodCreateParams = PaymentMethodCreateParams.create(
                 bacsDebit = PaymentMethodCreateParams.BacsDebit(
                     accountNumber = BACS_ACCOUNT_NUMBER,
                     sortCode = BACS_SORT_CODE
@@ -2780,6 +2738,7 @@ internal class DefaultFlowControllerTest {
         )
         private val GENERIC_PAYMENT_SELECTION = PaymentSelection.New.GenericPaymentMethod(
             iconResource = R.drawable.stripe_ic_paymentsheet_card_visa_ref,
+            iconResourceNight = null,
             label = "Bancontact".resolvableString,
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.BANCONTACT,
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
@@ -2819,6 +2778,7 @@ internal class DefaultFlowControllerTest {
 
         private const val ENABLE_LOGGING = false
         private val PRODUCT_USAGE = setOf("TestProductUsage")
+        private const val PUBLISHABLE_KEY = "pk_test_123"
 
         private val STATUS_BAR_COLOR = Color.GREEN
 

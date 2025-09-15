@@ -66,6 +66,7 @@ internal class OnrampModule {
     fun provideCryptoApiRepository(
         stripeNetworkClient: StripeNetworkClient,
         stripeRepository: StripeRepository,
+        linkController: LinkController,
         @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
         @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?,
     ): CryptoApiRepository {
@@ -75,6 +76,7 @@ internal class OnrampModule {
             publishableKeyProvider = publishableKeyProvider,
             stripeAccountIdProvider = stripeAccountIdProvider,
             apiVersion = ApiVersion.get().code,
+            linkController = linkController,
             appInfo = Stripe.appInfo
         )
     }

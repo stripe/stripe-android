@@ -5,6 +5,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
@@ -31,6 +32,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
@@ -47,6 +49,7 @@ import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -57,6 +60,12 @@ import com.stripe.android.uicore.R as UiCoreR
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentMethodMetadataTest {
+
+    @get:Rule
+    val enablePassiveCaptchaRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.enablePassiveCaptcha,
+        isEnabled = true
+    )
 
     @Test
     fun `hasIntentToSetup returns true for setup_intent`() {
@@ -1244,7 +1253,8 @@ internal class PaymentMethodMetadataTest {
             mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                 isPaymentMethodSaveEnabled = true,
                 paymentMethodRemove = ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
-                canRemoveLastPaymentMethod = true,
+                paymentMethodRemoveLast =
+                ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided,
                 allowRedisplayOverride = null,
                 isPaymentMethodSetAsDefaultEnabled = false,
             )
@@ -1259,7 +1269,8 @@ internal class PaymentMethodMetadataTest {
             mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                 isPaymentMethodSaveEnabled = false,
                 paymentMethodRemove = ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
-                canRemoveLastPaymentMethod = true,
+                paymentMethodRemoveLast =
+                ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided,
                 allowRedisplayOverride = null,
                 isPaymentMethodSetAsDefaultEnabled = false,
             ),
@@ -1684,6 +1695,13 @@ internal class PaymentMethodMetadataTest {
                 paymentMethodTypes = listOf("card"),
             ),
             linkMode = LinkMode.LinkCardBrand,
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION.copy(
+                    linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD", "INSTANT_DEBITS"),
+                ),
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
         )
 
         val displayedPaymentMethodTypes = metadata.supportedPaymentMethodTypes()
@@ -1698,6 +1716,13 @@ internal class PaymentMethodMetadataTest {
                 paymentMethodTypes = listOf("card"),
             ),
             linkMode = LinkMode.Passthrough,
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION.copy(
+                    linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+                ),
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
         )
 
         val displayedPaymentMethodTypes = metadata.supportedPaymentMethodTypes()
@@ -2122,6 +2147,7 @@ internal class PaymentMethodMetadataTest {
             customerId = null,
             saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             forceSetupFutureUseBehaviorAndNewMandate = false,
+            linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
         )
     }
 

@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.app.Application
 import android.os.Build
+import androidx.activity.result.ActivityResultCaller
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
@@ -10,6 +11,7 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.StripeError
@@ -122,6 +124,7 @@ import com.stripe.android.utils.BankFormScreenStateFactory
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import com.stripe.android.utils.FakePassiveChallengeWarmer
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.PaymentElementCallbackTestRule
@@ -1503,6 +1506,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.updateSelection(
             PaymentSelection.New.GenericPaymentMethod(
                 iconResource = 0,
+                iconResourceNight = null,
                 label = "".resolvableString,
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT,
                 customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
@@ -3593,6 +3597,84 @@ internal class PaymentSheetViewModelTest {
             }
         }
 
+    @Test
+    fun `On registerFromActivity, should register PassiveChallengeWarmer`() = testPassiveChallengeWarmer {
+        val registerCall = passiveChallengeWarmer.awaitRegisterCall()
+        assertThat(registerCall.activityResultCaller).isEqualTo(activityResultCaller)
+        assertThat(registerCall.lifecycleOwner).isEqualTo(lifecycleOwner)
+    }
+
+    @Test
+    fun `PassiveChallengeWarmer should be started when passive captcha params are available`() =
+        testPassiveChallengeWarmer(withPassiveCaptchaParams = true) {
+            passiveChallengeWarmer.awaitRegisterCall()
+
+            // The warmer should be started automatically when ViewModel loads with passive captcha params
+            val startCall = passiveChallengeWarmer.awaitStartCall()
+            assertThat(startCall.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
+            assertThat(startCall.publishableKey).isNotEmpty()
+            assertThat(startCall.productUsage).contains("PaymentSheet")
+        }
+
+    @Test
+    fun `PassiveChallengeWarmer should not be started when passive captcha params are not available`() =
+        testPassiveChallengeWarmer(withPassiveCaptchaParams = false) {
+            passiveChallengeWarmer.awaitRegisterCall()
+            // Should not start the warmer - no additional calls expected
+        }
+
+    private fun testPassiveChallengeWarmer(
+        withPassiveCaptchaParams: Boolean = false,
+        testBody: suspend PassiveChallengeWarmerTestScope.() -> Unit
+    ) = runTest {
+        DummyActivityResultCaller.test {
+            val passiveChallengeWarmer = FakePassiveChallengeWarmer()
+            val passiveCaptchaParams = if (withPassiveCaptchaParams) {
+                PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            } else {
+                null
+            }
+            val lifecycleOwner = TestLifecycleOwner()
+
+            val viewModel = createViewModel(
+                passiveChallengeWarmer = passiveChallengeWarmer,
+                paymentElementLoader = if (withPassiveCaptchaParams) {
+                    FakePaymentElementLoader(
+                        stripeIntent = PAYMENT_INTENT,
+                        passiveCaptchaParams = passiveCaptchaParams
+                    )
+                } else {
+                    FakePaymentElementLoader(stripeIntent = PAYMENT_INTENT)
+                }
+            )
+
+            viewModel.registerForActivityResult(
+                activityResultCaller = activityResultCaller,
+                lifecycleOwner = lifecycleOwner,
+            )
+
+            awaitRegisterCall()
+            awaitNextRegisteredLauncher()
+
+            val testScope = PassiveChallengeWarmerTestScope(
+                passiveChallengeWarmer = passiveChallengeWarmer,
+                passiveCaptchaParams = passiveCaptchaParams,
+                lifecycleOwner = lifecycleOwner,
+                activityResultCaller = activityResultCaller
+            )
+
+            testScope.testBody()
+            passiveChallengeWarmer.ensureAllEventsConsumed()
+        }
+    }
+
+    private data class PassiveChallengeWarmerTestScope(
+        val passiveChallengeWarmer: FakePassiveChallengeWarmer,
+        val passiveCaptchaParams: PassiveCaptchaParams?,
+        val lifecycleOwner: TestLifecycleOwner,
+        val activityResultCaller: ActivityResultCaller
+    )
+
     private fun testConfirmationStateRestorationAfterPaymentSuccess(
         loadStateBeforePaymentResult: Boolean
     ) = confirmationTest(
@@ -3799,7 +3881,8 @@ internal class PaymentSheetViewModelTest {
         eventReporter: EventReporter = this.eventReporter,
         cvcRecollectionHandler: CvcRecollectionHandler = this.cvcRecollectionHandler,
         cvcRecollectionInteractor: FakeCvcRecollectionInteractor = FakeCvcRecollectionInteractor(),
-        confirmationHandlerFactory: ConfirmationHandler.Factory? = null
+        confirmationHandlerFactory: ConfirmationHandler.Factory? = null,
+        passiveChallengeWarmer: PassiveChallengeWarmer = FakePassiveChallengeWarmer()
     ): PaymentSheetViewModel {
         return TestViewModelFactory.create(
             linkConfigurationCoordinator = linkConfigurationCoordinator,
@@ -3833,6 +3916,9 @@ internal class PaymentSheetViewModelTest {
                         return cvcRecollectionInteractor
                     }
                 },
+                passiveChallengeWarmer = passiveChallengeWarmer,
+                publishableKeyProvider = { "pk_test_12345" },
+                productUsage = setOf("PaymentSheet"),
                 isLiveModeProvider = { false }
             )
         }
@@ -3924,6 +4010,7 @@ internal class PaymentSheetViewModelTest {
         return PaymentSelection.New.GenericPaymentMethod(
             label = "Test".resolvableString,
             iconResource = 0,
+            iconResourceNight = null,
             paymentMethodCreateParams = PaymentMethodCreateParams.create(
                 bacsDebit = PaymentMethodCreateParams.BacsDebit(
                     accountNumber = BACS_ACCOUNT_NUMBER,

@@ -275,6 +275,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">Lihat selengkapnya</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Dengan melanjutkan, berarti Anda setuju untuk mengotorisasi pembayaran sesuai dengan <terms>ketentuan</terms> ini.]]></string>
+  <!-- Text providing link to terms for bank payments when seller information is provided -->
+  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[Dengan mengirimkan pesanan ke %1$s dan %2$s, Anda setuju untuk menyimpan informasi Anda dengan %3$s untuk pembelian di masa mendatang, dan setuju untuk mengotorisasi pembayaran sesuai dengan <terms>ketentuan ini</terms>.]]></string>
   <!-- Text providing link to terms for bank payments -->
   <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Dengan mengirimkan pesanan Anda ke %s, Anda setuju untuk mengotorisasi pembayaran sesuai dengan <terms>ketentuan ini</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->

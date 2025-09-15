@@ -10,6 +10,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.flatMapCatching
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAuthResult
+import com.stripe.android.link.account.toLinkAuthResult
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.confirmation.computeExpectedPaymentMethodType
 import com.stripe.android.link.exceptions.AppAttestationException
@@ -19,6 +20,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.wallet.displayName
+import com.stripe.android.link.utils.isLinkAuthorizationError
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentMethod
@@ -213,7 +215,7 @@ internal class LinkControllerInteractor @Inject constructor(
     fun onLinkActivityResult(result: LinkActivityResult) {
         val currentLaunchMode = _state.value.currentLaunchMode
         updateState { it.copy(currentLaunchMode = null) }
-        updateStateOnAccountUpdate(result.linkAccountUpdate)
+        updateLinkAccountOnLinkResult(result)
 
         when (currentLaunchMode) {
             is LinkLaunchMode.PaymentMethodSelection ->
@@ -225,6 +227,16 @@ internal class LinkControllerInteractor @Inject constructor(
             else ->
                 logger.warning("$tag: unexpected result for launch mode: $currentLaunchMode")
         }
+    }
+
+    private fun updateLinkAccountOnLinkResult(result: LinkActivityResult) {
+        val error: Throwable? = (result as? LinkActivityResult.Failed)?.error
+        val linkAccountUpdate = when {
+            // Clear Link account if we got a Link auth error during any flow.
+            error?.isLinkAuthorizationError() == true -> LinkAccountUpdate.Value(null)
+            else -> result.linkAccountUpdate
+        }
+        updateStateOnAccountUpdate(update = linkAccountUpdate)
     }
 
     private fun updateStateOnNewEmail(email: String?) {
@@ -350,13 +362,12 @@ internal class LinkControllerInteractor @Inject constructor(
     suspend fun lookupConsumer(email: String): LinkController.LookupConsumerResult {
         return requireLinkComponent()
             .flatMapCatching { component ->
-                component.linkAuth.lookUp(
+                component.linkAccountManager.lookupByEmail(
                     email = email,
                     emailSource = EmailSource.USER_ACTION,
                     startSession = true,
                     customerId = null,
-                )
-                    .toResult()
+                ).toResult()
             }
             .fold(
                 onSuccess = { account ->
@@ -403,7 +414,7 @@ internal class LinkControllerInteractor @Inject constructor(
     ): LinkController.RegisterConsumerResult {
         return requireLinkComponent()
             .flatMapCatching {
-                it.linkAuth.signUp(
+                it.linkAccountManager.signUp(
                     email = email,
                     phoneNumber = phone,
                     country = country,
@@ -540,23 +551,27 @@ internal class LinkControllerInteractor @Inject constructor(
                 Result.success(Unit)
         }
 
-    private fun LinkAuthResult.toResult(): Result<LinkAccount?> =
-        when (this) {
+    private fun Result<LinkAccount?>.toResult(): Result<LinkAccount?> =
+        when (val linkAuthResult = this.toLinkAuthResult()) {
             is LinkAuthResult.AccountError ->
-                Result.failure(error)
+                Result.failure(linkAuthResult.error)
             is LinkAuthResult.AttestationFailed ->
-                Result.failure(AppAttestationException(error))
+                Result.failure(AppAttestationException(linkAuthResult.error))
             is LinkAuthResult.Error ->
-                Result.failure(error)
+                Result.failure(linkAuthResult.error)
             LinkAuthResult.NoLinkAccountFound ->
                 Result.success(null)
             is LinkAuthResult.Success ->
-                Result.success(account)
+                Result.success(linkAuthResult.account)
         }
 
     @VisibleForTesting
     internal fun updateState(block: (State) -> State) {
         _state.update(block)
+    }
+
+    fun clearLinkAccount() {
+        updateStateOnAccountUpdate(LinkAccountUpdate.Value(account = null))
     }
 
     internal data class State(

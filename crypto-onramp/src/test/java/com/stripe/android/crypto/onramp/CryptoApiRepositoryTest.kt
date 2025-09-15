@@ -6,9 +6,11 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.DateOfBirth
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
+import com.stripe.android.link.LinkController
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.test.runTest
@@ -25,8 +27,8 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class CryptoApiRepositoryTest {
     private val stripeNetworkClient: StripeNetworkClient = mock()
-
     private val stripeRepository = mock<StripeRepository>()
+    private val linkController = mock<LinkController>()
 
     private val cryptoApiRepository = CryptoApiRepository(
         stripeNetworkClient = stripeNetworkClient,
@@ -35,7 +37,8 @@ class CryptoApiRepositoryTest {
         stripeAccountIdProvider = { "TestAccountId" },
         apiVersion = ApiVersion(betas = emptySet()).code,
         sdkVersion = StripeSdkVersion.VERSION,
-        appInfo = null
+        appInfo = null,
+        linkController = linkController
     )
 
     private val apiRequestArgumentCaptor: KArgumentCaptor<ApiRequest> = argumentCaptor()
@@ -74,6 +77,32 @@ class CryptoApiRepositoryTest {
 
             assertThat(result.getOrThrow().id)
                 .isEqualTo("test-id")
+        }
+    }
+
+    @Test
+    fun testGrantingPartnerMerchantPermissionsFails() {
+        runTest {
+            val stripeResponse = StripeResponse(
+                400,
+                """
+                    {
+                    }
+                    """,
+                emptyMap()
+            )
+
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val result = cryptoApiRepository.grantPartnerMerchantPermissions(
+                consumerSessionClientSecret = "test-secret"
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+            assertThat(result.isFailure)
+                .isEqualTo(true)
         }
     }
 
@@ -135,6 +164,36 @@ class CryptoApiRepositoryTest {
     }
 
     @Test
+    fun testCollectKycDataFails() {
+        runTest {
+            val stripeResponse = StripeResponse(
+                400,
+                "{}",
+                emptyMap()
+            )
+
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val result = cryptoApiRepository.collectKycData(
+                KycInfo(
+                    firstName = "Test",
+                    lastName = "User",
+                    idNumber = "999-88-7777",
+                    dateOfBirth = DateOfBirth(day = 1, month = 3, year = 1975),
+                    address = PaymentSheet.Address(city = "Orlando", state = "FL")
+                ),
+                consumerSessionClientSecret = "test-secret"
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+            assertThat(result.isFailure)
+                .isEqualTo(true)
+        }
+    }
+
+    @Test
     fun testStartIdentityVerificationSucceeds() {
         runTest {
             val stripeResponse = StripeResponse(
@@ -167,6 +226,91 @@ class CryptoApiRepositoryTest {
             )
 
             assertThat(result.isSuccess)
+                .isEqualTo(true)
+        }
+    }
+
+    @Test
+    fun testStartIdentityVerificationFails() {
+        runTest {
+            val stripeResponse = StripeResponse(
+                400,
+                """
+                    {
+                    }
+                    """,
+                emptyMap()
+            )
+
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val result = cryptoApiRepository.startIdentityVerification(consumerSessionClientSecret = "test-secret")
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+            assertThat(result.isFailure)
+                .isEqualTo(true)
+        }
+    }
+
+    @Test
+    fun testCollectWalletAddressSucceeds() {
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                "{}",
+                emptyMap()
+            )
+
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val result = cryptoApiRepository.setWalletAddress(
+                walletAddress = "0x1234567890abcdef",
+                network = CryptoNetwork.Ethereum,
+                consumerSessionClientSecret = "test-secret"
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val apiRequest = apiRequestArgumentCaptor.firstValue
+
+            assertThat(apiRequest.baseUrl)
+                .isEqualTo("https://api.stripe.com/v1/crypto/internal/wallet")
+
+            val params = apiRequest.params!!
+            assertThat(params["wallet_address"]).isEqualTo("0x1234567890abcdef")
+            assertThat(params["network"]).isEqualTo("ethereum")
+            assertThat(params["credentials"]).isEqualTo(
+                mapOf("consumer_session_client_secret" to "test-secret")
+            )
+
+            assertThat(result.isSuccess)
+                .isEqualTo(true)
+        }
+    }
+
+    @Test
+    fun testCollectWalletAddressFails() {
+        runTest {
+            val stripeResponse = StripeResponse(
+                400,
+                "{}",
+                emptyMap()
+            )
+
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val result = cryptoApiRepository.setWalletAddress(
+                walletAddress = "0x1234567890abcdef",
+                network = CryptoNetwork.Ethereum,
+                consumerSessionClientSecret = "test-secret"
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+            assertThat(result.isFailure)
                 .isEqualTo(true)
         }
     }

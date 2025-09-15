@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.PaymentMethod.Type.Link
 import kotlinx.parcelize.Parcelize
 import java.util.UUID
@@ -67,7 +68,12 @@ data class ElementsSession(
         get() = linkSettings?.linkMobileSkipWalletInFlowController ?: false
 
     val passiveCaptchaParams: PassiveCaptchaParams?
-        get() = passiveCaptcha.takeIf { flags[Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA] == true }
+        get() {
+            return passiveCaptcha.takeIf {
+                flags[Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA] == true &&
+                    FeatureFlags.enablePassiveCaptcha.isEnabled
+            }
+        }
 
     val linkSignUpOptInFeatureEnabled: Boolean
         get() = linkSettings?.linkSignUpOptInFeatureEnabled ?: false
@@ -90,7 +96,8 @@ data class ElementsSession(
         val linkEnableDisplayableDefaultValuesInEce: Boolean,
         val linkMobileSkipWalletInFlowController: Boolean,
         val linkSignUpOptInFeatureEnabled: Boolean,
-        val linkSignUpOptInInitialValue: Boolean
+        val linkSignUpOptInInitialValue: Boolean,
+        val linkSupportedPaymentMethodsOnboardingEnabled: List<String>,
     ) : StripeModel
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -163,10 +170,13 @@ data class ElementsSession(
                 data class Enabled(
                     val isPaymentMethodSaveEnabled: Boolean,
                     val paymentMethodRemove: PaymentMethodRemoveFeature,
-                    val canRemoveLastPaymentMethod: Boolean,
+                    val paymentMethodRemoveLast: PaymentMethodRemoveLastFeature,
                     val allowRedisplayOverride: PaymentMethod.AllowRedisplay?,
                     val isPaymentMethodSetAsDefaultEnabled: Boolean,
-                ) : MobilePaymentElement
+                ) : MobilePaymentElement {
+                    val canRemoveLastPaymentMethod: Boolean
+                        get() = paymentMethodRemoveLast.canRemoveLastPaymentMethod
+                }
             }
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -179,9 +189,12 @@ data class ElementsSession(
                 @Parcelize
                 data class Enabled(
                     val paymentMethodRemove: PaymentMethodRemoveFeature,
-                    val canRemoveLastPaymentMethod: Boolean,
+                    val paymentMethodRemoveLast: PaymentMethodRemoveLastFeature,
                     val isPaymentMethodSyncDefaultEnabled: Boolean,
-                ) : CustomerSheet
+                ) : CustomerSheet {
+                    val canRemoveLastPaymentMethod: Boolean
+                        get() = paymentMethodRemoveLast.canRemoveLastPaymentMethod
+                }
             }
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -189,6 +202,16 @@ data class ElementsSession(
                 Enabled,
                 Partial,
                 Disabled,
+            }
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            enum class PaymentMethodRemoveLastFeature {
+                Enabled,
+                Disabled,
+                NotProvided;
+
+                val canRemoveLastPaymentMethod: Boolean
+                    get() = this == Enabled || this == NotProvided
             }
         }
     }

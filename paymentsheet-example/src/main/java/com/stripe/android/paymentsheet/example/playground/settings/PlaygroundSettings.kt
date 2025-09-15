@@ -557,10 +557,7 @@ internal class PlaygroundSettings private constructor(
                     PlaygroundConfigurationData.IntegrationType.CustomerSheet,
                 )
             ),
-            FeatureFlagSettingsDefinition(
-                FeatureFlags.enablePayNow,
-                allowedIntegrationTypes = PlaygroundConfigurationData.IntegrationType.paymentFlows().toList(),
-            )
+            PassiveCaptchaDefinition,
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(

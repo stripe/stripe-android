@@ -2,6 +2,19 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [FIXED][11568](https://github.com/stripe/stripe-android/pull/11568) Fixed an issue where linking a bank account would fail for Stripe Connect accounts.
+
+## 21.26.0 - 2025-09-08
+
+### PaymentSheet
+* [ADDED][11539](https://github.com/stripe/stripe-android/pull/11539) Added support for [PayNow](https://stripe.com/payment-method/paynow) to PaymentSheet.
+
+## 21.25.0 - 2025-09-02
+
+### Payments
+* [ADDED][11419](https://github.com/stripe/stripe-android/pull/11491) Added `declineCode` parameter to `StripeErrorLocalizations` to allow for handling decline code localizations.
+
 ## 21.24.4 - 2025-08-29
 
 ### CryptoOnramp

@@ -86,6 +86,7 @@ internal class PaymentSelectionIconLoaderTest {
             },
         ).load(
             drawableResourceId = iconRes ?: 0,
+            drawableResourceIdNight = null,
             lightThemeIconUrl = iconUrl,
             darkThemeIconUrl = null,
         )

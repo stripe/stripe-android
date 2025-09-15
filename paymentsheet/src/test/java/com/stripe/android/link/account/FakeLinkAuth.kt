@@ -1,80 +1,63 @@
 package com.stripe.android.link.account
 
-import app.cash.turbine.Turbine
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.inline.SignUpConsentAction
+import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.EmailSource
-import kotlinx.coroutines.yield
 
 internal class FakeLinkAuth : LinkAuth {
-    var signupResult: LinkAuthResult = LinkAuthResult.Success(TestFactory.LINK_ACCOUNT)
-    var lookupResult: LinkAuthResult = LinkAuthResult.Success(TestFactory.LINK_ACCOUNT)
+    var lookupResult: Result<ConsumerSessionLookup> = Result.success(TestFactory.CONSUMER_SESSION_LOOKUP)
+    var signupResult: Result<ConsumerSessionSignup> = Result.success(TestFactory.CONSUMER_SESSION_SIGN_UP)
 
-    private val signupTurbine = Turbine<SignUpCall>()
-    private val lookupTurbine = Turbine<LookupCall>()
+    // Track calls for verification
+    var lookupCalls = mutableListOf<LookupCall>()
+    var signupCalls = mutableListOf<SignupCall>()
 
-    override suspend fun signUp(
-        email: String,
-        phoneNumber: String,
-        country: String,
-        countryInferringMethod: String,
-        name: String?,
-        consentAction: SignUpConsentAction
-    ): LinkAuthResult {
-        signupTurbine.add(
-            item = SignUpCall(
-                email = email,
-                phone = phoneNumber,
-                country = country,
-                name = name,
-                consentAction = consentAction
-            )
-        )
-        yield()
-        return signupResult
-    }
+    data class LookupCall(
+        val email: String?,
+        val emailSource: EmailSource?,
+        val linkAuthIntentId: String?,
+        val customerId: String?,
+        val sessionId: String
+    )
 
-    override suspend fun lookUp(
-        email: String,
-        emailSource: EmailSource,
-        startSession: Boolean,
-        customerId: String?
-    ): LinkAuthResult {
-        lookupTurbine.add(
-            item = LookupCall(
-                email = email,
-                emailSource = emailSource,
-                startSession = startSession
-            )
-        )
-        yield()
-        return lookupResult
-    }
-
-    suspend fun awaitSignUpCall(): SignUpCall {
-        return signupTurbine.awaitItem()
-    }
-
-    suspend fun awaitLookupCall(): LookupCall {
-        return lookupTurbine.awaitItem()
-    }
-
-    fun ensureAllItemsConsumed() {
-        lookupTurbine.ensureAllEventsConsumed()
-        signupTurbine.ensureAllEventsConsumed()
-    }
-
-    data class SignUpCall(
+    data class SignupCall(
         val email: String,
-        val phone: String,
-        val country: String,
+        val phoneNumber: String?,
+        val country: String?,
+        val countryInferringMethod: String,
         val name: String?,
         val consentAction: SignUpConsentAction
     )
 
-    data class LookupCall(
-        val email: String,
-        val emailSource: EmailSource,
-        val startSession: Boolean
-    )
+    override suspend fun lookup(
+        email: String?,
+        emailSource: EmailSource?,
+        linkAuthIntentId: String?,
+        customerId: String?,
+        sessionId: String
+    ): Result<ConsumerSessionLookup> {
+        lookupCalls.add(LookupCall(email, emailSource, linkAuthIntentId, customerId, sessionId))
+        return lookupResult
+    }
+
+    override suspend fun signup(
+        email: String,
+        phoneNumber: String?,
+        country: String?,
+        countryInferringMethod: String,
+        name: String?,
+        consentAction: SignUpConsentAction
+    ): Result<ConsumerSessionSignup> {
+        signupCalls.add(SignupCall(email, phoneNumber, country, countryInferringMethod, name, consentAction))
+        return signupResult
+    }
+
+    fun reset() {
+        lookupCalls.clear()
+        signupCalls.clear()
+        lookupResult = Result.success(TestFactory.CONSUMER_SESSION_LOOKUP)
+        signupResult = Result.success(TestFactory.CONSUMER_SESSION_SIGN_UP)
+    }
 }

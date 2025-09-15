@@ -6,520 +6,337 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.link.FakeIntegrityRequestManager
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.gate.FakeLinkGate
+import com.stripe.android.link.repositories.FakeLinkRepository
 import com.stripe.android.link.ui.inline.SignUpConsentAction
+import com.stripe.android.model.ConsumerSignUpConsentAction
+import com.stripe.android.model.EmailSource
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.attestation.AttestationError
-import com.stripe.attestation.IntegrityRequestManager
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 internal class DefaultLinkAuthTest {
 
+    private val dispatcher = UnconfinedTestDispatcher()
+
     @get:Rule
-    val testRule = CoroutineTestRule()
+    val coroutineTestRule = CoroutineTestRule(dispatcher)
+
+    private val fakeLinkGate = FakeLinkGate()
+    private val fakeLinkRepository = FakeLinkRepository()
+    private val fakeIntegrityRequestManager = FakeIntegrityRequestManager()
+    private val fakeErrorReporter = FakeErrorReporter()
+    private val config = TestFactory.LINK_CONFIGURATION.copy(
+        stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+            amount = 1000L,
+            currency = "usd"
+        )
+    )
+    private val applicationId = "test.app.id"
+
+    private fun createDefaultLinkAuth() = DefaultLinkAuth(
+        linkGate = fakeLinkGate,
+        linkRepository = fakeLinkRepository,
+        integrityRequestManager = fakeIntegrityRequestManager,
+        errorReporter = fakeErrorReporter,
+        config = config,
+        applicationId = applicationId
+    )
 
     @Test
-    fun `config with attestation enabled successfully signs in`() = runTest {
-        val linkAccountManager = FakeLinkAccountManager()
-        val integrityRequestManager = FakeIntegrityRequestManager()
+    fun `lookup validates required parameters`() = runTest {
+        val linkAuth = createDefaultLinkAuth()
 
-        val linkAuth = linkAuth(
-            linkAccountManager = linkAccountManager,
-            integrityRequestManager = integrityRequestManager
+        // Test with no email and no auth intent
+        val result = linkAuth.lookup(
+            email = null,
+            emailSource = null,
+            linkAuthIntentId = null,
+            customerId = null,
+            sessionId = "session_123"
         )
 
-        val result = linkAuth.signUp(
-            email = TestFactory.CUSTOMER_EMAIL,
-            phoneNumber = TestFactory.CUSTOMER_PHONE,
-            country = TestFactory.COUNTRY,
-            countryInferringMethod = TestFactory.COUNTRY_INFERRING_METHOD,
-            name = TestFactory.CUSTOMER_NAME,
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(result.exceptionOrNull()?.message).contains(
+            "Either email+emailSource or linkAuthIntentId must be provided"
+        )
+    }
+
+    @Test
+    fun `lookup accepts email and emailSource`() = runTest(dispatcher) {
+        val linkAuth = createDefaultLinkAuth()
+        fakeLinkGate.setUseAttestationEndpoints(false)
+
+        val result = linkAuth.lookup(
+            email = "test@example.com",
+            emailSource = EmailSource.USER_ACTION,
+            linkAuthIntentId = null,
+            customerId = null,
+            sessionId = "session_123"
+        )
+
+        assertThat(result.isSuccess).isTrue()
+
+        val lookupCall = fakeLinkRepository.awaitLookup()
+        assertThat(lookupCall.email).isEqualTo("test@example.com")
+        assertThat(lookupCall.linkAuthIntentId).isNull()
+    }
+
+    @Test
+    fun `lookup accepts linkAuthIntentId`() = runTest(dispatcher) {
+        val linkAuth = createDefaultLinkAuth()
+        fakeLinkGate.setUseAttestationEndpoints(false)
+
+        val result = linkAuth.lookup(
+            email = null,
+            emailSource = null,
+            linkAuthIntentId = "auth_intent_123",
+            customerId = "customer_123",
+            sessionId = "session_123"
+        )
+
+        assertThat(result.isSuccess).isTrue()
+
+        val lookupCall = fakeLinkRepository.awaitLookup()
+        assertThat(lookupCall.email).isNull()
+        assertThat(lookupCall.linkAuthIntentId).isEqualTo("auth_intent_123")
+    }
+
+    @Test
+    fun `lookup uses attestation when gate enabled`() = runTest(dispatcher) {
+        val linkAuth = createDefaultLinkAuth()
+        val verificationToken = "verification_token_123"
+
+        fakeLinkGate.setUseAttestationEndpoints(true)
+        fakeIntegrityRequestManager.requestResult = Result.success(verificationToken)
+
+        val result = linkAuth.lookup(
+            email = "test@example.com",
+            emailSource = EmailSource.USER_ACTION,
+            linkAuthIntentId = null,
+            customerId = null,
+            sessionId = "session_123"
+        )
+
+        assertThat(result.isSuccess).isTrue()
+
+        val mobileLookupCall = fakeLinkRepository.awaitMobileLookup()
+        assertThat(mobileLookupCall.verificationToken).isEqualTo(verificationToken)
+        assertThat(mobileLookupCall.appId).isEqualTo(applicationId)
+        assertThat(mobileLookupCall.email).isEqualTo("test@example.com")
+        assertThat(mobileLookupCall.linkAuthIntentId).isNull()
+        assertThat(mobileLookupCall.sessionId).isEqualTo("session_123")
+        assertThat(mobileLookupCall.emailSource).isEqualTo(EmailSource.USER_ACTION)
+    }
+
+    @Test
+    fun `lookup with attestation reports integrity manager errors`() = runTest(dispatcher) {
+        val linkAuth = createDefaultLinkAuth()
+        val attestationError = AttestationError(
+            errorType = AttestationError.ErrorType.API_NOT_AVAILABLE,
+            message = "Integrity token failed"
+        )
+
+        fakeLinkGate.setUseAttestationEndpoints(true)
+        fakeIntegrityRequestManager.requestResult = Result.failure(attestationError)
+
+        val result = linkAuth.lookup(
+            email = "test@example.com",
+            emailSource = EmailSource.USER_ACTION,
+            linkAuthIntentId = null,
+            customerId = null,
+            sessionId = "session_123"
+        )
+
+        assertThat(result.isFailure).isTrue()
+
+        val errorCall = fakeErrorReporter.awaitCall()
+        assertThat(errorCall.errorEvent).isEqualTo(
+            ErrorReporter.ExpectedErrorEvent.LINK_NATIVE_FAILED_TO_GET_INTEGRITY_TOKEN
+        )
+    }
+
+    @Test
+    fun `lookup with attestation reports backend attestation errors`() = runTest(dispatcher) {
+        val linkAuth = createDefaultLinkAuth()
+        val verificationToken = "verification_token_123"
+        val apiException = APIException(stripeError = StripeError(code = "link_failed_to_attest_request"))
+
+        fakeLinkGate.setUseAttestationEndpoints(true)
+        fakeLinkRepository.mobileLookupConsumerResult = Result.failure(apiException)
+        fakeIntegrityRequestManager.requestResult = Result.success(verificationToken)
+
+        val result = linkAuth.lookup(
+            email = "test@example.com",
+            emailSource = EmailSource.USER_ACTION,
+            linkAuthIntentId = null,
+            customerId = null,
+            sessionId = "session_123"
+        )
+
+        assertThat(result.isFailure).isTrue()
+
+        val errorCall = fakeErrorReporter.awaitCall()
+        assertThat(errorCall.errorEvent).isEqualTo(
+            ErrorReporter.ExpectedErrorEvent.LINK_NATIVE_FAILED_TO_ATTEST_REQUEST
+        )
+    }
+
+    @Test
+    fun `signup uses regular endpoint when attestation disabled`() = runTest(dispatcher) {
+        val linkAuth = createDefaultLinkAuth()
+        fakeLinkGate.setUseAttestationEndpoints(false)
+
+        val result = linkAuth.signup(
+            email = "test@example.com",
+            phoneNumber = "1234567890",
+            country = "US",
+            countryInferringMethod = "locale",
+            name = "Test User",
             consentAction = SignUpConsentAction.Implied
         )
 
-        val accountManagerCall = linkAccountManager.awaitMobileSignUpCall()
-        integrityRequestManager.awaitRequestTokenCall()
-
-        assertThat(accountManagerCall.name).isEqualTo(TestFactory.CUSTOMER_NAME)
-        assertThat(accountManagerCall.email).isEqualTo(TestFactory.CUSTOMER_EMAIL)
-        assertThat(accountManagerCall.country).isEqualTo(TestFactory.COUNTRY)
-        assertThat(accountManagerCall.phone).isEqualTo(TestFactory.CUSTOMER_PHONE)
-        assertThat(accountManagerCall.consentAction).isEqualTo(SignUpConsentAction.Implied)
-        assertThat(accountManagerCall.verificationToken).isEqualTo(TestFactory.VERIFICATION_TOKEN)
-        assertThat(accountManagerCall.appId).isEqualTo(TestFactory.APP_ID)
-
-        assertThat(result).isEqualTo(LinkAuthResult.Success(TestFactory.LINK_ACCOUNT))
-
-        linkAccountManager.ensureAllEventsConsumed()
-        integrityRequestManager.ensureAllEventsConsumed()
+        assertThat(result.isSuccess).isTrue()
+        // Note: FakeLinkRepository doesn't track regular consumerSignUp calls, only mobile ones
     }
 
     @Test
-    fun `sign up attempt with attestation failure returns AttestationFailed`() = runTest {
-        val error = APIException(
-            stripeError = StripeError(
-                code = "link_failed_to_attest_request"
-            )
-        )
-        val errorReporter = FakeErrorReporter()
-        val linkAccountManager = FakeLinkAccountManager()
-        val integrityRequestManager = FakeIntegrityRequestManager()
+    fun `signup uses attestation when gate enabled`() = runTest(dispatcher) {
+        val linkAuth = createDefaultLinkAuth()
+        val verificationToken = "verification_token_123"
 
-        integrityRequestManager.requestResult = Result.failure(error)
+        fakeLinkGate.setUseAttestationEndpoints(true)
+        fakeIntegrityRequestManager.requestResult = Result.success(verificationToken)
 
-        val linkAuth = linkAuth(
-            linkAccountManager = linkAccountManager,
-            integrityRequestManager = integrityRequestManager,
-            errorReporter = errorReporter
-        )
-
-        val result = linkAuth.signUp(
-            email = TestFactory.CUSTOMER_EMAIL,
-            phoneNumber = TestFactory.CUSTOMER_PHONE,
-            country = TestFactory.COUNTRY,
-            countryInferringMethod = TestFactory.COUNTRY_INFERRING_METHOD,
-            name = TestFactory.CUSTOMER_NAME,
+        val result = linkAuth.signup(
+            email = "test@example.com",
+            phoneNumber = "1234567890",
+            country = "US",
+            countryInferringMethod = "locale",
+            name = "Test User",
             consentAction = SignUpConsentAction.Implied
         )
 
-        integrityRequestManager.awaitRequestTokenCall()
+        assertThat(result.isSuccess).isTrue()
 
-        val errorReport = errorReporter.awaitCall()
-        assertThat(errorReport.errorEvent)
-            .isEqualTo(ErrorReporter.ExpectedErrorEvent.LINK_NATIVE_FAILED_TO_ATTEST_REQUEST)
-        assertThat(errorReport.additionalNonPiiParams)
-            .containsExactly("operation", "signup")
-
-        assertThat(result).isEqualTo(LinkAuthResult.AttestationFailed(error))
-
-        linkAccountManager.ensureAllEventsConsumed()
-        integrityRequestManager.ensureAllEventsConsumed()
-        errorReporter.ensureAllEventsConsumed()
+        val mobileSignupCall = fakeLinkRepository.awaitMobileSignup()
+        assertThat(mobileSignupCall.name).isEqualTo("Test User")
+        assertThat(mobileSignupCall.email).isEqualTo("test@example.com")
+        assertThat(mobileSignupCall.phoneNumber).isEqualTo("1234567890")
+        assertThat(mobileSignupCall.country).isEqualTo("US")
+        assertThat(mobileSignupCall.consentAction).isEqualTo(ConsumerSignUpConsentAction.Implied)
+        assertThat(mobileSignupCall.verificationToken).isEqualTo(verificationToken)
+        assertThat(mobileSignupCall.appId).isEqualTo(applicationId)
+        assertThat(mobileSignupCall.amount).isEqualTo(1000L)
+        assertThat(mobileSignupCall.currency).isEqualTo("usd")
+        assertThat(mobileSignupCall.incentiveEligibilitySession).isNull()
     }
 
     @Test
-    fun `sign up attempt with token fetch failure returns AttestationFailed`() = runTest {
-        val error = AttestationError(
-            errorType = AttestationError.ErrorType.INTERNAL_ERROR,
-            message = "oops"
-        )
-        val errorReporter = FakeErrorReporter()
-        val linkAccountManager = FakeLinkAccountManager()
-        val integrityRequestManager = FakeIntegrityRequestManager()
+    fun `signup with attestation handles null phone number`() = runTest(dispatcher) {
+        val linkAuth = createDefaultLinkAuth()
+        val verificationToken = "verification_token_123"
 
-        integrityRequestManager.requestResult = Result.failure(error)
+        fakeLinkGate.setUseAttestationEndpoints(true)
+        fakeIntegrityRequestManager.requestResult = Result.success(verificationToken)
 
-        val linkAuth = linkAuth(
-            linkAccountManager = linkAccountManager,
-            integrityRequestManager = integrityRequestManager,
-            errorReporter = errorReporter
-        )
-
-        val result = linkAuth.signUp(
-            email = TestFactory.CUSTOMER_EMAIL,
-            phoneNumber = TestFactory.CUSTOMER_PHONE,
-            country = TestFactory.COUNTRY,
-            countryInferringMethod = TestFactory.COUNTRY_INFERRING_METHOD,
-            name = TestFactory.CUSTOMER_NAME,
+        val result = linkAuth.signup(
+            email = "test@example.com",
+            phoneNumber = null,
+            country = "US",
+            countryInferringMethod = "locale",
+            name = "Test User",
             consentAction = SignUpConsentAction.Implied
         )
 
-        integrityRequestManager.awaitRequestTokenCall()
+        assertThat(result.isSuccess).isTrue()
 
-        val errorReport = errorReporter.awaitCall()
-        assertThat(errorReport.errorEvent)
-            .isEqualTo(ErrorReporter.ExpectedErrorEvent.LINK_NATIVE_FAILED_TO_GET_INTEGRITY_TOKEN)
-        assertThat(errorReport.additionalNonPiiParams)
-            .containsExactly("operation", "signup")
-        assertThat(result).isEqualTo(LinkAuthResult.AttestationFailed(error))
-
-        linkAccountManager.ensureAllEventsConsumed()
-        integrityRequestManager.ensureAllEventsConsumed()
-        errorReporter.ensureAllEventsConsumed()
+        val mobileSignupCall = fakeLinkRepository.awaitMobileSignup()
+        assertThat(mobileSignupCall.phoneNumber).isNull()
+        assertThat(mobileSignupCall.country).isEqualTo("US")
     }
 
     @Test
-    fun `sign in attempt with generic failure returns Error`() = runTest {
-        val error = Throwable("oops")
-        val linkAccountManager = FakeLinkAccountManager()
-        val integrityRequestManager = FakeIntegrityRequestManager()
+    fun `signup with attestation handles null country`() = runTest(dispatcher) {
+        val linkAuth = createDefaultLinkAuth()
+        val verificationToken = "verification_token_123"
 
-        integrityRequestManager.requestResult = Result.failure(error)
+        fakeLinkGate.setUseAttestationEndpoints(true)
+        fakeIntegrityRequestManager.requestResult = Result.success(verificationToken)
 
-        val linkAuth = linkAuth(
-            linkAccountManager = linkAccountManager,
-            integrityRequestManager = integrityRequestManager
-        )
-
-        val result = linkAuth.signUp(
-            email = TestFactory.CUSTOMER_EMAIL,
-            phoneNumber = TestFactory.CUSTOMER_PHONE,
-            country = TestFactory.COUNTRY,
-            countryInferringMethod = TestFactory.COUNTRY_INFERRING_METHOD,
-            name = TestFactory.CUSTOMER_NAME,
+        val result = linkAuth.signup(
+            email = "test@example.com",
+            phoneNumber = "1234567890",
+            country = null,
+            countryInferringMethod = "locale",
+            name = "Test User",
             consentAction = SignUpConsentAction.Implied
         )
 
-        integrityRequestManager.awaitRequestTokenCall()
+        assertThat(result.isSuccess).isTrue()
 
-        assertThat(result).isEqualTo(LinkAuthResult.Error(error))
-
-        linkAccountManager.ensureAllEventsConsumed()
-        integrityRequestManager.ensureAllEventsConsumed()
+        val mobileSignupCall = fakeLinkRepository.awaitMobileSignup()
+        assertThat(mobileSignupCall.phoneNumber).isEqualTo("1234567890")
+        assertThat(mobileSignupCall.country).isNull()
     }
 
     @Test
-    fun `config with attestation disabled successfully signs in`() = runTest {
-        val linkAccountManager = FakeLinkAccountManager()
-        val integrityRequestManager = FakeIntegrityRequestManager()
+    fun `signup with attestation reports errors`() = runTest(dispatcher) {
+        val linkAuth = createDefaultLinkAuth()
+        val verificationToken = "verification_token_123"
+        val apiException = APIException(stripeError = StripeError(code = "link_failed_to_attest_request"))
 
-        val linkAuth = linkAuth(
-            useAttestationEndpoints = false,
-            linkAccountManager = linkAccountManager,
-            integrityRequestManager = integrityRequestManager
-        )
+        fakeLinkGate.setUseAttestationEndpoints(true)
+        fakeLinkRepository.mobileConsumerSignUpResult = Result.failure(apiException)
+        fakeIntegrityRequestManager.requestResult = Result.success(verificationToken)
 
-        val result = linkAuth.signUp(
-            email = TestFactory.CUSTOMER_EMAIL,
-            phoneNumber = TestFactory.CUSTOMER_PHONE,
-            country = TestFactory.COUNTRY,
-            countryInferringMethod = TestFactory.COUNTRY_INFERRING_METHOD,
-            name = TestFactory.CUSTOMER_NAME,
+        val result = linkAuth.signup(
+            email = "test@example.com",
+            phoneNumber = "1234567890",
+            country = "US",
+            countryInferringMethod = "locale",
+            name = "Test User",
             consentAction = SignUpConsentAction.Implied
         )
 
-        val accountManagerCall = linkAccountManager.awaitSignUpCall()
+        assertThat(result.isFailure).isTrue()
 
-        assertThat(accountManagerCall.name).isEqualTo(TestFactory.CUSTOMER_NAME)
-        assertThat(accountManagerCall.email).isEqualTo(TestFactory.CUSTOMER_EMAIL)
-        assertThat(accountManagerCall.country).isEqualTo(TestFactory.COUNTRY)
-        assertThat(accountManagerCall.phone).isEqualTo(TestFactory.CUSTOMER_PHONE)
-        assertThat(accountManagerCall.consentAction).isEqualTo(SignUpConsentAction.Implied)
-
-        assertThat(result).isEqualTo(LinkAuthResult.Success(TestFactory.LINK_ACCOUNT))
-
-        linkAccountManager.ensureAllEventsConsumed()
-        integrityRequestManager.ensureAllEventsConsumed()
+        val errorCall = fakeErrorReporter.awaitCall()
+        assertThat(errorCall.errorEvent).isEqualTo(
+            ErrorReporter.ExpectedErrorEvent.LINK_NATIVE_FAILED_TO_ATTEST_REQUEST
+        )
     }
 
     @Test
-    fun `config with attestation disabled returns error on sign up failure`() = runTest {
-        val error = Throwable("oops")
-        val linkAccountManager = FakeLinkAccountManager()
-        val integrityRequestManager = FakeIntegrityRequestManager()
+    fun `non-attestation errors are not reported`() = runTest(dispatcher) {
+        val linkAuth = createDefaultLinkAuth()
+        val verificationToken = "verification_token_123"
+        val genericException = RuntimeException("Generic error")
 
-        linkAccountManager.signUpResult = Result.failure(error)
+        fakeLinkGate.setUseAttestationEndpoints(true)
+        fakeLinkRepository.mobileLookupConsumerResult = Result.failure(genericException)
+        fakeIntegrityRequestManager.requestResult = Result.success(verificationToken)
 
-        val linkAuth = linkAuth(
-            useAttestationEndpoints = false,
-            linkAccountManager = linkAccountManager,
-            integrityRequestManager = integrityRequestManager
+        val result = linkAuth.lookup(
+            email = "test@example.com",
+            emailSource = EmailSource.USER_ACTION,
+            linkAuthIntentId = null,
+            customerId = null,
+            sessionId = "session_123"
         )
 
-        val result = linkAuth.signUp(
-            email = TestFactory.CUSTOMER_EMAIL,
-            phoneNumber = TestFactory.CUSTOMER_PHONE,
-            country = TestFactory.COUNTRY,
-            countryInferringMethod = TestFactory.COUNTRY_INFERRING_METHOD,
-            name = TestFactory.CUSTOMER_NAME,
-            consentAction = SignUpConsentAction.Implied
-        )
+        assertThat(result.isFailure).isTrue()
 
-        val accountManagerCall = linkAccountManager.awaitSignUpCall()
-
-        assertThat(accountManagerCall.name).isEqualTo(TestFactory.CUSTOMER_NAME)
-        assertThat(accountManagerCall.email).isEqualTo(TestFactory.CUSTOMER_EMAIL)
-        assertThat(accountManagerCall.country).isEqualTo(TestFactory.COUNTRY)
-        assertThat(accountManagerCall.phone).isEqualTo(TestFactory.CUSTOMER_PHONE)
-        assertThat(accountManagerCall.consentAction).isEqualTo(SignUpConsentAction.Implied)
-
-        assertThat(result).isEqualTo(LinkAuthResult.Error(error))
-
-        linkAccountManager.ensureAllEventsConsumed()
-        integrityRequestManager.ensureAllEventsConsumed()
-    }
-
-    @Test
-    fun `config with attestation enabled performs lookup successfully`() = runTest {
-        val linkAccountManager = FakeLinkAccountManager()
-        val integrityRequestManager = FakeIntegrityRequestManager()
-
-        val linkAuth = linkAuth(
-            linkAccountManager = linkAccountManager,
-            integrityRequestManager = integrityRequestManager
-        )
-
-        val result = linkAuth.lookUp(
-            email = TestFactory.CUSTOMER_EMAIL,
-            emailSource = TestFactory.EMAIL_SOURCE,
-            startSession = true,
-            customerId = null
-        )
-
-        val accountManagerCall = linkAccountManager.awaitMobileLookupCall()
-        integrityRequestManager.awaitRequestTokenCall()
-
-        assertThat(accountManagerCall.email).isEqualTo(TestFactory.CUSTOMER_EMAIL)
-        assertThat(accountManagerCall.emailSource).isEqualTo(TestFactory.EMAIL_SOURCE)
-        assertThat(accountManagerCall.verificationToken).isEqualTo(TestFactory.VERIFICATION_TOKEN)
-        assertThat(accountManagerCall.appId).isEqualTo(TestFactory.APP_ID)
-        assertThat(accountManagerCall.startSession).isTrue()
-
-        assertThat(result).isEqualTo(LinkAuthResult.Success(TestFactory.LINK_ACCOUNT))
-
-        linkAccountManager.ensureAllEventsConsumed()
-        integrityRequestManager.ensureAllEventsConsumed()
-    }
-
-    @Test
-    fun `lookup attempt with attestation failure returns AttestationFailed`() = runTest {
-        val error = APIException(
-            stripeError = StripeError(
-                code = "link_failed_to_attest_request"
-            )
-        )
-        val linkAccountManager = FakeLinkAccountManager()
-        val integrityRequestManager = FakeIntegrityRequestManager()
-        val errorReporter = FakeErrorReporter()
-
-        integrityRequestManager.requestResult = Result.failure(error)
-
-        val linkAuth = linkAuth(
-            linkAccountManager = linkAccountManager,
-            integrityRequestManager = integrityRequestManager,
-            errorReporter = errorReporter
-        )
-
-        val result = linkAuth.lookUp(
-            email = TestFactory.CUSTOMER_EMAIL,
-            emailSource = TestFactory.EMAIL_SOURCE,
-            startSession = false,
-            customerId = null
-        )
-
-        integrityRequestManager.awaitRequestTokenCall()
-
-        val errorReport = errorReporter.awaitCall()
-        assertThat(errorReport.errorEvent)
-            .isEqualTo(ErrorReporter.ExpectedErrorEvent.LINK_NATIVE_FAILED_TO_ATTEST_REQUEST)
-        assertThat(errorReport.additionalNonPiiParams)
-            .containsExactly("operation", "lookup")
-
-        assertThat(result).isEqualTo(LinkAuthResult.AttestationFailed(error))
-
-        linkAccountManager.ensureAllEventsConsumed()
-        integrityRequestManager.ensureAllEventsConsumed()
-        errorReporter.ensureAllEventsConsumed()
-    }
-
-    @Test
-    fun `lookup attempt with token fetch failure returns AttestationFailed`() = runTest {
-        val error = AttestationError(
-            errorType = AttestationError.ErrorType.INTERNAL_ERROR,
-            message = "oops"
-        )
-        val linkAccountManager = FakeLinkAccountManager()
-        val integrityRequestManager = FakeIntegrityRequestManager()
-        val errorReporter = FakeErrorReporter()
-
-        integrityRequestManager.requestResult = Result.failure(error)
-
-        val linkAuth = linkAuth(
-            linkAccountManager = linkAccountManager,
-            integrityRequestManager = integrityRequestManager,
-            errorReporter = errorReporter
-        )
-
-        val result = linkAuth.lookUp(
-            email = TestFactory.CUSTOMER_EMAIL,
-            emailSource = TestFactory.EMAIL_SOURCE,
-            startSession = false,
-            customerId = null
-        )
-
-        integrityRequestManager.awaitRequestTokenCall()
-
-        val errorReport = errorReporter.awaitCall()
-        assertThat(errorReport.errorEvent)
-            .isEqualTo(ErrorReporter.ExpectedErrorEvent.LINK_NATIVE_FAILED_TO_GET_INTEGRITY_TOKEN)
-        assertThat(errorReport.additionalNonPiiParams)
-            .containsExactly("operation", "lookup")
-        assertThat(result).isEqualTo(LinkAuthResult.AttestationFailed(error))
-
-        linkAccountManager.ensureAllEventsConsumed()
-        integrityRequestManager.ensureAllEventsConsumed()
-        errorReporter.ensureAllEventsConsumed()
-    }
-
-    @Test
-    fun `lookup attempt with generic failure returns Error`() = runTest {
-        val error = Throwable("oops")
-        val linkAccountManager = FakeLinkAccountManager()
-        val integrityRequestManager = FakeIntegrityRequestManager()
-
-        integrityRequestManager.requestResult = Result.failure(error)
-
-        val linkAuth = linkAuth(
-            linkAccountManager = linkAccountManager,
-            integrityRequestManager = integrityRequestManager
-        )
-
-        val result = linkAuth.lookUp(
-            email = TestFactory.CUSTOMER_EMAIL,
-            emailSource = TestFactory.EMAIL_SOURCE,
-            startSession = false,
-            customerId = null
-        )
-
-        integrityRequestManager.awaitRequestTokenCall()
-
-        assertThat(result).isEqualTo(LinkAuthResult.Error(error))
-
-        linkAccountManager.ensureAllEventsConsumed()
-        integrityRequestManager.ensureAllEventsConsumed()
-    }
-
-    @Test
-    fun `config with attestation disabled performs lookup successfully`() = runTest {
-        val linkAccountManager = FakeLinkAccountManager()
-        val integrityRequestManager = FakeIntegrityRequestManager()
-
-        linkAccountManager.lookupConsumerResult = Result.success(TestFactory.LINK_ACCOUNT)
-
-        val linkAuth = linkAuth(
-            useAttestationEndpoints = false,
-            linkAccountManager = linkAccountManager,
-            integrityRequestManager = integrityRequestManager
-        )
-
-        val result = linkAuth.lookUp(
-            email = TestFactory.CUSTOMER_EMAIL,
-            emailSource = TestFactory.EMAIL_SOURCE,
-            startSession = false,
-            customerId = null
-        )
-
-        val accountManagerCall = linkAccountManager.awaitLookupCall()
-
-        assertThat(accountManagerCall.email).isEqualTo(TestFactory.CUSTOMER_EMAIL)
-        assertThat(accountManagerCall.startSession).isFalse()
-
-        assertThat(result).isEqualTo(LinkAuthResult.Success(TestFactory.LINK_ACCOUNT))
-
-        linkAccountManager.ensureAllEventsConsumed()
-        integrityRequestManager.ensureAllEventsConsumed()
-    }
-
-    @Test
-    fun `config with attestation disabled returns error on lookup failure`() = runTest {
-        val error = Throwable("oops")
-        val linkAccountManager = FakeLinkAccountManager()
-        val integrityRequestManager = FakeIntegrityRequestManager()
-
-        linkAccountManager.lookupConsumerResult = Result.failure(error)
-
-        val linkAuth = linkAuth(
-            useAttestationEndpoints = false,
-            linkAccountManager = linkAccountManager,
-            integrityRequestManager = integrityRequestManager
-        )
-
-        val result = linkAuth.lookUp(
-            email = TestFactory.CUSTOMER_EMAIL,
-            emailSource = TestFactory.EMAIL_SOURCE,
-            startSession = true,
-            customerId = null
-        )
-
-        val accountManagerCall = linkAccountManager.awaitLookupCall()
-
-        assertThat(accountManagerCall.email).isEqualTo(TestFactory.CUSTOMER_EMAIL)
-        assertThat(accountManagerCall.startSession).isTrue()
-
-        assertThat(result).isEqualTo(LinkAuthResult.Error(error))
-
-        linkAccountManager.ensureAllEventsConsumed()
-        integrityRequestManager.ensureAllEventsConsumed()
-    }
-
-    @Test
-    fun `null link account yields NoLinkAccountFound result`() = runTest {
-        val linkAccountManager = FakeLinkAccountManager()
-        val integrityRequestManager = FakeIntegrityRequestManager()
-
-        linkAccountManager.mobileLookupConsumerResult = Result.success(null)
-
-        val linkAuth = linkAuth(
-            linkAccountManager = linkAccountManager,
-            integrityRequestManager = integrityRequestManager
-        )
-
-        val result = linkAuth.lookUp(
-            email = TestFactory.CUSTOMER_EMAIL,
-            emailSource = TestFactory.EMAIL_SOURCE,
-            startSession = false,
-            customerId = null
-        )
-
-        val accountManagerCall = linkAccountManager.awaitMobileLookupCall()
-        integrityRequestManager.awaitRequestTokenCall()
-
-        assertThat(accountManagerCall.startSession).isFalse()
-        assertThat(result).isEqualTo(LinkAuthResult.NoLinkAccountFound)
-
-        linkAccountManager.ensureAllEventsConsumed()
-        integrityRequestManager.ensureAllEventsConsumed()
-    }
-
-    @Test
-    fun `lookup attempt with account error returns AccountError`() = runTest {
-        val error = APIException(
-            stripeError = StripeError(
-                code = "link_consumer_details_not_available"
-            )
-        )
-        val linkAccountManager = FakeLinkAccountManager()
-        val integrityRequestManager = FakeIntegrityRequestManager()
-
-        integrityRequestManager.requestResult = Result.failure(error)
-
-        val linkAuth = linkAuth(
-            linkAccountManager = linkAccountManager,
-            integrityRequestManager = integrityRequestManager
-        )
-
-        val result = linkAuth.lookUp(
-            email = TestFactory.CUSTOMER_EMAIL,
-            emailSource = TestFactory.EMAIL_SOURCE,
-            startSession = false,
-            customerId = null
-        )
-
-        integrityRequestManager.awaitRequestTokenCall()
-
-        assertThat(result).isEqualTo(LinkAuthResult.AccountError(error))
-
-        linkAccountManager.ensureAllEventsConsumed()
-        integrityRequestManager.ensureAllEventsConsumed()
-    }
-
-    private fun linkAuth(
-        useAttestationEndpoints: Boolean = true,
-        linkAccountManager: FakeLinkAccountManager = FakeLinkAccountManager(),
-        integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
-        errorReporter: ErrorReporter = FakeErrorReporter()
-    ): DefaultLinkAuth {
-        return DefaultLinkAuth(
-            linkGate = FakeLinkGate().apply {
-                setUseAttestationEndpoints(useAttestationEndpoints)
-            },
-            linkAccountManager = linkAccountManager,
-            integrityRequestManager = integrityRequestManager,
-            errorReporter = errorReporter,
-            applicationId = TestFactory.APP_ID
-        )
+        // Verify no error was reported
+        assertThat(fakeErrorReporter.getLoggedErrors()).isEmpty()
     }
 }

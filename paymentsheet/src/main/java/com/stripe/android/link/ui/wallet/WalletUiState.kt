@@ -128,8 +128,10 @@ private fun ConsumerPaymentDetails.PaymentDetails.makeMandateText(
     return when (this) {
         is ConsumerPaymentDetails.BankAccount -> when {
             signupToggleEnabled && sellerBusinessName != null -> resolvableString(
-                R.string.stripe_wallet_bank_account_terms_seller,
-                sellerBusinessName
+                R.string.stripe_wallet_bank_account_terms_merchant_and_seller,
+                merchantName,
+                sellerBusinessName,
+                merchantName
             )
             else -> resolvableString(R.string.stripe_wallet_bank_account_terms)
         }

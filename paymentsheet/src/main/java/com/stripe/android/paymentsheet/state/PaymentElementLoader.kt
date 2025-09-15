@@ -657,11 +657,20 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             saveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
             forceSetupFutureUseBehaviorAndNewMandate = elementsSession
                 .flags[ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT] == true,
+            linkSupportedPaymentMethodsOnboardingEnabled =
+            elementsSession.linkSettings?.linkSupportedPaymentMethodsOnboardingEnabled.orEmpty(),
         )
 
-        // CBF isn't currently supported in the web flow.
         val useWebLink = !linkGateFactory.create(linkConfiguration).useNativeLink
+
         if (isCardBrandFilteringRequired && useWebLink) {
+            // CBF isn't currently supported in the web flow.
+            return null
+        }
+
+        val collectsExtraBillingDetails = configuration.billingDetailsCollectionConfiguration.collectsAnything
+        if (collectsExtraBillingDetails && useWebLink) {
+            // Extra billing details collection isn't currently supported in the web flow.
             return null
         }
 

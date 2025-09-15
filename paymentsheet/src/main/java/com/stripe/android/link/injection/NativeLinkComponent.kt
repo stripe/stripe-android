@@ -16,7 +16,6 @@ import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.WebLinkActivityContract
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.ui.oauth.OAuthConsentViewModelComponent
@@ -61,7 +60,6 @@ internal interface NativeLinkComponent {
     val linkConfirmationHandlerFactory: LinkConfirmationHandler.Factory
     val webLinkActivityContract: WebLinkActivityContract
     val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory
-    val linkAuth: LinkAuth
     val savedStateHandle: SavedStateHandle
     val viewModel: LinkActivityViewModel
     val eventReporter: EventReporter

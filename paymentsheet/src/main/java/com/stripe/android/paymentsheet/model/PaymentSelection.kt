@@ -8,6 +8,7 @@ import android.graphics.drawable.ShapeDrawable
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import androidx.annotation.VisibleForTesting
+import androidx.compose.ui.graphics.luminance
 import androidx.core.content.res.ResourcesCompat
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
@@ -31,11 +32,13 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.BankFormScreenState
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountTextBuilder
+import com.stripe.android.paymentsheet.ui.MIN_LUMINANCE_FOR_LIGHT_ICON
 import com.stripe.android.paymentsheet.ui.createCardLabel
 import com.stripe.android.paymentsheet.ui.getCardBrandIcon
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getLinkIcon
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
@@ -185,7 +188,7 @@ internal sealed class PaymentSelection : Parcelable {
                         isSaveForFutureUseSelected = false,
                         isInstantDebits = false,
                         isSetupFlow = isSetupFlow,
-                        linkSignUpOptInFeatureEnabled = false,
+                        forceSetupFutureUseBehavior = false,
                         sellerBusinessName = null,
                     )
                 }
@@ -287,6 +290,7 @@ internal sealed class PaymentSelection : Parcelable {
         data class GenericPaymentMethod(
             val label: ResolvableString,
             @DrawableRes val iconResource: Int,
+            @DrawableRes val iconResourceNight: Int?,
             val lightThemeIconUrl: String?,
             val darkThemeIconUrl: String?,
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
@@ -302,11 +306,20 @@ internal sealed class PaymentSelection : Parcelable {
     ) {
         private fun isDarkTheme(): Boolean {
             return resources.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) ==
-                Configuration.UI_MODE_NIGHT_YES
+                Configuration.UI_MODE_NIGHT_YES ||
+                isCustomDarkTheme()
+        }
+
+        /**
+         * Some users implement a custom dark mode and will pass dark colors into colors light.
+         */
+        private fun isCustomDarkTheme(): Boolean {
+            return StripeTheme.colorsLightMutable.component.luminance() < MIN_LUMINANCE_FOR_LIGHT_ICON
         }
 
         suspend fun load(
             @DrawableRes drawableResourceId: Int,
+            @DrawableRes drawableResourceIdNight: Int?,
             lightThemeIconUrl: String?,
             darkThemeIconUrl: String?,
         ): Drawable {
@@ -315,7 +328,7 @@ internal sealed class PaymentSelection : Parcelable {
                 return runCatching {
                     ResourcesCompat.getDrawable(
                         resources,
-                        drawableResourceId,
+                        if (!isDarkTheme()) drawableResourceId else drawableResourceIdNight ?: drawableResourceId,
                         null
                     )
                 }.getOrNull() ?: emptyDrawable
@@ -371,6 +384,20 @@ internal val PaymentSelection.drawableResourceId: Int
         is PaymentSelection.Link -> getLinkIcon(iconOnly = true)
         is PaymentSelection.New.Card -> brand.getCardBrandIcon()
         is PaymentSelection.New.GenericPaymentMethod -> iconResource
+        is PaymentSelection.New.LinkInline -> brand.getCardBrandIcon()
+        is PaymentSelection.New.USBankAccount -> iconResource
+        is PaymentSelection.Saved -> getSavedIcon(this)
+        is PaymentSelection.ShopPay -> R.drawable.stripe_shop_pay_logo_white
+    }
+
+internal val PaymentSelection.drawableResourceIdNight: Int
+    get() = when (this) {
+        is PaymentSelection.ExternalPaymentMethod -> iconResource
+        is PaymentSelection.CustomPaymentMethod -> 0
+        PaymentSelection.GooglePay -> R.drawable.stripe_google_pay_mark
+        is PaymentSelection.Link -> getLinkIcon(iconOnly = true)
+        is PaymentSelection.New.Card -> brand.getCardBrandIcon()
+        is PaymentSelection.New.GenericPaymentMethod -> iconResourceNight ?: iconResource
         is PaymentSelection.New.LinkInline -> brand.getCardBrandIcon()
         is PaymentSelection.New.USBankAccount -> iconResource
         is PaymentSelection.Saved -> getSavedIcon(this)

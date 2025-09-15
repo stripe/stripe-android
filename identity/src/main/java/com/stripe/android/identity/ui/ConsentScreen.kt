@@ -1,8 +1,10 @@
 package com.stripe.android.identity.ui
 
 import android.net.Uri
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -149,6 +151,25 @@ private fun SuccessUI(
                 showLogos = visitedIndividualWelcomePage.not()
             )
             ConsentLines(lines = consentPage.lines, bottomSheets = bottomSheets)
+
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Html(
+                    html = consentPage.privacyPolicy,
+                    modifier = Modifier
+                        .padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
+                        .semantics {
+                            testTag = PRIVACY_POLICY_TAG
+                        },
+                    color = colorResource(id = R.color.stripe_html_line),
+                    urlSpanStyle = SpanStyle(
+                        textDecoration = TextDecoration.Underline,
+                        color = colorResource(id = R.color.stripe_html_line)
+                    )
+                )
+            }
         }
 
         var acceptState by remember { mutableStateOf(LoadingButtonState.Idle) }
@@ -160,20 +181,6 @@ private fun SuccessUI(
                 scrolledToBottom = scrollState.value == scrollState.maxValue
             }
         }
-
-        Html(
-            html = consentPage.privacyPolicy,
-            modifier = Modifier
-                .padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
-                .semantics {
-                    testTag = PRIVACY_POLICY_TAG
-                },
-            color = colorResource(id = R.color.stripe_html_line),
-            urlSpanStyle = SpanStyle(
-                textDecoration = TextDecoration.Underline,
-                color = colorResource(id = R.color.stripe_html_line)
-            )
-        )
 
         LoadingButton(
             modifier = Modifier

@@ -14,9 +14,11 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
@@ -32,7 +34,6 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.utils.determineFallbackPaymentSelectionAfterLinkLogout
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.WalletButtonsPreview
@@ -55,7 +56,6 @@ import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.allowedWalletTypes
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentOption
@@ -73,6 +73,7 @@ import com.stripe.android.paymentsheet.utils.toConfirmationError
 import com.stripe.android.uicore.utils.AnimationConstants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
@@ -106,6 +107,8 @@ internal class DefaultFlowController @Inject internal constructor(
     private val errorReporter: ErrorReporter,
     @InitializedViaCompose private val initializedViaCompose: Boolean,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
+    private val passiveChallengeWarmer: PassiveChallengeWarmer,
+    @Named(PUBLISHABLE_KEY) private val publishableKey: () -> String,
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private val sepaMandateActivityLauncher: ActivityResultLauncher<SepaMandateContract.Args>
@@ -134,6 +137,8 @@ internal class DefaultFlowController @Inject internal constructor(
 
     init {
         confirmationHandler.register(activityResultCaller, lifecycleOwner)
+        passiveChallengeWarmer.register(activityResultCaller, lifecycleOwner)
+        startPassiveChallengeWarmer()
 
         paymentOptionActivityLauncher = activityResultCaller.registerForActivityResult(
             PaymentOptionContract(),
@@ -294,6 +299,20 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
+    private fun startPassiveChallengeWarmer() {
+        lifecycleOwner.lifecycleScope.launch {
+            viewModel.stateFlow.mapNotNull {
+                it?.paymentSheetState?.paymentMethodMetadata?.passiveCaptchaParams
+            }.collectLatest {
+                passiveChallengeWarmer.start(
+                    passiveCaptchaParams = it,
+                    publishableKey = publishableKey(),
+                    productUsage = productUsage
+                )
+            }
+        }
+    }
+
     private fun shouldPresentLinkInsteadOfPaymentOptions(
         paymentSelection: PaymentSelection?,
         linkAccountInfo: LinkAccountUpdate.Value,
@@ -321,13 +340,7 @@ internal class DefaultFlowController @Inject internal constructor(
             enableLogging = enableLogging,
             productUsage = productUsage,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
-            walletsToShow = if (viewModel.walletButtonsRendered) {
-                WalletType.entries.filterNot {
-                    state.config.walletButtons.allowedWalletTypes.contains(it)
-                }
-            } else {
-                state.config.walletButtons.allowedWalletTypes
-            },
+            walletButtonsRendered = viewModel.walletButtonsRendered,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier
         )
 

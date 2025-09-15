@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.challenge.warmer.PassiveChallengeWarmerModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
@@ -68,6 +69,7 @@ import kotlin.coroutines.CoroutineContext
     includes = [
         LinkCommonModule::class,
         PaymentsIntegrityModule::class,
+        PassiveChallengeWarmerModule::class
     ]
 )
 internal abstract class PaymentSheetCommonModule {

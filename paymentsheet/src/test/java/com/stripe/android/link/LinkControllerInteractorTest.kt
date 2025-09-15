@@ -8,9 +8,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.account.FakeLinkAccountManager
-import com.stripe.android.link.account.FakeLinkAuth
 import com.stripe.android.link.account.LinkAccountHolder
-import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.attestation.FakeLinkAttestationCheck
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.exceptions.AppAttestationException
@@ -55,12 +53,10 @@ class LinkControllerInteractorTest {
     private val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
     private val linkAccountManager = FakeLinkAccountManager(linkAccountHolder)
     private val linkAttestationCheck = FakeLinkAttestationCheck()
-    private val linkAuth = FakeLinkAuth()
     private val linkComponent =
         FakeLinkComponent(
             linkAccountManager = linkAccountManager,
             linkAttestationCheck = linkAttestationCheck,
-            linkAuth = linkAuth,
         )
     private val linkComponentBuilderProvider: Provider<LinkComponent.Builder> =
         Provider { FakeLinkComponent.Builder(linkComponent) }
@@ -342,7 +338,7 @@ class LinkControllerInteractorTest {
         val interactor = createInteractor()
         configure(interactor)
 
-        linkAccountManager.lookupConsumerResult = Result.success(TestFactory.LINK_ACCOUNT)
+        linkAccountManager.lookupResult = Result.success(TestFactory.LINK_ACCOUNT)
 
         assertThat(interactor.lookupConsumer("test@example.com"))
             .isEqualTo(LinkController.LookupConsumerResult.Success("test@example.com", true))
@@ -354,7 +350,7 @@ class LinkControllerInteractorTest {
         configure(interactor)
 
         val error = Exception("Error")
-        linkAuth.lookupResult = LinkAuthResult.Error(error)
+        linkAccountManager.lookupResult = Result.failure(error)
 
         assertThat(interactor.lookupConsumer("test@example.com"))
             .isEqualTo(LinkController.LookupConsumerResult.Failed("test@example.com", error))
@@ -367,7 +363,7 @@ class LinkControllerInteractorTest {
             configure(interactor)
 
             val attestationError = Exception("Attestation failed")
-            linkAuth.lookupResult = LinkAuthResult.AttestationFailed(attestationError)
+            linkAccountManager.lookupResult = Result.failure(AppAttestationException(attestationError))
 
             val result = interactor.lookupConsumer("test@example.com")
             assertThat(result).isInstanceOf(LinkController.LookupConsumerResult.Failed::class.java)
@@ -850,7 +846,7 @@ class LinkControllerInteractorTest {
         configure(interactor)
 
         val expectedAccount = TestFactory.LINK_ACCOUNT
-        linkAuth.signupResult = LinkAuthResult.Success(expectedAccount)
+        linkAccountManager.signupResult = Result.success(expectedAccount)
 
         assertThat(interactor.registerConsumerWith())
             .isEqualTo(LinkController.RegisterConsumerResult.Success)
@@ -867,7 +863,7 @@ class LinkControllerInteractorTest {
         signIn()
 
         val error = Exception("Registration failed")
-        linkAuth.signupResult = LinkAuthResult.Error(error)
+        linkAccountManager.signupResult = Result.failure(error)
 
         val result = interactor.registerConsumerWith()
 
@@ -885,7 +881,7 @@ class LinkControllerInteractorTest {
         signIn()
 
         val attestationError = Exception("Attestation failed")
-        linkAuth.signupResult = LinkAuthResult.AttestationFailed(attestationError)
+        linkAccountManager.signupResult = Result.failure(AppAttestationException(attestationError))
 
         val result = interactor.registerConsumerWith()
 
@@ -1108,6 +1104,22 @@ class LinkControllerInteractorTest {
         val result = interactor.logOut()
 
         assertThat(result).isInstanceOf(LinkController.LogOutResult.Success::class.java)
+        assertThat(linkAccountHolder.linkAccountInfo.value.account).isNull()
+    }
+
+    @Test
+    fun `clearLinkAccount() clears account from holder`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+        signIn()
+
+        // Verify account is initially present
+        assertThat(linkAccountHolder.linkAccountInfo.value.account).isNotNull()
+
+        // Clear the account
+        interactor.clearLinkAccount()
+
+        // Verify account is cleared
         assertThat(linkAccountHolder.linkAccountInfo.value.account).isNull()
     }
 

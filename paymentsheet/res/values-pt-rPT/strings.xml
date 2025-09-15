@@ -275,6 +275,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">Ver mais</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Ao continuar, concorda em autorizar pagamentos de acordo com estes <terms>termos</terms>.]]></string>
+  <!-- Text providing link to terms for bank payments when seller information is provided -->
+  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[Ao submeter o seu pedido a %1$s e %2$s, concorda em guardar as suas informações com %3$s para compras futuras e concorda em autorizar pagamentos de acordo com <terms>estas condições</terms>.]]></string>
   <!-- Text providing link to terms for bank payments -->
   <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Ao submeter o seu pedido a %s, concorda em autorizar pagamentos de acordo com <terms>estas condições</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->

@@ -26,7 +26,7 @@ import com.stripe.android.paymentelement.embedded.content.EmbeddedLinkHelper
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.ButtonThemes.LinkButtonTheme
-import com.stripe.android.paymentsheet.allowedWalletTypes
+import com.stripe.android.paymentsheet.configType
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerViewModel
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -143,6 +143,7 @@ internal class DefaultWalletButtonsInteractor(
         linkInlineInteractor.state,
         linkAccountHolder.linkAccountInfo
     ) { arguments, confirmationState, linkEmbeddedState, linkAccountInfo ->
+        val walletsAllowedByMerchant = arguments?.let(::visibleWallets) ?: emptyList()
         val walletButtons = arguments?.run {
             arguments.paymentMethodMetadata.availableWallets.mapNotNull { wallet ->
                 when (wallet) {
@@ -263,6 +264,17 @@ internal class DefaultWalletButtonsInteractor(
         }
     }
 
+    private fun visibleWallets(arguments: Arguments): List<WalletType> {
+        val walletVisibility = arguments.configuration.walletButtons?.visibility?.walletButtonsView ?: emptyMap()
+
+        return WalletType.entries.filter { walletType ->
+            val configuredVisibility = walletVisibility[walletType.configType]
+
+            configuredVisibility == null || configuredVisibility ==
+                PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always
+        }
+    }
+
     private fun confirmationArgs(
         selection: PaymentSelection,
         arguments: Arguments,
@@ -288,7 +300,6 @@ internal class DefaultWalletButtonsInteractor(
         val configuration: CommonConfiguration,
         val appearance: PaymentSheet.Appearance,
         val initializationMode: PaymentElementLoader.InitializationMode,
-        val walletsAllowedByMerchant: List<WalletType>,
         val paymentSelection: PaymentSelection?,
     )
 
@@ -313,10 +324,6 @@ internal class DefaultWalletButtonsInteractor(
                             paymentMethodMetadata = flowControllerState.paymentSheetState.paymentMethodMetadata,
                             appearance = configureRequest.configuration.appearance,
                             initializationMode = configureRequest.initializationMode,
-                            walletsAllowedByMerchant = configureRequest
-                                .configuration
-                                .walletButtons
-                                .allowedWalletTypes,
                             paymentSelection = flowControllerViewModel.paymentSelection
                         )
                     } else {
@@ -357,7 +364,6 @@ internal class DefaultWalletButtonsInteractor(
                             paymentMethodMetadata = state.paymentMethodMetadata,
                             appearance = state.configuration.appearance,
                             initializationMode = state.initializationMode,
-                            walletsAllowedByMerchant = WalletType.entries,
                             paymentSelection = state.selection
                         )
                     }

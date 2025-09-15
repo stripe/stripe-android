@@ -4,9 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.Logger
 import com.stripe.android.link.account.FakeLinkAccountManager
-import com.stripe.android.link.account.FakeLinkAuth
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
@@ -41,7 +39,6 @@ internal class FakeNativeLinkComponent(
         NullCardAccountRangeRepositoryFactory,
     override val viewModel: LinkActivityViewModel = mock(),
     override val errorReporter: ErrorReporter = FakeErrorReporter(),
-    override val linkAuth: LinkAuth = FakeLinkAuth(),
     override val savedStateHandle: SavedStateHandle = SavedStateHandle(),
     override val eventReporter: EventReporter = FakeEventReporter(),
     override val navigationManager: NavigationManager = TestNavigationManager(),

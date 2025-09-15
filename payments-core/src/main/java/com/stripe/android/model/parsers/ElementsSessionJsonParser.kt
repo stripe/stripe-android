@@ -202,6 +202,10 @@ internal class ElementsSessionJsonParser(
             null
         }
 
+        val linkSupportedPaymentMethodsOnboardingEnabled = jsonArrayToList(
+            jsonArray = json?.optJSONArray(FIELD_LINK_SUPPORTED_PAYMENT_METHODS_ONBOARDING_ENABLED),
+        )
+
         return ElementsSession.LinkSettings(
             linkFundingSources = jsonArrayToList(linkFundingSources),
             linkPassthroughModeEnabled = linkPassthroughModeEnabled,
@@ -215,7 +219,8 @@ internal class ElementsSessionJsonParser(
             linkEnableDisplayableDefaultValuesInEce = linkEnableDisplayableDefaultValuesInEce,
             linkMobileSkipWalletInFlowController = linkMobileSkipWalletInFlowController,
             linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
-            linkSignUpOptInInitialValue = linkSignUpOptInInitialValue
+            linkSignUpOptInInitialValue = linkSignUpOptInInitialValue,
+            linkSupportedPaymentMethodsOnboardingEnabled = linkSupportedPaymentMethodsOnboardingEnabled,
         )
     }
 
@@ -329,7 +334,7 @@ internal class ElementsSessionJsonParser(
 
             val paymentMethodSaveFeature = paymentSheetFeatures.optString(FIELD_PAYMENT_METHOD_SAVE)
             val paymentMethodRemoveFeature = paymentSheetFeatures.optString(FIELD_PAYMENT_METHOD_REMOVE)
-            val paymentMethodRemoveLastFeature = paymentSheetFeatures.optString(FIELD_PAYMENT_METHOD_REMOVE_LAST)
+            val paymentMethodRemoveLastFeature = parsePaymentMethodRemoveLastFeatures(paymentSheetFeatures)
             val paymentMethodSetAsDefaultFeature = paymentSheetFeatures.optString(FIELD_PAYMENT_METHOD_SET_AS_DEFAULT)
             val allowRedisplayOverrideValue = paymentSheetFeatures
                 .optString(FIELD_PAYMENT_METHOD_ALLOW_REDISPLAY_OVERRIDE)
@@ -345,7 +350,7 @@ internal class ElementsSessionJsonParser(
                     VALUE_PARTIAL -> ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Partial
                     else -> ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled
                 },
-                canRemoveLastPaymentMethod = paymentMethodRemoveLastFeature == VALUE_ENABLED,
+                paymentMethodRemoveLast = paymentMethodRemoveLastFeature,
                 isPaymentMethodSetAsDefaultEnabled = paymentMethodSetAsDefaultFeature == VALUE_ENABLED,
                 allowRedisplayOverride = allowRedisplayOverride,
             )
@@ -366,7 +371,7 @@ internal class ElementsSessionJsonParser(
                 ?: return ElementsSession.Customer.Components.CustomerSheet.Disabled
 
             val paymentMethodRemoveFeature = customerSheetFeatures.optString(FIELD_PAYMENT_METHOD_REMOVE)
-            val paymentMethodRemoveLastFeature = customerSheetFeatures.optString(FIELD_PAYMENT_METHOD_REMOVE_LAST)
+            val paymentMethodRemoveLastFeature = parsePaymentMethodRemoveLastFeatures(customerSheetFeatures)
             val paymentMethodSyncDefaultFeature = customerSheetFeatures.optString(FIELD_PAYMENT_METHOD_SYNC_DEFAULT)
 
             ElementsSession.Customer.Components.CustomerSheet.Enabled(
@@ -375,7 +380,7 @@ internal class ElementsSessionJsonParser(
                     VALUE_PARTIAL -> ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Partial
                     else -> ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled
                 },
-                canRemoveLastPaymentMethod = paymentMethodRemoveLastFeature == VALUE_ENABLED,
+                paymentMethodRemoveLast = paymentMethodRemoveLastFeature,
                 isPaymentMethodSyncDefaultEnabled = paymentMethodSyncDefaultFeature == VALUE_ENABLED,
             )
         } else {
@@ -413,6 +418,21 @@ internal class ElementsSessionJsonParser(
         }
 
         return flags.toMap()
+    }
+
+    private fun parsePaymentMethodRemoveLastFeatures(
+        json: JSONObject
+    ): ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature {
+        val paymentMethodRemoveLastFeature = StripeJsonUtils.optString(
+            jsonObject = json,
+            fieldName = FIELD_PAYMENT_METHOD_REMOVE_LAST
+        )
+
+        return when (paymentMethodRemoveLastFeature) {
+            null -> ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided
+            VALUE_ENABLED -> ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled
+            else -> ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Disabled
+        }
     }
 
     /**
@@ -479,6 +499,8 @@ internal class ElementsSessionJsonParser(
             "link_mobile_skip_wallet_in_flow_controller"
         private const val FIELD_LINK_SIGN_UP_OPT_IN_FEATURE_ENABLED = "link_sign_up_opt_in_feature_enabled"
         private const val FIELD_LINK_SIGN_UP_OPT_IN_INITIAL_VALUE = "link_sign_up_opt_in_initial_value"
+        private const val FIELD_LINK_SUPPORTED_PAYMENT_METHODS_ONBOARDING_ENABLED =
+            "link_supported_payment_methods_onboarding_enabled"
         private const val FIELD_MERCHANT_COUNTRY = "merchant_country"
         private const val FIELD_MERCHANT_LOGO_URL = "merchant_logo_url"
         private const val FIELD_PAYMENT_METHOD_PREFERENCE = "payment_method_preference"

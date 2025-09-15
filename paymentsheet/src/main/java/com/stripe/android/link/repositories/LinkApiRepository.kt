@@ -157,8 +157,8 @@ internal class LinkApiRepository @Inject constructor(
     override suspend fun mobileSignUp(
         name: String?,
         email: String,
-        phoneNumber: String,
-        country: String,
+        phoneNumber: String?,
+        country: String?,
         countryInferringMethod: String,
         consentAction: ConsumerSignUpConsentAction,
         amount: Long?,

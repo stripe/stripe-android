@@ -144,6 +144,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                 cvc = cvc,
                 billingPhone = billingPhone,
                 allowRedisplay = allowRedisplay,
+                passiveCaptchaParams = passiveCaptchaParams
             )
         } else {
             PaymentMethodConfirmationOption.New(

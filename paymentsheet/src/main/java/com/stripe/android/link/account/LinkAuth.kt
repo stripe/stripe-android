@@ -1,22 +1,28 @@
 package com.stripe.android.link.account
 
 import com.stripe.android.link.ui.inline.SignUpConsentAction
+import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.EmailSource
 
+/**
+ * Interface for low-level Link authentication operations including attestation logic.
+ */
 internal interface LinkAuth {
-    suspend fun signUp(
+    suspend fun lookup(
+        email: String?,
+        emailSource: EmailSource?,
+        linkAuthIntentId: String?,
+        customerId: String?,
+        sessionId: String
+    ): Result<ConsumerSessionLookup>
+
+    suspend fun signup(
         email: String,
-        phoneNumber: String,
-        country: String,
+        phoneNumber: String?,
+        country: String?,
         countryInferringMethod: String,
         name: String?,
         consentAction: SignUpConsentAction
-    ): LinkAuthResult
-
-    suspend fun lookUp(
-        email: String,
-        emailSource: EmailSource,
-        startSession: Boolean,
-        customerId: String?
-    ): LinkAuthResult
+    ): Result<ConsumerSessionSignup>
 }

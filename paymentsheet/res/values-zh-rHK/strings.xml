@@ -275,6 +275,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">查看更多</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[點擊「繼續」，即表示您同意按照這些<terms>條款</terms>授權付款。]]></string>
+  <!-- Text providing link to terms for bank payments when seller information is provided -->
+  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[向 %1$s 和 %2$s 提交訂單，即表示您同意使用 %3$s 儲存您的資訊以供日後購買之用，並同意依據<terms>這些條款</terms>授權支付。]]></string>
   <!-- Text providing link to terms for bank payments -->
   <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[將訂單提交至 %s 即表示您同意根據<terms>這些條款</terms>授權付款。]]></string>
   <!-- Label for a section displaying payment details. -->

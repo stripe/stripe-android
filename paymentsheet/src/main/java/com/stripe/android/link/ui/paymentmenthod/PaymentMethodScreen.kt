@@ -19,7 +19,6 @@ import com.stripe.android.paymentsheet.ui.PaymentMethodForm
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
 import java.util.UUID
-import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 @Composable
 internal fun PaymentMethodScreen(
@@ -79,7 +78,6 @@ internal fun PaymentMethodBody(
                 focusManager.clearFocus()
                 onPayClicked()
             },
-            iconEnd = PaymentsUiCoreR.drawable.stripe_ic_lock
         )
     }
 }

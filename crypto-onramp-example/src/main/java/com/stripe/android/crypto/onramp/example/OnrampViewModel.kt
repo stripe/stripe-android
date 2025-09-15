@@ -32,6 +32,7 @@ import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.link.LinkAppearance
+import com.stripe.android.link.utils.isLinkAuthorizationError
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -59,6 +60,32 @@ internal class OnrampViewModel(
 
     private val _checkoutEvent = MutableStateFlow<CheckoutEvent?>(null)
     val checkoutEvent: StateFlow<CheckoutEvent?> = _checkoutEvent.asStateFlow()
+
+    private val _authorizeEvent = MutableStateFlow<AuthorizeEvent?>(null)
+    val authorizeEvent: StateFlow<AuthorizeEvent?> = _authorizeEvent.asStateFlow()
+
+    private fun handleError(error: Throwable, onNonAuthError: () -> Unit = {}) {
+        if (error.isLinkAuthorizationError()) {
+            _message.value = "Session expired. Reauthorizing..."
+            _uiState.update { it.copy(screen = Screen.Authentication) }
+
+            // Use the existing consented link auth intent ID to retrigger authorization
+            val currentState = _uiState.value
+            val linkAuthIntentId = currentState.consentedLinkAuthIntentIds.firstOrNull()
+
+            if (linkAuthIntentId != null) {
+                _authorizeEvent.value = AuthorizeEvent(linkAuthIntentId)
+            } else {
+                _message.value = "Session expired. Please reauthenticate."
+            }
+        } else {
+            onNonAuthError()
+        }
+    }
+
+    fun clearAuthorizeEvent() {
+        _authorizeEvent.value = null
+    }
 
     init {
         viewModelScope.launch {
@@ -296,7 +323,7 @@ internal class OnrampViewModel(
                         )
                     }
                 }
-                is OnrampRegisterWalletAddressResult.Failed -> {
+                is OnrampRegisterWalletAddressResult.Failed -> handleError(result.error) {
                     _message.value = "Failed to register wallet address: ${result.error.message}"
                     _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
                 }
@@ -315,7 +342,7 @@ internal class OnrampViewModel(
                     _message.value = "KYC Collection successful"
                     _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
                 }
-                is OnrampAttachKycInfoResult.Failed -> {
+                is OnrampAttachKycInfoResult.Failed -> handleError(result.error) {
                     _message.value = "KYC Collection failed: ${result.error.message}"
                     _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
                 }
@@ -339,7 +366,7 @@ internal class OnrampViewModel(
                     _message.value = "Phone number updated successfully!"
                     _uiState.update { it.copy(screen = currentScreen) }
                 }
-                is OnrampUpdatePhoneNumberResult.Failed -> {
+                is OnrampUpdatePhoneNumberResult.Failed -> handleError(result.error) {
                     _message.value = "Failed to update phone number: ${result.error.message}"
                     _uiState.update { it.copy(screen = currentScreen) }
                 }
@@ -363,7 +390,7 @@ internal class OnrampViewModel(
                         )
                     }
                 }
-                is OnrampCreateCryptoPaymentTokenResult.Failed -> {
+                is OnrampCreateCryptoPaymentTokenResult.Failed -> handleError(result.error) {
                     _message.value = "Failed to create crypto payment token: ${result.error.message}"
                     _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
                 }
@@ -558,3 +585,5 @@ data class CheckoutEvent(
     val sessionId: String,
     val sessionClientSecret: String
 )
+
+data class AuthorizeEvent(val linkAuthIntentId: String)

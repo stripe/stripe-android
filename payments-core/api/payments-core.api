@@ -930,6 +930,22 @@ public final class com/stripe/android/challenge/PassiveChallengeArgs$Creator : a
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/challenge/warmer/activity/PassiveChallengeWarmerArgs$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/challenge/warmer/activity/PassiveChallengeWarmerArgs;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/challenge/warmer/activity/PassiveChallengeWarmerArgs;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/challenge/warmer/activity/PassiveChallengeWarmerCompleted$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/challenge/warmer/activity/PassiveChallengeWarmerCompleted;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/challenge/warmer/activity/PassiveChallengeWarmerCompleted;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/exception/CardException : com/stripe/android/core/exception/StripeException {
 	public static final field $stable I
 	public fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;)V
@@ -2226,6 +2242,14 @@ public abstract interface class com/stripe/android/model/ConfirmStripeIntentPara
 }
 
 public final class com/stripe/android/model/ConfirmStripeIntentParams$Companion {
+}
+
+public final class com/stripe/android/model/ConfirmationTokenParams$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/ConfirmationTokenParams;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/ConfirmationTokenParams;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/model/ConsumerPaymentDetailsShare$Creator : android/os/Parcelable$Creator {

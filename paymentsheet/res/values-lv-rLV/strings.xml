@@ -275,6 +275,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">Skatīt vairāk</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Turpinot, jūs piekrītat autorizēt maksājumus saskaņā ar šiem<terms>noteikumiem</terms>.]]></string>
+  <!-- Text providing link to terms for bank payments when seller information is provided -->
+  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[Iesniedzot pasūtījumu %1$s un %2$s, jūs piekrītat saglabāt savu informāciju %3$s nākamajiem pirkumiem un piekrītat autorizēt maksājumus saskaņā ar <terms>šiem noteikumiem</terms>.]]></string>
   <!-- Text providing link to terms for bank payments -->
   <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Iesniedzot savu pasūtījumu %s, jūs piekrītat autorizēt maksājumus saskaņā ar <terms>šiem noteikumiem</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->

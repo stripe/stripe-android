@@ -14,11 +14,15 @@ internal class RetrieveStripeIntent @Inject constructor(
      */
     suspend operator fun invoke(
         publishableKey: String,
-        clientSecret: String
+        stripeAccountId: String?,
+        clientSecret: String,
     ): Result<StripeIntent> {
         return stripeRepository.retrieveStripeIntent(
             clientSecret = clientSecret,
-            options = ApiRequest.Options(publishableKey)
+            options = ApiRequest.Options(
+                publishableKey,
+                stripeAccountId,
+            ),
         )
     }
 }

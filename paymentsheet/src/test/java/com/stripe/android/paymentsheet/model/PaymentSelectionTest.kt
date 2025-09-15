@@ -236,7 +236,7 @@ class PaymentSelectionTest {
             USBankAccountTextBuilder.buildMandateText(
                 merchantName = metadata.merchantName,
                 sellerBusinessName = null,
-                linkSignUpOptInFeatureEnabled = false,
+                forceSetupFutureUseBehavior = false,
                 isSaveForFutureUseSelected = false,
                 isInstantDebits = false,
                 isSetupFlow = true

@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.core.utils.FeatureFlag
 
-internal class FeatureFlagSettingsDefinition(
+internal open class FeatureFlagSettingsDefinition(
     private val featureFlag: FeatureFlag,
     private val allowedIntegrationTypes: List<PlaygroundConfigurationData.IntegrationType> =
         PlaygroundConfigurationData.IntegrationType.entries,
