@@ -654,6 +654,23 @@ class DefaultConfirmationHandlerTest {
         }
     }
 
+    @Test
+    fun `On bootstrap, should call bootstrap on all mediators`() = test {
+        val metadata = mapOf<BootstrapKey<*>, Parcelable>(
+            BootstrapKey.PassiveCaptcha to TestParcelableValue
+        )
+        val lifecycleOwner = TestLifecycleOwner()
+
+        confirmationHandler.bootstrap(metadata, lifecycleOwner)
+
+        val someBootstrapCall = someDefinitionScenario.bootstrapCalls.awaitItem()
+        val someOtherBootstrapCall = someOtherDefinitionScenario.bootstrapCalls.awaitItem()
+
+        assertThat(someBootstrapCall.metadata).isEqualTo(metadata)
+        assertThat(someOtherBootstrapCall.metadata).isEqualTo(metadata)
+        someDefinitionScenario.bootstrapCalls.ensureAllEventsConsumed()
+    }
+
     private fun launcherResultTest(
         result: ConfirmationDefinition.Result,
         test: (ConfirmationHandler.State.Complete) -> Unit,
@@ -1129,6 +1146,9 @@ class DefaultConfirmationHandlerTest {
 
     @Parcelize
     private data object InvalidConfirmationOption : ConfirmationHandler.Option
+
+    @Parcelize
+    private data object TestParcelableValue : Parcelable
 
     private companion object {
         const val SOME_DEFINITION_PERSISTED_KEY = "SomeParameters"

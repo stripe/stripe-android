@@ -28,7 +28,7 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.bootstrap
+import com.stripe.android.paymentelement.confirmation.bootstrapHelper
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
@@ -475,7 +475,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         lifecycleOwner: LifecycleOwner,
     ) {
         confirmationHandler.register(activityResultCaller, lifecycleOwner)
-        confirmationHandler.bootstrap(
+        confirmationHandler.bootstrapHelper(
             passiveCaptchaParamsFlow = paymentMethodMetadata.map { it?.passiveCaptchaParams },
             lifecycleOwner = lifecycleOwner
         )

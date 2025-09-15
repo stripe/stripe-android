@@ -58,4 +58,8 @@ internal abstract class FakeConfirmationDefinition<
     ): ConfirmationDefinition.Result {
         return this.result
     }
+
+    override fun bootstrap(metadata: Map<BootstrapKey<*>, Parcelable>) {
+        // Do nothing
+    }
 }

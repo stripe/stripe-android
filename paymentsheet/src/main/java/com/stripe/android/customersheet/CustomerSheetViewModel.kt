@@ -52,7 +52,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
-import com.stripe.android.paymentelement.confirmation.bootstrap
+import com.stripe.android.paymentelement.confirmation.bootstrapHelper
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -345,7 +345,7 @@ internal class CustomerSheetViewModel(
         lifecycleOwner: LifecycleOwner
     ) {
         confirmationHandler.register(activityResultCaller, lifecycleOwner)
-        confirmationHandler.bootstrap(
+        confirmationHandler.bootstrapHelper(
             passiveCaptchaParamsFlow = customerState.map { it.metadata?.passiveCaptchaParams },
             lifecycleOwner = lifecycleOwner
         )

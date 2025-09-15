@@ -547,6 +547,24 @@ class ConfirmationMediatorTest {
         countDownLatch.await(2, TimeUnit.SECONDS)
     }
 
+    @Test
+    fun `On bootstrap, should call definition bootstrap`() = test {
+        val mediator = ConfirmationMediator(
+            savedStateHandle = SavedStateHandle(),
+            definition = definition,
+        )
+
+        val metadata = mapOf<BootstrapKey<*>, Parcelable>(
+            BootstrapKey.PassiveCaptcha to TestParcelableValue
+        )
+
+        mediator.bootstrap(metadata)
+
+        val bootstrapCall = bootstrapCalls.awaitItem()
+
+        assertThat(bootstrapCall.metadata).isEqualTo(metadata)
+    }
+
     private fun test(
         action: ConfirmationDefinition.Action<TestConfirmationDefinition.LauncherArgs> =
             ConfirmationDefinition.Action.Fail(
@@ -620,6 +638,9 @@ class ConfirmationMediatorTest {
 
     @Parcelize
     private object InvalidTestConfirmationOption : ConfirmationHandler.Option
+
+    @Parcelize
+    private object TestParcelableValue : Parcelable
 
     private companion object {
         private val INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD

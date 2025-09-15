@@ -36,7 +36,7 @@ import com.stripe.android.link.ui.wallet.AddPaymentMethodOptions
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.bootstrap
+import com.stripe.android.paymentelement.confirmation.bootstrapHelper
 import com.stripe.android.paymentsheet.addresselement.AutocompleteActivityLauncher
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
@@ -219,7 +219,7 @@ internal class LinkActivityViewModel @Inject constructor(
         autocompleteLauncher.register(activityResultCaller, lifecycleOwner)
         confirmationHandler.register(activityResultCaller, lifecycleOwner)
         if (passiveCaptchaParams != null) {
-            confirmationHandler.bootstrap(passiveCaptchaParams, lifecycleOwner)
+            confirmationHandler.bootstrapHelper(passiveCaptchaParams, lifecycleOwner)
         }
     }
 

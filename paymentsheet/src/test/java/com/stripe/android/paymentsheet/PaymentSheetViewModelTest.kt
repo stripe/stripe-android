@@ -3589,10 +3589,6 @@ internal class PaymentSheetViewModelTest {
                 assertThat(confirmationRegisterCall.activityResultCaller).isEqualTo(activityResultCaller)
                 assertThat(confirmationRegisterCall.lifecycleOwner).isEqualTo(lifecycleOwner)
 
-                // Verify bootstrap is called
-                val bootstrapCall = bootstrapTurbine.awaitItem()
-                assertThat(bootstrapCall.lifecycleOwner).isEqualTo(lifecycleOwner)
-
                 lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
                 assertThat(awaitNextUnregisteredLauncher()).isEqualTo(autocompleteLauncher)

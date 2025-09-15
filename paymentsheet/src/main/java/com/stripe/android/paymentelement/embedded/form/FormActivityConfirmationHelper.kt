@@ -8,7 +8,7 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.bootstrap
+import com.stripe.android.paymentelement.confirmation.bootstrapHelper
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -40,7 +40,7 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
     init {
         confirmationHandler.register(activityResultCaller, lifecycleOwner)
         paymentMethodMetadata.passiveCaptchaParams?.let {
-            confirmationHandler.bootstrap(it, lifecycleOwner)
+            confirmationHandler.bootstrapHelper(it, lifecycleOwner)
         }
         lifecycleOwner.lifecycleScope.launch {
             confirmationHandler.state.collectLatest {

@@ -4,7 +4,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.bootstrap
+import com.stripe.android.paymentelement.confirmation.bootstrapHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.map
@@ -41,7 +41,7 @@ internal class EmbeddedConfirmationStarter @Inject constructor(
         lifecycleOwner: LifecycleOwner,
     ) {
         confirmationHandler.register(activityResultCaller, lifecycleOwner)
-        confirmationHandler.bootstrap(
+        confirmationHandler.bootstrapHelper(
             passiveCaptchaParamsFlow = confirmationStateHolder.stateFlow.map {
                 it?.paymentMethodMetadata?.passiveCaptchaParams
             },
