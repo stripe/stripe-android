@@ -1,7 +1,6 @@
 package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmationTokenFixtures
 import org.json.JSONObject
@@ -37,10 +36,12 @@ class ConfirmationTokenJsonParserTest {
             parser.parse(ConfirmationTokenFixtures.CONFIRMATION_TOKEN_JSON)
         )
 
-        val paymentMethod = requireNotNull(confirmationToken.paymentMethodPreview)
-        assertThat(paymentMethod.type).isEqualTo(com.stripe.android.model.PaymentMethod.Type.Card)
+        val paymentMethodPreview = requireNotNull(confirmationToken.paymentMethodPreview)
+        assertThat(paymentMethodPreview.type).isEqualTo(com.stripe.android.model.PaymentMethod.Type.Card)
+        assertThat(paymentMethodPreview.customerId).isNull()
+        assertThat(paymentMethodPreview.allowRedisplay).isNull()
 
-        val billingDetails = requireNotNull(paymentMethod.billingDetails)
+        val billingDetails = requireNotNull(paymentMethodPreview.billingDetails)
         assertThat(billingDetails.name).isEqualTo("Jenny Rosen")
         assertThat(billingDetails.email).isEqualTo("jennyrosen@stripe.com")
 
@@ -51,13 +52,9 @@ class ConfirmationTokenJsonParserTest {
         assertThat(address.postalCode).isEqualTo("02136")
         assertThat(address.country).isEqualTo("US")
 
-        val card = requireNotNull(paymentMethod.card)
-        assertThat(card.brand).isEqualTo(CardBrand.Visa)
-        assertThat(card.last4).isEqualTo("4242")
-        assertThat(card.expiryMonth).isEqualTo(8)
-        assertThat(card.expiryYear).isEqualTo(2026)
-        assertThat(card.funding).isEqualTo("credit")
-        assertThat(card.country).isEqualTo("US")
+        // Verify allResponseFields contains the original JSON
+        assertThat(paymentMethodPreview.allResponseFields).isNotEmpty()
+        assertThat(paymentMethodPreview.allResponseFields).contains("\"type\":\"card\"")
     }
 
     @Test

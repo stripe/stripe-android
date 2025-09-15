@@ -90,8 +90,9 @@ data class ConfirmationToken internal constructor(
      * This represents the transactional checkout state, not a reusable PaymentMethod object.
      */
     @Parcelize
-    @Poko
-    class PaymentMethodPreview internal constructor(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    // TODO(cttsai-stripe): should convert this data class to @Poko class in next major release
+    data class PaymentMethodPreview internal constructor(
         /**
          *  This field indicates whether this payment method can be shown again to its customer in a checkout flow.
          *  Stripe products such as Checkout and Elements use this field to determine
@@ -119,5 +120,5 @@ data class ConfirmationToken internal constructor(
         @JvmField val type: PaymentMethod.Type,
 
         @JvmField val allResponseFields: String
-    ) : Parcelable
+    ) : StripeModel
 }
