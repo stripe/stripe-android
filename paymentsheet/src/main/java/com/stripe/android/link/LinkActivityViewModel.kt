@@ -446,6 +446,10 @@ internal class LinkActivityViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Determine the screen state when the account is verified.
+     * Returns null if the flow has been dismissed and no action is required.
+     */
     private fun getScreenStateWhenVerified(
         accountStatus: AccountStatus.Verified,
         linkAccount: LinkAccount,
@@ -497,6 +501,10 @@ internal class LinkActivityViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Determine the screen state after refreshing the consumer session in Authorization mode.
+     * Returns null if the flow should be dismissed.
+     */
     @VisibleForTesting
     internal fun getScreenStateForAuthorizationAfterRefresh(
         accountStatus: AccountStatus.Verified,
