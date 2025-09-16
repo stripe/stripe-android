@@ -107,7 +107,7 @@ data class ConfirmationToken internal constructor(
 
         /**
          *  The ID of the Customer to which this PaymentMethod is saved.
-         *  This will not be set when the PaymentMethod has not been saved to a Customer.
+         *  This will only be set when the PaymentMethod has been saved to a Customer.
          */
         @JvmField val customerId: String? = null,
 
