@@ -157,7 +157,6 @@ private fun Screens(
                 VerificationRoute(
                     linkAccount = linkAccount,
                     changeEmail = changeEmail,
-                    navigateAndClearStack = navigateAndClearStack,
                     goBack = goBack,
                     dismissWithResult = dismissWithResult
                 )
@@ -217,7 +216,6 @@ private fun SignUpRoute(
 @Composable
 private fun VerificationRoute(
     linkAccount: LinkAccount,
-    navigateAndClearStack: (route: LinkScreen) -> Unit,
     changeEmail: () -> Unit,
     goBack: () -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit
@@ -228,9 +226,6 @@ private fun VerificationRoute(
             onDismissClicked = goBack,
             linkAccount = linkAccount,
             isDialog = false,
-            onVerificationSucceeded = {
-                navigateAndClearStack(LinkScreen.Wallet)
-            },
             onChangeEmailClicked = changeEmail,
             dismissWithResult = dismissWithResult
         )

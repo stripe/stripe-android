@@ -6,8 +6,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkLaunchMode
+import com.stripe.android.link.WebLinkAuthChannel
+import com.stripe.android.link.WebLinkAuthResult
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.linkAccountUpdate
 import com.stripe.android.link.analytics.LinkEventsReporter
@@ -16,10 +20,12 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.ConsentPresentation
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.utils.errorMessage
+import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.ui.core.elements.OTPSpec
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -30,19 +36,24 @@ import javax.inject.Inject
  */
 internal class VerificationViewModel @Inject constructor(
     private val linkAccount: LinkAccount,
+    private val linkAccountHolder: LinkAccountHolder,
     private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger,
     private val linkLaunchMode: LinkLaunchMode,
+    private val webLinkAuthChannel: WebLinkAuthChannel,
     private val isDialog: Boolean,
-    private val onVerificationSucceeded: () -> Unit,
+    private val onVerificationSucceeded: (refresh: ConsumerSessionRefresh?) -> Unit,
     private val onChangeEmailRequested: () -> Unit,
     private val onDismissClicked: () -> Unit,
     private val dismissWithResult: (LinkActivityResult) -> Unit,
 ) : ViewModel() {
 
+    private val isProcessingWebAuth = linkAccount.webviewOpenUrl != null
+
     private val _viewState = MutableStateFlow(
         value = VerificationViewState(
+            isProcessingWebAuth = isProcessingWebAuth,
             redactedPhoneNumber = linkAccount.redactedPhoneNumber,
             email = linkAccount.email,
             isProcessing = false,
@@ -70,7 +81,9 @@ internal class VerificationViewModel @Inject constructor(
     }
 
     private fun setUp() {
-        if (linkAccount.accountStatus != AccountStatus.VerificationStarted) {
+        if (isProcessingWebAuth) {
+            startWebVerification()
+        } else if (linkAccount.accountStatus != AccountStatus.VerificationStarted) {
             startVerification()
         }
 
@@ -78,6 +91,10 @@ internal class VerificationViewModel @Inject constructor(
             otpCode.collect { code ->
                 code?.let { onVerificationCodeEntered(code) }
             }
+        }
+
+        viewModelScope.launch {
+            handleWebAuthResults()
         }
     }
 
@@ -113,7 +130,7 @@ internal class VerificationViewModel @Inject constructor(
                         )
                     )
                 } else {
-                    onVerificationSucceeded()
+                    onVerificationSucceeded(null)
                 }
             },
             onFailure = {
@@ -139,6 +156,42 @@ internal class VerificationViewModel @Inject constructor(
                     errorMessage = error?.errorMessage,
                 )
             }
+        }
+    }
+
+    private fun startWebVerification() {
+        viewModelScope.launch {
+            // If the web auth URL has already been consumed, perform lookup again to get a fresh one.
+            val updatedLinkAccountResult = linkAccount
+                .takeIf { !it.viewedWebviewOpenUrl }
+                ?.let { Result.success(it) }
+                // TODO: use `/refresh` instead.
+                ?: linkAccountManager.lookupByAccount(linkAccount)
+            updatedLinkAccountResult.fold(
+                onSuccess = { account ->
+                    // If we don't have a URL here, something went wrong upstream.
+                    // Cancel so user can try again.
+                    if (account.webviewOpenUrl == null) {
+                        dismissWithResult(
+                            LinkActivityResult.Canceled(linkAccountUpdate = linkAccountManager.linkAccountUpdate)
+                        )
+                        return@fold
+                    }
+                    // Mark the URL as viewed so we don't try to reuse it.
+                    linkAccountHolder.set(
+                        LinkAccountUpdate.Value(account = account.copy(viewedWebviewOpenUrl = true))
+                    )
+                    webLinkAuthChannel.requests.tryEmit(account.webviewOpenUrl)
+                },
+                onFailure = { error ->
+                    dismissWithResult(
+                        LinkActivityResult.Failed(
+                            error = error,
+                            linkAccountUpdate = LinkAccountUpdate.None
+                        )
+                    )
+                }
+            )
         }
     }
 
@@ -177,6 +230,39 @@ internal class VerificationViewModel @Inject constructor(
         }
     }
 
+    // This probably belongs in `LinkActivityViewModel` but we'd have to refactor
+    // verification cancellation/dismissal first.
+    private suspend fun handleWebAuthResults() {
+        webLinkAuthChannel.results.collectLatest { result ->
+            when (result) {
+                WebLinkAuthResult.Completed -> {
+                    linkAccountManager.refreshConsumer().fold(
+                        onSuccess = onVerificationSucceeded,
+                        onFailure = {
+                            dismissWithResult(
+                                LinkActivityResult.Failed(
+                                    error = it,
+                                    linkAccountUpdate = LinkAccountUpdate.None
+                                )
+                            )
+                        }
+                    )
+                }
+                WebLinkAuthResult.Canceled -> {
+                    onDismissClicked()
+                }
+                is WebLinkAuthResult.Failure -> {
+                    dismissWithResult(
+                        LinkActivityResult.Failed(
+                            error = result.error,
+                            linkAccountUpdate = LinkAccountUpdate.None
+                        )
+                    )
+                }
+            }
+        }
+    }
+
     private fun clearError() {
         updateViewState {
             it.copy(errorMessage = null)
@@ -203,7 +289,6 @@ internal class VerificationViewModel @Inject constructor(
             parentComponent: NativeLinkComponent,
             linkAccount: LinkAccount,
             isDialog: Boolean,
-            onVerificationSucceeded: () -> Unit,
             onChangeEmailClicked: () -> Unit,
             onDismissClicked: () -> Unit,
             dismissWithResult: (LinkActivityResult) -> Unit,
@@ -212,11 +297,13 @@ internal class VerificationViewModel @Inject constructor(
                 initializer {
                     VerificationViewModel(
                         linkAccount = linkAccount,
+                        linkAccountHolder = parentComponent.linkAccountHolder,
                         linkAccountManager = parentComponent.linkAccountManager,
                         linkEventsReporter = parentComponent.linkEventsReporter,
                         logger = parentComponent.logger,
                         linkLaunchMode = parentComponent.linkLaunchMode,
-                        onVerificationSucceeded = onVerificationSucceeded,
+                        webLinkAuthChannel = parentComponent.webLinkAuthChannel,
+                        onVerificationSucceeded = parentComponent.viewModel::onVerificationSucceeded,
                         onChangeEmailRequested = onChangeEmailClicked,
                         onDismissClicked = onDismissClicked,
                         isDialog = isDialog,

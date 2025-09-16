@@ -29,7 +29,6 @@ import com.stripe.android.uicore.utils.collectAsState
 internal fun VerificationDialog(
     modifier: Modifier,
     linkAccount: LinkAccount,
-    onVerificationSucceeded: () -> Unit,
     changeEmail: () -> Unit,
     onDismissClicked: () -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit
@@ -39,7 +38,6 @@ internal fun VerificationDialog(
             parentComponent = parentComponent,
             linkAccount = linkAccount,
             isDialog = true,
-            onVerificationSucceeded = onVerificationSucceeded,
             onChangeEmailClicked = changeEmail,
             onDismissClicked = onDismissClicked,
             dismissWithResult = dismissWithResult
@@ -47,6 +45,10 @@ internal fun VerificationDialog(
     }
 
     val state by viewModel.viewState.collectAsState()
+
+    if (state.isProcessingWebAuth) {
+        return
+    }
 
     VerificationDialogBody(
         modifier = modifier,

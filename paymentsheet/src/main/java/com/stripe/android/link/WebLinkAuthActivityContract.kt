@@ -5,6 +5,9 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
+import com.stripe.android.link.injection.NativeLinkScope
+import kotlinx.coroutines.flow.MutableSharedFlow
+import javax.inject.Inject
 
 /**
  * Contract used to authenticate a user given a Link auth URL.
@@ -63,4 +66,11 @@ internal sealed interface WebLinkAuthResult {
     data object Completed : WebLinkAuthResult
     data object Canceled : WebLinkAuthResult
     data class Failure(val error: Throwable) : WebLinkAuthResult
+}
+
+// Used to communicate between the ViewModel and the Activity.
+@NativeLinkScope
+internal class WebLinkAuthChannel @Inject constructor() {
+    val requests: MutableSharedFlow<String> = MutableSharedFlow(extraBufferCapacity = 1)
+    val results: MutableSharedFlow<WebLinkAuthResult> = MutableSharedFlow(extraBufferCapacity = 1)
 }

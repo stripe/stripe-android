@@ -4,6 +4,7 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.utils.flatMapCatching
 import com.stripe.android.link.ConsumerState
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason
@@ -473,45 +474,67 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
+    // TODO: use `/refresh` instead.
+    override suspend fun lookupByAccount(linkAccount: LinkAccount): Result<LinkAccount> {
+        val accountResult =
+            lookupAccount(
+                linkAccount = null,
+                email = linkAccount.email,
+            ) ?: return Result.failure(NoLinkAccountFoundException())
+        return accountResult.flatMapCatching { account ->
+            account
+                ?.let { Result.success(it) }
+                ?: Result.failure(NoLinkAccountFoundException())
+        }
+    }
+
+    private suspend fun lookupAccount(
+        linkAccount: LinkAccount?,
+        email: String?,
+    ): Result<LinkAccount?>? {
+        return when (val linkLaunchMode = this.linkLaunchMode) {
+            null,
+            is LinkLaunchMode.Authentication,
+            is LinkLaunchMode.Confirmation,
+            LinkLaunchMode.Full,
+            is LinkLaunchMode.PaymentMethodSelection -> {
+                linkAccount
+                    // If we already have an account, return it.
+                    ?.let { Result.success(it) }
+                    ?: run {
+                        email?.let {
+                            lookupByEmail(
+                                email = it,
+                                startSession = true,
+                                emailSource = EmailSource.CUSTOMER_OBJECT,
+                                customerId = config.customerIdForEceDefaultValues
+                            )
+                        }
+                    }
+            }
+            is LinkLaunchMode.Authorization -> {
+                val linkAuthIntentId = linkLaunchMode.linkAuthIntentId
+                linkAccount
+                    // If we already have an account for the LAI, return it.
+                    ?.takeIf { it.linkAuthIntentInfo?.linkAuthIntentId == linkAuthIntentId }
+                    ?.let { Result.success(it) }
+                    ?: lookupByLinkAuthIntent(
+                        linkAuthIntentId = linkAuthIntentId,
+                        customerId = config.customerIdForEceDefaultValues
+                    )
+            }
+        }
+    }
+
     private suspend fun getAccountStatus(
         linkAccount: LinkAccount?,
         canLookupCustomerEmail: Boolean
     ): AccountStatus {
-        val usableLinkAccount = linkAccount?.takeIf { !it.viewedWebviewOpenUrl }
-        val linkAccountResult =
-            when (val linkLaunchMode = this.linkLaunchMode) {
-                null,
-                is LinkLaunchMode.Authentication,
-                is LinkLaunchMode.Confirmation,
-                LinkLaunchMode.Full,
-                is LinkLaunchMode.PaymentMethodSelection -> {
-                    usableLinkAccount
-                        // If we already have an account, return it.
-                        ?.let { Result.success(it) }
-                        ?: run {
-                            val email = config.customerInfo.email?.takeIf { canLookupCustomerEmail }
-                            email?.let {
-                                lookupByEmail(
-                                    email = it,
-                                    startSession = true,
-                                    emailSource = EmailSource.CUSTOMER_OBJECT,
-                                    customerId = config.customerIdForEceDefaultValues
-                                )
-                            }
-                        }
-                }
-                is LinkLaunchMode.Authorization -> {
-                    val linkAuthIntentId = linkLaunchMode.linkAuthIntentId
-                    usableLinkAccount
-                        // If we already have an account for the LAI, return it.
-                        ?.takeIf { it.linkAuthIntentInfo?.linkAuthIntentId == linkAuthIntentId }
-                        ?.let { Result.success(it) }
-                        ?: lookupByLinkAuthIntent(
-                            linkAuthIntentId = linkAuthIntentId,
-                            customerId = config.customerIdForEceDefaultValues
-                        )
-                }
-            }
+        val email = config.customerInfo.email?.takeIf { canLookupCustomerEmail }
+        val linkAccountResult = lookupAccount(
+            linkAccount = linkAccount,
+            email = email
+        )
         return linkAccountResult
             ?.map { it?.accountStatus }
             ?.getOrElse { error -> AccountStatus.Error(error) }

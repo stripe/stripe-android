@@ -77,6 +77,9 @@ internal data class LinkAccount(
         }
     }
 
+    @IgnoredOnParcel
+    val webviewOpenUrl: String? = consumerSession.mobileFallbackWebviewParams?.webviewOpenUrl
+
     private fun ConsumerSession.containsSMSSessionStarted() = verificationSessions.find {
         it.type == ConsumerSession.VerificationSession.SessionType.Sms &&
             it.state == ConsumerSession.VerificationSession.SessionState.Started

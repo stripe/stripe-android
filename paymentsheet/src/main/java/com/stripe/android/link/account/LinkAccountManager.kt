@@ -39,6 +39,11 @@ internal interface LinkAccountManager {
     var cachedShippingAddresses: ConsumerShippingAddresses?
 
     /**
+     * Lookup consumer with the approach determined by the provided [linkAccount] state.
+     */
+    suspend fun lookupByAccount(linkAccount: LinkAccount): Result<LinkAccount>
+
+    /**
      * Retrieves the Link account associated with the email if it exists.
      *
      * Optionally starts a user session, by storing the cookie for the account and starting a

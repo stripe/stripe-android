@@ -97,7 +97,6 @@ internal class LinkActivityViewModel @Inject constructor(
         get() = linkAccountManager.linkAccountInfo.value.account
 
     var launchWebFlow: ((LinkConfiguration) -> Unit)? = null
-    var launchWebAuthFlow: ((String) -> Unit)? = null
 
     val canDismissSheet: Boolean
         get() = activityRetainedComponent.dismissalCoordinator.canDismiss
@@ -109,9 +108,12 @@ internal class LinkActivityViewModel @Inject constructor(
         }
     }
 
-    fun onVerificationSucceeded() {
+    fun onVerificationSucceeded(refresh: ConsumerSessionRefresh?) {
         viewModelScope.launch {
-            updateScreenState(withAnimationDelay = false)
+            updateScreenState(
+                withAnimationDelay = false,
+                consumerSessionRefresh = refresh
+            )
         }
     }
 
@@ -125,51 +127,6 @@ internal class LinkActivityViewModel @Inject constructor(
 
     fun handleWebActivityResult(result: LinkActivityResult) {
         dismissWithResult(result)
-    }
-
-    fun handleWebAuthActivityResult(result: WebLinkAuthResult) {
-        viewModelScope.launch {
-            val linkAccountUpdate = linkAccountHolder.linkAccountInfo.value.account
-                ?.copy(viewedWebviewOpenUrl = true)
-                ?.let { LinkAccountUpdate.Value(it) }
-                ?: LinkAccountUpdate.None
-            when (result) {
-                WebLinkAuthResult.Completed -> {
-                    linkAccountManager.refreshConsumer().fold(
-                        onSuccess = { refresh ->
-                            updateScreenState(
-                                withAnimationDelay = true,
-                                consumerSessionRefresh = refresh
-                            )
-                        },
-                        onFailure = {
-                            dismissWithResult(
-                                LinkActivityResult.Failed(
-                                    error = it,
-                                    linkAccountUpdate = linkAccountUpdate
-                                )
-                            )
-                        }
-                    )
-                }
-                WebLinkAuthResult.Canceled -> {
-                    dismissWithResult(
-                        LinkActivityResult.Canceled(
-                            reason = LinkActivityResult.Canceled.Reason.BackPressed,
-                            linkAccountUpdate = linkAccountUpdate
-                        )
-                    )
-                }
-                is WebLinkAuthResult.Failure -> {
-                    dismissWithResult(
-                        LinkActivityResult.Failed(
-                            error = result.error,
-                            linkAccountUpdate = linkAccountUpdate
-                        )
-                    )
-                }
-            }
-        }
     }
 
     fun verifyDuringSignUp() {
@@ -415,12 +372,6 @@ internal class LinkActivityViewModel @Inject constructor(
                 ScreenState.FullScreen(LinkScreen.SignUp)
             }
             is AccountStatus.NeedsVerification -> {
-                // Launch web auth flow if web auth URL is available.
-                // Next steps will happen in `handleWebAuthActivityResult`.
-                if (accountStatus.webviewOpenUrl != null) {
-                    launchWebAuthFlow?.invoke(accountStatus.webviewOpenUrl)
-                    return
-                }
                 getVerificationScreenState(linkAccount)
             }
             AccountStatus.VerificationStarted -> {
@@ -440,9 +391,11 @@ internal class LinkActivityViewModel @Inject constructor(
             // Otherwise, we get a weird scaling animation when we display the first non-loading screen.
             delay(LINK_DEFAULT_ANIMATION_DELAY_MILLIS)
         }
-        _linkScreenState.value = screenState
         if (clearStack && screenState is ScreenState.FullScreen) {
             navigate(screenState.initialDestination, clearStack = true)
+            // We don't update linkScreenState or it'll double nav.
+        } else {
+            _linkScreenState.value = screenState
         }
     }
 
