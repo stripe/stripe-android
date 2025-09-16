@@ -3642,7 +3642,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Both Link holdback experiments are triggered when loading PaymentSheet when Link is unavailable`() = runTest {
+    fun `All Link holdback experiments are triggered when loading PaymentSheet when Link is unavailable`() = runTest {
         val logLinkHoldbackExperiment = FakeLogLinkHoldbackExperiment()
 
         val loader = createPaymentElementLoader(
@@ -3662,12 +3662,14 @@ internal class DefaultPaymentElementLoaderTest {
 
         val globalHoldback = logLinkHoldbackExperiment.calls.awaitItem()
         assertThat(globalHoldback.experiment).isEqualTo(ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK)
+        val globalHoldbackAA = logLinkHoldbackExperiment.calls.awaitItem()
+        assertThat(globalHoldbackAA.experiment).isEqualTo(ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK_AA)
         val abTest = logLinkHoldbackExperiment.calls.awaitItem()
         assertThat(abTest.experiment).isEqualTo(ElementsSession.ExperimentAssignment.LINK_AB_TEST)
     }
 
     @Test
-    fun `Both Link holdback experiments are triggered when loading PaymentSheet when Link is available`() = runTest {
+    fun `All Link holdback experiments are triggered when loading PaymentSheet when Link is available`() = runTest {
         val logLinkHoldbackExperiment = FakeLogLinkHoldbackExperiment()
 
         val loader = createPaymentElementLoader(
@@ -3684,6 +3686,8 @@ internal class DefaultPaymentElementLoaderTest {
 
         val globalHoldback = logLinkHoldbackExperiment.calls.awaitItem()
         assertThat(globalHoldback.experiment).isEqualTo(ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK)
+        val globalHoldbackAA = logLinkHoldbackExperiment.calls.awaitItem()
+        assertThat(globalHoldbackAA.experiment).isEqualTo(ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK_AA)
         val abTest = logLinkHoldbackExperiment.calls.awaitItem()
         assertThat(abTest.experiment).isEqualTo(ElementsSession.ExperimentAssignment.LINK_AB_TEST)
     }
