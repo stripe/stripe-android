@@ -9,6 +9,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.state.CustomerState
@@ -24,10 +25,13 @@ class VerticalModeInitialScreenFactoryTest {
     val coroutineTestRule = CoroutineTestRule()
 
     @Test
-    fun `returns form screen when only one payment method available`() = runScenario(
+    fun `returns form screen when only one payment method available and has interactable elements`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("cashapp"),
+            ),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
             )
         )
     ) {
@@ -55,6 +59,19 @@ class VerticalModeInitialScreenFactoryTest {
         assertThat(screens).hasSize(2)
         assertThat(screens[0]).isInstanceOf<PaymentSheetScreen.VerticalMode>()
         assertThat(screens[1]).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
+    }
+
+    @Test
+    fun `returns list screen when only one payment method available with no interactable elements`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("alipay"),
+            )
+        ),
+        hasSavedPaymentMethods = false
+    ) {
+        assertThat(screens).hasSize(1)
+        assertThat(screens[0]).isInstanceOf<PaymentSheetScreen.VerticalMode>()
     }
 
     private fun runScenario(
