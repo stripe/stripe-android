@@ -28,12 +28,12 @@ data class MandateData internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class CustomerAcceptance internal constructor(
         /**
-         * If this is a Mandate accepted online, this hash contains details about the online acceptance.
+         * Details about the mandate's online acceptance. Null if mandate is accepted offline.
          */
         val online: Online?,
 
         /**
-         * The type of customer acceptance information included with the Mandate.
+         * The type of customer acceptance information included with the Mandate, such as: online or offline.
          */
         val type: String,
     ) : Parcelable {

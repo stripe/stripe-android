@@ -43,9 +43,7 @@ data class ConfirmationToken internal constructor(
     @JvmField val liveMode: Boolean,
 
     /**
-     * Mandate data for this confirmation token. This is automatically generated based on
-     * the payment method and usage, eliminating the need for manual mandate handling.
-     * Internal field containing auto-generated mandate configuration.
+     * Data used for generating a Mandate.
      */
     @JvmField val mandateData: MandateData?,
 
