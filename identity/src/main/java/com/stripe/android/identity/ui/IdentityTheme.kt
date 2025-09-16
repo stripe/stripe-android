@@ -17,8 +17,6 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
 import androidx.core.content.res.use
 import com.google.accompanist.themeadapter.material.createMdcTheme
-import com.google.accompanist.themeadapter.material.R as MaterialR
-import com.google.accompanist.themeadapter.material3.R as Material3R
 import com.stripe.android.uicore.LocalColors
 import com.stripe.android.uicore.LocalSectionStyle
 import com.stripe.android.uicore.LocalShapes
@@ -28,6 +26,8 @@ import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.StripeTypography
 import com.stripe.android.uicore.toComposeTypography
 import java.lang.reflect.Method
+import com.google.accompanist.themeadapter.material.R as MaterialR
+import com.google.accompanist.themeadapter.material3.R as Material3R
 
 /**
  * IdentityTheme tries to read theme values from hosting app's context. Then adapt the values with
@@ -36,7 +36,7 @@ import java.lang.reflect.Method
 @Composable
 internal fun IdentityTheme(content: @Composable () -> Unit) {
     val themeParameters = extractThemeParameters()
-    
+
     val isRobolectricTest = runCatching {
         Build.FINGERPRINT.lowercase() == "robolectric"
     }.getOrDefault(false)
@@ -72,7 +72,6 @@ private fun extractThemeParameters(): ThemeParameters {
     return remember(key, themeType) {
         when (themeType) {
             HostThemeType.MaterialComponents -> {
-                // Only call createMdcTheme if we have a MaterialComponents theme
                 runCatching {
                     val themeParams = createMdcTheme(
                         context = context,
@@ -89,14 +88,11 @@ private fun extractThemeParameters(): ThemeParameters {
                         shapes = themeParams.shapes ?: defaultParameters.shapes
                     )
                 }.getOrElse {
-                    // Fallback to default MaterialTheme if createMdcTheme fails
                     defaultParameters
                 }
             }
-            else -> {
-                // For AppCompat/Material3/other themes, use default MaterialTheme values
-                defaultParameters
-            }
+            HostThemeType.Material3,
+            HostThemeType.Unknown -> defaultParameters
         }
     }
 }
@@ -179,7 +175,6 @@ private inline val Resources.Theme.key: Any?
         return null
     }
 
-
 @Composable
 private fun detectHostThemeType(): HostThemeType {
     val context = LocalContext.current
@@ -203,14 +198,14 @@ private fun detectHostThemeType(): HostThemeType {
     return when {
         isMaterialTheme -> HostThemeType.MaterialComponents
         isMaterial3Theme -> HostThemeType.Material3
-        else -> HostThemeType.AppCompat
+        else -> HostThemeType.Unknown
     }
 }
 
 private enum class HostThemeType {
     MaterialComponents,
     Material3,
-    AppCompat
+    Unknown
 }
 
 private data class ThemeParameters(
