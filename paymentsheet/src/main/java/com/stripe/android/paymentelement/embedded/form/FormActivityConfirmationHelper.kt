@@ -38,7 +38,6 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
 
     init {
         confirmationHandler.register(activityResultCaller, lifecycleOwner)
-        confirmationHandler.bootstrap(paymentMethodMetadata)
         lifecycleOwner.lifecycleScope.launch {
             confirmationHandler.state.collectLatest {
                 stateHelper.updateConfirmationState(it)

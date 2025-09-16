@@ -127,9 +127,8 @@ class DefaultFormActivityConfirmationHelperTest {
         )
         assertThat(confirmationHandler.registerTurbine.awaitItem()).isNotNull()
         assertThat(stateHelper.updateTurbine.awaitItem()).isEqualTo(ConfirmationHandler.State.Idle)
-        with(confirmationHandler.bootstrapTurbine.awaitItem()) {
-            assertThat(paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
-        }
+        // Bootstrap is no longer called during DefaultFormActivityConfirmationHelper initialization
+        // It's now called in FormActivityViewModel.inject()
         Scenario(
             confirmationHelper = confirmationHelper,
             confirmationHandler = confirmationHandler,

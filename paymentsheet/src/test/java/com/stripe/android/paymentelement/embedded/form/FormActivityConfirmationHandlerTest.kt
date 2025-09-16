@@ -96,8 +96,6 @@ internal class FormActivityConfirmationHandlerTest {
         )
 
         assertThat(confirmationHandler.registerTurbine.awaitItem()).isNotNull()
-        assertThat(confirmationHandler.bootstrapTurbine.awaitItem().paymentMethodMetadata)
-            .isEqualTo(paymentMethodMetadata)
         assertThat(stateHelper.updateTurbine.awaitItem()).isInstanceOf<ConfirmationHandler.State.Idle>()
 
         Scenario(

@@ -51,10 +51,7 @@ internal class FormActivity : AppCompatActivity() {
 
         renderEdgeToEdge()
 
-        viewModel.component.subcomponentFactory.build(
-            activityResultCaller = this,
-            lifecycleOwner = this,
-        ).inject(this)
+        viewModel.inject(this)
 
         setContent {
             StripeTheme {
