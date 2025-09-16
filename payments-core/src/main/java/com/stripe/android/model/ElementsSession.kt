@@ -237,6 +237,7 @@ data class ElementsSession(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class ExperimentAssignment(val experimentValue: String) {
         LINK_GLOBAL_HOLD_BACK("link_global_holdback"),
+        LINK_GLOBAL_HOLD_BACK_AA("link_global_holdback_aa"),
         LINK_AB_TEST("link_ab_test"),
     }
 
