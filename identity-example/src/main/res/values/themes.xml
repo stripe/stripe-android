@@ -36,6 +36,12 @@
         <item name="textAppearanceButton">@style/TextAppearance.IdentityExampleAppTheme2.Button</item>
         <item name="textAppearanceHeadline6">@style/TextAppearance.IdentityExampleAppTheme2.H6</item>
         <item name="textAppearanceSubtitle1">@style/TextAppearance.IdentityExampleAppTheme2.Subtitle1</item>
+    </style>
 
+    <!-- Non-MaterialComponents theme -->
+    <style name="Theme.AppCompatTest" parent="Theme.AppCompat.DayNight">
+        <item name="colorPrimary">@color/purple_500</item>
+        <item name="colorPrimaryDark">@color/purple_700</item>
+        <item name="colorAccent">@color/teal_200</item>
     </style>
 </resources>

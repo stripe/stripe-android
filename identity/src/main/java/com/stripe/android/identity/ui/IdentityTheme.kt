@@ -15,7 +15,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
+import androidx.core.content.res.use
 import com.google.accompanist.themeadapter.material.createMdcTheme
+import com.google.accompanist.themeadapter.material.R as MaterialR
+import com.google.accompanist.themeadapter.material3.R as Material3R
 import com.stripe.android.uicore.LocalColors
 import com.stripe.android.uicore.LocalSectionStyle
 import com.stripe.android.uicore.LocalShapes
@@ -32,39 +35,71 @@ import java.lang.reflect.Method
  */
 @Composable
 internal fun IdentityTheme(content: @Composable () -> Unit) {
-    val context = LocalContext.current
-    val key = context.theme.key ?: context.theme
-
-    val layoutDirection = LocalLayoutDirection.current
-
-    val themeParams = remember(key) {
-        createMdcTheme(
-            context = context,
-            layoutDirection = layoutDirection,
-            readColors = true,
-            readTypography = true,
-            readShapes = true,
-            setTextColors = false,
-            setDefaultFontFamily = false
-        )
-    }
-
+    val themeParameters = extractThemeParameters()
+    
     val isRobolectricTest = runCatching {
         Build.FINGERPRINT.lowercase() == "robolectric"
     }.getOrDefault(false)
 
     val inspectionMode = LocalInspectionMode.current || isRobolectricTest
-    val hostingAppColors = themeParams.colors ?: MaterialTheme.colors
-    val hostingAppTypography = themeParams.typography ?: MaterialTheme.typography
-    val hostingAppShapes = themeParams.shapes ?: MaterialTheme.shapes
 
     AdoptForStripeTheme(
-        hostingAppColors = hostingAppColors,
-        hostingAppTypography = hostingAppTypography,
-        hostingAppShapes = hostingAppShapes,
+        hostingAppColors = themeParameters.colors,
+        hostingAppTypography = themeParameters.typography,
+        hostingAppShapes = themeParameters.shapes,
         inspectionMode = inspectionMode,
         content = content
     )
+}
+
+/**
+ * Extracts theme parameters from the hosting app's context with proper fallbacks.
+ * Reuses the theme detection logic from payments-core's AppCompatOrMdcTheme pattern.
+ */
+@Composable
+private fun extractThemeParameters(): ThemeParameters {
+    val context = LocalContext.current
+    val layoutDirection = LocalLayoutDirection.current
+    val key = context.theme.key ?: context.theme
+
+    val defaultParameters = ThemeParameters(
+        colors = MaterialTheme.colors,
+        typography = MaterialTheme.typography,
+        shapes = MaterialTheme.shapes
+    )
+
+    val themeType = detectHostThemeType()
+
+    return remember(key, themeType) {
+        when (themeType) {
+            HostThemeType.MaterialComponents -> {
+                // Only call createMdcTheme if we have a MaterialComponents theme
+                runCatching {
+                    val themeParams = createMdcTheme(
+                        context = context,
+                        layoutDirection = layoutDirection,
+                        readColors = true,
+                        readTypography = true,
+                        readShapes = true,
+                        setTextColors = false,
+                        setDefaultFontFamily = false
+                    )
+                    ThemeParameters(
+                        colors = themeParams.colors ?: defaultParameters.colors,
+                        typography = themeParams.typography ?: defaultParameters.typography,
+                        shapes = themeParams.shapes ?: defaultParameters.shapes
+                    )
+                }.getOrElse {
+                    // Fallback to default MaterialTheme if createMdcTheme fails
+                    defaultParameters
+                }
+            }
+            else -> {
+                // For AppCompat/Material3/other themes, use default MaterialTheme values
+                defaultParameters
+            }
+        }
+    }
 }
 
 @Composable
@@ -144,6 +179,46 @@ private inline val Resources.Theme.key: Any?
         }
         return null
     }
+
+
+@Composable
+private fun detectHostThemeType(): HostThemeType {
+    val context = LocalContext.current
+
+    val isMaterialTheme = remember {
+        runCatching {
+            context.obtainStyledAttributes(MaterialR.styleable.ThemeAdapterMaterialTheme).use { ta ->
+                ta.hasValue(MaterialR.styleable.ThemeAdapterMaterialTheme_isMaterialTheme)
+            }
+        }.getOrDefault(false)
+    }
+
+    val isMaterial3Theme = remember {
+        runCatching {
+            context.obtainStyledAttributes(Material3R.styleable.ThemeAdapterMaterial3Theme).use { ta ->
+                ta.hasValue(Material3R.styleable.ThemeAdapterMaterial3Theme_isMaterial3Theme)
+            }
+        }.getOrDefault(false)
+    }
+
+    return when {
+        isMaterialTheme -> HostThemeType.MaterialComponents
+        isMaterial3Theme -> HostThemeType.Material3
+        else -> HostThemeType.AppCompat
+    }
+}
+
+private enum class HostThemeType {
+    MaterialComponents,
+    Material3,
+    AppCompat
+}
+
+private data class ThemeParameters(
+    val colors: Colors,
+    val typography: Typography,
+    val shapes: Shapes
+)
 
 private var sThemeGetKeyMethodFetched = false
 private var sThemeGetKeyMethod: Method? = null
