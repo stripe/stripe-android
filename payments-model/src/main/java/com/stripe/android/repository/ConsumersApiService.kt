@@ -251,12 +251,6 @@ class ConsumersApiServiceImpl(
         sessionId: String,
         customerId: String?
     ): ConsumerSessionLookup {
-        val supportedVerificationTypes =
-            if (FeatureFlags.forceLinkWebAuth.isEnabled) {
-                listOf("__fake__")
-            } else {
-                ConsumersApiServiceImpl.supportedVerificationTypes.map { it.value }
-            }
         return executeRequestWithModelJsonParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
             stripeNetworkClient = stripeNetworkClient,
@@ -295,6 +289,7 @@ class ConsumersApiServiceImpl(
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
+                    "supported_verification_types" to supportedVerificationTypes
                 ),
             ),
             responseJsonParser = ConsumerSessionRefreshJsonParser()
@@ -541,8 +536,12 @@ class ConsumersApiServiceImpl(
     }
 
     internal companion object {
-        private val supportedVerificationTypes: List<VerificationType> =
-            listOf(VerificationType.SMS)
+        private val supportedVerificationTypes: List<String>
+            get() = if (FeatureFlags.forceLinkWebAuth.isEnabled) {
+                listOf("__fake__")
+            } else {
+                listOf(VerificationType.SMS.value)
+            }
 
         /**
          * @return `https://api.stripe.com/v1/consumers/accounts/sign_up`

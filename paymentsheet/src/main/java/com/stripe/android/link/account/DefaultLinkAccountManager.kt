@@ -4,7 +4,6 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
-import com.stripe.android.core.utils.flatMapCatching
 import com.stripe.android.link.ConsumerState
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason
@@ -471,20 +470,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 consumerSession = consumerSessionSignUp.consumerSession,
                 publishableKey = consumerSessionSignUp.publishableKey,
             )
-        }
-    }
-
-    // TODO: use `/refresh` instead.
-    override suspend fun lookupByAccount(linkAccount: LinkAccount): Result<LinkAccount> {
-        val accountResult =
-            lookupAccount(
-                linkAccount = null,
-                email = linkAccount.email,
-            ) ?: return Result.failure(NoLinkAccountFoundException())
-        return accountResult.flatMapCatching { account ->
-            account
-                ?.let { Result.success(it) }
-                ?: Result.failure(NoLinkAccountFoundException())
         }
     }
 

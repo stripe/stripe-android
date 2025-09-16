@@ -165,8 +165,9 @@ internal class VerificationViewModel @Inject constructor(
             val updatedLinkAccountResult = linkAccount
                 .takeIf { !it.viewedWebviewOpenUrl }
                 ?.let { Result.success(it) }
-                // TODO: use `/refresh` instead.
-                ?: linkAccountManager.lookupByAccount(linkAccount)
+                ?: linkAccountManager.refreshConsumer()
+                    // Get the updated account after refreshing the consumer session.
+                    .mapCatching { checkNotNull(linkAccountManager.linkAccountInfo.value.account) }
             updatedLinkAccountResult.fold(
                 onSuccess = { account ->
                     // If we don't have a URL here, something went wrong upstream.
