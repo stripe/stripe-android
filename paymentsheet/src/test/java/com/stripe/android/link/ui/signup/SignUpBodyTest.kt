@@ -145,5 +145,5 @@ internal class SignUpBodyTest {
     private fun onProgressIndicator() = composeTestRule.onNodeWithTag(ProgressIndicatorTestTag)
     private fun onPhoneField() = composeTestRule.onNodeWithText("Phone number")
     private fun onNameField() = composeTestRule.onNodeWithText("Full name")
-    private fun onSignUpButton() = composeTestRule.onNodeWithText("Agree and continue")
+    private fun onSignUpButton() = composeTestRule.onNodeWithText("Continue")
 }
