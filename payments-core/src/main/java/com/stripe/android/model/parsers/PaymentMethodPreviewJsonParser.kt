@@ -1,6 +1,5 @@
 package com.stripe.android.model.parsers
 
-import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.ConfirmationToken
@@ -10,7 +9,6 @@ import org.json.JSONObject
 /**
  * Parser for [ConfirmationToken.PaymentMethodPreview] JSON objects from the Stripe API.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal class PaymentMethodPreviewJsonParser : ModelJsonParser<ConfirmationToken.PaymentMethodPreview> {
     override fun parse(json: JSONObject): ConfirmationToken.PaymentMethodPreview? {
         val type = StripeJsonUtils.optString(json, FIELD_TYPE)?.let { code ->
