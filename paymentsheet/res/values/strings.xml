@@ -44,8 +44,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_confirm_payment_title">Confirm payment details</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Log in or sign up</string>
-  <!-- Title for a button that when tapped creates a Link account for the user. -->
-  <string name="stripe_link_sign_up">Agree and continue</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">Fast, secure, 1⁠-⁠click checkout</string>
   <!-- Title for the Link signup screen -->

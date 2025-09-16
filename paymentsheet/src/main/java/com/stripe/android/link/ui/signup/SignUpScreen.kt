@@ -45,6 +45,7 @@ import com.stripe.android.link.ui.ProgressIndicatorTestTag
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.ui.core.R as PaymentsUiCoreR
 import com.stripe.android.uicore.SectionStyle
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
@@ -143,7 +144,7 @@ internal fun SignUpBody(
         PrimaryButton(
             modifier = Modifier.padding(vertical = 16.dp),
             label = if (isSigningUp) {
-                stringResource(R.string.stripe_link_sign_up)
+                stringResource(PaymentsUiCoreR.string.stripe_continue_button_label)
             } else {
                 stringResource(R.string.stripe_link_log_in_or_sign_up)
             },
