@@ -101,7 +101,8 @@ internal class DocumentScanViewModel(
         return if (isFront) {
             R.string.stripe_front_of_driver_license_or_passport
         } else {
-            R.string.stripe_back_of_driver_license_or_passport
+            // Exclude passport from back-side copy
+            R.string.stripe_back_of_dl
         }
     }
 
@@ -110,7 +111,8 @@ internal class DocumentScanViewModel(
         return if (isFront) {
             R.string.stripe_front_of_passport_or_id
         } else {
-            R.string.stripe_back_of_passport_or_id
+            // Exclude passport from back-side copy
+            R.string.stripe_back_of_id_document
         }
     }
 
@@ -119,7 +121,8 @@ internal class DocumentScanViewModel(
         return if (isFront) {
             R.string.stripe_front_of_all_id_types
         } else {
-            R.string.stripe_back_of_all_id_types
+            // Exclude passport from back-side copy
+            R.string.stripe_back_of_driver_license_or_id
         }
     }
 
@@ -133,12 +136,9 @@ internal class DocumentScanViewModel(
     }
 
     // Helper for passport only
-    private fun getPassportStringRes(isFront: Boolean): Int {
-        return if (isFront) {
-            R.string.stripe_front_of_passport
-        } else {
-            R.string.stripe_back_of_passport
-        }
+    private fun getPassportStringRes(): Int {
+        // Passports don't have a back side — always use the front title
+        return R.string.stripe_front_of_passport
     }
 
     // Helper for id_card only
@@ -169,7 +169,7 @@ internal class DocumentScanViewModel(
             listOf("id_card", "passport") -> getPassportOrIdStringRes(isFront)
             listOf("driving_license", "id_card", "passport") -> getAllIdTypesStringRes(isFront)
             listOf("driving_license") -> getDriverLicenseStringRes(isFront)
-            listOf("passport") -> getPassportStringRes(isFront)
+            listOf("passport") -> getPassportStringRes()
             listOf("id_card") -> getIdDocumentStringRes(isFront)
             else -> getFallbackIdDocumentStringRes(isFront)
         }
@@ -210,7 +210,8 @@ internal class DocumentScanViewModel(
         return if (isFront) {
             R.string.stripe_position_driver_license_or_passport
         } else {
-            R.string.stripe_flip_driver_license_or_passport
+            // Exclude passport from back-side copy
+            R.string.stripe_position_dl_back
         }
     }
 
@@ -219,7 +220,8 @@ internal class DocumentScanViewModel(
         return if (isFront) {
             R.string.stripe_position_passport_or_id
         } else {
-            R.string.stripe_flip_passport_or_id
+            // Exclude passport from back-side copy; use generic government ID back instruction
+            R.string.stripe_flip_id_document
         }
     }
 
@@ -228,7 +230,8 @@ internal class DocumentScanViewModel(
         return if (isFront) {
             R.string.stripe_position_all_id_types
         } else {
-            R.string.stripe_flip_all_id_types
+            // Exclude passport from back-side copy
+            R.string.stripe_flip_driver_license_or_id
         }
     }
 
