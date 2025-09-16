@@ -1,6 +1,8 @@
 package com.stripe.android.crypto.onramp
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
+import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenResponse
 import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
@@ -44,11 +46,16 @@ import org.robolectric.RuntimeEnvironment
 class OnrampInteractorTest {
     private val linkController: LinkController = mock()
     private val cryptoApiRepository: CryptoApiRepository = mock()
+    private val testAnalyticsService = TestOnrampAnalyticsService()
+    private val analyticsServiceFactory: OnrampAnalyticsService.Factory = mock {
+        on { create(any()) } doReturn testAnalyticsService
+    }
 
     private val interactor: OnrampInteractor = OnrampInteractor(
         application = RuntimeEnvironment.getApplication(),
         linkController = linkController,
-        cryptoApiRepository = cryptoApiRepository
+        cryptoApiRepository = cryptoApiRepository,
+        analyticsServiceFactory = analyticsServiceFactory
     )
 
     @Test
@@ -76,6 +83,8 @@ class OnrampInteractorTest {
 
         whenever(linkController.lookupConsumer(any())).thenReturn(successResult)
 
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
         val result = interactor.hasLinkAccount("test@email.com")
 
         assert(result is OnrampHasLinkAccountResult.Completed)
@@ -83,6 +92,10 @@ class OnrampInteractorTest {
         val completed = result as OnrampHasLinkAccountResult.Completed
         assertThat(completed.hasLinkAccount).isTrue()
         verify(linkController).lookupConsumer("test@email.com")
+
+        testAnalyticsService.assertContainsEvent(
+            OnrampAnalyticsEvent.LinkAccountLookupCompleted(hasLinkAccount = true)
+        )
     }
 
     @Test
@@ -94,6 +107,9 @@ class OnrampInteractorTest {
         val permissionsResult = CryptoCustomerResponse(id = "customer_123")
         whenever(cryptoApiRepository.grantPartnerMerchantPermissions(any()))
             .thenReturn(Result.success(permissionsResult))
+
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
         val result = interactor.registerLinkUser(
             LinkUserInfo(
                 email = "email",
@@ -104,15 +120,22 @@ class OnrampInteractorTest {
         )
         assert(result is OnrampRegisterLinkUserResult.Completed)
         verify(linkController).registerConsumer("email", "phone", "US", "Test User")
+
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.LinkRegistrationCompleted)
     }
 
     @Test
     fun testUpdatePhoneNumberIsSuccessful() = runTest {
         whenever(linkController.updatePhoneNumber(any())).thenReturn(LinkController.UpdatePhoneNumberResult.Success)
+
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
         val result = interactor.updatePhoneNumber("+1234567890")
 
         assert(result is OnrampUpdatePhoneNumberResult.Completed)
         verify(linkController).updatePhoneNumber("+1234567890")
+
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.LinkPhoneNumberUpdated)
     }
 
     @Test
@@ -121,12 +144,18 @@ class OnrampInteractorTest {
         whenever(cryptoApiRepository.setWalletAddress(any(), any(), any()))
             .thenReturn(Result.success(Unit))
 
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
         val result = interactor.registerWalletAddress(
             walletAddress = "0x1234567890abcdef",
             network = CryptoNetwork.Ethereum
         )
 
         assert(result is OnrampRegisterWalletAddressResult.Completed)
+
+        testAnalyticsService.assertContainsEvent(
+            OnrampAnalyticsEvent.WalletRegistered(CryptoNetwork.Ethereum)
+        )
     }
 
     @Test
@@ -134,6 +163,9 @@ class OnrampInteractorTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
         whenever(cryptoApiRepository.collectKycData(any(), any()))
             .thenReturn(Result.success(Unit))
+
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
         val kycInfo = KycInfo(
             firstName = "Test",
             lastName = "User",
@@ -143,6 +175,8 @@ class OnrampInteractorTest {
         )
         val result = interactor.attachKycInfo(kycInfo)
         assert(result is OnrampAttachKycInfoResult.Completed)
+
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.KycInfoSubmitted)
     }
 
     @Test
@@ -155,8 +189,13 @@ class OnrampInteractorTest {
         )
         whenever(cryptoApiRepository.startIdentityVerification(any()))
             .thenReturn(Result.success(response))
+
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
         val result = interactor.startIdentityVerification()
         assert(result is OnrampStartVerificationResult.Completed)
+
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.IdentityVerificationStarted)
     }
 
     @Test
@@ -183,6 +222,8 @@ class OnrampInteractorTest {
 
         val result = interactor.createCryptoPaymentToken()
         assert(result is OnrampCreateCryptoPaymentTokenResult.Completed)
+
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.CryptoPaymentTokenCreated(null))
     }
 
     @Test
@@ -190,8 +231,12 @@ class OnrampInteractorTest {
         val mockLogOutSuccess = mock<LinkController.LogOutResult.Success>()
         whenever(linkController.logOut()).thenReturn(mockLogOutSuccess)
 
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
         val result = interactor.logOut()
         assert(result is OnrampLogOutResult.Completed)
+
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.LinkLogout)
     }
 
     @Test
@@ -201,8 +246,14 @@ class OnrampInteractorTest {
         whenever(cryptoApiRepository.grantPartnerMerchantPermissions(any()))
             .thenReturn(Result.success(permissionsResult))
 
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
         val result = interactor.handleAuthenticationResult(LinkController.AuthenticationResult.Success)
         assert(result is OnrampAuthenticateResult.Completed)
+
+        testAnalyticsService.assertContainsEvent(
+            OnrampAnalyticsEvent.LinkUserAuthenticationCompleted
+        )
     }
 
     @Test
@@ -212,21 +263,31 @@ class OnrampInteractorTest {
         whenever(cryptoApiRepository.grantPartnerMerchantPermissions(any()))
             .thenReturn(Result.success(permissionsResult))
 
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
         val result = interactor.handleAuthorizeResult(LinkController.AuthorizeResult.Consented)
         assert(result is OnrampAuthorizeResult.Consented)
+
+        testAnalyticsService.assertContainsEvent(
+            OnrampAnalyticsEvent.LinkAuthorizationCompleted(consented = true)
+        )
     }
 
     @Test
     fun testHandleIdentityVerificationResultCompleted() {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
         val result = interactor.handleIdentityVerificationResult(
             VerificationFlowResult.Completed
         )
 
         assert(result is OnrampVerifyIdentityResult.Completed)
+
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.IdentityVerificationCompleted)
     }
 
     @Test
-    fun testHandleSelectPaymentResultSuccess() {
+    fun testHandlePresentPaymentMethodsResultSuccess() {
         val context = RuntimeEnvironment.getApplication()
         val paymentMethodPreview = LinkController.PaymentMethodPreview(
             iconRes = 1,
@@ -241,11 +302,15 @@ class OnrampInteractorTest {
         )
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockState))
 
-        val result = interactor.handleSelectPaymentResult(
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        val result = interactor.handlePresentPaymentMethodsResult(
             LinkController.PresentPaymentMethodsResult.Success,
             context
         )
         assert(result is OnrampCollectPaymentMethodResult.Completed)
+
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.CollectPaymentMethodCompleted(null))
     }
 
     private fun mockLinkAccount(): LinkController.LinkAccount = LinkController.LinkAccount(
@@ -255,10 +320,44 @@ class OnrampInteractorTest {
         consumerSessionClientSecret = "secret_123"
     )
 
+    @Test
+    fun testOnAuthorize() {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        interactor.onAuthorize()
+
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.LinkAuthorizationStarted)
+    }
+
+    @Test
+    fun testOnAuthenticateUser() {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        interactor.onAuthenticateUser()
+
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.LinkUserAuthenticationStarted)
+    }
+
+    @Test
+    fun testOnHandleNextActionError() = runTest {
+        val error = RuntimeException("Payment failed")
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        interactor.onHandleNextActionError(error)
+
+        testAnalyticsService.assertContainsEvent(
+            OnrampAnalyticsEvent.ErrorOccurred(
+                operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.PerformCheckout,
+                error = error
+            )
+        )
+    }
+
     private fun mockLinkStateWithAccount(): LinkController.State = LinkController.State(
         internalLinkAccount = mockLinkAccount(),
         merchantLogoUrl = null,
         selectedPaymentMethodPreview = null,
-        createdPaymentMethod = null
+        createdPaymentMethod = null,
+        elementsSessionId = "test-elements-session-id"
     )
 }
