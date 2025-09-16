@@ -1,4 +1,4 @@
-package com.stripe.android.messagingelement
+package com.stripe.android.paymentmethodmessaging.view.messagingelement
 
 //import dagger.Subcomponent
 //

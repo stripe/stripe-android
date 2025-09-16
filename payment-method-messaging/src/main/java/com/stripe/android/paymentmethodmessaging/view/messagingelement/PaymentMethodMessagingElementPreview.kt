@@ -1,4 +1,4 @@
-package com.stripe.android.messagingelement
+package com.stripe.android.paymentmethodmessaging.view.messagingelement
 
 @RequiresOptIn(
     level = RequiresOptIn.Level.ERROR,

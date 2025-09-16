@@ -1,4 +1,4 @@
-package com.stripe.android.messagingelement
+package com.stripe.android.paymentmethodmessaging.view.messagingelement
 
 import com.stripe.android.networking.StripeApiRepository
 import javax.inject.Inject

@@ -1,4 +1,4 @@
-package com.stripe.android.messagingelement
+package com.stripe.android.paymentmethodmessaging.view.messagingelement
 
 import androidx.compose.material.Button
 import androidx.compose.material.Text
