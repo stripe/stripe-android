@@ -1,6 +1,7 @@
 package com.stripe.android.crypto.onramp.analytics
 
 import android.content.Context
+import com.stripe.android.common.di.MOBILE_SESSION_ID
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestV2Executor
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory
@@ -9,6 +10,8 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -27,6 +30,7 @@ internal class OnrampAnalyticsServiceImpl @AssistedInject constructor(
     @Assisted override val elementsSessionId: String,
     private val requestExecutor: AnalyticsRequestV2Executor,
     @IOContext private val workContext: CoroutineContext,
+    @Named(MOBILE_SESSION_ID) private val mobileSessionIdProvider: Provider<String>,
 ) : OnrampAnalyticsService {
 
     private val requestFactory = AnalyticsRequestV2Factory(
@@ -40,7 +44,8 @@ internal class OnrampAnalyticsServiceImpl @AssistedInject constructor(
             val request = requestFactory.createRequest(
                 eventName = event.eventName,
                 additionalParams = buildMap {
-                    put("elements_session_id", elementsSessionId)
+                    put("session_id", elementsSessionId)
+                    put("mobile_session_id", mobileSessionIdProvider.get())
                     event.params?.let { putAll(it) }
                 },
                 includeSDKParams = true,
