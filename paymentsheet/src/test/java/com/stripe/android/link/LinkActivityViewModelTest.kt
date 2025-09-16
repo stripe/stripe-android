@@ -763,7 +763,6 @@ internal class LinkActivityViewModelTest {
         }
     }
 
-
     @Test
     fun `moveToWeb with Authorization launch mode should fail`() = runTest {
         val vm = createViewModel(

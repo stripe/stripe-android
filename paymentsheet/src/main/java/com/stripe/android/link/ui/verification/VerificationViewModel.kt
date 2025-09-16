@@ -182,7 +182,7 @@ internal class VerificationViewModel @Inject constructor(
                     linkAccountHolder.set(
                         LinkAccountUpdate.Value(account = account.copy(viewedWebviewOpenUrl = true))
                     )
-                    webLinkAuthChannel.requests.tryEmit(account.webviewOpenUrl)
+                    webLinkAuthChannel.requests.emit(account.webviewOpenUrl)
                 },
                 onFailure = { error ->
                     dismissWithResult(
