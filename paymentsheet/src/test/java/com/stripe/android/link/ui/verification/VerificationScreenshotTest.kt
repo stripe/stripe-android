@@ -210,6 +210,46 @@ internal class VerificationScreenshotTest(
                         )
                     )
                 ),
+                TestCase(
+                    name = "VerificationScreenProcessingWebAuth",
+                    content = TestCase.Content(
+                        otpElement = otpSpecWithContent(content = ""),
+                        state = VerificationViewState(
+                            isProcessingWebAuth = true,
+                            isDialog = false,
+                            // Other fields shouldn't matter.
+                            requestFocus = false,
+                            redactedPhoneNumber = "(•••) ••• ••91",
+                            email = "test@test.com",
+                            isProcessing = false,
+                            errorMessage = null,
+                            isSendingNewCode = false,
+                            didSendNewCode = false,
+                            defaultPayment = null,
+                            allowLogout = true,
+                        )
+                    )
+                ),
+                TestCase(
+                    name = "VerificationDialogProcessingWebAuth",
+                    content = TestCase.Content(
+                        otpElement = otpSpecWithContent(content = ""),
+                        state = VerificationViewState(
+                            isProcessingWebAuth = true,
+                            isDialog = true,
+                            // Other fields shouldn't matter.
+                            requestFocus = false,
+                            redactedPhoneNumber = "(•••) ••• ••91",
+                            email = "test@test.com",
+                            isProcessing = false,
+                            errorMessage = null,
+                            isSendingNewCode = false,
+                            didSendNewCode = false,
+                            defaultPayment = null,
+                            allowLogout = true,
+                        )
+                    )
+                ),
             )
         }
 
