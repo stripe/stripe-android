@@ -13,10 +13,10 @@ import kotlinx.parcelize.Parcelize
  * and [Customer Acceptance](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-mandate_data-customer_acceptance)
  * in the Stripe API reference.
  */
+@Poko
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-// TODO(cttsai-stripe): MOBILESDK-4044 should convert this data class to @Poko class in next major release
-data class MandateData internal constructor(
+class MandateData internal constructor(
     val customerAcceptance: CustomerAcceptance
 ) : StripeModel {
 

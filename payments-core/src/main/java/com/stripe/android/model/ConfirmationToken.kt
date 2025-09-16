@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -18,10 +19,10 @@ import kotlinx.parcelize.Parcelize
  *
  * Related guides: [Confirmation Tokens](https://stripe.com/docs/api/confirmation_tokens)
  */
+@Poko
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-// TODO(cttsai-stripe): MOBILESDK-4044 should convert this data class to @Poko class in next major release
-data class ConfirmationToken internal constructor(
+class ConfirmationToken internal constructor(
     /**
      * Unique identifier for the object.
      */
@@ -85,10 +86,10 @@ data class ConfirmationToken internal constructor(
      * Preview of the payment method data collected from Elements.
      * This represents the transactional checkout state, not a reusable PaymentMethod object.
      */
+    @Poko
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    // TODO(cttsai-stripe): MOBILESDK-4044 should convert this data class to @Poko class in next major release
-    data class PaymentMethodPreview internal constructor(
+    class PaymentMethodPreview internal constructor(
         /**
          *  This field indicates whether this payment method can be shown again to its customer in a checkout flow.
          *  Stripe products such as Checkout and Elements use this field to determine
