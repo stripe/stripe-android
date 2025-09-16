@@ -26,8 +26,6 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.shadows.ShadowSystemClock
-import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -77,7 +75,6 @@ internal class DefaultHCaptchaServiceTest {
     fun `performPassiveHCaptcha returns success when HCaptcha succeeds`() = runTest {
         TestContext.test {
             hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha()
-            ShadowSystemClock.advanceBy(15, TimeUnit.MILLISECONDS)
 
             val result = service.performPassiveHCaptcha(
                 activity,
@@ -108,7 +105,6 @@ internal class DefaultHCaptchaServiceTest {
         TestContext.test {
             val exception = HCaptchaException(HCaptchaError.NETWORK_ERROR)
             hCaptchaProvider.hCaptchaHandler = SetupFailedHCaptcha(exception)
-            ShadowSystemClock.advanceBy(10, TimeUnit.MILLISECONDS)
 
             val result = service.performPassiveHCaptcha(
                 activity,
@@ -190,7 +186,6 @@ internal class DefaultHCaptchaServiceTest {
         TestContext.test {
             val expectedException = RuntimeException("Test exception")
             hCaptchaProvider.hCaptchaHandler = SetupExceptionDuringSetup(expectedException)
-            ShadowSystemClock.advanceBy(5, TimeUnit.MILLISECONDS)
 
             val result = service.performPassiveHCaptcha(
                 activity,
@@ -352,7 +347,6 @@ internal class DefaultHCaptchaServiceTest {
         TestContext.test {
             val expectedException = HCaptchaException(HCaptchaError.NETWORK_ERROR)
             hCaptchaProvider.hCaptchaHandler = SetupFailedHCaptcha(expectedException)
-            ShadowSystemClock.advanceBy(15, TimeUnit.MILLISECONDS)
 
             service.warmUp(
                 activity,

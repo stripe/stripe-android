@@ -29,7 +29,7 @@ internal class DefaultCaptchaEventsReporter @Inject constructor(
         val duration = durationProvider.end(DurationProvider.Key.Captcha)
         fireEvent(
             event = CaptchaAnalyticsEvent.Success(siteKey),
-            additionalParams = durationInSecondsFromStart(duration)
+            additionalParams = durationInMsFromStart(duration)
         )
     }
 
@@ -47,7 +47,7 @@ internal class DefaultCaptchaEventsReporter @Inject constructor(
 
         fireEvent(
             event = CaptchaAnalyticsEvent.Error(error, siteKey),
-            additionalParams = durationInSecondsFromStart(duration)
+            additionalParams = durationInMsFromStart(duration)
         )
     }
 
@@ -59,7 +59,7 @@ internal class DefaultCaptchaEventsReporter @Inject constructor(
         val duration = durationProvider.end(DurationProvider.Key.CaptchaAttach)
         fireEvent(
             event = CaptchaAnalyticsEvent.Attach(isReady, siteKey),
-            additionalParams = durationInSecondsFromStart(duration)
+            additionalParams = durationInMsFromStart(duration)
         )
     }
 
@@ -75,7 +75,7 @@ internal class DefaultCaptchaEventsReporter @Inject constructor(
         )
     }
 
-    private fun durationInSecondsFromStart(duration: Duration?): Map<String, Float> {
+    private fun durationInMsFromStart(duration: Duration?): Map<String, Float> {
         return duration?.let {
             mapOf("duration" to it.toDouble(DurationUnit.MILLISECONDS).toFloat())
         } ?: emptyMap()
