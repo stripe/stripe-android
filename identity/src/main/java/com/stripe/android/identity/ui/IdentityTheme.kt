@@ -53,8 +53,7 @@ internal fun IdentityTheme(content: @Composable () -> Unit) {
 }
 
 /**
- * Extracts theme parameters from the hosting app's context with proper fallbacks.
- * Reuses the theme detection logic from payments-core's AppCompatOrMdcTheme pattern.
+ * Extracts theme parameters from the hosting app's context
  */
 @Composable
 private fun extractThemeParameters(): ThemeParameters {
