@@ -82,16 +82,20 @@ internal class DefaultHCaptchaServiceTest {
                 rqData = null
             )
 
-            assertThat(result).isInstanceOf(HCaptchaService.Result.Success::class.java)
-            assertThat((result as HCaptchaService.Result.Success).token).isEqualTo("token")
-
-            // Verify analytics calls in order
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.AttachStart)
             assertThat(captchaEventsReporter.awaitCall())
                 .isEqualTo(FakeCaptchaEventsReporter.Call.Init(TEST_SITE_KEY))
             assertThat(captchaEventsReporter.awaitCall())
                 .isEqualTo(FakeCaptchaEventsReporter.Call.Execute(TEST_SITE_KEY))
             assertThat(captchaEventsReporter.awaitCall())
                 .isEqualTo(FakeCaptchaEventsReporter.Call.Success(TEST_SITE_KEY))
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.AttachEnd(isReady = false, TEST_SITE_KEY))
+
+            assertThat(result).isInstanceOf(HCaptchaService.Result.Success::class.java)
+            assertThat((result as HCaptchaService.Result.Success).token).isEqualTo("token")
+
             captchaEventsReporter.ensureAllEventsConsumed()
         }
     }
@@ -108,16 +112,20 @@ internal class DefaultHCaptchaServiceTest {
                 rqData = null
             )
 
-            assertThat(result).isInstanceOf(HCaptchaService.Result.Failure::class.java)
-            assertThat((result as HCaptchaService.Result.Failure).error).isEqualTo(exception)
-
-            // Verify analytics calls in order
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.AttachStart)
             assertThat(captchaEventsReporter.awaitCall())
                 .isEqualTo(FakeCaptchaEventsReporter.Call.Init(TEST_SITE_KEY))
             assertThat(captchaEventsReporter.awaitCall())
                 .isEqualTo(FakeCaptchaEventsReporter.Call.Execute(TEST_SITE_KEY))
             assertThat(captchaEventsReporter.awaitCall())
                 .isEqualTo(FakeCaptchaEventsReporter.Call.Error(exception, TEST_SITE_KEY))
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.AttachEnd(isReady = false, TEST_SITE_KEY))
+
+            assertThat(result).isInstanceOf(HCaptchaService.Result.Failure::class.java)
+            assertThat((result as HCaptchaService.Result.Failure).error).isEqualTo(exception)
+
             captchaEventsReporter.ensureAllEventsConsumed()
         }
     }
@@ -185,15 +193,19 @@ internal class DefaultHCaptchaServiceTest {
                 rqData = null
             )
 
-            assertThat(result).isInstanceOf(HCaptchaService.Result.Failure::class.java)
-            assertThat((result as HCaptchaService.Result.Failure).error).isEqualTo(expectedException)
-            verify(hCaptchaProvider.awaitCall(), atLeastOnce()).reset()
-
-            // Verify analytics calls - setup failure happens before execute
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.AttachStart)
             assertThat(captchaEventsReporter.awaitCall())
                 .isEqualTo(FakeCaptchaEventsReporter.Call.Init(TEST_SITE_KEY))
             assertThat(captchaEventsReporter.awaitCall())
                 .isEqualTo(FakeCaptchaEventsReporter.Call.Error(expectedException, TEST_SITE_KEY))
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.AttachEnd(isReady = false, TEST_SITE_KEY))
+
+            assertThat(result).isInstanceOf(HCaptchaService.Result.Failure::class.java)
+            assertThat((result as HCaptchaService.Result.Failure).error).isEqualTo(expectedException)
+            verify(hCaptchaProvider.awaitCall(), atLeastOnce()).reset()
+
             captchaEventsReporter.ensureAllEventsConsumed()
         }
     }
@@ -305,13 +317,28 @@ internal class DefaultHCaptchaServiceTest {
 
             hCaptchaProvider.awaitCall()
 
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.Init(TEST_SITE_KEY))
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.Execute(TEST_SITE_KEY))
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.Success(TEST_SITE_KEY))
+
             val result = service.performPassiveHCaptcha(
                 activity,
                 siteKey = TEST_SITE_KEY,
                 rqData = TEST_RQ_DATA
             )
+
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.AttachStart)
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.AttachEnd(isReady = true, TEST_SITE_KEY))
+
             assertThat(result).isInstanceOf(HCaptchaService.Result.Success::class.java)
             assertThat((result as HCaptchaService.Result.Success).token).isEqualTo(expectedToken)
+
+            captchaEventsReporter.ensureAllEventsConsumed()
         }
     }
 
@@ -329,14 +356,27 @@ internal class DefaultHCaptchaServiceTest {
 
             hCaptchaProvider.awaitCall()
 
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.Init(TEST_SITE_KEY))
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.Execute(TEST_SITE_KEY))
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.Error(expectedException, TEST_SITE_KEY))
+
             val result = service.performPassiveHCaptcha(
                 activity,
                 siteKey = TEST_SITE_KEY,
                 rqData = null
             )
 
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.AttachStart)
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.AttachEnd(isReady = true, TEST_SITE_KEY))
+
             assertThat(result).isInstanceOf(HCaptchaService.Result.Failure::class.java)
             assertThat((result as HCaptchaService.Result.Failure).error).isEqualTo(expectedException)
+            captchaEventsReporter.ensureAllEventsConsumed()
         }
     }
 
@@ -542,6 +582,14 @@ internal class DefaultHCaptchaServiceTest {
             calls.add(Call.Error(error, siteKey))
         }
 
+        override fun attachStart() {
+            calls.add(Call.AttachStart)
+        }
+
+        override fun attachEnd(siteKey: String, isReady: Boolean) {
+            calls.add(Call.AttachEnd(isReady, siteKey))
+        }
+
         suspend fun awaitCall(): Call = calls.awaitItem()
 
         fun ensureAllEventsConsumed() {
@@ -552,9 +600,19 @@ internal class DefaultHCaptchaServiceTest {
             val siteKey: String
 
             data class Init(override val siteKey: String) : Call
+
             data class Execute(override val siteKey: String) : Call
+
             data class Success(override val siteKey: String) : Call
+
             data class Error(val error: Throwable?, override val siteKey: String) : Call
+
+            data object AttachStart : Call {
+                override val siteKey: String
+                    get() = ""
+            }
+
+            data class AttachEnd(val isReady: Boolean, override val siteKey: String) : Call
         }
     }
 
