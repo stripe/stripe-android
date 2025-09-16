@@ -20,7 +20,7 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-// TODO(cttsai-stripe): should convert this data class to @Poko class in next major release
+// TODO(cttsai-stripe): MOBILESDK-4044 should convert this data class to @Poko class in next major release
 data class ConfirmationToken internal constructor(
     /**
      * Unique identifier for the object.
@@ -89,7 +89,7 @@ data class ConfirmationToken internal constructor(
      */
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    // TODO(cttsai-stripe): should convert this data class to @Poko class in next major release
+    // TODO(cttsai-stripe): MOBILESDK-4044 should convert this data class to @Poko class in next major release
     data class PaymentMethodPreview internal constructor(
         /**
          *  This field indicates whether this payment method can be shown again to its customer in a checkout flow.

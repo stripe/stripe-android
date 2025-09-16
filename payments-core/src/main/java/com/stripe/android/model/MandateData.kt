@@ -15,7 +15,7 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-// TODO(cttsai-stripe): should convert this data class to @Poko class in next major release
+// TODO(cttsai-stripe): MOBILESDK-4044 should convert this data class to @Poko class in next major release
 data class MandateData internal constructor(
     val customerAcceptance: CustomerAcceptance
 ) : StripeModel {
