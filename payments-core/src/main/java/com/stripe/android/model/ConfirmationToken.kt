@@ -117,6 +117,6 @@ data class ConfirmationToken internal constructor(
          */
         @JvmField val type: PaymentMethod.Type,
 
-        @JvmField val allResponseFields: String
+        @JvmField internal val allResponseFields: String
     ) : StripeModel
 }
