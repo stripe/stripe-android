@@ -150,14 +150,14 @@ internal class PassiveChallengeConfirmationDefinitionTest {
             passiveChallengeWarmer = fakePassiveChallengeWarmer
         )
 
-        var onResultCalled = false
-        val onResult: (PassiveChallengeActivityResult) -> Unit = { onResultCalled = true }
-
         DummyActivityResultCaller.test {
             definition.createLauncher(
                 activityResultCaller = activityResultCaller,
-                onResult = onResult,
+                onResult = {},
             )
+
+            awaitRegisterCall()
+            awaitNextRegisteredLauncher()
 
             val registerCall = fakePassiveChallengeWarmer.awaitRegisterCall()
             assertThat(registerCall.activityResultCaller).isEqualTo(activityResultCaller)

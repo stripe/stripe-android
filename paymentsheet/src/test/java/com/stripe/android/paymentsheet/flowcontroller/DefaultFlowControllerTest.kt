@@ -2366,15 +2366,16 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `on init, bootstrap is called`() = confirmationTest {
-        val viewModel = createViewModel()
-        val flowController = createFlowController(viewModel = viewModel)
-        flowController.configureExpectingSuccess()
-        viewModel.stateFlow.test {
-            val paymentMethodMetadata = awaitItem()?.paymentSheetState?.paymentMethodMetadata
-            assertThat(bootstrapTurbine.awaitItem().paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
+    fun `confirmation handler is bootstrapped after flowController is configured`() =
+        confirmationTest(consumeBootstrap = false) {
+            val viewModel = createViewModel()
+            val flowController = createFlowController(viewModel = viewModel)
+            flowController.configureExpectingSuccess()
+            viewModel.stateFlow.test {
+                val paymentMethodMetadata = awaitItem()?.paymentSheetState?.paymentMethodMetadata
+                assertThat(bootstrapTurbine.awaitItem().paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
+            }
         }
-    }
 
     private fun selectionSavedTest(
         customerRequestedSave: PaymentSelection.CustomerRequestedSave =
@@ -2472,6 +2473,7 @@ internal class DefaultFlowControllerTest {
     }
 
     private fun confirmationTest(
+        consumeBootstrap: Boolean = true,
         block: suspend FakeConfirmationHandler.Scenario.(scope: TestScope) -> Unit,
     ) = runTest {
         FakeConfirmationHandler.test(
@@ -2479,6 +2481,9 @@ internal class DefaultFlowControllerTest {
             initialState = ConfirmationHandler.State.Idle,
         ) {
             block(this@runTest)
+            if (consumeBootstrap) {
+                bootstrapTurbine.awaitItem()
+            }
         }
     }
 
@@ -2582,7 +2587,7 @@ internal class DefaultFlowControllerTest {
                 viewModel = viewModel,
                 paymentSelectionUpdater = { _, _, newState, _, _ -> newState.paymentSelection },
                 isLiveModeProvider = { false },
-                confirmationHandler = FakeConfirmationHandler(),
+                confirmationHandler = confirmationHandler ?: FakeConfirmationHandler(),
             ),
             errorReporter = errorReporter,
             initializedViaCompose = false,

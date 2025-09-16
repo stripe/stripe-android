@@ -79,10 +79,11 @@ internal class FormActivityConfirmationHandlerTest {
         val embeddedState = EmbeddedConfirmationStateFixtures.defaultState()
         val stateHelper = FakeFormActivityStateHelper()
         val onClickOverrideDelegate = OnClickDelegateOverrideImpl()
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
 
         val confirmationHelper = DefaultFormActivityConfirmationHelper(
             initializationMode = embeddedState.initializationMode,
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            paymentMethodMetadata = paymentMethodMetadata,
             confirmationHandler = confirmationHandler,
             configuration = embeddedState.configuration,
             selectionHolder = selectionHolder,
@@ -95,6 +96,8 @@ internal class FormActivityConfirmationHandlerTest {
         )
 
         assertThat(confirmationHandler.registerTurbine.awaitItem()).isNotNull()
+        assertThat(confirmationHandler.bootstrapTurbine.awaitItem().paymentMethodMetadata)
+            .isEqualTo(paymentMethodMetadata)
         assertThat(stateHelper.updateTurbine.awaitItem()).isInstanceOf<ConfirmationHandler.State.Idle>()
 
         Scenario(

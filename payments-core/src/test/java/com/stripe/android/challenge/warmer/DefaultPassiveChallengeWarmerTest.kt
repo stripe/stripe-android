@@ -86,7 +86,7 @@ internal class DefaultPassiveChallengeWarmerTest {
     }
 
     @Test
-    fun `unregister should clear launcher reference`() = runTest {
+    fun `unregister should unregister launcher and clear launcher reference`() = runTest {
         val mockActivityResultCaller = mock<ActivityResultCaller>()
         val mockLauncher = mock<ActivityResultLauncher<PassiveChallengeWarmerContract.Args>>()
 

@@ -100,17 +100,16 @@ internal class LinkActivityViewModelTest {
                 val confirmationHandler = FakeConfirmationHandler()
                 val vm = createViewModel(
                     autocompleteLauncher = launcher,
-                    confirmationHandler = confirmationHandler,
+                    confirmationHandler = confirmationHandler
                 )
 
                 val activityResultCaller = DummyActivityResultCaller.noOp()
-                val lifecycleOwner = object : LifecycleOwner {
-                    override val lifecycle: Lifecycle = mock()
-                }
 
                 vm.registerForActivityResult(
                     activityResultCaller = activityResultCaller,
-                    lifecycleOwner = lifecycleOwner
+                    lifecycleOwner = object : LifecycleOwner {
+                        override val lifecycle: Lifecycle = mock()
+                    }
                 )
 
                 vm.unregisterActivity()
@@ -120,7 +119,6 @@ internal class LinkActivityViewModelTest {
 
                 assertThat(autocompleteRegisterCall.activityResultCaller).isEqualTo(activityResultCaller)
                 assertThat(confirmationHandlerRegisterCall.activityResultCaller).isEqualTo(activityResultCaller)
-                assertThat(confirmationHandlerRegisterCall.lifecycleOwner).isEqualTo(lifecycleOwner)
             }
         }
 

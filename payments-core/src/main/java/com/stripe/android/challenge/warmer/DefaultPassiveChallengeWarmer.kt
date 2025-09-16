@@ -2,8 +2,6 @@ package com.stripe.android.challenge.warmer
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerContract
 import com.stripe.android.model.PassiveCaptchaParams
 

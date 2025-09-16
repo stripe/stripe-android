@@ -44,6 +44,9 @@ class PaymentElementConfirmationOrderTest {
             assertThat(awaitRegisterCall().contract).isInstanceOf<BacsMandateConfirmationContract>()
             assertThat(awaitNextRegisteredLauncher()).isInstanceOf<ActivityResultLauncher<*>>()
 
+            assertThat(awaitRegisterCall().contract).isInstanceOf<PassiveChallengeWarmerContract>()
+            assertThat(awaitNextRegisteredLauncher()).isInstanceOf<ActivityResultLauncher<*>>()
+
             assertThat(awaitRegisterCall().contract).isInstanceOf<PassiveChallengeActivityContract>()
             assertThat(awaitNextRegisteredLauncher()).isInstanceOf<ActivityResultLauncher<*>>()
 
@@ -63,9 +66,6 @@ class PaymentElementConfirmationOrderTest {
             assertThat(awaitNextRegisteredLauncher()).isInstanceOf<ActivityResultLauncher<*>>()
 
             assertThat(awaitRegisterCall().contract).isInstanceOf<ShopPayActivityContract>()
-            assertThat(awaitNextRegisteredLauncher()).isInstanceOf<ActivityResultLauncher<*>>()
-
-            assertThat(awaitRegisterCall().contract).isInstanceOf<PassiveChallengeWarmerContract>()
             assertThat(awaitNextRegisteredLauncher()).isInstanceOf<ActivityResultLauncher<*>>()
         }
     }

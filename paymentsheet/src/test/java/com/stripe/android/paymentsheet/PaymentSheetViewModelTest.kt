@@ -3595,33 +3595,18 @@ internal class PaymentSheetViewModelTest {
         }
 
     @Test
-    fun `On register for activity result, should bootstrap confirmation handler`() =
-        confirmationTest {
+    fun `confirmation handler is bootstrapped after payment sheet is loaded`() =
+        confirmationTest(consumeBootstrap = false) {
             val viewModel = createViewModel(
                 paymentElementLoader = FakePaymentElementLoader(
                     stripeIntent = PAYMENT_INTENT,
                 )
             )
 
-            DummyActivityResultCaller.test {
-                val lifecycleOwner = TestLifecycleOwner()
-
-                viewModel.registerForActivityResult(
-                    activityResultCaller = activityResultCaller,
-                    lifecycleOwner = lifecycleOwner,
-                )
-
-                // Skip the autocomplete and register calls
-                awaitRegisterCall()
-                awaitNextRegisteredLauncher()
-                registerTurbine.awaitItem()
-
-                // Verify bootstrap is called with passiveCaptchaParams
-                val bootstrapCall = bootstrapTurbine.awaitItem()
-                viewModel.paymentMethodMetadata.test {
-                    val paymentMethodMetadata = awaitItem()
-                    assertThat(paymentMethodMetadata).isEqualTo(bootstrapCall.paymentMethodMetadata)
-                }
+            val bootstrapCall = bootstrapTurbine.awaitItem()
+            viewModel.paymentMethodMetadata.test {
+                val paymentMethodMetadata = awaitItem()
+                assertThat(paymentMethodMetadata).isEqualTo(bootstrapCall.paymentMethodMetadata)
             }
         }
 
@@ -3630,6 +3615,7 @@ internal class PaymentSheetViewModelTest {
     ) = confirmationTest(
         hasReloadedFromProcessDeath = true,
         emitNullResults = false,
+        consumeBootstrap = false,
     ) {
         val stripeIntent = PaymentIntentFactory.create(status = StripeIntent.Status.Succeeded)
 
@@ -3982,6 +3968,7 @@ internal class PaymentSheetViewModelTest {
     private fun confirmationTest(
         hasReloadedFromProcessDeath: Boolean = false,
         emitNullResults: Boolean = true,
+        consumeBootstrap: Boolean = true,
         block: suspend FakeConfirmationHandler.Scenario.(scope: TestScope) -> Unit,
     ) = runTest {
         FakeConfirmationHandler.test(
@@ -3994,6 +3981,11 @@ internal class PaymentSheetViewModelTest {
             }
 
             block(this@runTest)
+
+            // Consume the bootstrap call that happens when ViewModel is created
+            if (consumeBootstrap) {
+                bootstrapTurbine.awaitItem()
+            }
         }
     }
 
