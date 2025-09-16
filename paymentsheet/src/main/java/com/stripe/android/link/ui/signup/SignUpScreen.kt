@@ -45,7 +45,6 @@ import com.stripe.android.link.ui.ProgressIndicatorTestTag
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.ui.core.R as PaymentsUiCoreR
 import com.stripe.android.uicore.SectionStyle
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
@@ -56,6 +55,7 @@ import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.delay
+import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 @Composable
 internal fun SignUpScreen(
