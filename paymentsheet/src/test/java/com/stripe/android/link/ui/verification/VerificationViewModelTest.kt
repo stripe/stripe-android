@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.verification
 
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
@@ -7,7 +8,9 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.WebLinkAuthChannel
 import com.stripe.android.link.account.FakeLinkAccountManager
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
@@ -16,6 +19,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.LinkAuthIntentInfo
 import com.stripe.android.model.ConsentUi
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.delay
@@ -66,7 +70,7 @@ internal class VerificationViewModelTest {
     fun `When confirmVerification succeeds then it navigates to Wallet`() =
         runTest(dispatcher) {
             val onVerificationSucceededCalls = arrayListOf<Unit>()
-            fun onVerificationSucceeded() {
+            fun onVerificationSucceeded(refresh: ConsumerSessionRefresh?) {
                 onVerificationSucceededCalls.add(Unit)
             }
 
@@ -357,21 +361,25 @@ internal class VerificationViewModelTest {
 
     private fun createViewModel(
         linkAccount: LinkAccount = TestFactory.LINK_ACCOUNT,
+        linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
         linkEventsReporter: LinkEventsReporter = FakeLinkEventsReporter(),
         logger: Logger = FakeLogger(),
         linkLaunchMode: LinkLaunchMode = LinkLaunchMode.PaymentMethodSelection(null),
-        onVerificationSucceeded: () -> Unit = { },
+        webLinkAuthChannel: WebLinkAuthChannel = WebLinkAuthChannel(),
+        onVerificationSucceeded: (refresh: ConsumerSessionRefresh?) -> Unit = {},
         onChangeEmailRequested: () -> Unit = {},
         onDismissClicked: () -> Unit = {},
         dismissWithResult: (LinkActivityResult) -> Unit = { },
     ): VerificationViewModel {
         return VerificationViewModel(
             linkAccount = linkAccount,
+            linkAccountHolder = linkAccountHolder,
             linkAccountManager = linkAccountManager,
             linkEventsReporter = linkEventsReporter,
             logger = logger,
             linkLaunchMode = linkLaunchMode,
+            webLinkAuthChannel = webLinkAuthChannel,
             isDialog = false,
             onVerificationSucceeded = onVerificationSucceeded,
             onChangeEmailRequested = onChangeEmailRequested,

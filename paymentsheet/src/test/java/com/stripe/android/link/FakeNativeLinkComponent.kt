@@ -3,7 +3,9 @@ package com.stripe.android.link
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.Logger
+import com.stripe.android.link.WebLinkAuthChannel
 import com.stripe.android.link.account.FakeLinkAccountManager
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
@@ -27,6 +29,7 @@ import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import org.mockito.kotlin.mock
 
 internal class FakeNativeLinkComponent(
+    override val linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
     override val linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
     override val configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
     override val linkEventsReporter: LinkEventsReporter = FakeLinkEventsReporter(),
@@ -47,5 +50,6 @@ internal class FakeNativeLinkComponent(
     override val autocompleteLauncher: AutocompleteLauncher = TestAutocompleteLauncher.noOp(),
     override val addPaymentMethodOptionsFactory: AddPaymentMethodOptions.Factory = mock(),
     override val oAuthConsentViewModelComponentFactory: OAuthConsentViewModelComponent.Factory = mock(),
+    override val webLinkAuthChannel: WebLinkAuthChannel = WebLinkAuthChannel(),
     override val passiveCaptchaParams: PassiveCaptchaParams? = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
 ) : NativeLinkComponent

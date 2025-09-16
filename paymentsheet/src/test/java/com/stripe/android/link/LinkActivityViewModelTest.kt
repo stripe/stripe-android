@@ -580,7 +580,7 @@ internal class LinkActivityViewModelTest {
             assertThat(awaitItem()).isEqualTo(ScreenState.VerificationDialog(TestFactory.LINK_ACCOUNT))
 
             linkAccountManager.setAccountStatus(AccountStatus.Verified(true, null))
-            vm.onVerificationSucceeded()
+            vm.onVerificationSucceeded(null)
             assertThat(awaitItem()).isInstanceOf(ScreenState.FullScreen::class.java)
         }
     }
@@ -763,71 +763,6 @@ internal class LinkActivityViewModelTest {
         }
     }
 
-    @Test
-    fun `handleWebAuthActivityResult marks account as viewed web auth URL on completion`() = runTest {
-        val linkAccountManager = FakeLinkAccountManager()
-        val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
-        linkAccountHolder.set(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
-        val viewModel = createViewModel(
-            linkAccountManager = linkAccountManager,
-            linkAccountHolder = linkAccountHolder
-        )
-
-        linkAccountManager.refreshConsumerResult = Result.success(
-            ConsumerSessionRefresh(TestFactory.CONSUMER_SESSION, null)
-        )
-
-        // Test that the completion flow doesn't emit a result (success path calls updateScreenState)
-        viewModel.result.test {
-            viewModel.handleWebAuthActivityResult(WebLinkAuthResult.Completed)
-            advanceUntilIdle()
-
-            // The completion case should not emit any result immediately
-            // (unlike cancellation/failure which emit results)
-            expectNoEvents()
-        }
-    }
-
-    @Test
-    fun `handleWebAuthActivityResult marks account as viewed web auth URL on cancellation`() = runTest {
-        val linkAccountManager = FakeLinkAccountManager()
-        val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
-        linkAccountHolder.set(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
-        val viewModel = createViewModel(
-            linkAccountManager = linkAccountManager,
-            linkAccountHolder = linkAccountHolder
-        )
-
-        viewModel.result.test {
-            viewModel.handleWebAuthActivityResult(WebLinkAuthResult.Canceled)
-
-            val result = awaitItem() as LinkActivityResult.Canceled
-            val updatedAccount = (result.linkAccountUpdate as LinkAccountUpdate.Value).account
-            assertThat(updatedAccount?.viewedWebviewOpenUrl).isTrue()
-        }
-    }
-
-    @Test
-    fun `handleWebAuthActivityResult marks account as viewed web auth URL on failure`() = runTest {
-        val linkAccountManager = FakeLinkAccountManager()
-        val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
-        linkAccountHolder.set(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
-        val viewModel = createViewModel(
-            linkAccountManager = linkAccountManager,
-            linkAccountHolder = linkAccountHolder
-        )
-
-        val error = RuntimeException("test error")
-
-        viewModel.result.test {
-            viewModel.handleWebAuthActivityResult(WebLinkAuthResult.Failure(error))
-
-            val result = awaitItem() as LinkActivityResult.Failed
-            val updatedAccount = (result.linkAccountUpdate as LinkAccountUpdate.Value).account
-            assertThat(updatedAccount?.viewedWebviewOpenUrl).isTrue()
-            assertThat(result.error).isEqualTo(error)
-        }
-    }
 
     @Test
     fun `moveToWeb with Authorization launch mode should fail`() = runTest {
