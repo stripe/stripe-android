@@ -129,7 +129,6 @@ internal interface FormActivityViewModelModule {
 
         @Provides
         @Singleton
-        @ViewModelScope
         fun providesFormActivityConfirmationHandlerRegistrar(
             confirmationHandler: ConfirmationHandler
         ): FormActivityConfirmationHandlerRegistrar {

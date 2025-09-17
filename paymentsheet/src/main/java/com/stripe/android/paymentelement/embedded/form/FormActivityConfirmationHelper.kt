@@ -34,7 +34,7 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
     lifecycleOwner: LifecycleOwner,
     activityResultCaller: ActivityResultCaller,
     @ViewModelScope private val coroutineScope: CoroutineScope,
-    @ViewModelScope private val formActivityConfirmationHandlerRegistrar: FormActivityConfirmationHandlerRegistrar
+    formActivityConfirmationHandlerRegistrar: FormActivityConfirmationHandlerRegistrar
 ) : FormActivityConfirmationHelper {
 
     init {
