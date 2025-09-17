@@ -17,7 +17,6 @@ internal class ConfirmationTokenJsonParser : ModelJsonParser<ConfirmationToken> 
             ?: return null
         val createdTimestamp = StripeJsonUtils.optLong(json, FIELD_CREATED)
             ?: return null
-
         return ConfirmationToken(
             id = id,
             created = createdTimestamp,
