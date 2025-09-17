@@ -8,6 +8,8 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.flatMapCatching
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAuthResult
@@ -21,6 +23,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.wallet.displayName
+import com.stripe.android.link.ui.wallet.makeFallbackCardName
 import com.stripe.android.link.utils.isLinkAuthorizationError
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -590,13 +593,51 @@ internal class LinkControllerInteractor @Inject constructor(
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed class PaymentIconDetails {
+sealed interface PaymentMethodPreviewDetails {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class Card(
+        val brand: CardBrand,
+        val funding: String,
+        val last4: String
+    ) : PaymentMethodPreviewDetails
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data class Card(val brand: CardBrand, val funding: String, val last4: String) : PaymentIconDetails()
+    data class BankAccount(
+        val bankIconCode: String?,
+        val bankName: String?,
+        val last4: String
+    ) : PaymentMethodPreviewDetails
+}
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data class BankAccount(val bankIconCode: String?, val bankName: String?, val last4: String) : PaymentIconDetails()
+internal fun PaymentMethodPreviewDetails.toPreview(
+    context: Context,
+): LinkController.PaymentMethodPreview {
+    val label = context.getString(com.stripe.android.R.string.stripe_link)
+    val drawableResourceId = getIconDrawableRes(this, context.isSystemDarkTheme())
+    val sublabel = buildString {
+        val name: ResolvableString
+        val last4: String
+        when (this@toPreview) {
+            is PaymentMethodPreviewDetails.Card -> {
+                name = makeFallbackCardName(funding, brand.displayName)
+                last4 = this@toPreview.last4
+            }
+            is PaymentMethodPreviewDetails.BankAccount -> {
+                name = bankName?.resolvableString
+                    ?: com.stripe.android.ui.core.R.string.stripe_payment_method_bank.resolvableString
+                last4 = this@toPreview.last4
+            }
+        }
+        append(name.resolve(context))
+        append(" •••• ")
+        append(last4)
+    }
+
+    return LinkController.PaymentMethodPreview(
+        iconRes = drawableResourceId,
+        label = label,
+        sublabel = sublabel,
+    )
 }
 
 internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
@@ -624,18 +665,18 @@ internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
 internal fun ConsumerPaymentDetails.PaymentDetails.getIconDrawableRes(isDarkTheme: Boolean): Int {
     return when (this) {
         is ConsumerPaymentDetails.BankAccount ->
-            getIconDrawableRes(PaymentIconDetails.BankAccount(bankIconCode, bankName, last4), isDarkTheme)
+            getIconDrawableRes(PaymentMethodPreviewDetails.BankAccount(bankIconCode, bankName, last4), isDarkTheme)
         is ConsumerPaymentDetails.Card ->
-            getIconDrawableRes(PaymentIconDetails.Card(brand, funding, last4), isDarkTheme)
+            getIconDrawableRes(PaymentMethodPreviewDetails.Card(brand, funding, last4), isDarkTheme)
         is ConsumerPaymentDetails.Passthrough ->
             getLinkIcon(iconOnly = true)
     }
 }
 
 @DrawableRes
-internal fun getIconDrawableRes(type: PaymentIconDetails, isDarkTheme: Boolean): Int {
+internal fun getIconDrawableRes(type: PaymentMethodPreviewDetails, isDarkTheme: Boolean): Int {
     return when (type) {
-        is PaymentIconDetails.BankAccount -> {
+        is PaymentMethodPreviewDetails.BankAccount -> {
             val fallbackIcon =
                 if (!isDarkTheme) {
                     R.drawable.stripe_link_bank_with_bg_day
@@ -655,7 +696,7 @@ internal fun getIconDrawableRes(type: PaymentIconDetails, isDarkTheme: Boolean):
                     fallbackIcon = fallbackIcon
                 )
         }
-        is PaymentIconDetails.Card ->
+        is PaymentMethodPreviewDetails.Card ->
             type.brand.getCardBrandIconForVerticalMode()
     }
 }

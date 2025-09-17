@@ -11,15 +11,11 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.configuration.ConfigurationDefaults
-import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.injection.DaggerLinkControllerComponent
 import com.stripe.android.link.injection.LinkControllerPresenterComponent
-import com.stripe.android.link.ui.wallet.makeFallbackCardName
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.uicore.isSystemDarkTheme
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
@@ -751,38 +747,11 @@ class LinkController @Inject internal constructor(
         companion object {
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @JvmStatic
-            fun createOnrampPreview(
+            fun create(
                 context: Context,
-                iconType: PaymentIconDetails
+                details: PaymentMethodPreviewDetails
             ): PaymentMethodPreview {
-                val label = context.getString(com.stripe.android.R.string.stripe_link)
-                val drawableResourceId = getIconDrawableRes(iconType, context.isSystemDarkTheme())
-                val sublabel = buildString {
-                    val name: ResolvableString
-                    val last4: String
-
-                    when (iconType) {
-                        is PaymentIconDetails.Card -> {
-                            name = makeFallbackCardName(iconType.funding, iconType.brand.displayName)
-                            last4 = iconType.last4
-                        }
-                        is PaymentIconDetails.BankAccount -> {
-                            name = iconType.bankName?.resolvableString
-                                ?: com.stripe.android.ui.core.R.string.stripe_payment_method_bank.resolvableString
-                            last4 = iconType.last4
-                        }
-                    }
-
-                    append(name.resolve(context))
-                    append(" •••• ")
-                    append(last4)
-                }
-
-                return PaymentMethodPreview(
-                    iconRes = drawableResourceId,
-                    label = label,
-                    sublabel = sublabel,
-                )
+                return details.toPreview(context)
             }
         }
     }
