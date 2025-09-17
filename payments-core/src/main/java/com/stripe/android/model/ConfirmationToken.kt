@@ -44,11 +44,6 @@ class ConfirmationToken internal constructor(
     @JvmField val liveMode: Boolean,
 
     /**
-     * Data used for generating a Mandate.
-     */
-    @JvmField val mandateData: MandateData?,
-
-    /**
      * ID of the PaymentIntent that this ConfirmationToken was used to confirm,
      * or null if this ConfirmationToken has not yet been used.
      */
