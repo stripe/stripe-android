@@ -21,4 +21,5 @@ internal data class VerificationViewState(
     val allowLogout: Boolean,
     val defaultPayment: DefaultPaymentUI?,
     val consentSection: ConsentUi.ConsentSection? = null,
+    val isProcessingWebAuth: Boolean = false,
 ) : Parcelable

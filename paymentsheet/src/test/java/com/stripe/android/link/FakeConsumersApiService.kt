@@ -6,6 +6,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.CustomEmailType
 import com.stripe.android.model.EmailSource
@@ -23,6 +24,10 @@ internal open class FakeConsumersApiService : ConsumersApiService {
     var mobileSignUpResult = Result.success(TestFactory.CONSUMER_SESSION_SIGN_UP)
     var lookupConsumerSessionResult = TestFactory.CONSUMER_SESSION_LOOKUP
     var mobileLookupConsumerSessionResult = TestFactory.CONSUMER_SESSION_LOOKUP
+    var refreshConsumerSessionResult = ConsumerSessionRefresh(
+        consumerSession = TestFactory.CONSUMER_SESSION,
+        linkAuthIntent = null
+    )
 
     val signUpCalls = arrayListOf<SignUpCall>()
     val mobileSignUpCalls = arrayListOf<SignUpCall>()
@@ -61,6 +66,7 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         requestSurface: String,
         sessionId: String,
         doNotLogConsumerFunnelEvent: Boolean,
+        supportedVerificationTypes: List<String>?,
         requestOptions: ApiRequest.Options,
         customerId: String?
     ): ConsumerSessionLookup {
@@ -83,6 +89,7 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         requestSurface: String,
         verificationToken: String,
         appId: String,
+        supportedVerificationTypes: List<String>?,
         requestOptions: ApiRequest.Options,
         sessionId: String,
         customerId: String?
@@ -183,6 +190,14 @@ internal open class FakeConsumersApiService : ConsumersApiService {
     ): Result<LinkAccountSession> {
         TODO("Not yet implemented")
     }
+
+    override suspend fun refreshConsumerSession(
+        appId: String,
+        consumerSessionClientSecret: String,
+        supportedVerificationTypes: List<String>?,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSessionRefresh = refreshConsumerSessionResult
 
     override suspend fun updatePhoneNumber(
         consumerSessionClientSecret: String,

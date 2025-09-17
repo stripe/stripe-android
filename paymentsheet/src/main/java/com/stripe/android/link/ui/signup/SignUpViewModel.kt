@@ -53,7 +53,8 @@ internal class SignUpViewModel @Inject constructor(
     private val navigateAndClearStack: (LinkScreen) -> Unit,
     private val moveToWeb: (Throwable) -> Unit,
     private val linkLaunchMode: LinkLaunchMode,
-    private val dismissWithResult: (LinkActivityResult) -> Unit
+    private val dismissWithResult: (LinkActivityResult) -> Unit,
+    private val verifyDuringSignUp: () -> Unit,
 ) : ViewModel() {
     private val useLinkConfigurationCustomerInfo =
         savedStateHandle.get<Boolean>(USE_LINK_CONFIGURATION_CUSTOMER_INFO) ?: true
@@ -233,10 +234,10 @@ internal class SignUpViewModel @Inject constructor(
         }
     }
 
-    private fun onAccountFetched(linkAccount: LinkAccount?) {
+    private fun onAccountFetched(linkAccount: LinkAccount) {
         val targetScreen = when {
-            linkAccount?.completedSignup == true -> LinkScreen.PaymentMethod
-            linkAccount?.isVerified == true -> LinkScreen.Wallet
+            linkAccount.completedSignup -> LinkScreen.PaymentMethod
+            linkAccount.isVerified -> LinkScreen.Wallet
             else -> LinkScreen.Verification
         }
 
@@ -248,6 +249,8 @@ internal class SignUpViewModel @Inject constructor(
                     selectedPayment = null,
                 )
             )
+        } else if (targetScreen == LinkScreen.Verification) {
+            verifyDuringSignUp()
         } else {
             navigateAndClearStack(targetScreen)
         }
@@ -312,7 +315,8 @@ internal class SignUpViewModel @Inject constructor(
                         navigateAndClearStack = navigateAndClearStack,
                         moveToWeb = moveToWeb,
                         linkLaunchMode = parentComponent.linkLaunchMode,
-                        dismissWithResult = dismissWithResult
+                        dismissWithResult = dismissWithResult,
+                        verifyDuringSignUp = parentComponent.viewModel::verifyDuringSignUp,
                     )
                 }
             }

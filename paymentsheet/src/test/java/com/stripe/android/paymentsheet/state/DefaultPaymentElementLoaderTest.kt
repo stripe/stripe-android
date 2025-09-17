@@ -762,7 +762,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Considers Link as needing verification if the account needs verification`() = runTest {
-        val loader = createPaymentElementLoader(linkAccountState = AccountStatus.NeedsVerification)
+        val loader = createPaymentElementLoader(linkAccountState = AccountStatus.NeedsVerification())
 
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
@@ -1083,7 +1083,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `Disables Link inline signup if user already has an unverified account`() = runTest {
         val loader = createPaymentElementLoader(
-            linkAccountState = AccountStatus.NeedsVerification,
+            linkAccountState = AccountStatus.NeedsVerification(),
         )
 
         val result = loader.load(
@@ -1117,7 +1117,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `Disables Link inline signup if there is an account error`() = runTest {
         val loader = createPaymentElementLoader(
-            linkAccountState = AccountStatus.Error,
+            linkAccountState = AccountStatus.Error(Exception()),
         )
 
         val result = loader.load(

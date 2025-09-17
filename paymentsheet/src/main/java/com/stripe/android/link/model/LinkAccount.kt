@@ -3,6 +3,7 @@ package com.stripe.android.link.model
 import android.os.Parcelable
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.DisplayablePaymentDetails
+import com.stripe.android.model.MobileFallbackWebviewParams
 import com.stripe.android.uicore.elements.convertPhoneNumberToE164
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
@@ -16,6 +17,7 @@ internal data class LinkAccount(
     val consumerPublishableKey: String? = null,
     val displayablePaymentDetails: DisplayablePaymentDetails? = null,
     val linkAuthIntentInfo: LinkAuthIntentInfo? = null,
+    val viewedWebviewOpenUrl: Boolean = false,
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -64,9 +66,19 @@ internal data class LinkAccount(
             AccountStatus.VerificationStarted
         }
         else -> {
-            AccountStatus.NeedsVerification
+            val params = consumerSession.mobileFallbackWebviewParams
+            AccountStatus.NeedsVerification(
+                webviewOpenUrl = params
+                    ?.webviewOpenUrl
+                    ?.takeIf {
+                        params.webViewRequirementType == MobileFallbackWebviewParams.WebviewRequirementType.Required
+                    }
+            )
         }
     }
+
+    @IgnoredOnParcel
+    val webviewOpenUrl: String? = consumerSession.mobileFallbackWebviewParams?.webviewOpenUrl
 
     private fun ConsumerSession.containsSMSSessionStarted() = verificationSessions.find {
         it.type == ConsumerSession.VerificationSession.SessionType.Sms &&

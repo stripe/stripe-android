@@ -10,13 +10,16 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.WebLinkAuthChannel
 import com.stripe.android.link.account.FakeLinkAccountManager
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
@@ -264,15 +267,17 @@ internal class VerificationScreenTest {
         dismissWithResult: (LinkActivityResult) -> Unit = {}
     ): VerificationViewModel {
         return VerificationViewModel(
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             linkAccountManager = linkAccountManager,
             linkEventsReporter = linkEventsReporter,
             logger = logger,
-            onDismissClicked = onDismissClicked,
-            onVerificationSucceeded = {},
-            onChangeEmailRequested = {},
-            linkAccount = TestFactory.LINK_ACCOUNT,
-            isDialog = isDialog,
             linkLaunchMode = linkLaunchMode,
+            webLinkAuthChannel = WebLinkAuthChannel(),
+            isDialog = isDialog,
+            onVerificationSucceeded = { _ -> },
+            onChangeEmailRequested = {},
+            onDismissClicked = onDismissClicked,
             dismissWithResult = dismissWithResult
         )
     }

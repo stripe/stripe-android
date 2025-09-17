@@ -14,6 +14,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.CustomEmailType
 import com.stripe.android.model.EmailSource
@@ -27,6 +28,7 @@ import com.stripe.android.model.parsers.AttachConsumerToLinkAccountSessionJsonPa
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionLookupJsonParser
+import com.stripe.android.model.parsers.ConsumerSessionRefreshJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionSignupJsonParser
 import com.stripe.android.model.parsers.LinkAccountSessionJsonParser
 import com.stripe.android.model.parsers.SharePaymentDetailsJsonParser
@@ -52,6 +54,7 @@ interface ConsumersApiService {
         requestSurface: String,
         sessionId: String,
         doNotLogConsumerFunnelEvent: Boolean,
+        supportedVerificationTypes: List<String>?,
         requestOptions: ApiRequest.Options,
         customerId: String?
     ): ConsumerSessionLookup
@@ -63,10 +66,19 @@ interface ConsumersApiService {
         requestSurface: String,
         verificationToken: String,
         appId: String,
+        supportedVerificationTypes: List<String>?,
         requestOptions: ApiRequest.Options,
         sessionId: String,
         customerId: String?
     ): ConsumerSessionLookup
+
+    suspend fun refreshConsumerSession(
+        appId: String,
+        consumerSessionClientSecret: String,
+        supportedVerificationTypes: List<String>?,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSessionRefresh
 
     suspend fun startConsumerVerification(
         consumerSessionClientSecret: String,
@@ -202,6 +214,7 @@ class ConsumersApiServiceImpl(
         requestSurface: String,
         sessionId: String,
         doNotLogConsumerFunnelEvent: Boolean,
+        supportedVerificationTypes: List<String>?,
         requestOptions: ApiRequest.Options,
         customerId: String?
     ): ConsumerSessionLookup {
@@ -238,6 +251,7 @@ class ConsumersApiServiceImpl(
         requestSurface: String,
         verificationToken: String,
         appId: String,
+        supportedVerificationTypes: List<String>?,
         requestOptions: ApiRequest.Options,
         sessionId: String,
         customerId: String?
@@ -256,10 +270,37 @@ class ConsumersApiServiceImpl(
                     "session_id" to sessionId,
                     "email_source" to emailSource?.backendValue,
                     "app_id" to appId,
-                    "customer_id" to customerId
+                    "customer_id" to customerId,
+                    "supported_verification_types" to supportedVerificationTypes
                 ).filterValues { it != null }
             ),
             responseJsonParser = ConsumerSessionLookupJsonParser()
+        )
+    }
+
+    override suspend fun refreshConsumerSession(
+        appId: String,
+        consumerSessionClientSecret: String,
+        supportedVerificationTypes: List<String>?,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSessionRefresh {
+        return executeRequestWithModelJsonParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createPost(
+                url = consumerSessionRefreshUrl,
+                options = requestOptions,
+                params = mapOf(
+                    "app_id" to appId,
+                    "request_surface" to requestSurface,
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    ),
+                    "supported_verification_types" to supportedVerificationTypes
+                ),
+            ),
+            responseJsonParser = ConsumerSessionRefreshJsonParser()
         )
     }
 
@@ -503,7 +544,6 @@ class ConsumersApiServiceImpl(
     }
 
     internal companion object {
-
         /**
          * @return `https://api.stripe.com/v1/consumers/accounts/sign_up`
          */
@@ -527,6 +567,12 @@ class ConsumersApiServiceImpl(
          */
         internal val mobileConsumerSessionLookupUrl: String =
             getApiUrl("consumers/mobile/sessions/lookup")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/sessions/refresh`
+         */
+        internal val consumerSessionRefreshUrl: String =
+            getApiUrl("consumers/sessions/refresh")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/sessions/start_verification`

@@ -15,6 +15,8 @@ import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.WebLinkActivityContract
+import com.stripe.android.link.WebLinkAuthChannel
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
@@ -51,6 +53,7 @@ internal annotation class NativeLinkScope
     ]
 )
 internal interface NativeLinkComponent {
+    val linkAccountHolder: LinkAccountHolder
     val linkAccountManager: LinkAccountManager
     val configuration: LinkConfiguration
     val passiveCaptchaParams: PassiveCaptchaParams?
@@ -69,6 +72,7 @@ internal interface NativeLinkComponent {
     val autocompleteLauncher: AutocompleteLauncher
     val addPaymentMethodOptionsFactory: AddPaymentMethodOptions.Factory
     val oAuthConsentViewModelComponentFactory: OAuthConsentViewModelComponent.Factory
+    val webLinkAuthChannel: WebLinkAuthChannel
 
     @Component.Builder
     interface Builder {

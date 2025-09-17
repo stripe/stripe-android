@@ -194,7 +194,7 @@ internal class OAuthConsentViewModelTest {
 
     @Test
     fun `consent pane data is correctly extracted from link account`() = runTest(dispatcher) {
-        val consentPane = createTestConsentPane()
+        val consentPane = TestFactory.CONSENT_PANE
 
         val linkAccountWithConsent = createLinkAccountWithConsent(consentPane)
         val viewModel = createViewModel(linkAccount = linkAccountWithConsent)
@@ -219,7 +219,7 @@ internal class OAuthConsentViewModelTest {
     }
 
     private fun createLinkAccountWithConsent(
-        consentPane: ConsentUi.ConsentPane? = createTestConsentPane()
+        consentPane: ConsentUi.ConsentPane? = TestFactory.CONSENT_PANE
     ): LinkAccount {
         val consumerSession = TestFactory.CONSUMER_SESSION
 
@@ -231,21 +231,4 @@ internal class OAuthConsentViewModelTest {
             )
         )
     }
-
-    private fun createTestConsentPane() = ConsentUi.ConsentPane(
-        title = "Test Consent",
-        scopesSection = ConsentUi.ConsentPane.ScopesSection(
-            header = "Test Header",
-            scopes = listOf(
-                ConsentUi.ConsentPane.ScopesSection.Scope(
-                    icon = ConsentUi.Icon(default = "test_icon"),
-                    header = "Test Scope",
-                    description = "Test scope description"
-                )
-            )
-        ),
-        disclaimer = "Test disclaimer",
-        denyButtonLabel = "Deny",
-        allowButtonLabel = "Allow"
-    )
 }

@@ -263,7 +263,8 @@ internal class SignUpScreenTest {
             dismissalCoordinator = dismissalCoordinator,
             moveToWeb = moveToWeb,
             linkLaunchMode = LinkLaunchMode.Full,
-            dismissWithResult = {}
+            dismissWithResult = {},
+            verifyDuringSignUp = {},
         )
     }
 

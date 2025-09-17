@@ -1,13 +1,17 @@
 package com.stripe.android.link.ui.verification
 
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.WebLinkAuthChannel
 import com.stripe.android.link.account.FakeLinkAccountManager
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
@@ -16,6 +20,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.LinkAuthIntentInfo
 import com.stripe.android.model.ConsentUi
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.delay
@@ -44,11 +49,12 @@ internal class VerificationViewModelTest {
             }
         }
 
-        createViewModel(
+        val vm = createViewModel(
             linkAccountManager = linkAccountManager
         )
 
         assertThat(linkAccountManager.callCount).isEqualTo(1)
+        assertThat(vm.viewState.value.isProcessingWebAuth).isFalse()
     }
 
     @Test
@@ -66,12 +72,8 @@ internal class VerificationViewModelTest {
     fun `When confirmVerification succeeds then it navigates to Wallet`() =
         runTest(dispatcher) {
             val onVerificationSucceededCalls = arrayListOf<Unit>()
-            fun onVerificationSucceeded() {
-                onVerificationSucceededCalls.add(Unit)
-            }
-
             val viewModel = createViewModel(
-                onVerificationSucceeded = ::onVerificationSucceeded,
+                onVerificationSucceeded = { onVerificationSucceededCalls.add(Unit) }
             )
             viewModel.onVerificationCodeEntered("code")
 
@@ -344,6 +346,95 @@ internal class VerificationViewModelTest {
         assertThat(onVerificationSucceededCalls).isEqualTo(1)
     }
 
+    @Test
+    fun `web auth is started`() = runTest(dispatcher) {
+        val webLinkAuthChannel = WebLinkAuthChannel()
+        webLinkAuthChannel.requests.test {
+            val linkAccount = LinkAccount(TestFactory.CONSUMER_SESSION_WITH_WEB_AUTH)
+            val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+            val viewModel = createViewModel(
+                linkAccount = linkAccount,
+                linkAccountHolder = linkAccountHolder,
+                webLinkAuthChannel = webLinkAuthChannel,
+            )
+            assertThat(awaitItem()).isEqualTo(linkAccount.webviewOpenUrl)
+            assertThat(viewModel.viewState.value.isProcessingWebAuth).isTrue()
+            assertThat(linkAccountHolder.linkAccountInfo.value)
+                .isEqualTo(LinkAccountUpdate.Value(linkAccount.copy(viewedWebviewOpenUrl = true)))
+        }
+    }
+
+    @Test
+    fun `web auth refreshes consumer when URL already consumed`() = runTest(dispatcher) {
+        val webLinkAuthChannel = WebLinkAuthChannel()
+        val newWebAuthUrl = "https://new_auth.stripe.com/mobile/67890"
+        val newConsumerSession = TestFactory.CONSUMER_SESSION_WITH_WEB_AUTH.copy(
+            mobileFallbackWebviewParams = TestFactory.MOBILE_FALLBACK_WEBVIEW_PARAMS.copy(
+                webviewOpenUrl = newWebAuthUrl
+            )
+        )
+        val refreshedAccount = LinkAccount(newConsumerSession)
+
+        val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+        val linkAccountManager = object : FakeLinkAccountManager(linkAccountHolder = linkAccountHolder) {
+            override suspend fun refreshConsumer(): Result<ConsumerSessionRefresh> {
+                linkAccountHolder.set(LinkAccountUpdate.Value(refreshedAccount))
+                return Result.success(
+                    ConsumerSessionRefresh(
+                        consumerSession = newConsumerSession,
+                        linkAuthIntent = null
+                    )
+                )
+            }
+        }
+
+        webLinkAuthChannel.requests.test {
+            val consumedAccount = LinkAccount(TestFactory.CONSUMER_SESSION_WITH_WEB_AUTH)
+                .copy(viewedWebviewOpenUrl = true)
+
+            val viewModel = createViewModel(
+                linkAccount = consumedAccount,
+                linkAccountHolder = linkAccountHolder,
+                linkAccountManager = linkAccountManager,
+                webLinkAuthChannel = webLinkAuthChannel,
+            )
+
+            assertThat(awaitItem()).isEqualTo(newWebAuthUrl)
+            assertThat(viewModel.viewState.value.isProcessingWebAuth).isTrue()
+            assertThat(linkAccountHolder.linkAccountInfo.value)
+                .isEqualTo(LinkAccountUpdate.Value(refreshedAccount.copy(viewedWebviewOpenUrl = true)))
+        }
+    }
+
+    @Test
+    fun `web auth fails when refresh consumer fails`() = runTest(dispatcher) {
+        val refreshError = RuntimeException("Failed to refresh consumer")
+        val linkAccountManager = object : FakeLinkAccountManager() {
+            override suspend fun refreshConsumer(): Result<ConsumerSessionRefresh> {
+                return Result.failure(refreshError)
+            }
+        }
+
+        var dismissedResult: LinkActivityResult? = null
+        val dismissWithResult = { result: LinkActivityResult -> dismissedResult = result }
+
+        val consumedAccount = LinkAccount(TestFactory.CONSUMER_SESSION_WITH_WEB_AUTH).copy(
+            viewedWebviewOpenUrl = true
+        )
+
+        val viewModel = createViewModel(
+            linkAccount = consumedAccount,
+            linkAccountManager = linkAccountManager,
+            dismissWithResult = dismissWithResult,
+        )
+
+        val failedResult = dismissedResult as? LinkActivityResult.Failed
+        assertThat(failedResult).isNotNull()
+        assertThat(failedResult?.error).isEqualTo(refreshError)
+        assertThat(failedResult?.linkAccountUpdate).isEqualTo(LinkAccountUpdate.None)
+        assertThat(viewModel.viewState.value.isProcessingWebAuth).isTrue()
+    }
+
     // Utility functions for test setup
     private fun linkAccountWithInlineConsent(consentSection: ConsentUi.ConsentSection = mock()) =
         TestFactory.LINK_ACCOUNT.copy(
@@ -357,21 +448,25 @@ internal class VerificationViewModelTest {
 
     private fun createViewModel(
         linkAccount: LinkAccount = TestFactory.LINK_ACCOUNT,
+        linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
         linkEventsReporter: LinkEventsReporter = FakeLinkEventsReporter(),
         logger: Logger = FakeLogger(),
         linkLaunchMode: LinkLaunchMode = LinkLaunchMode.PaymentMethodSelection(null),
-        onVerificationSucceeded: () -> Unit = { },
+        webLinkAuthChannel: WebLinkAuthChannel = WebLinkAuthChannel(),
+        onVerificationSucceeded: (refresh: ConsumerSessionRefresh?) -> Unit = {},
         onChangeEmailRequested: () -> Unit = {},
         onDismissClicked: () -> Unit = {},
         dismissWithResult: (LinkActivityResult) -> Unit = { },
     ): VerificationViewModel {
         return VerificationViewModel(
             linkAccount = linkAccount,
+            linkAccountHolder = linkAccountHolder,
             linkAccountManager = linkAccountManager,
             linkEventsReporter = linkEventsReporter,
             logger = logger,
             linkLaunchMode = linkLaunchMode,
+            webLinkAuthChannel = webLinkAuthChannel,
             isDialog = false,
             onVerificationSucceeded = onVerificationSucceeded,
             onChangeEmailRequested = onChangeEmailRequested,

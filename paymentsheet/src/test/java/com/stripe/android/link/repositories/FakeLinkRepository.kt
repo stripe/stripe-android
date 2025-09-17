@@ -8,6 +8,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.ConsumerSignUpConsentAction
@@ -24,6 +25,12 @@ internal open class FakeLinkRepository : LinkRepository {
     var lookupConsumerResult = Result.success(TestFactory.CONSUMER_SESSION_LOOKUP)
     var lookupConsumerWithoutBackendLoggingResult = Result.success(TestFactory.CONSUMER_SESSION_LOOKUP)
     var mobileLookupConsumerResult = Result.success(TestFactory.CONSUMER_SESSION_LOOKUP)
+    var refreshConsumerResult = Result.success(
+        ConsumerSessionRefresh(
+            consumerSession = TestFactory.CONSUMER_SESSION,
+            linkAuthIntent = null
+        )
+    )
     var consumerSignUpResult = Result.success(TestFactory.CONSUMER_SESSION_SIGN_UP)
     var mobileConsumerSignUpResult = Result.success(TestFactory.CONSUMER_SESSION_SIGN_UP)
     var createLinkAccountSessionResult = Result.success(TestFactory.LINK_ACCOUNT_SESSION)
@@ -51,7 +58,8 @@ internal open class FakeLinkRepository : LinkRepository {
         email: String?,
         linkAuthIntentId: String?,
         sessionId: String,
-        customerId: String?
+        customerId: String?,
+        supportedVerificationTypes: List<String>?
     ): Result<ConsumerSessionLookup> {
         lookupConsumerCalls.add(
             item = LookupCall(
@@ -82,7 +90,8 @@ internal open class FakeLinkRepository : LinkRepository {
         verificationToken: String,
         appId: String,
         sessionId: String,
-        customerId: String?
+        customerId: String?,
+        supportedVerificationTypes: List<String>?
     ): Result<ConsumerSessionLookup> {
         mobileLookupCalls.add(
             item = MobileLookupCall(
@@ -96,6 +105,12 @@ internal open class FakeLinkRepository : LinkRepository {
         )
         return mobileLookupConsumerResult
     }
+
+    override suspend fun refreshConsumer(
+        appId: String,
+        consumerSessionClientSecret: String,
+        supportedVerificationTypes: List<String>?
+    ): Result<ConsumerSessionRefresh> = refreshConsumerResult
 
     override suspend fun consumerSignUp(
         email: String,

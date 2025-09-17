@@ -330,7 +330,8 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         appId = appId,
         sessionId = sessionId,
         requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
-        customerId = null
+        customerId = null,
+        supportedVerificationTypes = null,
     ).also {
         updateCachedConsumerSessionFromLookup(it)
     }

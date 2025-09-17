@@ -52,9 +52,10 @@ class DefaultLinkAccountManagerTest {
     @Test
     fun `When cookie exists and network call fails then account status is Error`() = runSuspendTest {
         val fakeLinkAuth = fakeLinkAuth()
-        fakeLinkAuth.lookupResult = Result.failure(Exception())
+        val error = Exception()
+        fakeLinkAuth.lookupResult = Result.failure(error)
         val accountManager = accountManager(TestFactory.EMAIL, linkAuth = fakeLinkAuth)
-        assertThat(accountManager.accountStatus.first()).isEqualTo(AccountStatus.Error)
+        assertThat(accountManager.accountStatus.first()).isEqualTo(AccountStatus.Error(error))
     }
 
     @Test
@@ -74,14 +75,15 @@ class DefaultLinkAccountManagerTest {
     @Test
     fun `When customerEmail is set and network call fails then account status is Error`() = runSuspendTest {
         val fakeLinkAuth = fakeLinkAuth()
-        fakeLinkAuth.lookupResult = Result.failure(Exception())
+        val error = Exception()
+        fakeLinkAuth.lookupResult = Result.failure(error)
 
         assertThat(
             accountManager(
                 TestFactory.EMAIL,
                 linkAuth = fakeLinkAuth
             ).accountStatus.first()
-        ).isEqualTo(AccountStatus.Error)
+        ).isEqualTo(AccountStatus.Error(error))
     }
 
     @Test
@@ -418,14 +420,16 @@ class DefaultLinkAccountManagerTest {
                 email: String?,
                 linkAuthIntentId: String?,
                 sessionId: String,
-                customerId: String?
+                customerId: String?,
+                supportedVerificationTypes: List<String>?
             ): Result<ConsumerSessionLookup> {
                 callCount += 1
                 return super.lookupConsumer(
                     email = email,
                     linkAuthIntentId = linkAuthIntentId,
                     sessionId = sessionId,
-                    customerId = customerId
+                    customerId = customerId,
+                    supportedVerificationTypes = supportedVerificationTypes
                 )
             }
         }

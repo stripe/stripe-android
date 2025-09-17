@@ -47,12 +47,11 @@ internal fun LinkScreenContent(
             screenState = screenState,
             appBarState = appBarState,
             eventReporter = viewModel.eventReporter,
-            onVerificationSucceeded = viewModel::onVerificationSucceeded,
             onDismissClicked = viewModel::onDismissVerificationClicked,
             onBackPressed = viewModel::goBack,
             navigate = viewModel::navigate,
             dismiss = viewModel::dismissSheet,
-            dismissWithResult = viewModel::handleResult,
+            dismissWithResult = viewModel::handleWebActivityResult,
             getLinkAccount = {
                 viewModel.linkAccount
             },
@@ -74,7 +73,6 @@ internal fun LinkScreenContentBody(
     eventReporter: EventReporter,
     navigationChannel: SharedFlow<NavigationIntent>,
     onNavBackStackEntryChanged: (NavBackStackEntryUpdate) -> Unit,
-    onVerificationSucceeded: () -> Unit,
     onDismissClicked: () -> Unit,
     onBackPressed: () -> Unit,
     navigate: (route: LinkScreen, clearStack: Boolean) -> Unit,
@@ -114,7 +112,6 @@ internal fun LinkScreenContentBody(
                 modifier = Modifier
                     .testTag(VERIFICATION_DIALOG_CONTENT_TAG),
                 linkAccount = screenState.linkAccount,
-                onVerificationSucceeded = onVerificationSucceeded,
                 changeEmail = changeEmail,
                 onDismissClicked = onDismissClicked,
                 dismissWithResult = dismissWithResult,

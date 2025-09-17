@@ -30,6 +30,10 @@ internal open class FakeLinkEventsReporter : LinkEventsReporter {
         throw NotImplementedError()
     }
 
+    override fun onAccountRefreshFailure(error: Throwable) {
+        throw NotImplementedError()
+    }
+
     override fun on2FAStart() {
         throw NotImplementedError()
     }

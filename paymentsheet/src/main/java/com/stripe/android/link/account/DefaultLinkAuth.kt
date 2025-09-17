@@ -7,6 +7,7 @@ import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.EmailSource
@@ -34,7 +35,8 @@ internal class DefaultLinkAuth @Inject constructor(
         emailSource: EmailSource?,
         linkAuthIntentId: String?,
         customerId: String?,
-        sessionId: String
+        sessionId: String,
+        supportedVerificationTypes: List<String>?
     ): Result<ConsumerSessionLookup> {
         val hasEmailAndSource = email != null && emailSource != null
         val hasAuthIntent = linkAuthIntentId != null
@@ -52,14 +54,16 @@ internal class DefaultLinkAuth @Inject constructor(
                 emailSource = emailSource,
                 sessionId = sessionId,
                 linkAuthIntentId = linkAuthIntentId,
-                customerId = customerId
+                customerId = customerId,
+                supportedVerificationTypes = supportedVerificationTypes
             )
         } else {
             linkRepository.lookupConsumer(
                 email = email,
                 linkAuthIntentId = linkAuthIntentId,
                 sessionId = sessionId,
-                customerId = customerId
+                customerId = customerId,
+                supportedVerificationTypes = supportedVerificationTypes
             )
         }
     }
@@ -70,7 +74,7 @@ internal class DefaultLinkAuth @Inject constructor(
         country: String?,
         countryInferringMethod: String,
         name: String?,
-        consentAction: SignUpConsentAction
+        consentAction: SignUpConsentAction,
     ): Result<ConsumerSessionSignup> {
         return if (linkGate.useAttestationEndpoints) {
             mobileSignUpWithAttestation(
@@ -88,9 +92,20 @@ internal class DefaultLinkAuth @Inject constructor(
                 country = country,
                 countryInferringMethod = countryInferringMethod,
                 name = name,
-                consentAction = consentAction.consumerAction
+                consentAction = consentAction.consumerAction,
             )
         }
+    }
+
+    override suspend fun refreshConsumer(
+        consumerSessionClientSecret: String,
+        supportedVerificationTypes: List<String>?
+    ): Result<ConsumerSessionRefresh> {
+        return linkRepository.refreshConsumer(
+            appId = applicationId,
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            supportedVerificationTypes = supportedVerificationTypes
+        )
     }
 
     private suspend fun mobileLookupWithAttestation(
@@ -98,7 +113,8 @@ internal class DefaultLinkAuth @Inject constructor(
         emailSource: EmailSource?,
         linkAuthIntentId: String?,
         customerId: String?,
-        sessionId: String
+        sessionId: String,
+        supportedVerificationTypes: List<String>?
     ): Result<ConsumerSessionLookup> {
         return runCatching {
             val verificationToken = integrityRequestManager.requestToken().getOrThrow()
@@ -109,7 +125,8 @@ internal class DefaultLinkAuth @Inject constructor(
                 linkAuthIntentId = linkAuthIntentId,
                 sessionId = sessionId,
                 emailSource = emailSource,
-                customerId = customerId
+                customerId = customerId,
+                supportedVerificationTypes = supportedVerificationTypes
             ).getOrThrow()
         }.onFailure { error ->
             val operation = if (email != null) "lookup" else "lookupByAuthIntent"
