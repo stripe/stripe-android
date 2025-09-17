@@ -49,11 +49,9 @@ internal class VerificationViewModel @Inject constructor(
     private val dismissWithResult: (LinkActivityResult) -> Unit,
 ) : ViewModel() {
 
-    private val isProcessingWebAuth = linkAccount.webviewOpenUrl != null
-
     private val _viewState = MutableStateFlow(
         value = VerificationViewState(
-            isProcessingWebAuth = isProcessingWebAuth,
+            isProcessingWebAuth = linkAccount.webviewOpenUrl != null,
             redactedPhoneNumber = linkAccount.redactedPhoneNumber,
             email = linkAccount.email,
             isProcessing = false,
@@ -81,7 +79,7 @@ internal class VerificationViewModel @Inject constructor(
     }
 
     private fun setUp() {
-        if (isProcessingWebAuth) {
+        if (viewState.value.isProcessingWebAuth) {
             startWebVerification()
         } else if (linkAccount.accountStatus != AccountStatus.VerificationStarted) {
             startVerification()
@@ -161,7 +159,8 @@ internal class VerificationViewModel @Inject constructor(
 
     private fun startWebVerification() {
         viewModelScope.launch {
-            // If the web auth URL has already been consumed, perform lookup again to get a fresh one.
+            // The web auth URL is single use, so if the web auth URL has already been consumed,
+            // refresh the consumer session to get a fresh auth URL.
             val updatedLinkAccountResult = linkAccount
                 .takeIf { !it.viewedWebviewOpenUrl }
                 ?.let { Result.success(it) }
