@@ -22,9 +22,6 @@ internal class ConfirmationTokenJsonParser : ModelJsonParser<ConfirmationToken> 
             created = createdTimestamp,
             expiresAt = StripeJsonUtils.optLong(json, FIELD_EXPIRES_AT),
             liveMode = StripeJsonUtils.optBoolean(json, FIELD_LIVEMODE),
-            mandateData = json.optJSONObject(FIELD_MANDATE_DATA)?.let {
-                MandateDataJsonParser().parse(it)
-            },
             paymentIntentId = StripeJsonUtils.optString(json, FIELD_PAYMENT_INTENT_ID),
             paymentMethodPreview = json.optJSONObject(FIELD_PAYMENT_METHOD_PREVIEW)?.let {
                 PaymentMethodPreviewJsonParser().parse(it)
