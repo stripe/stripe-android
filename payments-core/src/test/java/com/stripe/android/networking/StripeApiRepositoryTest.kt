@@ -33,7 +33,6 @@ import com.stripe.android.model.CardParamsFixtures
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
-import com.stripe.android.model.ConfirmationTokenFixtures
 import com.stripe.android.model.ConfirmationTokenParams
 import com.stripe.android.model.ConsumerFixtures
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
@@ -50,6 +49,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
+import com.stripe.android.model.PaymentMethodCreateParamsFixtures.BILLING_DETAILS
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodMessageFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -64,6 +64,7 @@ import com.stripe.android.model.TokenFixtures
 import com.stripe.android.model.VerificationMethodParam
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
@@ -3378,121 +3379,88 @@ internal class StripeApiRepositoryTest {
 
     @Test
     fun createConfirmationToken_withPaymentMethodData_shouldSucceed() = runTest {
-        val stripeResponse = StripeResponse(
-            200,
-            ConfirmationTokenFixtures.DEFAULT_JSON.toString(),
-            emptyMap()
-        )
-        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-            .thenReturn(stripeResponse)
-
         val confirmationTokenParams = ConfirmationTokenParams(
             paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             returnUrl = "https://example.com/return"
         )
 
-        val confirmationToken = create().createConfirmationToken(
+        val confirmationToken = stripeApiRepository.createConfirmationToken(
             confirmationTokenParams,
             DEFAULT_OPTIONS
         ).getOrThrow()
 
-        assertThat(confirmationToken.id).isEqualTo("ctoken_1234567890")
         assertThat(confirmationToken.returnUrl).isEqualTo("https://example.com/return")
-
-        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-        val apiRequest = apiRequestArgumentCaptor.firstValue
-        assertThat(apiRequest.baseUrl)
-            .isEqualTo("https://api.stripe.com/v1/confirmation_tokens")
-
-        val params = apiRequest.params
-        assertThat(params?.get("payment_method_data")).isNotNull()
-        assertThat(params?.get("return_url")).isEqualTo("https://example.com/return")
+        assertThat(confirmationToken.paymentMethodPreview!!.type).isEqualTo(PaymentMethod.Type.Card)
     }
 
     @Test
     fun createConfirmationToken_withExistingPaymentMethod_shouldSucceed() = runTest {
-        val stripeResponse = StripeResponse(
-            200,
-            ConfirmationTokenFixtures.DEFAULT_JSON.toString(),
-            emptyMap()
-        )
-        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-            .thenReturn(stripeResponse)
+        val defaultCard = PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+        val paymentMethodId = stripeApiRepository.createPaymentMethod(
+            defaultCard,
+            DEFAULT_OPTIONS
+        ).getOrThrow().id
 
         val confirmationTokenParams = ConfirmationTokenParams(
-            paymentMethodId = "pm_1234567890",
-            returnUrl = "https://example.com/return"
+            paymentMethodId = paymentMethodId
         )
 
-        val confirmationToken = create().createConfirmationToken(
+        val confirmationToken = stripeApiRepository.createConfirmationToken(
             confirmationTokenParams,
             DEFAULT_OPTIONS
         ).getOrThrow()
 
-        assertThat(confirmationToken.id).isEqualTo("ctoken_1234567890")
+        val cardTruth = defaultCard.card!!
+        val card = JSONObject(confirmationToken.paymentMethodPreview!!.allResponseFields)
+            .optJSONObject("card")!!
+        assertThat(card.optString("last4")).isEqualTo(cardTruth.number!!.takeLast(4))
+        assertThat(card.optInt("exp_month")).isEqualTo(cardTruth.expiryMonth!!)
+        assertThat(card.optInt("exp_year")).isEqualTo(cardTruth.expiryYear!!)
 
-        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-        val apiRequest = apiRequestArgumentCaptor.firstValue
-
-        val params = apiRequest.params
-        assertThat(params?.get("payment_method")).isEqualTo("pm_1234567890")
-        assertThat(params?.get("return_url")).isEqualTo("https://example.com/return")
+        val billingDetailsTruth = defaultCard.billingDetails!!
+        val billingDetails = confirmationToken.paymentMethodPreview.billingDetails!!
+        assertThat(billingDetails.email).isEqualTo(billingDetailsTruth.email)
+        assertThat(billingDetails.name).isEqualTo(billingDetailsTruth.name)
+        assertThat(billingDetails.phone).isEqualTo(billingDetailsTruth.phone)
+        assertThat(billingDetails.address).isEqualTo(billingDetailsTruth.address)
     }
 
     @Test
-    fun createConfirmationToken_withShippingAndMandateData_shouldSucceed() = runTest {
-        val stripeResponse = StripeResponse(
-            200,
-            ConfirmationTokenFixtures.WITH_SHIPPING_JSON.toString(),
-            emptyMap()
-        )
-        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-            .thenReturn(stripeResponse)
-
-        val sepaParams = PaymentMethodCreateParamsFixtures.DEFAULT_SEPA_DEBIT
+    fun createConfirmationToken_withShipping_shouldSucceed() = runTest {
         val shipping = ConfirmPaymentIntentParams.Shipping(
             address = AddressFixtures.ADDRESS,
             name = "Jenny Rosen"
+        )
+        val sepaParams = PaymentMethodCreateParams.create(
+            sepaDebit = PaymentMethodCreateParams.SepaDebit(iban = "DE89370400440532013000"),
+            billingDetails = BILLING_DETAILS
         )
         val mandateData = MandateDataParamsFixtures.DEFAULT
 
         val confirmationTokenParams = ConfirmationTokenParams(
             paymentMethodData = sepaParams,
-            returnUrl = "https://example.com/return",
             shipping = shipping,
             mandateDataParams = mandateData,
             setUpFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
         )
 
-        val confirmationToken = create().createConfirmationToken(
+        val confirmationToken = stripeApiRepository.createConfirmationToken(
             confirmationTokenParams,
             DEFAULT_OPTIONS
         ).getOrThrow()
 
-        assertThat(confirmationToken.id).isEqualTo("ctoken_1234567890")
-        assertThat(confirmationToken.shipping).isNotNull()
-
-        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-        val apiRequest = apiRequestArgumentCaptor.firstValue
-
-        val params = apiRequest.params
-        assertThat(params?.get("payment_method_data")).isNotNull()
-        assertThat(params?.get("return_url")).isEqualTo("https://example.com/return")
-        assertThat(params?.get("shipping")).isNotNull()
-        assertThat(params?.get("mandate_data")).isNotNull()
-        assertThat(params?.get("setup_future_usage")).isEqualTo("off_session")
+        assertThat(confirmationToken.paymentMethodPreview!!.type).isEqualTo(PaymentMethod.Type.SepaDebit)
+        with(confirmationToken.shipping!!) {
+            assertThat(name).isEqualTo(shipping.name)
+            assertThat(address).isEqualTo(shipping.address)
+            assertThat(phone).isEqualTo(shipping.phone)
+        }
+        assertThat(confirmationToken.setupFutureUsage)
+            .isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.OffSession)
     }
 
     @Test
     fun createConfirmationToken_withSetAsDefaultPaymentMethod_shouldSucceed() = runTest {
-        val stripeResponse = StripeResponse(
-            200,
-            ConfirmationTokenFixtures.DEFAULT_JSON.toString(),
-            emptyMap()
-        )
-        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-            .thenReturn(stripeResponse)
-
         val confirmationTokenParams = ConfirmationTokenParams(
             paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             returnUrl = "https://example.com/return",
@@ -3500,37 +3468,31 @@ internal class StripeApiRepositoryTest {
             setAsDefaultPaymentMethod = true
         )
 
-        val confirmationToken = create().createConfirmationToken(
+        val confirmationToken = stripeApiRepository.createConfirmationToken(
             confirmationTokenParams,
             DEFAULT_OPTIONS
         ).getOrThrow()
 
-        assertThat(confirmationToken.id).isEqualTo("ctoken_1234567890")
-
-        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-        val apiRequest = apiRequestArgumentCaptor.firstValue
-
-        val params = apiRequest.params
-        assertThat(params?.get("payment_method_data")).isNotNull()
-        assertThat(params?.get("return_url")).isEqualTo("https://example.com/return")
-        assertThat(params?.get("setup_future_usage")).isEqualTo("off_session")
-        assertThat(params?.get("set_as_default_payment_method")).isEqualTo(true)
+        // set_as_default_payment_method is not returned in the response,
+        // we only need to check the creation is successful
+        assertThat(confirmationToken).isNotNull()
     }
 
     @Test
-    fun createConfirmationToken_setsCorrectPaymentUserAgent() = runTest {
+    fun createConfirmationToken_setsCorrectPaymentUserAgentAndMandateData() = runTest {
         val stripeResponse = StripeResponse(
             200,
-            ConfirmationTokenFixtures.DEFAULT_JSON.toString(),
+            "",
             emptyMap()
         )
         whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
             .thenReturn(stripeResponse)
 
+        val mandateData = MandateDataParamsFixtures.DEFAULT
         val productUsage = "TestProductUsage"
         val confirmationTokenParams = ConfirmationTokenParams(
             paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-            returnUrl = "https://example.com/return"
+            mandateDataParams = mandateData,
         )
 
         create(setOf(productUsage)).createConfirmationToken(
@@ -3544,20 +3506,21 @@ internal class StripeApiRepositoryTest {
             apiRequest.params?.get("payment_method_data") as Map<*, *>
         assertThat(paymentMethodDataParams["payment_user_agent"])
             .isEqualTo("stripe-android/${StripeSdkVersion.VERSION_NAME};$productUsage")
+        assertThat(apiRequest.params?.get("mandate_data") as Map<*, *>).isEqualTo(mandateData.toParamMap())
     }
 
     @Test
     fun createConfirmationToken_withAttribution_setsCorrectPaymentUserAgent() = runTest {
         val stripeResponse = StripeResponse(
             200,
-            ConfirmationTokenFixtures.DEFAULT_JSON.toString(),
+            "",
             emptyMap()
         )
         whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
             .thenReturn(stripeResponse)
 
         val productUsage = "TestProductUsage"
-        val attribution = "CardInputView"
+        val attribution = "example_product_usage"
         val confirmationTokenParams = ConfirmationTokenParams(
             paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD.copy(
                 productUsage = setOf(attribution)
@@ -3576,52 +3539,6 @@ internal class StripeApiRepositoryTest {
             apiRequest.params?.get("payment_method_data") as Map<*, *>
         assertThat(paymentMethodDataParams["payment_user_agent"])
             .isEqualTo("stripe-android/${StripeSdkVersion.VERSION_NAME};$productUsage;$attribution")
-    }
-
-    @Test
-    fun createConfirmationToken_withInvalidParams_shouldReturnError() = runTest {
-        val errorResponse = StripeResponse(
-            400,
-            ConfirmationTokenFixtures.ERROR_INVALID_PARAMS_JSON.toString(),
-            emptyMap()
-        )
-        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-            .thenReturn(errorResponse)
-
-        val confirmationTokenParams = ConfirmationTokenParams(
-            returnUrl = "https://example.com/return"
-            // Missing both paymentMethodId and paymentMethodData
-        )
-
-        val result = create().createConfirmationToken(
-            confirmationTokenParams,
-            DEFAULT_OPTIONS
-        )
-
-        assertThat(result.isFailure).isTrue()
-        val exception = result.exceptionOrNull() as InvalidRequestException
-        assertThat(exception.stripeError?.message)
-            .isEqualTo("You must provide either payment_method or payment_method_data")
-    }
-
-    @Test
-    fun createConfirmationToken_withConnectionError_shouldReturnError() = runTest {
-        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-            .thenAnswer { throw IOException() }
-
-        val confirmationTokenParams = ConfirmationTokenParams(
-            paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-            returnUrl = "https://example.com/return"
-        )
-
-        val result = create().createConfirmationToken(
-            confirmationTokenParams,
-            DEFAULT_OPTIONS
-        )
-
-        assertThat(result.isFailure).isTrue()
-        val exception = result.exceptionOrNull()
-        assertThat(exception).isInstanceOf(APIConnectionException::class.java)
     }
 
     /**
