@@ -55,6 +55,7 @@ interface ConsumersApiService {
         requestSurface: String,
         sessionId: String,
         doNotLogConsumerFunnelEvent: Boolean,
+        supportedVerificationTypes: List<String>?,
         requestOptions: ApiRequest.Options,
         customerId: String?
     ): ConsumerSessionLookup
@@ -66,13 +67,16 @@ interface ConsumersApiService {
         requestSurface: String,
         verificationToken: String,
         appId: String,
+        supportedVerificationTypes: List<String>?,
         requestOptions: ApiRequest.Options,
         sessionId: String,
         customerId: String?
     ): ConsumerSessionLookup
 
     suspend fun refreshConsumerSession(
+        appId: String,
         consumerSessionClientSecret: String,
+        supportedVerificationTypes: List<String>?,
         requestSurface: String,
         requestOptions: ApiRequest.Options
     ): ConsumerSessionRefresh
@@ -211,6 +215,7 @@ class ConsumersApiServiceImpl(
         requestSurface: String,
         sessionId: String,
         doNotLogConsumerFunnelEvent: Boolean,
+        supportedVerificationTypes: List<String>?,
         requestOptions: ApiRequest.Options,
         customerId: String?
     ): ConsumerSessionLookup {
@@ -247,6 +252,7 @@ class ConsumersApiServiceImpl(
         requestSurface: String,
         verificationToken: String,
         appId: String,
+        supportedVerificationTypes: List<String>?,
         requestOptions: ApiRequest.Options,
         sessionId: String,
         customerId: String?
@@ -274,7 +280,9 @@ class ConsumersApiServiceImpl(
     }
 
     override suspend fun refreshConsumerSession(
+        appId: String,
         consumerSessionClientSecret: String,
+        supportedVerificationTypes: List<String>?,
         requestSurface: String,
         requestOptions: ApiRequest.Options
     ): ConsumerSessionRefresh {
@@ -285,6 +293,7 @@ class ConsumersApiServiceImpl(
                 url = consumerSessionRefreshUrl,
                 options = requestOptions,
                 params = mapOf(
+                    "app_id" to appId,
                     "request_surface" to requestSurface,
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to consumerSessionClientSecret
@@ -536,13 +545,6 @@ class ConsumersApiServiceImpl(
     }
 
     internal companion object {
-        private val supportedVerificationTypes: List<String>
-            get() = if (FeatureFlags.forceLinkWebAuth.isEnabled) {
-                listOf("__fake__")
-            } else {
-                listOf(VerificationType.SMS.value)
-            }
-
         /**
          * @return `https://api.stripe.com/v1/consumers/accounts/sign_up`
          */

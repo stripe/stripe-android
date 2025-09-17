@@ -35,7 +35,8 @@ internal interface LinkRepository {
         email: String?,
         linkAuthIntentId: String?,
         sessionId: String,
-        customerId: String?
+        customerId: String?,
+        supportedVerificationTypes: List<String>?,
     ): Result<ConsumerSessionLookup>
 
     /**
@@ -61,15 +62,17 @@ internal interface LinkRepository {
         verificationToken: String,
         appId: String,
         sessionId: String,
-        customerId: String?
+        customerId: String?,
+        supportedVerificationTypes: List<String>?,
     ): Result<ConsumerSessionLookup>
 
     /**
      * Refresh the mobile consumer session.
      */
     suspend fun refreshConsumer(
+        appId: String,
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
+        supportedVerificationTypes: List<String>?,
     ): Result<ConsumerSessionRefresh>
 
     /**

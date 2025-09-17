@@ -4,6 +4,7 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.ConsumerState
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason
@@ -32,6 +33,7 @@ import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
+import com.stripe.android.model.VerificationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -537,7 +539,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
             emailSource = emailSource,
             sessionId = config.elementsSessionId,
             customerId = customerId,
-            linkAuthIntentId = null
+            linkAuthIntentId = null,
+            supportedVerificationTypes = supportedVerificationTypes.takeIf { startSession },
         ).onFailure { error ->
             linkEventsReporter.onAccountLookupFailure(error)
         }.map { consumerSessionLookup ->
@@ -559,6 +562,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             customerId = customerId,
             email = null,
             emailSource = null,
+            supportedVerificationTypes = supportedVerificationTypes,
         ).onFailure { error ->
             linkEventsReporter.onAccountLookupFailure(error)
         }.map { consumerSessionLookup ->
@@ -573,9 +577,9 @@ internal class DefaultLinkAccountManager @Inject constructor(
     override suspend fun refreshConsumer(): Result<ConsumerSessionRefresh> {
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
             ?: return Result.failure(NoLinkAccountFoundException())
-        return linkRepository.refreshConsumer(
+        return linkAuth.refreshConsumer(
             consumerSessionClientSecret = linkAccount.clientSecret,
-            consumerPublishableKey = linkAccount.consumerPublishableKey
+            supportedVerificationTypes = supportedVerificationTypes,
         )
             .onFailure { error ->
                 linkEventsReporter.onAccountRefreshFailure(error)
@@ -583,4 +587,11 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 setAccount(consumerSession = it.consumerSession)
             }
     }
+
+    private val supportedVerificationTypes: List<String>
+        get() = if (FeatureFlags.forceLinkWebAuth.isEnabled) {
+            listOf("__fake__")
+        } else {
+            listOf(VerificationType.SMS.value)
+        }
 }

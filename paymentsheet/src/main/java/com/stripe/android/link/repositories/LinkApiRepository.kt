@@ -69,7 +69,8 @@ internal class LinkApiRepository @Inject constructor(
         email: String?,
         linkAuthIntentId: String?,
         sessionId: String,
-        customerId: String?
+        customerId: String?,
+        supportedVerificationTypes: List<String>?,
     ): Result<ConsumerSessionLookup> = withContext(workContext) {
         runCatching {
             requireNotNull(
@@ -80,7 +81,8 @@ internal class LinkApiRepository @Inject constructor(
                     sessionId = sessionId,
                     doNotLogConsumerFunnelEvent = false,
                     requestOptions = buildRequestOptions(),
-                    customerId = customerId
+                    customerId = customerId,
+                    supportedVerificationTypes = supportedVerificationTypes
                 )
             )
         }
@@ -98,6 +100,7 @@ internal class LinkApiRepository @Inject constructor(
                     requestSurface = requestSurface.value,
                     sessionId = sessionId,
                     doNotLogConsumerFunnelEvent = true,
+                    supportedVerificationTypes = null,
                     requestOptions = buildRequestOptions(),
                     customerId = null
                 )
@@ -112,7 +115,8 @@ internal class LinkApiRepository @Inject constructor(
         verificationToken: String,
         appId: String,
         sessionId: String,
-        customerId: String?
+        customerId: String?,
+        supportedVerificationTypes: List<String>?,
     ): Result<ConsumerSessionLookup> = withContext(workContext) {
         runCatching {
             consumersApiService.mobileLookupConsumerSession(
@@ -124,20 +128,24 @@ internal class LinkApiRepository @Inject constructor(
                 appId = appId,
                 requestOptions = buildRequestOptions(),
                 sessionId = sessionId,
-                customerId = customerId
+                customerId = customerId,
+                supportedVerificationTypes = supportedVerificationTypes
             )
         }
     }
 
     override suspend fun refreshConsumer(
+        appId: String,
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
+        supportedVerificationTypes: List<String>?,
     ): Result<ConsumerSessionRefresh> = withContext(workContext) {
         runCatching {
             consumersApiService.refreshConsumerSession(
+                appId = appId,
                 consumerSessionClientSecret = consumerSessionClientSecret,
+                supportedVerificationTypes = supportedVerificationTypes,
                 requestSurface = requestSurface.value,
-                requestOptions = buildRequestOptions(consumerPublishableKey),
+                requestOptions = buildRequestOptions(),
             )
         }
     }
