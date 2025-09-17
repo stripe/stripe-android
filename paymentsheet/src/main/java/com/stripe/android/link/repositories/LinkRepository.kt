@@ -6,6 +6,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.ConsumerSignUpConsentAction
@@ -34,7 +35,8 @@ internal interface LinkRepository {
         email: String?,
         linkAuthIntentId: String?,
         sessionId: String,
-        customerId: String?
+        customerId: String?,
+        supportedVerificationTypes: List<String>?,
     ): Result<ConsumerSessionLookup>
 
     /**
@@ -60,8 +62,18 @@ internal interface LinkRepository {
         verificationToken: String,
         appId: String,
         sessionId: String,
-        customerId: String?
+        customerId: String?,
+        supportedVerificationTypes: List<String>?,
     ): Result<ConsumerSessionLookup>
+
+    /**
+     * Refresh the mobile consumer session.
+     */
+    suspend fun refreshConsumer(
+        appId: String,
+        consumerSessionClientSecret: String,
+        supportedVerificationTypes: List<String>?,
+    ): Result<ConsumerSessionRefresh>
 
     /**
      * Sign up for a new Link account.

@@ -4,6 +4,7 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.ConsumerState
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason
@@ -24,6 +25,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.model.EmailSource
@@ -31,6 +33,7 @@ import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
+import com.stripe.android.model.VerificationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -158,7 +161,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     )
                 )
             }
-            AccountStatus.NeedsVerification,
+            is AccountStatus.NeedsVerification,
             AccountStatus.VerificationStarted -> {
                 linkEventsReporter.onInvalidSessionState(LinkEventsReporter.SessionState.RequiresVerification)
 
@@ -170,7 +173,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 )
             }
             AccountStatus.SignedOut,
-            AccountStatus.Error -> {
+            is AccountStatus.Error -> {
                 signUp(
                     email = email,
                     phoneNumber = phone,
@@ -281,20 +284,18 @@ internal class DefaultLinkAccountManager @Inject constructor(
 
     private suspend fun setAccount(
         consumerSession: ConsumerSession,
-        publishableKey: String?,
-        displayablePaymentDetails: DisplayablePaymentDetails?,
-        linkAuthIntentInfo: LinkAuthIntentInfo?,
+        publishableKey: String? = null,
+        displayablePaymentDetails: DisplayablePaymentDetails? = null,
+        linkAuthIntentInfo: LinkAuthIntentInfo? = null,
     ): LinkAccount {
         val currentAccount = linkAccountHolder.linkAccountInfo.value.account
+        val isSameUser = currentAccount?.email == consumerSession.emailAddress
         val newConsumerPublishableKey = publishableKey
-            ?: currentAccount?.consumerPublishableKey
-                ?.takeIf { currentAccount.email == consumerSession.emailAddress }
+            ?: currentAccount?.consumerPublishableKey?.takeIf { isSameUser }
         val newPaymentDetails = displayablePaymentDetails
-            ?: currentAccount?.displayablePaymentDetails
-                ?.takeIf { currentAccount.email == consumerSession.emailAddress }
+            ?: currentAccount?.displayablePaymentDetails?.takeIf { isSameUser }
         val newLaiInfo = linkAuthIntentInfo
-            ?: currentAccount?.linkAuthIntentInfo
-                ?.takeIf { currentAccount.email == consumerSession.emailAddress }
+            ?: currentAccount?.linkAuthIntentInfo?.takeIf { isSameUser }
 
         val newAccount = LinkAccount(
             consumerSession = consumerSession,
@@ -350,12 +351,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             .onFailure {
                 linkEventsReporter.on2FAStartFailure()
             }.map { consumerSession ->
-                setAccount(
-                    consumerSession = consumerSession,
-                    publishableKey = null,
-                    displayablePaymentDetails = null,
-                    linkAuthIntentInfo = linkAccount.linkAuthIntentInfo, // Keep LAI info.
-                )
+                setAccount(consumerSession = consumerSession)
             }
     }
 
@@ -376,12 +372,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             }.onFailure {
                 linkEventsReporter.on2FAFailure()
             }.map { consumerSession ->
-                setAccount(
-                    consumerSession = consumerSession,
-                    publishableKey = null,
-                    displayablePaymentDetails = null,
-                    linkAuthIntentInfo = linkAccount.linkAuthIntentInfo, // Keep LAI info.
-                )
+                setAccount(consumerSession = consumerSession)
             }
     }
 
@@ -457,12 +448,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             phoneNumber = phoneNumber,
             consumerPublishableKey = linkAccount.consumerPublishableKey
         ).map { consumerSession ->
-            setAccount(
-                consumerSession = consumerSession,
-                publishableKey = null,
-                displayablePaymentDetails = null,
-                linkAuthIntentInfo = linkAccount.linkAuthIntentInfo,
-            )
+            setAccount(consumerSession = consumerSession)
         }
     }
 
@@ -485,9 +471,45 @@ internal class DefaultLinkAccountManager @Inject constructor(
             setAccount(
                 consumerSession = consumerSessionSignUp.consumerSession,
                 publishableKey = consumerSessionSignUp.publishableKey,
-                displayablePaymentDetails = null,
-                linkAuthIntentInfo = null,
             )
+        }
+    }
+
+    private suspend fun lookupAccount(
+        linkAccount: LinkAccount?,
+        email: String?,
+    ): Result<LinkAccount?>? {
+        return when (val linkLaunchMode = this.linkLaunchMode) {
+            null,
+            is LinkLaunchMode.Authentication,
+            is LinkLaunchMode.Confirmation,
+            LinkLaunchMode.Full,
+            is LinkLaunchMode.PaymentMethodSelection -> {
+                linkAccount
+                    // If we already have an account, return it.
+                    ?.let { Result.success(it) }
+                    ?: run {
+                        email?.let {
+                            lookupByEmail(
+                                email = it,
+                                startSession = true,
+                                emailSource = EmailSource.CUSTOMER_OBJECT,
+                                customerId = config.customerIdForEceDefaultValues
+                            )
+                        }
+                    }
+            }
+            is LinkLaunchMode.Authorization -> {
+                val linkAuthIntentId = linkLaunchMode.linkAuthIntentId
+                linkAccount
+                    // If we already have an account for the LAI, return it.
+                    ?.takeIf { it.linkAuthIntentInfo?.linkAuthIntentId == linkAuthIntentId }
+                    ?.let { Result.success(it) }
+                    ?: lookupByLinkAuthIntent(
+                        linkAuthIntentId = linkAuthIntentId,
+                        customerId = config.customerIdForEceDefaultValues
+                    )
+            }
         }
     }
 
@@ -495,43 +517,14 @@ internal class DefaultLinkAccountManager @Inject constructor(
         linkAccount: LinkAccount?,
         canLookupCustomerEmail: Boolean
     ): AccountStatus {
-        val linkAccountResult =
-            when (val linkLaunchMode = this.linkLaunchMode) {
-                null,
-                is LinkLaunchMode.Authentication,
-                is LinkLaunchMode.Confirmation,
-                LinkLaunchMode.Full,
-                is LinkLaunchMode.PaymentMethodSelection -> {
-                    linkAccount
-                        // If we already have an account, return it.
-                        ?.let { Result.success(it) }
-                        ?: run {
-                            val email = config.customerInfo.email?.takeIf { canLookupCustomerEmail }
-                            email?.let {
-                                lookupByEmail(
-                                    email = it,
-                                    startSession = true,
-                                    emailSource = EmailSource.CUSTOMER_OBJECT,
-                                    customerId = config.customerIdForEceDefaultValues
-                                )
-                            }
-                        }
-                }
-                is LinkLaunchMode.Authorization -> {
-                    val linkAuthIntentId = linkLaunchMode.linkAuthIntentId
-                    linkAccount
-                        // If we already have an account for the LAI, return it.
-                        ?.takeIf { it.linkAuthIntentInfo?.linkAuthIntentId == linkAuthIntentId }
-                        ?.let { Result.success(it) }
-                        ?: lookupByLinkAuthIntent(
-                            linkAuthIntentId = linkAuthIntentId,
-                            customerId = config.customerIdForEceDefaultValues
-                        )
-                }
-            }
+        val email = config.customerInfo.email?.takeIf { canLookupCustomerEmail }
+        val linkAccountResult = lookupAccount(
+            linkAccount = linkAccount,
+            email = email
+        )
         return linkAccountResult
             ?.map { it?.accountStatus }
-            ?.getOrElse { AccountStatus.Error }
+            ?.getOrElse { error -> AccountStatus.Error(error) }
             ?: AccountStatus.SignedOut
     }
 
@@ -546,7 +539,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
             emailSource = emailSource,
             sessionId = config.elementsSessionId,
             customerId = customerId,
-            linkAuthIntentId = null
+            linkAuthIntentId = null,
+            supportedVerificationTypes = supportedVerificationTypes.takeIf { startSession },
         ).onFailure { error ->
             linkEventsReporter.onAccountLookupFailure(error)
         }.map { consumerSessionLookup ->
@@ -568,6 +562,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             customerId = customerId,
             email = null,
             emailSource = null,
+            supportedVerificationTypes = supportedVerificationTypes,
         ).onFailure { error ->
             linkEventsReporter.onAccountLookupFailure(error)
         }.map { consumerSessionLookup ->
@@ -578,4 +573,25 @@ internal class DefaultLinkAccountManager @Inject constructor(
             )
         }
     }
+
+    override suspend fun refreshConsumer(): Result<ConsumerSessionRefresh> {
+        val linkAccount = linkAccountHolder.linkAccountInfo.value.account
+            ?: return Result.failure(NoLinkAccountFoundException())
+        return linkAuth.refreshConsumer(
+            consumerSessionClientSecret = linkAccount.clientSecret,
+            supportedVerificationTypes = supportedVerificationTypes,
+        )
+            .onFailure { error ->
+                linkEventsReporter.onAccountRefreshFailure(error)
+            }.onSuccess {
+                setAccount(consumerSession = it.consumerSession)
+            }
+    }
+
+    private val supportedVerificationTypes: List<String>
+        get() = if (FeatureFlags.forceLinkWebAuth.isEnabled) {
+            listOf("__fake__")
+        } else {
+            listOf(VerificationType.SMS.value)
+        }
 }

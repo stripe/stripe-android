@@ -61,7 +61,8 @@ internal class DefaultLinkAuthTest {
             emailSource = null,
             linkAuthIntentId = null,
             customerId = null,
-            sessionId = "session_123"
+            sessionId = "session_123",
+            supportedVerificationTypes = null
         )
 
         assertThat(result.isFailure).isTrue()
@@ -81,7 +82,8 @@ internal class DefaultLinkAuthTest {
             emailSource = EmailSource.USER_ACTION,
             linkAuthIntentId = null,
             customerId = null,
-            sessionId = "session_123"
+            sessionId = "session_123",
+            supportedVerificationTypes = null
         )
 
         assertThat(result.isSuccess).isTrue()
@@ -101,7 +103,8 @@ internal class DefaultLinkAuthTest {
             emailSource = null,
             linkAuthIntentId = "auth_intent_123",
             customerId = "customer_123",
-            sessionId = "session_123"
+            sessionId = "session_123",
+            supportedVerificationTypes = null
         )
 
         assertThat(result.isSuccess).isTrue()
@@ -124,7 +127,8 @@ internal class DefaultLinkAuthTest {
             emailSource = EmailSource.USER_ACTION,
             linkAuthIntentId = null,
             customerId = null,
-            sessionId = "session_123"
+            sessionId = "session_123",
+            supportedVerificationTypes = null
         )
 
         assertThat(result.isSuccess).isTrue()
@@ -154,7 +158,8 @@ internal class DefaultLinkAuthTest {
             emailSource = EmailSource.USER_ACTION,
             linkAuthIntentId = null,
             customerId = null,
-            sessionId = "session_123"
+            sessionId = "session_123",
+            supportedVerificationTypes = null
         )
 
         assertThat(result.isFailure).isTrue()
@@ -180,7 +185,8 @@ internal class DefaultLinkAuthTest {
             emailSource = EmailSource.USER_ACTION,
             linkAuthIntentId = null,
             customerId = null,
-            sessionId = "session_123"
+            sessionId = "session_123",
+            supportedVerificationTypes = null
         )
 
         assertThat(result.isFailure).isTrue()
@@ -331,7 +337,8 @@ internal class DefaultLinkAuthTest {
             emailSource = EmailSource.USER_ACTION,
             linkAuthIntentId = null,
             customerId = null,
-            sessionId = "session_123"
+            sessionId = "session_123",
+            supportedVerificationTypes = null
         )
 
         assertThat(result.isFailure).isTrue()

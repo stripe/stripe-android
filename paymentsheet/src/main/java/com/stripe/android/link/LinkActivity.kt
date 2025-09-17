@@ -12,12 +12,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.R
 import com.stripe.android.core.Logger
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.fadeOut
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 internal class LinkActivity : ComponentActivity() {
     @VisibleForTesting
@@ -26,6 +29,7 @@ internal class LinkActivity : ComponentActivity() {
     internal var viewModel: LinkActivityViewModel? = null
 
     private var webLauncher: ActivityResultLauncher<LinkActivityContract.Args>? = null
+    private var webAuthLauncher: ActivityResultLauncher<String>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,12 +52,22 @@ internal class LinkActivity : ComponentActivity() {
         )
 
         webLauncher = registerForActivityResult(vm.activityRetainedComponent.webLinkActivityContract) { result ->
-            vm.handleResult(result)
+            vm.handleWebActivityResult(result)
+        }
+
+        webAuthLauncher = registerForActivityResult(WebLinkAuthActivityContract) { result ->
+            vm.activityRetainedComponent.webLinkAuthChannel.results.tryEmit(result)
         }
 
         vm.launchWebFlow = ::launchWebFlow
         lifecycle.addObserver(vm)
         observeBackPress()
+
+        lifecycleScope.launch {
+            vm.activityRetainedComponent.webLinkAuthChannel.requests.collectLatest { url ->
+                webAuthLauncher?.launch(url)
+            }
+        }
 
         setContent {
             val bottomSheetState = rememberStripeBottomSheetState(
@@ -108,6 +122,7 @@ internal class LinkActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         viewModel?.unregisterActivity()
+        viewModel?.launchWebFlow = null
     }
 
     override fun finish() {

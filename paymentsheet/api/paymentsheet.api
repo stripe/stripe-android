@@ -626,9 +626,10 @@ public final class com/stripe/android/link/ui/verification/ComposableSingletons$
 	public static final field INSTANCE Lcom/stripe/android/link/ui/verification/ComposableSingletons$VerificationBodyKt;
 	public fun <init> ()V
 	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-3$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-4$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-5$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/link/ui/verification/ComposableSingletons$VerificationDialogKt {

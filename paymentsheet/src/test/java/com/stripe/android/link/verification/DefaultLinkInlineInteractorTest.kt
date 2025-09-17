@@ -118,7 +118,7 @@ class DefaultLinkInlineInteractorTest {
     fun `when account status is NeedsVerification, should call startVerification`() = runTest(testDispatcher) {
         // Setup
         linkAccountManager.setLinkAccount(
-            LinkAccountUpdate.Value(createLinkAccount(AccountStatus.NeedsVerification))
+            LinkAccountUpdate.Value(createLinkAccount(AccountStatus.NeedsVerification()))
         )
         val metadata = createPaymentMethodMetadata()
 
@@ -140,7 +140,7 @@ class DefaultLinkInlineInteractorTest {
     @Test
     fun `when otp complete and confirmation succeeds, keeps status as Render2FA and launches Link`() =
         runTest(testDispatcher) {
-            val mockAccount = createLinkAccount(AccountStatus.NeedsVerification)
+            val mockAccount = createLinkAccount(AccountStatus.NeedsVerification())
             linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(mockAccount))
             linkAccountManager.confirmVerificationResult = Result.success(mockAccount)
 
@@ -170,7 +170,7 @@ class DefaultLinkInlineInteractorTest {
         runTest(testDispatcher) {
             // Setup
             val passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
-            val mockAccount = createLinkAccount(AccountStatus.NeedsVerification)
+            val mockAccount = createLinkAccount(AccountStatus.NeedsVerification())
             linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(mockAccount))
             linkAccountManager.confirmVerificationResult = Result.success(mockAccount)
 
@@ -224,7 +224,7 @@ class DefaultLinkInlineInteractorTest {
     @Test
     fun `when verification is already processing, otp complete should be ignored`() = runTest(testDispatcher) {
         // Setup
-        val mockAccount = createLinkAccount(AccountStatus.NeedsVerification)
+        val mockAccount = createLinkAccount(AccountStatus.NeedsVerification())
         linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(mockAccount))
 
         val interactor = createInteractor()
@@ -315,7 +315,7 @@ class DefaultLinkInlineInteractorTest {
     @Test
     fun `resendCode should reset OTP controller and start verification`() = runTest(testDispatcher) {
         // Setup
-        val mockAccount = createLinkAccount(AccountStatus.NeedsVerification)
+        val mockAccount = createLinkAccount(AccountStatus.NeedsVerification())
         linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(mockAccount))
         linkAccountManager.startVerificationResult = Result.success(createLinkAccount())
 
@@ -372,7 +372,7 @@ class DefaultLinkInlineInteractorTest {
     @Test
     fun `resendCode should handle verification failure`() = runTest(testDispatcher) {
         // Setup
-        val mockAccount = createLinkAccount(AccountStatus.NeedsVerification)
+        val mockAccount = createLinkAccount(AccountStatus.NeedsVerification())
         linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(mockAccount))
         val testError = RuntimeException("Verification failed")
         linkAccountManager.startVerificationResult = Result.failure(testError)
@@ -420,7 +420,7 @@ class DefaultLinkInlineInteractorTest {
     @Test
     fun `resendCode should clear error message`() = runTest(testDispatcher) {
         // Setup
-        val mockAccount = createLinkAccount(AccountStatus.NeedsVerification)
+        val mockAccount = createLinkAccount(AccountStatus.NeedsVerification())
         linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(mockAccount))
         linkAccountManager.startVerificationResult = Result.success(createLinkAccount())
 
@@ -487,7 +487,7 @@ class DefaultLinkInlineInteractorTest {
     @Test
     fun `resendCode should reset OTP controller even when verification fails`() = runTest(testDispatcher) {
         // Setup
-        val mockAccount = createLinkAccount(AccountStatus.NeedsVerification)
+        val mockAccount = createLinkAccount(AccountStatus.NeedsVerification())
         linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(mockAccount))
         val testError = RuntimeException("Verification failed")
         linkAccountManager.startVerificationResult = Result.failure(testError)
@@ -568,7 +568,7 @@ class DefaultLinkInlineInteractorTest {
     }
 
     private fun createLinkAccount(
-        accountStatus: AccountStatus = AccountStatus.NeedsVerification,
+        accountStatus: AccountStatus = AccountStatus.NeedsVerification(),
         redactedPhoneNumber: String = "",
         email: String = ""
     ): LinkAccount {

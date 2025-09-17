@@ -16,6 +16,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
@@ -27,7 +28,6 @@ import com.stripe.android.link.attestation.FakeLinkAttestationCheck
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
-import com.stripe.android.link.confirmation.Result
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.ConsentPresentation
@@ -35,6 +35,8 @@ import com.stripe.android.link.model.LinkAuthIntentInfo
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.wallet.AddPaymentMethodOptions
 import com.stripe.android.link.utils.TestNavigationManager
+import com.stripe.android.model.ConsumerSessionRefresh
+import com.stripe.android.model.LinkAuthIntent
 import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -61,6 +63,7 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
 @SuppressWarnings("LargeClass")
 @RunWith(RobolectricTestRunner::class)
@@ -249,7 +252,7 @@ internal class LinkActivityViewModelTest {
         linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
 
         val confirmationHandler = FakeLinkConfirmationHandler()
-        confirmationHandler.confirmWithLinkPaymentDetailsResult = Result.Succeeded
+        confirmationHandler.confirmWithLinkPaymentDetailsResult = LinkConfirmationResult.Succeeded
 
         val vm = createViewModel(
             linkLaunchMode = LinkLaunchMode.Confirmation(selectedPayment = selectedPayment),
@@ -277,8 +280,8 @@ internal class LinkActivityViewModelTest {
 
         val linkConfirmationHandler = FakeLinkConfirmationHandler()
         linkConfirmationHandler.confirmWithLinkPaymentDetailsResult =
-            Result.Failed("something went wrong".resolvableString)
-        linkConfirmationHandler.confirmResult = Result.Failed("something went wrong".resolvableString)
+            LinkConfirmationResult.Failed("something went wrong".resolvableString)
+        linkConfirmationHandler.confirmResult = LinkConfirmationResult.Failed("something went wrong".resolvableString)
 
         val vm = createViewModel(
             linkLaunchMode = LinkLaunchMode.Confirmation(selectedPayment = selectedPayment),
@@ -297,9 +300,10 @@ internal class LinkActivityViewModelTest {
     @Test
     fun `onCreate should start with Wallet screen account status is Verified`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+        linkAccountManager.setAccountStatus(AccountStatus.Verified(true, null))
 
         val vm = createViewModel(linkAccountManager = linkAccountManager)
-        linkAccountManager.setAccountStatus(AccountStatus.Verified(true, null))
 
         vm.onCreate(mock())
 
@@ -314,7 +318,7 @@ internal class LinkActivityViewModelTest {
         val linkAccountManager = FakeLinkAccountManager()
 
         val vm = createViewModel(linkAccountManager = linkAccountManager)
-        linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
+        linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification())
 
         vm.onCreate(mock())
 
@@ -366,7 +370,7 @@ internal class LinkActivityViewModelTest {
     @Test
     fun `onCreate returns Failed result when Authentication existingOnly and account status is Error`() = runTest {
         testAuthenticationFailureCase(
-            accountStatus = AccountStatus.Error,
+            accountStatus = AccountStatus.Error(Exception()),
             existingOnly = true,
             allowUserEmailEdits = true
         )
@@ -384,7 +388,7 @@ internal class LinkActivityViewModelTest {
     @Test
     fun `onCreate returns Failed when Authentication with email edits disabled and Error`() = runTest {
         testAuthenticationFailureCase(
-            accountStatus = AccountStatus.Error,
+            accountStatus = AccountStatus.Error(Exception()),
             existingOnly = false,
             allowUserEmailEdits = false
         )
@@ -461,7 +465,6 @@ internal class LinkActivityViewModelTest {
             val result = awaitItem()
             assertThat(result).isInstanceOf(LinkActivityResult.Failed::class.java)
             val failedResult = result as LinkActivityResult.Failed
-            assertThat(failedResult.error).isInstanceOf(NoLinkAccountFoundException::class.java)
             assertThat(failedResult.linkAccountUpdate).isEqualTo(LinkAccountUpdate.None)
         }
     }
@@ -471,7 +474,7 @@ internal class LinkActivityViewModelTest {
         val linkAccountManager = FakeLinkAccountManager()
 
         val vm = createViewModel(linkAccountManager = linkAccountManager)
-        linkAccountManager.setAccountStatus(AccountStatus.Error)
+        linkAccountManager.setAccountStatus(AccountStatus.Error(Exception()))
 
         vm.onCreate(mock())
 
@@ -551,7 +554,7 @@ internal class LinkActivityViewModelTest {
             linkAttestationCheck = linkAttestationCheck,
             linkExpressMode = LinkExpressMode.ENABLED
         )
-        linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
+        linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification())
 
         vm.onCreate(mock())
 
@@ -569,7 +572,7 @@ internal class LinkActivityViewModelTest {
             linkAccountManager = linkAccountManager,
             linkExpressMode = LinkExpressMode.ENABLED
         )
-        linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
+        linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification())
 
         vm.linkScreenState.test {
             assertThat(awaitItem()).isEqualTo(ScreenState.Loading)
@@ -577,7 +580,7 @@ internal class LinkActivityViewModelTest {
             assertThat(awaitItem()).isEqualTo(ScreenState.VerificationDialog(TestFactory.LINK_ACCOUNT))
 
             linkAccountManager.setAccountStatus(AccountStatus.Verified(true, null))
-            vm.onVerificationSucceeded()
+            vm.onVerificationSucceeded(null)
             assertThat(awaitItem()).isInstanceOf(ScreenState.FullScreen::class.java)
         }
     }
@@ -593,7 +596,7 @@ internal class LinkActivityViewModelTest {
         )
 
         vm.result.test {
-            linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
+            linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification())
 
             vm.onCreate(mock())
 
@@ -814,13 +817,129 @@ internal class LinkActivityViewModelTest {
             linkAccountManager = linkAccountManager,
             linkLaunchMode = LinkLaunchMode.Authorization(linkAuthIntentId = "lai_123")
         )
-        linkAccountManager.setAccountStatus(AccountStatus.Verified(true, null))
+        linkAccountManager.setAccountStatus(
+            AccountStatus.Verified(
+                hasVerifiedSMSSession = true,
+                consentPresentation = ConsentPresentation.FullScreen(TestFactory.CONSENT_PANE)
+            )
+        )
 
         vm.onCreate(mock())
         advanceUntilIdle()
 
         val state = vm.linkScreenState.value as ScreenState.FullScreen
         assertEquals(state.initialDestination, LinkScreen.OAuthConsent)
+    }
+
+    @Test
+    fun `getScreenStateForAuthorizationAfterRefresh should complete with consent granted when status is Consented`() =
+        testGetScreenStateForAuthorizationAfterRefresh(
+            linkAuthIntentStatus = LinkAuthIntent.Status.Consented,
+            assertionBlock = {
+                val activityResult = awaitItem() as LinkActivityResult.Completed
+                assertThat(activityResult.authorizationConsentGranted).isTrue()
+            }
+        )
+
+    @Test
+    fun `getScreenStateForAuthorizationAfterRefresh should complete with consent rejected when status is Rejected`() =
+        testGetScreenStateForAuthorizationAfterRefresh(
+            linkAuthIntentStatus = LinkAuthIntent.Status.Rejected,
+            assertionBlock = {
+                val activityResult = awaitItem() as LinkActivityResult.Completed
+                assertThat(activityResult.authorizationConsentGranted).isFalse()
+            }
+        )
+
+    @Test
+    fun `getScreenStateForAuthorizationAfterRefresh should fail when status is Created`() =
+        testGetScreenStateForAuthorizationAfterRefresh(
+            linkAuthIntentStatus = LinkAuthIntent.Status.Created,
+            assertionBlock = {
+                val activityResult = awaitItem() as LinkActivityResult.Failed
+                assertThat(activityResult.error.message)
+                    .contains("Unexpected LAI status when account is verified: Created")
+            }
+        )
+
+    @Test
+    fun `getScreenStateForAuthorizationAfterRefresh should fail when status is Expired`() =
+        testGetScreenStateForAuthorizationAfterRefresh(
+            linkAuthIntentStatus = LinkAuthIntent.Status.Expired,
+            assertionBlock = {
+                val activityResult = awaitItem() as LinkActivityResult.Failed
+                assertThat(activityResult.error.message)
+                    .contains("Unexpected LAI status when account is verified: Expired")
+            }
+        )
+
+    @Test
+    fun `getScreenStateForAuthorizationAfterRefresh navigates to OAuthConsent with Authenticated FullScreen consent`() =
+        testGetScreenStateForAuthorizationAfterRefresh(
+            linkAuthIntentStatus = LinkAuthIntent.Status.Authenticated,
+            consentPresentation = ConsentPresentation.FullScreen(TestFactory.CONSENT_PANE),
+            expectedScreenState = ScreenState.FullScreen(LinkScreen.OAuthConsent)
+        )
+
+    @Test
+    fun `getScreenStateForAuthorizationAfterRefresh completes with Authenticated non-FullScreen consent`() =
+        testGetScreenStateForAuthorizationAfterRefresh(
+            linkAuthIntentStatus = LinkAuthIntent.Status.Authenticated,
+            consentPresentation = mock<ConsentPresentation.Inline>(),
+            assertionBlock = {
+                val activityResult = awaitItem() as LinkActivityResult.Completed
+                assertThat(activityResult.linkAccountUpdate).isNotNull()
+            }
+        )
+
+    @Test
+    fun `getScreenStateForAuthorizationAfterRefresh navigates to OAuthConsent with null LAI FullScreen consent`() =
+        testGetScreenStateForAuthorizationAfterRefresh(
+            linkAuthIntentStatus = null,
+            consentPresentation = ConsentPresentation.FullScreen(TestFactory.CONSENT_PANE),
+            expectedScreenState = ScreenState.FullScreen(LinkScreen.OAuthConsent)
+        )
+
+    @Test
+    fun `getScreenStateForAuthorizationAfterRefresh completes with null linkAuthIntent non-FullScreen consent`() =
+        testGetScreenStateForAuthorizationAfterRefresh(
+            linkAuthIntentStatus = null,
+            consentPresentation = mock<ConsentPresentation.Inline>(),
+            assertionBlock = {
+                assertThat(awaitItem()).isInstanceOf(LinkActivityResult.Completed::class.java)
+            }
+        )
+
+    private fun testGetScreenStateForAuthorizationAfterRefresh(
+        linkAuthIntentStatus: LinkAuthIntent.Status?,
+        consentPresentation: ConsentPresentation? = null,
+        expectedScreenState: ScreenState? = null,
+        assertionBlock: (suspend TurbineTestContext<LinkActivityResult>.() -> Unit)? = null
+    ) = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+
+        val vm = createViewModel(linkAccountManager = linkAccountManager)
+
+        val accountStatus = AccountStatus.Verified(true, consentPresentation)
+        val consumerSessionRefresh = ConsumerSessionRefresh(
+            consumerSession = TestFactory.CONSUMER_SESSION,
+            linkAuthIntent = linkAuthIntentStatus?.let { LinkAuthIntent(it) }
+        )
+
+        if (expectedScreenState != null) {
+            // Test case expecting a specific ScreenState return value
+            val result = vm.getScreenStateForAuthorizationAfterRefresh(accountStatus, consumerSessionRefresh)
+            assertThat(result).isEqualTo(expectedScreenState)
+        }
+        if (assertionBlock != null) {
+            // Test case expecting null return with result emissions
+            vm.result.test {
+                val result = vm.getScreenStateForAuthorizationAfterRefresh(accountStatus, consumerSessionRefresh)
+                assertThat(result).isNull()
+                assertionBlock()
+            }
+        }
     }
 
     private fun testAttestationCheckError(

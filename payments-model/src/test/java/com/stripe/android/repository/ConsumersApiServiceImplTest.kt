@@ -109,6 +109,7 @@ class ConsumersApiServiceImplTest {
             sessionId = DEFAULT_SESSION_ID,
             requestOptions = DEFAULT_OPTIONS,
             doNotLogConsumerFunnelEvent = false,
+            supportedVerificationTypes = null,
             customerId = null
         )
 
@@ -141,6 +142,7 @@ class ConsumersApiServiceImplTest {
                 requestSurface = requestSurface,
                 sessionId = DEFAULT_SESSION_ID,
                 doNotLogConsumerFunnelEvent = false,
+                supportedVerificationTypes = null,
                 requestOptions = DEFAULT_OPTIONS,
                 customerId = null
             )

@@ -11,6 +11,7 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.LinkAccountSession
@@ -63,6 +64,11 @@ internal interface LinkAccountManager {
         linkAuthIntentId: String?,
         customerId: String?
     ): Result<LinkAccount?>
+
+    /**
+     * Refresh the mobile consumer session.
+     */
+    suspend fun refreshConsumer(): Result<ConsumerSessionRefresh>
 
     /**
      * Registers the user for a new Link account.

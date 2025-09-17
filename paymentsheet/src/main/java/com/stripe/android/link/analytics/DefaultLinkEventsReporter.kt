@@ -71,6 +71,14 @@ internal class DefaultLinkEventsReporter @Inject constructor(
         fireEvent(LinkEvent.AccountLookupFailure, params)
     }
 
+    override fun onAccountRefreshFailure(error: Throwable) {
+        val params = mapOf(FIELD_ERROR_MESSAGE to error.safeAnalyticsMessage).plus(
+            ErrorReporter.getAdditionalParamsFromError(error)
+        )
+
+        fireEvent(LinkEvent.AccountRefreshFailure, params)
+    }
+
     override fun on2FAStart() {
         fireEvent(LinkEvent.TwoFAStart)
     }

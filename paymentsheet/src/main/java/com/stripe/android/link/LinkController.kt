@@ -742,6 +742,18 @@ class LinkController @Inject internal constructor(
         val iconPainter: Painter
             @Composable
             get() = painterResource(iconRes)
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        companion object {
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @JvmStatic
+            fun create(
+                context: Context,
+                details: PaymentMethodPreviewDetails
+            ): PaymentMethodPreview {
+                return details.toPreview(context)
+            }
+        }
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

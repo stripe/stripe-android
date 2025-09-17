@@ -12,9 +12,10 @@ object FeatureFlags {
     val financialConnectionsFullSdkUnavailable = FeatureFlag("FC Full SDK Unavailable")
     val forceEnableNativeFinancialConnections = FeatureFlag("Force enable FC Native")
     val showInlineOtpInWalletButtons = FeatureFlag("Show Inline Signup in Wallet Buttons")
-    val forceEnableLinkPaymentSelectionHint = FeatureFlag("Force enable payment selection hint")
+    val forceEnableLinkPaymentSelectionHint = FeatureFlag("Link: Force enable payment selection hint")
     val cardScanGooglePayMigration = FeatureFlag("Use Google Payment Card Recognition API for Card Scan")
     val enablePassiveCaptcha = FeatureFlag("Enable Passive Captcha")
+    val forceLinkWebAuth = FeatureFlag("Link: Force web auth")
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

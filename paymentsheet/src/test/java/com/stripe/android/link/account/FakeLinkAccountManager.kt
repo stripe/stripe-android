@@ -15,6 +15,7 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.LinkAccountSession
@@ -33,6 +34,12 @@ internal open class FakeLinkAccountManager(
 ) : LinkAccountManager {
 
     var lookupResult: Result<LinkAccount?> = Result.success(null)
+    var refreshConsumerResult: Result<ConsumerSessionRefresh> = Result.success(
+        ConsumerSessionRefresh(
+            consumerSession = TestFactory.CONSUMER_SESSION,
+            linkAuthIntent = null
+        )
+    )
     var signupResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
 
     data class SignUpCall(
@@ -163,6 +170,10 @@ internal open class FakeLinkAccountManager(
             )
         )
         return lookupConsumerByAuthIntentResult
+    }
+
+    override suspend fun refreshConsumer(): Result<ConsumerSessionRefresh> {
+        return refreshConsumerResult
     }
 
     override suspend fun signInWithUserInput(userInput: UserInput): Result<LinkAccount> {

@@ -54,6 +54,16 @@ internal val ConsumerPaymentDetails.PaymentDetails.paymentOptionLabel: Resolvabl
         return components.joinToString(separator = " ")
     }
 
+internal fun makeFallbackCardName(funding: String, brand: String): ResolvableString {
+    return when (funding) {
+        "CREDIT" -> resolvableString(R.string.stripe_link_card_type_credit, brand)
+        "DEBIT" -> resolvableString(R.string.stripe_link_card_type_debit, brand)
+        "PREPAID" -> resolvableString(R.string.stripe_link_card_type_prepaid, brand)
+        "CHARGE", "FUNDING_INVALID" -> resolvableString(R.string.stripe_link_card_type_unknown, brand)
+        else -> resolvableString(R.string.stripe_link_card_type_unknown, brand)
+    }
+}
+
 private fun makeCardDisplayName(nickname: String?, funding: String, brand: CardBrand): ResolvableString {
     return nickname?.resolvableString ?: makeFallbackCardName(funding, brand.displayName)
 }
@@ -62,16 +72,6 @@ private fun makeBankAccountDisplayName(nickname: String?, bankName: String?): Re
     return nickname?.resolvableString
         ?: bankName?.resolvableString
         ?: StripeUiCoreR.string.stripe_payment_method_bank.resolvableString
-}
-
-private fun makeFallbackCardName(funding: String, brand: String): ResolvableString {
-    return when (funding) {
-        "CREDIT" -> resolvableString(R.string.stripe_link_card_type_credit, brand)
-        "DEBIT" -> resolvableString(R.string.stripe_link_card_type_debit, brand)
-        "PREPAID" -> resolvableString(R.string.stripe_link_card_type_prepaid, brand)
-        "CHARGE", "FUNDING_INVALID" -> resolvableString(R.string.stripe_link_card_type_unknown, brand)
-        else -> resolvableString(R.string.stripe_link_card_type_unknown, brand)
-    }
 }
 
 private fun List<ResolvableString>.joinToString(separator: String): ResolvableString {

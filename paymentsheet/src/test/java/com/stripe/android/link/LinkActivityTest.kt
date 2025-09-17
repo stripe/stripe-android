@@ -77,7 +77,7 @@ internal class LinkActivityTest {
     fun `verification dialog is displayed when link screen state is VerificationDialog`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
         linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
-        linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
+        linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification())
 
         setupActivityController(
             use2faDialog = true,
@@ -96,7 +96,7 @@ internal class LinkActivityTest {
     fun `full screen content is displayed when link screen state is FullScreen`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
         linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
-        linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
+        linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification())
 
         setupActivityController(
             use2faDialog = false,
