@@ -239,6 +239,7 @@ internal object TestFactory {
         saveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(null),
         forceSetupFutureUseBehaviorAndNewMandate = false,
         linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+        disableFundingSources = emptyList(),
     )
 
     val LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING = LINK_CONFIGURATION.copy(
