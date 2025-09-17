@@ -58,7 +58,8 @@ internal open class FakeLinkRepository : LinkRepository {
         email: String?,
         linkAuthIntentId: String?,
         sessionId: String,
-        customerId: String?
+        customerId: String?,
+        supportedVerificationTypes: List<String>?
     ): Result<ConsumerSessionLookup> {
         lookupConsumerCalls.add(
             item = LookupCall(
@@ -89,7 +90,8 @@ internal open class FakeLinkRepository : LinkRepository {
         verificationToken: String,
         appId: String,
         sessionId: String,
-        customerId: String?
+        customerId: String?,
+        supportedVerificationTypes: List<String>?
     ): Result<ConsumerSessionLookup> {
         mobileLookupCalls.add(
             item = MobileLookupCall(
@@ -105,8 +107,9 @@ internal open class FakeLinkRepository : LinkRepository {
     }
 
     override suspend fun refreshConsumer(
+        appId: String,
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
+        supportedVerificationTypes: List<String>?
     ): Result<ConsumerSessionRefresh> = refreshConsumerResult
 
     override suspend fun consumerSignUp(

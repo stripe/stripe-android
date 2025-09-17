@@ -420,14 +420,16 @@ class DefaultLinkAccountManagerTest {
                 email: String?,
                 linkAuthIntentId: String?,
                 sessionId: String,
-                customerId: String?
+                customerId: String?,
+                supportedVerificationTypes: List<String>?
             ): Result<ConsumerSessionLookup> {
                 callCount += 1
                 return super.lookupConsumer(
                     email = email,
                     linkAuthIntentId = linkAuthIntentId,
                     sessionId = sessionId,
-                    customerId = customerId
+                    customerId = customerId,
+                    supportedVerificationTypes = supportedVerificationTypes
                 )
             }
         }

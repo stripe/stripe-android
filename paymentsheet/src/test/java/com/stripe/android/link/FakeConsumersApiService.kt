@@ -66,6 +66,7 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         requestSurface: String,
         sessionId: String,
         doNotLogConsumerFunnelEvent: Boolean,
+        supportedVerificationTypes: List<String>?,
         requestOptions: ApiRequest.Options,
         customerId: String?
     ): ConsumerSessionLookup {
@@ -88,6 +89,7 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         requestSurface: String,
         verificationToken: String,
         appId: String,
+        supportedVerificationTypes: List<String>?,
         requestOptions: ApiRequest.Options,
         sessionId: String,
         customerId: String?
@@ -190,7 +192,9 @@ internal open class FakeConsumersApiService : ConsumersApiService {
     }
 
     override suspend fun refreshConsumerSession(
+        appId: String,
         consumerSessionClientSecret: String,
+        supportedVerificationTypes: List<String>?,
         requestSurface: String,
         requestOptions: ApiRequest.Options
     ): ConsumerSessionRefresh = refreshConsumerSessionResult

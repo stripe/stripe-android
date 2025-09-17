@@ -72,6 +72,7 @@ class LinkApiRepositoryTest {
             linkAuthIntentId = null,
             sessionId = SESSION_ID,
             customerId = null,
+            supportedVerificationTypes = null
         )
 
         assertThat(result).isEqualTo(Result.success(TestFactory.CONSUMER_SESSION_LOOKUP))
@@ -94,6 +95,7 @@ class LinkApiRepositoryTest {
                 requestSurface: String,
                 sessionId: String,
                 doNotLogConsumerFunnelEvent: Boolean,
+                supportedVerificationTypes: List<String>?,
                 requestOptions: ApiRequest.Options,
                 customerId: String?
             ): ConsumerSessionLookup {
@@ -106,7 +108,8 @@ class LinkApiRepositoryTest {
             email = "email",
             linkAuthIntentId = null,
             sessionId = SESSION_ID,
-            customerId = null
+            customerId = null,
+            supportedVerificationTypes = null
         )
 
         assertThat(result).isEqualTo(Result.failure<ConsumerSessionLookup>(error))
@@ -124,7 +127,8 @@ class LinkApiRepositoryTest {
             appId = TestFactory.APP_ID,
             sessionId = TestFactory.SESSION_ID,
             emailSource = TestFactory.EMAIL_SOURCE,
-            customerId = null
+            customerId = null,
+            supportedVerificationTypes = null
         )
 
         assertThat(result).isEqualTo(Result.success(TestFactory.CONSUMER_SESSION_LOOKUP))
@@ -151,6 +155,7 @@ class LinkApiRepositoryTest {
                 requestSurface: String,
                 verificationToken: String,
                 appId: String,
+                supportedVerificationTypes: List<String>?,
                 requestOptions: ApiRequest.Options,
                 sessionId: String,
                 customerId: String?
@@ -167,7 +172,8 @@ class LinkApiRepositoryTest {
             appId = TestFactory.APP_ID,
             sessionId = TestFactory.SESSION_ID,
             emailSource = TestFactory.EMAIL_SOURCE,
-            customerId = null
+            customerId = null,
+            supportedVerificationTypes = null
         )
 
         assertThat(result).isEqualTo(Result.failure<ConsumerSessionLookup>(error))
