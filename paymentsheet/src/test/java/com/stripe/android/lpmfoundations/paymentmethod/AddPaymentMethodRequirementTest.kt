@@ -292,12 +292,12 @@ internal class AddPaymentMethodRequirementTest {
     }
 
     @Test
-    fun testInstantDebitsReturnsFalseWhenBankDisabledInFundingSources() {
+    fun testInstantDebitsReturnsFalseWhenBankAccountDisabledInFundingSources() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = createValidInstantDebitsPaymentIntent(),
             linkConfiguration = PaymentSheet.LinkConfiguration(
                 display = PaymentSheet.LinkConfiguration.Display.Automatic,
-                disableFundingSources = listOf("BANK"),
+                disableFundingSources = listOf("BANK_ACCOUNT"),
             ),
             linkState = LinkState(
                 configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
@@ -310,12 +310,12 @@ internal class AddPaymentMethodRequirementTest {
     }
 
     @Test
-    fun testInstantDebitsReturnsTrueWhenBankNotInDisabledFundingSources() {
+    fun testInstantDebitsReturnsTrueWhenBankAccountNotInDisabledFundingSources() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = createValidInstantDebitsPaymentIntent(),
             linkConfiguration = PaymentSheet.LinkConfiguration(
                 display = PaymentSheet.LinkConfiguration.Display.Automatic,
-                disableFundingSources = listOf("CARD"), // Disable something else, not BANK
+                disableFundingSources = listOf("CARD"), // Disable something else, not BANK_ACCOUNT
             ),
             linkState = LinkState(
                 configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,

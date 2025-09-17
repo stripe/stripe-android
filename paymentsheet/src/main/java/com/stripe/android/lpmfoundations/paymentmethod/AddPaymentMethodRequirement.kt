@@ -4,7 +4,6 @@ import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
-import kotlin.text.contains
 
 internal enum class AddPaymentMethodRequirement {
     /** A special case that indicates the payment method is always unsupported by PaymentSheet. */
@@ -90,7 +89,9 @@ internal enum class AddPaymentMethodRequirement {
 private val PaymentMethodMetadata.supportsMobileInstantDebitsFlow: Boolean
     get() {
         val supportsInstantDebitsOnboarding = linkState?.configuration?.supportsInstantDebitsOnboarding == true
-        val instantDebitsDisabledViaConfig = linkConfiguration.disableFundingSources.contains("BANK")
+        val instantDebitsDisabledViaConfig = linkConfiguration.disableFundingSources.any {
+            it.equals("BANK_ACCOUNT", ignoreCase = true)
+        }
         return supportsInstantDebitsOnboarding && canShowBankForm && instantDebitsDisabledViaConfig.not()
     }
 
