@@ -20,7 +20,7 @@ import com.stripe.android.uicore.R as UiCoreR
 /**
  * An [EditText] that handles putting numbers around a central divider character.
  */
-class ExpiryDateEditText @JvmOverloads constructor(
+open class ExpiryDateEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = AppCompatR.attr.editTextStyle
