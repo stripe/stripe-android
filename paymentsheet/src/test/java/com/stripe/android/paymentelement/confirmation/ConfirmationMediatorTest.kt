@@ -638,9 +638,6 @@ class ConfirmationMediatorTest {
     @Parcelize
     private object InvalidTestConfirmationOption : ConfirmationHandler.Option
 
-    @Parcelize
-    private object TestParcelableValue : Parcelable
-
     private companion object {
         private val INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
 

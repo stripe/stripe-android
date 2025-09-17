@@ -6,36 +6,14 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.requireApplication
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import javax.inject.Inject
 
 internal class FormActivityViewModel @Inject constructor(
     val component: FormActivityViewModelComponent,
-    @ViewModelScope private val customViewModelScope: CoroutineScope,
-    private val confirmationHandler: ConfirmationHandler,
-    private val paymentMethodMetadata: PaymentMethodMetadata
+    @ViewModelScope private val customViewModelScope: CoroutineScope
 ) : ViewModel() {
-
-    private var isBootstrapped = false
-
-    fun inject(activity: FormActivity) {
-        component.subcomponentFactory.build(
-            activityResultCaller = activity,
-            lifecycleOwner = activity
-        ).inject(activity)
-        bootstrapConfirmationHandler()
-    }
-
-    private fun bootstrapConfirmationHandler() {
-        if (!isBootstrapped) {
-            confirmationHandler.bootstrap(paymentMethodMetadata)
-            isBootstrapped = true
-        }
-    }
-
     override fun onCleared() {
         customViewModelScope.cancel()
     }

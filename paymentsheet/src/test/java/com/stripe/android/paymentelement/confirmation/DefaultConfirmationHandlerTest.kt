@@ -1119,9 +1119,6 @@ class DefaultConfirmationHandlerTest {
     @Parcelize
     private data object InvalidConfirmationOption : ConfirmationHandler.Option
 
-    @Parcelize
-    private data object TestParcelableValue : Parcelable
-
     private companion object {
         const val SOME_DEFINITION_PERSISTED_KEY = "SomeParameters"
         const val AWAITING_CONFIRMATION_RESULT_KEY = "AwaitingConfirmationResult"
