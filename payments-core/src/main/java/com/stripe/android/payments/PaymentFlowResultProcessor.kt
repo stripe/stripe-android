@@ -8,12 +8,9 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripeIntentResult.Outcome.Companion.CANCELED
 import com.stripe.android.StripeIntentResult.Outcome.Companion.SUCCEEDED
 import com.stripe.android.core.Logger
-import com.stripe.android.core.exception.MaxRetryReachedException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.networking.LinearRetryDelaySupplier
-import com.stripe.android.core.networking.RetryDelaySupplier
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
@@ -38,7 +35,6 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
     protected val stripeRepository: StripeRepository,
     private val logger: Logger,
     private val workContext: CoroutineContext,
-    private val retryDelaySupplier: RetryDelaySupplier = LinearRetryDelaySupplier()
 ) {
     private val failureMessageFactory = PaymentFlowFailureMessageFactory(context)
 
@@ -53,6 +49,8 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
             apiKey = publishableKeyProvider.get(),
             stripeAccount = result.stripeAccountId
         )
+
+        val startTime = System.currentTimeMillis()
 
         retrieveStripeIntent(
             clientSecret = result.clientSecret,
@@ -72,7 +70,8 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                     val intent = refreshStripeIntentUntilTerminalState(
                         stripeIntent,
                         result.clientSecret,
-                        requestOptions
+                        requestOptions,
+                        startTime
                     ).getOrThrow()
                     val flowOutcome = determineFlowOutcome(intent, result.flowOutcome)
                     createStripeIntentResult(
@@ -198,19 +197,39 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
      * @param requestOptions options for [ApiRequest]
      *
      * @return a [StripeIntent] object with a deterministic state.
-     *
-     * @throws MaxRetryReachedException when max retry is reached and the status is still
-     * "requires_action".
      */
     private suspend fun refreshStripeIntentUntilTerminalState(
         originalIntent: StripeIntent,
         clientSecret: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        startTime: Long
     ): Result<T> {
-        val maxRetries = originalIntent.paymentMethod?.type?.afterRedirectAction?.retryCount ?: MAX_RETRIES
-        var remainingRetries = maxRetries
+        var stripeIntentResult = refreshOrRetrieveIntent(originalIntent, clientSecret, requestOptions)
 
-        var stripeIntentResult = if (shouldCallRefreshIntent(originalIntent)) {
+        // The p99 for the intent status to be updated is 5s. So we only want to poll for a maximum of 5s from
+        // the time that the intent was first retrieved, before making one final fetch
+        val duration = POLLING_DURATION - (System.currentTimeMillis() - startTime)
+
+        withTimeoutOrNull(duration) {
+            while (shouldRetry(stripeIntentResult)) {
+                delay(POLLING_DELAY)
+                stripeIntentResult = refreshOrRetrieveIntent(originalIntent, clientSecret, requestOptions)
+            }
+        }
+
+        if (shouldRetry(stripeIntentResult)) {
+            stripeIntentResult = refreshOrRetrieveIntent(originalIntent, clientSecret, requestOptions)
+        }
+
+        return stripeIntentResult
+    }
+
+    private suspend fun refreshOrRetrieveIntent(
+        originalIntent: StripeIntent,
+        clientSecret: String,
+        requestOptions: ApiRequest.Options,
+    ): Result<T> {
+        return if (shouldCallRefreshIntent(originalIntent)) {
             refreshStripeIntent(
                 clientSecret = clientSecret,
                 requestOptions = requestOptions,
@@ -223,32 +242,6 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                 expandFields = EXPAND_PAYMENT_METHOD
             )
         }
-
-        withTimeoutOrNull(retryDelaySupplier.maxDuration(maxRetries = maxRetries)) {
-            while (shouldRetry(stripeIntentResult) && remainingRetries > 1) {
-                val delayDuration = retryDelaySupplier.getDelay(
-                    maxRetries,
-                    remainingRetries
-                )
-                delay(delayDuration)
-                stripeIntentResult = if (shouldCallRefreshIntent(originalIntent)) {
-                    refreshStripeIntent(
-                        clientSecret = clientSecret,
-                        requestOptions = requestOptions,
-                        expandFields = EXPAND_PAYMENT_METHOD
-                    )
-                } else {
-                    retrieveStripeIntent(
-                        clientSecret = clientSecret,
-                        requestOptions = requestOptions,
-                        expandFields = EXPAND_PAYMENT_METHOD
-                    )
-                }
-                remainingRetries--
-            }
-        }
-
-        return stripeIntentResult
     }
 
     /**
@@ -272,12 +265,17 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         val requiresAction = stripeIntent.requiresAction()
         val isCardPaymentProcessing = stripeIntent.status == StripeIntent.Status.Processing &&
             stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card
-        return requiresAction || isCardPaymentProcessing
+        // Card does not have an AfterRedirectAction but we do poll for the 3DS2 WebView cancellation case
+        val shouldRetryFor3ds2OrRefreshAction =
+            stripeIntent.paymentMethod?.type?.afterRedirectAction?.shouldRetry ?: false ||
+                stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card
+        return (requiresAction && shouldRetryFor3ds2OrRefreshAction) || isCardPaymentProcessing
     }
 
     internal companion object {
         val EXPAND_PAYMENT_METHOD = listOf("payment_method")
-        const val MAX_RETRIES = 5
+        const val POLLING_DURATION = 5000L
+        const val POLLING_DELAY = 1000L
     }
 }
 
