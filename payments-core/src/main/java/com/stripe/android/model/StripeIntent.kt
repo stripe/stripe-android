@@ -76,6 +76,8 @@ sealed interface StripeIntent : StripeModel {
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     val countryCode: String?
 
+    val automaticPaymentMethods: AutomaticPaymentMethods?
+
     fun requiresAction(): Boolean
 
     fun requiresConfirmation(): Boolean
@@ -113,6 +115,9 @@ sealed interface StripeIntent : StripeModel {
             }
         }
     }
+
+    @Parcelize
+    data class AutomaticPaymentMethods(val enabled: Boolean) : StripeModel
 
     /**
      * - [The Intent State Machine - Intent statuses](https://stripe.com/docs/payments/intents#intent-statuses)

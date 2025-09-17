@@ -2,6 +2,7 @@ package com.stripe.android.networking
 
 import android.content.Context
 import android.net.http.HttpResponseCache
+import android.util.Log
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.DefaultFraudDetectionDataRepository
@@ -48,10 +49,12 @@ import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.exception.CardException
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata
+import com.stripe.android.model.ClientAttributionMetadataHolder
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
@@ -230,7 +233,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options,
         expandFields: List<String>
     ): Result<PaymentIntent> {
-        val params = fraudDetectionDataParamsUtils.addFraudDetectionData(
+        var params: Map<String, Any?> = fraudDetectionDataParamsUtils.addFraudDetectionData(
             // Add payment_user_agent if the Payment Method is being created on this call
             maybeAddPaymentUserAgent(
                 confirmPaymentIntentParams.toParamMap()
@@ -240,7 +243,11 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 confirmPaymentIntentParams.sourceParams
             ).plus(createExpandParam(expandFields)),
             fraudDetectionData
-        )
+        ).toMutableMap()
+
+        params = setClientAttributionMetadata(params)
+
+        Log.d("xkcd", "params for confirm PM: $params")
 
         val paymentIntentId = runCatching {
             PaymentIntent.ClientSecret(confirmPaymentIntentParams.clientSecret).paymentIntentId
@@ -268,6 +275,24 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     errorMessage = result.errorMessage,
                 )
             )
+        }
+    }
+
+    private fun setClientAttributionMetadata(params: Map<String, Any?>): Map<String, Any?> {
+        val clientAttributionMetadata = ClientAttributionMetadataHolder.getAndClear() ?: return params
+
+        if (clientAttributionMetadata.toParamMap().isEmpty()) {
+            return params
+        }
+
+        if (params.containsKey(PARAM_PAYMENT_METHOD_DATA)) {
+            val newPaymentMethodData: Map<*, *>? = params[PARAM_PAYMENT_METHOD_DATA] as? Map<*, *>
+            val mutableParams = params.toMutableMap()
+
+            mutableParams[PARAM_PAYMENT_METHOD_DATA] = newPaymentMethodData?.plus(clientAttributionMetadata.toParamMap()).orEmpty()
+            return mutableParams
+        } else {
+            return params.plus(clientAttributionMetadata.toParamMap())
         }
     }
 
@@ -433,22 +458,28 @@ class StripeApiRepository @JvmOverloads internal constructor(
             return Result.failure(it)
         }
 
+        var params = fraudDetectionDataParamsUtils.addFraudDetectionData(
+            // Add payment_user_agent if the Payment Method is being created on this call
+            maybeAddPaymentUserAgent(
+                confirmSetupIntentParams.toParamMap()
+                    // Omit client_secret with user key auth.
+                    .let { if (options.apiKeyIsUserKey) it.minus(PARAM_CLIENT_SECRET) else it },
+                confirmSetupIntentParams.paymentMethodCreateParams
+            ).plus(createExpandParam(expandFields)),
+            fraudDetectionData
+        )
+
+        params = setClientAttributionMetadata(params)
+
+        Log.d("xkcd", "params for confirm SI: $params")
+
         fireFraudDetectionDataRequest()
 
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 getConfirmSetupIntentUrl(setupIntentId),
                 options,
-                fraudDetectionDataParamsUtils.addFraudDetectionData(
-                    // Add payment_user_agent if the Payment Method is being created on this call
-                    maybeAddPaymentUserAgent(
-                        confirmSetupIntentParams.toParamMap()
-                            // Omit client_secret with user key auth.
-                            .let { if (options.apiKeyIsUserKey) it.minus(PARAM_CLIENT_SECRET) else it },
-                        confirmSetupIntentParams.paymentMethodCreateParams
-                    ).plus(createExpandParam(expandFields)),
-                    fraudDetectionData
-                )
+                params,
             ),
             SetupIntentJsonParser()
         ) { result ->
@@ -589,13 +620,19 @@ class StripeApiRepository @JvmOverloads internal constructor(
     ): Result<PaymentMethod> {
         fireFraudDetectionDataRequest()
 
+        var params: Map<String, Any?> = paymentMethodCreateParams.toParamMap()
+            .plus(buildPaymentUserAgentPair(paymentMethodCreateParams.attribution))
+            .plus(fraudDetectionData?.params.orEmpty())
+
+        params = setClientAttributionMetadata(params.toMutableMap())
+
+        Log.d("xkcd", "create PM params: $params")
+
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 paymentMethodsUrl,
                 options,
-                paymentMethodCreateParams.toParamMap()
-                    .plus(buildPaymentUserAgentPair(paymentMethodCreateParams.attribution))
-                    .plus(fraudDetectionData?.params.orEmpty())
+                params,
             ),
             PaymentMethodJsonParser()
         ) {
@@ -1186,18 +1223,22 @@ class StripeApiRepository @JvmOverloads internal constructor(
         extraParams: Map<String, *>?,
         requestOptions: ApiRequest.Options
     ): Result<PaymentMethod> {
+        val params = mapOf(
+            "request_surface" to requestSurface.value,
+            "credentials" to mapOf(
+                "consumer_session_client_secret" to consumerSessionClientSecret
+            ),
+            "id" to id,
+            buildPaymentUserAgentPair(),
+        ).plus(extraParams ?: emptyMap()).plus(ClientAttributionMetadataHolder.getAndClear()?.toParamMap() ?: emptyMap())
+
+        Log.d("xkcd", "share payment details params: $params")
+
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
                 url = sharePaymentDetailsUrl,
                 options = requestOptions,
-                params = mapOf(
-                    "request_surface" to requestSurface.value,
-                    "credentials" to mapOf(
-                        "consumer_session_client_secret" to consumerSessionClientSecret
-                    ),
-                    "id" to id,
-                    buildPaymentUserAgentPair(),
-                ).plus(extraParams ?: emptyMap())
+                params = params,
             ),
             jsonParser = ConsumerPaymentDetailsShareJsonParser,
         ).map { it.paymentMethod }

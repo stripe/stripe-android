@@ -12,7 +12,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal data class LinkConfiguration(
+internal data class LinkConfiguration constructor(
     val stripeIntent: StripeIntent,
     val merchantName: String,
     val sellerBusinessName: String?,

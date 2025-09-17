@@ -629,7 +629,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             merchantLogoUrl = elementsSession.merchantLogoUrl,
             customerInfo = customerInfo,
             shippingDetails = shippingDetails?.takeIf { it.isCheckboxSelected == true },
-            passthroughModeEnabled = elementsSession.linkPassthroughModeEnabled,
+            passthroughModeEnabled = true,
             cardBrandChoice = cardBrandChoice,
             cardBrandFilter = cardBrandFilter,
             financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = elementsSession),

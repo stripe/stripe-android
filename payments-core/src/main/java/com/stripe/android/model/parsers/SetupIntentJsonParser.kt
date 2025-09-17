@@ -32,6 +32,8 @@ class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
 
         val paymentMethodOptions = json.optJSONObject(FIELD_PAYMENT_METHOD_OPTIONS)?.toString()
 
+        val automaticPaymentMethods = json.optString(FIELD_AUTOMATIC_PAYMENT_METHODS)
+
         return SetupIntent(
             id = optString(json, FIELD_ID),
             created = json.optLong(FIELD_CREATED),
@@ -57,8 +59,8 @@ class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
             nextActionData = json.optJSONObject(FIELD_NEXT_ACTION)?.let {
                 NextActionDataParser().parse(it)
             },
-            paymentMethodOptionsJsonString = paymentMethodOptions
-        )
+            paymentMethodOptionsJsonString = paymentMethodOptions,
+            automaticPaymentMethods = automaticPaymentMethods?.let { StripeIntent.AutomaticPaymentMethods(enabled = (it == "enabled")) },        )
     }
 
     internal class ErrorJsonParser : ModelJsonParser<SetupIntent.Error> {
@@ -108,5 +110,6 @@ class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
             "unactivated_payment_method_types"
         private const val FIELD_LINK_FUNDING_SOURCES = "link_funding_sources"
         private const val FIELD_PAYMENT_METHOD_OPTIONS = "payment_method_options"
+        private const val FIELD_AUTOMATIC_PAYMENT_METHODS = "automatic_payment_methods"
     }
 }

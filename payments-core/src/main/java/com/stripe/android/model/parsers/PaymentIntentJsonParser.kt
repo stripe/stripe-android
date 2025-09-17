@@ -77,6 +77,8 @@ class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
 
         val countryCode = optString(json, FIELD_COUNTRY_CODE)
 
+        val automaticPaymentMethods = optString(json, FIELD_AUTOMATIC_PAYMENT_METHODS)
+
         return PaymentIntent(
             id = id,
             paymentMethodTypes = paymentMethodTypes,
@@ -101,7 +103,8 @@ class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
             unactivatedPaymentMethods = unactivatedPaymentMethods,
             linkFundingSources = linkFundingSources,
             nextActionData = nextActionData,
-            paymentMethodOptionsJsonString = paymentMethodOptions
+            paymentMethodOptionsJsonString = paymentMethodOptions,
+            automaticPaymentMethods = automaticPaymentMethods?.let { StripeIntent.AutomaticPaymentMethods(enabled = (it == "enabled")) },
         )
     }
 
@@ -170,6 +173,7 @@ class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
         private const val FIELD_CLIENT_SECRET = "client_secret"
         private const val FIELD_CONFIRMATION_METHOD = "confirmation_method"
         private const val FIELD_COUNTRY_CODE = "country_code"
+        private const val FIELD_AUTOMATIC_PAYMENT_METHODS = "automatic_payment_methods"
         private const val FIELD_CURRENCY = "currency"
         private const val FIELD_DESCRIPTION = "description"
         private const val FIELD_LAST_PAYMENT_ERROR = "last_payment_error"

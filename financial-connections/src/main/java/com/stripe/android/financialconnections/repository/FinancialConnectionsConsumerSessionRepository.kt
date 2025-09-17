@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.repository
 
+import android.util.Log
 import com.stripe.android.core.Logger
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.networking.ApiRequest
@@ -278,6 +279,8 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
     ): SharePaymentDetails {
         val fraudDetectionData = fraudDetectionDataRepository.getCached()?.params.orEmpty()
         val expandParams = mapOf("expand" to listOf("payment_method"))
+
+        Log.d("xkcd", "share payment details is called here.")
 
         return consumersApiService.sharePaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,

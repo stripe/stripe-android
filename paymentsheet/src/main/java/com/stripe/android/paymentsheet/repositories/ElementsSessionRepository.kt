@@ -6,11 +6,14 @@ import com.stripe.android.common.di.APPLICATION_ID
 import com.stripe.android.common.di.MOBILE_SESSION_ID
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.ClientAttributionMetadataHolder
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
@@ -74,9 +77,46 @@ internal class RealElementsSessionRepository @Inject constructor(
             options = requestOptions,
         )
 
+        setClientAttributionMetadata(
+            initializationMode = initializationMode,
+            elementsSession = elementsSession,
+        )
+
         return elementsSession.getResultOrElse { elementsSessionFailure ->
             fallback(params, elementsSessionFailure)
         }
+    }
+
+    private fun setClientAttributionMetadata(
+        initializationMode: PaymentElementLoader.InitializationMode,
+        elementsSession: Result<ElementsSession>,
+    ) {
+        val paymentIntentCreationFlow = when (initializationMode) {
+            is PaymentElementLoader.InitializationMode.DeferredIntent -> PaymentIntentCreationFlow.Deferred
+            is PaymentElementLoader.InitializationMode.PaymentIntent,
+            is PaymentElementLoader.InitializationMode.SetupIntent -> PaymentIntentCreationFlow.Standard
+        }
+
+        val paymentIntentSelectionFlowIsAutomatic = when (initializationMode) {
+            is PaymentElementLoader.InitializationMode.DeferredIntent -> initializationMode.intentConfiguration.paymentMethodTypes.isEmpty()
+            is PaymentElementLoader.InitializationMode.PaymentIntent,
+            is PaymentElementLoader.InitializationMode.SetupIntent -> elementsSession.getOrNull()?.stripeIntent?.automaticPaymentMethods?.enabled == true
+        }
+        val paymentMethodSelectionFlow = if (paymentIntentSelectionFlowIsAutomatic) {
+            PaymentMethodSelectionFlow.Automatic
+        } else {
+            PaymentMethodSelectionFlow.MerchantSpecified
+        }
+
+        // TODO: add comment about why it's ok if this is null, why we are getting it from here and not the fallback, etc.
+        // TODO: or get some info from the fallback idk.
+        val elementsSessionConfigId = elementsSession.getOrNull()?.elementsSessionId // TODO: confirm this is the right value.
+
+        ClientAttributionMetadataHolder.initClientAttributionMetadata(
+            elementsSessionConfigId = elementsSessionConfigId,
+            paymentIntentCreationFlow = paymentIntentCreationFlow,
+            paymentMethodSelectionFlow = paymentMethodSelectionFlow,
+        )
     }
 
     private suspend fun fallback(
@@ -221,7 +261,8 @@ private fun ElementsSessionParams.DeferredIntentType.toStripeIntent(options: Api
             currency = deferredIntentParams.mode.currency,
             isLiveMode = options.apiKeyIsLiveMode,
             unactivatedPaymentMethods = emptyList(),
-            paymentMethodOptionsJsonString = deferredIntentMode.paymentMethodOptionsJsonString
+            paymentMethodOptionsJsonString = deferredIntentMode.paymentMethodOptionsJsonString,
+            automaticPaymentMethods = null,
         )
         is DeferredIntentParams.Mode.Setup -> SetupIntent(
             id = deferredIntentParams.paymentMethodConfigurationId,
@@ -238,6 +279,7 @@ private fun ElementsSessionParams.DeferredIntentType.toStripeIntent(options: Api
             status = null,
             unactivatedPaymentMethods = emptyList(),
             usage = null,
+            automaticPaymentMethods = null,
         )
     }
 }

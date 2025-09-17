@@ -1,6 +1,7 @@
 package com.stripe.android.link.repositories
 
 import android.app.Application
+import android.util.Log
 import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
@@ -12,6 +13,7 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.confirmation.createPaymentMethodCreateParams
 import com.stripe.android.link.utils.toConsumerBillingAddress
+import com.stripe.android.model.ClientAttributionMetadataHolder
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams.Card.Companion.extraConfirmationParams
@@ -265,12 +267,18 @@ internal class LinkApiRepository @Inject constructor(
 
         val paymentMethodParams = mapOf("expand" to listOf("payment_method"))
 
+        val params = mapOf(
+            "payment_method_options" to extraConfirmationParams(paymentMethodCreateParams.toParamMap()),
+            // TODO: create helper function for this get and clear param map nonsense.
+            // TODO: I don't think we need to add client attribution metadata here, because it is also added in stripe api repo
+        ) + allowRedisplay + billingPhone + paymentMethodParams + (ClientAttributionMetadataHolder.getAndClear()?.toParamMap() ?: emptyMap())
+
+        Log.d("xkcd", "share card details params: $params")
+
         stripeRepository.sharePaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             id = id,
-            extraParams = mapOf(
-                "payment_method_options" to extraConfirmationParams(paymentMethodCreateParams.toParamMap()),
-            ) + allowRedisplay + billingPhone + paymentMethodParams,
+            extraParams = params,
             requestOptions = buildRequestOptions(),
         ).onFailure {
             errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_SHARE_CARD_FAILURE, StripeException.create(it))
@@ -310,6 +318,7 @@ internal class LinkApiRepository @Inject constructor(
         val allowRedisplayParams = allowRedisplay?.let {
             mapOf("allow_redisplay" to allowRedisplay)
         } ?: emptyMap()
+        val clientAttributionMetadata = ClientAttributionMetadataHolder.getAndClear()?.toParamMap() ?: emptyMap()
 
         consumersApiService.sharePaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
@@ -317,7 +326,7 @@ internal class LinkApiRepository @Inject constructor(
             expectedPaymentMethodType = expectedPaymentMethodType,
             requestOptions = buildRequestOptions(apiKey),
             requestSurface = requestSurface.value,
-            extraParams = paymentMethodParams + fraudParams + optionsParams + allowRedisplayParams,
+            extraParams = paymentMethodParams + fraudParams + optionsParams + allowRedisplayParams + clientAttributionMetadata,
             billingPhone = billingPhone,
         )
     }

@@ -440,7 +440,8 @@ class ElementsSessionJsonParserTest {
                 paymentMethodTypes = listOf("card", "link", "cashapp"),
                 linkFundingSources = listOf("card"),
                 paymentMethodOptionsJsonString = "{\"affirm\":{\"setup_future_usage\":\"none\"}," +
-                    "\"card\":{\"setup_future_usage\":\"off_session\"}}"
+                    "\"card\":{\"setup_future_usage\":\"off_session\"}}",
+                automaticPaymentMethods = null,
             )
         )
     }
@@ -487,7 +488,8 @@ class ElementsSessionJsonParserTest {
                 usage = StripeIntent.Usage.OffSession,
                 unactivatedPaymentMethods = listOf(),
                 paymentMethodTypes = listOf("card", "link", "cashapp"),
-                linkFundingSources = listOf("card")
+                linkFundingSources = listOf("card"),
+                automaticPaymentMethods = null,
             )
         )
     }
