@@ -2,6 +2,11 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.26.2 - 2025-09-17
+
+### PaymentSheet
+* [ADDED][11571](https://github.com/stripe/stripe-android/pull/11571) Adds support for non-phone two-factor authentication (2FA) methods in Link.
+
 ## 21.26.1 - 2025-09-15
 
 ### PaymentSheet
