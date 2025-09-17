@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
+import com.stripe.android.common.di.MobileSessionIdModule
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -28,6 +29,7 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 @Module(
+    includes = [MobileSessionIdModule::class],
     subcomponents = [OnrampPresenterComponent::class]
 )
 internal class OnrampModule {
