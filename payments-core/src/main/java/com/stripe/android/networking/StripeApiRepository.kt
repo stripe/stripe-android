@@ -691,7 +691,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
      */
     override suspend fun createConfirmationToken(
         confirmationTokenParams: ConfirmationTokenParams,
-        productUsageTokens: Set<String>,
         options: ApiRequest.Options
     ): Result<ConfirmationToken> {
         return fetchStripeModelResult(
@@ -708,7 +707,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createRequest(
                     PaymentAnalyticsEvent.ConfirmationTokenCreate,
-                    productUsageTokens = productUsageTokens,
+                    productUsageTokens = confirmationTokenParams.paymentMethodData?.attribution ?: emptySet(),
                 )
             )
         }

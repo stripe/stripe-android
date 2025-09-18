@@ -151,7 +151,6 @@ abstract class AbsFakeStripeRepository : StripeRepository {
 
     override suspend fun createConfirmationToken(
         confirmationTokenParams: ConfirmationTokenParams,
-        productUsageTokens: Set<String>,
         options: ApiRequest.Options
     ): Result<ConfirmationToken> {
         TODO("Not yet implemented")
