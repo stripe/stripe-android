@@ -6,21 +6,20 @@ import androidx.annotation.RestrictTo
  * Utility class for adding fraud detection data to API params
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class FraudDetectionDataParamsUtils {
-    fun addFraudDetectionData(
-        params: Map<String, *>,
+object FraudDetectionDataParamsUtils {
+    fun Map<String, *>.addFraudDetectionData(
         fraudDetectionData: FraudDetectionData?
     ): Map<String, *> {
         return setOf("source_data", "payment_method_data")
             .firstOrNull { key ->
-                params.containsKey(key)
+                this.containsKey(key)
             }?.let { key ->
                 addFraudDetectionData(
-                    params,
+                    this,
                     key,
                     fraudDetectionData
                 )
-            } ?: params
+            } ?: this
     }
 
     private fun addFraudDetectionData(
