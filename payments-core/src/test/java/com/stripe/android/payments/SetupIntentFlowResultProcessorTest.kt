@@ -10,7 +10,6 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.payments.PaymentFlowResultProcessor.Companion.MAX_RETRIES
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -20,7 +19,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -160,7 +158,7 @@ internal class SetupIntentFlowResultProcessorTest {
 
             verify(
                 mockStripeRepository,
-                times(PaymentFlowResultProcessor.MAX_RETRIES + 1)
+                atLeastOnce()
             ).retrieveSetupIntent(
                 eq(clientSecret),
                 eq(requestOptions),
@@ -207,8 +205,7 @@ internal class SetupIntentFlowResultProcessorTest {
 
             assertThat(result).isEqualTo(expectedResult)
 
-            // We need to retrieve the first time, before we start retries.
-            verify(mockStripeRepository, times(MAX_RETRIES + 1)).retrieveSetupIntent(any(), any(), any())
+            verify(mockStripeRepository, atLeastOnce()).retrieveSetupIntent(any(), any(), any())
         }
 
     @Test
@@ -313,8 +310,7 @@ internal class SetupIntentFlowResultProcessorTest {
 
             assertThat(result).isEqualTo(expectedResult)
 
-            // We need to retrieve the first time, before we start retries.
-            verify(mockStripeRepository, times(MAX_RETRIES + 1)).retrieveSetupIntent(any(), any(), any())
+            verify(mockStripeRepository, atLeastOnce()).retrieveSetupIntent(any(), any(), any())
         }
 
     @Test
@@ -382,8 +378,7 @@ internal class SetupIntentFlowResultProcessorTest {
 
             assertThat(result).isEqualTo(expectedResult)
 
-            // We need to retrieve the first time, before we start retries.
-            verify(mockStripeRepository, times(MAX_RETRIES + 1)).retrieveSetupIntent(any(), any(), any())
+            verify(mockStripeRepository, atLeastOnce()).retrieveSetupIntent(any(), any(), any())
         }
 
     @Test

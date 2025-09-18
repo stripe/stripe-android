@@ -50,7 +50,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
             stripeAccount = result.stripeAccountId
         )
 
-        val startTime = System.currentTimeMillis()
+        val initialRetrieveIntentStartTime = System.currentTimeMillis()
 
         retrieveStripeIntent(
             clientSecret = result.clientSecret,
@@ -71,7 +71,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                         stripeIntent,
                         result.clientSecret,
                         requestOptions,
-                        startTime
+                        initialRetrieveIntentStartTime
                     ).getOrThrow()
                     val flowOutcome = determineFlowOutcome(intent, result.flowOutcome)
                     createStripeIntentResult(
@@ -195,6 +195,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
      *
      * @param clientSecret for the intent
      * @param requestOptions options for [ApiRequest]
+     * @param initialRetrieveIntentStartTime time in milliseconds that the initial retrieveStripeIntent call was made.
      *
      * @return a [StripeIntent] object with a deterministic state.
      */
@@ -202,17 +203,20 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         originalIntent: StripeIntent,
         clientSecret: String,
         requestOptions: ApiRequest.Options,
-        startTime: Long
+        initialRetrieveIntentStartTime: Long
     ): Result<T> {
+        var timeOfLastRequest = System.currentTimeMillis()
         var stripeIntentResult = refreshOrRetrieveIntent(originalIntent, clientSecret, requestOptions)
 
-        // The p99 for the intent status to be updated is 5s. So we only want to poll for a maximum of 5s from
-        // the time that the intent was first retrieved, before making one final fetch
-        val duration = POLLING_DURATION - (System.currentTimeMillis() - startTime)
+        val timeRemaining = getPollingDurationForPaymentMethod(stripeIntentResult) -
+            (System.currentTimeMillis() - initialRetrieveIntentStartTime)
 
-        withTimeoutOrNull(duration) {
+        withTimeoutOrNull(timeRemaining) {
             while (shouldRetry(stripeIntentResult)) {
-                delay(POLLING_DELAY)
+                // We want to delay a maximum of 1s between requests, including the time the request took.
+                // e.g. if the previous request took 250ms, the delay will be 750ms
+                delay(POLLING_DELAY - (System.currentTimeMillis() - timeOfLastRequest))
+                timeOfLastRequest = System.currentTimeMillis()
                 stripeIntentResult = refreshOrRetrieveIntent(originalIntent, clientSecret, requestOptions)
             }
         }
@@ -222,6 +226,21 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         }
 
         return stripeIntentResult
+    }
+
+    private fun getPollingDurationForPaymentMethod(stripeIntentResult: Result<StripeIntent>): Long {
+        val stripeIntent = stripeIntentResult.getOrNull()
+        val paymentMethod = stripeIntent?.paymentMethod?.type
+        return when (paymentMethod) {
+            PaymentMethod.Type.P24,
+            PaymentMethod.Type.RevolutPay,
+            PaymentMethod.Type.AmazonPay,
+            PaymentMethod.Type.Swish,
+            PaymentMethod.Type.Twint -> REDUCED_POLLING_DURATION
+            PaymentMethod.Type.Card,
+            PaymentMethod.Type.WeChatPay -> MAX_POLLING_DURATION
+            else -> 0L
+        }
     }
 
     private suspend fun refreshOrRetrieveIntent(
@@ -274,7 +293,8 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
 
     internal companion object {
         val EXPAND_PAYMENT_METHOD = listOf("payment_method")
-        const val POLLING_DURATION = 5000L
+        const val MAX_POLLING_DURATION = 15000L
+        const val REDUCED_POLLING_DURATION = 5000L
         const val POLLING_DELAY = 1000L
     }
 }
