@@ -365,7 +365,6 @@ constructor(
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
-        // This had 5 retries
         WeChatPay(
             "wechat_pay",
             isReusable = false,
