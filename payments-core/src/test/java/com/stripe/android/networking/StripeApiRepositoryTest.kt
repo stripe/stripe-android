@@ -3369,8 +3369,6 @@ internal class StripeApiRepositoryTest {
         assertThat(params["deferred_intent[payment_method_options]"]).isEqualTo(pmMap)
     }
 
-    // MARK: - Confirmation Token Tests
-
     @Test
     fun testConfirmationTokensUrl() {
         assertThat(StripeApiRepository.confirmationTokensUrl)

@@ -697,7 +697,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiRequestFactory.createPost(
                 confirmationTokensUrl,
                 options,
-                // Use special method that nests payment_user_agent within payment_method_data
                 maybeAddPaymentUserAgent(
                     confirmationTokenParams.toParamMap(),
                     confirmationTokenParams.paymentMethodData
