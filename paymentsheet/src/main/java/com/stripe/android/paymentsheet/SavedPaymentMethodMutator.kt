@@ -286,7 +286,9 @@ internal class SavedPaymentMethodMutator(
                 expiryYear = cardUpdateParams.expiryYear,
                 productUsageTokens = setOf("PaymentSheet"),
             )
-        ).onSuccess { updatedMethod ->
+        ).map { updatedMethod ->
+            updatedMethod.withUpdatedLocalFields(original = paymentMethod)
+        }.onSuccess { updatedMethod ->
             withContext(uiContext) {
                 customerStateHolder.updateMostRecentlySelectedSavedPaymentMethod(updatedMethod)
                 customerStateHolder.setCustomerState(
@@ -470,4 +472,12 @@ internal class SavedPaymentMethodMutator(
             }
         }
     }
+}
+
+private fun PaymentMethod.withUpdatedLocalFields(original: PaymentMethod): PaymentMethod {
+    // We don't receive the following fields as part of the update response, so we need to copy them over
+    return copy(
+        linkPaymentDetails = original.linkPaymentDetails,
+        isLinkPassthroughMode = original.isLinkPassthroughMode,
+    )
 }
