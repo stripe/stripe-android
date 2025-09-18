@@ -40,7 +40,7 @@ internal fun createTestConfirmationHandlerFactory(
     linkLauncher: LinkPaymentLauncher,
     paymentConfiguration: PaymentConfiguration,
     statusBarColor: Int?,
-    errorReporter: ErrorReporter,
+    errorReporter: ErrorReporter
 ): ConfirmationHandler.Factory {
     return DefaultConfirmationHandler.Factory(
         registry = ConfirmationRegistry(
@@ -90,7 +90,7 @@ internal fun createTestConfirmationHandlerFactory(
         ),
         savedStateHandle = savedStateHandle,
         errorReporter = FakeErrorReporter(),
-        ioContext = Dispatchers.Unconfined,
+        ioContext = Dispatchers.Unconfined
     )
 }
 

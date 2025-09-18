@@ -150,7 +150,7 @@ internal object CustomerSheetTestHelper {
                 errorReporter = FakeErrorReporter(),
                 linkLauncher = RecordingLinkPaymentLauncher.noOp(),
                 linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-                cvcRecollectionLauncherFactory = RecordingCvcRecollectionLauncherFactory.noOp(),
+                cvcRecollectionLauncherFactory = RecordingCvcRecollectionLauncherFactory.noOp()
             ),
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,

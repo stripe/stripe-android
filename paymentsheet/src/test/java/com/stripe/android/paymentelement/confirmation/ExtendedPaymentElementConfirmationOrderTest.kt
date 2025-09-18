@@ -7,6 +7,7 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.challenge.PassiveChallengeActivityContract
+import com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerContract
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkActivityContract
@@ -42,6 +43,9 @@ class ExtendedPaymentElementConfirmationOrderTest {
             )
 
             assertThat(awaitRegisterCall().contract).isInstanceOf<BacsMandateConfirmationContract>()
+            assertThat(awaitNextRegisteredLauncher()).isInstanceOf<ActivityResultLauncher<*>>()
+
+            assertThat(awaitRegisterCall().contract).isInstanceOf<PassiveChallengeWarmerContract>()
             assertThat(awaitNextRegisteredLauncher()).isInstanceOf<ActivityResultLauncher<*>>()
 
             assertThat(awaitRegisterCall().contract).isInstanceOf<PassiveChallengeActivityContract>()

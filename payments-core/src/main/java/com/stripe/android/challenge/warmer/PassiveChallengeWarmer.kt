@@ -2,23 +2,18 @@ package com.stripe.android.challenge.warmer
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.annotation.RestrictTo
-import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.model.PassiveCaptchaParams
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface PassiveChallengeWarmer {
     /**
-     * Registers the passive challenge warmer with the given lifecycle owner and activity result caller.
-     * This sets up the necessary activity result launcher and lifecycle observers for handling
+     * Registers the passive challenge warmer with the given activity result caller.
+     * This sets up the necessary activity result launcher for handling
      * passive challenge warming activities.
      *
      * @param activityResultCaller a caller class that can start confirmation activity flows
-     * @param lifecycleOwner The owner of an observable lifecycle to attach the handlers to
      */
-    fun register(
-        activityResultCaller: ActivityResultCaller,
-        lifecycleOwner: LifecycleOwner
-    )
+    fun register(activityResultCaller: ActivityResultCaller)
 
     /**
      * Starts the passive challenge warming process with the given captcha parameters.
@@ -34,4 +29,10 @@ interface PassiveChallengeWarmer {
         publishableKey: String,
         productUsage: Set<String>
     )
+
+    /**
+     * Unregisters the activity result launcher and clears any internal references.
+     * This should be called to clean up resources when the warmer is no longer needed.
+     */
+    fun unregister()
 }

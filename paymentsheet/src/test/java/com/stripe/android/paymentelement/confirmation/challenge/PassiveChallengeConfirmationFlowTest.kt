@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation.challenge
 
 import com.stripe.android.challenge.PassiveChallengeActivityResult
+import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
 import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.RadarOptions
@@ -14,6 +15,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.utils.FakePassiveChallengeWarmer
 import org.junit.Test
 
 internal class PassiveChallengeConfirmationFlowTest {
@@ -140,8 +142,10 @@ internal class PassiveChallengeConfirmationFlowTest {
 
     private fun confirmationDefinition(
         errorReporter: FakeErrorReporter = FakeErrorReporter(),
+        passiveChallengeWarmer: PassiveChallengeWarmer = FakePassiveChallengeWarmer()
     ) = PassiveChallengeConfirmationDefinition(
         errorReporter = errorReporter,
+        passiveChallengeWarmer = passiveChallengeWarmer,
         publishableKeyProvider = { "pk_123" },
         productUsage = setOf("PaymentSheet"),
     )

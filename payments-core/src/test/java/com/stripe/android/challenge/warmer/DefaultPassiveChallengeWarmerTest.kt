@@ -3,14 +3,11 @@ package com.stripe.android.challenge.warmer
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerCompleted
 import com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerContract
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.testing.CoroutineTestRule
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -49,9 +46,8 @@ internal class DefaultPassiveChallengeWarmerTest {
         ).thenReturn(mockLauncher)
 
         val warmer = DefaultPassiveChallengeWarmer()
-        val lifecycleOwner = TestLifecycleOwner()
 
-        warmer.register(mockActivityResultCaller, lifecycleOwner)
+        warmer.register(mockActivityResultCaller)
 
         verify(mockActivityResultCaller).registerForActivityResult(
             any<PassiveChallengeWarmerContract>(),
@@ -73,9 +69,8 @@ internal class DefaultPassiveChallengeWarmerTest {
         ).thenReturn(mockLauncher)
 
         val warmer = DefaultPassiveChallengeWarmer()
-        val lifecycleOwner = TestLifecycleOwner()
 
-        warmer.register(mockActivityResultCaller, lifecycleOwner)
+        warmer.register(mockActivityResultCaller)
 
         warmer.start(
             passiveCaptchaParams = testPassiveCaptchaParams,
@@ -91,7 +86,7 @@ internal class DefaultPassiveChallengeWarmerTest {
     }
 
     @Test
-    fun `onDestroy should unregister launcher and clear reference`() = runTest {
+    fun `unregister should unregister launcher and clear launcher reference`() = runTest {
         val mockActivityResultCaller = mock<ActivityResultCaller>()
         val mockLauncher = mock<ActivityResultLauncher<PassiveChallengeWarmerContract.Args>>()
 
@@ -103,19 +98,16 @@ internal class DefaultPassiveChallengeWarmerTest {
         ).thenReturn(mockLauncher)
 
         val warmer = DefaultPassiveChallengeWarmer()
-        val lifecycleOwner = TestLifecycleOwner(
-            coroutineDispatcher = UnconfinedTestDispatcher()
-        )
 
-        warmer.register(mockActivityResultCaller, lifecycleOwner)
+        warmer.register(mockActivityResultCaller)
 
-        // Trigger lifecycle destroy
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        // Call unregister
+        warmer.unregister()
 
         // Should unregister the launcher
         verify(mockLauncher).unregister()
 
-        // Starting after destroy should not launch
+        // Starting after unregister should not launch
         warmer.start(
             passiveCaptchaParams = testPassiveCaptchaParams,
             publishableKey = testPublishableKey,
@@ -140,14 +132,12 @@ internal class DefaultPassiveChallengeWarmerTest {
         ).thenReturn(firstMockLauncher, secondMockLauncher)
 
         val warmer = DefaultPassiveChallengeWarmer()
-        val firstLifecycleOwner = TestLifecycleOwner()
-        val secondLifecycleOwner = TestLifecycleOwner()
 
         // Register first time
-        warmer.register(mockActivityResultCaller, firstLifecycleOwner)
+        warmer.register(mockActivityResultCaller)
 
         // Register second time (should unregister first launcher)
-        warmer.register(mockActivityResultCaller, secondLifecycleOwner)
+        warmer.register(mockActivityResultCaller)
 
         // First launcher should have been unregistered
         verify(firstMockLauncher).unregister()

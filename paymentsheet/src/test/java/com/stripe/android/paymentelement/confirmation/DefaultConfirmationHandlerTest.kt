@@ -10,6 +10,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -630,6 +631,20 @@ class DefaultConfirmationHandlerTest {
         }
     }
 
+    @Test
+    fun `On bootstrap, should call bootstrap on all mediators`() = test {
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
+
+        confirmationHandler.bootstrap(paymentMethodMetadata)
+
+        val someBootstrapCall = someDefinitionScenario.bootstrapCalls.awaitItem()
+        val someOtherBootstrapCall = someOtherDefinitionScenario.bootstrapCalls.awaitItem()
+
+        assertThat(someBootstrapCall.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
+        assertThat(someOtherBootstrapCall.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
+        someDefinitionScenario.bootstrapCalls.ensureAllEventsConsumed()
+    }
+
     private fun launcherResultTest(
         result: ConfirmationDefinition.Result,
         test: (ConfirmationHandler.State.Complete) -> Unit,
@@ -812,14 +827,14 @@ class DefaultConfirmationHandlerTest {
                 definition = SomeConfirmationDefinition(isConfirmable = true)
             )
         ),
-        errorReporter: ErrorReporter = FakeErrorReporter(),
+        errorReporter: ErrorReporter = FakeErrorReporter()
     ): DefaultConfirmationHandler {
         return DefaultConfirmationHandler(
             mediators = mediators,
             coroutineScope = CoroutineScope(dispatcher),
             errorReporter = errorReporter,
             savedStateHandle = savedStateHandle,
-            ioContext = dispatcher,
+            ioContext = dispatcher
         )
     }
 

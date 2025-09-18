@@ -3,8 +3,10 @@ package com.stripe.android.paymentelement.confirmation.challenge
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.challenge.PassiveChallengeActivityContract
 import com.stripe.android.challenge.PassiveChallengeActivityResult
+import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.RadarOptions
@@ -24,6 +26,7 @@ import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeActivityResultLauncher
+import com.stripe.android.utils.FakePassiveChallengeWarmer
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
@@ -137,6 +140,27 @@ internal class PassiveChallengeConfirmationDefinitionTest {
             callback.onActivityResult(PassiveChallengeActivityResult.Success("test_token"))
 
             assertThat(onResultCalled).isTrue()
+        }
+    }
+
+    @Test
+    fun `'createLauncher' should call passiveChallengeWarmer register`() = runTest {
+        val fakePassiveChallengeWarmer = FakePassiveChallengeWarmer()
+        val definition = createPassiveChallengeConfirmationDefinition(
+            passiveChallengeWarmer = fakePassiveChallengeWarmer
+        )
+
+        DummyActivityResultCaller.test {
+            definition.createLauncher(
+                activityResultCaller = activityResultCaller,
+                onResult = {},
+            )
+
+            awaitRegisterCall()
+            awaitNextRegisteredLauncher()
+
+            val registerCall = fakePassiveChallengeWarmer.awaitRegisterCall()
+            assertThat(registerCall.activityResultCaller).isEqualTo(activityResultCaller)
         }
     }
 
@@ -381,12 +405,69 @@ internal class PassiveChallengeConfirmationDefinitionTest {
             .isEqualTo(PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.passiveCaptchaParams)
     }
 
+    @Test
+    fun `'bootstrap' should start passive challenge warmer with passiveCaptchaParams`() = runTest {
+        val fakePassiveChallengeWarmer = FakePassiveChallengeWarmer()
+        val definition = createPassiveChallengeConfirmationDefinition(
+            passiveChallengeWarmer = fakePassiveChallengeWarmer
+        )
+
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            passiveCaptchaParams = PASSIVE_CAPTCHA_PARAMS
+        )
+
+        definition.bootstrap(paymentMethodMetadata)
+
+        val startCall = fakePassiveChallengeWarmer.awaitStartCall()
+
+        assertThat(startCall.passiveCaptchaParams).isEqualTo(PASSIVE_CAPTCHA_PARAMS)
+        assertThat(startCall.publishableKey).isEqualTo(launcherArgs.publishableKey)
+        assertThat(startCall.productUsage).isEqualTo(launcherArgs.productUsage)
+    }
+
+    @Test
+    fun `'bootstrap' should not start warmer if passiveCaptchaParams is null`() {
+        val fakePassiveChallengeWarmer = FakePassiveChallengeWarmer()
+        val definition = createPassiveChallengeConfirmationDefinition(
+            passiveChallengeWarmer = fakePassiveChallengeWarmer
+        )
+
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            passiveCaptchaParams = null
+        )
+
+        definition.bootstrap(paymentMethodMetadata)
+
+        fakePassiveChallengeWarmer.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `'unregister' should call passiveChallengeWarmer unregister`() = runTest {
+        val fakePassiveChallengeWarmer = FakePassiveChallengeWarmer()
+        val definition = createPassiveChallengeConfirmationDefinition(
+            passiveChallengeWarmer = fakePassiveChallengeWarmer
+        )
+
+        val launcher = FakeActivityResultLauncher<PassiveChallengeActivityContract.Args>()
+
+        definition.unregister(launcher)
+
+        fakePassiveChallengeWarmer.awaitUnregisterCall()
+        fakePassiveChallengeWarmer.ensureAllEventsConsumed()
+    }
+
     private fun createPassiveChallengeConfirmationDefinition(
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        passiveChallengeWarmer: PassiveChallengeWarmer = FakePassiveChallengeWarmer(),
         publishableKey: String = launcherArgs.publishableKey,
         productUsage: Set<String> = launcherArgs.productUsage
     ): PassiveChallengeConfirmationDefinition {
-        return PassiveChallengeConfirmationDefinition(errorReporter, { publishableKey }, productUsage)
+        return PassiveChallengeConfirmationDefinition(
+            errorReporter = errorReporter,
+            publishableKeyProvider = { publishableKey },
+            productUsage = productUsage,
+            passiveChallengeWarmer = passiveChallengeWarmer
+        )
     }
 
     private companion object {

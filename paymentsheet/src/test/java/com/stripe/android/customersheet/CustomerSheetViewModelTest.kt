@@ -35,6 +35,7 @@ import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentM
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -3831,6 +3832,27 @@ class CustomerSheetViewModelTest {
         }
         FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
+
+    @Test
+    fun `confirmation handler is bootstrapped after customer sheet is loaded`() =
+        runTest(testDispatcher) {
+            val fakeConfirmationHandler = FakeConfirmationHandler()
+            val confirmationHandlerFactory = ConfirmationHandler.Factory { fakeConfirmationHandler }
+            val customerSheetLoader = FakeCustomerSheetLoader()
+
+            createViewModel(
+                workContext = testDispatcher,
+                confirmationHandlerFactory = confirmationHandlerFactory,
+                customerSheetLoader = customerSheetLoader,
+            )
+
+            val bootstrapCall = fakeConfirmationHandler.bootstrapTurbine.awaitItem()
+
+            val expectedPaymentMethodMetadata = customerSheetLoader.load(
+                CustomerSheet.Configuration(merchantDisplayName = "Test")
+            ).getOrThrow().paymentMethodMetadata
+            assertThat(bootstrapCall.paymentMethodMetadata).isEqualTo(expectedPaymentMethodMetadata)
+        }
 
     private fun getAddPaymentMethodCardDetailsSectionController(
         addState: AddPaymentMethod

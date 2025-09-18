@@ -34,10 +34,16 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
     lifecycleOwner: LifecycleOwner,
     activityResultCaller: ActivityResultCaller,
     @ViewModelScope private val coroutineScope: CoroutineScope,
+    formActivityConfirmationHandlerRegistrar: FormActivityConfirmationHandlerRegistrar
 ) : FormActivityConfirmationHelper {
 
     init {
-        confirmationHandler.register(activityResultCaller, lifecycleOwner)
+        formActivityConfirmationHandlerRegistrar.registerAndBootstrap(
+            activityResultCaller,
+            lifecycleOwner,
+            paymentMethodMetadata
+        )
+
         lifecycleOwner.lifecycleScope.launch {
             confirmationHandler.state.collectLatest {
                 stateHelper.updateConfirmationState(it)

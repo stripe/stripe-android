@@ -342,10 +342,7 @@ internal class CustomerSheetViewModel(
         activityResultCaller: ActivityResultCaller,
         lifecycleOwner: LifecycleOwner
     ) {
-        confirmationHandler.register(
-            activityResultCaller = activityResultCaller,
-            lifecycleOwner = lifecycleOwner,
-        )
+        confirmationHandler.register(activityResultCaller, lifecycleOwner)
     }
 
     private suspend fun loadCustomerSheetState() {
@@ -375,6 +372,7 @@ internal class CustomerSheetViewModel(
                             metadata = state.paymentMethodMetadata,
                             permissions = state.customerPermissions,
                         )
+                        confirmationHandler.bootstrap(state.paymentMethodMetadata)
 
                         transitionToInitialScreen()
                     }
