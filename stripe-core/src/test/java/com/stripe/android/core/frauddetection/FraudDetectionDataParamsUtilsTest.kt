@@ -1,6 +1,7 @@
 package com.stripe.android.core.frauddetection
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.frauddetection.FraudDetectionDataParamsUtils.addFraudDetectionData
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -10,17 +11,15 @@ import kotlin.test.Test
 @Config(sdk = [30])
 class FraudDetectionDataParamsUtilsTest {
 
-    private val fraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils()
-
     @Test
     fun addUidParamsToPaymentIntent_withSource_addsParamsAtRightLevel() {
-        val updatedParams = fraudDetectionDataParamsUtils.addFraudDetectionData(
-            params = mapOf(
-                "source_data" to mapOf(
-                    "some_field" to 1,
-                    "some_other_field" to "foo",
-                ),
+        val params = mapOf(
+            "source_data" to mapOf(
+                "some_field" to 1,
+                "some_other_field" to "foo",
             ),
+        )
+        val updatedParams = params.addFraudDetectionData(
             fraudDetectionData = FRAUD_DETECTION_DATA
         )
 
@@ -38,13 +37,13 @@ class FraudDetectionDataParamsUtilsTest {
 
     @Test
     fun addUidParamsToPaymentIntent_withPaymentMethodParams_addsUidAtRightLevel() {
-        val updatedParams = fraudDetectionDataParamsUtils.addFraudDetectionData(
-            params = mapOf(
-                "payment_method_data" to mapOf(
-                    "some_field" to 1,
-                    "some_other_field" to "foo",
-                )
-            ),
+        val params = mapOf(
+            "payment_method_data" to mapOf(
+                "some_field" to 1,
+                "some_other_field" to "foo",
+            )
+        )
+        val updatedParams = params.addFraudDetectionData(
             fraudDetectionData = FRAUD_DETECTION_DATA
         )
         assertThat(updatedParams["payment_method_data"])
