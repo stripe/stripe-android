@@ -3604,7 +3604,6 @@ internal class StripeApiRepositoryTest {
             stripeNetworkClient = stripeNetworkClient,
             analyticsRequestExecutor = analyticsRequestExecutor,
             fraudDetectionDataRepository = fraudDetectionDataRepository,
-            fraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils()
         )
     }
 
