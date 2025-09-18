@@ -232,12 +232,12 @@ class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options,
         expandFields: List<String>
     ): Result<PaymentIntent> {
-
         val params = confirmPaymentIntentParams.toParamMap()
             // Omit client_secret with user key auth.
             .let { if (options.apiKeyIsUserKey) it.minus(PARAM_CLIENT_SECRET) else it }
             .maybeAddPaymentUserAgent(
-                confirmPaymentIntentParams.paymentMethodCreateParams, confirmPaymentIntentParams.sourceParams
+                confirmPaymentIntentParams.paymentMethodCreateParams,
+                confirmPaymentIntentParams.sourceParams,
             ).plus(createExpandParam(expandFields)).addFraudDetectionData(fraudDetectionData)
 
         val paymentIntentId = runCatching {
