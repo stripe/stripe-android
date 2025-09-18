@@ -3477,7 +3477,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun createConfirmationToken_setsCorrectPaymentUserAgentAndMandateData() = runTest {
+    fun createConfirmationToken_setsCorrectMandateData() = runTest {
         val stripeResponse = StripeResponse(
             200,
             "",
@@ -3487,10 +3487,34 @@ internal class StripeApiRepositoryTest {
             .thenReturn(stripeResponse)
 
         val mandateData = MandateDataParamsFixtures.DEFAULT
-        val productUsage = "TestProductUsage"
+
         val confirmationTokenParams = ConfirmationTokenParams(
             paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             mandateDataParams = mandateData,
+        )
+        create().createConfirmationToken(
+            confirmationTokenParams,
+            DEFAULT_OPTIONS
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        val apiRequest = apiRequestArgumentCaptor.firstValue
+        assertThat(apiRequest.params?.get("mandate_data") as Map<*, *>).isEqualTo(mandateData.toParamMap())
+    }
+
+    @Test
+    fun createConfirmationToken_setsCorrectPaymentUserAgent() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            "",
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
+        val productUsage = "TestProductUsage"
+        val confirmationTokenParams = ConfirmationTokenParams(
+            paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
         )
 
         create(setOf(productUsage)).createConfirmationToken(
@@ -3500,11 +3524,9 @@ internal class StripeApiRepositoryTest {
 
         verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
         val apiRequest = apiRequestArgumentCaptor.firstValue
-        val paymentMethodDataParams =
-            apiRequest.params?.get("payment_method_data") as Map<*, *>
+        val paymentMethodDataParams = apiRequest.params?.get("payment_method_data") as Map<*, *>
         assertThat(paymentMethodDataParams["payment_user_agent"])
             .isEqualTo("stripe-android/${StripeSdkVersion.VERSION_NAME};$productUsage")
-        assertThat(apiRequest.params?.get("mandate_data") as Map<*, *>).isEqualTo(mandateData.toParamMap())
     }
 
     @Test
