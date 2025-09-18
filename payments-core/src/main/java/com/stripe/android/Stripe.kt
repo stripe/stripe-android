@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.activity.ComponentActivity
+import androidx.annotation.RestrictTo
 import androidx.annotation.Size
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
@@ -1566,7 +1567,8 @@ class Stripe internal constructor(
 
     @UiThread
     @JvmOverloads
-    internal fun createConfirmationToken(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun createConfirmationToken(
         confirmationTokenParams: ConfirmationTokenParams,
         idempotencyKey: String? = null,
         stripeAccountId: String? = this.stripeAccountId,
