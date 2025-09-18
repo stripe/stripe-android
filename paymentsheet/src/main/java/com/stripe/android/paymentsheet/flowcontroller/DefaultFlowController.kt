@@ -70,7 +70,6 @@ import com.stripe.android.paymentsheet.utils.canSave
 import com.stripe.android.paymentsheet.utils.toConfirmationError
 import com.stripe.android.uicore.utils.AnimationConstants
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
@@ -92,7 +91,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val context: Context,
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
-    private val confirmationHandler: ConfirmationHandler,
+    private val confirmationHandler: FlowControllerConfirmationHandler,
     private val linkGateFactory: LinkGate.Factory,
     private val linkHandler: LinkHandler,
     private val linkAccountHolder: LinkAccountHolder,
@@ -168,7 +167,7 @@ internal class DefaultFlowController @Inject internal constructor(
         )
 
         lifecycleOwner.lifecycleScope.launch {
-            confirmationHandler.state.collectLatest { state ->
+            confirmationHandler.state.collect { state ->
                 when (state) {
                     is ConfirmationHandler.State.Idle,
                     is ConfirmationHandler.State.Confirming -> Unit

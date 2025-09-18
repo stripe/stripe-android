@@ -49,7 +49,6 @@ import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
@@ -1291,7 +1290,7 @@ internal class DefaultFlowControllerTest {
         )
     }
 
-    private suspend fun FakeConfirmationHandler.Scenario.verifyPaymentSelection(
+    private suspend fun FakeFlowControllerConfirmationHandler.Scenario.verifyPaymentSelection(
         intent: StripeIntent,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         expectedPaymentMethodOptions: PaymentMethodOptionsParams? = null
@@ -1625,7 +1624,7 @@ internal class DefaultFlowControllerTest {
                 currency = "usd"
             )
         )
-        val flowController = createAndConfigureFlowControllerForDeferredIntent(
+        val flowController = createAndConfigureFlowControllerForDeferred(
             intentConfiguration = PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = 12345,
@@ -1660,7 +1659,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `Completes if confirmation handler succeeds with deferred intents`() = confirmationTest {
-        val flowController = createAndConfigureFlowControllerForDeferredIntent(
+        val flowController = createAndConfigureFlowControllerForDeferred(
             paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED,
         )
 
@@ -1691,7 +1690,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `Returns failure if confirmation handler returns a failure with deferred intents`() = confirmationTest {
-        val flowController = createAndConfigureFlowControllerForDeferredIntent()
+        val flowController = createAndConfigureFlowControllerForDeferred()
 
         val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
@@ -1881,7 +1880,7 @@ internal class DefaultFlowControllerTest {
     @Test
     fun `Sends correct deferred_intent_confirmation_type for client-side confirmation of deferred intent`() =
         confirmationTest {
-            val flowController = createAndConfigureFlowControllerForDeferredIntent()
+            val flowController = createAndConfigureFlowControllerForDeferred()
 
             val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
             val savedSelection = PaymentSelection.Saved(paymentMethod)
@@ -1911,7 +1910,7 @@ internal class DefaultFlowControllerTest {
     @Test
     fun `Sends correct deferred_intent_confirmation_type for server-side confirmation of deferred intent`() =
         confirmationTest {
-            val flowController = createAndConfigureFlowControllerForDeferredIntent()
+            val flowController = createAndConfigureFlowControllerForDeferred()
 
             val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
             val savedSelection = PaymentSelection.Saved(paymentMethod)
@@ -2449,7 +2448,7 @@ internal class DefaultFlowControllerTest {
         }
     }
 
-    private suspend fun FakeConfirmationHandler.Scenario.createAndConfigureFlowControllerForDeferredIntent(
+    private suspend fun FakeFlowControllerConfirmationHandler.Scenario.createAndConfigureFlowControllerForDeferred(
         paymentIntent: PaymentIntent = PaymentIntentFixtures.PI_SUCCEEDED,
         intentConfiguration: PaymentSheet.IntentConfiguration = PaymentSheet.IntentConfiguration(
             mode = PaymentSheet.IntentConfiguration.Mode.Payment(
@@ -2474,10 +2473,9 @@ internal class DefaultFlowControllerTest {
 
     private fun confirmationTest(
         consumeBootstrap: Boolean = true,
-        block: suspend FakeConfirmationHandler.Scenario.(scope: TestScope) -> Unit,
+        block: suspend FakeFlowControllerConfirmationHandler.Scenario.(scope: TestScope) -> Unit,
     ) = runTest {
-        FakeConfirmationHandler.test(
-            hasReloadedFromProcessDeath = false,
+        FakeFlowControllerConfirmationHandler.test(
             initialState = ConfirmationHandler.State.Idle,
         ) {
             block(this@runTest)
@@ -2487,7 +2485,7 @@ internal class DefaultFlowControllerTest {
         }
     }
 
-    private suspend fun FakeConfirmationHandler.Scenario.createFlowController(
+    private suspend fun FakeFlowControllerConfirmationHandler.Scenario.createFlowController(
         customer: CustomerState? = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
         paymentSelection: PaymentSelection? = null,
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
@@ -2533,7 +2531,7 @@ internal class DefaultFlowControllerTest {
         viewModel: FlowControllerViewModel = createViewModel(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
         eventReporter: EventReporter = this.eventReporter,
-        confirmationHandler: ConfirmationHandler? = null,
+        confirmationHandler: FlowControllerConfirmationHandler? = null,
         linkHandler: LinkHandler? = null,
         passiveCaptchaParams: PassiveCaptchaParams? = null
     ): DefaultFlowController {
@@ -2558,7 +2556,7 @@ internal class DefaultFlowControllerTest {
         viewModel: FlowControllerViewModel = createViewModel(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
         eventReporter: EventReporter = this.eventReporter,
-        confirmationHandler: ConfirmationHandler? = null,
+        confirmationHandler: FlowControllerConfirmationHandler? = null,
         linkHandler: LinkHandler? = null,
     ): DefaultFlowController {
         return DefaultFlowController(
@@ -2587,7 +2585,7 @@ internal class DefaultFlowControllerTest {
                 viewModel = viewModel,
                 paymentSelectionUpdater = { _, _, newState, _, _ -> newState.paymentSelection },
                 isLiveModeProvider = { false },
-                confirmationHandler = confirmationHandler ?: FakeConfirmationHandler(),
+                confirmationHandler = confirmationHandler ?: FakeFlowControllerConfirmationHandler(),
             ),
             errorReporter = errorReporter,
             initializedViaCompose = false,
@@ -2598,7 +2596,7 @@ internal class DefaultFlowControllerTest {
             walletsButtonLinkLauncher = walletsButtonLinkPaymentLauncher,
             activityResultRegistryOwner = mock(),
             linkGateFactory = { linkGate },
-            confirmationHandler = confirmationHandler ?: FakeConfirmationHandler(),
+            confirmationHandler = confirmationHandler ?: FakeFlowControllerConfirmationHandler(),
         )
     }
 
