@@ -156,6 +156,7 @@ interface StripeRepository {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun createConfirmationToken(
         confirmationTokenParams: ConfirmationTokenParams,
+        productUsageTokens: Set<String>,
         options: ApiRequest.Options
     ): Result<ConfirmationToken>
 
