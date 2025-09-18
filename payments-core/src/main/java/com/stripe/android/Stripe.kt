@@ -1565,7 +1565,6 @@ class Stripe internal constructor(
         }
     }
 
-    @UiThread
     @JvmOverloads
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun createConfirmationToken(
