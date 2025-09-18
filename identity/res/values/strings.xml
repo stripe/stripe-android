@@ -104,6 +104,8 @@
   <string name="stripe_flash_mask">Mask for selfie animation</string>
   <!-- Description of front of driver's license image -->
   <string name="stripe_front_of_dl">Front of driver\'s license</string>
+  <!-- Description of front of passport image -->
+  <string name="stripe_front_of_passport">Front of passport</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
   <string name="stripe_front_of_dl_selected">Front of driver license is selected</string>
   <!-- Description of front of identity card image -->
@@ -174,6 +176,8 @@
   <string name="stripe_position_selfie">Position your face in the center of the frame.</string>
   <!-- Instructional text when the document is too blurry -->
   <string name="stripe_reduce_blur">ID not in focus</string>
+  <!-- Generic back-side instruction for government-issued photo ID (no passport mention) -->
+  <string name="stripe_flip_id_document">Flip your government-issued photo ID over to the other side</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Details not visible</string>
   <string name="stripe_reduce_glare_2">Try reduce glare and make ID visible</string>
@@ -223,4 +227,24 @@
   <string name="stripe_upload_file_text">Alternatively, you may manually upload a photo of your %1$s</string>
   <!-- Title of document upload screen -->
   <string name="stripe_upload_your_photo_id">Upload your photo ID</string>
+  <!-- Title for scan screen when front of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_front_of_driver_license_or_id">Front of driver\'s license or government-issued photo ID</string>
+  <!-- Title for scan screen when back of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_back_of_driver_license_or_id">Back of driver\'s license or government-issued photo ID</string>
+  <!-- Title for scan screen when front of driver's license or passport is shown -->
+  <string name="stripe_front_of_driver_license_or_passport">Front of driver\'s license or passport</string>
+  <!-- Title for scan screen when front of passport or government-issued photo ID is shown -->
+  <string name="stripe_front_of_passport_or_id">Front of passport or government-issued photo ID</string>
+  <!-- Title for scan screen when front of all ID types is shown -->
+  <string name="stripe_front_of_all_id_types">Front of driver\'s license, passport, or government-issued photo ID</string>
+  <!-- Instruction for positioning driver's license or government-issued photo ID -->
+  <string name="stripe_position_driver_license_or_id">Position your driver\'s license or government-issued photo ID in the center of the frame</string>
+  <!-- Instruction for flipping driver's license or government-issued photo ID -->
+  <string name="stripe_flip_driver_license_or_id">Flip your driver\'s license or government-issued photo ID over to the other side</string>
+  <!-- Instruction for positioning driver's license or passport -->
+  <string name="stripe_position_driver_license_or_passport">Position your driver\'s license or passport in the center of the frame</string>
+  <!-- Instruction for positioning passport or government-issued photo ID -->
+  <string name="stripe_position_passport_or_id">Position your passport or government-issued photo ID in the center of the frame</string>
+  <!-- Instruction for positioning all ID types -->
+  <string name="stripe_position_all_id_types">Position your driver\'s license, passport, or government-issued photo ID in the center of the frame</string>
 </resources>
