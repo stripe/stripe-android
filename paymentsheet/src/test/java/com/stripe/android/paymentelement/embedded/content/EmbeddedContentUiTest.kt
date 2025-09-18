@@ -8,6 +8,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
@@ -21,6 +22,7 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.utils.AnalyticEventCallbackRule
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
@@ -123,6 +125,7 @@ internal class EmbeddedContentUiTest {
         val embeddedContentHelper: DefaultEmbeddedContentHelper,
     )
 
+    @OptIn(ExperimentalAnalyticEventCallbackApi::class)
     private fun runScenario(
         internalRowSelectionCallback: InternalRowSelectionCallback? = null,
         block: suspend Scenario.() -> Unit,
@@ -176,6 +179,7 @@ internal class EmbeddedContentUiTest {
                 errorReporter = errorReporter,
                 internalRowSelectionCallback = { internalRowSelectionCallback },
                 linkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
+                analyticsCallbackProvider = { AnalyticEventCallbackRule() },
                 linkAccountHolder = LinkAccountHolder(SavedStateHandle())
             )
         Scenario(

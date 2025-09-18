@@ -21,6 +21,9 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilt
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.model.PassiveCaptchaParamsFactory
+import com.stripe.android.paymentelement.AnalyticEvent
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
+import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
@@ -34,6 +37,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.utils.AnalyticEventCallbackRule
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -43,6 +47,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
 
+@OptIn(ExperimentalAnalyticEventCallbackApi::class, WalletButtonsPreview::class)
 @Suppress("LargeClass")
 class DefaultWalletButtonsInteractorTest {
 
@@ -50,6 +55,9 @@ class DefaultWalletButtonsInteractorTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
+
+    @get:Rule
+    val analyticsEventCallbackRule = AnalyticEventCallbackRule()
 
     @Test
     fun `on init with no arguments, state should be empty`() = runTest {
@@ -252,6 +260,10 @@ class DefaultWalletButtonsInteractorTest {
             )
         )
 
+        analyticsEventCallbackRule.assertMatchesExpectedEvent(
+            AnalyticEvent.TapsButtonInWalletsButtonsView(walletType = "link")
+        )
+
         val call = errorReporter.awaitCall()
 
         assertThat(call.errorEvent)
@@ -283,6 +295,10 @@ class DefaultWalletButtonsInteractorTest {
         )
 
         val call = errorReporter.awaitCall()
+
+        analyticsEventCallbackRule.assertMatchesExpectedEvent(
+            AnalyticEvent.TapsButtonInWalletsButtonsView(walletType = "link")
+        )
 
         assertThat(call.errorEvent)
             .isEqualTo(ErrorReporter.UnexpectedErrorEvent.WALLET_BUTTONS_NULL_CONFIRMATION_ARGS_ON_CONFIRM)
@@ -387,6 +403,10 @@ class DefaultWalletButtonsInteractorTest {
                 )
             }
 
+            analyticsEventCallbackRule.assertMatchesExpectedEvent(
+                AnalyticEvent.TapsButtonInWalletsButtonsView(walletType = "link")
+            )
+
             val call = presentCalls.awaitItem()
             assertThat(call.configuration).isEqualTo(linkConfiguration)
             assertThat(call.linkExpressMode).isNotEqualTo(LinkExpressMode.DISABLED)
@@ -485,6 +505,10 @@ class DefaultWalletButtonsInteractorTest {
 
             interactor.handleViewAction(
                 WalletButtonsInteractor.ViewAction.OnButtonPressed(state.walletButtons.first())
+            )
+
+            analyticsEventCallbackRule.assertMatchesExpectedEvent(
+                AnalyticEvent.TapsButtonInWalletsButtonsView(walletType = "google_pay")
             )
 
             val arguments = confirmationHandler.startTurbine.awaitItem()
@@ -926,6 +950,7 @@ class DefaultWalletButtonsInteractorTest {
             linkInlineInteractor = NoOpLinkInlineInteractor(),
             linkPaymentLauncher = linkPaymentLauncher,
             linkAccountHolder = linkAccountHolder,
+            analyticsCallbackProvider = { analyticsEventCallbackRule },
             onWalletButtonsRenderStateChanged = onWalletButtonsRenderStateChanged,
         )
     }
