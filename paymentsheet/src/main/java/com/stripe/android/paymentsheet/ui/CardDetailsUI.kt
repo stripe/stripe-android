@@ -31,13 +31,13 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.ui.EditCardDetailsInteractor.ViewAction
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.Section
-import com.stripe.android.uicore.elements.SectionElement
-import com.stripe.android.uicore.elements.SectionElementUI
 import com.stripe.android.uicore.elements.SectionFieldElement
+import com.stripe.android.uicore.elements.SectionFieldElementUI
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
 import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.ui.core.R as CoreR
 
 @Composable
@@ -52,13 +52,6 @@ internal fun CardDetailsEditUI(
         ?.collectAsState()
 
     Column {
-        // Contact section - show if we have contact elements
-        if (state.contactSectionElements.isNotEmpty()) {
-            ContactInformationSection(
-                contactElements = state.contactSectionElements
-            )
-        }
-
         // Card section - show if we have card details
         state.cardDetailsState?.let { cardDetails ->
             CardDetailsFormUI(
@@ -105,18 +98,20 @@ private fun CardDetailsFormUI(
     onExpDateChanged: (String) -> Unit,
     nameElementForCardSection: SectionFieldElement?,
 ) {
+    val error = rememberError(cardDetailsState, billingDetailsForm)
+
     Section(
         title = billingDetailsForm?.let {
             resolvableString(CoreR.string.stripe_paymentsheet_add_payment_method_card_information)
         },
-        error = cardDetailsState.expiryDateState.sectionError()?.resolve(),
+        error = error,
         modifier = Modifier.testTag(UPDATE_PM_CARD_TEST_TAG),
     ) {
         Column {
             nameElementForCardSection?.let { nameElement ->
-                SectionElementUI(
+                SectionFieldElementUI(
                     enabled = true,
-                    element = SectionElement.wrap(sectionFieldElement = nameElement),
+                    field = nameElement,
                     hiddenIdentifiers = emptySet(),
                     lastTextFieldIdentifier = null
                 )
@@ -164,21 +159,21 @@ private fun CardDetailsFormUI(
 }
 
 @Composable
-private fun ContactInformationSection(
-    contactElements: List<SectionFieldElement>,
-) {
-    if (contactElements.isNotEmpty()) {
-        SectionElementUI(
-            enabled = true,
-            element = SectionElement.wrap(
-                sectionFieldElements = contactElements,
-                label = resolvableString(CoreR.string.stripe_contact_information)
-            ),
-            hiddenIdentifiers = emptySet(),
-            lastTextFieldIdentifier = null
-        )
-        Spacer(Modifier.height(32.dp))
+private fun rememberError(
+    cardDetailsState: EditCardDetailsInteractor.CardDetailsState,
+    billingDetailsForm: BillingDetailsForm?
+): String? {
+    val nameErrorState = remember(billingDetailsForm?.nameElement) {
+        billingDetailsForm?.nameElement?.controller?.error ?: stateFlowOf(null)
     }
+
+    val nameError by nameErrorState.collectAsState()
+
+    val error = nameError?.let {
+        resolvableString(it.errorMessage, it.formatArgs)
+    } ?: cardDetailsState.expiryDateState.sectionError()
+
+    return error?.resolve()
 }
 
 /**

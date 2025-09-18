@@ -3,11 +3,14 @@ package com.stripe.android.customersheet.analytics
 import com.stripe.android.common.analytics.toAnalyticsMap
 import com.stripe.android.common.analytics.toAnalyticsValue
 import com.stripe.android.core.networking.AnalyticsEvent
+import com.stripe.android.core.utils.mapOfDurationInSeconds
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetIntegration
 import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.customersheet.util.getDefaultPaymentMethodsEnabledForCustomerSheet
 import com.stripe.android.model.CardBrand
+import com.stripe.android.ui.core.cardscan.CardScanEvent
+import kotlin.time.Duration
 
 internal sealed class CustomerSheetEvent : AnalyticsEvent {
 
@@ -270,6 +273,73 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
         )
     }
 
+    class CardScanStarted(
+        implementation: String,
+    ) : CustomerSheetEvent(), CardScanEvent {
+        override val eventName: String = CS_CARDSCAN_SCAN_STARTED
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_IMPLEMENTATION to implementation
+        )
+    }
+
+    class CardScanSucceeded(
+        implementation: String,
+        duration: Duration?,
+    ) : CustomerSheetEvent(), CardScanEvent {
+        override val eventName: String = CS_CARDSCAN_SUCCESS
+        override val additionalParams: Map<String, Any?> =
+            duration.mapOfDurationInSeconds() +
+                mapOf(
+                    FIELD_IMPLEMENTATION to implementation
+                )
+    }
+
+    class CardScanFailed(
+        implementation: String,
+        duration: Duration?,
+        error: Throwable?,
+    ) : CustomerSheetEvent(), CardScanEvent {
+        override val eventName: String = CS_CARDSCAN_FAILED
+        override val additionalParams: Map<String, Any?> =
+            duration.mapOfDurationInSeconds() +
+                mapOf(
+                    FIELD_IMPLEMENTATION to implementation,
+                    FIELD_ERROR_MESSAGE to error?.javaClass?.simpleName
+                )
+    }
+
+    class CardScanCancelled(
+        implementation: String,
+        duration: Duration?,
+    ) : CustomerSheetEvent(), CardScanEvent {
+        override val eventName: String = CS_CARDSCAN_CANCEL
+        override val additionalParams: Map<String, Any?> =
+            duration.mapOfDurationInSeconds() +
+                mapOf(
+                    FIELD_IMPLEMENTATION to implementation
+                )
+    }
+
+    class CardScanApiCheckSucceeded(
+        implementation: String,
+    ) : CustomerSheetEvent(), CardScanEvent {
+        override val eventName: String = CS_CARDSCAN_API_CHECK_SUCCEEDED
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_IMPLEMENTATION to implementation
+        )
+    }
+
+    class CardScanApiCheckFailed(
+        implementation: String,
+        error: Throwable?,
+    ) : CustomerSheetEvent(), CardScanEvent {
+        override val eventName: String = CS_CARDSCAN_API_CHECK_FAILED
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_IMPLEMENTATION to implementation,
+            FIELD_ERROR_MESSAGE to error?.javaClass?.simpleName
+        )
+    }
+
     internal companion object {
         const val CS_INIT_WITH_CUSTOMER_ADAPTER = "cs_init_with_customer_adapter"
         const val CS_INIT_WITH_CUSTOMER_SESSION = "cs_init_with_customer_session"
@@ -325,6 +395,13 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
         const val CS_UPDATE_PAYMENT_METHOD_FAILED = "cs_update_card_failed"
         const val CS_DISALLOWED_CARD_BRAND = "cs_disallowed_card_brand"
 
+        const val CS_CARDSCAN_SCAN_STARTED = "cs_cardscan_scan_started"
+        const val CS_CARDSCAN_SUCCESS = "cs_cardscan_success"
+        const val CS_CARDSCAN_FAILED = "cs_cardscan_failed"
+        const val CS_CARDSCAN_CANCEL = "cs_cardscan_cancel"
+        const val CS_CARDSCAN_API_CHECK_SUCCEEDED = "cs_cardscan_api_check_succeeded"
+        const val CS_CARDSCAN_API_CHECK_FAILED = "cs_cardscan_api_check_failed"
+
         const val FIELD_GOOGLE_PAY_ENABLED = "google_pay_enabled"
         const val FIELD_BILLING = "default_billing_details"
         const val FIELD_PREFERRED_NETWORKS = "preferred_networks"
@@ -342,6 +419,7 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
         const val FIELD_CARD_BRAND_ACCEPTANCE = "card_brand_acceptance"
         const val FIELD_CUSTOMER_ACCESS_PROVIDER = "customer_access_provider"
         const val FIELD_HAS_DEFAULT_PAYMENT_METHOD = "has_default_payment_method"
+        const val FIELD_IMPLEMENTATION = "implementation"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"

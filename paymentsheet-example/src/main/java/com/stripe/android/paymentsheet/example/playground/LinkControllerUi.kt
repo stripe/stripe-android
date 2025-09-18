@@ -14,6 +14,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -30,16 +31,18 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Divider
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -51,41 +54,37 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.LinkController
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 import com.stripe.android.ui.core.R
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @Composable
 internal fun LinkControllerUi(
     modifier: Modifier,
     controllerState: LinkController.State,
     playgroundState: LinkControllerPlaygroundState,
-    onEmailChange: (email: String) -> Unit,
-    onPaymentMethodButtonClick: (email: String) -> Unit,
+    onPaymentMethodButtonClick: (email: String, filter: LinkController.PaymentMethodType?) -> Unit,
     onCreatePaymentMethodClick: () -> Unit,
+    onLookupClick: (email: String) -> Unit,
     onAuthenticationClick: (email: String, existingOnly: Boolean) -> Unit,
+    onAuthorizeClick: (linkAuthIntentId: String) -> Unit,
     onRegisterConsumerClick: (email: String, phone: String, country: String, name: String?) -> Unit,
+    onUpdatePhoneNumberClick: (phoneNumber: String) -> Unit,
+    onLogOutClick: () -> Unit,
     onErrorMessage: (message: String) -> Unit,
 ) {
     var email by rememberSaveable { mutableStateOf("") }
+    var linkAuthIntentId by rememberSaveable { mutableStateOf("") }
     var existingOnly by rememberSaveable { mutableStateOf(false) }
     var showRegistrationForm by rememberSaveable { mutableStateOf(false) }
     var registrationPhone by rememberSaveable { mutableStateOf("") }
     var registrationCountry by rememberSaveable { mutableStateOf("US") }
     var registrationName by rememberSaveable { mutableStateOf("") }
+    var updatePhoneNumber by rememberSaveable { mutableStateOf("") }
+    var paymentMethodFilter by remember { mutableStateOf<LinkController.PaymentMethodType?>(null) }
     val errorToPresent = playgroundState.linkControllerError()
-
-    val scope = rememberCoroutineScope()
-    DisposableEffect(email) {
-        val job = scope.launch {
-            delay(500L)
-            onEmailChange(email)
-        }
-        onDispose { job.cancel() }
-    }
 
     LaunchedEffect(errorToPresent) {
         if (errorToPresent != null) {
@@ -192,10 +191,31 @@ internal fun LinkControllerUi(
                 ) {
                     Text("Register")
                 }
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = updatePhoneNumber,
+                    label = { Text(text = "New phone number") },
+                    onValueChange = { updatePhoneNumber = it }
+                )
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        onUpdatePhoneNumberClick(updatePhoneNumber.trim())
+                    },
+                    enabled = updatePhoneNumber.isNotBlank()
+                ) {
+                    Text("Update Phone Number")
+                }
+                Divider(Modifier.padding(top = 10.dp, bottom = 10.dp))
             }
         }
         Divider(Modifier.padding(bottom = 10.dp))
 
+        LookupButton(
+            modifier = Modifier.fillMaxWidth(),
+            email = email,
+            onClick = { onLookupClick(email) },
+        )
         AuthenticateButton(
             modifier = Modifier.fillMaxWidth(),
             email = email,
@@ -211,9 +231,29 @@ internal fun LinkControllerUi(
         )
         Divider(Modifier.padding(top = 10.dp, bottom = 20.dp))
 
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = linkAuthIntentId,
+            label = { Text(text = "LinkAuthIntent ID") },
+            onValueChange = { linkAuthIntentId = it }
+        )
+        AuthorizeButton(
+            modifier = Modifier.fillMaxWidth(),
+            linkAuthIntentId = linkAuthIntentId,
+            onClick = { onAuthorizeClick(linkAuthIntentId) },
+        )
+        Divider(Modifier.padding(top = 10.dp, bottom = 20.dp))
+
+        PaymentMethodTypeSelector(
+            modifier = Modifier.fillMaxWidth(),
+            selectedPaymentMethodType = paymentMethodFilter,
+            onSelectionChange = { paymentMethodFilter = it }
+        )
+        Divider(Modifier.padding(top = 10.dp, bottom = 20.dp))
+
         PaymentMethodButton(
             preview = controllerState.selectedPaymentMethodPreview,
-            onClick = { onPaymentMethodButtonClick(email) },
+            onClick = { onPaymentMethodButtonClick(email, paymentMethodFilter) },
         )
         Spacer(Modifier.height(16.dp))
 
@@ -221,9 +261,16 @@ internal fun LinkControllerUi(
             onClick = onCreatePaymentMethodClick,
             enabled = controllerState.selectedPaymentMethodPreview != null,
         )
+        Spacer(Modifier.height(16.dp))
+
+        LogOutButton(
+            onClick = onLogOutClick,
+            enabled = controllerState.isConsumerVerified == true,
+        )
     }
 }
 
+@Suppress("CyclomaticComplexMethod")
 @Composable
 private fun StatusBox(
     controllerState: LinkController.State,
@@ -249,7 +296,10 @@ private fun StatusBox(
         add("Consumer verified" to (controllerState.isConsumerVerified?.toString() ?: ""))
         add("Payment Method created" to (controllerState.createdPaymentMethod?.id ?: ""))
         add("Authentication result" to (playgroundState.authenticationResult?.toString() ?: ""))
+        add("Authorize result" to (playgroundState.authorizeResult?.toString() ?: ""))
         add("Register result" to (playgroundState.registerConsumerResult?.toString() ?: ""))
+        add("Update phone result" to (playgroundState.updatePhoneNumberResult?.toString() ?: ""))
+        add("Logout result" to (playgroundState.logOutResult?.toString() ?: ""))
     }
 
     if (statusItems.isNotEmpty()) {
@@ -294,21 +344,26 @@ private fun LinkControllerPlaygroundState.linkControllerError(): Throwable? = li
     (lookupConsumerResult as? LinkController.LookupConsumerResult.Failed)?.error,
     (createPaymentMethodResult as? LinkController.CreatePaymentMethodResult.Failed)?.error,
     (authenticationResult as? LinkController.AuthenticationResult.Failed)?.error,
+    (authorizeResult as? LinkController.AuthorizeResult.Failed)?.error,
+    (logOutResult as? LinkController.LogOutResult.Failed)?.error,
 ).firstOrNull { it != null }
 
 @Composable
-@Preview(showBackground = true)
+@Preview(showBackground = true, heightDp = 1_200)
 private fun LinkControllerUiPreview() {
     PaymentSheetExampleTheme {
         LinkControllerUi(
             modifier = Modifier,
             controllerState = LinkController.State(),
             playgroundState = LinkControllerPlaygroundState(),
-            onEmailChange = {},
-            onPaymentMethodButtonClick = {},
+            onPaymentMethodButtonClick = { _, _ -> },
             onCreatePaymentMethodClick = {},
+            onLookupClick = {},
             onAuthenticationClick = { _, _ -> },
+            onAuthorizeClick = {},
             onRegisterConsumerClick = { _, _, _, _ -> },
+            onUpdatePhoneNumberClick = {},
+            onLogOutClick = {},
             onErrorMessage = {},
         )
     }
@@ -324,11 +379,11 @@ private fun ConfirmButton(
         modifier = modifier
             .clip(CircleShape)
             .clickable(onClick = onClick, enabled = enabled)
-            .background(color = Color.Black)
+            .background(color = MaterialTheme.colors.primary)
             .padding(horizontal = 16.dp, vertical = 16.dp)
             .fillMaxWidth(),
         style = MaterialTheme.typography.h6,
-        color = Color.White,
+        color = MaterialTheme.colors.onPrimary,
         textAlign = TextAlign.Center,
         text = "Confirm",
     )
@@ -340,11 +395,18 @@ private fun PaymentMethodButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val (bgColor, contentColor) =
+        if (MaterialTheme.colors.isLight) {
+            Color.LightGray to Color.Black
+        } else {
+            Color.DarkGray to Color.White
+        }
+
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(20.dp))
             .clickable(onClick = onClick)
-            .background(color = Color.Black.copy(alpha = 0.1f))
+            .background(color = bgColor)
             .heightIn(min = 80.dp)
             .padding(horizontal = 16.dp, vertical = 16.dp)
             .fillMaxWidth(),
@@ -363,7 +425,7 @@ private fun PaymentMethodButton(
                 if (preview != null) {
                     Image(
                         modifier = Modifier.size(iconSize),
-                        painter = painterResource(preview.iconRes),
+                        painter = preview.iconPainter,
                         contentDescription = null,
                     )
                     Column(
@@ -375,15 +437,14 @@ private fun PaymentMethodButton(
                             modifier = Modifier,
                             text = preview.label,
                             style = MaterialTheme.typography.h6,
+                            color = contentColor,
                         )
                         preview.sublabel?.let { sublabel ->
                             Text(
                                 modifier = Modifier.padding(top = 2.dp),
                                 text = sublabel,
                                 style = MaterialTheme.typography.body2,
-                                color = MaterialTheme.colors.onSurface.copy(
-                                    alpha = 0.6f
-                                ),
+                                color = contentColor.copy(alpha = 0.6f),
                             )
                         }
                     }
@@ -392,6 +453,7 @@ private fun PaymentMethodButton(
                         modifier = Modifier.size(iconSize),
                         painter = painterResource(R.drawable.stripe_ic_paymentsheet_pm_card),
                         contentDescription = null,
+                        tint = contentColor,
                     )
                     Column(
                         modifier = Modifier
@@ -402,6 +464,7 @@ private fun PaymentMethodButton(
                             modifier = Modifier,
                             text = "Choose payment method",
                             style = MaterialTheme.typography.h6,
+                            color = contentColor,
                         )
                     }
                 }
@@ -411,12 +474,12 @@ private fun PaymentMethodButton(
             modifier = Modifier.size(18.dp),
             painter = painterResource(com.stripe.android.paymentsheet.R.drawable.stripe_ic_chevron_right),
             contentDescription = null,
-            tint = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+            tint = contentColor.copy(alpha = 0.6f),
         )
     }
 }
 
-@Preview(showBackground = true)
+@PreviewLightDark
 @Composable
 private fun PaymentMethodButtonPreview() {
     PaymentSheetExampleTheme {
@@ -429,13 +492,28 @@ private fun PaymentMethodButtonPreview() {
             PaymentMethodButton(
                 modifier = Modifier.padding(16.dp),
                 preview = LinkController.PaymentMethodPreview(
+                    iconRes = com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_link_arrow,
                     label = "Link",
                     sublabel = "Visa (Personal) •••• 4242",
-                    iconRes = com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_link_arrow,
                 ),
                 onClick = {},
             )
         }
+    }
+}
+
+@Composable
+private fun LogOutButton(
+    onClick: () -> Unit,
+    enabled: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        Text("Log Out")
     }
 }
 
@@ -465,6 +543,29 @@ private fun LabeledCheckbox(
 }
 
 @Composable
+private fun LookupButton(
+    email: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier,
+    ) {
+        Text(
+            text = buildString {
+                append("Lookup")
+                if (email.isNotBlank()) {
+                    append(" ${email.trim()}")
+                }
+            },
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
 private fun AuthenticateButton(
     email: String,
     onClick: () -> Unit,
@@ -484,5 +585,90 @@ private fun AuthenticateButton(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+    }
+}
+
+@Composable
+private fun AuthorizeButton(
+    linkAuthIntentId: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier,
+    ) {
+        Text(
+            text = buildString {
+                append("Authorize")
+                if (linkAuthIntentId.isNotBlank()) {
+                    append(" ${linkAuthIntentId.trim()}")
+                }
+            },
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
+private fun PaymentMethodTypeSelector(
+    selectedPaymentMethodType: LinkController.PaymentMethodType?,
+    onSelectionChange: (LinkController.PaymentMethodType?) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var isExpanded by remember { mutableStateOf(false) }
+
+    Box(modifier = modifier) {
+        Column {
+            Text(
+                text = "Payment Method Type",
+                style = MaterialTheme.typography.caption,
+                color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                modifier = Modifier.padding(bottom = 4.dp)
+            )
+            OutlinedButton(
+                onClick = { isExpanded = !isExpanded },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(selectedPaymentMethodType?.name ?: "Any")
+                    Icon(
+                        painter = painterResource(com.stripe.android.uicore.R.drawable.stripe_ic_chevron_down),
+                        contentDescription = null
+                    )
+                }
+            }
+        }
+
+        DropdownMenu(
+            expanded = isExpanded,
+            onDismissRequest = { isExpanded = false }
+        ) {
+            DropdownMenuItem(
+                onClick = {
+                    onSelectionChange(null)
+                    isExpanded = false
+                }
+            ) {
+                Text("Any")
+            }
+            LinkController.PaymentMethodType.entries.forEach { type ->
+                DropdownMenuItem(
+                    onClick = {
+                        onSelectionChange(type)
+                        isExpanded = false
+                    }
+                ) {
+                    Text(type.name)
+                }
+            }
+        }
     }
 }

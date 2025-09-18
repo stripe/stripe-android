@@ -3,6 +3,7 @@ package com.stripe.android.customersheet
 import android.app.Application
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
@@ -12,6 +13,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
@@ -56,6 +58,7 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -70,7 +73,9 @@ import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
+import com.stripe.android.ui.core.cardscan.CardScanEvent
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -107,6 +112,7 @@ internal class CustomerSheetViewModel(
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     private val customerSheetLoader: CustomerSheetLoader,
     private val errorReporter: ErrorReporter,
+    private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
     @Inject
@@ -125,6 +131,7 @@ internal class CustomerSheetViewModel(
         confirmationHandlerFactory: ConfirmationHandler.Factory,
         customerSheetLoader: CustomerSheetLoader,
         errorReporter: ErrorReporter,
+        savedStateHandle: SavedStateHandle,
     ) : this(
         application = application,
         originalPaymentSelection = originalPaymentSelection,
@@ -143,6 +150,7 @@ internal class CustomerSheetViewModel(
         confirmationHandlerFactory = confirmationHandlerFactory,
         customerSheetLoader = customerSheetLoader,
         errorReporter = errorReporter,
+        savedStateHandle = savedStateHandle,
     )
 
     private val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
@@ -177,7 +185,7 @@ internal class CustomerSheetViewModel(
             configuration = configuration,
             currentSelection = originalPaymentSelection,
             permissions = CustomerPermissions(
-                canRemovePaymentMethods = false,
+                removePaymentMethod = PaymentMethodRemovePermission.None,
                 canRemoveLastPaymentMethod = false,
                 canUpdateFullPaymentMethodDetails = false,
             ),
@@ -219,6 +227,11 @@ internal class CustomerSheetViewModel(
 
     private var previouslySelectedPaymentMethod: SupportedPaymentMethod? = null
     private var supportedPaymentMethods = mutableListOf<SupportedPaymentMethod>()
+    private val automaticallyLaunchedCardScanFormDataHelper = AutomaticallyLaunchedCardScanFormDataHelper(
+        openCardScanAutomaticallyConfig = configuration.opensCardScannerAutomatically,
+        hasAutomaticallyLaunchedCardScanInitialValue = false,
+        savedStateHandle = savedStateHandle,
+    )
 
     init {
         configuration.appearance.parseAppearance()
@@ -273,6 +286,7 @@ internal class CustomerSheetViewModel(
             is CustomerSheetViewAction.OnCardNumberInputCompleted -> onCardNumberInputCompleted()
             is CustomerSheetViewAction.OnDisallowedCardBrandEntered -> onDisallowedCardBrandEntered(viewAction.brand)
             is CustomerSheetViewAction.OnAnalyticsEvent -> onAnalyticsEvent(viewAction.event)
+            is CustomerSheetViewAction.OnCardScanEvent -> onCardScanEvent(viewAction.event)
             is CustomerSheetViewAction.OnBackPressed -> onBackPressed()
             is CustomerSheetViewAction.OnEditPressed -> onEditPressed()
             is CustomerSheetViewAction.OnModifyItem -> onModifyItem(viewAction.paymentMethod)
@@ -328,10 +342,7 @@ internal class CustomerSheetViewModel(
         activityResultCaller: ActivityResultCaller,
         lifecycleOwner: LifecycleOwner
     ) {
-        confirmationHandler.register(
-            activityResultCaller = activityResultCaller,
-            lifecycleOwner = lifecycleOwner,
-        )
+        confirmationHandler.register(activityResultCaller, lifecycleOwner)
     }
 
     private suspend fun loadCustomerSheetState() {
@@ -361,6 +372,7 @@ internal class CustomerSheetViewModel(
                             metadata = state.paymentMethodMetadata,
                             permissions = state.customerPermissions,
                         )
+                        confirmationHandler.bootstrap(state.paymentMethodMetadata)
 
                         transitionToInitialScreen()
                     }
@@ -468,6 +480,7 @@ internal class CustomerSheetViewModel(
                             )
                         },
                         autocompleteAddressInteractorFactory = null,
+                        automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper
                     ),
                 ) ?: listOf(),
                 primaryButtonLabel = if (
@@ -564,6 +577,8 @@ internal class CustomerSheetViewModel(
                     canUpdateFullPaymentMethodDetails = customerState.canUpdateFullPaymentMethodDetails,
                     displayableSavedPaymentMethod = paymentMethod,
                     addressCollectionMode = configuration.billingDetailsCollectionConfiguration.address,
+                    allowedBillingCountries =
+                    configuration.billingDetailsCollectionConfiguration.allowedBillingCountries,
                     cardBrandFilter = PaymentSheetCardBrandFilter(customerState.configuration.cardBrandAcceptance),
                     removeExecutor = ::removeExecutor,
                     onBrandChoiceSelected = { brand ->
@@ -581,6 +596,8 @@ internal class CustomerSheetViewModel(
                     // This checkbox is never displayed in CustomerSheet.
                     shouldShowSetAsDefaultCheckbox = false,
                     isDefaultPaymentMethod = false,
+                    removeMessage = customerState.permissions.removePaymentMethod
+                        .removeMessage(configuration.merchantDisplayName),
                     // Should never be called from CustomerSheet, because we don't enable the set as default checkbox.
                     setDefaultPaymentMethodExecutor = {
                         Result.failure(
@@ -799,6 +816,7 @@ internal class CustomerSheetViewModel(
             ?: requireNotNull(paymentMethodMetadata.supportedPaymentMethodForCode(paymentMethodCode))
 
         val stripeIntent = paymentMethodMetadata.stripeIntent
+        automaticallyLaunchedCardScanFormDataHelper.hasAutomaticallyLaunchedCardScan = false
         val formElements = paymentMethodMetadata.formElementsForCode(
             code = selectedPaymentMethod.code,
             uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
@@ -815,6 +833,7 @@ internal class CustomerSheetViewModel(
                     )
                 },
                 autocompleteAddressInteractorFactory = null,
+                automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
             )
         ) ?: emptyList()
 
@@ -874,6 +893,9 @@ internal class CustomerSheetViewModel(
             financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),
             setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
             autocompleteAddressInteractorFactory = null,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+            sellerBusinessName = null,
+            forceSetupFutureUseBehavior = false,
         )
     }
 
@@ -926,6 +948,10 @@ internal class CustomerSheetViewModel(
 
     private fun onAnalyticsEvent(event: AnalyticsEvent) {
         eventReporter.onAnalyticsEvent(event)
+    }
+
+    private fun onCardScanEvent(event: CardScanEvent) {
+        eventReporter.onCardScanEvent(event)
     }
 
     private fun onDisallowedCardBrandEntered(brand: CardBrand) {
@@ -1023,6 +1049,7 @@ internal class CustomerSheetViewModel(
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
                     paymentMethod = paymentMethod,
                     optionsParams = null,
+                    passiveCaptchaParams = customerState.value.metadata?.passiveCaptchaParams
                 ),
                 intent = stripeIntent,
                 initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(

@@ -18,8 +18,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 internal interface AddPaymentMethodInteractor {
     val isLiveMode: Boolean
@@ -34,12 +37,17 @@ internal interface AddPaymentMethodInteractor {
         val selectedPaymentMethodCode: PaymentMethodCode,
         val supportedPaymentMethods: List<SupportedPaymentMethod>,
         val arguments: FormArguments,
-        val formElements: List<FormElement>,
+        private val formElements: List<FormElement>,
         val paymentSelection: PaymentSelection?,
         val processing: Boolean,
+        private val validating: Boolean,
         val incentive: PaymentMethodIncentive?,
         val usBankAccountFormArguments: USBankAccountFormArguments,
-    )
+    ) {
+        val formUiElements = formElements.onEach { element ->
+            element.onValidationStateChanged(validating)
+        }
+    }
 
     sealed class ViewAction {
         data class OnPaymentMethodSelected(val code: PaymentMethodCode) : ViewAction()
@@ -56,6 +64,7 @@ internal class DefaultAddPaymentMethodInteractor(
     private val initiallySelectedPaymentMethodType: PaymentMethodCode,
     private val selection: StateFlow<PaymentSelection?>,
     private val processing: StateFlow<Boolean>,
+    private val validationRequested: SharedFlow<Unit>,
     private val incentive: StateFlow<PaymentMethodIncentive?>,
     private val supportedPaymentMethods: List<SupportedPaymentMethod>,
     private val createFormArguments: (PaymentMethodCode) -> FormArguments,
@@ -66,6 +75,7 @@ internal class DefaultAddPaymentMethodInteractor(
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
     private val createUSBankAccountFormArguments: (PaymentMethodCode) -> USBankAccountFormArguments,
     private val coroutineScope: CoroutineScope,
+    private val uiContext: CoroutineContext,
     override val isLiveMode: Boolean,
 ) : AddPaymentMethodInteractor {
 
@@ -77,7 +87,8 @@ internal class DefaultAddPaymentMethodInteractor(
             val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
             val formHelper = DefaultFormHelper.create(
                 viewModel = viewModel,
-                paymentMethodMetadata = paymentMethodMetadata
+                paymentMethodMetadata = paymentMethodMetadata,
+                shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = true,
             )
             val bankFormInteractor = BankFormInteractor.create(viewModel)
 
@@ -103,6 +114,8 @@ internal class DefaultAddPaymentMethodInteractor(
                     )
                 },
                 coroutineScope = coroutineScope,
+                validationRequested = viewModel.validationRequested,
+                uiContext = Dispatchers.Main,
                 isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             )
         }
@@ -128,6 +141,7 @@ internal class DefaultAddPaymentMethodInteractor(
             paymentSelection = selection.value,
             processing = processing.value,
             incentive = incentive.value,
+            validating = false,
             usBankAccountFormArguments = createUSBankAccountFormArguments(selectedPaymentMethodCode),
         )
     }
@@ -167,6 +181,16 @@ internal class DefaultAddPaymentMethodInteractor(
                 _state.value = _state.value.copy(
                     processing = it
                 )
+            }
+        }
+
+        coroutineScope.launch {
+            validationRequested.collect {
+                withContext(uiContext) {
+                    _state.value = _state.value.copy(
+                        validating = true
+                    )
+                }
             }
         }
     }

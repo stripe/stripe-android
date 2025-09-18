@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet.utils
 
+import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetLoader
@@ -7,6 +8,7 @@ import com.stripe.android.customersheet.CustomerSheetState
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -31,11 +33,12 @@ internal class FakeCustomerSheetLoader(
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     private val financialConnectionsAvailability: FinancialConnectionsAvailability = Full,
     private val permissions: CustomerPermissions = CustomerPermissions(
-        canRemovePaymentMethods = true,
+        removePaymentMethod = PaymentMethodRemovePermission.Full,
         canRemoveLastPaymentMethod = true,
         canUpdateFullPaymentMethodDetails = true,
     ),
     private val isPaymentMethodSyncDefaultEnabled: Boolean = false,
+    private val passiveCaptchaParams: PassiveCaptchaParams? = null,
 ) : CustomerSheetLoader {
 
     override suspend fun load(configuration: CustomerSheet.Configuration): Result<CustomerSheetState.Full> {
@@ -53,6 +56,7 @@ internal class FakeCustomerSheetLoader(
                         paymentMethodOrder = configuration.paymentMethodOrder,
                         isGooglePayReady = isGooglePayAvailable,
                         isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
+                        passiveCaptchaParams = passiveCaptchaParams,
                     ),
                     supportedPaymentMethods = supportedPaymentMethods,
                     customerPaymentMethods = customerPaymentMethods,

@@ -37,6 +37,7 @@ class BacsConfirmationFlowTest {
                 optionsParams = BACS_CONFIRMATION_OPTION.optionsParams,
                 shouldSave = false,
                 extraParams = null,
+                passiveCaptchaParams = null
             ),
             parameters = CONFIRMATION_PARAMETERS,
         ),
@@ -55,6 +56,7 @@ class BacsConfirmationFlowTest {
                 )
             ),
             optionsParams = null,
+            passiveCaptchaParams = null
         )
 
         private val PAYMENT_INTENT = PaymentIntentFactory.create()

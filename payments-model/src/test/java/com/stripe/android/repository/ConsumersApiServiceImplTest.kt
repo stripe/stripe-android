@@ -66,6 +66,7 @@ class ConsumersApiServiceImplTest {
                 email = email,
                 phoneNumber = "+15555555568",
                 country = "US",
+                countryInferringMethod = "PHONE_NUMBER",
                 name = null,
                 locale = Locale.US,
                 amount = 1234,
@@ -96,15 +97,19 @@ class ConsumersApiServiceImplTest {
             header("User-Agent", "Stripe/v1 ${StripeSdkVersion.VERSION}"),
             bodyPart("email_address", "email%40example.com"),
             bodyPart("request_surface", requestSurface),
+            bodyPart("session_id", DEFAULT_SESSION_ID),
         ) { response ->
             response.setBody(ConsumerFixtures.EXISTING_CONSUMER_JSON.toString())
         }
 
         val lookup = consumersApiService.lookupConsumerSession(
             email = email,
+            linkAuthIntentId = null,
             requestSurface = requestSurface,
+            sessionId = DEFAULT_SESSION_ID,
             requestOptions = DEFAULT_OPTIONS,
             doNotLogConsumerFunnelEvent = false,
+            supportedVerificationTypes = null,
             customerId = null
         )
 
@@ -133,8 +138,11 @@ class ConsumersApiServiceImplTest {
         assertFailsWith<APIException> {
             consumersApiService.lookupConsumerSession(
                 email = email,
+                linkAuthIntentId = null,
                 requestSurface = requestSurface,
+                sessionId = DEFAULT_SESSION_ID,
                 doNotLogConsumerFunnelEvent = false,
+                supportedVerificationTypes = null,
                 requestOptions = DEFAULT_OPTIONS,
                 customerId = null
             )
@@ -201,6 +209,7 @@ class ConsumersApiServiceImplTest {
             verificationCode = verificationCode,
             requestSurface = "android_payment_element",
             type = VerificationType.SMS,
+            consentGranted = null,
             requestOptions = DEFAULT_OPTIONS
         )
 
@@ -225,7 +234,7 @@ class ConsumersApiServiceImplTest {
             header("User-Agent", "Stripe/v1 ${StripeSdkVersion.VERSION}"),
             bodyPart(urlEncode("credentials[consumer_session_client_secret]"), "secret"),
             bodyPart("type", "card"),
-            bodyPart("active", "false"),
+            bodyPart("active", "true"),
             bodyPart("billing_email_address", urlEncode(email)),
             bodyPart(urlEncode("card[number]"), "4242424242424242"),
             bodyPart(urlEncode("card[exp_month]"), "12"),
@@ -257,7 +266,6 @@ class ConsumersApiServiceImplTest {
             paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.Card(
                 cardPaymentMethodCreateParamsMap = paymentMethodCreateParams,
                 email = email,
-                active = false,
             ),
             requestSurface = requestSurface,
             requestOptions = DEFAULT_OPTIONS,
@@ -279,7 +287,7 @@ class ConsumersApiServiceImplTest {
             header("User-Agent", "Stripe/v1 ${StripeSdkVersion.VERSION}"),
             bodyPart(urlEncode("credentials[consumer_session_client_secret]"), "secret"),
             bodyPart("type", "card"),
-            bodyPart("active", "false"),
+            bodyPart("active", "true"),
             bodyPart("billing_email_address", urlEncode(email)),
             bodyPart(urlEncode("card[number]"), "4242424242424242"),
             bodyPart(urlEncode("card[exp_month]"), "12"),
@@ -315,7 +323,6 @@ class ConsumersApiServiceImplTest {
             paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.Card(
                 cardPaymentMethodCreateParamsMap = paymentMethodCreateParams,
                 email = email,
-                active = false,
             ),
             requestSurface = requestSurface,
             requestOptions = DEFAULT_OPTIONS,
@@ -345,5 +352,6 @@ class ConsumersApiServiceImplTest {
 
     private companion object {
         private val DEFAULT_OPTIONS = ApiRequest.Options("pk_test_vOo1umqsYxSrP5UXfOeL3ecm")
+        private const val DEFAULT_SESSION_ID = "sess_123"
     }
 }

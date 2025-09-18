@@ -5,10 +5,12 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.utils.IntegrationType
@@ -140,7 +142,7 @@ internal class PaymentSheetTest {
         }
 
         page.clickPrimaryButton()
-        page.waitForText("Your card has insufficient funds.")
+        page.waitForText("Your card was declined")
         page.assertNoText("StripeException", substring = true)
         testContext.markTestSucceeded()
     }
@@ -369,6 +371,73 @@ internal class PaymentSheetTest {
     }
 
     @Test
+    fun testSavedUsBankAccountMandateNotDisplayDuringCardCheckout() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/payment_methods"),
+            query("type", "card"),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-get-success-empty.json")
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/payment_methods"),
+            query("type", "us_bank_account"),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-get-success-us-bank.json")
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = PaymentSheet.Configuration.Builder(
+                    merchantDisplayName = "Merchant, Inc."
+                )
+                    .customer(
+                        customer = PaymentSheet.CustomerConfiguration(
+                            id = "cus_1",
+                            ephemeralKeySecret = "ek_123",
+                        )
+                    )
+                    .allowsDelayedPaymentMethods(true)
+                    .link(PaymentSheet.LinkConfiguration.Builder().display(PaymentSheet.LinkConfiguration.Display.Never).build())
+                    .build()
+            )
+        }
+
+        page.assertSavedSelection("pm_6789")
+        page.assertHasMandate("By continuing, you agree to authorize payments", substring = true)
+        page.clickOnLpm("card", forVerticalMode = true)
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+        ) { response ->
+            response.setResponseCode(500)
+        }
+
+        page.clickPrimaryButton()
+        page.assertMandateIsMissing()
+        testContext.markTestSucceeded()
+    }
+
+    @Test
     fun testPrimaryButtonAccessibility() = runPaymentSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -449,6 +518,48 @@ internal class PaymentSheetTest {
             .onAllNodesWithTag(TEST_TAG_MODIFY_BADGE)[0]
             .assertIsFocused()
 
+        testContext.markTestSucceeded()
+    }
+
+    @Test
+    fun testTermsDisplayNeverHidesMandate() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        val configurationWithTermsDisplayNever = PaymentSheet.Configuration.Builder(
+            merchantDisplayName = "Example, Inc."
+        )
+            .termsDisplay(
+                mapOf(
+                    PaymentMethod.Type.Card to PaymentSheet.TermsDisplay.NEVER
+                )
+            )
+            .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+            .build()
+
+        testContext.presentPaymentSheet {
+            presentWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 5000,
+                        currency = "USD",
+                        setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+                    )
+                ),
+                configuration = configurationWithTermsDisplayNever,
+            )
+        }
+
+        page.assertMandateIsMissing()
         testContext.markTestSucceeded()
     }
 }

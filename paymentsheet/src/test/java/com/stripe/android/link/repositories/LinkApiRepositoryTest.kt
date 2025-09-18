@@ -20,6 +20,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.VerificationType
+import com.stripe.android.networking.RequestSurface
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.repository.ConsumersApiService
@@ -54,16 +55,7 @@ class LinkApiRepositoryTest {
         whenever(clientSecret).thenReturn("secret")
     }
 
-    private val linkRepository = LinkApiRepository(
-        application = ApplicationProvider.getApplicationContext(),
-        publishableKeyProvider = { PUBLISHABLE_KEY },
-        stripeAccountIdProvider = { STRIPE_ACCOUNT_ID },
-        stripeRepository = stripeRepository,
-        consumersApiService = consumersApiService,
-        workContext = Dispatchers.IO,
-        locale = Locale.US,
-        errorReporter = errorReporter
-    )
+    private val linkRepository = linkRepository(consumersApiService = consumersApiService)
 
     @Before
     fun clearErrorReporter() {
@@ -75,13 +67,20 @@ class LinkApiRepositoryTest {
         val consumersApiService = FakeConsumersApiService()
         val linkRepository = linkRepository(consumersApiService)
 
-        val result = linkRepository.lookupConsumer(TestFactory.EMAIL, customerId = null)
+        val result = linkRepository.lookupConsumer(
+            email = TestFactory.EMAIL,
+            linkAuthIntentId = null,
+            sessionId = SESSION_ID,
+            customerId = null,
+            supportedVerificationTypes = null
+        )
 
         assertThat(result).isEqualTo(Result.success(TestFactory.CONSUMER_SESSION_LOOKUP))
         assertThat(consumersApiService.lookupCalls.size).isEqualTo(1)
         val lookup = consumersApiService.lookupCalls.first()
         assertThat(lookup.email).isEqualTo(TestFactory.EMAIL)
         assertThat(lookup.requestSurface).isEqualTo(CONSUMER_SURFACE)
+        assertThat(lookup.sessionId).isEqualTo(SESSION_ID)
         assertThat(lookup.requestOptions.apiKey).isEqualTo(PUBLISHABLE_KEY)
         assertThat(lookup.requestOptions.stripeAccount).isEqualTo(STRIPE_ACCOUNT_ID)
     }
@@ -91,9 +90,12 @@ class LinkApiRepositoryTest {
         val error = RuntimeException("error")
         val consumersApiService = object : FakeConsumersApiService() {
             override suspend fun lookupConsumerSession(
-                email: String,
+                email: String?,
+                linkAuthIntentId: String?,
                 requestSurface: String,
+                sessionId: String,
                 doNotLogConsumerFunnelEvent: Boolean,
+                supportedVerificationTypes: List<String>?,
                 requestOptions: ApiRequest.Options,
                 customerId: String?
             ): ConsumerSessionLookup {
@@ -102,7 +104,13 @@ class LinkApiRepositoryTest {
         }
         val linkRepository = linkRepository(consumersApiService)
 
-        val result = linkRepository.lookupConsumer("email", customerId = null)
+        val result = linkRepository.lookupConsumer(
+            email = "email",
+            linkAuthIntentId = null,
+            sessionId = SESSION_ID,
+            customerId = null,
+            supportedVerificationTypes = null
+        )
 
         assertThat(result).isEqualTo(Result.failure<ConsumerSessionLookup>(error))
     }
@@ -114,11 +122,13 @@ class LinkApiRepositoryTest {
 
         val result = linkRepository.mobileLookupConsumer(
             email = TestFactory.EMAIL,
+            linkAuthIntentId = null,
             verificationToken = TestFactory.VERIFICATION_TOKEN,
             appId = TestFactory.APP_ID,
             sessionId = TestFactory.SESSION_ID,
             emailSource = TestFactory.EMAIL_SOURCE,
-            customerId = null
+            customerId = null,
+            supportedVerificationTypes = null
         )
 
         assertThat(result).isEqualTo(Result.success(TestFactory.CONSUMER_SESSION_LOOKUP))
@@ -139,11 +149,13 @@ class LinkApiRepositoryTest {
         val error = RuntimeException("error")
         val consumersApiService = object : FakeConsumersApiService() {
             override suspend fun mobileLookupConsumerSession(
-                email: String,
-                emailSource: EmailSource,
+                email: String?,
+                emailSource: EmailSource?,
+                linkAuthIntentId: String?,
                 requestSurface: String,
                 verificationToken: String,
                 appId: String,
+                supportedVerificationTypes: List<String>?,
                 requestOptions: ApiRequest.Options,
                 sessionId: String,
                 customerId: String?
@@ -155,11 +167,13 @@ class LinkApiRepositoryTest {
 
         val result = linkRepository.mobileLookupConsumer(
             email = TestFactory.EMAIL,
+            linkAuthIntentId = null,
             verificationToken = TestFactory.VERIFICATION_TOKEN,
             appId = TestFactory.APP_ID,
             sessionId = TestFactory.SESSION_ID,
             emailSource = TestFactory.EMAIL_SOURCE,
-            customerId = null
+            customerId = null,
+            supportedVerificationTypes = null
         )
 
         assertThat(result).isEqualTo(Result.failure<ConsumerSessionLookup>(error))
@@ -174,6 +188,7 @@ class LinkApiRepositoryTest {
             email = TestFactory.EMAIL,
             phone = TestFactory.CUSTOMER_PHONE,
             country = TestFactory.COUNTRY,
+            countryInferringMethod = TestFactory.COUNTRY_INFERRING_METHOD,
             name = TestFactory.CUSTOMER_NAME,
             consentAction = TestFactory.CONSENT_ACTION
         )
@@ -203,6 +218,7 @@ class LinkApiRepositoryTest {
             email = TestFactory.EMAIL,
             phone = TestFactory.CUSTOMER_PHONE,
             country = TestFactory.COUNTRY,
+            countryInferringMethod = TestFactory.COUNTRY_INFERRING_METHOD,
             name = TestFactory.CUSTOMER_NAME,
             consentAction = TestFactory.CONSENT_ACTION
         )
@@ -219,6 +235,7 @@ class LinkApiRepositoryTest {
             email = TestFactory.EMAIL,
             phoneNumber = TestFactory.CUSTOMER_PHONE,
             country = TestFactory.COUNTRY,
+            countryInferringMethod = TestFactory.COUNTRY_INFERRING_METHOD,
             name = TestFactory.CUSTOMER_NAME,
             consentAction = TestFactory.CONSENT_ACTION,
             verificationToken = TestFactory.VERIFICATION_TOKEN,
@@ -255,6 +272,7 @@ class LinkApiRepositoryTest {
             email = TestFactory.EMAIL,
             phoneNumber = TestFactory.CUSTOMER_PHONE,
             country = TestFactory.COUNTRY,
+            countryInferringMethod = TestFactory.COUNTRY_INFERRING_METHOD,
             name = TestFactory.CUSTOMER_NAME,
             consentAction = TestFactory.CONSENT_ACTION,
             verificationToken = TestFactory.VERIFICATION_TOKEN,
@@ -279,7 +297,6 @@ class LinkApiRepositoryTest {
             stripeIntent = paymentIntent,
             consumerSessionClientSecret = secret,
             consumerPublishableKey = consumerKey,
-            active = false,
         )
 
         verify(consumersApiService).createPaymentDetails(
@@ -297,7 +314,7 @@ class LinkApiRepositoryTest {
                         "country_code" to "US",
                         "postal_code" to "12345"
                     ),
-                    "active" to false,
+                    "active" to true,
                 )
             },
             requestSurface = eq("android_payment_element"),
@@ -330,7 +347,6 @@ class LinkApiRepositoryTest {
                 stripeIntent = paymentIntent,
                 consumerSessionClientSecret = secret,
                 consumerPublishableKey = consumerKey,
-                active = false,
             ).getOrThrow()
 
             assertThat(linkDetails.paymentMethodCreateParams.allowRedisplay).isEqualTo(allowRedisplay)
@@ -349,7 +365,6 @@ class LinkApiRepositoryTest {
                 stripeIntent = paymentIntent,
                 consumerSessionClientSecret = secret,
                 consumerPublishableKey = null,
-                active = false,
             )
 
             verify(consumersApiService).createPaymentDetails(
@@ -367,7 +382,7 @@ class LinkApiRepositoryTest {
                             "country_code" to "US",
                             "postal_code" to "12345"
                         ),
-                        "active" to false,
+                        "active" to true,
                     )
                 },
                 requestSurface = eq("android_payment_element"),
@@ -395,7 +410,6 @@ class LinkApiRepositoryTest {
             stripeIntent = paymentIntent,
             consumerSessionClientSecret = consumerSessionSecret,
             consumerPublishableKey = null,
-            active = false,
         )
 
         assertThat(result.isSuccess).isTrue()
@@ -443,7 +457,6 @@ class LinkApiRepositoryTest {
             stripeIntent = paymentIntent,
             consumerSessionClientSecret = "secret",
             consumerPublishableKey = null,
-            active = false,
         )
         val loggedErrors = errorReporter.getLoggedErrors()
 
@@ -821,6 +834,7 @@ class LinkApiRepositoryTest {
     ): LinkApiRepository {
         return LinkApiRepository(
             application = ApplicationProvider.getApplicationContext(),
+            requestSurface = RequestSurface.PaymentElement,
             publishableKeyProvider = { PUBLISHABLE_KEY },
             stripeAccountIdProvider = { STRIPE_ACCOUNT_ID },
             stripeRepository = stripeRepository,
@@ -849,5 +863,6 @@ class LinkApiRepositoryTest {
         const val PUBLISHABLE_KEY = "publishableKey"
         const val STRIPE_ACCOUNT_ID = "stripeAccountId"
         const val CONSUMER_SURFACE = "android_payment_element"
+        const val SESSION_ID = "sess_123"
     }
 }

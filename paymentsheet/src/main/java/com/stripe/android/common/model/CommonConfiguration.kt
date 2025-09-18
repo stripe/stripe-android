@@ -3,11 +3,13 @@ package com.stripe.android.common.model
 import android.os.Parcelable
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
+import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkController
-import com.stripe.android.link.model.LinkAppearance
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.TermsDisplay
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import kotlinx.parcelize.Parcelize
 
@@ -30,7 +32,10 @@ internal data class CommonConfiguration(
     val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
     val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
     val googlePlacesApiKey: String?,
-    val linkAppearance: LinkAppearance? = null
+    val linkAppearance: LinkAppearance? = null,
+    val termsDisplay: Map<PaymentMethod.Type, TermsDisplay>,
+    val walletButtons: PaymentSheet.WalletButtonsConfiguration?,
+    val opensCardScannerAutomatically: Boolean,
 ) : Parcelable {
 
     fun validate(isLiveMode: Boolean) {
@@ -160,6 +165,9 @@ internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfigura
     link = link,
     shopPayConfiguration = shopPayConfiguration,
     googlePlacesApiKey = googlePlacesApiKey,
+    termsDisplay = termsDisplay,
+    walletButtons = walletButtons,
+    opensCardScannerAutomatically = opensCardScannerAutomatically,
 )
 
 internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
@@ -180,6 +188,9 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
     link = link,
     shopPayConfiguration = null,
     googlePlacesApiKey = null,
+    termsDisplay = termsDisplay,
+    walletButtons = null,
+    opensCardScannerAutomatically = opensCardScannerAutomatically,
 )
 
 internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
@@ -201,10 +212,14 @@ internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfigu
         display = PaymentSheet.LinkConfiguration.Display.Automatic,
         collectMissingBillingDetailsForExistingPaymentMethods = true,
         allowUserEmailEdits = allowUserEmailEdits,
+        allowLogOut = allowLogOut,
     ),
     shopPayConfiguration = null,
     googlePlacesApiKey = null,
-    linkAppearance = linkAppearance
+    linkAppearance = linkAppearance,
+    termsDisplay = emptyMap(),
+    walletButtons = null,
+    opensCardScannerAutomatically = false,
 )
 
 private fun String.isEKClientSecretValid(): Boolean {

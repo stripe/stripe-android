@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.R
@@ -49,6 +50,7 @@ internal class ConfirmationMediator<
             activityResultCaller
         ) { result ->
             val confirmationResult = persistedParameters?.let { params ->
+                persistedParameters = null
                 definition.toResult(
                     confirmationOption = params.confirmationOption,
                     confirmationParameters = params.confirmationParameters,
@@ -69,6 +71,10 @@ internal class ConfirmationMediator<
 
             onResult(confirmationResult)
         }
+    }
+
+    fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
+        definition.bootstrap(paymentMethodMetadata)
     }
 
     fun unregister() {
@@ -170,7 +176,7 @@ internal class ConfirmationMediator<
         val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
     ) : Parcelable
 
-    private companion object {
-        private const val PARAMETERS_POSTFIX_KEY = "Parameters"
+    companion object {
+        const val PARAMETERS_POSTFIX_KEY = "Parameters"
     }
 }

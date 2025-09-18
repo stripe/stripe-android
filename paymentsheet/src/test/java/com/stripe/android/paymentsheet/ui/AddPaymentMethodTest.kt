@@ -452,7 +452,11 @@ internal class AddPaymentMethodTest {
 
         val metadataWithSepaDebit = metadata.copy(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("sepa_debit")
+                paymentMethodTypes = listOf("sepa_debit"),
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
+                    code = "sepa_debit",
+                    sfuValue = "off_session"
+                )
             )
         )
         val sepaDebitPaymentMethod = metadataWithSepaDebit.supportedPaymentMethodForCode("sepa_debit")!!
@@ -479,7 +483,11 @@ internal class AddPaymentMethodTest {
 
         val metadataWithSepaDebit = metadata.copy(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("sepa_debit")
+                paymentMethodTypes = listOf("sepa_debit"),
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
+                    code = "sepa_debit",
+                    sfuValue = "off_session"
+                )
             )
         )
         val sepaDebitPaymentMethod = metadataWithSepaDebit.supportedPaymentMethodForCode("sepa_debit")!!
@@ -490,7 +498,7 @@ internal class AddPaymentMethodTest {
 
         val options = sepaDebitPaymentSelection.paymentMethodOptionsParams as? PaymentMethodOptionsParams.SepaDebit
         assertThat(sepaDebitPaymentSelection.customerRequestedSave).isEqualTo(customerRequestedSave)
-        assertThat(options?.setupFutureUsage).isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.Blank)
+        assertThat(options?.setupFutureUsage).isNull()
     }
 
     @Test
@@ -505,7 +513,11 @@ internal class AddPaymentMethodTest {
 
         val metadataWithSepaDebit = metadata.copy(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("sepa_debit")
+                paymentMethodTypes = listOf("sepa_debit"),
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
+                    code = "sepa_debit",
+                    sfuValue = "off_session"
+                )
             )
         )
         val sepaDebitPaymentMethod = metadataWithSepaDebit.supportedPaymentMethodForCode("sepa_debit")!!
@@ -584,6 +596,7 @@ internal class AddPaymentMethodTest {
             ),
             paymentSelection = null,
             processing = false,
+            validating = false,
             usBankAccountFormArguments = mock(),
             incentive = null,
         )

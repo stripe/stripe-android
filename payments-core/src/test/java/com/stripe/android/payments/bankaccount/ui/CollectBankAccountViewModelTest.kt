@@ -22,6 +22,8 @@ import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResu
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithResult
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.testing.SetupIntentFactory
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -157,7 +159,7 @@ class CollectBankAccountViewModelTest {
         viewEffect.test {
             // Given
             givenCreateAccountSessionForPaymentIntentReturns(Result.success(financialConnectionsSession))
-            givenRetrieveStripeIntentReturns(Result.success(mock()))
+            givenRetrieveStripeIntentReturns(Result.success(PaymentIntentFactory.create()))
 
             // When
             val viewModel = buildViewModel(viewEffect, paymentIntentConfiguration(attachToIntent = false))
@@ -173,6 +175,11 @@ class CollectBankAccountViewModelTest {
                 any(),
                 any()
             )
+            verify(retrieveStripeIntent).invoke(
+                publishableKey,
+                stripeAccountId,
+                clientSecret,
+            )
         }
     }
 
@@ -182,7 +189,7 @@ class CollectBankAccountViewModelTest {
         viewEffect.test {
             // Given
             givenCreateAccountSessionForSetupIntentReturns(Result.success(financialConnectionsSession))
-            givenRetrieveStripeIntentReturns(Result.success(mock()))
+            givenRetrieveStripeIntentReturns(Result.success(SetupIntentFactory.create()))
 
             // When
             val viewModel = buildViewModel(viewEffect, setupIntentConfiguration(attachToIntent = false))
@@ -197,6 +204,11 @@ class CollectBankAccountViewModelTest {
                 any(),
                 any(),
                 any()
+            )
+            verify(retrieveStripeIntent).invoke(
+                publishableKey,
+                stripeAccountId,
+                clientSecret,
             )
         }
     }
@@ -484,6 +496,7 @@ class CollectBankAccountViewModelTest {
             onBlocking {
                 this(
                     publishableKey = publishableKey,
+                    stripeAccountId = stripeAccountId,
                     clientSecret = clientSecret
                 )
             }.doReturn(result)

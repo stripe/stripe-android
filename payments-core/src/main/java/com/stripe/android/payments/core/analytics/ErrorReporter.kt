@@ -176,6 +176,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         PREPARE_PAYMENT_METHOD_HANDLER_NULL(
             eventName = "paymentsheet.prepare_payment_method_handler.is_null"
         ),
+        HCAPTCHA_FAILURE(
+            eventName = "elements.captcha.passive.expected_failure"
+        ),
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -263,6 +266,12 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         WALLET_BUTTONS_NULL_CONFIRMATION_ARGS_ON_CONFIRM(
             partialEventName = "wallet_buttons.confirmation_arguments.null_on_confirm"
+        ),
+        INTENT_CONFIRMATION_HANDLER_PASSIVE_CHALLENGE_PARAMS_NULL(
+            partialEventName = "intent_confirmation_handler.passive_challenge.params_null"
+        ),
+        HCAPTCHA_UNEXPECTED_FAILURE(
+            partialEventName = "elements.captcha.passive.unexpected_failure"
         ),
         ;
 

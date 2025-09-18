@@ -52,7 +52,8 @@ private object SofortUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDat
                 listOf(IdentifierSpec.Name, IdentifierSpec.Email)
             } else {
                 emptyList()
-            }
+            },
+            termsDisplay = metadata.termsDisplayForType(SofortDefinition.type),
         )
     }
 }

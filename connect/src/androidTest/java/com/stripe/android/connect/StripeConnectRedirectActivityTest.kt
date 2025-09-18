@@ -1,32 +1,26 @@
 package com.stripe.android.connect
 
+import android.app.Activity.RESULT_CANCELED
 import android.app.Application
+import android.app.Instrumentation
 import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.intent.Intents.intended
+import androidx.test.espresso.intent.Intents.intending
 import androidx.test.espresso.intent.matcher.IntentMatchers
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.intent.rule.IntentsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.uiautomator.UiDevice
-import androidx.test.uiautomator.UiSelector
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
 import org.hamcrest.CoreMatchers
 import org.hamcrest.Matcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 
 @RunWith(AndroidJUnit4::class)
 internal class StripeConnectRedirectActivityTest {
@@ -44,7 +38,7 @@ internal class StripeConnectRedirectActivityTest {
     private fun chromeIntentMatcher(url: String? = null): Matcher<Intent> {
         val matchers = listOfNotNull(
             IntentMatchers.hasAction(Intent.ACTION_VIEW),
-            IntentMatchers.toPackage("com.android.chrome"),
+            IntentMatchers.hasExtraWithKey("android.support.customtabs.extra.SESSION"),
             url?.let { IntentMatchers.hasData(Uri.parse(it)) }
         )
         return CoreMatchers.allOf(matchers)
@@ -79,11 +73,16 @@ internal class StripeConnectRedirectActivityTest {
     }
 
     @Test
-    fun testClosingCustomTabClosesActivity() = runTest {
+    fun testCancelingCustomTabClosesActivity() = runTest {
+        intending(chromeIntentMatcher(customTabUrl)).respondWith(
+            Instrumentation.ActivityResult(
+                RESULT_CANCELED,
+                Intent()
+            )
+        )
+
         launchWithCustomTabUrl(customTabUrl).use {
-            assertThat(it.state).isEqualTo(Lifecycle.State.CREATED)
-            closeCustomTab()
-            pollUntil(5.seconds) { it.state == Lifecycle.State.DESTROYED }
+            assertThat(it.state).isEqualTo(Lifecycle.State.DESTROYED)
         }
     }
 
@@ -102,22 +101,5 @@ internal class StripeConnectRedirectActivityTest {
                 url = url
             )
         return ActivityScenario.launch(intent)
-    }
-
-    private fun closeCustomTab() {
-        val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-        device.findObject(UiSelector().packageName("com.android.chrome")).waitForExists(5_000L)
-        device.pressBack()
-    }
-
-    private suspend inline fun pollUntil(timeout: Duration, crossinline condition: () -> Boolean) {
-        withContext(Dispatchers.Default.limitedParallelism(1)) {
-            withTimeout(timeout) {
-                while (!condition()) {
-                    // Poll.
-                    delay(50L)
-                }
-            }
-        }
     }
 }

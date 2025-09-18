@@ -106,6 +106,11 @@ internal fun <
     }
 }
 
+@Suppress("UNCHECKED_CAST")
+internal fun <T : ConfirmationHandler.Option> ConfirmationHandler.Option.asOption(): T {
+    return this as T
+}
+
 internal fun ConfirmationHandler.Option.asSaved(): PaymentMethodConfirmationOption.Saved {
     return this as PaymentMethodConfirmationOption.Saved
 }

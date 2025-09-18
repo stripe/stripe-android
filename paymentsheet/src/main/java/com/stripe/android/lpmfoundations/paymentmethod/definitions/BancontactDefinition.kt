@@ -52,7 +52,8 @@ private object BancontactUiDefinitionFactory : UiDefinitionFactory.RequiresShare
                 listOf(IdentifierSpec.Name, IdentifierSpec.Email)
             } else {
                 emptyList()
-            }
+            },
+            termsDisplay = metadata.termsDisplayForType(BancontactDefinition.type),
         )
     }
 }

@@ -1,6 +1,5 @@
 package com.stripe.android.link.injection
 
-import android.app.Application
 import android.content.Context
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.SavedStateHandle
@@ -37,6 +36,7 @@ import com.stripe.android.link.gate.DefaultLinkGate
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.repositories.LinkApiRepository
 import com.stripe.android.link.repositories.LinkRepository
+import com.stripe.android.link.ui.oauth.OAuthConsentViewModelComponent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
@@ -59,7 +59,6 @@ import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.repository.ConsumersApiServiceImpl
 import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.navigation.NavigationManagerImpl
-import com.stripe.attestation.IntegrityRequestManager
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -70,7 +69,11 @@ import kotlin.coroutines.CoroutineContext
 
 @Module(
     includes = [
-        StripeRepositoryModule::class
+        StripeRepositoryModule::class,
+        PaymentsIntegrityModule::class
+    ],
+    subcomponents = [
+        OAuthConsentViewModelComponent::class,
     ]
 )
 internal interface NativeLinkModule {
@@ -213,12 +216,6 @@ internal interface NativeLinkModule {
         @Provides
         @NativeLinkScope
         fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Custom
-
-        @Provides
-        @NativeLinkScope
-        fun provideIntegrityStandardRequestManager(
-            context: Application
-        ): IntegrityRequestManager = createIntegrityStandardRequestManager(context)
 
         @JvmSuppressWildcards
         @Provides

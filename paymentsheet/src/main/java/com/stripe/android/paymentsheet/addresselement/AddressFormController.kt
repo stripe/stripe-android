@@ -1,11 +1,11 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.uicore.elements.AddressFieldConfiguration
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.elements.PhoneNumberState
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.utils.mapAsStateFlow
 
@@ -18,10 +18,10 @@ internal class AddressFormController(
         identifier = IdentifierSpec.Generic("address"),
         initialValues = initialValues,
         countryCodes = config?.allowedCountries ?: CountryUtils.supportedBillingCountries,
-        phoneNumberState = parsePhoneNumberConfig(config?.additionalFields?.phone),
+        nameConfig = AddressFieldConfiguration.REQUIRED,
+        phoneNumberConfig = parsePhoneNumberConfig(config?.additionalFields?.phone),
         shippingValuesMap = null,
         sameAsShippingElement = null,
-        hideName = false,
         interactorFactory = { interactor },
     )
 
@@ -46,18 +46,4 @@ internal class AddressFormController(
             it.second.isComplete
         }
         .toMap()
-
-    private fun parsePhoneNumberConfig(
-        configuration: AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration?
-    ): PhoneNumberState {
-        return when (configuration) {
-            AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN ->
-                PhoneNumberState.HIDDEN
-            AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.OPTIONAL ->
-                PhoneNumberState.OPTIONAL
-            AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.REQUIRED ->
-                PhoneNumberState.REQUIRED
-            null -> PhoneNumberState.OPTIONAL
-        }
-    }
 }

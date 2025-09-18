@@ -5,7 +5,6 @@ import android.app.Application
 import android.app.Instrumentation
 import android.content.Intent
 import androidx.core.os.bundleOf
-import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.Intents.intending
@@ -15,12 +14,14 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
 import com.stripe.android.paymentelement.confirmation.ExtendedPaymentElementConfirmationTestActivity
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.assertComplete
 import com.stripe.android.paymentelement.confirmation.assertConfirming
 import com.stripe.android.paymentelement.confirmation.assertIdle
 import com.stripe.android.paymentelement.confirmation.assertSucceeded
+import com.stripe.android.paymentelement.confirmation.extendedPaymentElementConfirmationTest
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -30,15 +31,10 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.view.ActivityStarter
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 @RunWith(RobolectricTestRunner::class)
 internal class CvcRecollectionConfirmationActivityTest {
@@ -77,6 +73,7 @@ internal class CvcRecollectionConfirmationActivityTest {
                     PaymentMethodConfirmationOption.Saved(
                         paymentMethod = PAYMENT_METHOD,
                         optionsParams = PaymentMethodOptionsParams.Card(cvc = "444"),
+                        passiveCaptchaParams = null
                     )
                 )
 
@@ -109,6 +106,7 @@ internal class CvcRecollectionConfirmationActivityTest {
                     PaymentMethodConfirmationOption.Saved(
                         paymentMethod = PAYMENT_METHOD,
                         optionsParams = null,
+                        passiveCaptchaParams = null
                     )
                 )
 
@@ -122,23 +120,8 @@ internal class CvcRecollectionConfirmationActivityTest {
     }
 
     private fun test(
-        test: suspend ExtendedPaymentElementConfirmationTestActivity.() -> Unit
-    ) = runTest(StandardTestDispatcher()) {
-        val countDownLatch = CountDownLatch(1)
-
-        ActivityScenario.launch<ExtendedPaymentElementConfirmationTestActivity>(
-            Intent(application, ExtendedPaymentElementConfirmationTestActivity::class.java)
-        ).use { scenario ->
-            scenario.onActivity { activity ->
-                launch {
-                    test(activity)
-                    countDownLatch.countDown()
-                }
-            }
-
-            countDownLatch.await(10, TimeUnit.SECONDS)
-        }
-    }
+        test: suspend ConfirmationTestScenario.() -> Unit
+    ) = extendedPaymentElementConfirmationTest(application, test)
 
     private fun intendingCvcRecollectionToBeLaunched(result: CvcRecollectionResult) {
         intending(hasComponent(CVC_RECOLLECTION_ACTIVITY_NAME)).respondWith(
@@ -187,6 +170,7 @@ internal class CvcRecollectionConfirmationActivityTest {
         val CONFIRMATION_OPTION = PaymentMethodConfirmationOption.Saved(
             paymentMethod = PAYMENT_METHOD,
             optionsParams = null,
+            passiveCaptchaParams = null
         )
 
         val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(

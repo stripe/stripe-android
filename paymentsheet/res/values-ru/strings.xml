@@ -29,6 +29,9 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">Сохранить мои данные для ускоренного оформления покупок с помощью Link</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_toggle">Создайте учетную запись в Link для более быстрого оформления заказов в Интернете</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s кредитная</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -45,8 +48,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up">Согласиться и продолжить</string>
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">Быстрое, безопасное оформление оплаты одним щелчком</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header_v2">Быстрое и безопасное оформление заказа</string>
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Сохраните платежные реквизиты в Link, чтобы безопасно оформлять заказы одним щелчком на всех сайтах, поддерживающих Link.</string>
+  <!-- Subtitle for the Link signup screen -->
+  <string name="stripe_link_sign_up_message_v2">Платите быстрее везде, где принимают Link.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Продолжая, вы тем самым принимаете соответствующие <terms>Условия</terms> и <privacy>политику конфиденциальности</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -105,6 +112,14 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Реквизиты карты нельзя изменить.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Указывая реквизиты карты, вы разрешаете компании %s списывать средства с карты в рамках будущих платежей в соответствии с условиями компании.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Продолжая, вы соглашаетесь сохранить вашу информацию для будущих покупок через %s.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Продолжая, вы соглашаетесь сохранить вашу информацию для будущих покупок через %s и <link>Link</link>. Вы также соглашаетесь с <terms>условиями</terms> и <privacy>политикой конфиденциальности</privacy> Link.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Продолжая, вы соглашаетесь сохранить вашу информацию для будущих покупок через %s и <link>Ссылка</link> (см. <terms>Условия</terms> и <privacy>Политику конфиденциальности</privacy>).]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Продолжая, вы соглашаетесь сохранить свою информацию для будущих покупок через %s и <link>Link</link> в соответствии с <terms>условиями</terms> и <privacy>политикой конфиденциальности</privacy> Link.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Карта не была обновлена. Попробуйте еще раз.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -164,6 +179,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_remove_card">Удалить карту</string>
   <!-- Title for confirmation alert to remove a card -->
   <string name="stripe_paymentsheet_remove_card_title">Удалить карту?</string>
+  <!-- Description for a confirmation alert indicating to the customer that their payment method will be removed but still available to the merchant for subscriptions -->
+  <string name="stripe_paymentsheet_remove_partial_description">Этот способ оплаты будет удален, но останется доступным для подписок (%s).</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Удалить %s</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
@@ -194,6 +211,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_total_amount">Всего: %s</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Бренд карты не был обновлен. Попробуйте еще раз.</string>
+  <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
+  <string name="stripe_paynow_confirm_payment">Чтобы завершить оформление покупки, подтвердите платеж в банковском или платежном приложении в течение %s.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Назначить способом оплаты по умолчанию</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -256,6 +275,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">Показать ещё</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Продолжая использование, вы тем самым соглашаетесь авторизовать платежи согласно данным <terms>условиям</terms>.]]></string>
+  <!-- Text providing link to terms for bank payments when seller information is provided -->
+  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[Отправляя заказ на %1$s и %2$s, вы соглашаетесь сохранить вашу информацию в %3$s для будущих покупок, а также соглашаетесь разрешить платежи в соответствии с <terms>этими условиями</terms>.]]></string>
+  <!-- Text providing link to terms for bank payments -->
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Отправляя заказ в %s, вы соглашаетесь разрешить платежи в соответствии с <terms>этими условиями</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Платеж</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
@@ -269,6 +292,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_passthrough_description">Passthrough</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
   <string name="stripe_wallet_pay_another_way">Оплатить другим способом</string>
+  <!-- Hint shown when selecting a payment method indicating debit cards are preferred. -->
+  <string name="stripe_wallet_prefer_debit_card_hint">Чаще всего принимаются дебетовые карты.</string>
   <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
   <string name="stripe_wallet_recollect_cvc_error">В целях безопасности введите заново код CVV/CVC карты.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->

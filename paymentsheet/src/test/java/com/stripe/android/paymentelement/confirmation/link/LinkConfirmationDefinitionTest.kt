@@ -6,10 +6,12 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkStore
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
@@ -143,16 +145,16 @@ internal class LinkConfirmationDefinitionTest {
 
         val presentCall = launcherScenario.presentCalls.awaitItem()
 
-        assertThat(presentCall.useLinkExpress).isTrue()
+        assertThat(presentCall.linkExpressMode).isNotEqualTo(LinkExpressMode.DISABLED)
     }
 
     @Test
-    fun `'launch' should launch properly with provided parameters when useLinkExpress is false`() = test {
+    fun `'launch' should launch properly with provided parameters when linkExpressMode is disabled`() = test {
         val definition = createLinkConfirmationDefinition()
 
         definition.launch(
             confirmationOption = LINK_CONFIRMATION_OPTION.copy(
-                useLinkExpress = false
+                linkExpressMode = LinkExpressMode.DISABLED
             ),
             confirmationParameters = CONFIRMATION_PARAMETERS,
             launcher = launcherScenario.launcher,
@@ -163,7 +165,7 @@ internal class LinkConfirmationDefinitionTest {
 
         assertThat(presentCall.configuration).isEqualTo(LINK_CONFIRMATION_OPTION.configuration)
         assertThat(presentCall.linkAccount).isNull()
-        assertThat(presentCall.useLinkExpress).isFalse()
+        assertThat(presentCall.linkExpressMode).isEqualTo(LinkExpressMode.DISABLED)
     }
 
     @Test
@@ -355,7 +357,8 @@ internal class LinkConfirmationDefinitionTest {
 
         private val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(
             configuration = TestFactory.LINK_CONFIGURATION,
-            useLinkExpress = true,
+            linkExpressMode = LinkExpressMode.ENABLED,
+            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
         )
     }
 }

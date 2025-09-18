@@ -98,6 +98,9 @@ internal fun USBankAccountForm(
                 setAsDefaultPaymentMethodEnabled = usBankAccountFormArgs.setAsDefaultPaymentMethodEnabled,
                 financialConnectionsAvailability = usBankAccountFormArgs.financialConnectionsAvailability,
                 setAsDefaultMatchesSaveForFutureUse = usBankAccountFormArgs.setAsDefaultMatchesSaveForFutureUse,
+                termsDisplay = usBankAccountFormArgs.termsDisplay,
+                sellerBusinessName = usBankAccountFormArgs.sellerBusinessName,
+                forceSetupFutureUseBehavior = usBankAccountFormArgs.forceSetupFutureUseBehavior,
             )
         },
     )

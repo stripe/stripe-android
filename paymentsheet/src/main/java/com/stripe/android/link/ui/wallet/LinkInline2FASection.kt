@@ -191,7 +191,7 @@ private fun OTPSection(
             LinkSpinner(
                 modifier = Modifier.size(20.dp),
                 strokeWidth = 4.dp,
-                filledColor = LinkTheme.colors.buttonPrimary
+                filledColor = LinkTheme.colors.textPrimary
             )
         }
     }
@@ -230,7 +230,8 @@ private fun LinkEmbeddedOtpSectionDefaultPreview() {
         redactedPhoneNumber = "***-***-1234",
         email = "user@example.com",
         defaultPayment = null,
-        isDialog = false
+        isDialog = false,
+        allowLogout = true,
     )
 
     LinkInline2FASection(
@@ -261,7 +262,8 @@ private fun LinkEmbeddedOtpSectionDefaultCardPreview() {
             defaultPaymentType = "CARD",
             last4 = "1234",
         ).toDefaultPaymentUI(true),
-        isDialog = false
+        isDialog = false,
+        allowLogout = true,
     )
 
     LinkInline2FASection(
@@ -292,7 +294,8 @@ private fun LinkEmbeddedOtpSectionDefaultBankPreview() {
             defaultPaymentType = "BANK_ACCOUNT",
             last4 = "1234",
         ).toDefaultPaymentUI(true),
-        isDialog = false
+        isDialog = false,
+        allowLogout = true,
     )
 
     LinkInline2FASection(
@@ -321,7 +324,8 @@ private fun LinkEmbeddedOtpSectionProcessingPreview() {
         redactedPhoneNumber = "***-***-1234",
         email = "user@example.com",
         defaultPayment = null,
-        isDialog = false
+        isDialog = false,
+        allowLogout = true,
     )
 
     Box(
@@ -354,7 +358,8 @@ private fun LinkEmbeddedOtpSectionErrorPreview() {
         redactedPhoneNumber = "***-***-1234",
         email = "user@example.com",
         defaultPayment = null,
-        isDialog = false
+        isDialog = false,
+        allowLogout = true,
     )
 
     LinkInline2FASection(

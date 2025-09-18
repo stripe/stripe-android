@@ -7,5 +7,9 @@ import dagger.assisted.AssistedFactory
 
 @AssistedFactory
 internal interface LinkInlineSignupAssistedViewModelFactory {
-    fun create(signupMode: LinkSignupMode, initialUserInput: UserInput?): InlineSignupViewModel
+    fun create(
+        signupMode: LinkSignupMode,
+        initialUserInput: UserInput?,
+        previousLinkSignupCheckboxSelection: Boolean?
+    ): InlineSignupViewModel
 }

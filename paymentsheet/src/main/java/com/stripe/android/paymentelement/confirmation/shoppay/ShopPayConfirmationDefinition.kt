@@ -6,6 +6,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.utils.sellerBusinessName
 import com.stripe.android.shoppay.ShopPayActivityContract
 import com.stripe.android.shoppay.ShopPayActivityResult
 import javax.inject.Inject
@@ -74,7 +75,8 @@ internal class ShopPayConfirmationDefinition @Inject constructor(
             ShopPayActivityContract.Args(
                 shopPayConfiguration = confirmationOption.shopPayConfiguration,
                 customerSessionClientSecret = confirmationOption.customerSessionClientSecret,
-                businessName = confirmationOption.businessName
+                businessName = confirmationParameters.initializationMode.sellerBusinessName
+                    ?: confirmationOption.merchantDisplayName
             )
         )
     }

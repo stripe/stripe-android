@@ -13,12 +13,13 @@ class AutocompleteAddressElement(
         CountryConfig(countryCodes),
         initialValues[IdentifierSpec.Country]
     ),
-    phoneNumberState: PhoneNumberState = PhoneNumberState.HIDDEN,
+    phoneNumberConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
+    nameConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
+    emailConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
     sameAsShippingElement: SameAsShippingElement?,
     shippingValuesMap: Map<IdentifierSpec, String?>?,
     interactorFactory: AutocompleteAddressInteractor.Factory,
     hideCountry: Boolean = false,
-    hideName: Boolean = true,
 ) : AddressFieldsElement {
     private val controller by lazy {
         AutocompleteAddressController(
@@ -26,12 +27,13 @@ class AutocompleteAddressElement(
             initialValues = initialValues,
             countryCodes = countryCodes,
             countryDropdownFieldController = countryDropdownFieldController,
-            phoneNumberState = phoneNumberState,
+            phoneNumberConfig = phoneNumberConfig,
+            nameConfig = nameConfig,
+            emailConfig = emailConfig,
             sameAsShippingElement = sameAsShippingElement,
             shippingValuesMap = shippingValuesMap,
             interactorFactory = interactorFactory,
             hideCountry = hideCountry,
-            hideName = hideName,
         )
     }
 
@@ -52,4 +54,8 @@ class AutocompleteAddressElement(
     override fun getFormFieldValueFlow() = controller.formFieldValues
 
     override fun getTextFieldIdentifiers() = controller.textFieldIdentifiers
+
+    override fun onValidationStateChanged(isValidating: Boolean) {
+        controller.onValidationStateChanged(isValidating)
+    }
 }

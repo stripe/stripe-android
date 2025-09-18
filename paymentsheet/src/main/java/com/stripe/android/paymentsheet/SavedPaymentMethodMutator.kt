@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -377,6 +376,7 @@ internal class SavedPaymentMethodMutator(
         ) {
             if (displayableSavedPaymentMethod.savedPaymentMethod != SavedPaymentMethod.Unexpected) {
                 val isLiveMode = requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode
+                val paymentMethodMetadata = viewModel.paymentMethodMetadata.value
                 viewModel.navigationHandler.transitionTo(
                     PaymentSheetScreen.UpdatePaymentMethod(
                         DefaultUpdatePaymentMethodInteractor(
@@ -386,8 +386,9 @@ internal class SavedPaymentMethodMutator(
                                 .canUpdateFullPaymentMethodDetails.value,
                             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
                             cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
-                            addressCollectionMode = viewModel.config.asCommonConfiguration()
-                                .billingDetailsCollectionConfiguration.address,
+                            addressCollectionMode = viewModel.config.billingDetailsCollectionConfiguration.address,
+                            allowedBillingCountries =
+                            viewModel.config.billingDetailsCollectionConfiguration.allowedBillingCountries,
                             removeExecutor = { method ->
                                 performRemove()
                             },
@@ -402,9 +403,7 @@ internal class SavedPaymentMethodMutator(
                                 )
                             },
                             shouldShowSetAsDefaultCheckbox = (
-                                viewModel
-                                    .paymentMethodMetadata
-                                    .value?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true
+                                paymentMethodMetadata?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true
                                 ),
                             isDefaultPaymentMethod = (
                                 displayableSavedPaymentMethod.isDefaultPaymentMethod(
@@ -412,6 +411,8 @@ internal class SavedPaymentMethodMutator(
                                     viewModel.customerStateHolder.customer.value?.defaultPaymentMethodId
                                 )
                                 ),
+                            removeMessage = paymentMethodMetadata?.customerMetadata?.permissions?.removePaymentMethod
+                                ?.removeMessage(paymentMethodMetadata.merchantName),
                             onUpdateSuccess = viewModel.navigationHandler::pop,
                         )
                     )

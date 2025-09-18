@@ -2,6 +2,7 @@ package com.stripe.android.link.ui.verification
 
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.LinkScreenshotSurface
+import com.stripe.android.model.ConsentUi
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.uicore.elements.OTPElement
@@ -27,6 +28,30 @@ internal class VerificationScreenshotTest(
                     otpElement = testCase.content.otpElement,
                     onBack = {},
                     onResendCodeClick = {},
+                    onConsentShown = {},
+                    onChangeEmailClick = {},
+                    didShowCodeSentNotification = {},
+                    onFocusRequested = {},
+                )
+            }
+        }
+    }
+
+    @Test
+    fun testContentWithConsent() {
+        paparazziRule.snapshot {
+            LinkScreenshotSurface {
+                val state = testCase.content.state.copy(
+                    consentSection = ConsentUi.ConsentSection(
+                        "By continuing, you’ll be remembered next time on <a href=''>Powdur</a>"
+                    )
+                )
+                VerificationBody(
+                    state = state,
+                    otpElement = testCase.content.otpElement,
+                    onBack = {},
+                    onResendCodeClick = {},
+                    onConsentShown = {},
                     onChangeEmailClick = {},
                     didShowCodeSentNotification = {},
                     onFocusRequested = {},
@@ -54,7 +79,8 @@ internal class VerificationScreenshotTest(
                             isSendingNewCode = false,
                             didSendNewCode = false,
                             defaultPayment = null,
-                            isDialog = false
+                            isDialog = false,
+                            allowLogout = true,
                         )
                     )
                 ),
@@ -71,7 +97,8 @@ internal class VerificationScreenshotTest(
                             isSendingNewCode = false,
                             didSendNewCode = false,
                             defaultPayment = null,
-                            isDialog = false
+                            isDialog = false,
+                            allowLogout = true,
                         )
                     )
                 ),
@@ -88,7 +115,8 @@ internal class VerificationScreenshotTest(
                             isSendingNewCode = false,
                             didSendNewCode = false,
                             defaultPayment = null,
-                            isDialog = false
+                            isDialog = false,
+                            allowLogout = true,
                         )
                     )
                 ),
@@ -105,7 +133,8 @@ internal class VerificationScreenshotTest(
                             errorMessage = null,
                             didSendNewCode = false,
                             defaultPayment = null,
-                            isDialog = false
+                            isDialog = false,
+                            allowLogout = true,
                         )
                     )
                 ),
@@ -122,7 +151,8 @@ internal class VerificationScreenshotTest(
                             errorMessage = "Something went wrong".resolvableString,
                             didSendNewCode = false,
                             defaultPayment = null,
-                            isDialog = false
+                            isDialog = false,
+                            allowLogout = true,
                         )
                     )
                 ),
@@ -139,7 +169,8 @@ internal class VerificationScreenshotTest(
                             isSendingNewCode = false,
                             didSendNewCode = false,
                             defaultPayment = null,
-                            isDialog = true
+                            isDialog = true,
+                            allowLogout = false,
                         )
                     )
                 ),
@@ -156,7 +187,8 @@ internal class VerificationScreenshotTest(
                             isSendingNewCode = false,
                             didSendNewCode = false,
                             defaultPayment = null,
-                            isDialog = true
+                            isDialog = true,
+                            allowLogout = false,
                         )
                     )
                 ),
@@ -173,7 +205,48 @@ internal class VerificationScreenshotTest(
                             errorMessage = "Something went wrong".resolvableString,
                             didSendNewCode = false,
                             defaultPayment = null,
-                            isDialog = true
+                            isDialog = true,
+                            allowLogout = false,
+                        )
+                    )
+                ),
+                TestCase(
+                    name = "VerificationScreenProcessingWebAuth",
+                    content = TestCase.Content(
+                        otpElement = otpSpecWithContent(content = ""),
+                        state = VerificationViewState(
+                            isProcessingWebAuth = true,
+                            isDialog = false,
+                            // Other fields shouldn't matter.
+                            requestFocus = false,
+                            redactedPhoneNumber = "(•••) ••• ••91",
+                            email = "test@test.com",
+                            isProcessing = false,
+                            errorMessage = null,
+                            isSendingNewCode = false,
+                            didSendNewCode = false,
+                            defaultPayment = null,
+                            allowLogout = true,
+                        )
+                    )
+                ),
+                TestCase(
+                    name = "VerificationDialogProcessingWebAuth",
+                    content = TestCase.Content(
+                        otpElement = otpSpecWithContent(content = ""),
+                        state = VerificationViewState(
+                            isProcessingWebAuth = true,
+                            isDialog = true,
+                            // Other fields shouldn't matter.
+                            requestFocus = false,
+                            redactedPhoneNumber = "(•••) ••• ••91",
+                            email = "test@test.com",
+                            isProcessing = false,
+                            errorMessage = null,
+                            isSendingNewCode = false,
+                            didSendNewCode = false,
+                            defaultPayment = null,
+                            allowLogout = true,
                         )
                     )
                 ),

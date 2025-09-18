@@ -181,6 +181,24 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
         }
     }
 
+    @Test
+    fun updatePaymentMethodScreen_forCard_validating() {
+        paparazziRule.snapshot {
+            PaymentSheetScreenOnUpdatePaymentMethod(
+                paymentMethod = PaymentMethodFixtures
+                    .CARD_PAYMENT_METHOD
+                    .toDisplayableSavedPaymentMethod(),
+                isModifiablePaymentMethod = true,
+                canRemove = true,
+                shouldShowSetAsDefaultCheckbox = false,
+                canUpdateFullPaymentMethodDetails = true,
+                addressCollectionMode = AddressCollectionMode.Full,
+                useDefaultBillingDetails = false,
+                validating = true,
+            )
+        }
+    }
+
     @Composable
     fun PaymentSheetScreenOnUpdatePaymentMethod(
         paymentMethod: DisplayableSavedPaymentMethod,
@@ -190,7 +208,9 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
         error: String? = null,
         shouldShowSetAsDefaultCheckbox: Boolean = false,
         canUpdateFullPaymentMethodDetails: Boolean = false,
-        addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Never
+        addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Never,
+        useDefaultBillingDetails: Boolean = true,
+        validating: Boolean = false,
     ) {
         val interactor = FakeUpdatePaymentMethodInteractor(
             displayableSavedPaymentMethod = paymentMethod,
@@ -206,10 +226,15 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
                 setAsDefaultCheckboxChecked = false,
                 isSaveButtonEnabled = false,
             ),
+            useDefaultBillingDetails = useDefaultBillingDetails,
             shouldShowSaveButton = isModifiablePaymentMethod || shouldShowSetAsDefaultCheckbox,
             addressCollectionMode = addressCollectionMode,
             canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails
-        )
+        ).apply {
+            if (validating) {
+                editCardDetailsInteractor.handleViewAction(EditCardDetailsInteractor.ViewAction.Validate)
+            }
+        }
         val screen = com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.UpdatePaymentMethod(interactor)
         val metadata = PaymentMethodMetadataFactory.create()
         val viewModel = FakeBaseSheetViewModel.create(metadata, screen, canGoBack = true)

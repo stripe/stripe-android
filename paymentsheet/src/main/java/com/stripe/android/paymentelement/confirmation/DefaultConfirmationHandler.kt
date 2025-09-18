@@ -8,6 +8,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.R
 import kotlinx.coroutines.CoroutineScope
@@ -29,7 +30,7 @@ internal class DefaultConfirmationHandler(
     private val coroutineScope: CoroutineScope,
     private val savedStateHandle: SavedStateHandle,
     private val errorReporter: ErrorReporter,
-    private val ioContext: CoroutineContext,
+    private val ioContext: CoroutineContext
 ) : ConfirmationHandler {
     private val isInitiallyAwaitingForResultData = retrieveIsAwaitingForResultData()
 
@@ -64,7 +65,10 @@ internal class DefaultConfirmationHandler(
         }
     }
 
-    override fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
+    override fun register(
+        activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
+    ) {
         mediators.forEach { mediator ->
             mediator.register(activityResultCaller, ::onResult)
         }
@@ -79,6 +83,12 @@ internal class DefaultConfirmationHandler(
                 }
             }
         )
+    }
+
+    override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
+        mediators.forEach { mediator ->
+            mediator.bootstrap(paymentMethodMetadata)
+        }
     }
 
     override suspend fun start(
@@ -290,7 +300,7 @@ internal class DefaultConfirmationHandler(
                 coroutineScope = scope,
                 errorReporter = errorReporter,
                 savedStateHandle = savedStateHandle,
-                ioContext = ioContext,
+                ioContext = ioContext
             )
         }
     }

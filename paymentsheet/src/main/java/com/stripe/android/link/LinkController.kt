@@ -6,12 +6,15 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.link.injection.DaggerLinkControllerComponent
 import com.stripe.android.link.injection.LinkControllerPresenterComponent
-import com.stripe.android.link.model.LinkAppearance
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentsheet.PaymentSheet
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.flow.StateFlow
@@ -60,6 +63,11 @@ class LinkController @Inject internal constructor(
         return interactor.createPaymentMethod()
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun createPaymentMethodForOnramp(apiKey: String): CreatePaymentMethodResult {
+        return interactor.createPaymentMethod(apiKey)
+    }
+
     /**
      * Look up whether the provided email address is associated with an existing Link consumer account.
      *
@@ -74,6 +82,24 @@ class LinkController @Inject internal constructor(
     }
 
     /**
+     * Update the phone number associated with the current Link consumer account.
+     *
+     * @param phoneNumber The new phone number to associate with the Link account, in E.164 format.
+     */
+    suspend fun updatePhoneNumber(phoneNumber: String): UpdatePhoneNumberResult {
+        return interactor.updatePhoneNumber(phoneNumber)
+    }
+
+    /**
+     * Log out the current Link consumer.
+     *
+     * @return The result of the logout operation.
+     */
+    suspend fun logOut(): LogOutResult {
+        return interactor.logOut()
+    }
+
+    /**
      * Creates a [Presenter] for the Link controller that can present user-interactive flows.
      *
      * @param activity The [ComponentActivity] that will host the Link UI.
@@ -84,6 +110,7 @@ class LinkController @Inject internal constructor(
         activity: ComponentActivity,
         presentPaymentMethodsCallback: PresentPaymentMethodsCallback,
         authenticationCallback: AuthenticationCallback,
+        authorizeCallback: AuthorizeCallback,
     ): Presenter {
         return presenterComponentFactory
             .build(
@@ -92,6 +119,7 @@ class LinkController @Inject internal constructor(
                 activityResultRegistryOwner = activity,
                 presentPaymentMethodsCallback = presentPaymentMethodsCallback,
                 authenticationCallback = authenticationCallback,
+                authorizeCallback = authorizeCallback,
             )
             .presenter
     }
@@ -122,6 +150,14 @@ class LinkController @Inject internal constructor(
     }
 
     /**
+     * [CRYPTO ONRAMP ONLY] Clear the Link account from local storage.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun clearLinkAccount() {
+        return interactor.clearLinkAccount()
+    }
+
+    /**
      * Configuration for [LinkController].
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -129,10 +165,13 @@ class LinkController @Inject internal constructor(
     @Poko
     class Configuration internal constructor(
         internal val merchantDisplayName: String,
+        internal val publishableKey: String,
+        internal val stripeAccountId: String?,
         internal val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
         internal val defaultBillingDetails: PaymentSheet.BillingDetails?,
         internal val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
         internal val allowUserEmailEdits: Boolean,
+        internal val allowLogOut: Boolean,
         internal val linkAppearance: LinkAppearance? = null
     ) : Parcelable {
 
@@ -147,8 +186,10 @@ class LinkController @Inject internal constructor(
              * Your customer-facing business name.
              */
             private val merchantDisplayName: String,
-            private val appearance: LinkAppearance? = null
+            private val publishableKey: String,
+            private val stripeAccountId: String? = null,
         ) {
+            private var appearance: LinkAppearance? = null
             private var cardBrandAcceptance: PaymentSheet.CardBrandAcceptance =
                 ConfigurationDefaults.cardBrandAcceptance
             private var defaultBillingDetails: PaymentSheet.BillingDetails? =
@@ -156,6 +197,17 @@ class LinkController @Inject internal constructor(
             private var billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
                 ConfigurationDefaults.billingDetailsCollectionConfiguration
             private var allowUserEmailEdits: Boolean = true
+            private var allowLogOut: Boolean = true
+
+            /**
+             * Configure the appearance of Link UI components.
+             *
+             * @param appearance The [LinkAppearance] configuration for customizing Link UI styling.
+             * @return This builder instance for method chaining.
+             */
+            fun appearance(appearance: LinkAppearance) = apply {
+                this.appearance = appearance
+            }
 
             /**
              * Configuration for which card brands should be accepted or blocked.
@@ -204,24 +256,40 @@ class LinkController @Inject internal constructor(
             }
 
             /**
+             * Whether to allow users to log out from Link.
+             *
+             * @param allowLogOut True to allow logout, false to disable it.
+             * @return This builder instance for method chaining.
+             */
+            fun allowLogOut(allowLogOut: Boolean) = apply {
+                this.allowLogOut = allowLogOut
+            }
+
+            /**
              * Build the [Configuration] instance.
              *
              * @return A new [Configuration] with the specified settings.
              */
             fun build(): Configuration = Configuration(
-                allowUserEmailEdits = allowUserEmailEdits,
                 merchantDisplayName = merchantDisplayName,
+                publishableKey = publishableKey,
+                stripeAccountId = stripeAccountId,
                 cardBrandAcceptance = cardBrandAcceptance,
                 defaultBillingDetails = defaultBillingDetails,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                allowUserEmailEdits = allowUserEmailEdits,
+                allowLogOut = allowLogOut,
                 linkAppearance = appearance
             )
         }
 
         internal companion object {
-            fun default(context: Context): Configuration {
+            fun default(context: Context, publishableKey: String): Configuration {
                 val appName = context.applicationInfo.loadLabel(context.packageManager).toString()
-                return Builder(appName).build()
+                return Builder(
+                    merchantDisplayName = appName,
+                    publishableKey = publishableKey
+                ).build()
             }
         }
     }
@@ -233,17 +301,24 @@ class LinkController @Inject internal constructor(
      * @param createdPaymentMethod The [PaymentMethod] created from the selected Link payment method, if any.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    @Parcelize
     @Poko
     class State
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val elementsSessionId: String? = null,
+
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val internalLinkAccount: LinkAccount? = null,
+
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val merchantLogoUrl: String? = null,
         val selectedPaymentMethodPreview: PaymentMethodPreview? = null,
         val createdPaymentMethod: PaymentMethod? = null,
-    ) : Parcelable {
+    ) {
         /**
          * Whether the Link consumer account is verified. Null if no account is loaded.
          */
@@ -262,9 +337,6 @@ class LinkController @Inject internal constructor(
         private val coordinator: LinkControllerCoordinator,
         private val interactor: LinkControllerInteractor,
     ) {
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        var paymentSelectionHint: String? = null
-
         /**
          * Present the Link payment methods selection screen.
          *
@@ -277,12 +349,16 @@ class LinkController @Inject internal constructor(
          * @param email The email address to use for Link account lookup. If provided and the email
          * matches an existing Link account, the account's payment methods will be available for selection.
          * If null, the user will need to sign in or create a Link account.
+         * @param paymentMethodType Optional filter for the type of payment methods to present.
          */
-        fun presentPaymentMethods(email: String?) {
+        fun presentPaymentMethods(
+            email: String?,
+            paymentMethodType: PaymentMethodType? = null
+        ) {
             interactor.presentPaymentMethods(
                 launcher = coordinator.linkActivityResultLauncher,
                 email = email,
-                hint = paymentSelectionHint,
+                paymentMethodType = paymentMethodType,
             )
         }
 
@@ -332,6 +408,22 @@ class LinkController @Inject internal constructor(
             interactor.authenticateExistingConsumer(
                 launcher = coordinator.linkActivityResultLauncher,
                 email = email
+            )
+        }
+
+        /**
+         * [CRYPTO ONRAMP ONLY] Authorize a LinkAuthIntent.
+         *
+         * This will launch the Link activity where users can authenticate with their Link account and
+         * submit consent for scopes associated with the LinkAuthIntent.
+         *
+         * The result will be communicated through the [AuthorizeCallback] provided during controller creation.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun authorize(linkAuthIntentId: String) {
+            interactor.authorize(
+                launcher = coordinator.linkActivityResultLauncher,
+                linkAuthIntentId = linkAuthIntentId
             )
         }
     }
@@ -413,6 +505,28 @@ class LinkController @Inject internal constructor(
     }
 
     /**
+     * Result of logging out from Link.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    sealed interface LogOutResult {
+
+        /**
+         * The user successfully logged out from Link.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class Success internal constructor() : LogOutResult
+
+        /**
+         * An error occurred while logging out from Link.
+         *
+         * @param error The error that occurred during logout.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Poko
+        class Failed internal constructor(val error: Throwable) : LogOutResult
+    }
+
+    /**
      * Result of creating a payment method from a selected Link payment method.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -422,7 +536,8 @@ class LinkController @Inject internal constructor(
          * The payment method was created successfully.
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data object Success : CreatePaymentMethodResult
+        @Poko
+        class Success internal constructor(val paymentMethod: PaymentMethod) : CreatePaymentMethodResult
 
         /**
          * An error occurred while creating the payment method.
@@ -485,6 +600,60 @@ class LinkController @Inject internal constructor(
     }
 
     /**
+     * [CRYPTO ONRAMP ONLY] Result of authorizing a LinkAuthIntent.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    sealed interface AuthorizeResult {
+
+        /**
+         * The user granted consent to the scopes requested by the LinkAuthIntent.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data object Consented : AuthorizeResult
+
+        /**
+         * The user denied consent to the scopes requested by the LinkAuthIntent.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data object Denied : AuthorizeResult
+
+        /**
+         * The user canceled the authorization.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data object Canceled : AuthorizeResult
+
+        /**
+         * An error occurred while authorizing the LinkAuthIntent.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Poko
+        class Failed internal constructor(val error: Throwable) : AuthorizeResult
+    }
+
+    /**
+     * Result of updating a consumer's phone number.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    sealed interface UpdatePhoneNumberResult {
+
+        /**
+         * The phone number was updated successfully.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data object Success : UpdatePhoneNumberResult
+
+        /**
+         * An error occurred while updating the phone number.
+         *
+         * @param error The error that occurred.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Poko
+        class Failed internal constructor(val error: Throwable) : UpdatePhoneNumberResult
+    }
+
+    /**
      * Callback for receiving results from [Presenter.presentPaymentMethods].
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -499,6 +668,14 @@ class LinkController @Inject internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun interface AuthenticationCallback {
         fun onAuthenticationResult(result: AuthenticationResult)
+    }
+
+    /**
+     * [CRYPTO ONRAMP ONLY] Callback for receiving results from [Presenter.authorize].
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun interface AuthorizeCallback {
+        fun onAuthorizeResult(result: AuthorizeResult)
     }
 
     /**
@@ -535,20 +712,49 @@ class LinkController @Inject internal constructor(
     }
 
     /**
-     * Preview information for a Link payment method.
-     *
-     * @param iconRes The drawable resource ID for the payment method icon.
-     * @param label The main label text (e.g., "Link").
-     * @param sublabel Additional descriptive text (e.g., "Card •••• 1234").
+     * The type of payment method to present for selection.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    @Parcelize
+    enum class PaymentMethodType {
+        Card,
+        BankAccount
+    }
+
+    /**
+     * Preview information for a Link payment method.
+     *
+     * @param iconRes An image representing a payment method; e.g. the VISA logo.
+     * @param label The main label text (e.g., "Link").
+     * @param sublabel Additional descriptive text (e.g., "Visa •••• 4242").
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Poko
-    class PaymentMethodPreview(
+    class PaymentMethodPreview
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         @DrawableRes val iconRes: Int,
         val label: String,
-        val sublabel: String?
-    ) : Parcelable
+        val sublabel: String?,
+    ) {
+        /**
+         * An image representing a payment method; e.g. the VISA logo.
+         */
+        val iconPainter: Painter
+            @Composable
+            get() = painterResource(iconRes)
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        companion object {
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @JvmStatic
+            fun create(
+                context: Context,
+                details: PaymentMethodPreviewDetails
+            ): PaymentMethodPreview {
+                return details.toPreview(context)
+            }
+        }
+    }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
@@ -558,11 +764,29 @@ class LinkController @Inject internal constructor(
             application: Application,
             savedStateHandle: SavedStateHandle
         ): LinkController {
+            return create(
+                application = application,
+                savedStateHandle = savedStateHandle,
+                // Temporarily "android_crypto_onramp" until backend is ready.
+                // Should be "android_link_controller" instead.
+                requestSurface = RequestSurface.CryptoOnramp,
+            )
+        }
+
+        // Internal use only.
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @JvmStatic
+        fun create(
+            application: Application,
+            savedStateHandle: SavedStateHandle,
+            requestSurface: RequestSurface,
+        ): LinkController {
             return DaggerLinkControllerComponent.factory()
                 .build(
                     application = application,
                     savedStateHandle = savedStateHandle,
                     paymentElementCallbackIdentifier = "LinkController",
+                    requestSurface = requestSurface,
                 )
                 .linkController
         }

@@ -15,6 +15,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.utils.sellerBusinessName
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -87,6 +88,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             factory = googlePayPaymentMethodLauncherFactory,
             activityLauncher = launcher,
             config = confirmationOption.config,
+            confirmationParameters = confirmationParameters,
         )
 
         googlePayLauncher.present(
@@ -113,6 +115,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
                     paymentMethod = result.paymentMethod,
                     optionsParams = null,
                     originatedFromWallet = true,
+                    passiveCaptchaParams = confirmationOption.passiveCaptchaParams
                 )
 
                 ConfirmationDefinition.Result.NextStep(
@@ -143,6 +146,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
         factory: GooglePayPaymentMethodLauncherFactory,
         activityLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
         config: GooglePayConfirmationOption.Config,
+        confirmationParameters: ConfirmationDefinition.Parameters,
     ): GooglePayPaymentMethodLauncher {
         return factory.create(
             lifecycleScope = CoroutineScope(Dispatchers.Default),
@@ -152,7 +156,8 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
                     else -> GooglePayEnvironment.Test
                 },
                 merchantCountryCode = config.merchantCountryCode,
-                merchantName = config.merchantName,
+                merchantName = confirmationParameters.initializationMode.sellerBusinessName
+                    ?: config.merchantName,
                 isEmailRequired = config.billingDetailsCollectionConfiguration.collectsEmail,
                 billingAddressConfig = config.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
             ),

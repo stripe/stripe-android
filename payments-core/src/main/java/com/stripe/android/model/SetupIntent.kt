@@ -147,6 +147,7 @@ constructor(
             is StripeIntent.NextActionData.WeChatPayRedirect,
             is StripeIntent.NextActionData.UpiAwaitNotification,
             is StripeIntent.NextActionData.SwishRedirect,
+            is StripeIntent.NextActionData.DisplayPayNowDetails,
             null -> {
                 null
             }

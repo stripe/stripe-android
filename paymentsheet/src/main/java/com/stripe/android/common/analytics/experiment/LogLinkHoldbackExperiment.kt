@@ -3,13 +3,16 @@ package com.stripe.android.common.analytics.experiment
 import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkHoldback
 import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkHoldback.EmailRecognitionSource
 import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkHoldback.ProvidedDefaultValues
+import com.stripe.android.common.di.MOBILE_SESSION_ID
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement
 import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement.Enabled
+import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_DISABLE_LINK_GLOBAL_HOLDBACK_LOOKUP
 import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_ENABLE_LINK_SPM
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -20,6 +23,7 @@ import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
 internal interface LogLinkHoldbackExperiment {
@@ -30,7 +34,7 @@ internal interface LogLinkHoldbackExperiment {
      * @param state The current state of the payment element loader.
      */
     operator fun invoke(
-        experimentAssignment: ElementsSession.ExperimentAssignment,
+        experimentAssignments: List<ExperimentAssignment>,
         elementsSession: ElementsSession,
         state: PaymentElementLoader.State
     )
@@ -39,6 +43,7 @@ internal interface LogLinkHoldbackExperiment {
 internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
     private val eventReporter: EventReporter,
     @LinkDisabledApiRepository private val linkDisabledApiRepository: LinkRepository,
+    @Named(MOBILE_SESSION_ID) private val mobileSessionId: String,
     @IOContext private val workContext: CoroutineContext,
     private val retrieveCustomerEmail: RetrieveCustomerEmail,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
@@ -47,13 +52,13 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
 ) : LogLinkHoldbackExperiment {
 
     override operator fun invoke(
-        experimentAssignment: ElementsSession.ExperimentAssignment,
+        experimentAssignments: List<ExperimentAssignment>,
         elementsSession: ElementsSession,
         state: PaymentElementLoader.State
     ) {
         CoroutineScope(workContext).launch {
             runCatching {
-                logExposure(elementsSession, state, experimentAssignment)
+                logExposure(elementsSession, state, experimentAssignments)
             }.onFailure { error ->
                 logger.error("Failed to log Global holdback exposure", error)
             }
@@ -63,7 +68,7 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
     private suspend fun logExposure(
         elementsSession: ElementsSession,
         state: PaymentElementLoader.State,
-        experimentAssignment: ElementsSession.ExperimentAssignment
+        experimentAssignments: List<ExperimentAssignment>
     ) {
         // Don't log if the lookup kill-switch is disabled.
         if (elementsSession.flags[ELEMENTS_DISABLE_LINK_GLOBAL_HOLDBACK_LOOKUP] == true) {
@@ -73,14 +78,13 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
         val experimentsData = requireNotNull(
             elementsSession.experimentsData
         ) { "Experiments data required to log exposures" }
-        val experimentGroup: String = elementsSession.experimentsData
-            ?.experimentAssignments[experimentAssignment] ?: "control"
 
         val customerEmail = state.getEmail()
 
         val defaultValues = state.getDefaultValues()
 
-        val isReturningUser: Boolean = customerEmail != null && isReturningUser(customerEmail)
+        val isReturningUser = customerEmail != null &&
+            isReturningUser(email = customerEmail, sessionId = elementsSession.elementsSessionId)
 
         val useLinkNative: Boolean = state.paymentMethodMetadata.linkState?.configuration?.let {
             linkConfigurationCoordinator.linkGate(it).useNativeLink
@@ -94,20 +98,27 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
 
         val isSpmEnabled: Boolean = elementsSession.isSpmEnabled(linkEnabled)
 
-        eventReporter.onExperimentExposure(
-            experiment = LinkHoldback(
-                arbId = experimentsData.arbId,
-                experiment = experimentAssignment,
-                isReturningLinkUser = isReturningUser,
-                providedDefaultValues = defaultValues,
-                linkDisplayed = linkEnabled,
-                useLinkNative = useLinkNative,
-                spmEnabled = isSpmEnabled,
-                integrationShape = integrationShape,
-                emailRecognitionSource = emailRecognitionSource,
-                group = experimentGroup,
-            ),
-        )
+        experimentAssignments.forEach { experimentAssignment ->
+            val experimentGroup = elementsSession.experimentsData
+                ?.experimentAssignments?.get(experimentAssignment) ?: "control"
+            eventReporter.onExperimentExposure(
+                experiment = LinkHoldback(
+                    arbId = experimentsData.arbId,
+                    experiment = experimentAssignment,
+                    isReturningLinkUser = isReturningUser,
+                    providedDefaultValues = defaultValues,
+                    linkDisplayed = linkEnabled,
+                    useLinkNative = useLinkNative,
+                    spmEnabled = isSpmEnabled,
+                    integrationShape = integrationShape,
+                    emailRecognitionSource = emailRecognitionSource,
+                    group = experimentGroup,
+                    elementsSessionId = elementsSession.elementsSessionId,
+                    mobileSessionId = mobileSessionId,
+                    mobileSdkVersion = StripeSdkVersion.VERSION_NAME
+                ),
+            )
+        }
     }
 
     private fun PaymentElementLoader.State.getDefaultValues(): ProvidedDefaultValues {
@@ -124,11 +135,15 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
      *
      * If lookup fails, we populate the error as we don't want to log exposures on these cases.
      */
-    suspend fun isReturningUser(
+    private suspend fun isReturningUser(
         email: String,
+        sessionId: String,
     ): Boolean {
         return linkDisabledApiRepository
-            .lookupConsumerWithoutBackendLoggingForExposure(email)
+            .lookupConsumerWithoutBackendLoggingForExposure(
+                email = email,
+                sessionId = sessionId,
+            )
             .map { it.exists }
             .onFailure {
                 logger.error("Failed to check if user is returning", it)

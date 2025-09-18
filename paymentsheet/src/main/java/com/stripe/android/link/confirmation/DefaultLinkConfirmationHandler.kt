@@ -5,14 +5,18 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.PassiveCaptchaParams
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -25,7 +29,9 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
     private val configuration: LinkConfiguration,
     private val logger: Logger,
     private val confirmationHandler: ConfirmationHandler,
+    private val passiveCaptchaParams: PassiveCaptchaParams?
 ) : LinkConfirmationHandler {
+
     override suspend fun confirm(
         paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         linkAccount: LinkAccount,
@@ -123,12 +129,22 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         cvc: String?,
         billingPhone: String?
     ): ConfirmationHandler.Args {
+        val paymentMethodType = if (configuration.passthroughModeEnabled) {
+            computeExpectedPaymentMethodType(configuration, paymentDetails)
+        } else {
+            PaymentMethod.Type.Link.code
+        }
+
+        val allowRedisplay = allowRedisplay(paymentMethodType = paymentMethodType)
+
         val confirmationOption = if (configuration.passthroughModeEnabled) {
             LinkPassthroughConfirmationOption(
                 paymentDetailsId = paymentDetails.id,
-                expectedPaymentMethodType = computeExpectedPaymentMethodType(configuration, paymentDetails),
+                expectedPaymentMethodType = paymentMethodType,
                 cvc = cvc,
-                billingPhone = billingPhone
+                billingPhone = billingPhone,
+                allowRedisplay = allowRedisplay,
+                passiveCaptchaParams = passiveCaptchaParams
             )
         } else {
             PaymentMethodConfirmationOption.New(
@@ -137,10 +153,12 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                     consumerSessionClientSecret = linkAccount.clientSecret,
                     cvc = cvc,
                     billingPhone = billingPhone,
+                    allowRedisplay = allowRedisplay,
                 ),
                 extraParams = null,
                 optionsParams = null,
-                shouldSave = false
+                shouldSave = false,
+                passiveCaptchaParams = passiveCaptchaParams
             )
         }
 
@@ -151,6 +169,19 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
             initializationMode = configuration.initializationMode,
             shippingDetails = configuration.shippingDetails
         )
+    }
+
+    private fun allowRedisplay(paymentMethodType: String): PaymentMethod.AllowRedisplay? {
+        val isSettingUp = when (val intent = configuration.stripeIntent) {
+            is PaymentIntent -> intent.isSetupFutureUsageSet(paymentMethodType)
+            is SetupIntent -> true
+        }
+
+        return if (isSettingUp || configuration.forceSetupFutureUseBehaviorAndNewMandate) {
+            configuration.saveConsentBehavior.overrideAllowRedisplay ?: PaymentMethod.AllowRedisplay.LIMITED
+        } else {
+            PaymentMethod.AllowRedisplay.UNSPECIFIED
+        }
     }
 
     private fun savedConfirmationArgs(
@@ -176,7 +207,8 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                     cvc = cvc?.takeIf {
                         configuration.passthroughModeEnabled.not()
                     }
-                )
+                ),
+                passiveCaptchaParams = passiveCaptchaParams
             ),
             appearance = PaymentSheet.Appearance(),
             initializationMode = configuration.initializationMode,
@@ -186,6 +218,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
 
     class Factory @Inject constructor(
         private val configuration: LinkConfiguration,
+        private val passiveCaptchaParams: PassiveCaptchaParams?,
         private val logger: Logger,
     ) : LinkConfirmationHandler.Factory {
         override fun create(confirmationHandler: ConfirmationHandler): LinkConfirmationHandler {
@@ -193,6 +226,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                 confirmationHandler = confirmationHandler,
                 logger = logger,
                 configuration = configuration,
+                passiveCaptchaParams = passiveCaptchaParams
             )
         }
     }
@@ -203,6 +237,7 @@ internal fun createPaymentMethodCreateParams(
     consumerSessionClientSecret: String,
     cvc: String?,
     billingPhone: String?,
+    allowRedisplay: PaymentMethod.AllowRedisplay? = null,
 ): PaymentMethodCreateParams {
     val billingDetails = PaymentMethod.BillingDetails(
         address = selectedPaymentDetails.billingAddress?.let {
@@ -225,6 +260,7 @@ internal fun createPaymentMethodCreateParams(
         consumerSessionClientSecret = consumerSessionClientSecret,
         billingDetails = billingDetails.takeIf { it != PaymentMethod.BillingDetails() },
         extraParams = cvc?.let { mapOf("card" to mapOf("cvc" to cvc)) },
+        allowRedisplay = allowRedisplay,
     )
 }
 
@@ -249,3 +285,9 @@ private fun computeBankAccountExpectedPaymentMethodType(configuration: LinkConfi
         ConsumerPaymentDetails.BankAccount.TYPE
     }
 }
+
+private val PaymentMethodSaveConsentBehavior.overrideAllowRedisplay: PaymentMethod.AllowRedisplay?
+    get() = when (this) {
+        is PaymentMethodSaveConsentBehavior.Disabled -> overrideAllowRedisplay
+        is PaymentMethodSaveConsentBehavior.Enabled, PaymentMethodSaveConsentBehavior.Legacy -> null
+    }

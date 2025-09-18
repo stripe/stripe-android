@@ -8,6 +8,7 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_ID
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RADAR_OPTIONS
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RETURN_URL
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_SET_AS_DEFAULT_PAYMENT_METHOD
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_USE_STRIPE_SDK
@@ -127,6 +128,8 @@ constructor(
     internal val setAsDefaultPaymentMethod: Boolean? = null,
 
     internal val paymentMethodCode: PaymentMethodCode? = paymentMethodCreateParams?.code,
+
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val radarOptions: RadarOptions? = null
 ) : ConfirmStripeIntentParams {
     fun shouldSavePaymentMethod(): Boolean {
         return savePaymentMethod == true
@@ -174,6 +177,10 @@ constructor(
         ).plus(
             shipping?.let {
                 mapOf(PARAM_SHIPPING to it.toParamMap())
+            }.orEmpty()
+        ).plus(
+            radarOptions?.let {
+                mapOf(PARAM_RADAR_OPTIONS to it.toParamMap())
             }.orEmpty()
         ).plus(
             paymentMethodParamMap
@@ -255,7 +262,13 @@ constructor(
          * Use `` if you want to clear reusable from the payment intent.  Note: this
          * only works if the PaymentIntent was created with no setup_future_usage.
          */
-        Blank("")
+        Blank(""),
+
+        /**
+         * Use `none` to override top level setup_future_usage in payment_method_options.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        None("none")
     }
 
     /**
@@ -466,6 +479,7 @@ constructor(
                 shipping = shipping,
                 paymentMethodOptions = paymentMethodOptions,
                 setAsDefaultPaymentMethod = null,
+                radarOptions = null
             )
         }
 
@@ -564,6 +578,7 @@ constructor(
             shipping: Shipping? = null,
             paymentMethodOptions: PaymentMethodOptionsParams? = null,
             setAsDefaultPaymentMethod: Boolean?,
+            radarOptions: RadarOptions?
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
@@ -576,6 +591,7 @@ constructor(
                 paymentMethodOptions = paymentMethodOptions,
                 setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
                 paymentMethodCode = paymentMethodCreateParams.code,
+                radarOptions = radarOptions
             )
         }
 
@@ -590,6 +606,7 @@ constructor(
             paymentMethodOptions: PaymentMethodOptionsParams? = null,
             setAsDefaultPaymentMethod: Boolean? = null,
             paymentMethodCode: PaymentMethodCode,
+            radarOptions: RadarOptions?
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 paymentMethodId = paymentMethodId,
@@ -602,6 +619,7 @@ constructor(
                 paymentMethodOptions = paymentMethodOptions,
                 setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
                 paymentMethodCode = paymentMethodCode,
+                radarOptions = radarOptions
             )
         }
 

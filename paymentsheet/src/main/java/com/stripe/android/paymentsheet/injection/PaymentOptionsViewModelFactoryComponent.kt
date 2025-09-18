@@ -5,10 +5,10 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
+import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
-import com.stripe.android.paymentsheet.injection.PaymentSheetLauncherComponent.Builder
 import com.stripe.android.ui.core.di.CardScanModule
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
@@ -21,6 +21,7 @@ import javax.inject.Singleton
     modules = [
         StripeRepositoryModule::class,
         PaymentSheetCommonModule::class,
+        PaymentElementRequestSurfaceModule::class,
         PaymentOptionsViewModelModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class,

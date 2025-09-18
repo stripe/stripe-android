@@ -25,23 +25,26 @@ fun AddressElementUI(
 
     // The last rendered field is not always the last field in the list.
     // So we need to pre filter so we know when to stop drawing dividers.
-    fields.filterNot { hiddenIdentifiers.contains(it.identifier) }.let { fieldList ->
-        Column {
-            fieldList.forEachIndexed { index, field ->
-                SectionFieldElementUI(
-                    enabled,
-                    field,
-                    hiddenIdentifiers = hiddenIdentifiers,
-                    lastTextFieldIdentifier = lastTextFieldIdentifier,
-                    modifier = modifier,
-                )
-                if (index != fieldList.lastIndex) {
-                    Divider(
-                        color = MaterialTheme.stripeColors.componentDivider,
-                        thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
+    fields
+        .filterOutHiddenIdentifiers(hiddenIdentifiers)
+        .takeIf { it.isNotEmpty() }
+        ?.let { fieldList ->
+            Column {
+                fieldList.forEachIndexed { index, field ->
+                    SectionFieldElementUI(
+                        enabled,
+                        field,
+                        hiddenIdentifiers = hiddenIdentifiers,
+                        lastTextFieldIdentifier = lastTextFieldIdentifier,
+                        modifier = modifier,
                     )
+                    if (index != fieldList.lastIndex) {
+                        Divider(
+                            color = MaterialTheme.stripeColors.componentDivider,
+                            thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
+                        )
+                    }
                 }
             }
         }
-    }
 }

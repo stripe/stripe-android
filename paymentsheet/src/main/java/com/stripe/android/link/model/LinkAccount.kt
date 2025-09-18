@@ -3,8 +3,8 @@ package com.stripe.android.link.model
 import android.os.Parcelable
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.DisplayablePaymentDetails
+import com.stripe.android.model.MobileFallbackWebviewParams
 import com.stripe.android.uicore.elements.convertPhoneNumberToE164
-import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
@@ -12,11 +12,12 @@ import kotlinx.parcelize.Parcelize
  * Immutable object representing a Link account.
  */
 @Parcelize
-@Poko
-internal class LinkAccount(
+internal data class LinkAccount(
     private val consumerSession: ConsumerSession,
     val consumerPublishableKey: String? = null,
     val displayablePaymentDetails: DisplayablePaymentDetails? = null,
+    val linkAuthIntentInfo: LinkAuthIntentInfo? = null,
+    val viewedWebviewOpenUrl: Boolean = false,
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -41,24 +42,43 @@ internal class LinkAccount(
     val email = consumerSession.emailAddress
 
     @IgnoredOnParcel
+    val hasVerifiedSMSSession: Boolean = consumerSession.containsVerifiedSMSSession()
+
+    @IgnoredOnParcel
     val isVerified: Boolean = consumerSession.containsVerifiedSMSSession() ||
         consumerSession.isVerifiedForSignup()
 
     @IgnoredOnParcel
     val completedSignup: Boolean = consumerSession.isVerifiedForSignup()
 
+    val consentPresentation: ConsentPresentation?
+        get() = linkAuthIntentInfo?.consentPresentation
+
     @IgnoredOnParcel
     val accountStatus = when {
         isVerified -> {
-            AccountStatus.Verified
+            AccountStatus.Verified(
+                hasVerifiedSMSSession = hasVerifiedSMSSession,
+                consentPresentation = consentPresentation
+            )
         }
         consumerSession.containsSMSSessionStarted() -> {
             AccountStatus.VerificationStarted
         }
         else -> {
-            AccountStatus.NeedsVerification
+            val params = consumerSession.mobileFallbackWebviewParams
+            AccountStatus.NeedsVerification(
+                webviewOpenUrl = params
+                    ?.webviewOpenUrl
+                    ?.takeIf {
+                        params.webViewRequirementType == MobileFallbackWebviewParams.WebviewRequirementType.Required
+                    }
+            )
         }
     }
+
+    @IgnoredOnParcel
+    val webviewOpenUrl: String? = consumerSession.mobileFallbackWebviewParams?.webviewOpenUrl
 
     private fun ConsumerSession.containsSMSSessionStarted() = verificationSessions.find {
         it.type == ConsumerSession.VerificationSession.SessionType.Sms &&

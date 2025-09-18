@@ -126,6 +126,14 @@ internal interface FormActivityViewModelModule {
         @Provides
         @Singleton
         fun provideOnClickOverrideDelegate(): OnClickOverrideDelegate = OnClickDelegateOverrideImpl()
+
+        @Provides
+        @Singleton
+        fun providesFormActivityConfirmationHandlerRegistrar(
+            confirmationHandler: ConfirmationHandler
+        ): FormActivityConfirmationHandlerRegistrar {
+            return DefaultFormActivityConfirmationHandlerRegistrar(confirmationHandler)
+        }
     }
 }
 

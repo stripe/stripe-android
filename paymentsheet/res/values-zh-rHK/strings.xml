@@ -29,6 +29,9 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">保存我的資訊，用 Link 更快結賬</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_toggle">使用 Link 建立帳戶，以便在網站上更快結帳</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s 信用卡</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -112,7 +115,11 @@ to be saved and used in future checkout sessions. -->
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">繼續即表示您同意儲存您的資訊,以便將來透過 %s 進行購買。</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[繼續即表示您同意儲存您的資訊，以便將來透過 %s 和 Link 進行 <link>購買</link>。您也同意 Link 的<terms>條款</terms>和<privacy>隱私政策</privacy>。]]></string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[繼續即表示您同意儲存您的個人資料，以便將來透過 %s 和 <link>Link 購物</link>. 您也同意 Link 的<terms>條款</terms>與<privacy>私隱聲明</privacy>。]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[繼續即表示您同意儲存您的個人資料，以便將來透過 %s 和 <link>Link</link> 進行購物（請參閱<terms>條款</terms>與<privacy>隱私政策</privacy>）。]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[繼續即表示您同意儲存您的個人資料，以便將來根據 <link>Link</link> <terms>條款</terms>與<privacy>私隱政策</privacy> 透過 %s 和 Link 購物]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">卡未更新，請重試。</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -172,6 +179,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_remove_card">解除綁定</string>
   <!-- Title for confirmation alert to remove a card -->
   <string name="stripe_paymentsheet_remove_card_title">移除卡？</string>
+  <!-- Description for a confirmation alert indicating to the customer that their payment method will be removed but still available to the merchant for subscriptions -->
+  <string name="stripe_paymentsheet_remove_partial_description">此支付方式將被移除，但仍適用於 %s 項訂閱。</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">移除 %s</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
@@ -202,6 +211,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_total_amount">合計：%s</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">銀行卡品牌未更新，請重試。</string>
+  <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
+  <string name="stripe_paynow_confirm_payment">在 %s 內於銀行或付款應用程式確認付款以完成購買。</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">設置為預設支付方式</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -264,6 +275,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">查看更多</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[點擊「繼續」，即表示您同意按照這些<terms>條款</terms>授權付款。]]></string>
+  <!-- Text providing link to terms for bank payments when seller information is provided -->
+  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[向 %1$s 和 %2$s 提交訂單，即表示您同意使用 %3$s 儲存您的資訊以供日後購買之用，並同意依據<terms>這些條款</terms>授權支付。]]></string>
+  <!-- Text providing link to terms for bank payments -->
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[將訂單提交至 %s 即表示您同意根據<terms>這些條款</terms>授權付款。]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">支付方式</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
@@ -277,6 +292,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_passthrough_description">Passthrough</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
   <string name="stripe_wallet_pay_another_way">用另一方式支付</string>
+  <!-- Hint shown when selecting a payment method indicating debit cards are preferred. -->
+  <string name="stripe_wallet_prefer_debit_card_hint">扣賬卡最有可能獲接受。</string>
   <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
   <string name="stripe_wallet_recollect_cvc_error">出於安全原因，請重新輸入您的銀行卡的安全碼。</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->

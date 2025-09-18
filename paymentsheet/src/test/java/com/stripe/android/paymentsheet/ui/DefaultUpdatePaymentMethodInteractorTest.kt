@@ -6,12 +6,14 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.isInstanceOf
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.setDefaultPaymentMethodErrorMessage
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.updateCardBrandErrorMessage
@@ -609,6 +611,78 @@ class DefaultUpdatePaymentMethodInteractorTest {
         }
     }
 
+    @Test
+    fun editCardDetailsInteractorCallback_passesBillingConfigurationProperly_forCard() {
+        val editCardDetailsInteractorFactory = FakeEditCardDetailsInteractorFactory()
+        runScenario(
+            displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+            addressCollectionMode = AddressCollectionMode.Full,
+            allowedBillingCountries = setOf("us", "CA"),
+            editCardDetailsInteractorFactory = editCardDetailsInteractorFactory
+        ) {
+            assertThat(interactor.editCardDetailsInteractor.state.value).isNotNull()
+
+            val configuration = editCardDetailsInteractorFactory.billingDetailsCollectionConfiguration
+
+            assertThat(configuration?.name)
+                .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never)
+            assertThat(configuration?.email)
+                .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never)
+            assertThat(configuration?.phone)
+                .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never)
+
+            assertThat(configuration?.address).isEqualTo(AddressCollectionMode.Full)
+            assertThat(configuration?.allowedBillingCountries).isEqualTo(setOf("US", "CA"))
+            assertThat(configuration?.attachDefaultsToPaymentMethod).isFalse()
+        }
+    }
+
+    @Test
+    fun editCardDetailsInteractorCallback_passesBillingConfigurationProperly_forLink() {
+        val editCardDetailsInteractorFactory = FakeEditCardDetailsInteractorFactory()
+        runScenario(
+            displayableSavedPaymentMethod = PaymentMethodFixtures.displayableLinkPaymentMethod(),
+            addressCollectionMode = AddressCollectionMode.Full,
+            allowedBillingCountries = setOf("us", "CA"),
+            editCardDetailsInteractorFactory = editCardDetailsInteractorFactory
+        ) {
+            assertThat(interactor.editCardDetailsInteractor.state.value).isNotNull()
+
+            val configuration = editCardDetailsInteractorFactory.billingDetailsCollectionConfiguration
+
+            assertThat(configuration?.name)
+                .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never)
+            assertThat(configuration?.email)
+                .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never)
+            assertThat(configuration?.phone)
+                .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never)
+
+            assertThat(configuration?.address).isEqualTo(AddressCollectionMode.Never)
+            assertThat(configuration?.allowedBillingCountries).isEqualTo(setOf("US", "CA"))
+            assertThat(configuration?.attachDefaultsToPaymentMethod).isFalse()
+        }
+    }
+
+    @Test
+    fun editCardDetailsInteractor_calledWhenDisabledSaveButtonIsPressed() {
+        runScenario(
+            displayableSavedPaymentMethod = PaymentMethodFixtures.displayableLinkPaymentMethod(),
+            addressCollectionMode = AddressCollectionMode.Full,
+            allowedBillingCountries = setOf("us", "CA"),
+            editCardDetailsInteractorFactory = FakeEditCardDetailsInteractorFactory()
+        ) {
+            assertThat(interactor.editCardDetailsInteractor).isInstanceOf<FakeEditCardDetailsInteractor>()
+
+            val editCardDetailsInteractor = interactor.editCardDetailsInteractor as FakeEditCardDetailsInteractor
+
+            interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.DisabledSaveButtonPressed)
+
+            editCardDetailsInteractor.viewActionRecorder.consume(
+                EditCardDetailsInteractor.ViewAction.Validate
+            )
+        }
+    }
+
     private fun updateCardAndDefaultPaymentMethod(
         interactor: UpdatePaymentMethodInteractor,
     ) {
@@ -638,6 +712,8 @@ class DefaultUpdatePaymentMethodInteractorTest {
         shouldShowSetAsDefaultCheckbox: Boolean = false,
         isDefaultPaymentMethod: Boolean = false,
         canUpdateFullPaymentMethodDetails: Boolean = false,
+        addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Automatic,
+        allowedBillingCountries: Set<String> = setOf("US", "CA"),
         editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = DefaultEditCardDetailsInteractor
             .Factory(),
         onBrandChoiceSelected: (CardBrand) -> Unit = {},
@@ -649,7 +725,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             canRemove = canRemove,
             canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
-            addressCollectionMode = AddressCollectionMode.Automatic,
+            addressCollectionMode = addressCollectionMode,
             removeExecutor = onRemovePaymentMethod,
             updatePaymentMethodExecutor = updatePaymentMethodExecutor,
             setDefaultPaymentMethodExecutor = onSetDefaultPaymentMethod,
@@ -660,7 +736,9 @@ class DefaultUpdatePaymentMethodInteractorTest {
             onUpdateSuccess = {
                 onUpdateSuccessTurbine.add(Unit)
             },
-            editCardDetailsInteractorFactory = editCardDetailsInteractorFactory
+            editCardDetailsInteractorFactory = editCardDetailsInteractorFactory,
+            removeMessage = null,
+            allowedBillingCountries = allowedBillingCountries,
         )
 
         TestParams(

@@ -21,10 +21,15 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 internal class DelegateDrawable(
-    private val imageLoader: suspend () -> Drawable,
+    imageLoader: suspend () -> Drawable,
 ) : Drawable() {
     @Volatile
     private var delegate: Drawable = ShapeDrawable()
+        .apply {
+            // Non-zero dimensions to avoid crashing before `delegate` has been initialized.
+            intrinsicHeight = 1
+            intrinsicWidth = 1
+        }
 
     init {
         @OptIn(DelicateCoroutinesApi::class)

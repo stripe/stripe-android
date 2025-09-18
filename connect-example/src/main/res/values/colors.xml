@@ -80,4 +80,74 @@
     <color name="dynamic_colors_badge_danger_border">#DD7815</color>
     <color name="dynamic_colors_badge_danger_text">#B35900</color>
     <color name="dynamic_colors_offset_background">#F8F8F8</color>
+
+    <!-- Dark Mode Theme Colors -->
+    <color name="dark_mode_primary">#0085FF</color>
+    <color name="dark_mode_text">#C9CED8</color>
+    <color name="dark_mode_background">#14171D</color>
+    <color name="dark_mode_button_secondary_background">#2B3039</color>
+    <color name="dark_mode_button_secondary_text">#C9CED8</color>
+    <color name="dark_mode_secondary_text">#8C99AD</color>
+    <color name="dark_mode_action_secondary_text">#C9CED8</color>
+    <color name="dark_mode_border">#2B3039</color>
+    <color name="dark_mode_danger">#F23154</color>
+    <color name="dark_mode_badge_neutral_background">#1B1E25</color>
+    <color name="dark_mode_badge_neutral_border">#2B3039</color>
+    <color name="dark_mode_badge_neutral_text">#8C99AD</color>
+    <color name="dark_mode_badge_success_background">#152207</color>
+    <color name="dark_mode_badge_success_border">#20360C</color>
+    <color name="dark_mode_badge_success_text">#3EAE20</color>
+    <color name="dark_mode_badge_warning_background">#400A00</color>
+    <color name="dark_mode_badge_warning_border">#5F1400</color>
+    <color name="dark_mode_badge_warning_text">#F27400</color>
+    <color name="dark_mode_badge_danger_background">#420320</color>
+    <color name="dark_mode_badge_danger_border">#61092D</color>
+    <color name="dark_mode_badge_danger_text">#F46B7D</color>
+    <color name="dark_mode_offset_background">#1B1E25</color>
+    <color name="dark_mode_form_background">#14171D</color>
+
+    <!-- Forest Theme Colors -->
+    <color name="forest_primary">#537D5D</color>
+    <color name="forest_background">#FFFDF6</color>
+    <color name="forest_button_secondary_background">#DEECD4</color>
+    <color name="forest_button_secondary_text">#537D5D</color>
+    <color name="forest_secondary_text">#878682</color>
+    <color name="forest_border">#D6D6D6</color>
+    <color name="forest_danger">#EC5228</color>
+    <color name="forest_badge_neutral_background">#F5ECD5</color>
+    <color name="forest_badge_neutral_border">#F5ECD5</color>
+    <color name="forest_badge_success_background">#DEECD4</color>
+    <color name="forest_badge_success_border">#DEECD4</color>
+    <color name="forest_badge_success_text">#537D5D</color>
+    <color name="forest_badge_warning_background">#FBDAB1</color>
+    <color name="forest_badge_warning_border">#FBDAB1</color>
+    <color name="forest_badge_warning_text">#751F00</color>
+    <color name="forest_badge_danger_background">#EC5228</color>
+    <color name="forest_badge_danger_border">#EC5228</color>
+    <color name="forest_badge_danger_text">#FFFFFF</color>
+    <color name="forest_offset_background">#FAF6E9</color>
+    <color name="forest_form_background">#FAF6E9</color>
+
+    <!-- Retro Theme Colors -->
+    <color name="retro_primary">#008080</color>
+    <color name="retro_text">#000000</color>
+    <color name="retro_background">#E6E6E6</color>
+    <color name="retro_button_secondary_background">#C3C3C3</color>
+    <color name="retro_button_secondary_text">#000000</color>
+    <color name="retro_secondary_text">#575757</color>
+    <color name="retro_action_secondary_text">#575757</color>
+    <color name="retro_border">#575757</color>
+    <color name="retro_badge_neutral_background">#444444</color>
+    <color name="retro_badge_neutral_border">#444444</color>
+    <color name="retro_badge_neutral_text">#FFFFFF</color>
+    <color name="retro_badge_success_background">#008080</color>
+    <color name="retro_badge_success_border">#008080</color>
+    <color name="retro_badge_success_text">#FFFFFF</color>
+    <color name="retro_badge_warning_background">#DFDF60</color>
+    <color name="retro_badge_warning_border">#DFDF60</color>
+    <color name="retro_badge_warning_text">#69691C</color>
+    <color name="retro_badge_danger_background">#E35F5F</color>
+    <color name="retro_badge_danger_border">#E35F5F</color>
+    <color name="retro_badge_danger_text">#FFFFFF</color>
+    <color name="retro_offset_background">#FFFFFF</color>
 </resources>

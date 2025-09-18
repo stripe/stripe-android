@@ -15,7 +15,7 @@ import org.junit.Test
 class AutocompleteAddressControllerTest {
     @Test
     fun `Phone number field is hidden when state is HIDDEN`() = elementsTest(
-        phoneNumberState = PhoneNumberState.HIDDEN,
+        phoneNumberConfig = AddressFieldConfiguration.HIDDEN,
         sameAsShippingElement = null,
         shippingValuesMap = emptyMap(),
     ) { elements ->
@@ -24,21 +24,21 @@ class AutocompleteAddressControllerTest {
 
     @Test
     fun `Phone number field is shown when state is OPTIONAL`() = elementsTest(
-        phoneNumberState = PhoneNumberState.OPTIONAL,
+        phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
     ) { elements ->
         assertThat(elements.filterIsInstance<PhoneNumberElement>()).hasSize(1)
     }
 
     @Test
-    fun `Phone number field is shown when state iS REQUIRED`() = elementsTest(
-        phoneNumberState = PhoneNumberState.REQUIRED,
+    fun `Phone number field is shown when state is REQUIRED`() = elementsTest(
+        phoneNumberConfig = AddressFieldConfiguration.REQUIRED,
     ) { elements ->
         assertThat(elements.filterIsInstance<PhoneNumberElement>()).hasSize(1)
     }
 
     @Test
-    fun `Name should be hidden if 'hideName' is set to true`() = elementsTest(
-        hideName = true
+    fun `Name field is hidden when state is HIDDEN`() = elementsTest(
+        nameConfig = AddressFieldConfiguration.HIDDEN
     ) { elements ->
         assertThat(
             elements.any { it.identifier == IdentifierSpec.Name }
@@ -46,12 +46,42 @@ class AutocompleteAddressControllerTest {
     }
 
     @Test
-    fun `Name should be shown if 'hideName' is set to false`() = elementsTest(
-        hideName = false
+    fun `Name field is shown when state is OPTIONAL`() = elementsTest(
+        nameConfig = AddressFieldConfiguration.OPTIONAL
     ) { elements ->
         assertThat(
             elements.any { it.identifier == IdentifierSpec.Name }
         ).isTrue()
+    }
+
+    @Test
+    fun `Name should be shown when state is REQUIRED`() = elementsTest(
+        nameConfig = AddressFieldConfiguration.REQUIRED
+    ) { elements ->
+        assertThat(
+            elements.any { it.identifier == IdentifierSpec.Name }
+        ).isTrue()
+    }
+
+    @Test
+    fun `Email field is hidden when state is HIDDEN`() = elementsTest(
+        emailConfig = AddressFieldConfiguration.HIDDEN
+    ) { elements ->
+        assertThat(elements.filterIsInstance<EmailElement>()).isEmpty()
+    }
+
+    @Test
+    fun `Email field is shown when state is OPTIONAL`() = elementsTest(
+        emailConfig = AddressFieldConfiguration.OPTIONAL
+    ) { elements ->
+        assertThat(elements.filterIsInstance<EmailElement>()).hasSize(1)
+    }
+
+    @Test
+    fun `Email should be shown when state is REQUIRED`() = elementsTest(
+        emailConfig = AddressFieldConfiguration.REQUIRED
+    ) { elements ->
+        assertThat(elements.filterIsInstance<EmailElement>()).hasSize(1)
     }
 
     @Test
@@ -466,6 +496,55 @@ class AutocompleteAddressControllerTest {
     }
 
     @Test
+    fun `Errors should be pulled from internal address element`() = runTest {
+        val controller = createAutocompleteAddressController(
+            phoneNumberConfig = AddressFieldConfiguration.REQUIRED,
+            interactor = TestAutocompleteAddressInteractor.noOp(
+                autocompleteConfig = AutocompleteAddressInteractor.Config(
+                    googlePlacesApiKey = null,
+                    autocompleteCountries = emptySet(),
+                    isPlacesAvailable = false,
+                )
+            ),
+            values = mapOf(
+                IdentifierSpec.Country to "US",
+                IdentifierSpec.PostalCode to "999",
+                IdentifierSpec.Phone to "+1222"
+            )
+        )
+
+        controller.error.test {
+            val error = awaitItem()
+
+            assertThat(error?.errorMessage).isEqualTo(R.string.stripe_address_zip_incomplete)
+
+            controller.addressElementFlow.test {
+                val addressElement = awaitItem()
+
+                addressElement.fields.test {
+                    val fields = awaitItem()
+
+                    val rowElements = fields.filterIsInstance<RowElement>()
+
+                    assertThat(rowElements).hasSize(1)
+
+                    val zipCodeElement = rowElements[0].fields.find { element ->
+                        element.identifier == IdentifierSpec.PostalCode
+                    }
+
+                    assertThat(zipCodeElement).isNotNull()
+
+                    requireNotNull(zipCodeElement).setRawValue(mapOf(IdentifierSpec.PostalCode to "99999"))
+                }
+            }
+
+            val nextError = expectMostRecentItem()
+
+            assertThat(nextError?.errorMessage).isEqualTo(R.string.stripe_incomplete_phone_number)
+        }
+    }
+
+    @Test
     fun `on condensed to expanded form, should change address controllers`() = runTest {
         TestAutocompleteAddressInteractor.test(
             autocompleteConfig = AutocompleteAddressInteractor.Config(
@@ -501,6 +580,32 @@ class AutocompleteAddressControllerTest {
         }
     }
 
+    @Test
+    fun `on validating, should update all internal fields of validation state`() =
+        fieldsTest { controller ->
+            val fields = awaitItem()
+
+            fields.element(IdentifierSpec.Country).errorTest(fieldError = null)
+            fields.element(IdentifierSpec.Line1).errorTest(fieldError = null)
+            fields.element(IdentifierSpec.Line2).errorTest(fieldError = null)
+            fields.element(IdentifierSpec.State).errorTest(fieldError = null)
+            fields.element(IdentifierSpec.PostalCode).errorTest(fieldError = null)
+            fields.element(IdentifierSpec.City).errorTest(fieldError = null)
+
+            controller.onValidationStateChanged(true)
+
+            fields.element(IdentifierSpec.Country).errorTest(fieldError = null)
+            fields.element(IdentifierSpec.Line1)
+                .errorTest(fieldError = FieldError(R.string.stripe_blank_and_required))
+            fields.element(IdentifierSpec.Line2).errorTest(fieldError = null)
+            fields.element(IdentifierSpec.State)
+                .errorTest(fieldError = FieldError(R.string.stripe_blank_and_required))
+            fields.element(IdentifierSpec.PostalCode)
+                .errorTest(fieldError = FieldError(R.string.stripe_blank_and_required))
+            fields.element(IdentifierSpec.City)
+                .errorTest(fieldError = FieldError(R.string.stripe_blank_and_required))
+        }
+
     private fun noAutocompleteTest(
         autocompleteConfig: AutocompleteAddressInteractor.Config,
     ) = elementsTest(
@@ -526,7 +631,9 @@ class AutocompleteAddressControllerTest {
 
     private fun elementsTest(
         values: Map<IdentifierSpec, String?> = emptyMap(),
-        phoneNumberState: PhoneNumberState = PhoneNumberState.HIDDEN,
+        nameConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
+        phoneNumberConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
+        emailConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
         sameAsShippingElement: SameAsShippingElement? = null,
         shippingValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
         autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
@@ -535,7 +642,6 @@ class AutocompleteAddressControllerTest {
         ),
         eventToEmit: AutocompleteAddressInteractor.Event? = null,
         hideCountry: Boolean = false,
-        hideName: Boolean = true,
         test: suspend TestAutocompleteAddressInteractor.Scenario.(elements: List<SectionFieldElement>) -> Unit
     ) = runTest {
         TestAutocompleteAddressInteractor.test(
@@ -543,12 +649,13 @@ class AutocompleteAddressControllerTest {
         ) {
             val controller = createAutocompleteAddressController(
                 values = values,
-                phoneNumberState = phoneNumberState,
+                nameConfig = nameConfig,
+                phoneNumberConfig = phoneNumberConfig,
+                emailConfig = emailConfig,
                 sameAsShippingElement = sameAsShippingElement,
                 shippingValuesMap = shippingValuesMap,
                 interactor = interactor,
                 hideCountry = hideCountry,
-                hideName = hideName,
             )
 
             val registerCall = registerCalls.awaitItem()
@@ -568,13 +675,13 @@ class AutocompleteAddressControllerTest {
     }
 
     private fun formFieldsTest(
-        phoneNumberState: PhoneNumberState = PhoneNumberState.HIDDEN,
+        phoneNumberConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
         sameAsShippingElement: SameAsShippingElement? = null,
         shippingValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
         test: suspend TurbineTestContext<List<Pair<IdentifierSpec, FormFieldEntry>>>.() -> Unit
     ) = runTest {
         val controller = createAutocompleteAddressController(
-            phoneNumberState = phoneNumberState,
+            phoneNumberConfig = phoneNumberConfig,
             sameAsShippingElement = sameAsShippingElement,
             shippingValuesMap = shippingValuesMap,
         )
@@ -590,7 +697,9 @@ class AutocompleteAddressControllerTest {
 
     private fun createAutocompleteAddressController(
         values: Map<IdentifierSpec, String?> = emptyMap(),
-        phoneNumberState: PhoneNumberState = PhoneNumberState.HIDDEN,
+        phoneNumberConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
+        nameConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
+        emailConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,
         sameAsShippingElement: SameAsShippingElement? = null,
         shippingValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
         autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
@@ -598,7 +707,6 @@ class AutocompleteAddressControllerTest {
             googlePlacesApiKey = null,
         ),
         hideCountry: Boolean = false,
-        hideName: Boolean = true,
         interactor: AutocompleteAddressInteractor =
             TestAutocompleteAddressInteractor.noOp(
                 autocompleteConfig = autocompleteConfig,
@@ -609,9 +717,10 @@ class AutocompleteAddressControllerTest {
             initialValues = values,
             sameAsShippingElement = sameAsShippingElement,
             shippingValuesMap = shippingValuesMap,
-            phoneNumberState = phoneNumberState,
+            phoneNumberConfig = phoneNumberConfig,
+            emailConfig = emailConfig,
+            nameConfig = nameConfig,
             hideCountry = hideCountry,
-            hideName = hideName,
             interactorFactory = { interactor },
         )
     }
@@ -621,6 +730,55 @@ class AutocompleteAddressControllerTest {
             identifier = IdentifierSpec.SameAsShipping,
             controller = SameAsShippingController(initialValue = false)
         )
+    }
+
+    private fun List<SectionFieldElement>.element(identifierSpec: IdentifierSpec): SectionFieldElement {
+        val element = nullableElement(identifierSpec)
+
+        assertThat(element).isNotNull()
+
+        return requireNotNull(element)
+    }
+
+    private fun List<SectionFieldElement>.nullableElement(identifierSpec: IdentifierSpec): SectionFieldElement? {
+        for (element in this) {
+            if (element is RowElement) {
+                element.fields.nullableElement(identifierSpec)?.let {
+                    return it
+                }
+            } else if (element.identifier == identifierSpec) {
+                return element
+            }
+        }
+
+        return null
+    }
+
+    private suspend fun SectionFieldElement.errorTest(fieldError: FieldError?) {
+        sectionFieldErrorController().error.test {
+            fieldError?.let {
+                val error = awaitItem()
+
+                assertThat(error?.errorMessage).isEqualTo(it.errorMessage)
+                assertThat(error?.formatArgs).isEqualTo(it.formatArgs)
+            } ?: run {
+                assertThat(awaitItem()).isNull()
+            }
+        }
+    }
+
+    private fun fieldsTest(
+        block: suspend TurbineTestContext<List<SectionFieldElement>>.(controller: AutocompleteAddressController) -> Unit
+    ) = runTest {
+        val controller = createAutocompleteAddressController()
+
+        controller.addressElementFlow.test {
+            val addressElement = awaitItem()
+
+            addressElement.fields.test {
+                block(this, controller)
+            }
+        }
     }
 
     private class TestAutocompleteAddressInteractor private constructor(

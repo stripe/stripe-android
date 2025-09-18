@@ -111,13 +111,14 @@ internal class FakeEventReporter : EventReporter {
         linkDisplay: PaymentSheet.LinkConfiguration.Display,
         currency: String?,
         initializationMode: PaymentElementLoader.InitializationMode,
-        financialConectionsAvailability: FinancialConnectionsAvailability?,
+        financialConnectionsAvailability: FinancialConnectionsAvailability?,
         orderedLpms: List<String>,
         requireCvcRecollection: Boolean,
         hasDefaultPaymentMethod: Boolean?,
         setAsDefaultEnabled: Boolean?,
         paymentMethodOptionsSetupFutureUsage: Boolean,
-        setupFutureUsage: StripeIntent.Usage?
+        setupFutureUsage: StripeIntent.Usage?,
+        openCardScanAutomatically: Boolean,
     ) {
     }
 
@@ -273,6 +274,24 @@ internal class FakeEventReporter : EventReporter {
     }
 
     override fun onShopPayWebViewCancelled(didReceiveECEClick: Boolean) {
+    }
+
+    override fun onCardScanStarted(implementation: String) {
+    }
+
+    override fun onCardScanSucceeded(implementation: String) {
+    }
+
+    override fun onCardScanFailed(implementation: String, error: Throwable?) {
+    }
+
+    override fun onCardScanCancelled(implementation: String) {
+    }
+
+    override fun onCardScanApiCheckSucceeded(implementation: String) {
+    }
+
+    override fun onCardScanApiCheckFailed(implementation: String, error: Throwable?) {
     }
 
     data class PaymentFailureCall(

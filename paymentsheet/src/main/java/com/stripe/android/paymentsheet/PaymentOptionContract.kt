@@ -4,13 +4,12 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import com.stripe.android.link.LinkAccountUpdate
-import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
 internal class PaymentOptionContract :
-    ActivityResultContract<PaymentOptionContract.Args, PaymentOptionResult?>() {
+    ActivityResultContract<PaymentOptionContract.Args, PaymentOptionsActivityResult?>() {
     override fun createIntent(
         context: Context,
         input: Args
@@ -22,8 +21,8 @@ internal class PaymentOptionContract :
     override fun parseResult(
         resultCode: Int,
         intent: Intent?
-    ): PaymentOptionResult? {
-        return PaymentOptionResult.fromIntent(intent)
+    ): PaymentOptionsActivityResult? {
+        return PaymentOptionsActivityResult.fromIntent(intent)
     }
 
     @Parcelize
@@ -32,7 +31,7 @@ internal class PaymentOptionContract :
         val configuration: PaymentSheet.Configuration,
         val linkAccountInfo: LinkAccountUpdate.Value,
         val enableLogging: Boolean,
-        val walletsToShow: List<WalletType>,
+        val walletButtonsRendered: Boolean,
         val productUsage: Set<String>,
         val paymentElementCallbackIdentifier: String,
     ) : ActivityStarter.Args {

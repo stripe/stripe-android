@@ -5,10 +5,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.account.FakeLinkAccountManager
-import com.stripe.android.link.account.FakeLinkAuth
 import com.stripe.android.link.account.LinkAccountHolder
-import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.attestation.FakeLinkAttestationCheck
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.exceptions.AppAttestationException
@@ -53,12 +53,10 @@ class LinkControllerInteractorTest {
     private val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
     private val linkAccountManager = FakeLinkAccountManager(linkAccountHolder)
     private val linkAttestationCheck = FakeLinkAttestationCheck()
-    private val linkAuth = FakeLinkAuth()
     private val linkComponent =
         FakeLinkComponent(
             linkAccountManager = linkAccountManager,
             linkAttestationCheck = linkAttestationCheck,
-            linkAuth = linkAuth,
         )
     private val linkComponentBuilderProvider: Provider<LinkComponent.Builder> =
         Provider { FakeLinkComponent.Builder(linkComponent) }
@@ -124,8 +122,17 @@ class LinkControllerInteractorTest {
         val loadedConfiguration = LinkTestUtils.createLinkConfiguration()
         linkConfigurationLoader.linkConfigurationResult = Result.success(loadedConfiguration)
 
-        assertThat(interactor.configure(createControllerConfig())).isEqualTo(LinkController.ConfigureResult.Success)
+        val controllerConfig =
+            LinkController.Configuration.Builder(
+                merchantDisplayName = "Example",
+                publishableKey = "pk_123",
+                stripeAccountId = "acct_123"
+            ).build()
+        assertThat(interactor.configure(controllerConfig)).isEqualTo(LinkController.ConfigureResult.Success)
         assertThat(linkComponent.configuration).isEqualTo(loadedConfiguration)
+        val paymentConfiguration = PaymentConfiguration.getInstance(application)
+        assertThat(paymentConfiguration.publishableKey).isEqualTo(controllerConfig.publishableKey)
+        assertThat(paymentConfiguration.stripeAccountId).isEqualTo(controllerConfig.stripeAccountId)
     }
 
     @Test
@@ -152,8 +159,16 @@ class LinkControllerInteractorTest {
 
         interactor.state(application).test {
             assertThat(awaitItem()).isNotEqualTo(LinkController.State())
+
             assertThat(interactor.configure(createControllerConfig())).isEqualTo(LinkController.ConfigureResult.Success)
+
+            // Initial reset.
             assertThat(awaitItem()).isEqualTo(LinkController.State())
+
+            // After completion.
+            val finalState = awaitItem()
+            assertThat(finalState.elementsSessionId).isEqualTo(loadedConfiguration.elementsSessionId)
+            assertThat(finalState.merchantLogoUrl).isEqualTo(loadedConfiguration.merchantLogoUrl)
         }
     }
 
@@ -205,7 +220,7 @@ class LinkControllerInteractorTest {
         val interactor = createInteractor()
 
         interactor.presentPaymentMethodsResultFlow.test {
-            interactor.presentPaymentMethods(mock(), "test@example.com")
+            interactor.presentPaymentMethods(mock(), "test@example.com", null)
 
             val result = awaitItem()
             assertThat(result).isInstanceOf(LinkController.PresentPaymentMethodsResult.Failed::class.java)
@@ -251,7 +266,7 @@ class LinkControllerInteractorTest {
         linkAccountManager.createCardPaymentDetailsResult = Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
 
         assertThat(interactor.createPaymentMethod())
-            .isEqualTo(LinkController.CreatePaymentMethodResult.Success)
+            .isEqualTo(LinkController.CreatePaymentMethodResult.Success(paymentMethod))
 
         interactor.state(application).test {
             assertThat(awaitItem().createdPaymentMethod).isEqualTo(paymentMethod)
@@ -297,7 +312,7 @@ class LinkControllerInteractorTest {
         )
 
         assertThat(interactor.createPaymentMethod())
-            .isEqualTo(LinkController.CreatePaymentMethodResult.Success)
+            .isEqualTo(LinkController.CreatePaymentMethodResult.Success(paymentMethod))
 
         interactor.state(application).test {
             assertThat(awaitItem().createdPaymentMethod).isEqualTo(paymentMethod)
@@ -331,7 +346,7 @@ class LinkControllerInteractorTest {
         val interactor = createInteractor()
         configure(interactor)
 
-        linkAccountManager.lookupConsumerResult = Result.success(TestFactory.LINK_ACCOUNT)
+        linkAccountManager.lookupResult = Result.success(TestFactory.LINK_ACCOUNT)
 
         assertThat(interactor.lookupConsumer("test@example.com"))
             .isEqualTo(LinkController.LookupConsumerResult.Success("test@example.com", true))
@@ -343,7 +358,7 @@ class LinkControllerInteractorTest {
         configure(interactor)
 
         val error = Exception("Error")
-        linkAuth.lookupResult = LinkAuthResult.Error(error)
+        linkAccountManager.lookupResult = Result.failure(error)
 
         assertThat(interactor.lookupConsumer("test@example.com"))
             .isEqualTo(LinkController.LookupConsumerResult.Failed("test@example.com", error))
@@ -356,7 +371,7 @@ class LinkControllerInteractorTest {
             configure(interactor)
 
             val attestationError = Exception("Attestation failed")
-            linkAuth.lookupResult = LinkAuthResult.AttestationFailed(attestationError)
+            linkAccountManager.lookupResult = Result.failure(AppAttestationException(attestationError))
 
             val result = interactor.lookupConsumer("test@example.com")
             assertThat(result).isInstanceOf(LinkController.LookupConsumerResult.Failed::class.java)
@@ -367,22 +382,49 @@ class LinkControllerInteractorTest {
         }
 
     @Test
+    fun `updatePhoneNumber() on success emits success result`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+        signIn()
+
+        linkAccountManager.updatePhoneNumberResult = Result.success(TestFactory.LINK_ACCOUNT)
+
+        assertThat(interactor.updatePhoneNumber("+1234567890"))
+            .isEqualTo(LinkController.UpdatePhoneNumberResult.Success)
+    }
+
+    @Test
+    fun `updatePhoneNumber() on failure emits failure result`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+        signIn()
+
+        val error = Exception("Phone update error")
+        linkAccountManager.updatePhoneNumberResult = Result.failure(error)
+
+        val result = interactor.updatePhoneNumber("+1234567890")
+        assertThat(result).isInstanceOf(LinkController.UpdatePhoneNumberResult.Failed::class.java)
+        assertThat((result as LinkController.UpdatePhoneNumberResult.Failed).error).isEqualTo(error)
+    }
+
+    @Test
     fun `onPresentPaymentMethods() launches Link with correct arguments`() = runTest {
         val interactor = createInteractor()
         configure(interactor)
 
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        interactor.presentPaymentMethods(launcher, "test@example.com")
+        interactor.presentPaymentMethods(launcher, "test@example.com", null)
 
         val call = launcher.calls.awaitItem()
         val args = call.input
-        assertThat(args.startWithVerificationDialog).isTrue()
+        assertThat(args.linkExpressMode).isEqualTo(LinkExpressMode.ENABLED)
         assertThat(args.linkAccountInfo.account).isNull()
         assertThat(args.launchMode)
             .isEqualTo(
                 LinkLaunchMode.PaymentMethodSelection(
                     selectedPayment = null,
-                    sharePaymentDetailsImmediatelyAfterCreation = false
+                    sharePaymentDetailsImmediatelyAfterCreation = false,
+                    shouldShowSecondaryCta = false,
                 )
             )
 
@@ -397,7 +439,7 @@ class LinkControllerInteractorTest {
         signIn()
 
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        interactor.presentPaymentMethods(launcher, TestFactory.LINK_ACCOUNT.email)
+        interactor.presentPaymentMethods(launcher, TestFactory.LINK_ACCOUNT.email, null)
 
         val call = launcher.calls.awaitItem()
         val args = call.input
@@ -418,7 +460,7 @@ class LinkControllerInteractorTest {
         }
 
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        interactor.presentPaymentMethods(launcher, "another@email.com")
+        interactor.presentPaymentMethods(launcher, "another@email.com", null)
 
         val call = launcher.calls.awaitItem()
         val args = call.input
@@ -438,7 +480,7 @@ class LinkControllerInteractorTest {
 
         val newEmail = "new@email.com"
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        interactor.presentPaymentMethods(launcher = launcher, email = newEmail)
+        interactor.presentPaymentMethods(launcher = launcher, email = newEmail, paymentMethodType = null)
 
         val customerInfo = launcher.calls.awaitItem().input.configuration.customerInfo
         assertThat(customerInfo.email).isEqualTo(newEmail)
@@ -456,7 +498,7 @@ class LinkControllerInteractorTest {
         configure(interactor, defaultBillingDetails = Optional.of(billingDetails))
 
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        interactor.presentPaymentMethods(launcher = launcher, email = null)
+        interactor.presentPaymentMethods(launcher = launcher, email = null, paymentMethodType = null)
 
         val customerInfo = launcher.calls.awaitItem().input.configuration.customerInfo
         assertThat(customerInfo.email).isEqualTo(TestFactory.CUSTOMER_EMAIL)
@@ -473,7 +515,7 @@ class LinkControllerInteractorTest {
         val initialAccount = linkAccountHolder.linkAccountInfo.first()
 
         // First call onPresentPaymentMethods to set up the launch mode
-        interactor.presentPaymentMethods(FakeActivityResultLauncher(), "test@example.com")
+        interactor.presentPaymentMethods(FakeActivityResultLauncher(), "test@example.com", null)
 
         interactor.presentPaymentMethodsResultFlow.test {
             interactor.onLinkActivityResult(
@@ -494,7 +536,7 @@ class LinkControllerInteractorTest {
         configure(interactor)
 
         // First call onPresentPaymentMethods to set up the launch mode
-        interactor.presentPaymentMethods(FakeActivityResultLauncher(), "test@example.com")
+        interactor.presentPaymentMethods(FakeActivityResultLauncher(), "test@example.com", null)
 
         interactor.presentPaymentMethodsResultFlow.test {
             interactor.onLinkActivityResult(
@@ -513,7 +555,7 @@ class LinkControllerInteractorTest {
         configure(interactor)
 
         // First call onPresentPaymentMethods to set up the launch mode
-        interactor.presentPaymentMethods(FakeActivityResultLauncher(), "test@example.com")
+        interactor.presentPaymentMethods(FakeActivityResultLauncher(), "test@example.com", null)
 
         val linkPaymentMethod = createTestPaymentMethod()
         interactor.presentPaymentMethodsResultFlow.test {
@@ -524,6 +566,7 @@ class LinkControllerInteractorTest {
                     shippingAddress = null,
                 )
             )
+
             assertThat(awaitItem()).isEqualTo(LinkController.PresentPaymentMethodsResult.Success)
         }
 
@@ -539,7 +582,7 @@ class LinkControllerInteractorTest {
         configure(interactor)
 
         // First call onPresentPaymentMethods to set up the launch mode
-        interactor.presentPaymentMethods(FakeActivityResultLauncher(), "test@example.com")
+        interactor.presentPaymentMethods(FakeActivityResultLauncher(), "test@example.com", null)
 
         val error = Exception("Error")
         interactor.presentPaymentMethodsResultFlow.test {
@@ -593,7 +636,7 @@ class LinkControllerInteractorTest {
         interactor.authenticate(launcher, "test@example.com")
 
         val args = launcher.calls.awaitItem().input
-        assertThat(args.startWithVerificationDialog).isTrue()
+        assertThat(args.linkExpressMode).isEqualTo(LinkExpressMode.ENABLED)
         assertThat(args.linkAccountInfo.account).isNull()
         assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication())
 
@@ -705,7 +748,7 @@ class LinkControllerInteractorTest {
         interactor.authenticateExistingConsumer(launcher, "test@example.com")
 
         val args = launcher.calls.awaitItem().input
-        assertThat(args.startWithVerificationDialog).isTrue()
+        assertThat(args.linkExpressMode).isEqualTo(LinkExpressMode.ENABLED)
         assertThat(args.linkAccountInfo.account).isNull()
         assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication(existingOnly = true))
     }
@@ -795,7 +838,7 @@ class LinkControllerInteractorTest {
 
         // Call onPresentPaymentMethods with a non-matching email
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        interactor.presentPaymentMethods(launcher, "different@email.com")
+        interactor.presentPaymentMethods(launcher, "different@email.com", null)
 
         // Verify that the account holder was cleared
         assertThat(linkAccountHolder.linkAccountInfo.value.account).isNull()
@@ -811,7 +854,7 @@ class LinkControllerInteractorTest {
         configure(interactor)
 
         val expectedAccount = TestFactory.LINK_ACCOUNT
-        linkAuth.signupResult = LinkAuthResult.Success(expectedAccount)
+        linkAccountManager.signupResult = Result.success(expectedAccount)
 
         assertThat(interactor.registerConsumerWith())
             .isEqualTo(LinkController.RegisterConsumerResult.Success)
@@ -828,7 +871,7 @@ class LinkControllerInteractorTest {
         signIn()
 
         val error = Exception("Registration failed")
-        linkAuth.signupResult = LinkAuthResult.Error(error)
+        linkAccountManager.signupResult = Result.failure(error)
 
         val result = interactor.registerConsumerWith()
 
@@ -846,7 +889,7 @@ class LinkControllerInteractorTest {
         signIn()
 
         val attestationError = Exception("Attestation failed")
-        linkAuth.signupResult = LinkAuthResult.AttestationFailed(attestationError)
+        linkAccountManager.signupResult = Result.failure(AppAttestationException(attestationError))
 
         val result = interactor.registerConsumerWith()
 
@@ -901,6 +944,7 @@ class LinkControllerInteractorTest {
 
     private fun createInteractor(): LinkControllerInteractor {
         return LinkControllerInteractor(
+            application = application,
             logger = logger,
             linkConfigurationLoader = linkConfigurationLoader,
             linkAccountHolder = linkAccountHolder,
@@ -922,14 +966,18 @@ class LinkControllerInteractorTest {
         )
         linkConfigurationLoader.linkConfigurationResult = Result.success(linkConfiguration)
         interactor.configure(
-            LinkController.Configuration.Builder("Test")
+            LinkController.Configuration.Builder("Test", ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
                 .apply { defaultBillingDetails?.let { defaultBillingDetails(it.getOrNull()) } }
                 .apply { billingDetailsCollectionConfiguration?.let { billingDetailsCollectionConfiguration(it) } }
                 .build()
         )
     }
 
-    private fun createControllerConfig() = LinkController.Configuration.default(application)
+    private fun createControllerConfig() =
+        LinkController.Configuration.default(
+            context = application,
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+        )
 
     private fun signIn() {
         linkAccountHolder.set(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
@@ -954,6 +1002,159 @@ class LinkControllerInteractorTest {
         val loadedConfiguration = LinkTestUtils.createLinkConfiguration()
         linkConfigurationLoader.linkConfigurationResult = Result.success(loadedConfiguration)
         interactor.configure(createControllerConfig())
+    }
+
+    @Test
+    fun `authorize() launches Link with correct arguments`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+
+        val linkAuthIntentId = "lai_test123"
+        val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
+        interactor.authorize(launcher, linkAuthIntentId)
+
+        val args = launcher.calls.awaitItem().input
+        assertThat(args.linkExpressMode).isEqualTo(LinkExpressMode.ENABLED)
+        assertThat(args.linkAccountInfo.account).isNull()
+        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authorization(linkAuthIntentId = linkAuthIntentId))
+    }
+
+    @Test
+    fun `authorize() fails when configuration is not set`() = runTest {
+        val interactor = createInteractor()
+
+        interactor.authorizeResultFlow.test {
+            interactor.authorize(mock(), "lai_test123")
+            val result = awaitItem() as LinkController.AuthorizeResult.Failed
+            assertThat(result.error).isInstanceOf(MissingConfigurationException::class.java)
+        }
+    }
+
+    @Suppress("LongMethod")
+    @Test
+    fun `onLinkActivityResult() with Authorization results`() = runTest {
+        data class AuthorizationTestCase(
+            val name: String,
+            val linkActivityResult: LinkActivityResult,
+            val expectedAuthorizeResult: LinkController.AuthorizeResult
+        )
+
+        val error = Exception("Authorization error")
+        val testCases = listOf(
+            AuthorizationTestCase(
+                name = "Canceled",
+                linkActivityResult = LinkActivityResult.Canceled(
+                    reason = LinkActivityResult.Canceled.Reason.BackPressed,
+                    linkAccountUpdate = LinkAccountUpdate.Value(null)
+                ),
+                expectedAuthorizeResult = LinkController.AuthorizeResult.Canceled
+            ),
+            AuthorizationTestCase(
+                name = "Completed - Consented",
+                linkActivityResult = LinkActivityResult.Completed(
+                    linkAccountUpdate = LinkAccountUpdate.Value(null),
+                    selectedPayment = null,
+                    shippingAddress = null,
+                    authorizationConsentGranted = true
+                ),
+                expectedAuthorizeResult = LinkController.AuthorizeResult.Consented
+            ),
+            AuthorizationTestCase(
+                name = "Completed - Denied",
+                linkActivityResult = LinkActivityResult.Completed(
+                    linkAccountUpdate = LinkAccountUpdate.Value(null),
+                    selectedPayment = null,
+                    shippingAddress = null,
+                    authorizationConsentGranted = false
+                ),
+                expectedAuthorizeResult = LinkController.AuthorizeResult.Denied
+            ),
+            AuthorizationTestCase(
+                name = "Completed - null consent (fallback to Canceled)",
+                linkActivityResult = LinkActivityResult.Completed(
+                    linkAccountUpdate = LinkAccountUpdate.Value(null),
+                    selectedPayment = null,
+                    shippingAddress = null,
+                    authorizationConsentGranted = null
+                ),
+                expectedAuthorizeResult = LinkController.AuthorizeResult.Canceled
+            ),
+            AuthorizationTestCase(
+                name = "Failed",
+                linkActivityResult = LinkActivityResult.Failed(
+                    error = error,
+                    linkAccountUpdate = LinkAccountUpdate.Value(null)
+                ),
+                expectedAuthorizeResult = LinkController.AuthorizeResult.Failed(error)
+            )
+        )
+
+        testCases.forEach { testCase ->
+            val interactor = createInteractor()
+            configure(interactor)
+
+            // Set up the launch mode
+            interactor.authorize(FakeActivityResultLauncher(), "lai_test123")
+
+            interactor.authorizeResultFlow.test {
+                interactor.onLinkActivityResult(testCase.linkActivityResult)
+                assertThat(awaitItem()).isEqualTo(testCase.expectedAuthorizeResult)
+            }
+        }
+    }
+
+    @Test
+    fun `logOut() succeeds and clears account`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+        signIn()
+
+        val result = interactor.logOut()
+
+        assertThat(result).isInstanceOf(LinkController.LogOutResult.Success::class.java)
+        assertThat(linkAccountHolder.linkAccountInfo.value.account).isNull()
+    }
+
+    @Test
+    fun `clearLinkAccount() clears account from holder`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+        signIn()
+
+        // Verify account is initially present
+        assertThat(linkAccountHolder.linkAccountInfo.value.account).isNotNull()
+
+        // Clear the account
+        interactor.clearLinkAccount()
+
+        // Verify account is cleared
+        assertThat(linkAccountHolder.linkAccountInfo.value.account).isNull()
+    }
+
+    @Test
+    fun `logOut() succeeds and clears account even when request fails`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+        signIn()
+
+        val error = Exception("Logout failed")
+        linkAccountManager.logOutResult = Result.failure(error)
+
+        val result = interactor.logOut()
+
+        assertThat(result).isInstanceOf(LinkController.LogOutResult.Success::class.java)
+        assertThat(linkAccountHolder.linkAccountInfo.value.account).isNull()
+    }
+
+    @Test
+    fun `logOut() fails when configuration is not set`() = runTest {
+        val interactor = createInteractor()
+
+        val result = interactor.logOut()
+
+        assertThat(result).isInstanceOf(LinkController.LogOutResult.Failed::class.java)
+        val error = (result as LinkController.LogOutResult.Failed).error
+        assertThat(error).isInstanceOf(MissingConfigurationException::class.java)
     }
 
     private data class ConsumerRegistrationParams(

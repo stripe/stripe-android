@@ -21,7 +21,9 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -90,7 +92,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val errorReporter: ErrorReporter,
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
-    @Named(IS_LIVE_MODE) val isLiveModeProvider: () -> Boolean
+    @Named(IS_LIVE_MODE) val isLiveModeProvider: () -> Boolean,
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -117,6 +119,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
             checkout()
         },
+        onDisabledClick = ::onDisabledClick,
     )
 
     private val _paymentSheetResult = MutableSharedFlow<PaymentSheetResult>(replay = 1)
@@ -141,7 +144,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
 
     private val isConfirmingWithLinkExpress: Boolean
-        get() = (inProgressSelection as? PaymentSelection.Link)?.useLinkExpress == true
+        get() = (inProgressSelection as? PaymentSelection.Link)?.linkExpressMode
+            ?.let { it != LinkExpressMode.DISABLED }
+            ?: false
 
     override var newPaymentSelection: NewPaymentOptionSelection? = null
 
@@ -190,7 +195,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             googlePayButtonType = args.googlePayConfig?.buttonType.asGooglePayButtonType,
             onGooglePayPressed = this::checkoutWithGooglePay,
             onLinkPressed = this::checkoutWithLink,
-            isSetupIntent = paymentMethodMetadata?.stripeIntent is SetupIntent
+            isSetupIntent = paymentMethodMetadata?.stripeIntent is SetupIntent,
+            walletsAllowedInHeader = WalletType.entries // PaymentSheet: all wallets in header
         )
     }
 
@@ -272,6 +278,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             handlePaymentSheetStateLoadFailure(state.validationError)
         } else {
             initializeWithState(state)
+            confirmationHandler.bootstrap(state.paymentMethodMetadata)
         }
     }
 
@@ -372,11 +379,23 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     fun checkoutWithLink() {
-        checkout(PaymentSelection.Link(useLinkExpress = false), CheckoutIdentifier.SheetTopWallet)
+        checkout(
+            PaymentSelection.Link(
+                linkExpressMode = LinkExpressMode.DISABLED
+            ),
+            CheckoutIdentifier.SheetTopWallet
+        )
     }
 
     private fun checkoutWithLinkExpress() {
-        checkout(PaymentSelection.Link(useLinkExpress = true), CheckoutIdentifier.SheetTopWallet)
+        // We don't want to fall back to web on express mode if attestation
+        // fails on payment sheet given the OTP shows on launch.
+        checkout(
+            PaymentSelection.Link(
+                linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
+            ),
+            CheckoutIdentifier.SheetTopWallet
+        )
     }
 
     private fun checkout(
@@ -476,6 +495,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
+    private fun onDisabledClick() {
+        viewModelScope.launch {
+            validationRequested.emit(Unit)
+        }
+    }
+
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
         viewModelScope.launch(workContext) {
             val confirmationOption = withContext(viewModelScope.coroutineContext) {
@@ -485,6 +510,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     ?.toConfirmationOption(
                         configuration = config.asCommonConfiguration(),
                         linkConfiguration = linkHandler.linkConfiguration.value,
+                        passiveCaptchaParams = paymentMethodMetadata.value?.passiveCaptchaParams,
                     )
             }
 
@@ -749,7 +775,7 @@ private val ConfirmationHandler.State.contentVisible: Boolean
                 // Hide the payment sheet for these confirmation flows that render UI
                 // on top of the payment sheet to avoid weird visual overlap.
                 is GooglePayConfirmationOption -> false
-                is LinkConfirmationOption -> option.useLinkExpress
+                is LinkConfirmationOption -> option.linkExpressMode != LinkExpressMode.DISABLED
                 else -> true
             }
         }

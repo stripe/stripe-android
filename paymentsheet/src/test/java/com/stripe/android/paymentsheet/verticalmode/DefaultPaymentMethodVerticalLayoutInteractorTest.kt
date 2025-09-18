@@ -6,9 +6,11 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -23,6 +25,7 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
 import com.stripe.android.testing.PaymentMethodFactory
@@ -73,6 +76,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             selectionSource.value = PaymentSelection.New.GenericPaymentMethod(
                 label = "CashApp".resolvableString,
                 iconResource = 0,
+                iconResourceNight = null,
                 lightThemeIconUrl = null,
                 darkThemeIconUrl = null,
                 paymentMethodCreateParams = PaymentMethodCreateParams.createCashAppPay(),
@@ -477,7 +481,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 paymentMethodTypes = listOf("card", "cashapp")
             )
         ),
-        canShowWalletsInline = false,
     ) {
         walletsState.value = WalletsState(
             link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
@@ -490,6 +493,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             dividerTextResource = 0,
             onGooglePayPressed = {},
             onLinkPressed = {},
+            walletsAllowedInHeader = WalletType.entries, // PaymentSheet: wallets in header
         )
         interactor.state.test {
             awaitItem().run {
@@ -508,7 +512,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 paymentMethodTypes = listOf("card", "cashapp")
             )
         ),
-        canShowWalletsInline = true,
     ) {
         walletsState.value = WalletsState(
             link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
@@ -521,15 +524,17 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             dividerTextResource = 0,
             onGooglePayPressed = {},
             onLinkPressed = {},
+            walletsAllowedInHeader = listOf(WalletType.Link), // FlowController: Link in header, Google Pay inline
         )
         interactor.state.test {
             awaitItem().run {
+                // Link is not included because it'd show in the wallet, not in the list.
                 assertThat(displayablePaymentMethods.map { it.code })
-                    .isEqualTo(listOf("link", "google_pay", "card", "cashapp"))
+                    .isEqualTo(listOf("google_pay", "card", "cashapp"))
             }
         }
         interactor.showsWalletsHeader.test {
-            assertThat(awaitItem()).isFalse()
+            assertThat(awaitItem()).isTrue()
         }
     }
 
@@ -540,8 +545,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf("card", "cashapp")
                 )
-            ),
-            canShowWalletsInline = true,
+            )
         ) {
             walletsState.value = WalletsState(
                 link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
@@ -554,6 +558,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 dividerTextResource = 0,
                 onGooglePayPressed = {},
                 onLinkPressed = {},
+                walletsAllowedInHeader = emptyList(), // Test expects both wallets inline
             )
             assertThat(selection.value).isNull()
 
@@ -572,10 +577,11 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         var rowSelectionCallbackInvoked = false
         runScenario(
             invokeRowSelectionCallback = { rowSelectionCallbackInvoked = true },
-            paymentMethodMetadata = metadataWithOnlyPaymentMethodTypes,
-            canShowWalletsInline = true,
+            paymentMethodMetadata = metadataWithOnlyPaymentMethodTypes
         ) {
-            walletsState.value = linkAndGooglePayWalletState
+            walletsState.value = linkAndGooglePayWalletState.copy(
+                walletsAllowedInHeader = emptyList() // Tests Link inline.
+            )
 
             val displayablePaymentMethods = interactor.state.value.displayablePaymentMethods
             displayablePaymentMethods.first { it.code == "link" }.onClick()
@@ -590,10 +596,11 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         var rowSelectionCallbackInvoked = false
         runScenario(
             invokeRowSelectionCallback = { rowSelectionCallbackInvoked = true },
-            paymentMethodMetadata = metadataWithOnlyPaymentMethodTypes,
-            canShowWalletsInline = true,
+            paymentMethodMetadata = metadataWithOnlyPaymentMethodTypes
         ) {
-            walletsState.value = linkAndGooglePayWalletState
+            walletsState.value = linkAndGooglePayWalletState.copy(
+                walletsAllowedInHeader = emptyList() // Tests Google Pay inline
+            )
 
             val displayablePaymentMethods = interactor.state.value.displayablePaymentMethods
             displayablePaymentMethods.first { it.code == "google_pay" }.onClick()
@@ -610,7 +617,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 paymentMethodTypes = listOf("card", "cashapp")
             )
         ),
-        canShowWalletsInline = true,
     ) {
         walletsState.value = WalletsState(
             link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
@@ -619,6 +625,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             dividerTextResource = 0,
             onGooglePayPressed = {},
             onLinkPressed = {},
+            walletsAllowedInHeader = WalletType.entries,
         )
         interactor.state.test {
             awaitItem().run {
@@ -637,9 +644,9 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "cashapp")
             )
-        ),
-        canShowWalletsInline = true,
+        )
     ) {
+        // No Link available, Google Pay shows inline
         walletsState.value = WalletsState(
             link = null,
             googlePay = WalletsState.GooglePay(
@@ -651,6 +658,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             dividerTextResource = 0,
             onGooglePayPressed = {},
             onLinkPressed = {},
+            walletsAllowedInHeader = emptyList(),
         )
         interactor.state.test {
             awaitItem().run {
@@ -669,9 +677,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "cashapp")
             )
-        ),
-        canShowWalletsInline = true,
-        canShowWalletButtons = false,
+        )
     ) {
         walletsState.value = WalletsState(
             link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
@@ -680,6 +686,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             dividerTextResource = 0,
             onGooglePayPressed = {},
             onLinkPressed = {},
+            walletsAllowedInHeader = emptyList(),
         )
         interactor.state.test {
             awaitItem().run {
@@ -1416,10 +1423,11 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             googlePayLauncherConfig = null,
             onGooglePayPressed = {},
             onLinkPressed = {},
+            walletsAllowedInHeader = emptyList(), // Link inline to test row subtitle
         )
         runScenario(
             initialWalletsState = walletsState,
-            canShowWalletsInline = true,
+
         ) {
             interactor.state.test {
                 val linkPaymentMethod = awaitItem().displayablePaymentMethods.firstOrNull { it.code == "link" }
@@ -1441,10 +1449,11 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             googlePayLauncherConfig = null,
             onGooglePayPressed = {},
             onLinkPressed = {},
+            walletsAllowedInHeader = emptyList(), // Link inline to test row subtitle
         )
         runScenario(
             initialWalletsState = walletsState,
-            canShowWalletsInline = true,
+
         ) {
             interactor.state.test {
                 val linkPaymentMethod = awaitItem().displayablePaymentMethods.firstOrNull { it.code == "link" }
@@ -1467,6 +1476,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         dividerTextResource = 0,
         onGooglePayPressed = {},
         onLinkPressed = {},
+        walletsAllowedInHeader = WalletType.entries,
     )
 
     private val metadataWithOnlyPaymentMethodTypes = PaymentMethodMetadataFactory.create(
@@ -1481,7 +1491,12 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             cbcEligibility = CardBrandChoiceEligibility.create(
                 isEligible = true,
                 preferredNetworks = emptyList()
-            )
+            ),
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
         ),
         initialProcessing: Boolean = false,
         initialSelection: PaymentSelection? = null,
@@ -1490,8 +1505,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         formTypeForCode: (code: String) -> FormHelper.FormType = { notImplemented() },
         initialPaymentMethods: List<PaymentMethod> = emptyList(),
         initialMostRecentlySelectedSavedPaymentMethod: PaymentMethod? = null,
-        canShowWalletsInline: Boolean = false,
-        canShowWalletButtons: Boolean = true,
         canUpdateFullPaymentMethodDetails: Boolean = false,
         shouldUpdateVerticalModeSelection: (String?) -> Boolean = { paymentMethodCode ->
             val requiresFormScreen = paymentMethodCode != null &&
@@ -1543,8 +1556,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             providePaymentMethodName = { it!!.resolvableString },
             canRemove = canRemove,
             walletsState = walletsState,
-            canShowWalletsInline = canShowWalletsInline,
-            canShowWalletButtons = canShowWalletButtons,
             canUpdateFullPaymentMethodDetails = stateFlowOf(canUpdateFullPaymentMethodDetails),
             updateSelection = { paymentSelection, isFormScreen ->
                 selection.value = paymentSelection

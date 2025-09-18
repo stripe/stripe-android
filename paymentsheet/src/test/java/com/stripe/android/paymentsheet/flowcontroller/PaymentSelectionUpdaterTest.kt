@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -52,6 +53,7 @@ class PaymentSelectionUpdaterTest {
         val existingSelection = PaymentSelection.New.GenericPaymentMethod(
             label = "Sofort".resolvableString,
             iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_klarna,
+            iconResourceNight = null,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.SOFORT,
@@ -243,6 +245,7 @@ class PaymentSelectionUpdaterTest {
         val existingSelection = PaymentSelection.New.GenericPaymentMethod(
             label = "paypal".resolvableString,
             iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_paypal,
+            iconResourceNight = null,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.P24,
@@ -273,6 +276,7 @@ class PaymentSelectionUpdaterTest {
         val existingSelection = PaymentSelection.New.GenericPaymentMethod(
             label = "paypal".resolvableString,
             iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_paypal,
+            iconResourceNight = null,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.PAYPAL.copy(
@@ -305,6 +309,7 @@ class PaymentSelectionUpdaterTest {
         val existingSelection = PaymentSelection.New.GenericPaymentMethod(
             label = "paypal".resolvableString,
             iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_paypal,
+            iconResourceNight = null,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.PAYPAL.copy(
@@ -426,7 +431,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            selection = PaymentSelection.Link(useLinkExpress = false),
+            selection = PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED),
             previousConfig = null,
             newState = mockPaymentSheetStateWithPaymentIntent(),
             newConfig = defaultPaymentSheetConfiguration,
@@ -463,7 +468,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            selection = PaymentSelection.Link(useLinkExpress = false),
+            selection = PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED),
             previousConfig = null,
             newState = mockPaymentSheetStateWithPaymentIntent(),
             newConfig = defaultPaymentSheetConfiguration.newBuilder()
@@ -480,29 +485,36 @@ class PaymentSelectionUpdaterTest {
 
     @OptIn(WalletButtonsPreview::class)
     @Test
-    fun `If using wallet buttons config option with only GPay allowed and selection is Link, should be Link`() {
+    fun `If using wallet buttons config option with only GPay visible and selection is Link, should be Link`() {
         val updater = createUpdater()
 
         val result = updater(
-            selection = PaymentSelection.Link(useLinkExpress = false),
+            selection = PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED),
             previousConfig = null,
             newState = mockPaymentSheetStateWithPaymentIntent(),
             newConfig = defaultPaymentSheetConfiguration.newBuilder()
                 .walletButtons(
                     PaymentSheet.WalletButtonsConfiguration(
                         willDisplayExternally = true,
-                        walletsToShow = listOf("google_pay"),
+                        visibility = PaymentSheet.WalletButtonsConfiguration.Visibility(
+                            walletButtonsView = mapOf(
+                                PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                                    PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always,
+                                PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                                    PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Never,
+                            ),
+                        ),
                     ),
                 ).build(),
             walletButtonsAlreadyShown = false,
         )
 
-        assertThat(result).isEqualTo(PaymentSelection.Link(useLinkExpress = false))
+        assertThat(result).isEqualTo(PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED))
     }
 
     @OptIn(WalletButtonsPreview::class)
     @Test
-    fun `If using wallet buttons config option with only Link allowed and selection is GPay, should be GPay`() {
+    fun `If using wallet buttons config option with only Link visible and selection is GPay, should be GPay`() {
         val updater = createUpdater()
 
         val result = updater(
@@ -513,7 +525,14 @@ class PaymentSelectionUpdaterTest {
                 .walletButtons(
                     PaymentSheet.WalletButtonsConfiguration(
                         willDisplayExternally = true,
-                        walletsToShow = listOf("link"),
+                        visibility = PaymentSheet.WalletButtonsConfiguration.Visibility(
+                            walletButtonsView = mapOf(
+                                PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                                    PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Never,
+                                PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                                    PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always,
+                            ),
+                        ),
                     ),
                 ).build(),
             walletButtonsAlreadyShown = false,
@@ -528,20 +547,27 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            selection = PaymentSelection.Link(useLinkExpress = false),
+            selection = PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED),
             previousConfig = null,
             newState = mockPaymentSheetStateWithPaymentIntent(),
             newConfig = defaultPaymentSheetConfiguration.newBuilder()
                 .walletButtons(
                     PaymentSheet.WalletButtonsConfiguration(
                         willDisplayExternally = true,
-                        walletsToShow = listOf("link"),
+                        visibility = PaymentSheet.WalletButtonsConfiguration.Visibility(
+                            walletButtonsView = mapOf(
+                                PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
+                                    PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Never,
+                                PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                                    PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always,
+                            ),
+                        ),
                     ),
                 ).build(),
             walletButtonsAlreadyShown = false,
         )
 
-        assertThat(result).isEqualTo(PaymentSelection.Link(useLinkExpress = false))
+        assertThat(result).isEqualTo(PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED))
     }
 
     private fun mockPaymentSheetStateWithPaymentIntent(

@@ -8,7 +8,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -83,6 +85,7 @@ internal class DefaultEmbeddedStateHelperTest {
             selection = PaymentSelection.GooglePay,
             customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
         )
+        selectionHolder.previousNewSelections.putParcelable("card", PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
 
         assertThat(stateHelper.state).isNotNull()
         assertThat(confirmationStateHolder.state).isNotNull()
@@ -96,6 +99,7 @@ internal class DefaultEmbeddedStateHelperTest {
         assertThat(confirmationStateHolder.state).isNull()
         assertThat(customerStateHolder.customer.value).isNull()
         assertThat(selectionHolder.selection.value).isNull()
+        assertThat(selectionHolder.previousNewSelections.isEmpty).isTrue()
         assertThat(embeddedContentHelper.clearEmbeddedContentTurbine.awaitItem()).isEqualTo(Unit)
     }
 
@@ -211,7 +215,8 @@ internal class DefaultEmbeddedStateHelperTest {
             customerStateHolder = customerStateHolder,
             confirmationStateHolder = confirmationStateHolder,
             embeddedContentHelper = embeddedContentHelper,
-            internalRowSelectionCallback = { rowSelectionCallback }
+            internalRowSelectionCallback = { rowSelectionCallback },
+            confirmationHandler = FakeConfirmationHandler(),
         )
 
         Scenario(

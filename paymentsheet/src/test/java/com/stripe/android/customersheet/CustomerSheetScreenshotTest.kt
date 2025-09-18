@@ -16,6 +16,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -83,6 +84,9 @@ internal class CustomerSheetScreenshotTest {
         onAnalyticsEvent = { },
         setAsDefaultMatchesSaveForFutureUse = false,
         autocompleteAddressInteractorFactory = null,
+        termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        sellerBusinessName = null,
+        forceSetupFutureUseBehavior = false,
     )
 
     private val selectPaymentMethodViewState = CustomerSheetViewState.SelectPaymentMethod(
@@ -370,6 +374,8 @@ internal class CustomerSheetScreenshotTest {
                 // This checkbox is never displayed in CustomerSheet.
                 shouldShowSetAsDefaultCheckbox = false,
                 isDefaultPaymentMethod = false,
+                allowedBillingCountries = emptySet(),
+                removeMessage = null,
                 onUpdateSuccess = {},
             ),
             isLiveMode = true,

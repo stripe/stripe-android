@@ -16,6 +16,7 @@ class CardDetailsSectionElement(
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     initialValues: Map<IdentifierSpec, String?>,
     elementsSessionId: String? = null,
+    automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
     private val collectName: Boolean = false,
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
@@ -26,7 +27,8 @@ class CardDetailsSectionElement(
         collectName = collectName,
         cbcEligibility = cbcEligibility,
         cardBrandFilter = cardBrandFilter,
-        elementsSessionId = elementsSessionId
+        elementsSessionId = elementsSessionId,
+        automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
     )
 ) : FormElement {
     override val allowsUserInteraction: Boolean = true
@@ -37,4 +39,8 @@ class CardDetailsSectionElement(
 
     override fun getTextFieldIdentifiers(): StateFlow<List<IdentifierSpec>> =
         controller.cardDetailsElement.getTextFieldIdentifiers()
+
+    override fun onValidationStateChanged(isValidating: Boolean) {
+        controller.onValidationStateChanged(isValidating)
+    }
 }

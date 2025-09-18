@@ -315,7 +315,7 @@ internal class CustomerSheetTest {
 
         page.clickSaveButton()
 
-        page.waitForText("Your card's security code is incorrect.")
+        page.waitForText("Your card's security code is invalid.")
 
         context.markTestSucceeded()
     }

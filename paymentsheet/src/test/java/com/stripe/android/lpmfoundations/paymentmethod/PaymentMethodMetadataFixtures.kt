@@ -1,12 +1,13 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 
 internal object PaymentMethodMetadataFixtures {
 
     internal val DEFAULT_CUSTOMER_METADATA_PERMISSIONS = CustomerMetadata.Permissions(
-        canRemovePaymentMethods = true,
+        removePaymentMethod = PaymentMethodRemovePermission.Full,
         canRemoveLastPaymentMethod = true,
         canRemoveDuplicates = true,
         canUpdateFullPaymentMethodDetails = false,

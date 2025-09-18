@@ -622,6 +622,7 @@ class PaymentSheet internal constructor(
         @Parcelize
         @Poko
         class SellerDetails(
+            val businessName: String,
             val networkId: String,
             val externalId: String,
         ) : Parcelable
@@ -654,6 +655,19 @@ class PaymentSheet internal constructor(
             const val COMPLETE_WITHOUT_CONFIRMING_INTENT =
                 IntentConfirmationInterceptor.COMPLETE_WITHOUT_CONFIRMING_INTENT
         }
+    }
+
+    /**
+     * [TermsDisplay] controls how mandates and legal agreements are displayed.
+     * Use [TermsDisplay.NEVER] to never display legal agreements.
+     * The default setting is [TermsDisplay.AUTOMATIC], which causes legal agreements to be shown only when necessary.
+     */
+    enum class TermsDisplay {
+        /** Show legal agreements only when necessary */
+        AUTOMATIC,
+
+        /** Never show legal agreements */
+        NEVER
     }
 
     /** Configuration for [PaymentSheet] **/
@@ -791,6 +805,10 @@ class PaymentSheet internal constructor(
         internal val shopPayConfiguration: ShopPayConfiguration? = ConfigurationDefaults.shopPayConfiguration,
 
         internal val googlePlacesApiKey: String? = ConfigurationDefaults.googlePlacesApiKey,
+
+        internal val termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap(),
+
+        internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
     ) : Parcelable {
 
         @JvmOverloads
@@ -946,6 +964,9 @@ class PaymentSheet internal constructor(
             private var walletButtons: WalletButtonsConfiguration = ConfigurationDefaults.walletButtons
             private var shopPayConfiguration: ShopPayConfiguration? = ConfigurationDefaults.shopPayConfiguration
             private var googlePlacesApiKey: String? = ConfigurationDefaults.googlePlacesApiKey
+            private var termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap()
+            private var opensCardScannerAutomatically: Boolean =
+                ConfigurationDefaults.opensCardScannerAutomatically
 
             private var customPaymentMethods: List<CustomPaymentMethod> =
                 ConfigurationDefaults.customPaymentMethods
@@ -1102,6 +1123,25 @@ class PaymentSheet internal constructor(
                 this.googlePlacesApiKey = googlePlacesApiKey
             }
 
+            /**
+             * A map for specifying when legal agreements are displayed for each payment method type.
+             * If the payment method is not specified in the list, the TermsDisplay value will default to automatic.
+             */
+            fun termsDisplay(termsDisplay: Map<PaymentMethod.Type, TermsDisplay>) = apply {
+                this.termsDisplay = termsDisplay
+            }
+
+            /**
+             * By default, the payment sheet offers a card scan button within the new card entry form.
+             * When opensCardScannerAutomatically is set to true, the card entry form will
+             * initialize with the card scanner already open.
+             * **Note**: The stripecardscan dependency must be added to set `opensCardScannerAutomatically` to true
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun opensCardScannerAutomatically(opensCardScannerAutomatically: Boolean) = apply {
+                this.opensCardScannerAutomatically = opensCardScannerAutomatically
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -1125,6 +1165,8 @@ class PaymentSheet internal constructor(
                 walletButtons = walletButtons,
                 shopPayConfiguration = shopPayConfiguration,
                 googlePlacesApiKey = googlePlacesApiKey,
+                termsDisplay = termsDisplay,
+                opensCardScannerAutomatically = opensCardScannerAutomatically,
             )
         }
 
@@ -2742,7 +2784,51 @@ class PaymentSheet internal constructor(
          * If `false` (the default), those values will only be used to prefill the corresponding fields in the form.
          */
         val attachDefaultsToPaymentMethod: Boolean = false,
+
+        /**
+         * A list of two-letter country codes representing countries the customers can select.
+         *
+         * If the set is empty (the default), we display all countries.
+         */
+        private val allowedCountries: Set<String> = emptySet(),
     ) : Parcelable {
+        constructor(
+            /**
+             * How to collect the name field.
+             */
+            name: CollectionMode = CollectionMode.Automatic,
+
+            /**
+             * How to collect the phone field.
+             */
+            phone: CollectionMode = CollectionMode.Automatic,
+
+            /**
+             * How to collect the email field.
+             */
+            email: CollectionMode = CollectionMode.Automatic,
+
+            /**
+             * How to collect the billing address.
+             */
+            address: AddressCollectionMode = AddressCollectionMode.Automatic,
+
+            /**
+             * Whether the values included in [PaymentSheet.Configuration.defaultBillingDetails]
+             * should be attached to the payment method, this includes fields that aren't displayed in the form.
+             *
+             * If `false` (the default), those values will only be used to prefill the corresponding fields in the
+             * form.
+             */
+            attachDefaultsToPaymentMethod: Boolean = false,
+        ) : this(
+            name = name,
+            phone = phone,
+            email = email,
+            address = address,
+            attachDefaultsToPaymentMethod = attachDefaultsToPaymentMethod,
+            allowedCountries = emptySet(),
+        )
 
         internal val collectsName: Boolean
             get() = name == CollectionMode.Always
@@ -2761,6 +2847,11 @@ class PaymentSheet internal constructor(
 
         private val collectsFullAddress: Boolean
             get() = address == AddressCollectionMode.Full
+
+        @IgnoredOnParcel
+        internal val allowedBillingCountries by lazy {
+            allowedCountries.map { it.uppercase() }.toSet()
+        }
 
         internal fun toBillingAddressParameters(): GooglePayJsonFactory.BillingAddressParameters {
             val format = when (address) {
@@ -2917,7 +3008,6 @@ class PaymentSheet internal constructor(
      */
     @Poko
     @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class CustomPaymentMethod internal constructor(
         val id: String,
         internal val subtitle: ResolvableString?,
@@ -3126,6 +3216,7 @@ class PaymentSheet internal constructor(
         internal val display: Display,
         internal val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
         internal val allowUserEmailEdits: Boolean,
+        internal val allowLogOut: Boolean,
     ) : Parcelable {
 
         @JvmOverloads
@@ -3135,6 +3226,7 @@ class PaymentSheet internal constructor(
             display = display,
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             allowUserEmailEdits = true,
+            allowLogOut = true,
         )
 
         internal val shouldDisplay: Boolean
@@ -3164,6 +3256,7 @@ class PaymentSheet internal constructor(
                 collectMissingBillingDetailsForExistingPaymentMethods =
                 collectMissingBillingDetailsForExistingPaymentMethods,
                 allowUserEmailEdits = true,
+                allowLogOut = true,
             )
         }
 
@@ -3190,6 +3283,34 @@ class PaymentSheet internal constructor(
     }
 
     /**
+     * Theme configuration for wallet buttons
+     */
+    @Poko
+    @Parcelize
+    class ButtonThemes(
+        /**
+         * Theme configuration for Link button
+         */
+        val link: LinkButtonTheme = LinkButtonTheme.WHITE,
+    ) : Parcelable {
+
+        /**
+         * Link button theme options
+         */
+        enum class LinkButtonTheme {
+            /**
+             * Default green theme
+             */
+            DEFAULT,
+
+            /**
+             * White theme
+             */
+            WHITE
+        }
+    }
+
+    /**
      * Configuration for wallet buttons
      */
     @Poko
@@ -3203,12 +3324,79 @@ class PaymentSheet internal constructor(
         val willDisplayExternally: Boolean = false,
 
         /**
-         * Identifies the list of wallets that can be shown in `WalletButtons`. Wallets
-         * are identified by their wallet identifier (google_pay, link, shop_pay). An
-         * empty list means all wallets will be shown.
+         * Controls visibility of wallets within Payment Element and `WalletButtons`.
          */
-        val walletsToShow: List<String> = emptyList(),
-    ) : Parcelable
+        val visibility: Visibility = Visibility(),
+
+        /**
+         * Theme configuration for wallet buttons
+         */
+        val buttonThemes: ButtonThemes = ButtonThemes(),
+    ) : Parcelable {
+        @Poko
+        @Parcelize
+        class Visibility(
+            /**
+             * Configures how wallets are shown in Payment Element. Wallets that don't have a provided visibility will
+             * have theirs automatically determined.
+             *
+             * Defaults to an empty map.
+             */
+            val paymentElement: Map<Wallet, PaymentElementVisibility> = emptyMap(),
+
+            /**
+             * Configures how wallets are shown in the wallet buttons view. Wallets that don't have a provided
+             * visibility will have theirs automatically determined.
+             *
+             * Defaults to an empty map.
+             */
+            val walletButtonsView: Map<Wallet, WalletButtonsViewVisibility> = emptyMap(),
+        ) : Parcelable
+
+        /**
+         * Available visibility options within the wallet buttons view
+         */
+        enum class WalletButtonsViewVisibility {
+            /**
+             * Wallet is always shown when the wallet buttons view is rendered.
+             */
+            Always,
+
+            /**
+             * Wallet is never shown when the wallet buttons view is rendered.
+             */
+            Never,
+        }
+
+        /**
+         * Available visibility options for a wallet within Payment Element
+         */
+        enum class PaymentElementVisibility {
+            /**
+             * Wallet visibility is automatically determined based on if the wallet buttons view is rendered.
+             */
+            Automatic,
+
+            /**
+             * Wallet is always shown regardless of if the wallet buttons view is rendered.
+             */
+            Always,
+
+            /**
+             * Wallet is never shown regardless of if the wallet buttons view is rendered.
+             */
+            Never,
+        }
+
+        /**
+         * Definition for a wallet available for use with Payment Element.
+         */
+        enum class Wallet {
+            Link,
+            GooglePay,
+            ShopPay
+        }
+    }
 
     /**
      * Configuration related to Shop Pay, which only applies when using wallet buttons.
@@ -3367,12 +3555,26 @@ class PaymentSheet internal constructor(
          * Builder utility to set optional callbacks for [PaymentSheet.FlowController].
          *
          * @param resultCallback Called when a [PaymentSheetResult] is available.
-         * @param paymentOptionCallback Called when the customer's desired payment method changes.
+         * @param paymentOptionResultCallback Called after the customer attempts to make a payment method change.
          */
         class Builder(
             internal val resultCallback: PaymentSheetResultCallback,
-            internal val paymentOptionCallback: PaymentOptionCallback
+            internal val paymentOptionResultCallback: PaymentOptionResultCallback,
         ) {
+            /**
+             * Builder utility to set optional callbacks for [PaymentSheet.FlowController].
+             *
+             * @param resultCallback Called when a [PaymentSheetResult] is available.
+             * @param paymentOptionCallback Called when the customer's desired payment method changes.
+             */
+            constructor(
+                resultCallback: PaymentSheetResultCallback,
+                paymentOptionCallback: PaymentOptionCallback
+            ) : this(
+                resultCallback = resultCallback,
+                paymentOptionResultCallback = paymentOptionCallback.toResultCallback(),
+            )
+
             private val callbacksBuilder = PaymentElementCallbacks.Builder()
 
             /**
@@ -3431,7 +3633,7 @@ class PaymentSheet internal constructor(
              */
             fun build(activity: ComponentActivity): FlowController {
                 initializeCallbacks()
-                return FlowControllerFactory(activity, paymentOptionCallback, resultCallback).create()
+                return FlowControllerFactory(activity, paymentOptionResultCallback, resultCallback).create()
             }
 
             /**
@@ -3441,7 +3643,7 @@ class PaymentSheet internal constructor(
              */
             fun build(fragment: Fragment): FlowController {
                 initializeCallbacks()
-                return FlowControllerFactory(fragment, paymentOptionCallback, resultCallback).create()
+                return FlowControllerFactory(fragment, paymentOptionResultCallback, resultCallback).create()
             }
 
             /**
@@ -3454,7 +3656,7 @@ class PaymentSheet internal constructor(
                  */
                 return internalRememberPaymentSheetFlowController(
                     callbacks = callbacksBuilder.build(),
-                    paymentOptionCallback = paymentOptionCallback,
+                    paymentOptionResultCallback = paymentOptionResultCallback,
                     paymentResultCallback = resultCallback,
                 )
             }
@@ -3504,7 +3706,7 @@ class PaymentSheet internal constructor(
             ): FlowController {
                 return FlowControllerFactory(
                     activity,
-                    paymentOptionCallback,
+                    paymentOptionCallback.toResultCallback(),
                     paymentResultCallback
                 ).create()
             }
@@ -3545,7 +3747,7 @@ class PaymentSheet internal constructor(
                 )
                 return FlowControllerFactory(
                     activity,
-                    paymentOptionCallback,
+                    paymentOptionCallback.toResultCallback(),
                     paymentResultCallback
                 ).create()
             }
@@ -3583,7 +3785,7 @@ class PaymentSheet internal constructor(
                 )
                 return FlowControllerFactory(
                     activity,
-                    paymentOptionCallback,
+                    paymentOptionCallback.toResultCallback(),
                     paymentResultCallback
                 ).create()
             }
@@ -3628,7 +3830,7 @@ class PaymentSheet internal constructor(
                 )
                 return FlowControllerFactory(
                     activity,
-                    paymentOptionCallback,
+                    paymentOptionCallback.toResultCallback(),
                     paymentResultCallback
                 ).create()
             }
@@ -3655,7 +3857,7 @@ class PaymentSheet internal constructor(
             ): FlowController {
                 return FlowControllerFactory(
                     fragment,
-                    paymentOptionCallback,
+                    paymentOptionCallback.toResultCallback(),
                     paymentResultCallback
                 ).create()
             }
@@ -3694,7 +3896,7 @@ class PaymentSheet internal constructor(
                 )
                 return FlowControllerFactory(
                     fragment,
-                    paymentOptionCallback,
+                    paymentOptionCallback.toResultCallback(),
                     paymentResultCallback
                 ).create()
             }
@@ -3732,7 +3934,7 @@ class PaymentSheet internal constructor(
                 )
                 return FlowControllerFactory(
                     fragment,
-                    paymentOptionCallback,
+                    paymentOptionCallback.toResultCallback(),
                     paymentResultCallback
                 ).create()
             }
@@ -3777,7 +3979,7 @@ class PaymentSheet internal constructor(
                 )
                 return FlowControllerFactory(
                     fragment,
-                    paymentOptionCallback,
+                    paymentOptionCallback.toResultCallback(),
                     paymentResultCallback
                 ).create()
             }

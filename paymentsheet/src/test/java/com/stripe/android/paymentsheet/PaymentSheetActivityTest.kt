@@ -44,6 +44,7 @@ import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLaun
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.LinkButtonTestTag
 import com.stripe.android.model.CardBrand
@@ -467,7 +468,7 @@ internal class PaymentSheetActivityTest {
     @Test
     fun `removing last selected saved PM clears out saved payment selection`() {
         val paymentMethods = PAYMENT_METHODS.take(1)
-        val viewModel = createViewModel(paymentMethods = paymentMethods)
+        val viewModel = createViewModel(paymentMethods = paymentMethods, isLinkAvailable = true)
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity { activity ->
@@ -1237,7 +1238,7 @@ internal class PaymentSheetActivityTest {
                     customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods),
                     isGooglePayAvailable = isGooglePayAvailable,
                     linkState = LinkState(
-                        configuration = mock(),
+                        configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
                         loginState = LinkState.LoginState.LoggedOut,
                         signupMode = null,
                     ).takeIf { isLinkAvailable },
@@ -1263,7 +1264,7 @@ internal class PaymentSheetActivityTest {
                     linkLauncher = linkPaymentLauncher,
                     errorReporter = FakeErrorReporter(),
                     linkConfigurationCoordinator = coordinator,
-                    cvcRecollectionLauncherFactory = RecordingCvcRecollectionLauncherFactory.noOp(),
+                    cvcRecollectionLauncherFactory = RecordingCvcRecollectionLauncherFactory.noOp()
                 ),
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 errorReporter = FakeErrorReporter(),

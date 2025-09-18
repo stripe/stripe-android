@@ -1,7 +1,11 @@
 package com.stripe.android.link.theme
 
+import android.content.Context
 import android.content.res.Configuration
+import android.content.res.Resources
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -10,8 +14,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
-import com.stripe.android.link.model.LinkAppearance
+import com.stripe.android.link.LinkAppearance
+import com.stripe.android.link.ui.image.LocalStripeImageLoader
+import com.stripe.android.uicore.image.StripeImageLoader
+
+internal val LocalLinkAppearance = staticCompositionLocalOf<LinkAppearance?> { null }
 
 internal val LocalLinkTypography = staticCompositionLocalOf<LinkTypography> {
     error("No Typography provided")
@@ -26,25 +35,100 @@ internal val LocalLinkShapes = staticCompositionLocalOf<LinkShapes> {
 }
 
 internal val MinimumTouchTargetSize = 48.dp
-internal val PrimaryButtonHeight = 56.dp
 internal val AppBarHeight = 70.dp
 internal val HorizontalPadding = 20.dp
 
 @Composable
 internal fun DefaultLinkTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    appearance: LinkAppearance? = LocalLinkAppearance.current,
     content: @Composable () -> Unit
 ) {
+    val stripeImageLoader = runCatching { LocalStripeImageLoader.current }
+        .getOrElse { StripeImageLoader(LocalContext.current) }
+    val isDark = when (appearance?.style) {
+        LinkAppearance.Style.ALWAYS_LIGHT -> false
+        LinkAppearance.Style.ALWAYS_DARK -> true
+        LinkAppearance.Style.AUTOMATIC, null -> isSystemInDarkTheme()
+    }
+
+    // Colors
+    val defaultColors = LinkThemeConfig.colors(isDark)
+    val resolvedColors = appearance
+        ?.let {
+            val overrides = if (isDark) it.darkColors else it.lightColors
+            defaultColors.copy(
+                textBrand = overrides.primary,
+                onButtonBrand = overrides.contentOnPrimary,
+                buttonBrand = overrides.primary,
+                borderSelected = overrides.borderSelected
+            )
+        }
+        ?: defaultColors
+
+    // Shapes
+    val defaultLinkShapes = LinkShapes()
+    val linkShapes = appearance
+        ?.let {
+            defaultLinkShapes.copy(
+                primaryButton = it.primaryButton.cornerRadiusDp
+                    ?.let { radius -> RoundedCornerShape(radius.dp) }
+                    ?: defaultLinkShapes.primaryButton,
+                primaryButtonHeight = it.primaryButton.heightDp?.dp
+                    ?: defaultLinkShapes.primaryButtonHeight,
+            )
+        }
+        ?: defaultLinkShapes
+
+    // Set context configuration so the correct resources are loaded.
+    val baseContext = LocalContext.current
+    val inspectionMode = LocalInspectionMode.current
+    val styleContext = remember(baseContext, isDark, inspectionMode) {
+        val uiMode =
+            if (isDark) {
+                Configuration.UI_MODE_NIGHT_YES
+            } else {
+                Configuration.UI_MODE_NIGHT_NO
+            }
+        baseContext.withUiMode(uiMode, inspectionMode)
+    }
+
     CompositionLocalProvider(
+        LocalContext provides styleContext,
+        LocalLinkColors provides resolvedColors,
         LocalLinkTypography provides linkTypography,
-        LocalLinkColors provides LinkThemeConfig.colors(darkTheme),
-        LocalLinkShapes provides LinkShapes,
+        LocalLinkShapes provides linkShapes,
+        LocalStripeImageLoader provides stripeImageLoader,
     ) {
         MaterialTheme(
             colors = debugColors(),
-        ) {
-            content()
+            content = content
+        )
+    }
+}
+
+private fun Context.withUiMode(uiMode: Int, inspectionMode: Boolean): Context {
+    if (uiMode == this.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
+        return this
+    }
+    val config = Configuration(resources.configuration).apply {
+        this.uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or uiMode
+    }
+    return object : ContextThemeWrapper(this, theme) {
+        override fun getResources(): Resources? {
+            @Suppress("DEPRECATION")
+            if (inspectionMode) {
+                // Workaround NPE thrown in BridgeContext#createConfigurationContext() when getting resources.
+                val baseResources = this@withUiMode.resources
+                return Resources(
+                    baseResources.assets,
+                    baseResources.displayMetrics,
+                    config
+                )
+            }
+            return super.getResources()
         }
+    }.apply {
+        applyOverrideConfiguration(config)
     }
 }
 
@@ -69,90 +153,3 @@ private fun debugColors(
     onError = debugColor,
     isLight = true
 )
-
-@Composable
-internal fun LinkAppearanceTheme(
-    appearance: LinkAppearance? = null,
-    content: @Composable () -> Unit
-) {
-    appearance?.let {
-        val isDark: Boolean = when (appearance.style) {
-            LinkAppearance.Style.ALWAYS_LIGHT -> false
-            LinkAppearance.Style.ALWAYS_DARK -> true
-            LinkAppearance.Style.AUTOMATIC -> isSystemInDarkTheme()
-        }
-
-        val defaultColors = LinkThemeConfig.colors(isDark)
-        val overrides = if (isDark) appearance.darkColors else appearance.lightColors
-        val resolvedColors = defaultColors.copy(
-            textBrand = overrides.primary,
-            borderSelected = overrides.borderSelected
-        )
-
-        val baseContext = LocalContext.current
-
-        val styleContext = remember(baseContext, isDark) {
-            val config = Configuration(baseContext.resources.configuration).apply {
-                uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or
-                    if (isDark) {
-                        Configuration.UI_MODE_NIGHT_YES
-                    } else {
-                        Configuration.UI_MODE_NIGHT_NO
-                    }
-            }
-            baseContext.createConfigurationContext(config)
-        }
-
-        CompositionLocalProvider(
-            LocalLinkColors provides resolvedColors,
-            LocalLinkTypography provides linkTypography,
-            LocalLinkShapes provides LinkShapes,
-            LocalContext provides styleContext
-        ) {
-            MaterialTheme(
-                colors = resolvedColors.toMaterialColors(!isDark),
-                content = content
-            )
-        }
-    } ?: run {
-        DefaultLinkTheme(
-            content = content
-        )
-    }
-}
-
-private fun LinkColors.toMaterialColors(isLight: Boolean): Colors {
-    return if (isLight) {
-        Colors(
-            primary = buttonPrimary,
-            primaryVariant = buttonPrimary,
-            secondary = buttonTertiary,
-            secondaryVariant = buttonTertiary,
-            background = surfaceBackdrop,
-            surface = surfacePrimary,
-            error = buttonCritical,
-            onPrimary = textWhite,
-            onSecondary = textPrimary,
-            onBackground = textPrimary,
-            onSurface = textPrimary,
-            onError = textWhite,
-            isLight = true
-        )
-    } else {
-        Colors(
-            primary = buttonPrimary,
-            primaryVariant = buttonPrimary,
-            secondary = buttonTertiary,
-            secondaryVariant = buttonTertiary,
-            background = surfaceBackdrop,
-            surface = surfacePrimary,
-            error = buttonCritical,
-            onPrimary = textWhite,
-            onSecondary = textPrimary,
-            onBackground = textPrimary,
-            onSurface = textPrimary,
-            onError = textWhite,
-            isLight = false
-        )
-    }
-}

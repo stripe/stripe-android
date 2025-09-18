@@ -7,8 +7,10 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.DateUtils
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.cardscan.CardScanResult
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -97,6 +99,29 @@ internal class CardDetailsController(
         )
     )
 
+    val onCardScanResult: (CardScanResult) -> Unit = { result ->
+        (result as? CardScanResult.Completed)?.scannedCard?.let { scannedCard ->
+            cvcElement.controller.onRawValueChange("")
+            numberElement.controller.onRawValueChange(
+                scannedCard.pan
+            )
+            val newDate = if (
+                scannedCard.expirationMonth != null &&
+                scannedCard.expirationYear != null &&
+                DateUtils.isExpiryDataValid(
+                    expiryMonth = scannedCard.expirationMonth,
+                    expiryYear = scannedCard.expirationYear
+                )
+            ) {
+                @Suppress("MagicNumber")
+                "${scannedCard.expirationMonth}/${scannedCard.expirationYear % 100}"
+            } else {
+                ""
+            }
+            expirationDateElement.controller.onRawValueChange(newDate)
+        }
+    }
+
     private val rowFields = listOf(expirationDateElement, cvcElement)
     val fields = listOfNotNull(
         nameElement,
@@ -119,6 +144,12 @@ internal class CardDetailsController(
             .map { it.error }
     ) {
         it.filterNotNull().firstOrNull()
+    }
+
+    override fun onValidationStateChanged(isValidating: Boolean) {
+        fields.forEach {
+            it.onValidationStateChanged(isValidating)
+        }
     }
 
     @Composable

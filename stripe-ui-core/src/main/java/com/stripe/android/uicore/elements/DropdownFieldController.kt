@@ -4,10 +4,10 @@ import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.uicore.R
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
-import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -27,12 +27,22 @@ class DropdownFieldController(
     private val initialIndex = (0).takeIf {
         dropdownMode !is DropdownConfig.Mode.Full || dropdownMode.selectsFirstOptionAsDefault
     }
+    private val _validating = MutableStateFlow(false)
     private val _selectedIndex = MutableStateFlow(initialIndex)
     val selectedIndex: StateFlow<Int?> = _selectedIndex
     override val label: StateFlow<ResolvableString> = MutableStateFlow(config.label)
     override val fieldValue = selectedIndex.mapAsStateFlow { it?.let { displayItems[it] } ?: "" }
     override val rawFieldValue = selectedIndex.mapAsStateFlow { it?.let { config.rawItems.getOrNull(it) } }
-    override val error: StateFlow<FieldError?> = stateFlowOf(null)
+    override val error: StateFlow<FieldError?> = combineAsStateFlow(
+        _validating,
+        _selectedIndex,
+    ) { validating, index ->
+        if (validating && index == null) {
+            FieldError(R.string.stripe_blank_and_required)
+        } else {
+            null
+        }
+    }
     override val showOptionalLabel: Boolean = false // not supported yet
     override val isComplete: StateFlow<Boolean> = selectedIndex.mapAsStateFlow { it != null }
     override val formFieldValue: StateFlow<FormFieldEntry> =
@@ -56,6 +66,10 @@ class DropdownFieldController(
      */
     fun onValueChange(index: Int) {
         safelyUpdateSelectedIndex(index)
+    }
+
+    override fun onValidationStateChanged(isValidating: Boolean) {
+        _validating.value = isValidating
     }
 
     /**

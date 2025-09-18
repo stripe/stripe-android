@@ -58,7 +58,8 @@ internal class LinkConfirmationDefinition @Inject constructor(
             configuration = confirmationOption.configuration,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             launchMode = confirmationOption.linkLaunchMode,
-            useLinkExpress = confirmationOption.useLinkExpress,
+            linkExpressMode = confirmationOption.linkExpressMode,
+            passiveCaptchaParams = confirmationOption.passiveCaptchaParams
         )
     }
 
@@ -82,6 +83,7 @@ internal class LinkConfirmationDefinition @Inject constructor(
                         paymentMethod = result.paymentMethod,
                         optionsParams = null,
                         originatedFromWallet = true,
+                        passiveCaptchaParams = confirmationOption.passiveCaptchaParams
                     ),
                     parameters = confirmationParameters,
                 )

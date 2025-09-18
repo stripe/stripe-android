@@ -38,4 +38,8 @@ abstract class SectionSingleFieldElement(
             listOf(identifier).takeIf { controller is TextFieldController }
                 ?: emptyList()
         )
+
+    override fun onValidationStateChanged(isValidating: Boolean) {
+        controller.onValidationStateChanged(isValidating)
+    }
 }

@@ -19,9 +19,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.linkViewModel
 import com.stripe.android.link.model.LinkAccount
-import com.stripe.android.link.model.LinkAppearance
 import com.stripe.android.link.theme.DefaultLinkTheme
-import com.stripe.android.link.theme.LinkAppearanceTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.uicore.elements.OTPElement
@@ -31,8 +29,7 @@ import com.stripe.android.uicore.utils.collectAsState
 internal fun VerificationDialog(
     modifier: Modifier,
     linkAccount: LinkAccount,
-    linkAppearance: LinkAppearance?,
-    onVerificationSucceeded: () -> Unit,
+    changeEmail: () -> Unit,
     onDismissClicked: () -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit
 ) {
@@ -41,7 +38,7 @@ internal fun VerificationDialog(
             parentComponent = parentComponent,
             linkAccount = linkAccount,
             isDialog = true,
-            onVerificationSucceeded = onVerificationSucceeded,
+            onChangeEmailClicked = changeEmail,
             onDismissClicked = onDismissClicked,
             dismissWithResult = dismissWithResult
         )
@@ -49,16 +46,20 @@ internal fun VerificationDialog(
 
     val state by viewModel.viewState.collectAsState()
 
+    if (state.isProcessingWebAuth) {
+        return
+    }
+
     VerificationDialogBody(
         modifier = modifier,
         state = state,
         otpElement = viewModel.otpElement,
-        linkAppearance = linkAppearance,
         onBack = viewModel::onBack,
         onChangeEmailClick = viewModel::onChangeEmailButtonClicked,
         onResendCodeClick = viewModel::resendCode,
         onFocusRequested = viewModel::onFocusRequested,
         didShowCodeSentNotification = viewModel::didShowCodeSentNotification,
+        onConsentShown = viewModel::onConsentShown
     )
 }
 
@@ -67,12 +68,12 @@ internal fun VerificationDialogBody(
     modifier: Modifier = Modifier,
     state: VerificationViewState,
     otpElement: OTPElement,
-    linkAppearance: LinkAppearance?,
     onBack: () -> Unit,
     onFocusRequested: () -> Unit,
     didShowCodeSentNotification: () -> Unit,
     onChangeEmailClick: () -> Unit,
     onResendCodeClick: () -> Unit,
+    onConsentShown: () -> Unit,
 ) {
     Box(
         modifier = modifier
@@ -88,7 +89,7 @@ internal fun VerificationDialogBody(
             val dim = if (isSystemInDarkTheme()) DIM_DARK_THEME else DIM_LIGHT_THEME
             (LocalView.current.parent as? DialogWindowProvider)?.window?.setDimAmount(dim)
 
-            LinkAppearanceTheme(appearance = linkAppearance) {
+            DefaultLinkTheme {
                 Surface(
                     modifier = Modifier.width(360.dp),
                     shape = RoundedCornerShape(24.dp),
@@ -102,6 +103,7 @@ internal fun VerificationDialogBody(
                         onResendCodeClick = onResendCodeClick,
                         onFocusRequested = onFocusRequested,
                         didShowCodeSentNotification = didShowCodeSentNotification,
+                        onConsentShown = onConsentShown,
                     )
                 }
             }
@@ -130,15 +132,16 @@ fun VerificationDialogPreview() {
                     redactedPhoneNumber = "(...)",
                     email = "email@email.com",
                     defaultPayment = null,
-                    isDialog = true
+                    isDialog = true,
+                    allowLogout = true,
                 ),
-                linkAppearance = null,
                 otpElement = OTPSpec.transform(),
                 onBack = {},
                 onChangeEmailClick = {},
                 onResendCodeClick = {},
                 onFocusRequested = {},
                 didShowCodeSentNotification = {},
+                onConsentShown = {}
             )
         }
     }

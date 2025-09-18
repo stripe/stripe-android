@@ -29,6 +29,9 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">Simpan maklumat saya untuk proses bayar dan keluar yang lebih cepat dengan Link</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_toggle">Buat akaun dengan Link untuk proses bayar dan keluar lebih pantas di seluruh web</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">Kredit %1$s</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -113,6 +116,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Dengan meneruskan, anda bersetuju untuk menyimpan maklumat anda untuk pembelian masa hadapan dengan %s.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Dengan meneruskan, anda bersetuju untuk menyimpan maklumat anda bagi pembelian masa hadapan dengan %s dan <link>Link</link>. Anda juga bersetuju dengan <terms>Terma</terms> dan <privacy>Privasi</privacy> Link.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Dengan meneruskan, anda bersetuju untuk menyimpan maklumat anda bagi pembelian masa hadapan dengan %s dan <link>Link</link> (lihat <terms>Terma</terms> Dan <privacy>Privasi</privacy>).]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Dengan meneruskan, anda bersetuju untuk menyimpan maklumat anda bagi pembelian masa hadapan dengan %s dan <link>Link</link> menurut <terms>terma</terms> Dan <privacy>privasi</privacy> Link.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Kad tidak dikemaskinikan. Sila cuba lagi.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -172,6 +179,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_remove_card">Alih keluar kad</string>
   <!-- Title for confirmation alert to remove a card -->
   <string name="stripe_paymentsheet_remove_card_title">Alih keluar kad?</string>
+  <!-- Description for a confirmation alert indicating to the customer that their payment method will be removed but still available to the merchant for subscriptions -->
+  <string name="stripe_paymentsheet_remove_partial_description">Kaedah pembayaran ini akan dialih keluar tetapi akan kekal tersedia untuk langganan %s.</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Alih keluar %s</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
@@ -202,6 +211,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_total_amount">Jumlah: %s</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Jenama kad tidak dikemaskinikan. Sila cuba lagi.</string>
+  <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
+  <string name="stripe_paynow_confirm_payment">Sahkan pembayaran dalam bank atau aplikasi pembayaran anda dalam masa %s untuk melengkapkan pembelian.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Tetapkan sebagai kaedah pembayaran tetapan asal</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -264,6 +275,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">Lihat lebih banyak</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Dengan meneruskan langkah, anda bersetuju untuk mengizinkan pembayaran menurut <terms>terma</terms> ini.]]></string>
+  <!-- Text providing link to terms for bank payments when seller information is provided -->
+  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[Dengan menghantar pesanan anda kepada %1$s dan %2$s, anda bersetuju untuk menyimpan maklumat anda dengan %3$s bagi pembelian masa hadapan, serta bersetuju untuk membenarkan pembayaran dibuat menurut <terms>terma ini</terms>.]]></string>
+  <!-- Text providing link to terms for bank payments -->
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Dengan menghantar pesanan anda kepada %s anda bersetuju untuk mengizinkan pembayaran mengikut <terms>terma-terma ini</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Pembayaran</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
@@ -277,6 +292,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_passthrough_description">Serah semua</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
   <string name="stripe_wallet_pay_another_way">Bayar dengan cara lain</string>
+  <!-- Hint shown when selecting a payment method indicating debit cards are preferred. -->
+  <string name="stripe_wallet_prefer_debit_card_hint">Kad debit berkemungkinan besar akan diterima.</string>
   <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
   <string name="stripe_wallet_recollect_cvc_error">Bagi tujuan keselamatan, sila masukkan semula kod keselamatan kad anda.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->

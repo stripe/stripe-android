@@ -27,6 +27,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
     private val paymentSelectionUpdater: PaymentSelectionUpdater,
+    private val confirmationHandler: FlowControllerConfirmationHandler,
     @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean
 ) {
 
@@ -142,6 +143,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         withContext(uiContext) {
             viewModel.state = DefaultFlowController.State(paymentSheetState = state, config = configuration)
         }
+        confirmationHandler.bootstrap(state.paymentMethodMetadata)
     }
 
     private fun resetJob() {

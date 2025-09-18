@@ -19,7 +19,6 @@ import com.stripe.android.ui.core.elements.Capitalization
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.DropdownItemSpec
 import com.stripe.android.ui.core.elements.DropdownSpec
-import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.KeyboardType
 import com.stripe.android.ui.core.elements.MandateTextElement
@@ -37,6 +36,7 @@ import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.EmailConfig
+import com.stripe.android.uicore.elements.EmailElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberElement
@@ -71,8 +71,9 @@ internal class TransformSpecToElementsTest {
         runBlocking {
             val countrySection = CountrySpec(allowedCountryCodes = setOf("AT"))
             val formElement = transformSpecToElements.transform(
-                PaymentMethodMetadataFactory.create(),
-                listOf(countrySection),
+                metadata = PaymentMethodMetadataFactory.create(),
+                specs = listOf(element = countrySection),
+                termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
             )
 
             val countrySectionElement = formElement.first() as SectionElement
@@ -94,8 +95,9 @@ internal class TransformSpecToElementsTest {
         runBlocking {
             val idealSection = IDEAL_BANK_CONFIG
             val formElement = transformSpecToElements.transform(
-                PaymentMethodMetadataFactory.create(),
-                listOf(idealSection),
+                metadata = PaymentMethodMetadataFactory.create(),
+                specs = listOf(idealSection),
+                termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
             )
 
             val idealSectionElement = formElement.first() as SectionElement
@@ -112,8 +114,9 @@ internal class TransformSpecToElementsTest {
     @Test
     fun `Add a name section spec sets up the name element correctly`() = runBlocking {
         val formElement = transformSpecToElements.transform(
-            PaymentMethodMetadataFactory.create(),
-            listOf(nameSection),
+            metadata = PaymentMethodMetadataFactory.create(),
+            specs = listOf(nameSection),
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         )
 
         val nameElement = (formElement.first() as SectionElement)
@@ -134,8 +137,8 @@ internal class TransformSpecToElementsTest {
     @Test
     fun `Add a simple text section spec sets up the text element correctly`() = runBlocking {
         val formElement = transformSpecToElements.transform(
-            PaymentMethodMetadataFactory.create(),
-            listOf(
+            metadata = PaymentMethodMetadataFactory.create(),
+            specs = listOf(
                 SimpleTextSpec(
                     IdentifierSpec.Generic("simple"),
                     TranslationId.AddressName.resourceId,
@@ -144,6 +147,7 @@ internal class TransformSpecToElementsTest {
                     capitalization = Capitalization.Words
                 )
             ),
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         )
 
         val nameElement = (formElement.first() as SectionElement).fields[0]
@@ -160,8 +164,9 @@ internal class TransformSpecToElementsTest {
     @Test
     fun `Add a email section spec sets up the email element correctly`() = runBlocking {
         val formElement = transformSpecToElements.transform(
-            PaymentMethodMetadataFactory.create(),
-            listOf(emailSection),
+            metadata = PaymentMethodMetadataFactory.create(),
+            specs = listOf(emailSection),
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         )
 
         val emailSectionElement = formElement.first() as SectionElement
@@ -179,8 +184,9 @@ internal class TransformSpecToElementsTest {
             stringResId = R.string.stripe_sepa_mandate
         )
         val formElement = transformSpecToElements.transform(
-            PaymentMethodMetadataFactory.create(),
-            listOf(staticText),
+            metadata = PaymentMethodMetadataFactory.create(),
+            specs = listOf(staticText),
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         )
 
         val staticTextElement = formElement.first() as StaticTextElement
@@ -194,8 +200,9 @@ internal class TransformSpecToElementsTest {
     fun `Add a phone section spec sets up the phone element correctly`() = runBlocking {
         val phoneSpec = PhoneSpec()
         val formElement = transformSpecToElements.transform(
-            PaymentMethodMetadataFactory.create(),
-            listOf(phoneSpec),
+            metadata = PaymentMethodMetadataFactory.create(),
+            specs = listOf(phoneSpec),
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         )
 
         val phoneSectionElement = formElement.first() as SectionElement
@@ -216,8 +223,9 @@ internal class TransformSpecToElementsTest {
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
             )
         ).transform(
-            PaymentMethodMetadataFactory.create(),
-            listOf(placeholderSpec),
+            metadata = PaymentMethodMetadataFactory.create(),
+            specs = listOf(placeholderSpec),
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         )
 
         assertThat(formElement).hasSize(1)
@@ -238,8 +246,9 @@ internal class TransformSpecToElementsTest {
                 phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
             )
         ).transform(
-            PaymentMethodMetadataFactory.create(),
-            listOf(placeholderSpec),
+            metadata = PaymentMethodMetadataFactory.create(),
+            specs = listOf(placeholderSpec),
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         )
 
         assertThat(formElement).hasSize(1)
@@ -260,8 +269,9 @@ internal class TransformSpecToElementsTest {
                 name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
             )
         ).transform(
-            PaymentMethodMetadataFactory.create(),
-            listOf(placeholderSpec),
+            metadata = PaymentMethodMetadataFactory.create(),
+            specs = listOf(placeholderSpec),
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         )
 
         assertThat(formElement).hasSize(1)
@@ -282,8 +292,9 @@ internal class TransformSpecToElementsTest {
                 email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
             )
         ).transform(
-            PaymentMethodMetadataFactory.create(),
-            listOf(placeholderSpec),
+            metadata = PaymentMethodMetadataFactory.create(),
+            specs = listOf(placeholderSpec),
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         )
 
         assertThat(formElement).hasSize(1)
@@ -302,8 +313,9 @@ internal class TransformSpecToElementsTest {
         val formElement = TransformSpecToElementsFactory.create(
             requiresMandate = true
         ).transform(
-            PaymentMethodMetadataFactory.create(),
-            listOf(placeholderSpec),
+            metadata = PaymentMethodMetadataFactory.create(),
+            specs = listOf(placeholderSpec),
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         )
 
         assertThat(formElement).hasSize(1)
@@ -320,8 +332,9 @@ internal class TransformSpecToElementsTest {
         val formElement = TransformSpecToElementsFactory.create(
             requiresMandate = false
         ).transform(
-            PaymentMethodMetadataFactory.create(),
-            listOf(placeholderSpec),
+            metadata = PaymentMethodMetadataFactory.create(),
+            specs = listOf(placeholderSpec),
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         )
 
         assertThat(formElement).isEmpty()
@@ -335,8 +348,9 @@ internal class TransformSpecToElementsTest {
                 TestAutocompleteAddressInteractor.noOp()
             }
         ).transform(
-            PaymentMethodMetadataFactory.create(),
-            listOf(AddressSpec()),
+            metadata = PaymentMethodMetadataFactory.create(),
+            specs = listOf(AddressSpec()),
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         )
 
         assertThat(formElement).hasSize(1)

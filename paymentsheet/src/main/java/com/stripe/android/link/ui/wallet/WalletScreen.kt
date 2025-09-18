@@ -18,8 +18,10 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalTextStyle
@@ -82,7 +84,6 @@ import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.text.Html
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
-import com.stripe.android.ui.core.R as PaymentsUiCoreR
 import com.stripe.android.uicore.R as StripeUiCoreR
 
 @Composable
@@ -153,7 +154,7 @@ internal fun WalletBody(
 ) {
     val coroutineScope = rememberCoroutineScope()
     AnimatedContent(
-        targetState = state.paymentDetailsList.isEmpty(),
+        targetState = state.shouldShowLoadingState,
         transitionSpec = { LinkScreenTransition },
     ) { isLoading ->
         if (isLoading) {
@@ -241,14 +242,6 @@ private fun PaymentDetailsSection(
     Column(
         modifier = modifier
     ) {
-        if (state.paymentSelectionHint != null) {
-            Text(
-                modifier = Modifier.padding(bottom = 16.dp),
-                text = state.paymentSelectionHint,
-                style = LinkTheme.typography.body,
-                color = LinkTheme.colors.textPrimary,
-            )
-        }
         PaymentMethodSection(
             state = state,
             isExpanded = isExpanded,
@@ -262,6 +255,12 @@ private fun PaymentDetailsSection(
             hideBottomSheetContent = hideBottomSheetContent,
             onLogoutClicked = onLogoutClicked,
         )
+        if (state.paymentSelectionHint != null) {
+            PaymentSelectionHint(
+                modifier = Modifier.padding(top = 12.dp),
+                hint = state.paymentSelectionHint
+            )
+        }
 
         AnimatedVisibility(visible = state.mandate != null) {
             state.mandate?.let { mandate ->
@@ -283,6 +282,39 @@ private fun PaymentDetailsSection(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun PaymentSelectionHint(
+    hint: ResolvableString?,
+    modifier: Modifier = Modifier,
+) {
+    if (hint != null) {
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .background(
+                    color = LinkTheme.colors.surfaceSecondary,
+                    shape = RoundedCornerShape(12.dp)
+                )
+                .padding(horizontal = 20.dp, vertical = 12.dp),
+        ) {
+            Icon(
+                modifier = Modifier
+                    .padding(top = 2.dp)
+                    .size(16.dp),
+                painter = painterResource(com.stripe.android.ui.core.R.drawable.stripe_ic_info_outlined),
+                tint = LinkTheme.colors.iconTertiary,
+                contentDescription = null,
+            )
+            Text(
+                modifier = Modifier.padding(start = 8.dp),
+                text = hint.resolve(),
+                style = LinkTheme.typography.detail,
+                color = LinkTheme.colors.textTertiary,
+            )
         }
     }
 }
@@ -318,16 +350,16 @@ private fun ActionSection(
             label = state.primaryButtonLabel.resolve(),
             state = state.primaryButtonState,
             onButtonClick = onPrimaryButtonClick,
-            iconEnd = PaymentsUiCoreR.drawable.stripe_ic_lock
         )
-
-        SecondaryButton(
-            modifier = Modifier
-                .testTag(WALLET_SCREEN_PAY_ANOTHER_WAY_BUTTON),
-            enabled = !state.primaryButtonState.isBlocking,
-            label = state.secondaryButtonLabel.resolve(),
-            onClick = onPayAnotherWayClicked
-        )
+        state.secondaryButtonLabel?.let { secondaryButtonLabel ->
+            SecondaryButton(
+                modifier = Modifier
+                    .testTag(WALLET_SCREEN_PAY_ANOTHER_WAY_BUTTON),
+                enabled = !state.primaryButtonState.isBlocking,
+                label = secondaryButtonLabel.resolve(),
+                onClick = onPayAnotherWayClicked
+            )
+        }
     }
 }
 
@@ -357,6 +389,7 @@ private fun PaymentMethodSection(
         expanded = isExpanded,
         selectedItem = state.selectedItem,
         emailLabel = emailLabel,
+        showAccountMenu = state.allowLogOut,
         labelMaxWidth = labelMaxWidthDp,
         onAccountMenuClicked = {
             showBottomSheetContent {
@@ -433,6 +466,7 @@ private fun computeMaxLabelWidth(vararg labels: String): Dp {
 private fun PaymentMethodPicker(
     email: String,
     emailLabel: String,
+    showAccountMenu: Boolean,
     labelMaxWidth: Dp,
     expanded: Boolean,
     selectedItem: ConsumerPaymentDetails.PaymentDetails?,
@@ -454,6 +488,7 @@ private fun PaymentMethodPicker(
             email = email,
             label = emailLabel,
             labelMaxWidth = labelMaxWidth,
+            showMenu = showAccountMenu,
             onMenuClicked = onAccountMenuClicked,
         )
 
@@ -531,6 +566,7 @@ private fun EmailDetails(
     email: String,
     label: String,
     labelMaxWidth: Dp,
+    showMenu: Boolean,
     onMenuClicked: () -> Unit,
 ) {
     Row(
@@ -561,15 +597,17 @@ private fun EmailDetails(
             modifier = Modifier.weight(1f),
         )
 
-        Icon(
-            imageVector = Icons.Default.MoreVert,
-            contentDescription = stringResource(R.string.stripe_show_menu),
-            tint = LinkTheme.colors.iconSecondary,
-            modifier = Modifier
-                .clip(CircleShape)
-                .clickable(onClick = onMenuClicked)
-                .padding(4.dp),
-        )
+        if (showMenu) {
+            Icon(
+                imageVector = Icons.Default.MoreVert,
+                contentDescription = stringResource(R.string.stripe_show_menu),
+                tint = LinkTheme.colors.iconSecondary,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .clickable(onClick = onMenuClicked)
+                    .padding(4.dp),
+            )
+        }
     }
 }
 

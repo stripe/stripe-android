@@ -10,6 +10,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinitio
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
+import com.stripe.android.model.ConsentUi
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
@@ -22,10 +23,13 @@ import com.stripe.android.model.EmailSource
 import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.MobileFallbackWebviewParams
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
+import com.stripe.android.networking.RequestSurface
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -58,6 +62,7 @@ internal object TestFactory {
     const val AMOUNT = 100L
     const val CURRENCY = "USD"
     const val COUNTRY = "US"
+    const val COUNTRY_INFERRING_METHOD = "PHONE_NUMBER"
 
     val VERIFIED_SESSION = ConsumerSession.VerificationSession(
         type = ConsumerSession.VerificationSession.SessionType.Sms,
@@ -87,6 +92,16 @@ internal object TestFactory {
     val CONSUMER_SESSION_SIGN_UP = ConsumerSessionSignup(
         consumerSession = CONSUMER_SESSION,
         publishableKey = PUBLISHABLE_KEY
+    )
+
+    val MOBILE_FALLBACK_WEBVIEW_PARAMS = MobileFallbackWebviewParams(
+        webViewRequirementType = MobileFallbackWebviewParams.WebviewRequirementType.Required,
+        webviewOpenUrl = "https://fake_auth.stripe.com/mobile/12345"
+    )
+
+    val CONSUMER_SESSION_WITH_WEB_AUTH = CONSUMER_SESSION.copy(
+        verificationSessions = listOf(),
+        mobileFallbackWebviewParams = MOBILE_FALLBACK_WEBVIEW_PARAMS
     )
 
     val PAYMENT_METHOD_CREATE_PARAMS = PaymentMethodCreateParams.createCard(
@@ -205,7 +220,9 @@ internal object TestFactory {
     val LINK_CONFIGURATION = LinkConfiguration(
         stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
         merchantName = MERCHANT_NAME,
+        sellerBusinessName = null,
         merchantCountryCode = "",
+        merchantLogoUrl = null,
         customerInfo = LINK_CUSTOMER_INFO,
         shippingDetails = null,
         flags = emptyMap(),
@@ -224,11 +241,20 @@ internal object TestFactory {
         disableRuxInFlowController = false,
         collectMissingBillingDetailsForExistingPaymentMethods = true,
         allowUserEmailEdits = true,
+        allowLogOut = true,
         enableDisplayableDefaultValuesInEce = false,
+        skipWalletInFlowController = false,
         linkAppearance = null,
         linkSignUpOptInFeatureEnabled = false,
         linkSignUpOptInInitialValue = false,
-        customerId = null
+        customerId = null,
+        saveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(null),
+        forceSetupFutureUseBehaviorAndNewMandate = false,
+        linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+    )
+
+    val LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING = LINK_CONFIGURATION.copy(
+        linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD", "INSTANT_DEBITS"),
     )
 
     val LINK_WALLET_PRIMARY_BUTTON_LABEL = Amount(
@@ -261,12 +287,14 @@ internal object TestFactory {
 
     val NATIVE_LINK_ARGS = NativeLinkArgs(
         configuration = LINK_CONFIGURATION,
+        requestSurface = RequestSurface.PaymentElement,
         publishableKey = "",
         stripeAccountId = "",
-        startWithVerificationDialog = false,
+        linkExpressMode = LinkExpressMode.DISABLED,
         linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
         paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
         launchMode = LinkLaunchMode.Full,
+        passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
     )
 
     val FINANCIAL_CONNECTIONS_CHECKING_ACCOUNT = FinancialConnectionsAccount(
@@ -284,5 +312,22 @@ internal object TestFactory {
             FinancialConnectionsAccount.SupportedPaymentMethodTypes.US_BANK_ACCOUNT,
             FinancialConnectionsAccount.SupportedPaymentMethodTypes.LINK
         )
+    )
+
+    val CONSENT_PANE = ConsentUi.ConsentPane(
+        title = "Test Consent",
+        scopesSection = ConsentUi.ConsentPane.ScopesSection(
+            header = "Test Header",
+            scopes = listOf(
+                ConsentUi.ConsentPane.ScopesSection.Scope(
+                    icon = ConsentUi.Icon(default = "test_icon"),
+                    header = "Test Scope",
+                    description = "Test scope description"
+                )
+            )
+        ),
+        disclaimer = "Test disclaimer",
+        denyButtonLabel = "Deny",
+        allowButtonLabel = "Allow"
     )
 }

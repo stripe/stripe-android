@@ -9,6 +9,8 @@
     <string name="account_onboarding_menu_subtitle">Show a localized onboarding form that validates data</string>
     <string name="payouts">Payouts</string>
     <string name="payouts_menu_subtitle">Show payout information and allow your users to perform payouts</string>
+    <string name="payments">Payments</string>
+    <string name="payments_menu_subtitle">Show payments and allow your users to view payment details and manage disputes</string>
     <string name="connect_sdk_example">Connect SDK Example</string>
     <string name="customize_appearance">Customize Appearance</string>
     <string name="settings">Settings</string>
@@ -47,4 +49,7 @@
     <string name="appearance_link">Link</string>
     <string name="appearance_dynamic">Dynamic</string>
     <string name="custom_font">Custom Font</string>
+    <string name="appearance_retro">Retro</string>
+    <string name="appearance_forest">Forest</string>
+    <string name="appearance_dark_mode">Dark Mode</string>
 </resources>

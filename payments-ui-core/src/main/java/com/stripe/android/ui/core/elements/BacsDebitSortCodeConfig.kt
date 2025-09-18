@@ -27,6 +27,8 @@ class BacsDebitSortCodeConfig : TextFieldConfig {
 
     override val keyboard: KeyboardType = KeyboardType.NumberPassword
 
+    override val optional: Boolean = false
+
     override val visualTransformation: VisualTransformation = BacsDebitSortCodeVisualTransformation
 
     override val trailingIcon: StateFlow<TextFieldIcon?> = MutableStateFlow(null)

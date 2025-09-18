@@ -36,6 +36,8 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
             cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
             addressCollectionMode = paymentMethodMetadata.billingDetailsCollectionConfiguration.address,
+            allowedBillingCountries =
+            paymentMethodMetadata.billingDetailsCollectionConfiguration.allowedBillingCountries,
             removeExecutor = { method ->
                 val result = savedPaymentMethodMutatorProvider.get().removePaymentMethodInEditScreen(method)
                 if (result == null) {
@@ -75,6 +77,8 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                     defaultPaymentMethodId = customerStateHolder.customer.value?.defaultPaymentMethodId
                 )
                 ),
+            removeMessage = paymentMethodMetadata.customerMetadata?.permissions?.removePaymentMethod
+                ?.removeMessage(paymentMethodMetadata.merchantName),
             onUpdateSuccess = {
                 manageNavigatorProvider.get().performAction(ManageNavigator.Action.Back)
             },

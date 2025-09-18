@@ -25,7 +25,7 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
 
         @Suppress("DEPRECATION")
         val playgroundState = intent.getParcelableExtra<PlaygroundState.Payment?>(PLAYGROUND_STATE_KEY)!!
-        val linkControllerConfig = playgroundState.asPaymentState()?.linkControllerConfiguration()
+        val linkControllerConfig = playgroundState.asPaymentState()?.linkControllerConfiguration(this)
 
         if (linkControllerConfig == null) {
             finish()
@@ -46,11 +46,14 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
                         modifier = Modifier.padding(paddingValues),
                         controllerState = linkControllerState,
                         playgroundState = linkControllerPlaygroundState,
-                        onEmailChange = viewModel::onEmailChange,
                         onPaymentMethodButtonClick = viewModel::onPaymentMethodClick,
                         onCreatePaymentMethodClick = viewModel::onCreatePaymentMethodClick,
+                        onLookupClick = viewModel::onLookupClick,
                         onAuthenticationClick = viewModel::onAuthenticateClick,
+                        onAuthorizeClick = viewModel::onAuthorizeClick,
                         onRegisterConsumerClick = viewModel::onRegisterConsumerClick,
+                        onUpdatePhoneNumberClick = viewModel::onUpdatePhoneNumberClick,
+                        onLogOutClick = viewModel::onLogOutClick,
                         onErrorMessage = { viewModel.status.value = StatusMessage(it) },
                     )
                 }

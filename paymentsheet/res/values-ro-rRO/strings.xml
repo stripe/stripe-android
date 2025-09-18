@@ -29,6 +29,9 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">Salvează informațiile mele pentru finalizarea mai rapidă a comenzii cu Link</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_toggle">Creați un cont cu Link pentru o finalizare mai rapidă a comenzii online</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s Credit</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -113,6 +116,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Continuând, sunteți de acord să vă salvați informațiile pentru achiziții viitoare cu %s.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Continuând, sunteți de acord să vă salvați informațiile pentru achiziții viitoare cu %s și <link>Link</link>. De asemenea, sunteți de acord cu <terms>Termenii</terms> și <privacy>Confidențialitatea</privacy> Link.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Continuând, sunteți de acord să vă salvați informațiile pentru achiziții viitoare cu %s și <link>Link</link> (consultați <terms>Termeni</terms> și <privacy>Confidențialitate</privacy>).]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Continuând, sunteți de acord să vă salvați informațiile pentru achiziții viitoare cu %s și <link>Link</link> în conformitate cu <terms>Termenii</terms> și <privacy>confidențialitatea</privacy> Link.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Cardul nu a fost actualizat. Te rugăm să încerci din nou.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -172,6 +179,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_remove_card">Eliminare card</string>
   <!-- Title for confirmation alert to remove a card -->
   <string name="stripe_paymentsheet_remove_card_title">Doresti sa elimini cardul?</string>
+  <!-- Description for a confirmation alert indicating to the customer that their payment method will be removed but still available to the merchant for subscriptions -->
+  <string name="stripe_paymentsheet_remove_partial_description">Această metodă de plată va fi eliminată, dar va rămâne disponibilă pentru abonamentele %s.</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Elimina %s</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
@@ -202,6 +211,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_total_amount">Total: %s</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Marca cardului nu a fost actualizată. Vă rugăm să încercați din nou.</string>
+  <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
+  <string name="stripe_paynow_confirm_payment">Confirmați plata în banca dvs. sau în aplicația de plată în termen de %s pentru a finaliza achiziția.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Setează ca metodă de plată implicită</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -264,6 +275,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">Vizualizați mai multe</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Continuând, sunteți de acord să autorizați plățile în conformitate cu acești <terms>termeni</terms>.]]></string>
+  <!-- Text providing link to terms for bank payments when seller information is provided -->
+  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[Prin trimiterea comenzii dvs. către %1$s și %2$s, sunteți de acord să salvați informațiile dvs. în %3$s pentru achiziții viitoare și sunteți de acord să autorizați plățile în conformitate cu <terms>acești termeni</terms>.]]></string>
+  <!-- Text providing link to terms for bank payments -->
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Prin trimiterea comenzii dvs. către %s, sunteți de acord să autorizați plățile în conformitate cu <terms>acești termeni</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Plată</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
@@ -277,6 +292,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_passthrough_description">Passthrough</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
   <string name="stripe_wallet_pay_another_way">Folosiți altă metodă de plată</string>
+  <!-- Hint shown when selecting a payment method indicating debit cards are preferred. -->
+  <string name="stripe_wallet_prefer_debit_card_hint">Este cel mai probabil ca cardurile de debit să fie acceptate.</string>
   <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
   <string name="stripe_wallet_recollect_cvc_error">Din motive de securitate, vă rugăm să introduceți din nou codul de securitate al cardului dvs.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->

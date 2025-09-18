@@ -5,8 +5,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -26,15 +26,12 @@ import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
-import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.RenderableFormElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.elements.PhoneNumberController
-import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
@@ -90,11 +87,6 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
     ): List<FormElement> {
         val billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration
         return buildList {
-            addContactInformationElement(
-                arguments = arguments,
-                billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
-            )
-
             add(
                 CardDetailsSectionElement(
                     cardAccountRangeRepositoryFactory = arguments.cardAccountRangeRepositoryFactory,
@@ -103,7 +95,8 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                     collectName = billingDetailsCollectionConfiguration.collectsName,
                     cbcEligibility = arguments.cbcEligibility,
                     cardBrandFilter = arguments.cardBrandFilter,
-                    elementsSessionId = metadata.elementsSessionId
+                    elementsSessionId = metadata.elementsSessionId,
+                    automaticallyLaunchedCardScanFormDataHelper = arguments.automaticallyLaunchedCardScanFormDataHelper,
                 )
             )
 
@@ -117,11 +110,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                 metadata = metadata
             )
 
-            val linkSignupOptInEnabled =
-                metadata.linkState?.configuration?.linkSignUpOptInFeatureEnabled == true
-
-            // sign up opt in combines save for future usage and link signup acceptance
-            if (canChangeSaveForFutureUsage && linkSignupOptInEnabled.not()) {
+            if (canChangeSaveForFutureUsage && metadata.forceSetupFutureUseBehaviorAndNewMandate.not()) {
                 addSavePaymentOptionElements(
                     metadata = metadata,
                     arguments = arguments,
@@ -138,6 +127,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                         linkConfigurationCoordinator = arguments.linkConfigurationCoordinator,
                         initialLinkUserInput = arguments.initialLinkUserInput,
                         onLinkInlineSignupStateChanged = arguments.onLinkInlineSignupStateChanged,
+                        previousLinkSignupCheckboxSelection = arguments.previousLinkSignupCheckboxSelection,
                     )
                 )
 
@@ -146,17 +136,19 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                 null
             }
 
-            if (linkSignupOptInEnabled && signupMode != null) {
+            val mandateAllowed = metadata.mandateAllowed(CardDefinition.type)
+            if (metadata.forceSetupFutureUseBehaviorAndNewMandate) {
                 add(
                     CombinedLinkMandateElement(
                         identifier = IdentifierSpec.Generic("card_mandate"),
                         merchantName = metadata.merchantName,
                         signupMode = signupMode,
+                        isLinkUI = arguments.isLinkUI,
                         canChangeSaveForFutureUse = canChangeSaveForFutureUsage,
                         linkSignupStateFlow = arguments.linkInlineHandler?.linkInlineState ?: stateFlowOf(null)
                     )
                 )
-            } else if (metadata.hasIntentToSetup(CardDefinition.type.code)) {
+            } else if (metadata.hasIntentToSetup(CardDefinition.type.code) && mandateAllowed) {
                 add(
                     MandateTextElement(
                         identifier = IdentifierSpec.Generic("card_mandate"),
@@ -174,62 +166,52 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
         }
     }
 
-    private fun MutableList<FormElement>.addContactInformationElement(
-        arguments: UiDefinitionFactory.Arguments,
-        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
-    ): Boolean {
-        val contactInformationElement = contactInformationElement(
-            initialValues = arguments.initialValues,
-            collectEmail = billingDetailsCollectionConfiguration.collectsEmail,
-            collectPhone = billingDetailsCollectionConfiguration.collectsPhone,
-        )
-
-        return if (contactInformationElement != null) {
-            add(contactInformationElement)
-        } else {
-            false
-        }
-    }
-
     private fun MutableList<FormElement>.addCardBillingElements(
         arguments: UiDefinitionFactory.Arguments,
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
-    ): Boolean {
-        return if (billingDetailsCollectionConfiguration.address
-            != PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+    ) {
+        if (
+            billingDetailsCollectionConfiguration.address !=
+            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never ||
+            billingDetailsCollectionConfiguration.collectsEmail ||
+            billingDetailsCollectionConfiguration.collectsPhone
         ) {
             addAll(
                 cardBillingElements(
-                    billingDetailsCollectionConfiguration.address.toInternal(),
+                    billingDetailsCollectionConfiguration.allowedBillingCountries,
+                    billingDetailsCollectionConfiguration.toInternal(),
                     arguments.autocompleteAddressInteractorFactory,
                     arguments.initialValues,
                     arguments.shippingValues,
                 )
             )
-        } else {
-            false
         }
     }
 }
 
-internal fun PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.toInternal(): BillingDetailsCollectionConfiguration.AddressCollectionMode {
-    return when (this) {
-        PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
-            BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
+internal fun PaymentSheet.BillingDetailsCollectionConfiguration.toInternal(): BillingDetailsCollectionConfiguration {
+    return BillingDetailsCollectionConfiguration(
+        // Should never collect name from the billing details form since its collected in card information form
+        collectName = false,
+        collectEmail = collectsEmail,
+        collectPhone = collectsPhone,
+        address = when (address) {
+            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
+                BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
+            }
+            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> {
+                BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+            }
+            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> {
+                BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+            }
         }
-
-        PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> {
-            BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
-        }
-
-        PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> {
-            BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
-        }
-    }
+    )
 }
 
 private fun cardBillingElements(
-    collectionMode: BillingDetailsCollectionConfiguration.AddressCollectionMode,
+    allowedCountries: Set<String>,
+    collectionConfiguration: BillingDetailsCollectionConfiguration,
     autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
     initialValues: Map<IdentifierSpec, String?>,
     shippingValues: Map<IdentifierSpec, String?>?,
@@ -245,45 +227,28 @@ private fun cardBillingElements(
             }
     val addressElement = CardBillingAddressElement(
         IdentifierSpec.Generic("credit_billing"),
-        countryCodes = CountryUtils.supportedBillingCountries,
+        countryCodes = allowedCountries,
         rawValuesMap = initialValues,
         sameAsShippingElement = sameAsShippingElement,
         shippingValuesMap = shippingValues,
-        collectionMode = collectionMode,
+        collectionConfiguration = collectionConfiguration,
         autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
     )
+
+    val title = when {
+        collectionConfiguration.address ==
+            BillingDetailsCollectionConfiguration.AddressCollectionMode.Never &&
+            (collectionConfiguration.collectPhone || collectionConfiguration.collectEmail) ->
+            resolvableString(PaymentsUiCoreR.string.stripe_contact_information)
+        else -> resolvableString(PaymentsUiCoreR.string.stripe_billing_details)
+    }
 
     return listOfNotNull(
         SectionElement.wrap(
             addressElement,
-            resolvableString(PaymentsUiCoreR.string.stripe_billing_details),
+            title,
         ),
         sameAsShippingElement,
-    )
-}
-
-private fun contactInformationElement(
-    initialValues: Map<IdentifierSpec, String?>,
-    collectEmail: Boolean,
-    collectPhone: Boolean,
-): FormElement? {
-    val elements = listOfNotNull(
-        EmailElement(
-            initialValue = initialValues[IdentifierSpec.Email]
-        ).takeIf { collectEmail },
-        PhoneNumberElement(
-            identifier = IdentifierSpec.Phone,
-            controller = PhoneNumberController.createPhoneNumberController(
-                initialValue = initialValues[IdentifierSpec.Phone] ?: "",
-            )
-        ).takeIf { collectPhone },
-    )
-
-    if (elements.isEmpty()) return null
-
-    return SectionElement.wrap(
-        label = resolvableString(PaymentsUiCoreR.string.stripe_contact_information),
-        sectionFieldElements = elements,
     )
 }
 
@@ -293,6 +258,7 @@ internal class CombinedLinkMandateElement(
     canChangeSaveForFutureUse: Boolean,
     private val merchantName: String,
     private val linkSignupStateFlow: StateFlow<InlineSignupViewState?>,
+    private val isLinkUI: Boolean,
 ) : RenderableFormElement(
     allowsUserInteraction = false,
     identifier = identifier
@@ -310,9 +276,11 @@ internal class CombinedLinkMandateElement(
     override fun ComposeUI(enabled: Boolean) {
         val linkState by linkSignupStateFlow.collectAsState()
         Mandate(
-            mandateText = if (linkState?.isExpanded == true) {
+            // when displaying the mandate from Link UI (add card to Link) we always want the
+            // non-signup version of the mandate text.
+            mandateText = if (linkState?.isExpanded == true && isLinkUI.not()) {
                 stringResource(
-                    id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_on,
+                    id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_on_v3,
                     formatArgs = arrayOf(merchantName)
                 ).replaceHyperlinks()
             } else {
@@ -321,6 +289,7 @@ internal class CombinedLinkMandateElement(
                     formatArgs = arrayOf(merchantName)
                 ).replaceHyperlinks()
             },
+            textAlign = if (isLinkUI) TextAlign.Center else TextAlign.Start,
             modifier = Modifier.padding(top = topPadding)
         )
     }

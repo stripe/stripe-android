@@ -205,8 +205,6 @@
   <string name="stripe_test_model_title">Bħalissa qed tuża l-modalità ta\' prova</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Erġa\' Pprova</string>
-  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
-  <string name="stripe_unexpected_error_try_again">Kien hemm żball mhux mistenni -- erġa\' pprova wara ftit sekondi</string>
   <!-- Description to upload a photo -->
   <string name="stripe_upload_a_photo">Tella\' ritratt</string>
   <!-- Title of dialog to upload back of driver license -->

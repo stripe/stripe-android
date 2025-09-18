@@ -12,15 +12,17 @@ internal class FakeLogLinkHoldbackExperiment : LogLinkHoldbackExperiment {
     val calls: ReceiveTurbine<ExperimentCall> = _calls
 
     override fun invoke(
-        experiment: ElementsSession.ExperimentAssignment,
+        experimentAssignments: List<ElementsSession.ExperimentAssignment>,
         elementsSession: ElementsSession,
         state: PaymentElementLoader.State
     ) {
-        _calls.add(
-            ExperimentCall(
-                experiment = experiment
+        experimentAssignments.forEach { experiment ->
+            _calls.add(
+                ExperimentCall(
+                    experiment = experiment
+                )
             )
-        )
+        }
     }
 }
 

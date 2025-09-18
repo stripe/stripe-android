@@ -16,6 +16,7 @@ import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.injection.PaymentsIntegrityModule
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -66,6 +67,7 @@ import kotlin.coroutines.CoroutineContext
         MobileSessionIdModule::class,
         CardScanModule::class,
         EmbeddedLinkExtrasModule::class,
+        PaymentsIntegrityModule::class,
         LinkHoldbackExposureModule::class,
     ],
 )
@@ -232,6 +234,13 @@ internal interface EmbeddedPaymentElementViewModelModule {
             @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
         ): InternalRowSelectionCallback? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.rowSelectionCallback
+        }
+
+        // SelectedPaymentMethodCode is used in FormActivity to determine if cardScan should be automatically launched
+        // Outside of FormActivity it is not relevant, but is still required for dependency injection
+        @Provides
+        fun providesSelectedPaymentMethodCode(): String {
+            return ""
         }
     }
 }

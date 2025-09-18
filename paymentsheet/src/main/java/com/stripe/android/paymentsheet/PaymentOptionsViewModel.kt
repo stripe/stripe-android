@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
@@ -16,6 +17,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
@@ -49,6 +51,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -90,28 +93,54 @@ internal class PaymentOptionsViewModel @Inject constructor(
             }
             onUserSelection()
         },
+        onDisabledClick = ::onDisabledClick,
     )
 
-    private val _paymentOptionResult = MutableSharedFlow<PaymentOptionResult>(replay = 1)
-    internal val paymentOptionResult: SharedFlow<PaymentOptionResult> = _paymentOptionResult
+    private val _paymentOptionsActivityResult = MutableSharedFlow<PaymentOptionsActivityResult>(replay = 1)
+    internal val paymentOptionsActivityResult: SharedFlow<PaymentOptionsActivityResult> = _paymentOptionsActivityResult
 
     private val _error = MutableStateFlow<ResolvableString?>(null)
     override val error: StateFlow<ResolvableString?> = _error
 
     override val walletsProcessingState: StateFlow<WalletsProcessingState?> = MutableStateFlow(null).asStateFlow()
 
+    private val visibleWallets by lazy {
+        val visibility = config.walletButtons.visibility
+
+        WalletType.entries.filter { walletType ->
+            val configuredVisibility = visibility.paymentElement[walletType.configType]
+
+            when (configuredVisibility) {
+                null,
+                PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Automatic -> {
+                    if (!args.walletButtonsRendered) {
+                        true
+                    } else {
+                        visibility.walletButtonsView[walletType.configType] ==
+                            PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Never
+                    }
+                }
+                PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Always -> true
+                PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Never -> false
+            }
+        }
+    }
+
     override val walletsState: StateFlow<WalletsState?> = combineAsStateFlow(
         linkHandler.isLinkEnabled,
         linkHandler.linkConfigurationCoordinator.emailFlow,
         buttonsEnabled,
-    ) { isLinkAvailable, linkEmail, buttonsEnabled ->
+        selection,
+        linkAccountHolder.linkAccountInfo
+
+    ) { isLinkAvailable, linkEmail, buttonsEnabled, currentSelection, linkAccountInfo ->
         val paymentMethodMetadata = args.state.paymentMethodMetadata
+        val linkConfiguration = paymentMethodMetadata.linkState?.configuration
+        val hasLinkWithSelectedPayment = currentSelection is Link && currentSelection.selectedPayment != null
         WalletsState.create(
-            isLinkAvailable = isLinkAvailable == true &&
-                args.walletsToShow.contains(WalletType.Link),
+            isLinkAvailable = isLinkAvailable == true && visibleWallets.contains(WalletType.Link),
             linkEmail = linkEmail,
-            isGooglePayReady = paymentMethodMetadata.isGooglePayReady &&
-                args.walletsToShow.contains(WalletType.GooglePay),
+            isGooglePayReady = paymentMethodMetadata.isGooglePayReady && visibleWallets.contains(WalletType.GooglePay),
             buttonsEnabled = buttonsEnabled,
             paymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes(),
             googlePayLauncherConfig = null,
@@ -124,8 +153,24 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 updateSelection(PaymentSelection.Link())
                 onUserSelection()
             },
-            isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent
+            isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent,
+            walletsAllowedInHeader = walletsAllowedInHeader(paymentMethodMetadata),
+            paymentDetails = linkAccountInfo.account?.displayablePaymentDetails,
+            enableDefaultValues = linkConfiguration?.enableDisplayableDefaultValuesInEce == true &&
+                hasLinkWithSelectedPayment.not()
         )
+    }
+
+    private fun walletsAllowedInHeader(paymentMethodMetadata: PaymentMethodMetadata): List<WalletType> {
+        val showsDirectForm = paymentMethodMetadata.supportedPaymentMethodTypes().size == 1 &&
+            customerStateHolder.paymentMethods.value.isEmpty()
+        return if (showsDirectForm) {
+            // Direct to form: show wallets in header
+            WalletType.entries
+        } else {
+            // Regular FlowController payment options list: show Link wallet in header.
+            listOf(WalletType.Link)
+        }
     }
 
     // Only used to determine if we should skip the list and go to the add card view and how to populate that view.
@@ -191,8 +236,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
             }
             // Link verification dialog completed -> close payment method selection with authenticated state
             is LinkActivityResult.Completed -> {
-                _paymentOptionResult.tryEmit(
-                    PaymentOptionResult.Succeeded(
+                _paymentOptionsActivityResult.tryEmit(
+                    PaymentOptionsActivityResult.Succeeded(
                         linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                         paymentSelection = Link(
                             selectedPayment = result.selectedPayment,
@@ -214,8 +259,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     override fun onUserCancel() {
         eventReporter.onDismiss()
-        _paymentOptionResult.tryEmit(
-            PaymentOptionResult.Canceled(
+        _paymentOptionsActivityResult.tryEmit(
+            PaymentOptionsActivityResult.Canceled(
                 linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                 mostRecentError = null,
                 paymentSelection = determinePaymentSelectionUponCancel(),
@@ -261,17 +306,24 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     configuration = linkState!!.configuration,
                     launchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment = null),
                     linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
-                    useLinkExpress = true
+                    linkExpressMode = LinkExpressMode.ENABLED,
+                    passiveCaptchaParams = args.state.paymentMethodMetadata.passiveCaptchaParams
                 )
             } else {
-                _paymentOptionResult.tryEmit(
-                    PaymentOptionResult.Succeeded(
+                _paymentOptionsActivityResult.tryEmit(
+                    PaymentOptionsActivityResult.Succeeded(
                         linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                         paymentSelection = paymentSelection.withLinkDetails(),
                         paymentMethods = customerStateHolder.paymentMethods.value
                     )
                 )
             }
+        }
+    }
+
+    private fun onDisabledClick() {
+        viewModelScope.launch {
+            validationRequested.emit(Unit)
         }
     }
 

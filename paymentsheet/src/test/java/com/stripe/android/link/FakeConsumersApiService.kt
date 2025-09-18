@@ -6,6 +6,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.CustomEmailType
 import com.stripe.android.model.EmailSource
@@ -23,6 +24,10 @@ internal open class FakeConsumersApiService : ConsumersApiService {
     var mobileSignUpResult = Result.success(TestFactory.CONSUMER_SESSION_SIGN_UP)
     var lookupConsumerSessionResult = TestFactory.CONSUMER_SESSION_LOOKUP
     var mobileLookupConsumerSessionResult = TestFactory.CONSUMER_SESSION_LOOKUP
+    var refreshConsumerSessionResult = ConsumerSessionRefresh(
+        consumerSession = TestFactory.CONSUMER_SESSION,
+        linkAuthIntent = null
+    )
 
     val signUpCalls = arrayListOf<SignUpCall>()
     val mobileSignUpCalls = arrayListOf<SignUpCall>()
@@ -56,28 +61,35 @@ internal open class FakeConsumersApiService : ConsumersApiService {
     }
 
     override suspend fun lookupConsumerSession(
-        email: String,
+        email: String?,
+        linkAuthIntentId: String?,
         requestSurface: String,
+        sessionId: String,
         doNotLogConsumerFunnelEvent: Boolean,
+        supportedVerificationTypes: List<String>?,
         requestOptions: ApiRequest.Options,
         customerId: String?
     ): ConsumerSessionLookup {
         lookupCalls.add(
             LookupCall(
                 email = email,
+                linkAuthIntentId = linkAuthIntentId,
                 requestOptions = requestOptions,
-                requestSurface = requestSurface
+                requestSurface = requestSurface,
+                sessionId = sessionId,
             )
         )
         return lookupConsumerSessionResult
     }
 
     override suspend fun mobileLookupConsumerSession(
-        email: String,
-        emailSource: EmailSource,
+        email: String?,
+        emailSource: EmailSource?,
+        linkAuthIntentId: String?,
         requestSurface: String,
         verificationToken: String,
         appId: String,
+        supportedVerificationTypes: List<String>?,
         requestOptions: ApiRequest.Options,
         sessionId: String,
         customerId: String?
@@ -86,6 +98,7 @@ internal open class FakeConsumersApiService : ConsumersApiService {
             MobileLookupCall(
                 email = email,
                 emailSource = emailSource,
+                linkAuthIntentId = linkAuthIntentId,
                 requestOptions = requestOptions,
                 verificationToken = verificationToken,
                 appId = appId,
@@ -113,8 +126,18 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         verificationCode: String,
         requestSurface: String,
         type: VerificationType,
+        consentGranted: Boolean?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun postConsentUpdate(
+        consumerSessionClientSecret: String,
+        consentGranted: Boolean,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options
+    ): Result<Unit> {
         TODO("Not yet implemented")
     }
 
@@ -168,15 +191,35 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         TODO("Not yet implemented")
     }
 
+    override suspend fun refreshConsumerSession(
+        appId: String,
+        consumerSessionClientSecret: String,
+        supportedVerificationTypes: List<String>?,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSessionRefresh = refreshConsumerSessionResult
+
+    override suspend fun updatePhoneNumber(
+        consumerSessionClientSecret: String,
+        phoneNumber: String,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options
+    ): Result<ConsumerSession> {
+        TODO("Not yet implemented")
+    }
+
     data class LookupCall(
-        val email: String,
+        val email: String?,
+        val linkAuthIntentId: String?,
         val requestSurface: String,
+        val sessionId: String,
         val requestOptions: ApiRequest.Options
     )
 
     data class MobileLookupCall(
-        val email: String,
-        val emailSource: EmailSource,
+        val email: String?,
+        val emailSource: EmailSource?,
+        val linkAuthIntentId: String?,
         val requestSurface: String,
         val verificationToken: String,
         val appId: String,

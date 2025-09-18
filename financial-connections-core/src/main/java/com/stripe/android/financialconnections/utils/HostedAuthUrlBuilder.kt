@@ -24,6 +24,7 @@ object HostedAuthUrlBuilder {
             billingDetails = args.elementsSessionContext?.billingDetails,
             prefillDetails = prefillDetails,
             incentiveEligibilitySession = args.elementsSessionContext?.incentiveEligibilitySession,
+            allowRedisplay = args.elementsSessionContext?.allowRedisplay
         )
     }
 
@@ -34,6 +35,7 @@ object HostedAuthUrlBuilder {
         billingDetails: ElementsSessionContext.BillingDetails?,
         prefillDetails: ElementsSessionContext.PrefillDetails?,
         incentiveEligibilitySession: IncentiveEligibilitySession?,
+        allowRedisplay: ElementsSessionContext.AllowRedisplay?,
     ): String? {
         if (hostedAuthUrl == null) {
             return null
@@ -49,6 +51,7 @@ object HostedAuthUrlBuilder {
             linkMode?.let { queryParams.add("link_mode=${it.value}") }
             billingDetails?.let { queryParams.add(makeBillingDetailsQueryParams(it)) }
             incentiveEligibilitySession?.let { queryParams.add("incentiveEligibilitySession=${it.id}") }
+            allowRedisplay?.let { queryParams.add("allow_redisplay=${it.value}") }
         }
 
         prefillDetails?.run {

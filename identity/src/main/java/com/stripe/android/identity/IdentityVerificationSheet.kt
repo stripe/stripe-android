@@ -6,6 +6,7 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
@@ -96,6 +97,22 @@ interface IdentityVerificationSheet {
             identityVerificationCallback: IdentityVerificationCallback
         ): IdentityVerificationSheet =
             StripeIdentityVerificationSheet(from, configuration, identityVerificationCallback)
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun onrampCreate(
+            from: ComponentActivity,
+            configuration: Configuration,
+            identityVerificationCallback: IdentityVerificationCallback
+        ): IdentityVerificationSheet {
+            return StripeIdentityVerificationSheet(
+                lifecycleOwner = from,
+                activityResultRegistryOwner = from,
+                identityVerificationSheetContract = IdentityVerificationSheetContract(),
+                identityVerificationCallback = identityVerificationCallback,
+                context = from,
+                configuration = configuration
+            )
+        }
 
         /**
          * Creates a [IdentityVerificationSheet] instance in a [Composable]. Which would be

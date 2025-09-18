@@ -38,6 +38,7 @@ import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.Token;
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory;
+import com.stripe.android.networking.RequestSurface;
 import com.stripe.android.networking.StripeApiRepository;
 import com.stripe.android.networking.StripeRepository;
 import com.stripe.android.testing.FakeLogger;
@@ -515,7 +516,7 @@ public class StripeTest {
                 CardException.class,
                 () -> defaultStripe.createCardTokenSynchronous(cardParams)
         );
-        assertEquals("Your card number is incorrect.", cardException.getMessage());
+        assertEquals("Your card's number is invalid.", cardException.getMessage());
     }
 
     @Test
@@ -954,6 +955,7 @@ public class StripeTest {
         return new StripeApiRepository(
                 context,
                 () -> publishableKey,
+                RequestSurface.PaymentElement,
                 null,
                 new FakeLogger(),
                 workDispatcher,

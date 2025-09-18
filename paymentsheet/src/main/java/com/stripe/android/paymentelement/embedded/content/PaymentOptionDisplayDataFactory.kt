@@ -8,6 +8,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.model.darkThemeIconUrl
 import com.stripe.android.paymentsheet.model.drawableResourceId
+import com.stripe.android.paymentsheet.model.drawableResourceIdNight
 import com.stripe.android.paymentsheet.model.label
 import com.stripe.android.paymentsheet.model.lightThemeIconUrl
 import com.stripe.android.paymentsheet.model.mandateTextFromPaymentMethodMetadata
@@ -48,6 +49,7 @@ internal class PaymentOptionDisplayDataFactory @Inject constructor(
             imageLoader = {
                 iconLoader.load(
                     drawableResourceId = selection.drawableResourceId,
+                    drawableResourceIdNight = selection.drawableResourceIdNight,
                     lightThemeIconUrl = selection.lightThemeIconUrl,
                     darkThemeIconUrl = selection.darkThemeIconUrl,
                 )

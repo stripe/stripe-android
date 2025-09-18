@@ -38,12 +38,14 @@ import com.stripe.android.uicore.utils.collectAsState
 @Composable
 internal fun UpdateCardScreen(viewModel: UpdateCardScreenViewModel) {
     val state by viewModel.state.collectAsState()
-    when (val interactor = viewModel.interactor) {
+    val interactor by viewModel.interactor.collectAsState()
+    when (val currentInteractor = interactor) {
         null -> LinkLoadingScreen()
         else -> UpdateCardScreenBody(
-            interactor = interactor,
+            interactor = currentInteractor,
             state = state,
             onUpdateClicked = viewModel::onUpdateClicked,
+            onDisabledButtonClicked = viewModel::onDisabledUpdateClicked,
         )
     }
 }
@@ -53,6 +55,7 @@ internal fun UpdateCardScreenBody(
     interactor: EditCardDetailsInteractor,
     state: UpdateCardScreenState,
     onUpdateClicked: () -> Unit,
+    onDisabledButtonClicked: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -85,9 +88,13 @@ internal fun UpdateCardScreenBody(
             modifier = Modifier.padding(vertical = 16.dp),
             label = state.primaryButtonLabel.resolve(),
             state = state.primaryButtonState,
+            allowedDisabledClicks = true,
             onButtonClick = {
                 focusManager.clearFocus()
                 onUpdateClicked()
+            },
+            onDisabledButtonClick = {
+                onDisabledButtonClicked()
             }
         )
     }
@@ -96,7 +103,7 @@ internal fun UpdateCardScreenBody(
 @Preview
 @Composable
 internal fun UpdateCardScreenBodyPreview() {
-    DefaultLinkTheme(darkTheme = false) {
+    DefaultLinkTheme {
         Surface(
             color = LinkTheme.colors.surfacePrimary
         ) {
@@ -148,6 +155,7 @@ internal fun UpdateCardScreenBodyPreview() {
                     processing = false,
                 ),
                 onUpdateClicked = {},
+                onDisabledButtonClicked = {},
             )
         }
     }

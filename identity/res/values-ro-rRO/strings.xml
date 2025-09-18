@@ -205,8 +205,6 @@
   <string name="stripe_test_model_title">În prezent, sunteți în modul de testare</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Încercați din nou</string>
-  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
-  <string name="stripe_unexpected_error_try_again">A apărut o eroare neașteptată -- încercați din nou în câteva secunde</string>
   <!-- Description to upload a photo -->
   <string name="stripe_upload_a_photo">Încărcați o fotografie</string>
   <!-- Title of dialog to upload back of driver license -->

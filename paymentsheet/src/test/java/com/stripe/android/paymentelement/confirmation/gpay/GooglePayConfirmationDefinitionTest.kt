@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultCallback
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
@@ -12,6 +13,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -379,6 +381,41 @@ class GooglePayConfirmationDefinitionTest {
             cardBrandFilterShouldBe = DefaultCardBrandFilter,
         )
 
+    @OptIn(SharedPaymentTokenSessionPreview::class)
+    @Test
+    fun `On 'launch', should create google pay launcher with expected merchant name from seller`() = runTest {
+        RecordingGooglePayPaymentMethodLauncherFactory.test(mock()) {
+            val definition = createGooglePayConfirmationDefinition(factory)
+            val launcher = FakeActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>()
+
+            definition.launch(
+                confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
+                confirmationParameters = CONFIRMATION_PARAMETERS.copy(
+                    initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                        intentConfiguration = PaymentSheet.IntentConfiguration(
+                            sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                                amount = 5000,
+                                currency = "CAD",
+                            ),
+                            sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                                businessName = "My business, Inc.",
+                                networkId = "network_123",
+                                externalId = "external_123"
+                            )
+                        )
+                    )
+                ),
+                arguments = Unit,
+                launcher = launcher,
+            )
+
+            val createGooglePayLauncherCall = createGooglePayPaymentMethodLauncherCalls.awaitItem()
+
+            assertThat(createGooglePayLauncherCall.activityResultLauncher).isEqualTo(launcher)
+            assertThat(createGooglePayLauncherCall.config.merchantName).isEqualTo("My business, Inc.")
+        }
+    }
+
     @Test
     fun `On 'launch', should use payment intent currency code if available`() = runTest {
         val googlePayLauncher = mock<GooglePayPaymentMethodLauncher>()
@@ -621,7 +658,8 @@ class GooglePayConfirmationDefinitionTest {
                     address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 ),
                 cardBrandFilter = DefaultCardBrandFilter,
-            )
+            ),
+            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
         )
 
         private val PAYMENT_INTENT = PaymentIntentFactory.create()

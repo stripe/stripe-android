@@ -53,6 +53,7 @@ private object IdealUiDefinitionFactory : UiDefinitionFactory.RequiresSharedData
             } else {
                 emptyList()
             },
+            termsDisplay = metadata.termsDisplayForType(IdealDefinition.type),
         )
     }
 }

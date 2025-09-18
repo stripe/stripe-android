@@ -11,6 +11,7 @@ import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
@@ -45,6 +46,7 @@ import javax.inject.Named
 @Module(
     includes = [
         StripeRepositoryModule::class,
+        PaymentElementRequestSurfaceModule::class,
     ]
 )
 internal interface ShopPayModule {

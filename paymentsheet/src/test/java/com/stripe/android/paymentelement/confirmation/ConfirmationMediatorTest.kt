@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -444,8 +445,10 @@ class ConfirmationMediatorTest {
     ) {
         val waitForResultLatch = CountDownLatch(1)
 
+        val savedStateHandle = SavedStateHandle()
+
         val mediator = ConfirmationMediator(
-            savedStateHandle = SavedStateHandle(),
+            savedStateHandle = savedStateHandle,
             definition = definition,
         )
 
@@ -505,6 +508,9 @@ class ConfirmationMediatorTest {
 
         assertThat(successResult.intent).isEqualTo(INTENT)
         assertThat(successResult.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
+
+        // The params should be cleared to avoid keeping the PAN around in memory longer than necessary.
+        assertThat(savedStateHandle.get<Any>(mediator.key + ConfirmationMediator.PARAMETERS_POSTFIX_KEY)).isNull()
     }
 
     @Test
@@ -540,6 +546,22 @@ class ConfirmationMediatorTest {
         createLauncherCall.onResult(TestConfirmationDefinition.LauncherResult)
 
         countDownLatch.await(2, TimeUnit.SECONDS)
+    }
+
+    @Test
+    fun `On bootstrap, should call definition bootstrap`() = test {
+        val mediator = ConfirmationMediator(
+            savedStateHandle = SavedStateHandle(),
+            definition = definition,
+        )
+
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
+
+        mediator.bootstrap(paymentMethodMetadata)
+
+        val bootstrapCall = bootstrapCalls.awaitItem()
+
+        assertThat(bootstrapCall.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
     }
 
     private fun test(

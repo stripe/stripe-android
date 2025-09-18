@@ -2,9 +2,14 @@ package com.stripe.android.payments.paymentlauncher
 
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.BuildConfig
+import com.stripe.android.core.utils.StatusBarCompat
 
 /**
  * Factory to create a [PaymentLauncher], initialize all required dependencies.
@@ -25,7 +30,7 @@ class PaymentLauncherFactory(
             PaymentLauncherContract(),
             callback::onPaymentResult
         ),
-        statusBarColor = activity.window?.statusBarColor,
+        statusBarColor = StatusBarCompat.color(activity),
     )
 
     constructor(
@@ -36,8 +41,32 @@ class PaymentLauncherFactory(
             PaymentLauncherContract(),
             callback::onPaymentResult
         ),
-        statusBarColor = fragment.requireActivity().window?.statusBarColor,
+        statusBarColor = StatusBarCompat.color(fragment.requireActivity()),
     )
+
+    constructor(
+        activityResultRegistryOwner: ActivityResultRegistryOwner,
+        lifecycleOwner: LifecycleOwner,
+        statusBarColor: Int?,
+        callback: PaymentLauncher.InternalPaymentResultCallback
+    ) : this(
+        hostActivityLauncher = activityResultRegistryOwner.activityResultRegistry.register(
+            "PaymentLauncherFactory_hostActivityLauncher",
+            PaymentLauncherContract(),
+            callback::onPaymentResult
+        ),
+        statusBarColor = statusBarColor
+    ) {
+        check(lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.INITIALIZED))
+
+        lifecycleOwner.lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onDestroy(owner: LifecycleOwner) {
+                    hostActivityLauncher.unregister()
+                }
+            }
+        )
+    }
 
     fun create(
         publishableKey: String,

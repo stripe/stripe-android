@@ -205,8 +205,6 @@
   <string name="stripe_test_model_title">Naudojatės bandomuoju režimu</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Bandyti dar kartą</string>
-  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
-  <string name="stripe_unexpected_error_try_again">Įvyko netikėta klaida, po kelių sekundžių bandykite dar kartą</string>
   <!-- Description to upload a photo -->
   <string name="stripe_upload_a_photo">Įkelti nuotrauką</string>
   <!-- Title of dialog to upload back of driver license -->

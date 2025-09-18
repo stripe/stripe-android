@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.link.ui.wallet.toDefaultPaymentUI
 import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.ButtonThemes.LinkButtonTheme
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.Locale
@@ -36,6 +37,33 @@ private enum class LinkButtonAppearance(private val appearance: PaymentSheet.App
     }
 }
 
+private enum class LinkButtonThemes(val buttonThemes: PaymentSheet.ButtonThemes) : PaparazziConfigOption {
+
+    DefaultTheme(
+        buttonThemes = PaymentSheet.ButtonThemes(
+            link = LinkButtonTheme.DEFAULT
+        )
+    ),
+
+    WhiteTheme(
+        buttonThemes = PaymentSheet.ButtonThemes(
+            link = LinkButtonTheme.WHITE
+        )
+    );
+
+    override fun initialize() {
+        currentTheme = buttonThemes.link
+    }
+
+    override fun reset() {
+        currentTheme = LinkButtonTheme.DEFAULT
+    }
+
+    companion object {
+        var currentTheme: LinkButtonTheme = LinkButtonTheme.DEFAULT
+    }
+}
+
 internal class LinkButtonScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
@@ -51,6 +79,14 @@ internal class LinkButtonScreenshotTest {
         SystemAppearance.entries,
         FontSize.entries,
         Locale.entries,
+        boxModifier = Modifier
+            .padding(0.dp)
+            .fillMaxWidth(),
+    )
+
+    @get:Rule
+    val themesRule = PaparazziRule(
+        LinkButtonThemes.entries,
         boxModifier = Modifier
             .padding(0.dp)
             .fillMaxWidth(),
@@ -142,6 +178,42 @@ internal class LinkButtonScreenshotTest {
                     ).toDefaultPaymentUI(true)!!,
                 ),
                 enabled = true,
+                onClick = { }
+            )
+        }
+    }
+
+    @Test
+    fun testNewUserWithThemes() {
+        themesRule.snapshot {
+            LinkButton(
+                state = LinkButtonState.Default,
+                enabled = true,
+                theme = LinkButtonThemes.currentTheme,
+                onClick = { }
+            )
+        }
+    }
+
+    @Test
+    fun testExistingUserWithThemes() {
+        themesRule.snapshot {
+            LinkButton(
+                state = LinkButtonState.Email("jaynewstrom@test.com"),
+                enabled = true,
+                theme = LinkButtonThemes.currentTheme,
+                onClick = { }
+            )
+        }
+    }
+
+    @Test
+    fun testDisabledUserWithThemes() {
+        themesRule.snapshot {
+            LinkButton(
+                state = LinkButtonState.Email("jaynewstrom@test.com"),
+                enabled = false,
+                theme = LinkButtonThemes.currentTheme,
                 onClick = { }
             )
         }

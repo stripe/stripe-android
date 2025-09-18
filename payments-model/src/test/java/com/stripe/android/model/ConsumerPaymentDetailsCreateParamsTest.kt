@@ -30,7 +30,6 @@ class ConsumerPaymentDetailsCreateParamsTest {
                     )
                 ),
                 email = "email@stripe.com",
-                active = false,
             ).toParamMap()
         ).isEqualTo(
             mapOf(
@@ -45,7 +44,7 @@ class ConsumerPaymentDetailsCreateParamsTest {
                     "country_code" to "US",
                     "postal_code" to "12345"
                 ),
-                "active" to false,
+                "active" to true,
             )
         )
     }
@@ -75,7 +74,6 @@ class ConsumerPaymentDetailsCreateParamsTest {
                     )
                 ),
                 email = "email@stripe.com",
-                active = false,
             ).toParamMap()
         ).isEqualTo(
             mapOf(
@@ -91,7 +89,7 @@ class ConsumerPaymentDetailsCreateParamsTest {
                     "country_code" to "US",
                     "postal_code" to "12345"
                 ),
-                "active" to false,
+                "active" to true,
             )
         )
     }
@@ -279,7 +277,29 @@ class ConsumerPaymentDetailsCreateParamsTest {
 
         val result = updateParams.toParamMap()
 
-        assertThat(result).containsEntry("is_default", false)
+        assertThat(result).doesNotContainKey("is_default")
+        assertThat(result).containsEntry("exp_month", 3)
+        assertThat(result).containsEntry("exp_year", 2027)
+        assertThat(result).doesNotContainKey("billing_address")
+        assertThat(result).doesNotContainKey("preferred_network")
+    }
+
+    @Test
+    fun `ConsumerPaymentDetailsUpdateParams_toParamMap_withCardFieldsOnly_isDefault`() {
+        val updateParams = ConsumerPaymentDetailsUpdateParams(
+            id = "card_123",
+            isDefault = true,
+            cardPaymentMethodCreateParamsMap = mapOf(
+                "card" to mapOf(
+                    "exp_month" to 3,
+                    "exp_year" to 2027
+                )
+            )
+        )
+
+        val result = updateParams.toParamMap()
+
+        assertThat(result).containsEntry("is_default", true)
         assertThat(result).containsEntry("exp_month", 3)
         assertThat(result).containsEntry("exp_year", 2027)
         assertThat(result).doesNotContainKey("billing_address")

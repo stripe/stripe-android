@@ -29,6 +29,9 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">Shrani moje podatke za hitrejšo izvedbo plačila s storitvijo Link</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_toggle">Ustvarite račun v storitvi Link za hitrejšo izvedbo plačila na spletu</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">Kreditna kartica %1$s</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -113,6 +116,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_off">Z nadaljevanjem se strinjate, da se vaši podatki shranijo za prihodnje nakupe pri %s.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on"><![CDATA[Z nadaljevanjem se strinjate, da se vaši podatki shranijo za prihodnje nakupe pri %s in <link>Link</link>. Strinjate se tudi s <terms>Pogoji</terms> in <privacy>Politiko zasebnosti</privacy> Link.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Z nadaljevanjem se strinjate, da se vaši podatki shranijo za prihodnje nakupe pri %s in <link>Link</link> (glejte <terms>Pogoji</terms> in <privacy>Politika o zasebnost</privacy>).]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Z nadaljevanjem se strinjate, da se vaši podatki shranijo za prihodnje nakupe pri %s in <link>Link</link> glede na povezavo <terms>pogoji</terms> in <privacy>zasebnost</privacy>.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Kartica ni bila posodobljena. Poskusite znova.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -172,6 +179,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_remove_card">Odstrani kartico</string>
   <!-- Title for confirmation alert to remove a card -->
   <string name="stripe_paymentsheet_remove_card_title">Ali želite odstranit kartico?</string>
+  <!-- Description for a confirmation alert indicating to the customer that their payment method will be removed but still available to the merchant for subscriptions -->
+  <string name="stripe_paymentsheet_remove_partial_description">Ta način plačila bo odstranjen, vendar bo še naprej na voljo za naročnine %s.</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Odstrani %s</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
@@ -202,6 +211,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_total_amount">Skupaj: %s</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Blagovna znamka kartice ni bila posodobljena. Poskusite znova.</string>
+  <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
+  <string name="stripe_paynow_confirm_payment">Za dokončanje nakupa potrdite plačilo v svoji banki ali aplikaciji za plačevanje v roku %s.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Nastavi kot privzeti način plačila</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -264,6 +275,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">Prikaži več</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Če nadaljujete postopek, se strinjate z odobritvijo plačil v skladu s temi <terms>pogoji</terms>.]]></string>
+  <!-- Text providing link to terms for bank payments when seller information is provided -->
+  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[Z oddajo naročila %1$s in %2$s se strinjate, da bodo vaši podatki shranjeni pri %3$s za prihodnje nakupe, in se strinjate, da boste odobrili plačila v skladu s <terms>temi pogoji</terms>.]]></string>
+  <!-- Text providing link to terms for bank payments -->
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Z oddajo naročila podjetju %s se strinjate, da boste odobrili plačila v skladu s <terms>temi pogoji</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Plačilo</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
@@ -277,6 +292,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_passthrough_description">Prepustno</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
   <string name="stripe_wallet_pay_another_way">Plačaj na drugačen način</string>
+  <!-- Hint shown when selecting a payment method indicating debit cards are preferred. -->
+  <string name="stripe_wallet_prefer_debit_card_hint">Najverjetneje bodo sprejete debetne kartice.</string>
   <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
   <string name="stripe_wallet_recollect_cvc_error">Iz varnostnih razlogov morate znova vnesti varnostno kodo svoje kartice.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->

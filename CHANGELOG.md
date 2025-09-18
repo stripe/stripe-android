@@ -1,7 +1,67 @@
 # CHANGELOG
 
 ## XX.XX.XX - 20XX-XX-XX
+
+## 21.26.2 - 2025-09-17
+
+### PaymentSheet
+* [ADDED][11571](https://github.com/stripe/stripe-android/pull/11571) Adds support for non-phone two-factor authentication (2FA) methods in Link.
+
+## 21.26.1 - 2025-09-15
+
+### PaymentSheet
+* [FIXED][11568](https://github.com/stripe/stripe-android/pull/11568) Fixed an issue where linking a bank account would fail for Stripe Connect accounts.
+
+## 21.26.0 - 2025-09-08
+
+### PaymentSheet
+* [ADDED][11539](https://github.com/stripe/stripe-android/pull/11539) Added support for [PayNow](https://stripe.com/payment-method/paynow) to PaymentSheet.
+
+## 21.25.0 - 2025-09-02
+
+### Payments
+* [ADDED][11419](https://github.com/stripe/stripe-android/pull/11491) Added `declineCode` parameter to `StripeErrorLocalizations` to allow for handling decline code localizations.
+
+## 21.24.4 - 2025-08-29
+
+### CryptoOnramp
+[Added] Additional APIs and improvements to support the development of the React Native CryptoOnramp SDK.
+
+## 21.24.3 - 2025-08-27
+
+Bug fixes and improvements.
+
+## 21.24.2 - 2025-08-26
+
+Bug fixes and improvements.
+
+## 21.24.1 - 2025-08-25
+
+Bug fixes and improvements.
+
+## 21.24.0 - 2025-08-25
+
+### CardScan
+* [DEPRECATED][11419](https://github.com/stripe/stripe-android/pull/11419) Deprecated stripecardscan Module Public APIs.
+
+### PaymentSheet
+* [ADDED][11398](https://github.com/stripe/stripe-android/pull/11398) Added form validation when adding payment methods in PaymentSheet & Link
+* [ADDED][11437](https://github.com/stripe/stripe-android/pull/11437) Added form validation when updating payment methods in PaymentSheet & Link
+
+## 21.23.1 - 2025-08-18
+
+### PaymentSheet
+* [FIXED][11332](https://github.com/stripe/stripe-android/pull/11332) Added additional spacing between the section title and section content for payment form screens.
+
+## 21.23.0 - 2025-08-12
+### PaymentSheet
+* [ADDED][11303](https://github.com/stripe/stripe-android/pull/11303) You no longer need to set the backend PaymentIntent setup_future_usage or payment_method_options setup_future_usage values to match the client's IntentConfiguration; the client will automatically configure this for you.
+* [CHANGED][11307](https://github.com/stripe/stripe-android/pull/11307) The value of `shouldSavePaymentMethod` passed to `CreateIntentCallback.onCreateIntent` is now `true` if `SetupFutureUse` is `OffSession` or `OnSession` in your `IntentConfiguration`.
+
+## 21.22.2 - 2025-08-11
+### PaymentSheet
 * [ADDED][11179](https://github.com/stripe/stripe-android/pull/11179) More specific error messaging for postal codes
+* [FIXED][11280](https://github.com/stripe/stripe-android/pull/11280) Flows initiated with PaymentSheet.IntentConfiguration now show specific API error messages instead of generic fallback messages
 
 ## 21.22.1 - 2025-08-04
 

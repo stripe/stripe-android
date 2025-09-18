@@ -22,7 +22,9 @@ internal object AmazonPayDefinition : PaymentMethodDefinition {
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf()
 
-    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup(type.code)
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean {
+        return metadata.hasIntentToSetup(type.code) && metadata.mandateAllowed(type)
+    }
 
     override fun uiDefinitionFactory(): UiDefinitionFactory = AmazonPayUiDefinitionFactory
 }
@@ -52,6 +54,7 @@ private object AmazonPayUiDefinitionFactory : UiDefinitionFactory.RequiresShared
         return transformSpecToElements.transform(
             metadata = metadata,
             specs = sharedDataSpec.fields + localLayoutSpecs,
+            termsDisplay = metadata.termsDisplayForType(AmazonPayDefinition.type),
         )
     }
 }
