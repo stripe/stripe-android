@@ -31,6 +31,7 @@ import com.stripe.android.paymentelement.AddressAutocompletePreview
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
+import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
@@ -317,6 +318,23 @@ class PaymentSheet internal constructor(
         fun createIntentCallback(callback: CreateIntentCallback) = apply {
             callbacksBuilder.createIntentCallback(callback)
         }
+
+        /**
+         * @param callback Called with the ConfirmationToken when the customer confirms
+         * the payment or setup. Use this for payment confirmation workflows
+         * where the SDK generates ConfirmationTokens and then continues to confirm the intent.
+         *
+         * The callback should process the ConfirmationToken on the server and return a
+         * CreateIntentResult with the client secret.
+         *
+         * @throws IllegalStateException if CreateIntentCallback is already set.
+         * Callbacks are mutually exclusive - only one should be configured.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun createIntentCallback(callback: CreateIntentWithConfirmationTokenCallback) = apply {
+            callbacksBuilder.createIntentWithConfirmationTokenCallback(callback)
+        }
+
 
         /**
          * @param callback Called when an analytic event occurs.
@@ -3597,6 +3615,19 @@ class PaymentSheet internal constructor(
              */
             fun createIntentCallback(callback: CreateIntentCallback) = apply {
                 callbacksBuilder.createIntentCallback(callback)
+            }
+
+            /**
+             * @param callback Called with the ConfirmationToken result when the customer confirms
+             * the payment or setup. Use this for payment confirmation workflows
+             * where the SDK generates ConfirmationTokens and then continues to confirm the intent.
+             *
+             * @throws IllegalStateException if CreateIntentCallback is already set.
+             * Callbacks are mutually exclusive - only one should be configured.
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun createIntentCallback(callback: CreateIntentWithConfirmationTokenCallback) = apply {
+                callbacksBuilder.createIntentWithConfirmationTokenCallback(callback)
             }
 
             /**
