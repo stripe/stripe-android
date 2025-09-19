@@ -111,9 +111,20 @@ internal data class WalletUiState(
     fun updateWithResponse(
         response: List<LinkPaymentMethod.ConsumerPaymentDetails>,
     ): WalletUiState {
+        val paymentDetails = response.map { it.details }
+
+        val selectedItem = if (selectedItemId != null) {
+            paymentDetails.firstOrNull { it.id == selectedItemId }
+        } else {
+            paymentDetails.firstOrNull { it.isDefault } ?: paymentDetails.firstOrNull()
+        }
+
+        val expanded = (userSetIsExpanded == true) || (selectedItem?.let { !isItemAvailable(it) } == true)
+
         return copy(
-            paymentDetailsList = response.map { it.details },
+            paymentDetailsList = paymentDetails,
             isProcessing = false,
+            userSetIsExpanded = expanded,
             cardBeingUpdated = null
         )
     }
