@@ -87,13 +87,12 @@ internal class InputAddressViewModel @Inject constructor(
                 AddressElementNavigator.AutocompleteEvent.KEY
             )?.collect { event ->
                 val oldAddress = _collectedAddress.value
-                val newAddress = event?.addressDetails
+                val newAddress = event?.address
                 val autocompleteAddress = AddressDetails(
-                    name = oldAddress?.name ?: newAddress?.name,
-                    address = newAddress?.address ?: oldAddress?.address,
-                    phoneNumber = oldAddress?.phoneNumber ?: newAddress?.phoneNumber,
+                    name = oldAddress?.name,
+                    address = newAddress ?: oldAddress?.address,
+                    phoneNumber = oldAddress?.phoneNumber,
                     isCheckboxSelected = oldAddress?.isCheckboxSelected
-                        ?: newAddress?.isCheckboxSelected
                 )
 
                 val values = autocompleteAddress.toIdentifierMap()
@@ -206,14 +205,10 @@ internal class InputAddressViewModel @Inject constructor(
 
                 if (newState.isChecked) {
                     initialBillingAddress?.let {
-                        eventListener?.invoke(AutocompleteAddressInteractor.Event.OnValues(it))
+                        addressFormController.setRawValues(it)
                     }
                 } else {
-                    eventListener?.invoke(
-                        AutocompleteAddressInteractor.Event.OnValues(
-                            values = previousUserInput ?: emptyMap()
-                        )
-                    )
+                    addressFormController.setRawValues(previousUserInput ?: emptyMap())
                 }
             }
         }

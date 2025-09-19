@@ -72,7 +72,7 @@ class AutocompleteAddressController(
     init {
         interactor.register { event ->
             val currentValues = getCurrentValues()
-            val newValues = event.values ?: currentValues
+            val newValues = currentValues.plus(event.values ?: emptyMap())
 
             when (event) {
                 is AutocompleteAddressInteractor.Event.OnValues -> Unit
@@ -90,6 +90,10 @@ class AutocompleteAddressController(
                     createAddressElement(newValues, toAddressInputMode(expandForm, newValues))
             }
         }
+    }
+
+    fun setRawValue(values: Map<IdentifierSpec, String?>) {
+        _addressElementFlow.value = createAddressElement(values, toAddressInputMode(expandForm, values))
     }
 
     private fun createAddressElement(

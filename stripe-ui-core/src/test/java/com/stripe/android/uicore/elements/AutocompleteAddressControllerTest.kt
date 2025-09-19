@@ -349,6 +349,121 @@ class AutocompleteAddressControllerTest {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
+    fun `Should merge with existing values on autocomplete event`() = runTest(UnconfinedTestDispatcher()) {
+        TestAutocompleteAddressInteractor.test(DEFAULT_AUTOCOMPLETE_CONFIG) {
+            val controller = createAutocompleteAddressController(
+                interactor = interactor,
+                nameConfig = AddressFieldConfiguration.REQUIRED,
+                phoneNumberConfig = AddressFieldConfiguration.REQUIRED,
+                emailConfig = AddressFieldConfiguration.REQUIRED,
+                values = mapOf(
+                    IdentifierSpec.Name to "John Doe",
+                    IdentifierSpec.Email to "email@email.com",
+                    IdentifierSpec.Phone to "+11234567890",
+                    IdentifierSpec.Line1 to "123",
+                )
+            )
+
+            val registerCall = registerCalls.awaitItem()
+
+            controller.formFieldValues.test {
+                assertThat(awaitItem()).containsExactly(
+                    IdentifierSpec.Name to FormFieldEntry(value = "John Doe", isComplete = true),
+                    IdentifierSpec.Email to FormFieldEntry(value = "email@email.com", isComplete = true),
+                    IdentifierSpec.PhoneNumberCountry to FormFieldEntry(value = "US", isComplete = true),
+                    IdentifierSpec.Phone to FormFieldEntry(value = "+11234567890", isComplete = true),
+                    IdentifierSpec.Line1 to FormFieldEntry(value = "123", isComplete = true),
+                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
+                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
+                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
+                    IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false),
+                )
+
+                registerCall.onEvent(
+                    AutocompleteAddressInteractor.Event.OnValues(
+                        values = mapOf(
+                            IdentifierSpec.Line1 to "123 Main Street",
+                            IdentifierSpec.Line2 to "456",
+                            IdentifierSpec.City to "San Francisco",
+                            IdentifierSpec.State to "CA",
+                            IdentifierSpec.Country to "US",
+                            IdentifierSpec.PostalCode to "94111",
+                        )
+                    )
+                )
+
+                assertThat(awaitItem()).containsExactly(
+                    IdentifierSpec.Name to FormFieldEntry(value = "John Doe", isComplete = true),
+                    IdentifierSpec.Email to FormFieldEntry(value = "email@email.com", isComplete = true),
+                    IdentifierSpec.PhoneNumberCountry to FormFieldEntry(value = "US", isComplete = true),
+                    IdentifierSpec.Phone to FormFieldEntry(value = "+11234567890", isComplete = true),
+                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Main Street", isComplete = true),
+                    IdentifierSpec.Line2 to FormFieldEntry(value = "456", isComplete = true),
+                    IdentifierSpec.City to FormFieldEntry(value = "San Francisco", isComplete = true),
+                    IdentifierSpec.State to FormFieldEntry(value = "CA", isComplete = true),
+                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
+                    IdentifierSpec.PostalCode to FormFieldEntry(value = "94111", isComplete = true),
+                )
+            }
+        }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `Should override filled values with null when key provided in event`() = runTest(UnconfinedTestDispatcher()) {
+        TestAutocompleteAddressInteractor.test(DEFAULT_AUTOCOMPLETE_CONFIG) {
+            val controller = createAutocompleteAddressController(
+                interactor = interactor,
+                values = mapOf(
+                    IdentifierSpec.Line1 to "123 Main Street",
+                    IdentifierSpec.Line2 to "456",
+                    IdentifierSpec.City to "San Francisco",
+                    IdentifierSpec.State to "CA",
+                    IdentifierSpec.Country to "US",
+                    IdentifierSpec.PostalCode to "94111",
+                )
+            )
+
+            val registerCall = registerCalls.awaitItem()
+
+            controller.formFieldValues.test {
+                assertThat(awaitItem()).containsExactly(
+                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Main Street", isComplete = true),
+                    IdentifierSpec.Line2 to FormFieldEntry(value = "456", isComplete = true),
+                    IdentifierSpec.City to FormFieldEntry(value = "San Francisco", isComplete = true),
+                    IdentifierSpec.State to FormFieldEntry(value = "CA", isComplete = true),
+                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
+                    IdentifierSpec.PostalCode to FormFieldEntry(value = "94111", isComplete = true),
+                )
+
+                registerCall.onEvent(
+                    AutocompleteAddressInteractor.Event.OnValues(
+                        values = mapOf(
+                            IdentifierSpec.Line1 to "123 Main Street",
+                            IdentifierSpec.Line2 to null,
+                            IdentifierSpec.City to null,
+                            IdentifierSpec.State to "CA",
+                            IdentifierSpec.Country to "US",
+                            IdentifierSpec.PostalCode to "94111",
+                        )
+                    )
+                )
+
+                assertThat(awaitItem()).containsExactly(
+                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Main Street", isComplete = true),
+                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
+                    IdentifierSpec.State to FormFieldEntry(value = "CA", isComplete = true),
+                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
+                    IdentifierSpec.PostalCode to FormFieldEntry(value = "94111", isComplete = true),
+                )
+            }
+        }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
     fun `On autocomplete event should update country`() = runTest(UnconfinedTestDispatcher()) {
         TestAutocompleteAddressInteractor.test(
             autocompleteConfig = AutocompleteAddressInteractor.Config(
@@ -841,5 +956,12 @@ class AutocompleteAddressControllerTest {
                 autocompleteConfig = autocompleteConfig,
             )
         }
+    }
+
+    private companion object {
+        val DEFAULT_AUTOCOMPLETE_CONFIG = AutocompleteAddressInteractor.Config(
+            googlePlacesApiKey = "123",
+            autocompleteCountries = setOf("US"),
+        )
     }
 }
