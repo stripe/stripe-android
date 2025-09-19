@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### Connect
+* [Added] Payments and Payouts embedded components are available to use in public preview.
+
 ## 21.26.2 - 2025-09-17
 
 ### PaymentSheet
