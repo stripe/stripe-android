@@ -208,7 +208,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         var timeOfLastRequest = System.currentTimeMillis()
         var stripeIntentResult = refreshOrRetrieveIntent(originalIntent, clientSecret, requestOptions)
 
-        val timeRemaining = getPollingDurationForPaymentMethod(stripeIntentResult) -
+        val timeRemaining = getPollingDurationForPaymentMethod(originalIntent) -
             (System.currentTimeMillis() - initialRetrieveIntentStartTime)
 
         withTimeoutOrNull(timeRemaining) {
@@ -228,9 +228,8 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         return stripeIntentResult
     }
 
-    private fun getPollingDurationForPaymentMethod(stripeIntentResult: Result<StripeIntent>): Long {
-        val stripeIntent = stripeIntentResult.getOrNull()
-        val paymentMethod = stripeIntent?.paymentMethod?.type
+    private fun getPollingDurationForPaymentMethod(stripeIntent: StripeIntent): Long {
+        val paymentMethod = stripeIntent.paymentMethod?.type
         return when (paymentMethod) {
             PaymentMethod.Type.P24,
             PaymentMethod.Type.RevolutPay,

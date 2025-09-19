@@ -10,13 +10,16 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.PaymentIntentFlowResultProcessorTest.Companion.MINIMUM_RETRIEVE_CALLS
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.atLeast
 import org.mockito.kotlin.atLeastOnce
+import org.mockito.kotlin.atMost
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -158,7 +161,16 @@ internal class SetupIntentFlowResultProcessorTest {
 
             verify(
                 mockStripeRepository,
-                atLeastOnce()
+                atLeast(MINIMUM_RETRIEVE_CALLS)
+            ).retrieveSetupIntent(
+                eq(clientSecret),
+                eq(requestOptions),
+                eq(PaymentFlowResultProcessor.EXPAND_PAYMENT_METHOD)
+            )
+
+            verify(
+                mockStripeRepository,
+                atMost(getMaxNumberOfInvocations(PaymentMethodFactory.card()))
             ).retrieveSetupIntent(
                 eq(clientSecret),
                 eq(requestOptions),
@@ -178,9 +190,10 @@ internal class SetupIntentFlowResultProcessorTest {
     @Test
     fun `Stops polling after max retries when encountering a Swish payment that still requires action`() =
         runTest(testDispatcher) {
+            val paymentMethod = PaymentMethodFactory.swish()
             val requiresActionIntent = SetupIntentFixtures.SI_SUCCEEDED.copy(
                 status = StripeIntent.Status.RequiresAction,
-                paymentMethod = PaymentMethodFactory.swish(),
+                paymentMethod = paymentMethod,
                 paymentMethodTypes = listOf("card", "swish"),
             )
 
@@ -205,7 +218,23 @@ internal class SetupIntentFlowResultProcessorTest {
 
             assertThat(result).isEqualTo(expectedResult)
 
-            verify(mockStripeRepository, atLeastOnce()).retrieveSetupIntent(any(), any(), any())
+            verify(
+                mockStripeRepository,
+                atLeast(MINIMUM_RETRIEVE_CALLS)
+            ).retrieveSetupIntent(
+                any(),
+                any(),
+                any(),
+            )
+
+            verify(
+                mockStripeRepository,
+                atMost(getMaxNumberOfInvocations(paymentMethod))
+            ).retrieveSetupIntent(
+                any(),
+                any(),
+                any(),
+            )
         }
 
     @Test
@@ -283,9 +312,10 @@ internal class SetupIntentFlowResultProcessorTest {
     @Test
     fun `Stops polling after max retries when encountering a Amazon Pay payment that still requires action`() =
         runTest(testDispatcher) {
+            val paymentMethod = PaymentMethodFactory.amazonPay()
             val requiresActionIntent = SetupIntentFixtures.SI_SUCCEEDED.copy(
                 status = StripeIntent.Status.RequiresAction,
-                paymentMethod = PaymentMethodFactory.amazonPay(),
+                paymentMethod = paymentMethod,
                 paymentMethodTypes = listOf("card", "amazon_pay"),
             )
 
@@ -310,7 +340,23 @@ internal class SetupIntentFlowResultProcessorTest {
 
             assertThat(result).isEqualTo(expectedResult)
 
-            verify(mockStripeRepository, atLeastOnce()).retrieveSetupIntent(any(), any(), any())
+            verify(
+                mockStripeRepository,
+                atLeast(MINIMUM_RETRIEVE_CALLS)
+            ).retrieveSetupIntent(
+                any(),
+                any(),
+                any(),
+            )
+
+            verify(
+                mockStripeRepository,
+                atMost(getMaxNumberOfInvocations(paymentMethod))
+            ).retrieveSetupIntent(
+                any(),
+                any(),
+                any(),
+            )
         }
 
     @Test
@@ -351,9 +397,10 @@ internal class SetupIntentFlowResultProcessorTest {
     @Test
     fun `Stops polling after max retries when encountering a Revolut Pay payment that still requires action`() =
         runTest(testDispatcher) {
+            val paymentMethod = PaymentMethodFactory.revolutPay()
             val requiresActionIntent = SetupIntentFixtures.SI_SUCCEEDED.copy(
                 status = StripeIntent.Status.RequiresAction,
-                paymentMethod = PaymentMethodFactory.revolutPay(),
+                paymentMethod = paymentMethod,
                 paymentMethodTypes = listOf("card", "revolut_pay"),
             )
 
@@ -378,7 +425,23 @@ internal class SetupIntentFlowResultProcessorTest {
 
             assertThat(result).isEqualTo(expectedResult)
 
-            verify(mockStripeRepository, atLeastOnce()).retrieveSetupIntent(any(), any(), any())
+            verify(
+                mockStripeRepository,
+                atLeast(MINIMUM_RETRIEVE_CALLS)
+            ).retrieveSetupIntent(
+                any(),
+                any(),
+                any(),
+            )
+
+            verify(
+                mockStripeRepository,
+                atMost(getMaxNumberOfInvocations(paymentMethod))
+            ).retrieveSetupIntent(
+                any(),
+                any(),
+                any(),
+            )
         }
 
     @Test

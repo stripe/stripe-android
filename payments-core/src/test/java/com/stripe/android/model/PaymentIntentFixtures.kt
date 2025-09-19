@@ -1998,7 +1998,10 @@ internal object PaymentIntentFixtures {
               "timestamp": "1634159381"
             }
           },
-          "payment_method": "pm_1JkEhjBNJ02ErVOjUZ3ekLUL",
+          "payment_method": {
+            "id": "pm_1JkEhjBNJ02ErVOjUZ3ekLUL",
+            "type": "wechat_pay"
+          },
           "payment_method_types": [
             "wechat_pay"
           ],
