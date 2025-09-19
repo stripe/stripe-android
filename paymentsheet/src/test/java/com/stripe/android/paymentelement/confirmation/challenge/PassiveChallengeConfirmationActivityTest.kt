@@ -168,7 +168,7 @@ internal class PassiveChallengeConfirmationActivityTest {
                             optionsParams = SAVED_CONFIRMATION_OPTION.optionsParams,
                             originatedFromWallet = false,
                             passiveCaptchaParams = null,
-                            hCaptchaToken = "test_token"
+                            hCaptchaToken = "test_token",
                         )
                     )
 
@@ -233,7 +233,7 @@ internal class PassiveChallengeConfirmationActivityTest {
             optionsParams = null,
             originatedFromWallet = false,
             passiveCaptchaParams = PASSIVE_CAPTCHA_PARAMS,
-            hCaptchaToken = null
+            hCaptchaToken = null,
         )
 
         val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(

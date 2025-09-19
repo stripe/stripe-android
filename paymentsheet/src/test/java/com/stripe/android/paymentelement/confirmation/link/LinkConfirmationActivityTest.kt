@@ -122,7 +122,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                         paymentMethod = paymentMethod,
                         optionsParams = null,
                         originatedFromWallet = true,
-                        passiveCaptchaParams = null
+                        passiveCaptchaParams = null,
                     )
                 )
 

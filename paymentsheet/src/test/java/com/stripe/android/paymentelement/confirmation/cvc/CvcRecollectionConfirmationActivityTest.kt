@@ -73,7 +73,7 @@ internal class CvcRecollectionConfirmationActivityTest {
                     PaymentMethodConfirmationOption.Saved(
                         paymentMethod = PAYMENT_METHOD,
                         optionsParams = PaymentMethodOptionsParams.Card(cvc = "444"),
-                        passiveCaptchaParams = null
+                        passiveCaptchaParams = null,
                     )
                 )
 
@@ -106,7 +106,7 @@ internal class CvcRecollectionConfirmationActivityTest {
                     PaymentMethodConfirmationOption.Saved(
                         paymentMethod = PAYMENT_METHOD,
                         optionsParams = null,
-                        passiveCaptchaParams = null
+                        passiveCaptchaParams = null,
                     )
                 )
 
@@ -170,7 +170,7 @@ internal class CvcRecollectionConfirmationActivityTest {
         val CONFIRMATION_OPTION = PaymentMethodConfirmationOption.Saved(
             paymentMethod = PAYMENT_METHOD,
             optionsParams = null,
-            passiveCaptchaParams = null
+            passiveCaptchaParams = null,
         )
 
         val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(

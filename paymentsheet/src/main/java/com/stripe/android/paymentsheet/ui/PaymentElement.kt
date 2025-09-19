@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentMethod.Type.Link
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCode
@@ -48,6 +49,7 @@ internal fun PaymentElement(
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
     modifier: Modifier = Modifier,
     onInteractionEvent: () -> Unit = {},
+    clientAttributionMetadata: ClientAttributionMetadata,
 ) {
     val context = LocalContext.current
     val imageLoader = remember {
@@ -138,7 +140,8 @@ internal fun FormElement(
                     previouslyCompletedUSBankAccountForm = true
                 },
                 modifier = Modifier.padding(horizontalPaddingValues),
-                enabled = enabled
+                enabled = enabled,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         } else {
             PaymentMethodForm(

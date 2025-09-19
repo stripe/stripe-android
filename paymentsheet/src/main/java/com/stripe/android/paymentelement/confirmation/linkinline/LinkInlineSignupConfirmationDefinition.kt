@@ -170,7 +170,8 @@ internal class LinkInlineSignupConfirmationDefinition(
                 } ?: ConfirmPaymentIntentParams.SetupFutureUsage.Blank
             ),
             originatedFromWallet = true,
-            passiveCaptchaParams = passiveCaptchaParams
+            passiveCaptchaParams = passiveCaptchaParams,
+            clientAttributionMetadata = null, // TODO: this should have client attribution metadata I think?
         )
     }
 

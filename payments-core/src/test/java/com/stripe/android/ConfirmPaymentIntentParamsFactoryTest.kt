@@ -128,7 +128,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 setAsDefault = true
             ),
             intentConfigSetupFutureUsage = null,
-            radarOptions = null
+            radarOptions = null,
         )
         assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isTrue()
     }
@@ -144,7 +144,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 setAsDefault = false
             ),
             intentConfigSetupFutureUsage = null,
-            radarOptions = null
+            radarOptions = null,
         )
         assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isFalse()
     }
@@ -184,7 +184,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 setAsDefault = true
             ),
             intentConfigSetupFutureUsage = null,
-            radarOptions = null
+            radarOptions = null,
         )
         assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isTrue()
     }
@@ -198,7 +198,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 setAsDefault = false
             ),
             intentConfigSetupFutureUsage = null,
-            radarOptions = null
+            radarOptions = null,
         )
         assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isFalse()
     }
@@ -225,7 +225,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
             optionsParams = null,
             extraParams = null,
             intentConfigSetupFutureUsage = null,
-            radarOptions = null
+            radarOptions = null,
         )
         assertThat(result.shipping).isEqualTo(shippingDetails)
     }
@@ -270,7 +270,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
             ),
             extraParams = null,
             intentConfigSetupFutureUsage = null,
-            radarOptions = null
+            radarOptions = null,
         )
 
         assertThat(result.paymentMethodOptions).isEqualTo(
@@ -295,7 +295,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
             ),
             extraParams = null,
             intentConfigSetupFutureUsage = null,
-            radarOptions = null
+            radarOptions = null,
         )
 
         assertThat(result.paymentMethodOptions).isEqualTo(
@@ -323,7 +323,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
             ),
             extraParams = null,
             intentConfigSetupFutureUsage = null,
-            radarOptions = null
+            radarOptions = null,
         )
 
         assertThat(result.paymentMethodOptions).isEqualTo(
@@ -347,7 +347,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
             optionsParams = null,
             extraParams = null,
             intentConfigSetupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
-            radarOptions = null
+            radarOptions = null,
         )
 
         assertThat(result.setupFutureUsage).isEqualTo(
@@ -443,7 +443,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
             optionsParams = null,
             extraParams = null,
             intentConfigSetupFutureUsage = intentConfigSetupFutureUsage,
-            radarOptions = null
+            radarOptions = null,
         )
 
         assertThat(result).isInstanceOf(ConfirmPaymentIntentParams::class.java)
@@ -487,7 +487,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
             optionsParams = null,
             extraParams = null,
             intentConfigSetupFutureUsage = null,
-            radarOptions = radarOptions
+            radarOptions = radarOptions,
         )
 
         assertThat(result.radarOptions).isEqualTo(radarOptions)

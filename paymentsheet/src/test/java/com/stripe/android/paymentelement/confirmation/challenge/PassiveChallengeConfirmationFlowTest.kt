@@ -65,7 +65,7 @@ internal class PassiveChallengeConfirmationFlowTest {
                 optionsParams = SAVED_CONFIRMATION_OPTION.optionsParams,
                 originatedFromWallet = false,
                 passiveCaptchaParams = null,
-                hCaptchaToken = "test_token"
+                hCaptchaToken = "test_token",
             ),
             parameters = CONFIRMATION_PARAMETERS,
         ),
@@ -101,7 +101,7 @@ internal class PassiveChallengeConfirmationFlowTest {
                 optionsParams = SAVED_CONFIRMATION_OPTION.optionsParams,
                 originatedFromWallet = false,
                 passiveCaptchaParams = null,
-                hCaptchaToken = null
+                hCaptchaToken = null,
             ),
             parameters = CONFIRMATION_PARAMETERS,
         ),
@@ -127,7 +127,7 @@ internal class PassiveChallengeConfirmationFlowTest {
             optionsParams = null,
             originatedFromWallet = false,
             passiveCaptchaParams = PASSIVE_CAPTCHA_PARAMS,
-            hCaptchaToken = null,
+            hCaptchaToken = null,,
         )
 
         private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(

@@ -500,7 +500,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
             optionsParams = null,
             originatedFromWallet = false,
             passiveCaptchaParams = PASSIVE_CAPTCHA_PARAMS,
-            hCaptchaToken = null,
+            hCaptchaToken = null,,
         )
 
         private val launcherArgs = PassiveChallengeActivityContract.Args(

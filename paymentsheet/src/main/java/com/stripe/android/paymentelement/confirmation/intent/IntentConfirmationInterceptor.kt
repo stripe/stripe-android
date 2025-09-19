@@ -11,6 +11,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.utils.errorMessage
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -108,6 +109,7 @@ internal interface IntentConfirmationInterceptor {
         paymentMethodExtraParams: PaymentMethodExtraParams? = null,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         hCaptchaToken: String?,
+        clientAttributionMetadata: ClientAttributionMetadata?,
     ): NextStep
 
     companion object {
@@ -229,7 +231,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        hCaptchaToken: String?
+        hCaptchaToken: String?,
+        clientAttributionMetadata: ClientAttributionMetadata?,
     ): NextStep {
         return when (initializationMode) {
             is PaymentElementLoader.InitializationMode.DeferredIntent -> {
@@ -262,7 +265,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     isDeferred = false,
                     intentConfigSetupFutureUsage = null,
-                    hCaptchaToken = hCaptchaToken
+                    hCaptchaToken = hCaptchaToken,
+                    clientAttributionMetadata = clientAttributionMetadata,
                 )
             }
 
@@ -276,7 +280,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     isDeferred = false,
                     intentConfigSetupFutureUsage = null,
-                    hCaptchaToken = hCaptchaToken
+                    hCaptchaToken = hCaptchaToken,
+                    clientAttributionMetadata = clientAttributionMetadata,
                 )
             }
         }
@@ -579,7 +584,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     isDeferred = true,
                     intentConfigSetupFutureUsage = intentConfiguration
                         .mode.setupFutureUse?.toConfirmParamsSetupFutureUsage(),
-                    hCaptchaToken = hCaptchaToken
+                    hCaptchaToken = hCaptchaToken,
+                    clientAttributionMetadata = null,
                 )
             }
         }.getOrElse { error ->
@@ -622,7 +628,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodExtraParams: PaymentMethodExtraParams?,
         isDeferred: Boolean,
         intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
-        hCaptchaToken: String?
+        hCaptchaToken: String?,
+        clientAttributionMetadata: ClientAttributionMetadata?
     ): NextStep {
         val factory = ConfirmStripeIntentParamsFactory.createFactory(
             clientSecret = clientSecret,
@@ -639,7 +646,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             optionsParams = paymentMethodOptionsParams,
             extraParams = paymentMethodExtraParams,
             intentConfigSetupFutureUsage = intentConfigSetupFutureUsage,
-            radarOptions = hCaptchaToken?.let { RadarOptions(it) }
+            radarOptions = hCaptchaToken?.let { RadarOptions(it) },
+            clientAttributionMetadata = clientAttributionMetadata,
         )
         return NextStep.Confirm(
             confirmParams = confirmParams,

@@ -237,9 +237,10 @@ class ConfirmSetupIntentParamsTest {
     fun toParamMap_withRadarOptions_shouldCreateExpectedMap() {
         val radarOptions = RadarOptions(hCaptchaToken = "test_token")
         val params = ConfirmSetupIntentParams(
-            paymentMethodId = "pm_123",
             clientSecret = CLIENT_SECRET,
-            radarOptions = radarOptions
+            paymentMethodId = "pm_123",
+            radarOptions = radarOptions,
+            clientAttributionMetadata = null
         ).toParamMap()
 
         val radarOptionsMap = params["radar_options"] as? Map<*, *>

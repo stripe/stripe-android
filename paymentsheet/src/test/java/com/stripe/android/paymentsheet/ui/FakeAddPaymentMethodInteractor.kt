@@ -62,9 +62,9 @@ internal class FakeAddPaymentMethodInteractor(
                 ) ?: emptyList(),
                 paymentSelection = null,
                 processing = false,
-                usBankAccountFormArguments = mock(),
                 validating = isValidating,
                 incentive = null,
+                usBankAccountFormArguments = mock(),,
             )
         }
     }

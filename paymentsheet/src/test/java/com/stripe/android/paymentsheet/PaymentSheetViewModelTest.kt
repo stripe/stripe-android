@@ -442,7 +442,7 @@ internal class PaymentSheetViewModelTest {
                 paymentMethod = CARD_PAYMENT_METHOD,
                 optionsParams = optionsParams,
                 originatedFromWallet = false,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
             )
         )
         assertThat(arguments.intent).isEqualTo(stripeIntent)
@@ -517,7 +517,7 @@ internal class PaymentSheetViewModelTest {
                 paymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT,
                 optionsParams = optionsParams,
                 originatedFromWallet = false,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
             )
         )
         assertThat(arguments.intent).isEqualTo(stripeIntent)
@@ -545,7 +545,7 @@ internal class PaymentSheetViewModelTest {
                     paymentMethod = SEPA_DEBIT_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false,
-                    passiveCaptchaParams = null
+                    passiveCaptchaParams = null,
                 )
             )
             assertThat(arguments.intent).isEqualTo(stripeIntent)
@@ -1016,7 +1016,7 @@ internal class PaymentSheetViewModelTest {
             PaymentMethodConfirmationOption.Saved(
                 paymentMethod = CARD_PAYMENT_METHOD,
                 optionsParams = null,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
             )
         )
 
@@ -1146,7 +1146,7 @@ internal class PaymentSheetViewModelTest {
             PaymentMethodConfirmationOption.Saved(
                 paymentMethod = CARD_PAYMENT_METHOD,
                 optionsParams = null,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
             )
         )
 
@@ -2131,7 +2131,7 @@ internal class PaymentSheetViewModelTest {
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false,
-                    passiveCaptchaParams = null
+                    passiveCaptchaParams = null,
                 )
             )
 
@@ -2170,7 +2170,7 @@ internal class PaymentSheetViewModelTest {
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false,
-                    passiveCaptchaParams = null
+                    passiveCaptchaParams = null,
                 )
             )
 
@@ -2269,7 +2269,7 @@ internal class PaymentSheetViewModelTest {
             PaymentMethodConfirmationOption.Saved(
                 paymentMethod = paymentMethod,
                 optionsParams = null,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
             )
         )
 
@@ -2304,7 +2304,7 @@ internal class PaymentSheetViewModelTest {
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false,
-                    passiveCaptchaParams = null
+                    passiveCaptchaParams = null,
                 )
             )
 
@@ -2339,7 +2339,7 @@ internal class PaymentSheetViewModelTest {
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false,
-                    passiveCaptchaParams = null
+                    passiveCaptchaParams = null,
                 )
             )
 
@@ -2374,7 +2374,7 @@ internal class PaymentSheetViewModelTest {
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false,
-                    passiveCaptchaParams = null
+                    passiveCaptchaParams = null,
                 )
             )
 
@@ -3232,7 +3232,7 @@ internal class PaymentSheetViewModelTest {
                 paymentMethod = CARD_PAYMENT_METHOD,
                 optionsParams = null,
                 originatedFromWallet = false,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
             )
         )
     }
@@ -3253,7 +3253,7 @@ internal class PaymentSheetViewModelTest {
                 paymentMethod = CARD_PAYMENT_METHOD,
                 optionsParams = optionsParams,
                 originatedFromWallet = false,
-                passiveCaptchaParams = passiveCaptchaParams
+                passiveCaptchaParams = passiveCaptchaParams,
             )
         )
     }

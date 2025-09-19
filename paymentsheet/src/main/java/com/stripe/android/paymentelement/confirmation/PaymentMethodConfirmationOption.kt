@@ -1,6 +1,8 @@
 package com.stripe.android.paymentelement.confirmation
 
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PassiveCaptchaParams
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -11,15 +13,16 @@ internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.
 
     @Parcelize
     data class Saved(
-        val paymentMethod: com.stripe.android.model.PaymentMethod,
+        val paymentMethod: PaymentMethod,
         val optionsParams: PaymentMethodOptionsParams?,
         val originatedFromWallet: Boolean = false,
         override val passiveCaptchaParams: PassiveCaptchaParams?,
         val hCaptchaToken: String? = null,
+        val clientAttributionMetadata: ClientAttributionMetadata?,
     ) : PaymentMethodConfirmationOption
 
     @Parcelize
-    data class New(
+    data class New constructor(
         val createParams: PaymentMethodCreateParams,
         val optionsParams: PaymentMethodOptionsParams?,
         val extraParams: PaymentMethodExtraParams?,

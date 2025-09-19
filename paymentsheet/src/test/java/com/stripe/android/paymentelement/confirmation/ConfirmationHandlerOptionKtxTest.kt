@@ -55,7 +55,7 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.New(
@@ -78,7 +78,7 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.New(
@@ -101,7 +101,7 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.New(
@@ -135,7 +135,7 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             )
         ).isEqualTo(
             BacsConfirmationOption(
@@ -156,7 +156,7 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.New(
@@ -182,7 +182,7 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
@@ -190,7 +190,7 @@ class ConfirmationHandlerOptionKtxTest {
                 optionsParams = PaymentMethodOptionsParams.Card(
                     cvc = "505"
                 ),
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             )
         )
     }
@@ -215,7 +215,7 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             )
         ).isEqualTo(
             ExternalPaymentMethodConfirmationOption(
@@ -236,7 +236,7 @@ class ConfirmationHandlerOptionKtxTest {
             PaymentSelection.GooglePay.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             )
         ).isNull()
     }
@@ -258,7 +258,7 @@ class ConfirmationHandlerOptionKtxTest {
                     .build()
                     .asCommonConfiguration(),
                 linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             )
         ).isEqualTo(
             GooglePayConfirmationOption(
@@ -285,7 +285,7 @@ class ConfirmationHandlerOptionKtxTest {
             PaymentSelection.Link().toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             )
         ).isNull()
     }
@@ -296,7 +296,7 @@ class ConfirmationHandlerOptionKtxTest {
             PaymentSelection.Link().toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = LINK_CONFIGURATION,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             )
         ).isEqualTo(
             LinkConfirmationOption(
@@ -315,7 +315,7 @@ class ConfirmationHandlerOptionKtxTest {
             ).toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = LINK_CONFIGURATION,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             )
         ).isEqualTo(
             LinkConfirmationOption(
@@ -332,7 +332,7 @@ class ConfirmationHandlerOptionKtxTest {
             PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             )
         ).isNull()
     }
@@ -368,13 +368,13 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
-                optionsParams = null,
                 paymentMethod = expectedPaymentMethod,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                optionsParams = null,
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             )
         )
     }
@@ -389,13 +389,13 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
-                optionsParams = null,
                 paymentMethod = expectedPaymentMethod,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                optionsParams = null,
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             )
         )
     }
@@ -410,7 +410,7 @@ class ConfirmationHandlerOptionKtxTest {
         val confirmationOption = linkInlinePaymentSelection.toConfirmationOption(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             linkConfiguration = LINK_CONFIGURATION,
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
         )
 
         assertThat(confirmationOption).isInstanceOf<LinkInlineSignupConfirmationOption>()
@@ -435,7 +435,7 @@ class ConfirmationHandlerOptionKtxTest {
                 .build()
                 .asCommonConfiguration(),
             linkConfiguration = null,
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
         )
 
         assertThat(confirmationOption).isNull()
@@ -465,7 +465,7 @@ class ConfirmationHandlerOptionKtxTest {
                 .build()
                 .asCommonConfiguration(),
             linkConfiguration = null,
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
         )
 
         assertThat(confirmationOption).isInstanceOf<CustomPaymentMethodConfirmationOption>()
@@ -481,7 +481,7 @@ class ConfirmationHandlerOptionKtxTest {
             PaymentSelection.ShopPay.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             )
         ).isNull()
     }
@@ -495,7 +495,7 @@ class ConfirmationHandlerOptionKtxTest {
                     customer = null
                 ),
                 linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             )
         ).isNull()
     }
@@ -515,7 +515,7 @@ class ConfirmationHandlerOptionKtxTest {
                         shopPayConfiguration = SHOP_PAY_CONFIGURATION
                     ),
                 linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             )
         ).isEqualTo(
             ShopPayConfirmationOption(
@@ -544,7 +544,7 @@ class ConfirmationHandlerOptionKtxTest {
                 .toConfirmationOption(
                     configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                     linkConfiguration = LINK_CONFIGURATION,
-                    passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                    passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
                 )
         ).isEqualTo(
             LinkInlineSignupConfirmationOption(

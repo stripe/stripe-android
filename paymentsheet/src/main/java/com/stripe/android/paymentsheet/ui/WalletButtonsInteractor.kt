@@ -282,7 +282,8 @@ internal class DefaultWalletButtonsInteractor(
         val confirmationOption = selection.toConfirmationOption(
             configuration = arguments.configuration,
             linkConfiguration = arguments.paymentMethodMetadata.linkState?.configuration,
-            passiveCaptchaParams = arguments.paymentMethodMetadata.passiveCaptchaParams
+            passiveCaptchaParams = arguments.paymentMethodMetadata.passiveCaptchaParams,
+            clientAttributionMetadata = null, // TODO: this should be sent in the create pm call instead I think
         ) ?: return null
 
         return ConfirmationHandler.Args(

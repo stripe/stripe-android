@@ -51,7 +51,7 @@ class InitialValuesFactoryTest {
                 "cvc" to "111"
             )
         ),
-        productUsage = emptySet(),
+        productUsage = emptySet(),,
     )
 
     @Test

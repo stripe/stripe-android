@@ -1224,7 +1224,7 @@ internal class DefaultFlowControllerTest {
             PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
                 optionsParams = null,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
             )
         )
     }
@@ -1286,7 +1286,7 @@ internal class DefaultFlowControllerTest {
             PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
                 optionsParams = null,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
             )
         )
     }
@@ -1651,7 +1651,7 @@ internal class DefaultFlowControllerTest {
             PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
             )
         )
         assertThat(arguments.initializationMode)
@@ -2310,7 +2310,7 @@ internal class DefaultFlowControllerTest {
                     cvc = "505"
                 ),
                 originatedFromWallet = false,
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
             )
         )
         assertThat(arguments.shippingDetails).isEqualTo(shippingDetails)

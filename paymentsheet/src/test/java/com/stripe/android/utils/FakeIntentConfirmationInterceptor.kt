@@ -3,6 +3,7 @@ package com.stripe.android.utils
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentMethod
@@ -82,6 +83,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
         paymentMethodExtraParams: PaymentMethodExtraParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         hCaptchaToken: String?,
+        clientAttributionMetadata: ClientAttributionMetadata?,
     ): IntentConfirmationInterceptor.NextStep {
         _calls.add(
             InterceptCall.WithExistingPaymentMethod(

@@ -54,7 +54,8 @@ constructor(
      *
      * The values of the map must be any of the types supported by [android.os.Parcel.writeValue].
      */
-    private val overrideParamMap: Map<String, @RawValue Any>? = null
+    private val overrideParamMap: Map<String, @RawValue Any>? = null,
+    val clientAttributionMetadata: ClientAttributionMetadata? = null
 ) : StripeParamsModel, Parcelable {
 
     internal constructor(
@@ -311,6 +312,8 @@ constructor(
             radarOptions?.let {
                 mapOf(PARAM_RADAR_OPTIONS to it.toParamMap())
             }.orEmpty()
+        ).plus(
+            clientAttributionMetadata?.toParamMap().orEmpty()
         )
     }
 
@@ -1370,9 +1373,9 @@ constructor(
             return PaymentMethodCreateParams(
                 code = PaymentMethod.Type.Link.code,
                 requiresMandate = requiresMandate,
-                overrideParamMap = emptyMap(),
                 allowRedisplay = allowRedisplay,
                 productUsage = productUsage,
+                overrideParamMap = emptyMap(),
             )
         }
 
@@ -1396,14 +1399,16 @@ constructor(
             overrideParamMap: Map<String, @RawValue Any>?,
             productUsage: Set<String>,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+            clientAttributionMetadata: ClientAttributionMetadata?,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 code = code,
-                billingDetails = billingDetails,
                 requiresMandate = requiresMandate,
+                billingDetails = billingDetails,
                 allowRedisplay = allowRedisplay,
+                productUsage = productUsage,
                 overrideParamMap = overrideParamMap,
-                productUsage = productUsage
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         }
 

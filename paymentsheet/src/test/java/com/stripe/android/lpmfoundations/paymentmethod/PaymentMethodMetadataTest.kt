@@ -1105,7 +1105,7 @@ internal class PaymentMethodMetadataTest {
                 configuration = createLinkConfiguration(),
                 loginState = LinkState.LoginState.LoggedOut,
             ),
-            customerMetadata = DEFAULT_CUSTOMER_METADATA
+            customerMetadata = DEFAULT_CUSTOMER_METADATA,
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -1147,24 +1147,25 @@ internal class PaymentMethodMetadataTest {
             customerMetadata = getDefaultCustomerMetadata(
                 isPaymentMethodSetAsDefaultEnabled = false
             ),
-            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             isGooglePayReady = false,
             linkConfiguration = PaymentSheet.LinkConfiguration(),
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             linkMode = null,
             linkState = LinkState(
                 signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
                 configuration = createLinkConfiguration(),
                 loginState = LinkState.LoginState.LoggedOut,
             ),
-            cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
-            elementsSessionId = "session_1234",
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+            cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
+            elementsSessionId = "session_1234",
             shopPayConfiguration = null,
             termsDisplay = emptyMap(),
             forceSetupFutureUseBehaviorAndNewMandate = false,
             passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             openCardScanAutomatically = false,
+            clientAttributionMetadata = null,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1230,19 +1231,20 @@ internal class PaymentMethodMetadataTest {
                 isPaymentMethodSetAsDefaultEnabled = false
             ),
             isGooglePayReady = true,
-            paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             linkConfiguration = PaymentSheet.LinkConfiguration(),
-            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+            paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             linkMode = null,
             linkState = null,
-            cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+            cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             elementsSessionId = "session_1234",
             shopPayConfiguration = null,
             termsDisplay = emptyMap(),
             forceSetupFutureUseBehaviorAndNewMandate = false,
             passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             openCardScanAutomatically = false,
+            clientAttributionMetadata = null,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -1314,7 +1316,7 @@ internal class PaymentMethodMetadataTest {
             externalPaymentMethodSpecs = listOf(),
             isGooglePayReady = false,
             linkState = null,
-            customerMetadata = DEFAULT_CUSTOMER_METADATA
+            customerMetadata = DEFAULT_CUSTOMER_METADATA,
         )
     }
 
@@ -2067,7 +2069,7 @@ internal class PaymentMethodMetadataTest {
             } else {
                 null
             },
-            customerMetadata = DEFAULT_CUSTOMER_METADATA
+            customerMetadata = DEFAULT_CUSTOMER_METADATA,
         )
 
         assertThat(metadata.availableWallets)

@@ -238,7 +238,7 @@ internal sealed class PaymentSelection : Parcelable {
         }
 
         @Parcelize
-        data class USBankAccount(
+        data class USBankAccount constructor(
             val label: String,
             @DrawableRes val iconResource: Int,
             val input: Input,

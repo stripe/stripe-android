@@ -354,10 +354,11 @@ class ConfirmPaymentIntentParamsTest {
         assertThat(
             ConfirmPaymentIntentParams(
                 paymentMethodId = "pm_123",
+                clientSecret = CLIENT_SECRET,
                 paymentMethodOptions = PaymentMethodOptionsParams.Card(
                     cvc = "123"
                 ),
-                clientSecret = CLIENT_SECRET
+                clientAttributionMetadata = null
             ).toParamMap()
         ).isEqualTo(
             mapOf(
@@ -375,10 +376,11 @@ class ConfirmPaymentIntentParamsTest {
         assertThat(
             ConfirmPaymentIntentParams(
                 paymentMethodId = "pm_123",
+                clientSecret = CLIENT_SECRET,
                 paymentMethodOptions = PaymentMethodOptionsParams.Blik(
                     code = blikCode
                 ),
-                clientSecret = CLIENT_SECRET
+                clientAttributionMetadata = null
             ).toParamMap()
         ).isEqualTo(
             mapOf(
@@ -400,10 +402,11 @@ class ConfirmPaymentIntentParamsTest {
         assertThat(
             ConfirmPaymentIntentParams(
                 paymentMethodId = "pm_123",
+                clientSecret = CLIENT_SECRET,
                 paymentMethodOptions = PaymentMethodOptionsParams.WeChatPay(
                     appId = appId
                 ),
-                clientSecret = CLIENT_SECRET
+                clientAttributionMetadata = null
             ).toParamMap()
         ).isEqualTo(
             mapOf(
@@ -425,10 +428,11 @@ class ConfirmPaymentIntentParamsTest {
         assertThat(
             ConfirmPaymentIntentParams(
                 paymentMethodId = "pm_123",
+                clientSecret = CLIENT_SECRET,
                 paymentMethodOptions = PaymentMethodOptionsParams.USBankAccount(
                     setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                 ),
-                clientSecret = CLIENT_SECRET
+                clientAttributionMetadata = null
             ).toParamMap()
         ).isEqualTo(
             mapOf(
@@ -450,7 +454,8 @@ class ConfirmPaymentIntentParamsTest {
             ConfirmPaymentIntentParams(
                 paymentMethodId = "pm_123",
                 clientSecret = CLIENT_SECRET,
-                receiptEmail = "jenny.rosen@example.com"
+                receiptEmail = "jenny.rosen@example.com",
+                clientAttributionMetadata = null
             ).toParamMap()
         ).isEqualTo(
             mapOf(
@@ -558,7 +563,8 @@ class ConfirmPaymentIntentParamsTest {
         val params = ConfirmPaymentIntentParams(
             paymentMethodId = "pm_123",
             clientSecret = CLIENT_SECRET,
-            radarOptions = radarOptions
+            radarOptions = radarOptions,
+            clientAttributionMetadata = null
         ).toParamMap()
 
         val radarOptionsMap = params["radar_options"] as? Map<*, *>

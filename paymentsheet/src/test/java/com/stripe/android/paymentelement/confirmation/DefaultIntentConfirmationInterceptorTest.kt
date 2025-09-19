@@ -84,9 +84,9 @@ class DefaultIntentConfirmationInterceptorTest {
             intent = PaymentIntentFactory.create(),
             paymentMethod = paymentMethod,
             paymentMethodOptionsParams = null,
-            shippingValues = null,
             paymentMethodExtraParams = null,
-            hCaptchaToken = null,
+            shippingValues = null,
+            hCaptchaToken = null,,
         )
 
         val confirmNextStep = nextStep as? IntentConfirmationInterceptor.NextStep.Confirm
@@ -140,7 +140,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     optionsParams = PaymentMethodOptionsParams.Card(
                         setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                     ),
-                    passiveCaptchaParams = null
+                    passiveCaptchaParams = null,
                 ),
                 intent = PaymentIntentFactory.create(),
                 initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
@@ -191,9 +191,9 @@ class DefaultIntentConfirmationInterceptorTest {
             intent = PaymentIntentFactory.create(),
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             paymentMethodOptionsParams = null,
-            shippingValues = null,
             paymentMethodExtraParams = null,
-            hCaptchaToken = null,
+            shippingValues = null,
+            hCaptchaToken = null,,
         )
     }
 
@@ -274,7 +274,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodOptionsParams = null,
             paymentMethodExtraParams = null,
             shippingValues = null,
-            hCaptchaToken = null,
+            hCaptchaToken = null,,
         )
     }
 
@@ -330,7 +330,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     paymentMethodOptionsParams = null,
                     paymentMethodExtraParams = null,
                     shippingValues = null,
-                    hCaptchaToken = null,
+                    hCaptchaToken = null,,
                 )
             }
 
@@ -456,7 +456,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodOptionsParams = null,
             paymentMethodExtraParams = null,
             shippingValues = null,
-            hCaptchaToken = null,
+            hCaptchaToken = null,,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -499,7 +499,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodOptionsParams = null,
             paymentMethodExtraParams = null,
             shippingValues = null,
-            hCaptchaToken = null,
+            hCaptchaToken = null,,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -540,7 +540,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodOptionsParams = null,
             paymentMethodExtraParams = null,
             shippingValues = null,
-            hCaptchaToken = null,
+            hCaptchaToken = null,,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -595,7 +595,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodOptionsParams = null,
             paymentMethodExtraParams = null,
             shippingValues = null,
-            hCaptchaToken = null,
+            hCaptchaToken = null,,
         )
 
         assertThat(nextStep).isInstanceOf<IntentConfirmationInterceptor.NextStep.Confirm>()
@@ -641,7 +641,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodOptionsParams = null,
             paymentMethodExtraParams = null,
             shippingValues = null,
-            hCaptchaToken = null,
+            hCaptchaToken = null,,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -694,7 +694,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodOptionsParams = null,
             paymentMethodExtraParams = null,
             shippingValues = null,
-            hCaptchaToken = null,
+            hCaptchaToken = null,,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -751,7 +751,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 ).takeIf { input },
                 paymentMethodExtraParams = null,
                 shippingValues = null,
-                hCaptchaToken = null,
+                hCaptchaToken = null,,
             )
         }
 
@@ -809,7 +809,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodOptionsParams = null,
             paymentMethodExtraParams = null,
             shippingValues = null,
-            hCaptchaToken = null,
+            hCaptchaToken = null,,
         )
 
         assertThat(observedValue).isTrue()
@@ -865,7 +865,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodOptionsParams = null,
             paymentMethodExtraParams = null,
             shippingValues = null,
-            hCaptchaToken = null,
+            hCaptchaToken = null,,
         )
 
         assertThat(observedValue).isTrue()
@@ -906,7 +906,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodOptionsParams = null,
             paymentMethodExtraParams = null,
             shippingValues = null,
-            hCaptchaToken = null,
+            hCaptchaToken = null,,
         )
 
         verify(stripeRepository, never()).retrieveStripeIntent(any(), any(), any())
@@ -954,7 +954,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 paymentMethodOptionsParams = null,
                 paymentMethodExtraParams = null,
                 shippingValues = null,
-                hCaptchaToken = null,
+                hCaptchaToken = null,,
             )
 
             val failedStep = nextStep.asFail()
@@ -1010,7 +1010,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 paymentMethodOptionsParams = null,
                 paymentMethodExtraParams = null,
                 shippingValues = null,
-                hCaptchaToken = null,
+                hCaptchaToken = null,,
             )
         }
 
@@ -1060,7 +1060,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 paymentMethodOptionsParams = null,
                 paymentMethodExtraParams = null,
                 shippingValues = providedShippingAddress,
-                hCaptchaToken = null,
+                hCaptchaToken = null,,
             )
 
             assertThat(nextStep).isEqualTo(
@@ -1478,8 +1478,8 @@ class DefaultIntentConfirmationInterceptorTest {
             confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
+                passiveCaptchaParams = null,
                 hCaptchaToken = hCaptchaToken,
-                passiveCaptchaParams = null
             ),
             intent = SetupIntentFactory.create(),
             initializationMode = InitializationMode.SetupIntent("seti_1234_secret_4321"),
@@ -1526,7 +1526,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodOptionsParams = null,
             paymentMethodExtraParams = null,
             shippingValues = null,
-            hCaptchaToken = hCaptchaToken
+            hCaptchaToken = hCaptchaToken,
         )
 
         return nextStep.asConfirmParams()
@@ -1725,8 +1725,8 @@ class DefaultIntentConfirmationInterceptorTest {
             confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
+                passiveCaptchaParams = null,
                 hCaptchaToken = hCaptchaToken,
-                passiveCaptchaParams = null
             ),
             intent = PaymentIntentFactory.create(),
             initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
@@ -1773,7 +1773,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethodOptionsParams = null,
             paymentMethodExtraParams = null,
             shippingValues = null,
-            hCaptchaToken = hCaptchaToken
+            hCaptchaToken = hCaptchaToken,
         )
 
         return nextStep.asConfirmParams()

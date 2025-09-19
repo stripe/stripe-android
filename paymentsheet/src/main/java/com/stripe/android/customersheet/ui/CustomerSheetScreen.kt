@@ -259,17 +259,17 @@ internal fun AddPaymentMethod(
                 enabled = viewState.enabled,
                 supportedPaymentMethods = viewState.supportedPaymentMethods,
                 selectedItemCode = viewState.paymentMethodCode,
+                incentive = null,
                 formElements = viewState.formElements,
                 onItemSelectedListener = {
                     viewActionHandler(CustomerSheetViewAction.OnAddPaymentMethodItemChanged(it))
                 },
                 formArguments = viewState.formArguments,
                 usBankAccountFormArguments = viewState.usBankAccountFormArguments,
-                incentive = null,
                 onFormFieldValuesChanged = {
                     // This only gets emitted if form field values are complete
                     viewActionHandler(CustomerSheetViewAction.OnFormFieldValuesCompleted(it))
-                }
+                },
             )
         }
     }

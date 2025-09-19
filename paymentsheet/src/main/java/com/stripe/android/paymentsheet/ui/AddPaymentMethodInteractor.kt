@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.paymentsheet.DefaultFormHelper
@@ -43,6 +44,7 @@ internal interface AddPaymentMethodInteractor {
         private val validating: Boolean,
         val incentive: PaymentMethodIncentive?,
         val usBankAccountFormArguments: USBankAccountFormArguments,
+        val clientAttributionMetadata: ClientAttributionMetadata,
     ) {
         val formUiElements = formElements.onEach { element ->
             element.onValidationStateChanged(validating)
@@ -140,9 +142,9 @@ internal class DefaultAddPaymentMethodInteractor(
             formElements = formElementsForCode(selectedPaymentMethodCode),
             paymentSelection = selection.value,
             processing = processing.value,
-            incentive = incentive.value,
             validating = false,
-            usBankAccountFormArguments = createUSBankAccountFormArguments(selectedPaymentMethodCode),
+            incentive = incentive.value,
+            usBankAccountFormArguments = createUSBankAccountFormArguments(selectedPaymentMethodCode),,
         )
     }
 

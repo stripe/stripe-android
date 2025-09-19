@@ -129,7 +129,9 @@ constructor(
 
     internal val paymentMethodCode: PaymentMethodCode? = paymentMethodCreateParams?.code,
 
-    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val radarOptions: RadarOptions? = null
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val radarOptions: RadarOptions? = null,
+
+    internal val clientAttributionMetadata: ClientAttributionMetadata? = null,
 ) : ConfirmStripeIntentParams {
     fun shouldSavePaymentMethod(): Boolean {
         return savePaymentMethod == true
@@ -188,6 +190,8 @@ constructor(
             receiptEmail?.let {
                 mapOf(PARAM_RECEIPT_EMAIL to it)
             }.orEmpty()
+        ).plus(
+            clientAttributionMetadata?.toParamMap().orEmpty()
         )
     }
 
@@ -392,7 +396,7 @@ constructor(
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
                 setupFutureUsage = setupFutureUsage,
-                shipping = shipping
+                shipping = shipping,
             )
         }
 
@@ -606,7 +610,8 @@ constructor(
             paymentMethodOptions: PaymentMethodOptionsParams? = null,
             setAsDefaultPaymentMethod: Boolean? = null,
             paymentMethodCode: PaymentMethodCode,
-            radarOptions: RadarOptions?
+            radarOptions: RadarOptions?,
+            clientAttributionMetadata: ClientAttributionMetadata?,
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 paymentMethodId = paymentMethodId,
@@ -619,7 +624,8 @@ constructor(
                 paymentMethodOptions = paymentMethodOptions,
                 setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
                 paymentMethodCode = paymentMethodCode,
-                radarOptions = radarOptions
+                radarOptions = radarOptions,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         }
 

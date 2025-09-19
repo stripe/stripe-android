@@ -31,6 +31,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.R
@@ -77,7 +78,8 @@ internal fun USBankAccountForm(
     usBankAccountFormArgs: USBankAccountFormArguments,
     onCompleted: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean
+    enabled: Boolean,
+    clientAttributionMetadata: ClientAttributionMetadata
 ) {
     val viewModel = viewModel<USBankAccountFormViewModel>(
         factory = USBankAccountFormViewModel.Factory(usBankAccountFormArgs.autocompleteAddressInteractorFactory) {

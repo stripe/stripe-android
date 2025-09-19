@@ -21,7 +21,7 @@ class FieldValuesToParamsMapConverterTest {
                     )
                 ),
                 PaymentMethod.Type.Ideal.code,
-                PaymentMethod.Type.Ideal.requiresMandate
+                PaymentMethod.Type.Ideal.requiresMandate,
             )
 
         assertThat(paymentMethodParams.toParamMap().toString().replace("\\s".toRegex(), ""))
@@ -92,7 +92,7 @@ class FieldValuesToParamsMapConverterTest {
                     )
                 ),
                 PaymentMethod.Type.Sofort.code,
-                PaymentMethod.Type.Sofort.requiresMandate
+                PaymentMethod.Type.Sofort.requiresMandate,
             )
 
         assertThat(
@@ -123,7 +123,7 @@ class FieldValuesToParamsMapConverterTest {
             .transformToPaymentMethodCreateParams(
                 emptyMap(),
                 PaymentMethod.Type.Sofort.code,
-                PaymentMethod.Type.Sofort.requiresMandate
+                PaymentMethod.Type.Sofort.requiresMandate,
             )
 
         assertThat(paymentMethodParams.billingDetails).isNull()
@@ -156,7 +156,7 @@ class FieldValuesToParamsMapConverterTest {
                     )
                 ),
                 PaymentMethod.Type.Blik.code,
-                PaymentMethod.Type.Blik.requiresMandate
+                PaymentMethod.Type.Blik.requiresMandate,
             )
 
         assertThat(
@@ -207,7 +207,7 @@ class FieldValuesToParamsMapConverterTest {
                     )
                 ),
                 PaymentMethod.Type.Card.code,
-                PaymentMethod.Type.Card.requiresMandate
+                PaymentMethod.Type.Card.requiresMandate,
             )
 
         assertThat(
@@ -264,7 +264,7 @@ class FieldValuesToParamsMapConverterTest {
                     )
                 ),
                 "some code",
-                false
+                false,
             )
 
         assertThat(
@@ -479,7 +479,7 @@ class FieldValuesToParamsMapConverterTest {
                 fieldValuePairs = fieldValuePairs,
                 code = PaymentMethod.Type.Ideal.code,
                 requiresMandate = PaymentMethod.Type.Ideal.requiresMandate,
-                allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+                allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,,
             )
 
         assertThat(paymentMethodParams.toParamMap().toString().replace("\\s".toRegex(), ""))
@@ -497,7 +497,7 @@ class FieldValuesToParamsMapConverterTest {
                 fieldValuePairs = fieldValuePairs,
                 code = PaymentMethod.Type.Ideal.code,
                 requiresMandate = PaymentMethod.Type.Ideal.requiresMandate,
-                PaymentMethod.AllowRedisplay.LIMITED,
+                PaymentMethod.AllowRedisplay.LIMITED,,
             )
 
         assertThat(paymentMethodParams.toParamMap().toString().replace("\\s".toRegex(), ""))
@@ -515,7 +515,7 @@ class FieldValuesToParamsMapConverterTest {
                 fieldValuePairs = fieldValuePairs,
                 code = PaymentMethod.Type.Ideal.code,
                 requiresMandate = PaymentMethod.Type.Ideal.requiresMandate,
-                PaymentMethod.AllowRedisplay.ALWAYS,
+                PaymentMethod.AllowRedisplay.ALWAYS,,
             )
 
         assertThat(paymentMethodParams.toParamMap().toString().replace("\\s".toRegex(), ""))

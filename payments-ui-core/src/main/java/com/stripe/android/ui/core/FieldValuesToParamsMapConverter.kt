@@ -3,6 +3,7 @@ package com.stripe.android.ui.core
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.Address
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -27,6 +28,7 @@ class FieldValuesToParamsMapConverter {
             code: PaymentMethodCode,
             requiresMandate: Boolean,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+            clientAttributionMetadata: ClientAttributionMetadata?,
         ): PaymentMethodCreateParams {
             val fieldValuePairsForCreateParams = fieldValuePairs.filter { entry ->
                 entry.key.destination == ParameterDestination.Api.Params
@@ -42,11 +44,12 @@ class FieldValuesToParamsMapConverter {
                 .run {
                     PaymentMethodCreateParams.createWithOverride(
                         code,
-                        requiresMandate = requiresMandate,
                         billingDetails = createBillingDetails(fieldValuePairsForCreateParams),
+                        requiresMandate = requiresMandate,
                         overrideParamMap = this,
                         productUsage = emptySet(),
                         allowRedisplay = allowRedisplay,
+                        clientAttributionMetadata = clientAttributionMetadata,
                     )
                 }
         }

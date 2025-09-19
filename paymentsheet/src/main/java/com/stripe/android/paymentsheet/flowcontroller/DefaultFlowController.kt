@@ -530,7 +530,8 @@ internal class DefaultFlowController @Inject internal constructor(
             val confirmationOption = paymentSelection?.toConfirmationOption(
                 configuration = state.config,
                 linkConfiguration = state.linkConfiguration,
-                passiveCaptchaParams = state.paymentMethodMetadata.passiveCaptchaParams
+                passiveCaptchaParams = state.paymentMethodMetadata.passiveCaptchaParams,
+                clientAttributionMetadata = state.paymentMethodMetadata.clientAttributionMetadata,
             )
 
             confirmationOption?.let { option ->

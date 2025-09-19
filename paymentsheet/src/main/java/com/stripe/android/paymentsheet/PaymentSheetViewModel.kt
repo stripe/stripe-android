@@ -511,6 +511,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         configuration = config.asCommonConfiguration(),
                         linkConfiguration = linkHandler.linkConfiguration.value,
                         passiveCaptchaParams = paymentMethodMetadata.value?.passiveCaptchaParams,
+                        clientAttributionMetadata = paymentMethodMetadata.value?.clientAttributionMetadata,
                     )
             }
 

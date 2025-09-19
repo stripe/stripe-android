@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -29,7 +30,8 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
         optionsParams: PaymentMethodOptionsParams?,
         extraParams: PaymentMethodExtraParams?,
         intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
-        radarOptions: RadarOptions?
+        radarOptions: RadarOptions?,
+        clientAttributionMetadata: ClientAttributionMetadata?
     ): T
 
     abstract fun create(
@@ -44,7 +46,8 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
         optionsParams: PaymentMethodOptionsParams?,
         extraParams: PaymentMethodExtraParams?,
         intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
-        radarOptions: RadarOptions?
+        radarOptions: RadarOptions?,
+        clientAttributionMetadata: ClientAttributionMetadata?
     ): T {
         return create(
             paymentMethodId = paymentMethod.id.orEmpty(),
@@ -52,7 +55,8 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
             optionsParams = optionsParams,
             extraParams = extraParams,
             intentConfigSetupFutureUsage = intentConfigSetupFutureUsage,
-            radarOptions = radarOptions
+            radarOptions = radarOptions,
+            clientAttributionMetadata = clientAttributionMetadata,
         )
     }
 
@@ -87,7 +91,8 @@ internal class ConfirmPaymentIntentParamsFactory(
         optionsParams: PaymentMethodOptionsParams?,
         extraParams: PaymentMethodExtraParams?,
         intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
-        radarOptions: RadarOptions?
+        radarOptions: RadarOptions?,
+        clientAttributionMetadata: ClientAttributionMetadata?,
     ): ConfirmPaymentIntentParams {
         return ConfirmPaymentIntentParams.createWithSetAsDefaultPaymentMethod(
             paymentMethodId = paymentMethodId,
@@ -97,8 +102,8 @@ internal class ConfirmPaymentIntentParamsFactory(
             shipping = shipping,
             setAsDefaultPaymentMethod = extraParams?.extractSetAsDefaultPaymentMethodFromExtraParams(),
             paymentMethodCode = paymentMethodType.code,
-            setupFutureUsage = intentConfigSetupFutureUsage,
-            radarOptions = radarOptions
+            radarOptions = radarOptions,
+            clientAttributionMetadata = clientAttributionMetadata,
         )
     }
 
@@ -130,7 +135,8 @@ internal class ConfirmSetupIntentParamsFactory(
         optionsParams: PaymentMethodOptionsParams?,
         extraParams: PaymentMethodExtraParams?,
         intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
-        radarOptions: RadarOptions?
+        radarOptions: RadarOptions?,
+        clientAttributionMetadata: ClientAttributionMetadata?,
     ): ConfirmSetupIntentParams {
         return ConfirmSetupIntentParams.createWithSetAsDefaultPaymentMethod(
             paymentMethodId = paymentMethodId,
@@ -138,7 +144,8 @@ internal class ConfirmSetupIntentParamsFactory(
             mandateData = mandateData(intent, paymentMethodType, null, null),
             setAsDefaultPaymentMethod = extraParams?.extractSetAsDefaultPaymentMethodFromExtraParams(),
             paymentMethodCode = paymentMethodType.code,
-            radarOptions = radarOptions
+            radarOptions = radarOptions,
+            clientAttributionMetadata = clientAttributionMetadata,
         )
     }
 

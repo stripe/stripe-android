@@ -70,6 +70,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
 
+// TODO: client attribution metadata won't work out of the box with this.
 internal class USBankAccountFormViewModel @Inject internal constructor(
     private val args: Args,
     private val application: Application,
@@ -705,6 +706,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 )
             }
             is ResultIdentifier.Session -> {
+                // TODO: add client attribution metadata here
                 PaymentMethodCreateParams.create(
                     usBankAccount = PaymentMethodCreateParams.USBankAccount(
                         linkAccountSessionId = resultIdentifier.id,
@@ -839,7 +841,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
     }
 
-    data class Args(
+    data class Args constructor(
         val instantDebits: Boolean,
         val incentive: PaymentMethodIncentive?,
         val linkMode: LinkMode?,

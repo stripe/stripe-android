@@ -311,6 +311,8 @@ class PaymentMethodCreateParamsTest {
 
         val overrideParams = PaymentMethodCreateParams.createWithOverride(
             code = "bacs_debit",
+            billingDetails = null,
+            requiresMandate = false,
             overrideParamMap = mapOf(
                 "bacs_debit" to mapOf(
                     "account_number" to "00012345",
@@ -318,8 +320,6 @@ class PaymentMethodCreateParamsTest {
                 )
             ),
             productUsage = setOf(),
-            billingDetails = null,
-            requiresMandate = false
         )
 
         assertThat(
@@ -347,14 +347,14 @@ class PaymentMethodCreateParamsTest {
 
         val overrideParams = PaymentMethodCreateParams.createWithOverride(
             code = "bacs_debit",
+            billingDetails = null,
+            requiresMandate = false,
             overrideParamMap = mapOf(
                 "billing_details" to mapOf(
                     "name" to "John Doe"
                 )
             ),
             productUsage = setOf(),
-            billingDetails = null,
-            requiresMandate = false
         )
 
         assertThat(
@@ -377,14 +377,14 @@ class PaymentMethodCreateParamsTest {
 
         val overrideParams = PaymentMethodCreateParams.createWithOverride(
             code = "card",
+            billingDetails = null,
+            requiresMandate = false,
             overrideParamMap = mapOf(
                 "billing_details" to mapOf(
                     "email" to "johndoe@email.com"
                 )
             ),
             productUsage = setOf(),
-            billingDetails = null,
-            requiresMandate = false
         )
 
         assertThat(

@@ -15,7 +15,6 @@ import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.screenshottesting.LayoutDirection
 import com.stripe.android.screenshottesting.PaparazziConfigOption
 import com.stripe.android.screenshottesting.PaparazziRule
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -97,7 +96,7 @@ class CardUiDefinitionFactoryTest {
                             "postal_code" to "94080",
                         ),
                     ),
-                    productUsage = emptySet(),
+                    productUsage = emptySet(),,
                 )
             )
         }
@@ -287,7 +286,7 @@ class CardUiDefinitionFactoryTest {
                             )
                         ),
                     ),
-                    productUsage = emptySet(),
+                    productUsage = emptySet(),,
                 ),
                 metadata = metadata.copy(
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -319,7 +318,7 @@ class CardUiDefinitionFactoryTest {
                         ),
                         "billing_details" to emptyMap<IdentifierSpec, String?>(),
                     ),
-                    productUsage = emptySet(),
+                    productUsage = emptySet(),,
                 ),
                 metadata = metadata.copy(
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -348,7 +347,7 @@ class CardUiDefinitionFactoryTest {
                     billingDetails = null,
                     requiresMandate = false,
                     overrideParamMap = emptyMap(),
-                    productUsage = emptySet(),
+                    productUsage = emptySet(),,
                 ),
                 metadata = metadata.copy(
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -395,7 +394,7 @@ class CardUiDefinitionFactoryTest {
                             )
                         ),
                     ),
-                    productUsage = emptySet(),
+                    productUsage = emptySet(),,
                 ),
                 metadata = metadata.copy(
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(

@@ -67,7 +67,8 @@ constructor(
      */
     val paymentMethodOptions: PaymentMethodOptionsParams? = null,
 
-    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val radarOptions: RadarOptions? = null
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val radarOptions: RadarOptions? = null,
+    internal val clientAttributionMetadata: ClientAttributionMetadata? = null,
 ) : ConfirmStripeIntentParams {
 
     override fun shouldUseStripeSdk(): Boolean {
@@ -174,7 +175,7 @@ constructor(
             clientSecret: String
         ): ConfirmSetupIntentParams {
             return ConfirmSetupIntentParams(
-                clientSecret = clientSecret
+                clientSecret = clientSecret,
             )
         }
 
@@ -202,7 +203,7 @@ constructor(
                 clientSecret = clientSecret,
                 paymentMethodId = paymentMethodId,
                 mandateId = mandateId,
-                mandateData = mandateData
+                mandateData = mandateData,
             )
         }
 
@@ -250,7 +251,8 @@ constructor(
                 mandateData = mandateData,
                 setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
                 paymentMethodCode = paymentMethodCreateParams.code,
-                radarOptions = radarOptions
+                radarOptions = radarOptions,
+                clientAttributionMetadata = null,
             )
         }
 
@@ -261,16 +263,18 @@ constructor(
             mandateId: String? = null,
             setAsDefaultPaymentMethod: Boolean?,
             paymentMethodCode: PaymentMethodCode,
-            radarOptions: RadarOptions?
+            radarOptions: RadarOptions?,
+            clientAttributionMetadata: ClientAttributionMetadata?
         ): ConfirmSetupIntentParams {
             return ConfirmSetupIntentParams(
-                paymentMethodId = paymentMethodId,
                 clientSecret = clientSecret,
+                paymentMethodId = paymentMethodId,
                 mandateId = mandateId,
                 mandateData = mandateData,
                 setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
                 paymentMethodCode = paymentMethodCode,
-                radarOptions = radarOptions
+                radarOptions = radarOptions,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         }
 
@@ -283,12 +287,13 @@ constructor(
             return ConfirmSetupIntentParams(
                 clientSecret = clientSecret,
                 paymentMethodId = paymentMethodId,
+                useStripeSdk = true,
+                paymentMethodCode = PaymentMethod.Type.Card.code,
                 paymentMethodOptions = PaymentMethodOptionsParams.Card(
                     moto = true,
                     setupFutureUsage = (paymentMethodOptions as? PaymentMethodOptionsParams.Card)?.setupFutureUsage
                 ),
-                useStripeSdk = true,
-                paymentMethodCode = PaymentMethod.Type.Card.code,
+                clientAttributionMetadata = null,
             )
         }
     }
