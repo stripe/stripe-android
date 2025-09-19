@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
@@ -41,6 +42,8 @@ internal fun NewPaymentMethodTabLayoutUI(
     onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
+    shouldTrackRenderedLPMs: Boolean = false,
+    reportInitialPaymentMethodVisibilitySnapshot: (List<String>, List<String>) -> Unit = { _, _ -> },
     state: LazyListState = rememberLazyListState(),
 ) {
     // This is to fix an issue in tests involving this composable
@@ -92,6 +95,54 @@ internal fun NewPaymentMethodTabLayoutUI(
             }
         }
     }
+
+    if (shouldTrackRenderedLPMs) {
+        LaunchedEffect(state) {
+            snapshotFlow { state }
+                .collect {
+                    reportInitialPaymentMethodVisibilitySnapshot(
+                        paymentMethods,
+                        state,
+                    ) { visibleLpms, hiddenLpms ->
+                        reportInitialPaymentMethodVisibilitySnapshot(visibleLpms, hiddenLpms)
+                    }
+                }
+        }
+    }
+}
+
+@Suppress("MagicNumber")
+private fun getIndexOfLastFullyVisibleItem(state: LazyListState): Int {
+    val lastVisibleItem = state.layoutInfo.visibleItemsInfo.last()
+    val visibilityThreshold95Percent = 0.95
+    val isLastVisibleItemFullyVisible =
+        state.layoutInfo.viewportSize.width >
+            (lastVisibleItem.offset + lastVisibleItem.size * visibilityThreshold95Percent)
+    val lastFullyVisibleItemIndex = if (isLastVisibleItemFullyVisible) {
+        lastVisibleItem.index
+    } else {
+        (lastVisibleItem.index - 1).coerceAtLeast(0)
+    }
+
+    return lastFullyVisibleItemIndex
+}
+
+private fun reportInitialPaymentMethodVisibilitySnapshot(
+    paymentMethods: List<SupportedPaymentMethod>,
+    state: LazyListState,
+    callback: (List<String>, List<String>) -> Unit,
+) {
+    val firstVisibleItemIndex = state.firstVisibleItemIndex
+
+    val lastFullyVisibleItemIndex = getIndexOfLastFullyVisibleItem(state)
+    val visibleLpms = paymentMethods
+        .subList(firstVisibleItemIndex, lastFullyVisibleItemIndex + 1)
+        .map { pm -> pm.code }
+    val hiddenLpms = paymentMethods
+        .subList(lastFullyVisibleItemIndex + 1, paymentMethods.size)
+        .map { pm -> pm.code }
+
+    callback(visibleLpms, hiddenLpms)
 }
 
 @Composable

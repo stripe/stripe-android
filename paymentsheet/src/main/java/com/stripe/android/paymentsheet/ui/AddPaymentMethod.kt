@@ -60,6 +60,8 @@ internal fun AddPaymentMethod(
                 )
             )
         },
+        shouldTrackRenderedLPMs = true,
+        reportInitialPaymentMethodVisibilitySnapshot = interactor::reportInitialPaymentMethodVisibilitySnapshot
     )
 }
 
