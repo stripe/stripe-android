@@ -74,6 +74,7 @@ class CustomPaymentMethodsAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_load_succeeded")
         validateAnalyticsRequest(eventName = "mc_complete_sheet_newpm_show")
         validateAnalyticsRequest(eventName = "mc_form_shown")
+        validateAnalyticsRequest(eventName = "mc_initial_displayed_payment_methods")
 
         context.presentPaymentSheet {
             presentWithPaymentIntent(
