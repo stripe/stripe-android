@@ -1927,6 +1927,10 @@ class PaymentSheetEventTest {
 
         assertThat(initialDisplayedPaymentMethodsEvent.params).isEqualTo(
             mapOf(
+                "is_decoupled" to true,
+                "is_spt" to false,
+                "link_enabled" to true,
+                "google_pay_enabled" to true,
                 "visible_payment_methods" to "link,saved,card,affirm",
                 "hidden_payment_methods" to "crypto,klarna,alipay"
             )
