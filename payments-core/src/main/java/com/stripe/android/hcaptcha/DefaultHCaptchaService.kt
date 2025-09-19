@@ -100,26 +100,28 @@ internal class DefaultHCaptchaService(
         rqData: String?
     ): HCaptchaService.Result {
         val hCaptcha = hCaptchaProvider.get()
-        captchaEventsReporter.init(siteKey)
-        val result = runCatching {
-            startVerification(
+        val result = try {
+            captchaEventsReporter.init(siteKey)
+            val result = startVerification(
                 activity = activity,
                 siteKey = siteKey,
                 rqData = rqData,
                 hCaptcha = hCaptcha
             )
-        }.getOrElse { e ->
+            when (result) {
+                is HCaptchaService.Result.Failure -> {
+                    captchaEventsReporter.error(result.error, siteKey)
+                }
+                is HCaptchaService.Result.Success -> {
+                    captchaEventsReporter.success(siteKey)
+                }
+            }
+            result
+        } catch (e: Throwable) {
             HCaptchaService.Result.Failure(e)
+        } finally {
+            hCaptcha.reset()
         }
-        when (result) {
-            is HCaptchaService.Result.Failure -> {
-                captchaEventsReporter.error(result.error, siteKey)
-            }
-            is HCaptchaService.Result.Success -> {
-                captchaEventsReporter.success(siteKey)
-            }
-        }
-        hCaptcha.reset()
         return result
     }
 
