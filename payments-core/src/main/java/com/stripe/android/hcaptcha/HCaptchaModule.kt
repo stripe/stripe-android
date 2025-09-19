@@ -26,10 +26,7 @@ object HCaptchaModule {
         hCaptchaProvider: HCaptchaProvider,
         captchaEventsReporter: CaptchaEventsReporter
     ): HCaptchaService {
-        return hCaptchaService ?: synchronized(this) {
-            hCaptchaService ?: DefaultHCaptchaService(hCaptchaProvider, captchaEventsReporter)
-                .also { hCaptchaService = it }
-        }
+        return DefaultHCaptchaService(hCaptchaProvider, captchaEventsReporter)
     }
 
     @Provides
