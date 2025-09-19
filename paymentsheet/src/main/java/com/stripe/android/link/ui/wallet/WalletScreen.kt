@@ -256,7 +256,7 @@ private fun PaymentDetailsSection(
             onLogoutClicked = onLogoutClicked,
         )
         if (state.paymentSelectionHint != null) {
-            PaymentSelectionHint(
+            LinkHintMessageView(
                 modifier = Modifier.padding(top = 12.dp),
                 hint = state.paymentSelectionHint
             )
@@ -287,7 +287,7 @@ private fun PaymentDetailsSection(
 }
 
 @Composable
-private fun PaymentSelectionHint(
+internal fun LinkHintMessageView(
     hint: ResolvableString?,
     modifier: Modifier = Modifier,
 ) {
