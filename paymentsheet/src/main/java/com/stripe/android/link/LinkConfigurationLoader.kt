@@ -34,10 +34,13 @@ internal class DefaultLinkConfigurationLoader @Inject constructor(
         ).mapCatching { state ->
             @Suppress("TooGenericExceptionCaught")
             try {
-                checkNotNull(state.paymentMethodMetadata.linkState?.configuration).also {
-                    val linkGate = linkGateFactory.create(it)
-                    check(linkGate.useNativeLink) { "Native Link is not available" }
+                val config = checkNotNull(state.paymentMethodMetadata.linkState?.configuration) {
+                    "Link is not available"
                 }
+                check(linkGateFactory.create(config).useNativeLink) {
+                    "Native Link is not available"
+                }
+                config
             } catch (e: Throwable) {
                 throw LinkUnavailableException(e)
             }
