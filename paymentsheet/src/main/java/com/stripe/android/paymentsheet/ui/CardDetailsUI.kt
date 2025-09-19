@@ -43,6 +43,7 @@ import com.stripe.android.ui.core.R as CoreR
 @Composable
 internal fun CardDetailsEditUI(
     editCardDetailsInteractor: EditCardDetailsInteractor,
+    spacing: Dp = 32.dp,
 ) {
     val state by editCardDetailsInteractor.state.collectAsState()
     val dividerHeight = remember { mutableStateOf(0.dp) }
@@ -74,7 +75,7 @@ internal fun CardDetailsEditUI(
         // Billing section - show if we have a billing form
         state.billingDetailsForm?.let { billingForm ->
             if (state.needsSpacerBeforeBilling) {
-                Spacer(Modifier.height(32.dp))
+                Spacer(Modifier.height(spacing))
             }
             BillingDetailsFormUI(
                 form = billingForm,
