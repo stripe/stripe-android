@@ -14,6 +14,18 @@ internal class PopUpWebViewClient(
 ) : WebViewClient() {
     private val logger = Logger.getInstance(BuildConfig.DEBUG)
 
+    override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+        if (view == null || request == null ) {
+            return super.shouldOverrideUrlLoading(view, request)
+        }
+
+        assetLoader.shouldInterceptRequest(request.url) ?: run {
+            view.removeJavascriptInterface(BRIDGE_NAME)
+        }
+
+        return super.shouldOverrideUrlLoading(view, request)
+    }
+
     override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? {
         request ?: return null
         return assetLoader.shouldInterceptRequest(request.url)
@@ -21,6 +33,8 @@ internal class PopUpWebViewClient(
 
     override fun onPageFinished(view: WebView, url: String) {
         super.onPageFinished(view, url)
+        view.removeJavascriptInterface(BRIDGE_NAME)
+
         logger.info("✅ Navigation finished: $url")
         onPageLoaded(view, url)
     }
