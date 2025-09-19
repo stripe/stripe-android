@@ -89,6 +89,7 @@ internal object PaymentMethodMetadataFactory {
             forceSetupFutureUseBehaviorAndNewMandate = forceSetupFutureUseBehaviorAndNewMandate,
             passiveCaptchaParams = passiveCaptchaParams,
             openCardScanAutomatically = openCardScanAutomatically,
+            clientAttributionMetadata = null,
         )
     }
 

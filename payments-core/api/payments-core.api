@@ -2018,6 +2018,14 @@ public final class com/stripe/android/model/CardParams$Creator : android/os/Parc
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/model/ClientAttributionMetadata$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/ClientAttributionMetadata;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/ClientAttributionMetadata;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/model/ConfirmPaymentIntentParams : com/stripe/android/model/ConfirmStripeIntentParams {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;

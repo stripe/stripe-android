@@ -16,10 +16,12 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.getDefaultCustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.AffirmDefinition
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PassiveCaptchaParamsFactory
+import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -31,6 +33,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
@@ -1105,7 +1108,8 @@ internal class PaymentMethodMetadataTest {
                 configuration = createLinkConfiguration(),
                 loginState = LinkState.LoginState.LoggedOut,
             ),
-            customerMetadata = DEFAULT_CUSTOMER_METADATA
+            customerMetadata = DEFAULT_CUSTOMER_METADATA,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -1165,6 +1169,10 @@ internal class PaymentMethodMetadataTest {
             forceSetupFutureUseBehaviorAndNewMandate = false,
             passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             openCardScanAutomatically = false,
+            clientAttributionMetadata = ClientAttributionMetadata(
+                elementsSessionConfigId = elementsSession.elementsSessionId,
+                paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+            ),
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1243,6 +1251,7 @@ internal class PaymentMethodMetadataTest {
             forceSetupFutureUseBehaviorAndNewMandate = false,
             passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             openCardScanAutomatically = false,
+            clientAttributionMetadata = null,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -1314,7 +1323,8 @@ internal class PaymentMethodMetadataTest {
             externalPaymentMethodSpecs = listOf(),
             isGooglePayReady = false,
             linkState = null,
-            customerMetadata = DEFAULT_CUSTOMER_METADATA
+            customerMetadata = DEFAULT_CUSTOMER_METADATA,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
         )
     }
 
@@ -2067,7 +2077,8 @@ internal class PaymentMethodMetadataTest {
             } else {
                 null
             },
-            customerMetadata = DEFAULT_CUSTOMER_METADATA
+            customerMetadata = DEFAULT_CUSTOMER_METADATA,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
         )
 
         assertThat(metadata.availableWallets)
