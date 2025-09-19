@@ -2,6 +2,8 @@ package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.strings.ResolvableString
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AddressTextFieldElement(
@@ -17,4 +19,8 @@ class AddressTextFieldElement(
             label = label,
             onNavigation = onNavigation
         )
+
+    override fun getTextFieldIdentifiers(): StateFlow<List<IdentifierSpec>> {
+        return MutableStateFlow(listOf(identifier))
+    }
 }

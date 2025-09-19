@@ -1879,6 +1879,36 @@ class USBankAccountFormViewModelTest {
     }
 
     @Test
+    fun `If autocomplete & no billing, last text field identifier should be the autocomplete text field`() = runTest {
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    billingDetails = null,
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        name = CollectionMode.Always,
+                        phone = CollectionMode.Always,
+                        email = CollectionMode.Always,
+                        address = AddressCollectionMode.Full,
+                    ),
+                )
+            ),
+            autocompleteAddressInteractorFactory = {
+                TestAutocompleteAddressInteractor.noOp(
+                    autocompleteConfig = AutocompleteAddressInteractor.Config(
+                        googlePlacesApiKey = "gi_123",
+                        autocompleteCountries = setOf("US"),
+                        isPlacesAvailable = true,
+                    )
+                )
+            }
+        )
+
+        viewModel.lastTextFieldIdentifier.test {
+            assertThat(expectMostRecentItem()).isEqualTo(IdentifierSpec.OneLineAddress)
+        }
+    }
+
+    @Test
     fun `If missing required fields, 'validate' should validate fields & reset validation on 'reset'`() = runTest {
         val viewModel = createViewModel(
             args = defaultArgs.run {

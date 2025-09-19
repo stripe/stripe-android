@@ -143,6 +143,16 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         null
     }
 
+    private val lastNonAddressTextFieldIdentifier = if (collectingPhone) {
+        IdentifierSpec.Phone
+    } else if (collectingEmail) {
+        IdentifierSpec.Email
+    } else if (collectingName) {
+        IdentifierSpec.Name
+    } else {
+        null
+    }
+
     val phoneController = PhoneNumberController.createPhoneNumberController(
         initiallySelectedCountryCode = defaultPhoneCountry,
         initialValue = defaultPhone ?: "",
@@ -202,15 +212,11 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     val lastTextFieldIdentifier: StateFlow<IdentifierSpec?> = if (collectingAddress) {
-        addressElement.getTextFieldIdentifiers().mapAsStateFlow { it.last() }
-    } else if (collectingPhone) {
-        stateFlowOf(IdentifierSpec.Phone)
-    } else if (collectingEmail) {
-        stateFlowOf(IdentifierSpec.Email)
-    } else if (collectingName) {
-        stateFlowOf(IdentifierSpec.Name)
+        addressElement.getTextFieldIdentifiers().mapAsStateFlow {
+            it.lastOrNull() ?: lastNonAddressTextFieldIdentifier
+        }
     } else {
-        stateFlowOf(null)
+        stateFlowOf(lastNonAddressTextFieldIdentifier)
     }
 
     private val saveForFutureUseInitialValue: Boolean =
