@@ -72,6 +72,11 @@ class AutocompleteAddressController(
     init {
         interactor.register { event ->
             val currentValues = getCurrentValues()
+
+            /*
+             * Merges the current and new values together. New value keys will override current
+             * value keys if provided.
+             */
             val newValues = currentValues.plus(event.values ?: emptyMap())
 
             when (event) {
