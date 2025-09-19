@@ -9,7 +9,9 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -258,7 +261,8 @@ private fun PaymentDetailsSection(
         if (state.paymentSelectionHint != null) {
             LinkHintMessageView(
                 modifier = Modifier.padding(top = 12.dp),
-                hint = state.paymentSelectionHint
+                hint = state.paymentSelectionHint,
+                style = LinkHintStyle.Filled,
             )
         }
 
@@ -286,36 +290,71 @@ private fun PaymentDetailsSection(
     }
 }
 
+internal enum class LinkHintStyle {
+    Filled,
+    Outlined;
+
+    val textColor: Color
+        @Composable
+        get() = when (this) {
+            Filled -> LinkTheme.colors.textTertiary
+            Outlined -> LinkTheme.colors.textSecondary
+        }
+
+    val backgroundColor: Color
+        @Composable
+        get() = when (this) {
+            Filled -> LinkTheme.colors.surfaceSecondary
+            Outlined -> LinkTheme.colors.surfacePrimary
+        }
+
+    val borderWidth: Dp
+        get() = when (this) {
+            Filled -> 0.dp
+            Outlined -> 1.dp
+        }
+}
+
 @Composable
 internal fun LinkHintMessageView(
-    hint: ResolvableString?,
+    hint: ResolvableString,
+    style: LinkHintStyle,
     modifier: Modifier = Modifier,
 ) {
-    if (hint != null) {
-        Row(
-            modifier = modifier
-                .fillMaxWidth()
-                .background(
-                    color = LinkTheme.colors.surfaceSecondary,
-                    shape = RoundedCornerShape(12.dp)
-                )
-                .padding(horizontal = 20.dp, vertical = 12.dp),
-        ) {
-            Icon(
-                modifier = Modifier
-                    .padding(top = 2.dp)
-                    .size(16.dp),
-                painter = painterResource(com.stripe.android.ui.core.R.drawable.stripe_ic_info_outlined),
-                tint = LinkTheme.colors.iconTertiary,
-                contentDescription = null,
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                color = style.backgroundColor,
+                shape = RoundedCornerShape(12.dp),
             )
-            Text(
-                modifier = Modifier.padding(start = 8.dp),
-                text = hint.resolve(),
-                style = LinkTheme.typography.detail,
-                color = LinkTheme.colors.textTertiary,
+            .border(
+                width = style.borderWidth,
+                // This color isn't semantically correct, but borderDefault is the same as the background
+                // in dark mode and we want to make the border stand out.
+                color = if (isSystemInDarkTheme()) {
+                    LinkTheme.colors.surfaceTertiary
+                } else {
+                    LinkTheme.colors.borderDefault
+                },
+                shape = RoundedCornerShape(12.dp),
             )
-        }
+            .padding(horizontal = 20.dp, vertical = 12.dp),
+    ) {
+        Icon(
+            modifier = Modifier
+                .padding(top = 2.dp)
+                .size(16.dp),
+            painter = painterResource(com.stripe.android.ui.core.R.drawable.stripe_ic_info_outlined),
+            tint = LinkTheme.colors.iconTertiary,
+            contentDescription = null,
+        )
+        Text(
+            modifier = Modifier.padding(start = 8.dp),
+            text = hint.resolve(),
+            style = LinkTheme.typography.detail,
+            color = LinkTheme.colors.textTertiary,
+        )
     }
 }
 
