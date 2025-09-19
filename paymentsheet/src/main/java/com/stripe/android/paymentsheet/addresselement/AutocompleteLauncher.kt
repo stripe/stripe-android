@@ -30,13 +30,13 @@ internal interface AutocompleteLauncher {
     )
 
     sealed interface Result : Parcelable {
-        val addressDetails: AddressDetails?
+        val address: PaymentSheet.Address?
 
         @Parcelize
-        data class EnterManually(override val addressDetails: AddressDetails?) : Result
+        data class EnterManually(override val address: PaymentSheet.Address?) : Result
 
         @Parcelize
-        data class OnBack(override val addressDetails: AddressDetails?) : Result
+        data class OnBack(override val address: PaymentSheet.Address?) : Result
     }
 }
 
@@ -150,10 +150,10 @@ internal class DefaultAutocompleteLauncher(
             registeredAutocompleteListeners[result.id]?.get()?.onAutocompleteLauncherResult(
                 when (result) {
                     is AutocompleteContract.Result.EnterManually -> AutocompleteLauncher.Result.EnterManually(
-                        result.addressDetails,
+                        result.address,
                     )
                     is AutocompleteContract.Result.Address -> AutocompleteLauncher.Result.OnBack(
-                        result.addressDetails
+                        result.address
                     )
                 }
             )

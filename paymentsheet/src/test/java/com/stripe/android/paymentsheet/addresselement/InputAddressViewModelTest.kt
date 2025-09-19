@@ -60,7 +60,7 @@ class InputAddressViewModelTest {
 
     @Test
     fun `autocomplete address passed is collected to start`() = runTest(UnconfinedTestDispatcher()) {
-        val expectedAddress = AddressDetails(name = "skyler", address = PaymentSheet.Address(country = "US"))
+        val expectedAddress = PaymentSheet.Address(country = "US")
         val flow = MutableStateFlow<AddressElementNavigator.AutocompleteEvent?>(
             AddressElementNavigator.AutocompleteEvent.OnBack(expectedAddress)
         )
@@ -71,12 +71,16 @@ class InputAddressViewModelTest {
         ).thenReturn(flow)
 
         val viewModel = createViewModel()
-        assertThat(viewModel.collectedAddress.value).isEqualTo(expectedAddress)
+        assertThat(viewModel.collectedAddress.value).isEqualTo(
+            AddressDetails(
+                address = expectedAddress
+            )
+        )
     }
 
     @Test
     fun `takes only fields in new address`() = runTest(UnconfinedTestDispatcher()) {
-        val usAddress = AddressDetails(name = "skyler", address = PaymentSheet.Address(country = "US"))
+        val usAddress = PaymentSheet.Address(country = "US")
         val flow = MutableStateFlow<AddressElementNavigator.AutocompleteEvent?>(
             AddressElementNavigator.AutocompleteEvent.OnBack(usAddress)
         )
@@ -87,14 +91,19 @@ class InputAddressViewModelTest {
         ).thenReturn(flow)
 
         val viewModel = createViewModel()
-        assertThat(viewModel.collectedAddress.value).isEqualTo(usAddress)
-
-        val expectedAddress = AddressDetails(
-            name = "skyler",
-            address = PaymentSheet.Address(country = "CAN", line1 = "foobar")
+        assertThat(viewModel.collectedAddress.value).isEqualTo(
+            AddressDetails(
+                address = usAddress,
+            )
         )
+
+        val expectedAddress = PaymentSheet.Address(country = "CAN", line1 = "foobar")
         flow.tryEmit(AddressElementNavigator.AutocompleteEvent.OnBack(expectedAddress))
-        assertThat(viewModel.collectedAddress.value).isEqualTo(expectedAddress)
+        assertThat(viewModel.collectedAddress.value).isEqualTo(
+            AddressDetails(
+                address = expectedAddress,
+            )
+        )
     }
 
     @Test

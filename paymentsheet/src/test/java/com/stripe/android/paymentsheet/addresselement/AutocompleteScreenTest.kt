@@ -49,7 +49,7 @@ class AutocompleteScreenTest {
 
             assertThat(setResultCall.key).isEqualTo(AddressElementNavigator.AutocompleteEvent.KEY)
             assertThat(setResultCall.value).isEqualTo(
-                AddressElementNavigator.AutocompleteEvent.OnEnterManually(addressDetails = null)
+                AddressElementNavigator.AutocompleteEvent.OnEnterManually(address = null)
             )
 
             assertThat(onBackCalls.awaitItem()).isNotNull()
@@ -72,7 +72,7 @@ class AutocompleteScreenTest {
 
             assertThat(setResultCall.key).isEqualTo(AddressElementNavigator.AutocompleteEvent.KEY)
             assertThat(setResultCall.value).isEqualTo(
-                AddressElementNavigator.AutocompleteEvent.OnBack(addressDetails = null)
+                AddressElementNavigator.AutocompleteEvent.OnBack(address = null)
             )
 
             assertThat(onBackCalls.awaitItem()).isNotNull()
@@ -96,7 +96,7 @@ class AutocompleteScreenTest {
 
             assertThat(setResultCall.key).isEqualTo(AddressElementNavigator.AutocompleteEvent.KEY)
             assertThat(setResultCall.value).isEqualTo(
-                AddressElementNavigator.AutocompleteEvent.OnBack(addressDetails = null)
+                AddressElementNavigator.AutocompleteEvent.OnBack(address = null)
             )
 
             assertThat(onBackCalls.awaitItem()).isNotNull()

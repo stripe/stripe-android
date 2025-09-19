@@ -30,15 +30,12 @@ class AutocompleteContractTest {
     fun `should parse out address result`() {
         val expectedResult = AutocompleteContract.Result.Address(
             id = "123",
-            addressDetails = AddressDetails(
-                name = "John Doe",
-                address = PaymentSheet.Address(
-                    line1 = "123 Apple Street",
-                    city = "San Francisco",
-                    state = "CA",
-                    country = "US",
-                    postalCode = "99999"
-                )
+            address = PaymentSheet.Address(
+                line1 = "123 Apple Street",
+                city = "San Francisco",
+                state = "CA",
+                country = "US",
+                postalCode = "99999"
             )
         )
 
@@ -54,15 +51,12 @@ class AutocompleteContractTest {
     fun `should parse out enter manually result`() {
         val expectedResult = AutocompleteContract.Result.EnterManually(
             id = "123",
-            addressDetails = AddressDetails(
-                name = "John Doe",
-                address = PaymentSheet.Address(
-                    line1 = "123 Apple Street",
-                    city = "San Francisco",
-                    state = "CA",
-                    country = "US",
-                    postalCode = "99999"
-                )
+            address = PaymentSheet.Address(
+                line1 = "123 Apple Street",
+                city = "San Francisco",
+                state = "CA",
+                country = "US",
+                postalCode = "99999"
             )
         )
 

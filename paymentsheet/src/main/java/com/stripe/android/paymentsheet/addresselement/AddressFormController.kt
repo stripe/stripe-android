@@ -46,4 +46,6 @@ internal class AddressFormController(
             it.second.isComplete
         }
         .toMap()
+
+    fun setRawValues(values: Map<IdentifierSpec, String?>) = autocompleteAddressElement.setRawValue(values)
 }

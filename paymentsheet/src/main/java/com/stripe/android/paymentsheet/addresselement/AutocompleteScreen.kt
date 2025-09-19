@@ -87,13 +87,13 @@ internal fun AutocompleteScreenUI(
                 is AutocompleteViewModel.Event.GoBack -> {
                     navigator.setResult(
                         AddressElementNavigator.AutocompleteEvent.KEY,
-                        AddressElementNavigator.AutocompleteEvent.OnBack(event.addressDetails)
+                        AddressElementNavigator.AutocompleteEvent.OnBack(event.address)
                     )
                 }
                 is AutocompleteViewModel.Event.EnterManually -> {
                     navigator.setResult(
                         AddressElementNavigator.AutocompleteEvent.KEY,
-                        AddressElementNavigator.AutocompleteEvent.OnEnterManually(event.addressDetails)
+                        AddressElementNavigator.AutocompleteEvent.OnEnterManually(event.address)
                     )
                 }
             }
