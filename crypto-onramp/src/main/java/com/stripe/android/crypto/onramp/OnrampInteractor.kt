@@ -79,7 +79,7 @@ internal class OnrampInteractor @Inject constructor(
         return when (linkResult) {
             is ConfigureResult.Success -> OnrampConfigurationResult.Completed(success = true)
             is ConfigureResult.Failed -> {
-                analyticsService?.track(
+                track(
                     OnrampAnalyticsEvent.ErrorOccurred(
                         operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.Configure,
                         error = linkResult.error,
@@ -93,7 +93,7 @@ internal class OnrampInteractor @Inject constructor(
     suspend fun hasLinkAccount(email: String): OnrampHasLinkAccountResult {
         return when (val result = linkController.lookupConsumer(email)) {
             is LinkController.LookupConsumerResult.Success -> {
-                analyticsService?.track(
+                track(
                     OnrampAnalyticsEvent.LinkAccountLookupCompleted(
                         hasLinkAccount = result.isConsumer
                     )
@@ -103,7 +103,7 @@ internal class OnrampInteractor @Inject constructor(
                 )
             }
             is LinkController.LookupConsumerResult.Failed -> {
-                analyticsService?.track(
+                track(
                     OnrampAnalyticsEvent.ErrorOccurred(
                         operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.HasLinkAccount,
                         error = result.error,
@@ -131,11 +131,11 @@ internal class OnrampInteractor @Inject constructor(
                     cryptoApiRepository.createCryptoCustomer(secret).fold(
                         onSuccess = { customerResponse ->
                             _state.update { it.copy(cryptoCustomerId = customerResponse.id) }
-                            analyticsService?.track(OnrampAnalyticsEvent.LinkRegistrationCompleted)
+                            track(OnrampAnalyticsEvent.LinkRegistrationCompleted)
                             OnrampRegisterLinkUserResult.Completed(customerResponse.id)
                         },
                         onFailure = { error ->
-                            analyticsService?.track(
+                            track(
                                 OnrampAnalyticsEvent.ErrorOccurred(
                                     operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.RegisterLinkUser,
                                     error = error,
@@ -146,7 +146,7 @@ internal class OnrampInteractor @Inject constructor(
                     )
                 } else {
                     val error = MissingConsumerSecretException()
-                    analyticsService?.track(
+                    track(
                         OnrampAnalyticsEvent.ErrorOccurred(
                             operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.RegisterLinkUser,
                             error = error,
@@ -156,7 +156,7 @@ internal class OnrampInteractor @Inject constructor(
                 }
             }
             is LinkController.RegisterConsumerResult.Failed -> {
-                analyticsService?.track(
+                track(
                     OnrampAnalyticsEvent.ErrorOccurred(
                         operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.RegisterLinkUser,
                         error = result.error,
@@ -172,11 +172,11 @@ internal class OnrampInteractor @Inject constructor(
     suspend fun updatePhoneNumber(phoneNumber: String): OnrampUpdatePhoneNumberResult {
         return when (val result = linkController.updatePhoneNumber(phoneNumber)) {
             is LinkController.UpdatePhoneNumberResult.Success -> {
-                analyticsService?.track(OnrampAnalyticsEvent.LinkPhoneNumberUpdated)
+                track(OnrampAnalyticsEvent.LinkPhoneNumberUpdated)
                 OnrampUpdatePhoneNumberResult.Completed
             }
             is LinkController.UpdatePhoneNumberResult.Failed -> {
-                analyticsService?.track(
+                track(
                     OnrampAnalyticsEvent.ErrorOccurred(
                         operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.UpdatePhoneNumber,
                         error = result.error,
@@ -198,11 +198,11 @@ internal class OnrampInteractor @Inject constructor(
             val result = cryptoApiRepository.setWalletAddress(walletAddress, network, secret)
             result.fold(
                 onSuccess = {
-                    analyticsService?.track(OnrampAnalyticsEvent.WalletRegistered(network))
+                    track(OnrampAnalyticsEvent.WalletRegistered(network))
                     OnrampRegisterWalletAddressResult.Completed()
                 },
                 onFailure = { error ->
-                    analyticsService?.track(
+                    track(
                         OnrampAnalyticsEvent.ErrorOccurred(
                             operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.RegisterWalletAddress,
                             error = error,
@@ -213,7 +213,7 @@ internal class OnrampInteractor @Inject constructor(
             )
         } else {
             val error = MissingConsumerSecretException()
-            analyticsService?.track(
+            track(
                 OnrampAnalyticsEvent.ErrorOccurred(
                     operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.RegisterWalletAddress,
                     error = error,
@@ -227,7 +227,7 @@ internal class OnrampInteractor @Inject constructor(
         val secret = consumerSessionClientSecret()
         if (secret == null) {
             val error = MissingConsumerSecretException()
-            analyticsService?.track(
+            track(
                 OnrampAnalyticsEvent.ErrorOccurred(
                     operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.AttachKycInfo,
                     error = error,
@@ -239,11 +239,11 @@ internal class OnrampInteractor @Inject constructor(
         return cryptoApiRepository.collectKycData(kycInfo, secret)
             .fold(
                 onSuccess = {
-                    analyticsService?.track(OnrampAnalyticsEvent.KycInfoSubmitted)
+                    track(OnrampAnalyticsEvent.KycInfoSubmitted)
                     OnrampAttachKycInfoResult.Completed
                 },
                 onFailure = { error ->
-                    analyticsService?.track(
+                    track(
                         OnrampAnalyticsEvent.ErrorOccurred(
                             operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.AttachKycInfo,
                             error = error,
@@ -258,7 +258,7 @@ internal class OnrampInteractor @Inject constructor(
         val secret = consumerSessionClientSecret()
         if (secret == null) {
             val error = MissingConsumerSecretException()
-            analyticsService?.track(
+            track(
                 OnrampAnalyticsEvent.ErrorOccurred(
                     operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.VerifyIdentity,
                     error = error,
@@ -270,11 +270,11 @@ internal class OnrampInteractor @Inject constructor(
         return cryptoApiRepository.startIdentityVerification(secret)
             .fold(
                 onSuccess = { result ->
-                    analyticsService?.track(OnrampAnalyticsEvent.IdentityVerificationStarted)
+                    track(OnrampAnalyticsEvent.IdentityVerificationStarted)
                     OnrampStartVerificationResult.Completed(result)
                 },
                 onFailure = { error ->
-                    analyticsService?.track(
+                    track(
                         OnrampAnalyticsEvent.ErrorOccurred(
                             operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.VerifyIdentity,
                             error = error,
@@ -290,7 +290,7 @@ internal class OnrampInteractor @Inject constructor(
         val secret = consumerSessionClientSecret()
         if (secret == null) {
             val error = MissingConsumerSecretException()
-            analyticsService?.track(
+            track(
                 OnrampAnalyticsEvent.ErrorOccurred(
                     operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.CreateCryptoPaymentToken,
                     error = error,
@@ -321,7 +321,7 @@ internal class OnrampInteractor @Inject constructor(
             }
             .fold(
                 onSuccess = { cryptoPaymentToken ->
-                    analyticsService?.track(
+                    track(
                         OnrampAnalyticsEvent.CryptoPaymentTokenCreated(
                             paymentMethodType = _state.value.collectingPaymentMethodType
                         )
@@ -329,7 +329,7 @@ internal class OnrampInteractor @Inject constructor(
                     OnrampCreateCryptoPaymentTokenResult.Completed(cryptoPaymentToken.id)
                 },
                 onFailure = { error ->
-                    analyticsService?.track(
+                    track(
                         OnrampAnalyticsEvent.ErrorOccurred(
                             operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.CreateCryptoPaymentToken,
                             error = error,
@@ -343,11 +343,11 @@ internal class OnrampInteractor @Inject constructor(
     suspend fun logOut(): OnrampLogOutResult {
         return when (val result = linkController.logOut()) {
             is LinkController.LogOutResult.Success -> {
-                analyticsService?.track(OnrampAnalyticsEvent.LinkLogout)
+                track(OnrampAnalyticsEvent.LinkLogout)
                 OnrampLogOutResult.Completed
             }
             is LinkController.LogOutResult.Failed -> {
-                analyticsService?.track(
+                track(
                     OnrampAnalyticsEvent.ErrorOccurred(
                         operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.LogOut,
                         error = result.error,
@@ -367,11 +367,11 @@ internal class OnrampInteractor @Inject constructor(
                 cryptoApiRepository.createCryptoCustomer(secret).fold(
                     onSuccess = { customerResponse ->
                         _state.update { it.copy(cryptoCustomerId = customerResponse.id) }
-                        analyticsService?.track(OnrampAnalyticsEvent.LinkUserAuthenticationCompleted)
+                        track(OnrampAnalyticsEvent.LinkUserAuthenticationCompleted)
                         OnrampAuthenticateResult.Completed(customerResponse.id)
                     },
                     onFailure = { error ->
-                        analyticsService?.track(
+                        track(
                             OnrampAnalyticsEvent.ErrorOccurred(
                                 operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.AuthenticateUser,
                                 error = error,
@@ -382,7 +382,7 @@ internal class OnrampInteractor @Inject constructor(
                 )
             } else {
                 val error = MissingConsumerSecretException()
-                analyticsService?.track(
+                track(
                     OnrampAnalyticsEvent.ErrorOccurred(
                         operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.AuthenticateUser,
                         error = error,
@@ -392,7 +392,7 @@ internal class OnrampInteractor @Inject constructor(
             }
         }
         is LinkController.AuthenticationResult.Failed -> {
-            analyticsService?.track(
+            track(
                 OnrampAnalyticsEvent.ErrorOccurred(
                     operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.AuthenticateUser,
                     error = result.error,
@@ -412,11 +412,11 @@ internal class OnrampInteractor @Inject constructor(
                 cryptoApiRepository.createCryptoCustomer(secret).fold(
                     onSuccess = { customerResponse ->
                         _state.update { it.copy(cryptoCustomerId = customerResponse.id) }
-                        analyticsService?.track(OnrampAnalyticsEvent.LinkAuthorizationCompleted(consented = true))
+                        track(OnrampAnalyticsEvent.LinkAuthorizationCompleted(consented = true))
                         OnrampAuthorizeResult.Consented(customerResponse.id)
                     },
                     onFailure = { error ->
-                        analyticsService?.track(
+                        track(
                             OnrampAnalyticsEvent.ErrorOccurred(
                                 operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.Authorize,
                                 error = error,
@@ -427,7 +427,7 @@ internal class OnrampInteractor @Inject constructor(
                 )
             } else {
                 val error = MissingConsumerSecretException()
-                analyticsService?.track(
+                track(
                     OnrampAnalyticsEvent.ErrorOccurred(
                         operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.Authorize,
                         error = error,
@@ -437,13 +437,13 @@ internal class OnrampInteractor @Inject constructor(
             }
         }
         is LinkController.AuthorizeResult.Denied -> {
-            analyticsService?.track(OnrampAnalyticsEvent.LinkAuthorizationCompleted(consented = false))
+            track(OnrampAnalyticsEvent.LinkAuthorizationCompleted(consented = false))
             OnrampAuthorizeResult.Denied()
         }
         is LinkController.AuthorizeResult.Canceled ->
             OnrampAuthorizeResult.Canceled()
         is LinkController.AuthorizeResult.Failed -> {
-            analyticsService?.track(
+            track(
                 OnrampAnalyticsEvent.ErrorOccurred(
                     operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.Authorize,
                     error = result.error,
@@ -457,11 +457,11 @@ internal class OnrampInteractor @Inject constructor(
         result: IdentityVerificationSheet.VerificationFlowResult
     ): OnrampVerifyIdentityResult = when (result) {
         is IdentityVerificationSheet.VerificationFlowResult.Completed -> {
-            analyticsService?.track(OnrampAnalyticsEvent.IdentityVerificationCompleted)
+            track(OnrampAnalyticsEvent.IdentityVerificationCompleted)
             OnrampVerifyIdentityResult.Completed()
         }
         is IdentityVerificationSheet.VerificationFlowResult.Failed -> {
-            analyticsService?.track(
+            track(
                 OnrampAnalyticsEvent.ErrorOccurred(
                     operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.VerifyIdentity,
                     error = result.throwable,
@@ -478,7 +478,7 @@ internal class OnrampInteractor @Inject constructor(
         context: Context,
     ): OnrampCollectPaymentMethodResult = when (result) {
         is LinkController.PresentPaymentMethodsResult.Success -> {
-            analyticsService?.track(
+            track(
                 OnrampAnalyticsEvent.CollectPaymentMethodCompleted(
                     paymentMethodType = _state.value.collectingPaymentMethodType
                 )
@@ -496,7 +496,7 @@ internal class OnrampInteractor @Inject constructor(
             }
         }
         is LinkController.PresentPaymentMethodsResult.Failed -> {
-            analyticsService?.track(
+            track(
                 OnrampAnalyticsEvent.ErrorOccurred(
                     operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.CollectPaymentMethod,
                     error = result.error,
@@ -516,28 +516,28 @@ internal class OnrampInteractor @Inject constructor(
         if (analyticsService?.elementsSessionId != linkState.elementsSessionId) {
             analyticsService = linkState.elementsSessionId
                 ?.let { analyticsServiceFactory.create(it) }
-            analyticsService?.track(OnrampAnalyticsEvent.SessionCreated)
+            track(OnrampAnalyticsEvent.SessionCreated)
         }
         _state.value = _state.value.copy(linkControllerState = linkState)
     }
 
     fun onAuthorize() {
-        analyticsService?.track(OnrampAnalyticsEvent.LinkAuthorizationStarted)
+        track(OnrampAnalyticsEvent.LinkAuthorizationStarted)
     }
 
     fun onAuthenticateUser() {
-        analyticsService?.track(OnrampAnalyticsEvent.LinkUserAuthenticationStarted)
+        track(OnrampAnalyticsEvent.LinkUserAuthenticationStarted)
     }
 
     fun onCollectPaymentMethod(type: PaymentMethodType) {
         _state.update { it.copy(collectingPaymentMethodType = type) }
-        analyticsService?.track(
+        track(
             OnrampAnalyticsEvent.CollectPaymentMethodStarted(type)
         )
     }
 
     fun onHandleNextActionError(error: Throwable) {
-        analyticsService?.track(
+        track(
             OnrampAnalyticsEvent.ErrorOccurred(
                 operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.PerformCheckout,
                 error = error,
@@ -570,7 +570,7 @@ internal class OnrampInteractor @Inject constructor(
                 )
             )
         }
-        analyticsService?.track(
+        track(
             OnrampAnalyticsEvent.CheckoutStarted(
                 onrampSessionId = onrampSessionId,
                 paymentMethodType = _state.value.collectingPaymentMethodType
@@ -644,7 +644,7 @@ internal class OnrampInteractor @Inject constructor(
                     // which is handled by PaymentLauncher in the presenter.
                     paymentIntent.toCheckoutResult()
                         ?.let { checkoutResult ->
-                            analyticsService?.track(
+                            track(
                                 OnrampAnalyticsEvent.CheckoutCompleted(
                                     onrampSessionId = onrampSessionId,
                                     paymentMethodType = _state.value.collectingPaymentMethodType,
@@ -661,7 +661,7 @@ internal class OnrampInteractor @Inject constructor(
                         )
                 },
                 onFailure = { error ->
-                    analyticsService?.track(
+                    track(
                         OnrampAnalyticsEvent.ErrorOccurred(
                             operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.PerformCheckout,
                             error = error,
@@ -755,6 +755,10 @@ internal class OnrampInteractor @Inject constructor(
                     )
                 }
             }
+    }
+
+    private fun track(event: OnrampAnalyticsEvent) {
+        analyticsService?.track(event)
     }
 }
 
