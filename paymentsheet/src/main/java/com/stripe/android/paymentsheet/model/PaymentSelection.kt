@@ -387,7 +387,7 @@ internal val PaymentSelection.drawableResourceId: Int
         is PaymentSelection.New.LinkInline -> brand.getCardBrandIcon()
         is PaymentSelection.New.USBankAccount -> iconResource
         is PaymentSelection.Saved -> getSavedIcon(this)
-        is PaymentSelection.ShopPay -> R.drawable.stripe_shop_pay_logo_white
+        is PaymentSelection.ShopPay -> R.drawable.stripe_shop_pay_logo_mark
     }
 
 internal val PaymentSelection.drawableResourceIdNight: Int
@@ -401,7 +401,7 @@ internal val PaymentSelection.drawableResourceIdNight: Int
         is PaymentSelection.New.LinkInline -> brand.getCardBrandIcon()
         is PaymentSelection.New.USBankAccount -> iconResource
         is PaymentSelection.Saved -> getSavedIcon(this)
-        is PaymentSelection.ShopPay -> R.drawable.stripe_shop_pay_logo_white
+        is PaymentSelection.ShopPay -> R.drawable.stripe_shop_pay_logo_mark
     }
 
 private fun getSavedIcon(selection: PaymentSelection.Saved): Int {
