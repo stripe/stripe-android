@@ -14,6 +14,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.CustomPayment
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.LinkCardBrandDefinition
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT
 import com.stripe.android.model.LinkMode
@@ -23,6 +24,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.confirmation.utils.sellerBusinessName
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -31,6 +33,7 @@ import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.toPaymentMethodIncentive
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
@@ -76,6 +79,7 @@ internal data class PaymentMethodMetadata(
     val forceSetupFutureUseBehaviorAndNewMandate: Boolean,
     val passiveCaptchaParams: PassiveCaptchaParams?,
     val openCardScanAutomatically: Boolean,
+    val clientAttributionMetadata: ClientAttributionMetadata?,
 ) : Parcelable {
 
     fun hasIntentToSetup(code: PaymentMethodCode): Boolean {
@@ -310,7 +314,7 @@ internal data class PaymentMethodMetadata(
             isGooglePayReady: Boolean,
             linkState: LinkState?,
             customerMetadata: CustomerMetadata,
-            sellerBusinessName: String? = null,
+            initializationMode: PaymentElementLoader.InitializationMode,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
             return PaymentMethodMetadata(
@@ -332,7 +336,7 @@ internal data class PaymentMethodMetadata(
                     preferredNetworks = configuration.preferredNetworks,
                 ),
                 merchantName = configuration.merchantDisplayName,
-                sellerBusinessName = sellerBusinessName,
+                sellerBusinessName = initializationMode.sellerBusinessName,
                 defaultBillingDetails = configuration.defaultBillingDetails,
                 shippingDetails = configuration.shippingDetails,
                 customerMetadata = customerMetadata,
@@ -354,6 +358,10 @@ internal data class PaymentMethodMetadata(
                     .flags[ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT] == true,
                 passiveCaptchaParams = elementsSession.passiveCaptchaParams,
                 openCardScanAutomatically = configuration.opensCardScannerAutomatically,
+                clientAttributionMetadata = ClientAttributionMetadata.create(
+                    elementsSessionConfigId = elementsSession.elementsSessionId,
+                    initializationMode = initializationMode,
+                ),
             )
         }
 
@@ -405,6 +413,7 @@ internal data class PaymentMethodMetadata(
                     .flags[ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT] == true,
                 passiveCaptchaParams = elementsSession.passiveCaptchaParams,
                 openCardScanAutomatically = configuration.opensCardScannerAutomatically,
+                clientAttributionMetadata = null,
             )
         }
 
@@ -461,6 +470,7 @@ internal data class PaymentMethodMetadata(
                 forceSetupFutureUseBehaviorAndNewMandate = configuration.forceSetupFutureUseBehaviorAndNewMandate,
                 passiveCaptchaParams = passiveCaptchaParams,
                 openCardScanAutomatically = false,
+                clientAttributionMetadata = null,
             )
         }
     }
