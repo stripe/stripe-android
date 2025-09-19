@@ -19,6 +19,7 @@ import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerEphemeralKey
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
+import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -33,6 +34,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentRequest
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentResponse
+import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentWithConfirmationTokenRequest
 import com.stripe.android.paymentsheet.example.playground.model.CreateSetupIntentRequest
 import com.stripe.android.paymentsheet.example.playground.model.CreateSetupIntentResponse
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
@@ -518,6 +520,19 @@ internal class PaymentSheetPlaygroundViewModel(
         )
     }
 
+    suspend fun createIntentWithConfirmationTokenCallback(
+        confirmationToken: ConfirmationToken
+    ): CreateIntentResult {
+        val playgroundState = state.value?.asPaymentState() ?: return CreateIntentResult.Failure(
+            cause = IllegalStateException("No payment playground state"),
+            displayMessage = "No payment playground state"
+        )
+        return createAndConfirmIntentInternal(
+            confirmationTokenId = confirmationToken.id,
+            playgroundState = playgroundState,
+        )
+    }
+
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
     fun analyticCallback(event: AnalyticEvent) {
         Log.d("AnalyticEvent", "Event: $event")
@@ -572,6 +587,55 @@ internal class PaymentSheetPlaygroundViewModel(
 
         val result = Fuel.post(baseUrl + "confirm_intent")
             .jsonBody(Json.encodeToString(ConfirmIntentRequest.serializer(), request))
+            .suspendable()
+            .awaitModel(ConfirmIntentResponse.serializer())
+        val createIntentResult = when (result) {
+            is Result.Failure -> {
+                val message = "Creating intent failed:\n${result.getException().message}"
+                status.value = StatusMessage(message)
+
+                val error = if (result.error.cause is IOException) {
+                    ConfirmIntentNetworkException()
+                } else {
+                    ConfirmIntentEndpointException()
+                }
+
+                CreateIntentResult.Failure(
+                    cause = error,
+                    displayMessage = message
+                )
+            }
+
+            is Result.Success -> {
+                CreateIntentResult.Success(
+                    clientSecret = result.value.clientSecret,
+                )
+            }
+        }
+        return createIntentResult
+    }
+
+    private suspend fun createAndConfirmIntentInternal(
+        confirmationTokenId: String,
+        playgroundState: PlaygroundState.Payment,
+    ): CreateIntentResult {
+        // Note: This is not how you'd do this in a real application. You wouldn't have a client
+        // secret available at this point, but you'd call your backend to create (and optionally
+        // confirm) a payment or setup intent.
+        val request = ConfirmIntentWithConfirmationTokenRequest(
+            clientSecret = playgroundState.clientSecret,
+            confirmationTokenId = confirmationTokenId,
+            merchantCountryCode = playgroundState.countryCode.value,
+            mode = playgroundState.checkoutMode.value,
+        )
+
+        val result = Fuel.post(baseUrl + "confirm_intent")
+            .jsonBody(
+                Json.encodeToString(
+                    ConfirmIntentWithConfirmationTokenRequest.serializer(),
+                    request
+                )
+            )
             .suspendable()
             .awaitModel(ConfirmIntentResponse.serializer())
         val createIntentResult = when (result) {
