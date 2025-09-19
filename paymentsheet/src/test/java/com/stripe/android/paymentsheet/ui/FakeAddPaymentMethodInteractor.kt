@@ -24,6 +24,13 @@ internal class FakeAddPaymentMethodInteractor(
         viewActionRecorder.record(viewAction)
     }
 
+    override fun reportInitialPaymentMethodVisibilitySnapshot(
+        visiblePaymentMethods: List<String>,
+        hiddenPaymentMethods: List<String>
+    ) {
+        // Do nothing
+    }
+
     override fun close() {
         // Do nothing.
     }
