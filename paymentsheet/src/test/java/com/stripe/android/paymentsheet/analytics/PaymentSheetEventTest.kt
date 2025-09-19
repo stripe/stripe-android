@@ -1911,6 +1911,28 @@ class PaymentSheetEventTest {
         )
     }
 
+    @Test
+    fun `InitialDisplayedPaymentMethods event created correctly`() {
+        val visiblePaymentMethods = listOf("link", "saved", "card", "affirm")
+        val hiddenPaymentMethods = listOf("crypto", "klarna", "alipay")
+
+        val initialDisplayedPaymentMethodsEvent = PaymentSheetEvent.InitialDisplayedPaymentMethods(
+            visiblePaymentMethods = visiblePaymentMethods,
+            hiddenPaymentMethods = hiddenPaymentMethods,
+            isDeferred = true,
+            isSpt = false,
+            linkEnabled = true,
+            googlePaySupported = true,
+        )
+
+        assertThat(initialDisplayedPaymentMethodsEvent.params).isEqualTo(
+            mapOf(
+                "visible_payment_methods" to "link,saved,card,affirm",
+                "hidden_payment_methods" to "crypto,klarna,alipay"
+            )
+        )
+    }
+
     private fun newCardPaymentMethod(
         paymentMethodExtraParams: PaymentMethodExtraParams? = null,
         result: PaymentSheetEvent.Payment.Result

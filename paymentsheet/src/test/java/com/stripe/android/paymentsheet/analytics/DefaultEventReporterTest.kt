@@ -16,6 +16,8 @@ import com.stripe.android.core.networking.toMap
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.link.ui.LinkButtonState
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK
 import com.stripe.android.model.LinkMode
@@ -30,8 +32,10 @@ import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.IsStripeCardScanAvailable
@@ -1377,6 +1381,60 @@ class DefaultEventReporterTest {
             argWhere { req ->
                 req.params["event"] == "mc_cardscan_api_check_succeeded" &&
                     req.params["implementation"] == "ml_kit"
+            }
+        )
+    }
+
+    @Test
+    fun `onInitiallyDisplayedPaymentMethodVisibilitySnapshot creates correct event`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
+            visiblePaymentMethods = listOf("card", "klarna", "paypal"),
+            hiddenPaymentMethods = listOf("affirm", "afterpay"),
+            walletsState = null
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_initial_displayed_payment_methods" &&
+                    req.params["visible_payment_methods"] == "card,klarna,paypal" &&
+                    req.params["hidden_payment_methods"] == "affirm,afterpay"
+            }
+        )
+    }
+
+    @Test
+    fun `onInitiallyDisplayedPaymentMethodVisibilitySnapshot correctly adds visible wallets`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
+            visiblePaymentMethods = listOf("google_pay", "card", "klarna", "paypal"),
+            hiddenPaymentMethods = listOf("affirm", "afterpay"),
+            walletsState = WalletsState(
+                link = WalletsState.Link(state = LinkButtonState.Default),
+                googlePay = WalletsState.GooglePay(
+                    buttonType = GooglePayButtonType.Pay,
+                    allowCreditCards = true,
+                    billingAddressParameters = null,
+                ),
+                buttonsEnabled = true,
+                dividerTextResource = 0,
+                onGooglePayPressed = {},
+                onLinkPressed = {},
+                walletsAllowedInHeader = listOf(WalletType.Link), // FlowController: Link in header, Google Pay inline
+            )
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_initial_displayed_payment_methods" &&
+                    req.params["visible_payment_methods"] == "link,google_pay,card,klarna,paypal" &&
+                    req.params["hidden_payment_methods"] == "affirm,afterpay"
             }
         )
     }
