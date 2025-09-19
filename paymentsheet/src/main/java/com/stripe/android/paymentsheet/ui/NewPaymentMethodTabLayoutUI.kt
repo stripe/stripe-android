@@ -96,7 +96,7 @@ internal fun NewPaymentMethodTabLayoutUI(
         }
     }
 
-    if (shouldTrackRenderedLPMs) {
+    if (shouldTrackRenderedLPMs && !inspectionMode) {
         LaunchedEffect(state) {
             snapshotFlow { state }
                 .collect {

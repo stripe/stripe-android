@@ -25,6 +25,7 @@ import com.stripe.android.uicore.utils.collectAsState
 @Composable
 internal fun AddPaymentMethod(
     interactor: AddPaymentMethodInteractor,
+    shouldTrackRenderedLPMs: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     val state by interactor.state.collectAsState()
@@ -60,7 +61,7 @@ internal fun AddPaymentMethod(
                 )
             )
         },
-        shouldTrackRenderedLPMs = true,
+        shouldTrackRenderedLPMs = shouldTrackRenderedLPMs,
         reportInitialPaymentMethodVisibilitySnapshot = interactor::reportInitialPaymentMethodVisibilitySnapshot
     )
 }
