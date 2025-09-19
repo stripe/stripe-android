@@ -127,6 +127,7 @@ internal class DefaultWalletButtonsInteractor(
     private val linkInlineInteractor: LinkInlineInteractor,
     private val linkPaymentLauncher: LinkPaymentLauncher,
     private val linkAccountHolder: LinkAccountHolder,
+    private val onButtonPressed: (PaymentSelection) -> Unit,
     private val onWalletButtonsRenderStateChanged: (isRendered: Boolean) -> Unit
 ) : WalletButtonsInteractor {
 
@@ -253,7 +254,11 @@ internal class DefaultWalletButtonsInteractor(
     }
 
     private fun handleButtonPressed(button: WalletButton, arguments: Arguments) {
-        confirmationArgs(button.createSelection(), arguments)?.let {
+        val selection = button.createSelection()
+
+        onButtonPressed(selection)
+
+        confirmationArgs(selection, arguments)?.let {
             coroutineScope.launch {
                 confirmationHandler.start(it)
             }
@@ -335,6 +340,9 @@ internal class DefaultWalletButtonsInteractor(
                 linkInlineInteractor = flowControllerViewModel.flowControllerStateComponent.linkInlineInteractor,
                 linkPaymentLauncher = walletsButtonLinkLauncher,
                 linkAccountHolder = flowControllerViewModel.flowControllerStateComponent.linkAccountHolder,
+                onButtonPressed = { selection ->
+                    flowControllerViewModel.confirmingWalletButtonSelection = selection
+                },
                 onWalletButtonsRenderStateChanged = { isRendered ->
                     flowControllerViewModel.walletButtonsRendered = isRendered
                 }
@@ -373,6 +381,9 @@ internal class DefaultWalletButtonsInteractor(
                 linkInlineInteractor = linkInlineInteractor,
                 linkPaymentLauncher = linkPaymentLauncher,
                 linkAccountHolder = linkAccountHolder,
+                onButtonPressed = {
+                    // No-op, not supported for Embedded
+                },
                 onWalletButtonsRenderStateChanged = {
                     // No-op, not supported for Embedded
                 }

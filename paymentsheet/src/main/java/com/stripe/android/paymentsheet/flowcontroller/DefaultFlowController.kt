@@ -719,6 +719,18 @@ internal class DefaultFlowController @Inject internal constructor(
             viewModel.state = null
         }
 
+        val confirmingWalletButtonSelection = viewModel.confirmingWalletButtonSelection
+        val storedSelection = viewModel.paymentSelection
+
+        if (storedSelection == null && confirmingWalletButtonSelection != null) {
+            paymentOptionResultCallback.onPaymentOptionResult(
+                PaymentOptionResult(
+                    paymentOption = paymentOptionFactory.create(confirmingWalletButtonSelection),
+                    didCancel = false,
+                )
+            )
+        }
+
         viewModelScope.launch {
             paymentResultCallback.onPaymentSheetResult(
                 paymentResult.convertToPaymentSheetResult()
