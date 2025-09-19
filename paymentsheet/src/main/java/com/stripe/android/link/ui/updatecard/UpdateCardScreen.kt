@@ -21,6 +21,7 @@ import com.stripe.android.link.ui.LinkLoadingScreen
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.wallet.LinkHintMessageView
+import com.stripe.android.link.ui.wallet.LinkHintStyle
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
@@ -66,10 +67,11 @@ internal fun UpdateCardScreenBody(
             )
         }
 
-        if (state.thisIsYourDefaultHint != null) {
+        state.thisIsYourDefaultHint?.let { hint ->
             LinkHintMessageView(
                 modifier = Modifier.padding(top = 16.dp),
-                hint = state.thisIsYourDefaultHint,
+                hint = hint,
+                style = LinkHintStyle.Outlined,
             )
         }
 
