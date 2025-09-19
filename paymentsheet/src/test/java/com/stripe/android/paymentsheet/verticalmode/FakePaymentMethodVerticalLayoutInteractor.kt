@@ -53,4 +53,11 @@ internal class FakePaymentMethodVerticalLayoutInteractor(
     override fun handleViewAction(viewAction: PaymentMethodVerticalLayoutInteractor.ViewAction) {
         viewActionRecorder.record(viewAction)
     }
+
+    override fun reportInitialPaymentMethodVisibilitySnapshot(
+        visiblePaymentMethods: List<String>,
+        hiddenPaymentMethods: List<String>
+    ) {
+        // Do nothing
+    }
 }

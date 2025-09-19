@@ -47,6 +47,11 @@ internal interface PaymentMethodVerticalLayoutInteractor {
 
     fun handleViewAction(viewAction: ViewAction)
 
+    fun reportInitialPaymentMethodVisibilitySnapshot(
+        visiblePaymentMethods: List<String>,
+        hiddenPaymentMethods: List<String>,
+    )
+
     data class State(
         val displayablePaymentMethods: List<DisplayablePaymentMethod>,
         val isProcessing: Boolean,
@@ -106,6 +111,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val shouldUpdateVerticalModeSelection: (String?) -> Boolean,
     private val invokeRowSelectionCallback: (() -> Unit)? = null,
     private val displaysMandatesInFormScreen: Boolean,
+    private val onInitiallyDisplayedPaymentMethodVisibilitySnapshot: (List<String>, List<String>) -> Unit,
     dispatcher: CoroutineContext = Dispatchers.Default,
     mainDispatcher: CoroutineContext = Dispatchers.Main.immediate,
 ) : PaymentMethodVerticalLayoutInteractor {
@@ -175,6 +181,13 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     !requiresFormScreen
                 },
                 displaysMandatesInFormScreen = false,
+                onInitiallyDisplayedPaymentMethodVisibilitySnapshot = { visiblePaymentMethods, hiddenPaymentMethods ->
+                    viewModel.eventReporter.onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
+                        visiblePaymentMethods = visiblePaymentMethods,
+                        hiddenPaymentMethods = hiddenPaymentMethods,
+                        walletsState = viewModel.walletsState.value,
+                    )
+                },
             ).also { interactor ->
                 viewModel.viewModelScope.launch {
                     interactor.state.mapAsStateFlow { it.mandate }.collect { mandate ->
@@ -317,6 +330,13 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 }
             }
         }
+    }
+
+    override fun reportInitialPaymentMethodVisibilitySnapshot(
+        visiblePaymentMethods: List<String>,
+        hiddenPaymentMethods: List<String>,
+    ) {
+        onInitiallyDisplayedPaymentMethodVisibilitySnapshot(visiblePaymentMethods, hiddenPaymentMethods)
     }
 
     private fun getDisplayablePaymentMethods(
