@@ -105,7 +105,7 @@ class OnrampInteractorTest {
         )
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
         val permissionsResult = CryptoCustomerResponse(id = "customer_123")
-        whenever(cryptoApiRepository.grantPartnerMerchantPermissions(any()))
+        whenever(cryptoApiRepository.createCryptoCustomer(any()))
             .thenReturn(Result.success(permissionsResult))
 
         interactor.onLinkControllerState(mockLinkStateWithAccount())
@@ -243,7 +243,7 @@ class OnrampInteractorTest {
     fun testHandleAuthenticationResultSuccess() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
         val permissionsResult = CryptoCustomerResponse(id = "customer_123")
-        whenever(cryptoApiRepository.grantPartnerMerchantPermissions(any()))
+        whenever(cryptoApiRepository.createCryptoCustomer(any()))
             .thenReturn(Result.success(permissionsResult))
 
         interactor.onLinkControllerState(mockLinkStateWithAccount())
@@ -260,7 +260,7 @@ class OnrampInteractorTest {
     fun testHandleAuthorizeResultConsented() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
         val permissionsResult = CryptoCustomerResponse(id = "customer_123")
-        whenever(cryptoApiRepository.grantPartnerMerchantPermissions(any()))
+        whenever(cryptoApiRepository.createCryptoCustomer(any()))
             .thenReturn(Result.success(permissionsResult))
 
         interactor.onLinkControllerState(mockLinkStateWithAccount())

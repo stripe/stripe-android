@@ -7,8 +7,8 @@ import com.stripe.android.crypto.onramp.CheckoutState.Status
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
 import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
+import com.stripe.android.crypto.onramp.exception.MissingCryptoCustomerException
 import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
-import com.stripe.android.crypto.onramp.exception.MissingPlatformSettingsException
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
@@ -58,7 +58,10 @@ internal class OnrampInteractor @Inject constructor(
     private var analyticsService: OnrampAnalyticsService? = null
 
     suspend fun configure(configuration: OnrampConfiguration): OnrampConfigurationResult {
-        _state.value = _state.value.copy(configuration = configuration)
+        _state.value = OnrampState(
+            configuration = configuration,
+            cryptoCustomerId = configuration.cryptoCustomerId,
+        )
 
         // We are *not* calling `PaymentConfiguration.init()` here because we're relying on
         // `LinkController.configure()` to do it.
@@ -124,14 +127,12 @@ internal class OnrampInteractor @Inject constructor(
         return when (result) {
             is LinkController.RegisterConsumerResult.Success -> {
                 val secret = consumerSessionClientSecret()
-                secret?.let {
-                    val permissionsResult = cryptoApiRepository
-                        .grantPartnerMerchantPermissions(it)
-
-                    permissionsResult.fold(
-                        onSuccess = { result ->
+                if (secret != null) {
+                    cryptoApiRepository.createCryptoCustomer(secret).fold(
+                        onSuccess = { customerResponse ->
+                            _state.update { it.copy(cryptoCustomerId = customerResponse.id) }
                             analyticsService?.track(OnrampAnalyticsEvent.LinkRegistrationCompleted)
-                            OnrampRegisterLinkUserResult.Completed(result.id)
+                            OnrampRegisterLinkUserResult.Completed(customerResponse.id)
                         },
                         onFailure = { error ->
                             analyticsService?.track(
@@ -143,7 +144,7 @@ internal class OnrampInteractor @Inject constructor(
                             OnrampRegisterLinkUserResult.Failed(error)
                         }
                     )
-                } ?: run {
+                } else {
                     val error = MissingConsumerSecretException()
                     analyticsService?.track(
                         OnrampAnalyticsEvent.ErrorOccurred(
@@ -151,7 +152,7 @@ internal class OnrampInteractor @Inject constructor(
                             error = error,
                         )
                     )
-                    return OnrampRegisterLinkUserResult.Failed(error)
+                    OnrampRegisterLinkUserResult.Failed(error)
                 }
             }
             is LinkController.RegisterConsumerResult.Failed -> {
@@ -298,44 +299,34 @@ internal class OnrampInteractor @Inject constructor(
             return OnrampCreateCryptoPaymentTokenResult.Failed(error)
         }
 
-        val platformPublishableKey = getOrFetchPlatformKey()
-        if (platformPublishableKey == null) {
-            val error = MissingPlatformSettingsException()
-            analyticsService?.track(
-                OnrampAnalyticsEvent.ErrorOccurred(
-                    operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.CreateCryptoPaymentToken,
-                    error = error,
-                )
-            )
-            return OnrampCreateCryptoPaymentTokenResult.Failed(error)
-        }
-
-        return runCatching {
-            val apiKey = platformPublishableKey
-            when (val result = linkController.createPaymentMethodForOnramp(apiKey = apiKey)) {
-                is LinkController.CreatePaymentMethodResult.Success -> {
-                    result.paymentMethod
-                }
-                is LinkController.CreatePaymentMethodResult.Failed -> {
-                    throw result.error
+        // Get the platform publishable key
+        return getOrFetchPlatformKey()
+            // Create a PaymentMethod
+            .mapCatching { platformPublishableKey ->
+                when (val result = linkController.createPaymentMethodForOnramp(apiKey = platformPublishableKey)) {
+                    is LinkController.CreatePaymentMethodResult.Success -> {
+                        result.paymentMethod
+                    }
+                    is LinkController.CreatePaymentMethodResult.Failed -> {
+                        throw result.error
+                    }
                 }
             }
-        }
+            // Create a crypto payment token
             .flatMapCatching { paymentMethod ->
                 cryptoApiRepository.createPaymentToken(
                     consumerSessionClientSecret = secret,
                     paymentMethod = paymentMethod.id!!,
                 )
             }
-            .map { cryptoPayment -> cryptoPayment.id }
             .fold(
-                onSuccess = { result ->
+                onSuccess = { cryptoPaymentToken ->
                     analyticsService?.track(
                         OnrampAnalyticsEvent.CryptoPaymentTokenCreated(
-                            _state.value.collectingPaymentMethodType
+                            paymentMethodType = _state.value.collectingPaymentMethodType
                         )
                     )
-                    OnrampCreateCryptoPaymentTokenResult.Completed(result)
+                    OnrampCreateCryptoPaymentTokenResult.Completed(cryptoPaymentToken.id)
                 },
                 onFailure = { error ->
                     analyticsService?.track(
@@ -372,13 +363,12 @@ internal class OnrampInteractor @Inject constructor(
     ): OnrampAuthenticateResult = when (result) {
         is LinkController.AuthenticationResult.Success -> {
             val secret = consumerSessionClientSecret()
-            secret?.let {
-                val permissionsResult = cryptoApiRepository
-                    .grantPartnerMerchantPermissions(it)
-                permissionsResult.fold(
-                    onSuccess = { result ->
+            if (secret != null) {
+                cryptoApiRepository.createCryptoCustomer(secret).fold(
+                    onSuccess = { customerResponse ->
+                        _state.update { it.copy(cryptoCustomerId = customerResponse.id) }
                         analyticsService?.track(OnrampAnalyticsEvent.LinkUserAuthenticationCompleted)
-                        OnrampAuthenticateResult.Completed(result.id)
+                        OnrampAuthenticateResult.Completed(customerResponse.id)
                     },
                     onFailure = { error ->
                         analyticsService?.track(
@@ -390,7 +380,7 @@ internal class OnrampInteractor @Inject constructor(
                         OnrampAuthenticateResult.Failed(error)
                     }
                 )
-            } ?: run {
+            } else {
                 val error = MissingConsumerSecretException()
                 analyticsService?.track(
                     OnrampAnalyticsEvent.ErrorOccurred(
@@ -418,13 +408,12 @@ internal class OnrampInteractor @Inject constructor(
     ): OnrampAuthorizeResult = when (result) {
         is LinkController.AuthorizeResult.Consented -> {
             val secret = consumerSessionClientSecret()
-            secret?.let {
-                val permissionsResult = cryptoApiRepository
-                    .grantPartnerMerchantPermissions(it)
-                permissionsResult.fold(
-                    onSuccess = { result ->
+            if (secret != null) {
+                cryptoApiRepository.createCryptoCustomer(secret).fold(
+                    onSuccess = { customerResponse ->
+                        _state.update { it.copy(cryptoCustomerId = customerResponse.id) }
                         analyticsService?.track(OnrampAnalyticsEvent.LinkAuthorizationCompleted(consented = true))
-                        OnrampAuthorizeResult.Consented(result.id)
+                        OnrampAuthorizeResult.Consented(customerResponse.id)
                     },
                     onFailure = { error ->
                         analyticsService?.track(
@@ -436,7 +425,7 @@ internal class OnrampInteractor @Inject constructor(
                         OnrampAuthorizeResult.Failed(error)
                     }
                 )
-            } ?: run {
+            } else {
                 val error = MissingConsumerSecretException()
                 analyticsService?.track(
                     OnrampAnalyticsEvent.ErrorOccurred(
@@ -640,79 +629,48 @@ internal class OnrampInteractor @Inject constructor(
         onrampSessionId: String,
         checkoutHandler: suspend () -> String,
         isContinuation: Boolean,
-    ) = runCatching {
-        val platformApiKey = getOrFetchPlatformKey()
-        if (platformApiKey == null) {
-            val error = MissingPlatformSettingsException()
-            analyticsService?.track(
-                OnrampAnalyticsEvent.ErrorOccurred(
-                    operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.PerformCheckout,
-                    error = error,
-                )
-            )
-            _state.update {
-                it.copy(
-                    checkoutState = CheckoutState(
-                        status = Status.Completed(OnrampCheckoutResult.Failed(error))
-                    )
-                )
+    ) {
+        val checkoutStatus = getOrFetchPlatformKey()
+            .flatMapCatching { platformApiKey ->
+                retrievePaymentIntent(
+                    onrampSessionId = onrampSessionId,
+                    onrampSessionClientSecret = checkoutHandler(),
+                    platformApiKey = platformApiKey
+                ).map { platformApiKey to it }
             }
-            return
-        }
-        val paymentIntent = retrievePaymentIntent(
-            onrampSessionId = onrampSessionId,
-            onrampSessionClientSecret = checkoutHandler(),
-            platformApiKey = platformApiKey
-        )
-
-        // Check if the intent is already complete
-        val checkoutResult = paymentIntent.toCheckoutResult()
-        if (checkoutResult == null) {
-            // Requires next action - trigger PaymentLauncher to handle next actions (UI)
-            _state.update {
-                it.copy(
-                    checkoutState = CheckoutState(
-                        status = Status.RequiresNextAction(
+            .fold(
+                onSuccess = { (platformApiKey, paymentIntent) ->
+                    // If there is a checkout result, we're done. Otherwise, signal that next action is needed,
+                    // which is handled by PaymentLauncher in the presenter.
+                    paymentIntent.toCheckoutResult()
+                        ?.let { checkoutResult ->
+                            analyticsService?.track(
+                                OnrampAnalyticsEvent.CheckoutCompleted(
+                                    onrampSessionId = onrampSessionId,
+                                    paymentMethodType = _state.value.collectingPaymentMethodType,
+                                    requiredAction = isContinuation
+                                )
+                            )
+                            Status.Completed(checkoutResult)
+                        }
+                        ?: Status.RequiresNextAction(
                             platformKey = platformApiKey,
                             onrampSessionId = onrampSessionId,
                             checkoutHandler = checkoutHandler,
                             paymentIntent = paymentIntent
                         )
+                },
+                onFailure = { error ->
+                    analyticsService?.track(
+                        OnrampAnalyticsEvent.ErrorOccurred(
+                            operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.PerformCheckout,
+                            error = error,
+                        )
                     )
-                )
-            }
-        } else {
-            // Checkout is complete - emit result
-            analyticsService?.track(
-                OnrampAnalyticsEvent.CheckoutCompleted(
-                    onrampSessionId = onrampSessionId,
-                    paymentMethodType = _state.value.collectingPaymentMethodType,
-                    requiredAction = isContinuation
-                )
+                    Status.Completed(OnrampCheckoutResult.Failed(error))
+                }
             )
-            _state.update {
-                it.copy(
-                    checkoutState = CheckoutState(
-                        status = Status.Completed(checkoutResult)
-                    )
-                )
-            }
-        }
-    }.getOrElse { error ->
-        // Error occurred - emit failure
-        analyticsService?.track(
-            OnrampAnalyticsEvent.ErrorOccurred(
-                operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.PerformCheckout,
-                error = error,
-            )
-        )
-        _state.update {
-            it.copy(
-                checkoutState = CheckoutState(
-                    status = Status.Completed(OnrampCheckoutResult.Failed(error))
-                )
-            )
-        }
+        _state.update { it.copy(checkoutState = CheckoutState(checkoutStatus)) }
     }
 
     /**
@@ -727,18 +685,19 @@ internal class OnrampInteractor @Inject constructor(
         onrampSessionId: String,
         onrampSessionClientSecret: String,
         platformApiKey: String
-    ): PaymentIntent {
+    ): Result<PaymentIntent> {
         // Get the onramp session to extract the payment_intent_client_secret
-        val onrampSession = cryptoApiRepository.getOnrampSession(
+        return cryptoApiRepository.getOnrampSession(
             sessionId = onrampSessionId,
             sessionClientSecret = onrampSessionClientSecret
-        ).getOrThrow()
-
-        // Retrieve and return the PaymentIntent using the special publishable key
-        return cryptoApiRepository.retrievePaymentIntent(
-            clientSecret = onrampSession.paymentIntentClientSecret,
-            publishableKey = platformApiKey
-        ).getOrThrow()
+        )
+            // Retrieve and return the PaymentIntent using the special publishable key
+            .flatMapCatching { onrampSession ->
+                cryptoApiRepository.retrievePaymentIntent(
+                    clientSecret = onrampSession.paymentIntentClientSecret,
+                    publishableKey = platformApiKey
+                )
+            }
     }
 
     /**
@@ -766,43 +725,43 @@ internal class OnrampInteractor @Inject constructor(
      * Gets the platform publishable key from state, or fetches it if not available.
      * Returns null if fetch fails or key is null.
      */
-    private suspend fun getOrFetchPlatformKey(): String? {
-        val currentConsumerSecret = consumerSessionClientSecret()
+    private suspend fun getOrFetchPlatformKey(): Result<String> {
+        val cryptoCustomerId = _state.value.cryptoCustomerId
         val cachedKey = _state.value.platformKeyCache
 
-        // Check if we have a valid cached key for the current consumer session
-        if (cachedKey != null && cachedKey.consumerSessionClientSecret == currentConsumerSecret) {
-            return cachedKey.publishableKey
+        // Check if we have a valid cached key for the current customer
+        if (cachedKey != null && cachedKey.cryptoCustomerId == cryptoCustomerId) {
+            return Result.success(cachedKey.publishableKey)
         }
 
-        // Fetch platform settings if not available or consumer session changed
-        val platformSettingsResult = cryptoApiRepository.getPlatformSettings(
-            consumerSessionClientSecret = currentConsumerSecret,
+        if (cryptoCustomerId == null) {
+            return Result.failure(MissingCryptoCustomerException())
+        }
+
+        // Fetch platform settings if not available or customer changed
+        return cryptoApiRepository.getPlatformSettings(
+            cryptoCustomerId = cryptoCustomerId,
             countryHint = null
         )
-        if (platformSettingsResult.isFailure) {
-            return null
-        }
-
-        val platformPublishableKey = platformSettingsResult.getOrNull()?.publishableKey
-        if (platformPublishableKey != null) {
-            // Cache the key with the current consumer session
-            _state.update {
-                it.copy(
-                    platformKeyCache = PlatformKeyCache(
-                        publishableKey = platformPublishableKey,
-                        consumerSessionClientSecret = currentConsumerSecret
+            .map { it.publishableKey }
+            .onSuccess { platformPublishableKey ->
+                // Cache the key with the current consumer session
+                _state.update {
+                    it.copy(
+                        platformKeyCache = PlatformKeyCache(
+                            publishableKey = platformPublishableKey,
+                            cryptoCustomerId = cryptoCustomerId
+                        )
                     )
-                )
+                }
             }
-        }
-        return platformPublishableKey
     }
 }
 
 internal data class OnrampState(
     val configuration: OnrampConfiguration? = null,
     val linkControllerState: LinkController.State? = null,
+    val cryptoCustomerId: String? = null,
     val collectingPaymentMethodType: PaymentMethodType? = null,
     val checkoutState: CheckoutState? = null,
     val platformKeyCache: PlatformKeyCache? = null,
@@ -813,5 +772,5 @@ internal data class OnrampState(
  */
 internal data class PlatformKeyCache(
     val publishableKey: String,
-    val consumerSessionClientSecret: String?
+    val cryptoCustomerId: String?
 )
