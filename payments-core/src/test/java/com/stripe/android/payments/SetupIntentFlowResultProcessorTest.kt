@@ -7,6 +7,7 @@ import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
@@ -170,7 +171,7 @@ internal class SetupIntentFlowResultProcessorTest {
 
             verify(
                 mockStripeRepository,
-                atMost(getMaxNumberOfInvocations(PaymentMethodFactory.card()))
+                atMost(getMaxNumberOfInvocations(PaymentMethod.Type.Card))
             ).retrieveSetupIntent(
                 eq(clientSecret),
                 eq(requestOptions),
@@ -229,7 +230,7 @@ internal class SetupIntentFlowResultProcessorTest {
 
             verify(
                 mockStripeRepository,
-                atMost(getMaxNumberOfInvocations(paymentMethod))
+                atMost(getMaxNumberOfInvocations(paymentMethod.type!!))
             ).retrieveSetupIntent(
                 any(),
                 any(),
@@ -351,7 +352,7 @@ internal class SetupIntentFlowResultProcessorTest {
 
             verify(
                 mockStripeRepository,
-                atMost(getMaxNumberOfInvocations(paymentMethod))
+                atMost(getMaxNumberOfInvocations(paymentMethod.type!!))
             ).retrieveSetupIntent(
                 any(),
                 any(),
@@ -436,7 +437,7 @@ internal class SetupIntentFlowResultProcessorTest {
 
             verify(
                 mockStripeRepository,
-                atMost(getMaxNumberOfInvocations(paymentMethod))
+                atMost(getMaxNumberOfInvocations(paymentMethod.type!!))
             ).retrieveSetupIntent(
                 any(),
                 any(),

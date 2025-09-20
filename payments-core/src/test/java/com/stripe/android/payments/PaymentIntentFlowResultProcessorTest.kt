@@ -195,7 +195,7 @@ internal class PaymentIntentFlowResultProcessorTest {
                 mockStripeRepository,
                 atMost(
                     getMaxNumberOfInvocations(
-                        PaymentIntentFixtures.PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE.paymentMethod!!
+                        PaymentMethod.Type.WeChatPay
                     )
                 )
             ).refreshPaymentIntent(eq(clientSecret), eq(requestOptions))
@@ -412,7 +412,7 @@ internal class PaymentIntentFlowResultProcessorTest {
             verify(
                 mockStripeRepository,
                 atMost(
-                    getMaxNumberOfInvocations(PaymentMethodFactory.card())
+                    getMaxNumberOfInvocations(PaymentMethod.Type.Card)
                 )
             ).retrievePaymentIntent(any(), any(), any())
 
@@ -511,7 +511,7 @@ internal class PaymentIntentFlowResultProcessorTest {
             verify(
                 mockStripeRepository,
                 atMost(
-                    getMaxNumberOfInvocations(paymentMethod)
+                    getMaxNumberOfInvocations(paymentMethod.type!!)
                 )
             ).retrievePaymentIntent(any(), any(), any())
         }
@@ -666,7 +666,7 @@ internal class PaymentIntentFlowResultProcessorTest {
             verify(
                 mockStripeRepository,
                 atMost(
-                    getMaxNumberOfInvocations(paymentMethod)
+                    getMaxNumberOfInvocations(paymentMethod.type!!)
                 )
             ).retrievePaymentIntent(any(), any(), any())
         }
@@ -858,8 +858,8 @@ internal class PaymentIntentFlowResultProcessorTest {
     }
 }
 
-internal fun getMaxNumberOfInvocations(paymentMethod: PaymentMethod): Int {
-    val retryPollMaxAttempts = when (paymentMethod.type) {
+internal fun getMaxNumberOfInvocations(paymentMethodType: PaymentMethod.Type): Int {
+    val retryPollMaxAttempts = when (paymentMethodType) {
         PaymentMethod.Type.Card -> MAX_POLLING_DURATION / POLLING_DELAY + MINIMUM_RETRIEVE_CALLS
         // WeChatPay uses the refresh endpoint
         PaymentMethod.Type.WeChatPay -> MAX_POLLING_DURATION / POLLING_DELAY + MINIMUM_REFRESH_CALLS
