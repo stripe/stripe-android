@@ -89,7 +89,10 @@ internal enum class AddPaymentMethodRequirement {
 private val PaymentMethodMetadata.supportsMobileInstantDebitsFlow: Boolean
     get() {
         val supportsInstantDebitsOnboarding = linkState?.configuration?.supportsInstantDebitsOnboarding == true
-        return supportsInstantDebitsOnboarding && canShowBankForm
+        val instantDebitsDisabledViaConfig = linkConfiguration.disableFundingSources.any {
+            it.equals("BANK_ACCOUNT", ignoreCase = true)
+        }
+        return supportsInstantDebitsOnboarding && canShowBankForm && instantDebitsDisabledViaConfig.not()
     }
 
 private val PaymentMethodMetadata.canShowBankForm: Boolean

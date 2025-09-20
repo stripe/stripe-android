@@ -657,6 +657,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 .flags[ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT] == true,
             linkSupportedPaymentMethodsOnboardingEnabled =
             elementsSession.linkSettings?.linkSupportedPaymentMethodsOnboardingEnabled.orEmpty(),
+            disableFundingSources = configuration.link.disableFundingSources,
         )
 
         val useWebLink = !linkGateFactory.create(linkConfiguration).useNativeLink
