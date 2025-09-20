@@ -861,6 +861,14 @@ public final class com/stripe/android/paymentelement/AnalyticEvent$TappedConfirm
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class com/stripe/android/paymentelement/AnalyticEvent$TapsButtonInWalletsButtonsView : com/stripe/android/paymentelement/AnalyticEvent {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getWalletType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract interface class com/stripe/android/paymentelement/AnalyticEventCallback {
 	public abstract fun onEvent (Lcom/stripe/android/paymentelement/AnalyticEvent;)V
 }

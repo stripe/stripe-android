@@ -9,7 +9,9 @@ import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.verification.NoOpLinkInlineInteractor
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
@@ -62,6 +64,7 @@ internal interface EmbeddedContentHelper {
     fun clearSheetLauncher()
 }
 
+@OptIn(ExperimentalAnalyticEventCallbackApi::class)
 @Singleton
 internal class DefaultEmbeddedContentHelper @Inject constructor(
     @ViewModelScope private val coroutineScope: CoroutineScope,
@@ -75,6 +78,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     private val embeddedLinkHelper: EmbeddedLinkHelper,
     private val rowSelectionImmediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
+    private val analyticsCallbackProvider: Provider<AnalyticEventCallback?>,
     private val embeddedWalletsHelper: EmbeddedWalletsHelper,
     private val customerStateHolder: CustomerStateHolder,
     private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
@@ -171,7 +175,8 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             errorReporter = errorReporter,
             linkPaymentLauncher = linkPaymentLauncher,
             linkAccountHolder = linkAccountHolder,
-            linkInlineInteractor = NoOpLinkInlineInteractor()
+            linkInlineInteractor = NoOpLinkInlineInteractor(),
+            analyticsCallbackProvider = analyticsCallbackProvider,
         )
     }
 
