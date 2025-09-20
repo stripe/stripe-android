@@ -47,6 +47,8 @@ internal fun PaymentElement(
     usBankAccountFormArguments: USBankAccountFormArguments,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
     modifier: Modifier = Modifier,
+    shouldTrackRenderedLPMs: Boolean = false,
+    reportInitialPaymentMethodVisibilitySnapshot: (List<String>, List<String>) -> Unit = { _, _ -> },
     onInteractionEvent: () -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -73,6 +75,8 @@ internal fun PaymentElement(
                 onItemSelectedListener = onItemSelectedListener,
                 imageLoader = imageLoader,
                 modifier = Modifier.padding(bottom = 12.dp),
+                shouldTrackRenderedLPMs = shouldTrackRenderedLPMs,
+                reportInitialPaymentMethodVisibilitySnapshot = reportInitialPaymentMethodVisibilitySnapshot,
             )
         }
 

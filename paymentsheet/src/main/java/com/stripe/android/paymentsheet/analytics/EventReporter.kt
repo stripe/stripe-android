@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.ui.core.cardscan.CardScanEventsReporter
 
 @Suppress("TooManyFunctions")
@@ -237,6 +238,15 @@ internal interface EventReporter : CardScanEventsReporter {
 
     fun onUsBankAccountFormEvent(
         event: USBankAccountFormViewModel.AnalyticsEvent
+    )
+
+    /**
+     * Captures a snapshot of payment method visibility states when the UI has settled.
+     */
+    fun onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
+        visiblePaymentMethods: List<String>,
+        hiddenPaymentMethods: List<String>,
+        walletsState: WalletsState?,
     )
 
     /**

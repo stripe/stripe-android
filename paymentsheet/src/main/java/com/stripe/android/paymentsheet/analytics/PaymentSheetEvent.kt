@@ -800,6 +800,21 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         )
     }
 
+    class InitialDisplayedPaymentMethods(
+        visiblePaymentMethods: List<String>,
+        hiddenPaymentMethods: List<String>,
+        override val isDeferred: Boolean,
+        override val isSpt: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_initial_displayed_payment_methods"
+        override val additionalParams: Map<String, Any?> = buildMap {
+            put(FIELD_VISIBLE_PAYMENT_METHODS, visiblePaymentMethods.joinToString(","))
+            put(FIELD_HIDDEN_PAYMENT_METHODS, hiddenPaymentMethods.joinToString(","))
+        }
+    }
+
     private fun standardParams(
         isDecoupled: Boolean,
         isSpt: Boolean,
@@ -885,6 +900,8 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_PAYMENT_METHOD_OPTIONS_SETUP_FUTURE_USAGE = "payment_method_options_setup_future_usage"
         const val FIELD_SETUP_FUTURE_USAGE = "setup_future_usage"
         const val FIELD_ROW_SELECTION_BEHAVIOR = "row_selection_behavior"
+        const val FIELD_VISIBLE_PAYMENT_METHODS = "visible_payment_methods"
+        const val FIELD_HIDDEN_PAYMENT_METHODS = "hidden_payment_methods"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"

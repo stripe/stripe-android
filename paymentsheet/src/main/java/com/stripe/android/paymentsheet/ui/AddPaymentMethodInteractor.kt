@@ -31,6 +31,11 @@ internal interface AddPaymentMethodInteractor {
 
     fun handleViewAction(viewAction: ViewAction)
 
+    fun reportInitialPaymentMethodVisibilitySnapshot(
+        visiblePaymentMethods: List<String>,
+        hiddenPaymentMethods: List<String>,
+    )
+
     fun close()
 
     data class State(
@@ -76,6 +81,7 @@ internal class DefaultAddPaymentMethodInteractor(
     private val createUSBankAccountFormArguments: (PaymentMethodCode) -> USBankAccountFormArguments,
     private val coroutineScope: CoroutineScope,
     private val uiContext: CoroutineContext,
+    private val onInitiallyDisplayedPaymentMethodVisibilitySnapshot: (List<String>, List<String>) -> Unit,
     override val isLiveMode: Boolean,
 ) : AddPaymentMethodInteractor {
 
@@ -117,6 +123,14 @@ internal class DefaultAddPaymentMethodInteractor(
                 validationRequested = viewModel.validationRequested,
                 uiContext = Dispatchers.Main,
                 isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
+                onInitiallyDisplayedPaymentMethodVisibilitySnapshot = { visiblePaymentMethods, hiddenPaymentMethods ->
+                    viewModel.eventReporter.onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
+                        visiblePaymentMethods = visiblePaymentMethods,
+                        hiddenPaymentMethods = hiddenPaymentMethods,
+                        // Flow Controller does not show wallet header in AddPaymentMethod
+                        walletsState = viewModel.walletsState.value?.takeIf { viewModel.isCompleteFlow },
+                    )
+                }
             )
         }
     }
@@ -211,6 +225,16 @@ internal class DefaultAddPaymentMethodInteractor(
                 }
             }
         }
+    }
+
+    override fun reportInitialPaymentMethodVisibilitySnapshot(
+        visiblePaymentMethods: List<String>,
+        hiddenPaymentMethods: List<String>,
+    ) {
+        onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
+            visiblePaymentMethods,
+            hiddenPaymentMethods,
+        )
     }
 
     override fun close() {

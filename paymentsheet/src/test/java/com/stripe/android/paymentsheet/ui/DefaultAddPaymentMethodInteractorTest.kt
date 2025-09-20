@@ -308,6 +308,7 @@ class DefaultAddPaymentMethodInteractorTest {
             validationRequested = validationRequestedSource,
             isLiveMode = true,
             uiContext = dispatcher,
+            onInitiallyDisplayedPaymentMethodVisibilitySnapshot = { _, _ -> }
         )
 
         TestParams(

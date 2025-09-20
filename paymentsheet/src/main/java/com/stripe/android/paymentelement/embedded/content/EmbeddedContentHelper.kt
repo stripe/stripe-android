@@ -260,6 +260,13 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             },
             invokeRowSelectionCallback = ::invokeRowSelectionCallback,
             displaysMandatesInFormScreen = isImmediateAction && embeddedViewDisplaysMandateText,
+            onInitiallyDisplayedPaymentMethodVisibilitySnapshot = { visiblePaymentMethods, hiddenPaymentMethods ->
+                eventReporter.onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
+                    visiblePaymentMethods = visiblePaymentMethods,
+                    hiddenPaymentMethods = hiddenPaymentMethods,
+                    walletsState = walletsState.value,
+                )
+            },
         )
     }
 

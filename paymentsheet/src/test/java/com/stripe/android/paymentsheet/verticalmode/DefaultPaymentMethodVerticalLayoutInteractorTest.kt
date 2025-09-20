@@ -1576,6 +1576,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             mainDispatcher = UnconfinedTestDispatcher(),
             invokeRowSelectionCallback = invokeRowSelectionCallback,
             displaysMandatesInFormScreen = displaysMandatesInFormScreen,
+            onInitiallyDisplayedPaymentMethodVisibilitySnapshot = { _, _ -> }
         )
 
         TestParams(

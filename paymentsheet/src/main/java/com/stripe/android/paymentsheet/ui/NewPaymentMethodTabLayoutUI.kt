@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
@@ -41,13 +42,14 @@ internal fun NewPaymentMethodTabLayoutUI(
     onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
+    shouldTrackRenderedLPMs: Boolean = false,
+    reportInitialPaymentMethodVisibilitySnapshot: (List<String>, List<String>) -> Unit = { _, _ -> },
     state: LazyListState = rememberLazyListState(),
 ) {
     // This is to fix an issue in tests involving this composable
     // where the test would succeed when run in isolation, but would
     // fail when run as part of test suite.
     val inspectionMode = LocalInspectionMode.current
-
     LaunchedEffect(selectedIndex) {
         if (inspectionMode) {
             state.scrollToItem(selectedIndex)
@@ -55,7 +57,7 @@ internal fun NewPaymentMethodTabLayoutUI(
             state.animateScrollToItem(selectedIndex)
         }
     }
-
+    val paymentMethodCodes = remember(paymentMethods) { paymentMethods.map { it.code } }
     BoxWithConstraints(
         modifier = modifier.testTag(TEST_TAG_LIST + "1")
     ) {
@@ -64,10 +66,24 @@ internal fun NewPaymentMethodTabLayoutUI(
             paymentMethods.size
         )
 
+        val configuration = LocalConfiguration.current
+        val innerPadding = PaymentMethodsUISpacing.carouselInnerPadding
+        if (shouldTrackRenderedLPMs) {
+            LaunchedEffect(paymentMethodCodes) {
+                reportInitialPaymentMethodVisibilitySnapshot(
+                    paymentMethods = paymentMethods,
+                    tabWidth = viewWidth,
+                    screenWidth = configuration.screenWidthDp.dp,
+                    innerPadding = innerPadding,
+                    callback = reportInitialPaymentMethodVisibilitySnapshot
+                )
+            }
+        }
+
         LazyRow(
             state = state,
             contentPadding = StripeTheme.getOuterFormInsets(),
-            horizontalArrangement = Arrangement.spacedBy(PaymentMethodsUISpacing.carouselInnerPadding),
+            horizontalArrangement = Arrangement.spacedBy(innerPadding),
             userScrollEnabled = isEnabled,
             modifier = Modifier.testTag(TEST_TAG_LIST)
         ) {
@@ -92,6 +108,28 @@ internal fun NewPaymentMethodTabLayoutUI(
             }
         }
     }
+}
+
+private fun reportInitialPaymentMethodVisibilitySnapshot(
+    paymentMethods: List<SupportedPaymentMethod>,
+    tabWidth: Dp,
+    screenWidth: Dp,
+    innerPadding: Dp,
+    callback: (List<String>, List<String>) -> Unit,
+) {
+    // Since peek width of 1st partially visible item is never going to exceed more than 50%,
+    // the partially visible item will always be under 95% threshold, and thus considered hidden
+    val remainingWidth = screenWidth - tabWidth
+    val additionalItems = (remainingWidth / (tabWidth + innerPadding)).toInt()
+    val numberOfVisibleItems = (additionalItems + 1)
+        .coerceIn(0, paymentMethods.size)
+    val visibleLpms = paymentMethods
+        .subList(0, numberOfVisibleItems)
+        .map { pm -> pm.code }
+    val hiddenLpms = paymentMethods
+        .subList(numberOfVisibleItems, paymentMethods.size)
+        .map { pm -> pm.code }
+    callback(visibleLpms, hiddenLpms)
 }
 
 @Composable

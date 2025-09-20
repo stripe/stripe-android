@@ -73,7 +73,7 @@ internal fun NewPaymentMethodRowButton(
                 iconUrl = iconUrl,
                 imageLoader = imageLoader,
                 iconRequiresTinting = iconRequiresTinting,
-                modifier = modifier.height(iconHeight).width(iconWidth),
+                modifier = Modifier.height(iconHeight).width(iconWidth),
                 contentAlignment = Alignment.Center,
             )
         },
