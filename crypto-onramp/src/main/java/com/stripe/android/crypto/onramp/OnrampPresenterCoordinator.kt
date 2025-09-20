@@ -118,7 +118,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     fun collectPaymentMethod(type: PaymentMethodType) {
         interactor.onCollectPaymentMethod(type)
-        linkPresenter.presentPaymentMethods(
+        linkPresenter.presentPaymentMethodsForOnramp(
             email = clientEmail(),
             paymentMethodType = type.toLinkType()
         )
