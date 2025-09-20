@@ -13,15 +13,14 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
-import com.stripe.android.uicore.BuildConfig
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -51,17 +50,6 @@ internal fun NewPaymentMethodTabLayoutUI(
     // where the test would succeed when run in isolation, but would
     // fail when run as part of test suite.
     val inspectionMode = LocalInspectionMode.current
-
-    val isInstrumentationTest = runCatching {
-        BuildConfig.DEBUG && run {
-            // InstrumentationRegistry.getInstrumentation()
-            val registry = Class.forName("androidx.test.platform.app.InstrumentationRegistry")
-            val instrumentationMethod = registry.getDeclaredMethod("getInstrumentation")
-            instrumentationMethod.invoke(null) // This will throw if we're not in an instrumentation test.
-            true
-        }
-    }.getOrDefault(false)
-
     LaunchedEffect(selectedIndex) {
         if (inspectionMode) {
             state.scrollToItem(selectedIndex)
@@ -69,7 +57,7 @@ internal fun NewPaymentMethodTabLayoutUI(
             state.animateScrollToItem(selectedIndex)
         }
     }
-
+    val paymentMethodCodes = remember(paymentMethods) { paymentMethods.map { it.code } }
     BoxWithConstraints(
         modifier = modifier.testTag(TEST_TAG_LIST + "1")
     ) {
@@ -78,10 +66,24 @@ internal fun NewPaymentMethodTabLayoutUI(
             paymentMethods.size
         )
 
+        val configuration = LocalConfiguration.current
+        val innerPadding = PaymentMethodsUISpacing.carouselInnerPadding
+        if (shouldTrackRenderedLPMs) {
+            LaunchedEffect(paymentMethodCodes) {
+                reportInitialPaymentMethodVisibilitySnapshot(
+                    paymentMethods = paymentMethods,
+                    tabWidth = viewWidth,
+                    screenWidth = configuration.screenWidthDp.dp,
+                    innerPadding = innerPadding,
+                    callback = reportInitialPaymentMethodVisibilitySnapshot
+                )
+            }
+        }
+
         LazyRow(
             state = state,
             contentPadding = StripeTheme.getOuterFormInsets(),
-            horizontalArrangement = Arrangement.spacedBy(PaymentMethodsUISpacing.carouselInnerPadding),
+            horizontalArrangement = Arrangement.spacedBy(innerPadding),
             userScrollEnabled = isEnabled,
             modifier = Modifier.testTag(TEST_TAG_LIST)
         ) {
@@ -106,53 +108,27 @@ internal fun NewPaymentMethodTabLayoutUI(
             }
         }
     }
-
-    if (shouldTrackRenderedLPMs && !inspectionMode && !isInstrumentationTest) {
-        LaunchedEffect(state) {
-            snapshotFlow { state }
-                .collect {
-                    reportInitialPaymentMethodVisibilitySnapshot(
-                        paymentMethods,
-                        state,
-                    ) { visibleLpms, hiddenLpms ->
-                        reportInitialPaymentMethodVisibilitySnapshot(visibleLpms, hiddenLpms)
-                    }
-                }
-        }
-    }
-}
-
-@Suppress("MagicNumber")
-private fun getIndexOfLastFullyVisibleItem(state: LazyListState): Int {
-    val lastVisibleItem = state.layoutInfo.visibleItemsInfo.last()
-    val visibilityThreshold95Percent = 0.95
-    val isLastVisibleItemFullyVisible =
-        state.layoutInfo.viewportSize.width >
-            (lastVisibleItem.offset + lastVisibleItem.size * visibilityThreshold95Percent)
-    val lastFullyVisibleItemIndex = if (isLastVisibleItemFullyVisible) {
-        lastVisibleItem.index
-    } else {
-        (lastVisibleItem.index - 1).coerceAtLeast(0)
-    }
-
-    return lastFullyVisibleItemIndex
 }
 
 private fun reportInitialPaymentMethodVisibilitySnapshot(
     paymentMethods: List<SupportedPaymentMethod>,
-    state: LazyListState,
+    tabWidth: Dp,
+    screenWidth: Dp,
+    innerPadding: Dp,
     callback: (List<String>, List<String>) -> Unit,
 ) {
-    val firstVisibleItemIndex = state.firstVisibleItemIndex
-
-    val lastFullyVisibleItemIndex = getIndexOfLastFullyVisibleItem(state)
+    // Since peek width of 1st partially visible item is never going to exceed more than 50%,
+    // the partially visible item will always be under 95% threshold, and thus considered hidden
+    val remainingWidth = screenWidth - tabWidth
+    val additionalItems = (remainingWidth / (tabWidth + innerPadding)).toInt()
+    val numberOfVisibleItems = (additionalItems + 1)
+        .coerceIn(0, paymentMethods.size)
     val visibleLpms = paymentMethods
-        .subList(firstVisibleItemIndex, lastFullyVisibleItemIndex + 1)
+        .subList(0, numberOfVisibleItems)
         .map { pm -> pm.code }
     val hiddenLpms = paymentMethods
-        .subList(lastFullyVisibleItemIndex + 1, paymentMethods.size)
+        .subList(numberOfVisibleItems, paymentMethods.size)
         .map { pm -> pm.code }
-
     callback(visibleLpms, hiddenLpms)
 }
 
