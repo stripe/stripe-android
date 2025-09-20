@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
+import com.stripe.android.uicore.BuildConfig
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -50,6 +51,16 @@ internal fun NewPaymentMethodTabLayoutUI(
     // where the test would succeed when run in isolation, but would
     // fail when run as part of test suite.
     val inspectionMode = LocalInspectionMode.current
+
+    val isInstrumentationTest = runCatching {
+        BuildConfig.DEBUG && run {
+            // InstrumentationRegistry.getInstrumentation()
+            val registry = Class.forName("androidx.test.platform.app.InstrumentationRegistry")
+            val instrumentationMethod = registry.getDeclaredMethod("getInstrumentation")
+            instrumentationMethod.invoke(null) // This will throw if we're not in an instrumentation test.
+            true
+        }
+    }.getOrDefault(false)
 
     LaunchedEffect(selectedIndex) {
         if (inspectionMode) {
@@ -96,7 +107,7 @@ internal fun NewPaymentMethodTabLayoutUI(
         }
     }
 
-    if (shouldTrackRenderedLPMs && !inspectionMode) {
+    if (shouldTrackRenderedLPMs && !inspectionMode && !isInstrumentationTest) {
         LaunchedEffect(state) {
             snapshotFlow { state }
                 .collect {
