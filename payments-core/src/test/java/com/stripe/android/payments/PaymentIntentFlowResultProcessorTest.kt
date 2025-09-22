@@ -205,30 +205,28 @@ internal class PaymentIntentFlowResultProcessorTest {
     fun `keeps retrying for polling duration and makes final attempt for wechat`() {
         runTest(testDispatcher) {
             val clientSecret = "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq"
-            val paymentIntentResult = async(Dispatchers.IO) {
-                val stripeRepository = FakeStripeRepository(
-                    retrievePaymentIntent = {
-                        Result.success(PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE)
-                    },
-                    refreshPaymentIntent = {
-                        if (testDispatcher.scheduler.currentTime < MAX_POLLING_DURATION) {
-                            testDispatcher.scheduler.advanceTimeBy(POLLING_DELAY)
-                            Result.success(PaymentIntentFixtures.PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE)
-                        } else {
-                            Result.success(PaymentIntentFixtures.PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS)
-                        }
-                    },
+            val stripeRepository = FakeStripeRepository(
+                retrievePaymentIntent = {
+                    Result.success(PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE)
+                },
+                refreshPaymentIntent = {
+                    if (testDispatcher.scheduler.currentTime < MAX_POLLING_DURATION) {
+                        testDispatcher.scheduler.advanceTimeBy(POLLING_DELAY)
+                        Result.success(PaymentIntentFixtures.PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE)
+                    } else {
+                        Result.success(PaymentIntentFixtures.PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS)
+                    }
+                },
+            )
+
+            val paymentIntentResult = createProcessor(stripeRepository).processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.SUCCEEDED
                 )
+            ).getOrThrow()
 
-                createProcessor(stripeRepository).processResult(
-                    PaymentFlowResult.Unvalidated(
-                        clientSecret = clientSecret,
-                        flowOutcome = StripeIntentResult.Outcome.SUCCEEDED
-                    )
-                ).getOrThrow()
-            }
-
-            assertThat(paymentIntentResult.await())
+            assertThat(paymentIntentResult)
                 .isEqualTo(
                     PaymentIntentResult(
                         intent = PaymentIntentFixtures.PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS,
@@ -255,30 +253,28 @@ internal class PaymentIntentFlowResultProcessorTest {
                 paymentMethodTypes = listOf("card", "revolut_pay"),
             )
 
-            val paymentIntentResult = async(Dispatchers.IO) {
-                val stripeRepository = FakeStripeRepository(
-                    retrievePaymentIntent = {
-                        if (testDispatcher.scheduler.currentTime < REDUCED_POLLING_DURATION) {
-                            testDispatcher.scheduler.advanceTimeBy(POLLING_DELAY)
-                            Result.success(requiresActionIntent)
-                        } else {
-                            Result.success(successIntent)
-                        }
-                    },
-                    refreshPaymentIntent = {
+            val stripeRepository = FakeStripeRepository(
+                retrievePaymentIntent = {
+                    if (testDispatcher.scheduler.currentTime < REDUCED_POLLING_DURATION) {
+                        testDispatcher.scheduler.advanceTimeBy(POLLING_DELAY)
                         Result.success(requiresActionIntent)
-                    },
+                    } else {
+                        Result.success(successIntent)
+                    }
+                },
+                refreshPaymentIntent = {
+                    Result.success(requiresActionIntent)
+                },
+            )
+
+            val paymentIntentResult = createProcessor(stripeRepository).processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.SUCCEEDED
                 )
+            ).getOrThrow()
 
-                createProcessor(stripeRepository).processResult(
-                    PaymentFlowResult.Unvalidated(
-                        clientSecret = clientSecret,
-                        flowOutcome = StripeIntentResult.Outcome.SUCCEEDED
-                    )
-                ).getOrThrow()
-            }
-
-            assertThat(paymentIntentResult.await())
+            assertThat(paymentIntentResult)
                 .isEqualTo(
                     PaymentIntentResult(
                         intent = successIntent,

@@ -154,7 +154,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         // For some payment method types, the intent status can still be `requires_action` by the time the user
         // gets back to the merchant app. We poll until it's succeeded.
         val shouldRefresh = stripeIntent.requiresAction() &&
-            stripeIntent.paymentMethod?.type?.afterRedirectAction?.shouldRefresh == true
+            stripeIntent.paymentMethod?.type?.afterRedirectAction?.shouldRefreshOrRetrieve == true
 
         return succeededMaybeRefresh || cancelledMaybeRefresh || actionNotProcessedMaybeRefresh || shouldRefresh
     }
@@ -229,15 +229,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
     }
 
     private fun getPollingDurationForPaymentMethod(stripeIntent: StripeIntent): Long {
-        val paymentMethod = stripeIntent.paymentMethod?.type
-        return when (paymentMethod) {
-            PaymentMethod.Type.P24,
-            PaymentMethod.Type.RevolutPay,
-            PaymentMethod.Type.AmazonPay,
-            PaymentMethod.Type.Swish,
-            PaymentMethod.Type.Twint -> REDUCED_POLLING_DURATION
-            else -> MAX_POLLING_DURATION
-        }
+        return stripeIntent.paymentMethod?.type?.afterRedirectAction?.pollingDuration ?: MAX_POLLING_DURATION
     }
 
     private suspend fun refreshOrRetrieveIntent(
@@ -281,11 +273,10 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         val requiresAction = stripeIntent.requiresAction()
         val isCardPaymentProcessing = stripeIntent.status == StripeIntent.Status.Processing &&
             stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card
-        // Card does not have an AfterRedirectAction but we do poll for the 3DS2 WebView cancellation case
-        val shouldRetryFor3ds2OrRefreshAction =
-            stripeIntent.paymentMethod?.type?.afterRedirectAction?.shouldRetry ?: true ||
-                stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card
-        return (requiresAction && shouldRetryFor3ds2OrRefreshAction) || isCardPaymentProcessing
+        // Payment methods with AfterRedirectAction.Refresh should only call refresh endpoint once
+        val isNotRefreshPm =
+            stripeIntent.paymentMethod?.type?.afterRedirectAction !is PaymentMethod.AfterRedirectAction.Refresh
+        return (requiresAction && isNotRefreshPm) || isCardPaymentProcessing
     }
 
     internal companion object {
