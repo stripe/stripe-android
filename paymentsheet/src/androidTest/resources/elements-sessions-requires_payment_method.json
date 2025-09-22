@@ -265,5 +265,6 @@
   "shipping_address_settings": {
     "autocomplete_allowed": true
   },
-  "unactivated_payment_method_types": []
+  "unactivated_payment_method_types": [],
+  "session_id": "elements_session_123"
 }

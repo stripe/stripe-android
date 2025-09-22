@@ -43,6 +43,7 @@ constructor(
     private val radarOptions: RadarOptions? = null,
     private val metadata: Map<String, String>? = null,
     private val productUsage: Set<String> = emptySet(),
+    private val clientAttributionMetadata: ClientAttributionMetadata? = null,
 
     /**
      * If provided, will be used as the representation of this object when calling the Stripe API,
@@ -78,6 +79,7 @@ constructor(
         radarOptions: RadarOptions? = null,
         metadata: Map<String, String>? = null,
         productUsage: Set<String> = emptySet(),
+        clientAttributionMetadata: ClientAttributionMetadata? = null,
         overrideParamMap: Map<String, @RawValue Any>? = null
     ) : this(
         type.code,
@@ -101,6 +103,7 @@ constructor(
         radarOptions,
         metadata,
         productUsage,
+        clientAttributionMetadata,
         overrideParamMap
     )
 
@@ -310,6 +313,10 @@ constructor(
         ).plus(
             radarOptions?.let {
                 mapOf(PARAM_RADAR_OPTIONS to it.toParamMap())
+            }.orEmpty()
+        ).plus(
+            clientAttributionMetadata?.let {
+                mapOf(PARAM_CLIENT_ATTRIBUTION_METADATA to it.toParamMap())
             }.orEmpty()
         )
     }
@@ -735,6 +742,7 @@ constructor(
         private const val PARAM_ALLOW_REDISPLAY = "allow_redisplay"
         private const val PARAM_METADATA = "metadata"
         private const val PARAM_RADAR_OPTIONS = "radar_options"
+        private const val PARAM_CLIENT_ATTRIBUTION_METADATA = "client_attribution_metadata"
 
         /**
          * @return params for creating a [PaymentMethod.Type.Card] payment method
@@ -1396,6 +1404,7 @@ constructor(
             overrideParamMap: Map<String, @RawValue Any>?,
             productUsage: Set<String>,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+            clientAttributionMetadata: ClientAttributionMetadata? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 code = code,
@@ -1403,7 +1412,8 @@ constructor(
                 requiresMandate = requiresMandate,
                 allowRedisplay = allowRedisplay,
                 overrideParamMap = overrideParamMap,
-                productUsage = productUsage
+                productUsage = productUsage,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         }
 

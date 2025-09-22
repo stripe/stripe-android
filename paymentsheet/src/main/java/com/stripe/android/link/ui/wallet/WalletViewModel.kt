@@ -655,7 +655,8 @@ private fun WalletUiState.toPaymentMethodCreateParams(): PaymentMethodCreatePara
     return FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
         fieldValuePairs = expiryDateValues,
         code = Card.code,
-        requiresMandate = false
+        requiresMandate = false,
+        clientAttributionMetadata = null
     )
 }
 
