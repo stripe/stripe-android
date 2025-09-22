@@ -360,7 +360,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 elementsSession = elementsSession,
                 customerInfo = customerInfo,
             ),
-            sellerBusinessName = initializationMode.sellerBusinessName
+            initializationMode = initializationMode,
         )
     }
 

@@ -3,6 +3,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntentFixtures
@@ -53,6 +54,7 @@ internal object PaymentMethodMetadataFactory {
         forceSetupFutureUseBehaviorAndNewMandate: Boolean = false,
         passiveCaptchaParams: PassiveCaptchaParams? = null,
         openCardScanAutomatically: Boolean = false,
+        clientAttributionMetadata: ClientAttributionMetadata? = null,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -89,6 +91,7 @@ internal object PaymentMethodMetadataFactory {
             forceSetupFutureUseBehaviorAndNewMandate = forceSetupFutureUseBehaviorAndNewMandate,
             passiveCaptchaParams = passiveCaptchaParams,
             openCardScanAutomatically = openCardScanAutomatically,
+            clientAttributionMetadata = clientAttributionMetadata,
         )
     }
 

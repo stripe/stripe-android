@@ -58,7 +58,7 @@ internal class FakeElementsSessionRepository(
                     customer = sessionsCustomer,
                     cardBrandChoice = cardBrandChoice,
                     customPaymentMethods = this.customPaymentMethods,
-                    elementsSessionId = "session_1234",
+                    elementsSessionId = DEFAULT_ELEMENTS_SESSION_ID,
                     flags = mapOf(
                         ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA to true
                     ),
@@ -69,5 +69,9 @@ internal class FakeElementsSessionRepository(
                 )
             )
         }
+    }
+
+    companion object {
+        const val DEFAULT_ELEMENTS_SESSION_ID = "session_1234"
     }
 }
