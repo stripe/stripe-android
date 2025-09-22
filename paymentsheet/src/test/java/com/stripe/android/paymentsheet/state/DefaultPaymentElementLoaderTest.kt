@@ -34,6 +34,7 @@ import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.Status.Canceled
 import com.stripe.android.model.StripeIntent.Status.Succeeded
@@ -175,6 +176,7 @@ internal class DefaultPaymentElementLoaderTest {
                     clientAttributionMetadata = ClientAttributionMetadata(
                         elementsSessionConfigId = DEFAULT_ELEMENTS_SESSION_ID,
                         paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+                        paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
                     )
                 ),
             )
