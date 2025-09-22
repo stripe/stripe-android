@@ -163,9 +163,11 @@ internal class CryptoApiRepository @Inject constructor(
     }
 
     suspend fun createPaymentToken(
+        cryptoCustomerId: String,
         paymentMethod: String,
     ): Result<CreatePaymentTokenResponse> {
         val params = CreatePaymentTokenRequest(
+            cryptoCustomerId = cryptoCustomerId,
             paymentMethod = paymentMethod,
         )
         return executePost(

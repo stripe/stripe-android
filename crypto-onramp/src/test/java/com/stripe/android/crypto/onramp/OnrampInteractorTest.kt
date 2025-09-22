@@ -217,7 +217,7 @@ class OnrampInteractorTest {
 
         val createPaymentTokenResponse = CreatePaymentTokenResponse(id = "crypto_token_123")
         whenever(
-            cryptoApiRepository.createPaymentToken(any())
+            cryptoApiRepository.createPaymentToken(cryptoCustomerId = any(), paymentMethod = any())
         ).thenReturn(Result.success(createPaymentTokenResponse))
 
         val result = interactor.createCryptoPaymentToken()

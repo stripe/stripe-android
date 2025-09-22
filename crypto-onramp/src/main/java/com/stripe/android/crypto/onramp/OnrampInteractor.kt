@@ -287,9 +287,9 @@ internal class OnrampInteractor @Inject constructor(
 
     @Suppress("LongMethod")
     suspend fun createCryptoPaymentToken(): OnrampCreateCryptoPaymentTokenResult {
-        val secret = consumerSessionClientSecret()
-        if (secret == null) {
-            val error = MissingConsumerSecretException()
+        val cryptoCustomerId = _state.value.cryptoCustomerId
+        if (cryptoCustomerId == null) {
+            val error = MissingCryptoCustomerException()
             analyticsService?.track(
                 OnrampAnalyticsEvent.ErrorOccurred(
                     operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.CreateCryptoPaymentToken,
@@ -301,22 +301,20 @@ internal class OnrampInteractor @Inject constructor(
 
         // Get the platform publishable key
         return getOrFetchPlatformKey()
-            // Create a PaymentMethod
-            .mapCatching { platformPublishableKey ->
+            // Create a PaymentMethod + Crypto PaymentToken
+            .flatMapCatching { platformPublishableKey ->
                 when (val result = linkController.createPaymentMethodForOnramp(apiKey = platformPublishableKey)) {
                     is LinkController.CreatePaymentMethodResult.Success -> {
-                        result.paymentMethod
+                        // Create a crypto payment token
+                        cryptoApiRepository.createPaymentToken(
+                            cryptoCustomerId = cryptoCustomerId,
+                            paymentMethod = result.paymentMethod.id!!,
+                        )
                     }
                     is LinkController.CreatePaymentMethodResult.Failed -> {
                         throw result.error
                     }
                 }
-            }
-            // Create a crypto payment token
-            .flatMapCatching { paymentMethod ->
-                cryptoApiRepository.createPaymentToken(
-                    paymentMethod = paymentMethod.id!!,
-                )
             }
             .fold(
                 onSuccess = { cryptoPaymentToken ->
