@@ -76,6 +76,9 @@ sealed interface StripeIntent : StripeModel {
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     val countryCode: String?
 
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    val automaticPaymentMethodsEnabled: Boolean
+
     fun requiresAction(): Boolean
 
     fun requiresConfirmation(): Boolean
