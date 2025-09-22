@@ -315,7 +315,6 @@ internal class OnrampInteractor @Inject constructor(
             // Create a crypto payment token
             .flatMapCatching { paymentMethod ->
                 cryptoApiRepository.createPaymentToken(
-                    consumerSessionClientSecret = secret,
                     paymentMethod = paymentMethod.id!!,
                 )
             }
