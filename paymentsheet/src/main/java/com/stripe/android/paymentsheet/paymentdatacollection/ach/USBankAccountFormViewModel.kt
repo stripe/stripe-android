@@ -800,7 +800,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             isVerifyingMicrodeposits = isVerifyWithMicrodeposits,
             isSaveForFutureUseSelected = isSaveForFutureUseSelected,
             isInstantDebits = args.instantDebits,
-            isSetupFlow = !args.isPaymentFlow,
+            isSetupFlow = args.formArgs.hasIntentToSetup,
         )
     }
 
