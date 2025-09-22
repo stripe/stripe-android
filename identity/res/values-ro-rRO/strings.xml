@@ -12,6 +12,8 @@
   <string name="stripe_back_of_dl">Verso-ul permisului de conducere</string>
   <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
   <string name="stripe_back_of_dl_selected">Este selectat verso-ul permisului de conducere</string>
+  <!-- Title for scan screen when back of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_back_of_driver_license_or_id">Spatele permisului de conducere sau al documentului de identitate cu fotografie emis de guvern</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">Verso-ul cărții de identitate</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
@@ -102,16 +104,30 @@
   <string name="stripe_first_name">Prenume</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="stripe_flash_mask">Mască pentru animație selfie</string>
+  <!-- Instruction for flipping driver's license or government-issued photo ID -->
+  <string name="stripe_flip_driver_license_or_id">Întoarceți permisul de conducere sau documentul de identitate cu fotografie emis de guvern pe cealaltă parte</string>
+  <!-- Generic back-side instruction for government-issued photo ID (no passport mention) -->
+  <string name="stripe_flip_id_document">Întoarceți actul de identitate cu fotografie emis de guvern în cealaltă parte</string>
+  <!-- Title for scan screen when front of all ID types is shown -->
+  <string name="stripe_front_of_all_id_types">Partea frontală a permisului de conducere, a pașaportului sau a documentului de identitate cu fotografie emis de guvern</string>
   <!-- Description of front of driver's license image -->
   <string name="stripe_front_of_dl">Partea frontală a permisului de conducere</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
   <string name="stripe_front_of_dl_selected">Este selectată partea din față a permisului de conducere</string>
+  <!-- Title for scan screen when front of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_front_of_driver_license_or_id">Partea frontală a permisului de conducere sau a documentului de identitate cu fotografie emis de guvern</string>
+  <!-- Title for scan screen when front of driver's license or passport is shown -->
+  <string name="stripe_front_of_driver_license_or_passport">Partea frontală a permisului de conducere sau a pașaportului</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">Partea frontală a cărții de identitate</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">Partea frontală a documentului de identitate</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Este selectată partea din față a cărții de identitate</string>
+  <!-- Description of front of passport image -->
+  <string name="stripe_front_of_passport">Partea frontală a pașaportului</string>
+  <!-- Title for scan screen when front of passport or government-issued photo ID is shown -->
+  <string name="stripe_front_of_passport_or_id">Partea frontală a pașaportului sau a documentului de identitate cu fotografie emis de guvern</string>
   <!-- Button to go back to the previous screen -->
   <string name="stripe_go_back">Înapoi</string>
   <!-- display name for Government issued photo ID -->
@@ -160,16 +176,24 @@
   <string name="stripe_phone_number">Număr de telefon</string>
   <!-- Instructional text when there is no document in camera frame -->
   <string name="stripe_point_camera_to_document">Nu s-a detectat niciun document</string>
+  <!-- Instruction for positioning all ID types -->
+  <string name="stripe_position_all_id_types">Poziționați permisul de conducere, pașaportul sau documentul de identitate cu fotografie emis de guvern în centrul cadrului</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Întoarceți permisul de conducere pe partea cealaltă</string>
   <!-- Instructional text for scanning front of a driver's license -->
   <string name="stripe_position_dl_front">Poziționați-vă permisul de conducere în centrul cadrului</string>
+  <!-- Instruction for positioning driver's license or government-issued photo ID -->
+  <string name="stripe_position_driver_license_or_id">Poziționați permisul de conducere sau documentul de identitate cu fotografie emis de guvern în centrul cadrului</string>
+  <!-- Instruction for positioning driver's license or passport -->
+  <string name="stripe_position_driver_license_or_passport">Poziționați permisul de conducere sau pașaportul în centrul cadrului</string>
   <!-- Instructional text for scanning back of a identity card -->
   <string name="stripe_position_id_back">Întoarceți cartea de identitate pe partea cealaltă</string>
   <!-- Instructional text for scanning front of a identity card -->
   <string name="stripe_position_id_front">Poziționați-vă cartea de identitate în centrul cadrului</string>
   <!-- Instructional text for scanning a passport -->
   <string name="stripe_position_passport">Poziționați-vă pașaportul în centrul cadrului</string>
+  <!-- Instruction for positioning passport or government-issued photo ID -->
+  <string name="stripe_position_passport_or_id">Poziționați pașaportul sau documentul de identitate cu fotografie emis de guvern în centrul cadrului</string>
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Poziționați-vă fața în centrul cadrului.</string>
   <!-- Instructional text when the document is too blurry -->

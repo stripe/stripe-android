@@ -12,6 +12,8 @@
   <string name="stripe_back_of_dl">ด้านหลังของใบอนุญาตขับขี่</string>
   <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
   <string name="stripe_back_of_dl_selected">เลือกด้านหลังของใบอนุญาตขับขี่</string>
+  <!-- Title for scan screen when back of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_back_of_driver_license_or_id">ด้านหลังของใบอนุญาตขับขี่หรือบัตรประจำตัวที่มีรูปถ่ายที่ออกโดยรัฐบาล</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">ด้านหลังของบัตรประจำตัว</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
@@ -102,16 +104,30 @@
   <string name="stripe_first_name">ชื่อ</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="stripe_flash_mask">มาส์กสำหรับภาพเคลื่อนไหวเกี่ยวกับเซลฟี</string>
+  <!-- Instruction for flipping driver's license or government-issued photo ID -->
+  <string name="stripe_flip_driver_license_or_id">พลิกใบอนุญาตขับขี่หรือบัตรประจำตัวที่มีรูปถ่ายที่ออกโดยรัฐบาลไปอีกด้านหนึ่ง</string>
+  <!-- Generic back-side instruction for government-issued photo ID (no passport mention) -->
+  <string name="stripe_flip_id_document">พลิกบัตรประจำตัวที่มีรูปถ่ายที่ออกโดยรัฐบาลไปอีกด้านหนึ่ง</string>
+  <!-- Title for scan screen when front of all ID types is shown -->
+  <string name="stripe_front_of_all_id_types">ด้านหน้าของใบอนุญาตขับขี่ หนังสือเดินทาง หรือบัตรประจำตัวที่มีรูปถ่ายที่ออกโดยรัฐบาล</string>
   <!-- Description of front of driver's license image -->
   <string name="stripe_front_of_dl">ด้านหน้าของใบอนุญาตขับขี่</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
   <string name="stripe_front_of_dl_selected">เลือกด้านหน้าของใบอนุญาตขับขี่</string>
+  <!-- Title for scan screen when front of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_front_of_driver_license_or_id">ด้านหน้าของใบอนุญาตขับขี่หรือบัตรประจำตัวที่มีรูปถ่ายที่ออกโดยรัฐบาล</string>
+  <!-- Title for scan screen when front of driver's license or passport is shown -->
+  <string name="stripe_front_of_driver_license_or_passport">ด้านหน้าของใบอนุญาตขับขี่หรือหนังสือเดินทาง</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">ด้านหน้าของบัตรประจำตัว</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">ด้านหน้าของเอกสารประจำตัว</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">เลือกด้านหน้าของบัตรประจำตัว</string>
+  <!-- Description of front of passport image -->
+  <string name="stripe_front_of_passport">ด้านหน้าของหนังสือเดินทาง</string>
+  <!-- Title for scan screen when front of passport or government-issued photo ID is shown -->
+  <string name="stripe_front_of_passport_or_id">ด้านหน้าของหนังสือเดินทางหรือบัตรประจำตัวที่มีรูปถ่ายที่ออกโดยรัฐบาล</string>
   <!-- Button to go back to the previous screen -->
   <string name="stripe_go_back">ย้อนกลับ</string>
   <!-- display name for Government issued photo ID -->
@@ -160,16 +176,24 @@
   <string name="stripe_phone_number">หมายเลขโทรศัพท์</string>
   <!-- Instructional text when there is no document in camera frame -->
   <string name="stripe_point_camera_to_document">ตรวจไม่พบเอกสารประจำตัว</string>
+  <!-- Instruction for positioning all ID types -->
+  <string name="stripe_position_all_id_types">จัดตำแหน่งใบอนุญาตขับขี่ หนังสือเดินทาง หรือ บัตรประจำตัวที่มีรูปถ่ายที่ออกโดยรัฐบาลให้อยู่กลางเฟรม</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">พลิกไปยังอีกด้านของใบอนุญาตขับขี่</string>
   <!-- Instructional text for scanning front of a driver's license -->
   <string name="stripe_position_dl_front">จัดตำแหน่งใบอนุญาตขับขี่ให้อยู่กลางเฟรม</string>
+  <!-- Instruction for positioning driver's license or government-issued photo ID -->
+  <string name="stripe_position_driver_license_or_id">จัดตำแหน่งใบอนุญาตขับขี่หรือบัตรประจำตัวที่มีรูปถ่ายที่ออกโดยรัฐบาลให้อยู่กลางเฟรม</string>
+  <!-- Instruction for positioning driver's license or passport -->
+  <string name="stripe_position_driver_license_or_passport">จัดตำแหน่งใบอนุญาตขับขี่หรือหนังสือเดินทางให้อยู่กลางเฟรม</string>
   <!-- Instructional text for scanning back of a identity card -->
   <string name="stripe_position_id_back">พลิกไปยังอีกด้านของบัตรประจำตัว</string>
   <!-- Instructional text for scanning front of a identity card -->
   <string name="stripe_position_id_front">จัดตำแหน่งบัตรประจำตัวให้อยู่กลางเฟรม</string>
   <!-- Instructional text for scanning a passport -->
   <string name="stripe_position_passport">จัดตำแหน่งหนังสือเดินทางให้อยู่กลางเฟรม</string>
+  <!-- Instruction for positioning passport or government-issued photo ID -->
+  <string name="stripe_position_passport_or_id">จัดตำแหน่งหนังสือเดินทางหรือบัตรประจำตัวที่มีรูปถ่ายที่ออกโดยรัฐบาลให้อยู่กลางเฟรม</string>
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">จัดตำแหน่งใบหน้าให้อยู่กลางเฟรม</string>
   <!-- Instructional text when the document is too blurry -->

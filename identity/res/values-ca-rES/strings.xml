@@ -12,6 +12,8 @@
   <string name="stripe_back_of_dl">Revers del permís de conduir</string>
   <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
   <string name="stripe_back_of_dl_selected">S\'ha seleccionat el revers del permís de conduir</string>
+  <!-- Title for scan screen when back of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_back_of_driver_license_or_id">Revers del carnet de conduir o del document d\'identitat amb foto emès pel govern</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">Revers del document d\'identitat</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
@@ -102,16 +104,30 @@
   <string name="stripe_first_name">Nom</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="stripe_flash_mask">Màscara d\'animació per a l\'autofoto</string>
+  <!-- Instruction for flipping driver's license or government-issued photo ID -->
+  <string name="stripe_flip_driver_license_or_id">Gireu el carnet de conduir o el document d\'identitat amb foto emès pel govern cap a l\'altre costat</string>
+  <!-- Generic back-side instruction for government-issued photo ID (no passport mention) -->
+  <string name="stripe_flip_id_document">Gireu el document d\'identitat amb foto emès pel govern cap a l\'altre costat</string>
+  <!-- Title for scan screen when front of all ID types is shown -->
+  <string name="stripe_front_of_all_id_types">Anvers del carnet de conduir, del passaport o del document d\'identitat amb foto emès pel govern</string>
   <!-- Description of front of driver's license image -->
   <string name="stripe_front_of_dl">Anvers del permís de conduir</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
   <string name="stripe_front_of_dl_selected">S\'ha seleccionat l\'anvers del permís de conduir</string>
+  <!-- Title for scan screen when front of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_front_of_driver_license_or_id">Anvers del carnet de conduir o del document d\'identitat amb foto emès pel govern</string>
+  <!-- Title for scan screen when front of driver's license or passport is shown -->
+  <string name="stripe_front_of_driver_license_or_passport">Anvers del carnet de conduir o del passaport</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">Anvers del document d\'identitat</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">Anvers del document d\'identitat</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">S\'ha seleccionat l\'anvers de la identificació</string>
+  <!-- Description of front of passport image -->
+  <string name="stripe_front_of_passport">Anvers del passaport</string>
+  <!-- Title for scan screen when front of passport or government-issued photo ID is shown -->
+  <string name="stripe_front_of_passport_or_id">Anvers del passaport o del document d\'identitat amb foto emès pel govern</string>
   <!-- Button to go back to the previous screen -->
   <string name="stripe_go_back">Enrere</string>
   <!-- display name for Government issued photo ID -->
@@ -160,16 +176,24 @@
   <string name="stripe_phone_number">Número de telèfon</string>
   <!-- Instructional text when there is no document in camera frame -->
   <string name="stripe_point_camera_to_document">No s\'ha detectat cap document</string>
+  <!-- Instruction for positioning all ID types -->
+  <string name="stripe_position_all_id_types">Col·loqueu el carnet de conduir, el passaport o el document d\'identitat amb foto emès pel govern al centre del marc</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Gireu el permís de conduir perquè se\'n vegi l\'altra cara</string>
   <!-- Instructional text for scanning front of a driver's license -->
   <string name="stripe_position_dl_front">Col·loqueu el permís de conduir al centre del marc</string>
+  <!-- Instruction for positioning driver's license or government-issued photo ID -->
+  <string name="stripe_position_driver_license_or_id">Col·loqueu el carnet de conduir o el document d\'identitat amb foto emès pel govern al centre del marc</string>
+  <!-- Instruction for positioning driver's license or passport -->
+  <string name="stripe_position_driver_license_or_passport">Col·loqueu el carnet de conduir o el passaport al centre del marc</string>
   <!-- Instructional text for scanning back of a identity card -->
   <string name="stripe_position_id_back">Gireu el document d\'identitat perquè se\'n vegi l\'altra cara</string>
   <!-- Instructional text for scanning front of a identity card -->
   <string name="stripe_position_id_front">Col·loqueu el document d\'identitat al centre del marc</string>
   <!-- Instructional text for scanning a passport -->
   <string name="stripe_position_passport">Col·loqueu el passaport al centre del marc</string>
+  <!-- Instruction for positioning passport or government-issued photo ID -->
+  <string name="stripe_position_passport_or_id">Col·loqueu el passaport o el document d\'identitat amb foto emès pel govern al centre del marc</string>
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Col·loqueu la cara al centre del marc.</string>
   <!-- Instructional text when the document is too blurry -->

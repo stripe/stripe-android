@@ -12,6 +12,8 @@
   <string name="stripe_back_of_dl">Stražnja strana vozačke dozvole</string>
   <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
   <string name="stripe_back_of_dl_selected">Poleđina vozačke dozvole je odabrana</string>
+  <!-- Title for scan screen when back of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_back_of_driver_license_or_id">Stražnja strana vozačke dozvole ili službenog identifikacijskog dokumenta s fotografijom</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">Stražnja strana osobne iskaznice</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
@@ -102,16 +104,30 @@
   <string name="stripe_first_name">Ime</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="stripe_flash_mask">Maska za selfie animaciju</string>
+  <!-- Instruction for flipping driver's license or government-issued photo ID -->
+  <string name="stripe_flip_driver_license_or_id">Okrenite svoju vozačku dozvolu ili službeni identifikacijski dokument s fotografijom na drugu stranu</string>
+  <!-- Generic back-side instruction for government-issued photo ID (no passport mention) -->
+  <string name="stripe_flip_id_document">Okrenite svoju službeni identifikacijski dokument s fotografijom na drugu stranu</string>
+  <!-- Title for scan screen when front of all ID types is shown -->
+  <string name="stripe_front_of_all_id_types">Prednja strana vozačke dozvole, putovnice ili službenog identifikacijskog dokumenta s fotografijom</string>
   <!-- Description of front of driver's license image -->
   <string name="stripe_front_of_dl">Prednja strana vozačke dozvole</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
   <string name="stripe_front_of_dl_selected">Prednja strana vozačke dozvole je odabrana</string>
+  <!-- Title for scan screen when front of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_front_of_driver_license_or_id">Prednja strana vozačke dozvole ili službenog identifikacijskog dokumenta s fotografijom</string>
+  <!-- Title for scan screen when front of driver's license or passport is shown -->
+  <string name="stripe_front_of_driver_license_or_passport">Prednja strana vozačke dozvole ili putovnice</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">Prednja strana osobne iskaznice</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">Prednja strana identifikacijskog dokumenta</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Prednja strana osobne iskaznice je odabrana</string>
+  <!-- Description of front of passport image -->
+  <string name="stripe_front_of_passport">Prednja strana putovnice</string>
+  <!-- Title for scan screen when front of passport or government-issued photo ID is shown -->
+  <string name="stripe_front_of_passport_or_id">Prednja strana putovnice ili službenog identifikacijskog dokumenta s fotografijom</string>
   <!-- Button to go back to the previous screen -->
   <string name="stripe_go_back">Vrati se natrag</string>
   <!-- display name for Government issued photo ID -->
@@ -160,16 +176,24 @@
   <string name="stripe_phone_number">Telefonski broj</string>
   <!-- Instructional text when there is no document in camera frame -->
   <string name="stripe_point_camera_to_document">Nije otkriven dokument</string>
+  <!-- Instruction for positioning all ID types -->
+  <string name="stripe_position_all_id_types">Postavite vozačku dozvolu, putovnicu ili službeni identifikacijski dokument s fotografijom u sredinu okvira</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Okrenite svoju vozačku dozvolu na drugu stranu</string>
   <!-- Instructional text for scanning front of a driver's license -->
   <string name="stripe_position_dl_front">Postavite svoju vozačku dozvolu u sredinu okvira</string>
+  <!-- Instruction for positioning driver's license or government-issued photo ID -->
+  <string name="stripe_position_driver_license_or_id">Postavite vozačku dozvolu ili službeni identifikacijski dokument s fotografijom u sredinu okvira</string>
+  <!-- Instruction for positioning driver's license or passport -->
+  <string name="stripe_position_driver_license_or_passport">Postavite vozačku dozvolu ili putovnicu u sredinu okvira</string>
   <!-- Instructional text for scanning back of a identity card -->
   <string name="stripe_position_id_back">Okrenite svoju osobnu iskaznicu na drugu stranu</string>
   <!-- Instructional text for scanning front of a identity card -->
   <string name="stripe_position_id_front">Postavite svoju osobnu iskaznicu u sredinu okvira</string>
   <!-- Instructional text for scanning a passport -->
   <string name="stripe_position_passport">Postavite svoju putovnicu u sredinu okvira</string>
+  <!-- Instruction for positioning passport or government-issued photo ID -->
+  <string name="stripe_position_passport_or_id">Postavite putovnicu ili službeni identifikacijski dokument s fotografijom u sredinu okvira</string>
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Postavite svoje lice u središte okvira.</string>
   <!-- Instructional text when the document is too blurry -->

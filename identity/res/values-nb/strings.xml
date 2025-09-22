@@ -12,6 +12,8 @@
   <string name="stripe_back_of_dl">Baksiden av førerkortet</string>
   <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
   <string name="stripe_back_of_dl_selected">Baksiden av førerkortet er valgt</string>
+  <!-- Title for scan screen when back of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_back_of_driver_license_or_id">Baksiden av et førerkort eller en offentlig utstedt ID med bilde</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">Baksiden av identitetskortet</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
@@ -102,16 +104,30 @@
   <string name="stripe_first_name">Fornavn</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="stripe_flash_mask">Maske for selfieanimasjon</string>
+  <!-- Instruction for flipping driver's license or government-issued photo ID -->
+  <string name="stripe_flip_driver_license_or_id">Snu førerkortet eller den offentlig utstedte ID-en med bilde over til den andre siden</string>
+  <!-- Generic back-side instruction for government-issued photo ID (no passport mention) -->
+  <string name="stripe_flip_id_document">Vend den offentlig utstedte ID-en over til den andre siden</string>
+  <!-- Title for scan screen when front of all ID types is shown -->
+  <string name="stripe_front_of_all_id_types">Forsiden av et førerkort, et pass eller en offentlig utstedt ID med bilde</string>
   <!-- Description of front of driver's license image -->
   <string name="stripe_front_of_dl">Forsiden av førerkortet</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
   <string name="stripe_front_of_dl_selected">Forsiden av førerkortet er valgt</string>
+  <!-- Title for scan screen when front of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_front_of_driver_license_or_id">Forsiden av et førerkort eller en offentlig utstedt ID med bilde</string>
+  <!-- Title for scan screen when front of driver's license or passport is shown -->
+  <string name="stripe_front_of_driver_license_or_passport">Forsiden av et førerkort eller et pass</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">Forsiden av identitetskortet</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">Forsiden av identitetsdokumentet</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Forsiden av ID-en er valgt</string>
+  <!-- Description of front of passport image -->
+  <string name="stripe_front_of_passport">Forsiden av passet</string>
+  <!-- Title for scan screen when front of passport or government-issued photo ID is shown -->
+  <string name="stripe_front_of_passport_or_id">Forsiden av et pass eller en offentlig utstedt ID med bilde</string>
   <!-- Button to go back to the previous screen -->
   <string name="stripe_go_back">Gå tilbake</string>
   <!-- display name for Government issued photo ID -->
@@ -160,16 +176,24 @@
   <string name="stripe_phone_number">Telefonnummer</string>
   <!-- Instructional text when there is no document in camera frame -->
   <string name="stripe_point_camera_to_document">Ingen dokumenter er oppdaget</string>
+  <!-- Instruction for positioning all ID types -->
+  <string name="stripe_position_all_id_types">Plasser førerkortet, passet eller den offentlig utstedte ID-en med bilde i midten av rammen</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Snu førerkortet over til den andre siden</string>
   <!-- Instructional text for scanning front of a driver's license -->
   <string name="stripe_position_dl_front">Plasser førerkortet midt i bildet</string>
+  <!-- Instruction for positioning driver's license or government-issued photo ID -->
+  <string name="stripe_position_driver_license_or_id">Plasser førerkortet eller den offentlig utstedte ID-en med bilde i midten av rammen</string>
+  <!-- Instruction for positioning driver's license or passport -->
+  <string name="stripe_position_driver_license_or_passport">Plasser førerkortet eller passet i midten av rammen</string>
   <!-- Instructional text for scanning back of a identity card -->
   <string name="stripe_position_id_back">Snu identitetskortet over til den andre siden</string>
   <!-- Instructional text for scanning front of a identity card -->
   <string name="stripe_position_id_front">Plasser identitetskortet midt i bildet</string>
   <!-- Instructional text for scanning a passport -->
   <string name="stripe_position_passport">Plasser passet midt i bildet</string>
+  <!-- Instruction for positioning passport or government-issued photo ID -->
+  <string name="stripe_position_passport_or_id">Plasser passet eller den offentlig utstedte ID-en med bilde i midten av rammen</string>
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Plasser ansiktet midt i bildet.</string>
   <!-- Instructional text when the document is too blurry -->

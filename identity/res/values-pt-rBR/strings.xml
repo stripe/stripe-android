@@ -12,6 +12,8 @@
   <string name="stripe_back_of_dl">Verso da CNH</string>
   <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
   <string name="stripe_back_of_dl_selected">Verso da habilitação selecionado</string>
+  <!-- Title for scan screen when back of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_back_of_driver_license_or_id">Verso da carteira de habilitação ou documento de identificação oficial com foto</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">Verso da identidade</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
@@ -102,16 +104,30 @@
   <string name="stripe_first_name">Nome</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="stripe_flash_mask">Máscara para animação de selfie</string>
+  <!-- Instruction for flipping driver's license or government-issued photo ID -->
+  <string name="stripe_flip_driver_license_or_id">Vire sua carteira de habilitação ou documento de identificação oficial com foto para o outro lado</string>
+  <!-- Generic back-side instruction for government-issued photo ID (no passport mention) -->
+  <string name="stripe_flip_id_document">Vire seu documento de identificação oficial com foto para o outro lado</string>
+  <!-- Title for scan screen when front of all ID types is shown -->
+  <string name="stripe_front_of_all_id_types">Frente da carteira de habilitação, passaporte ou documento de identificação oficial com foto</string>
   <!-- Description of front of driver's license image -->
   <string name="stripe_front_of_dl">Frente da CNH</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
   <string name="stripe_front_of_dl_selected">Frente da habilitação selecionada</string>
+  <!-- Title for scan screen when front of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_front_of_driver_license_or_id">Frente da carteira de habilitação ou documento de identificação oficial com foto</string>
+  <!-- Title for scan screen when front of driver's license or passport is shown -->
+  <string name="stripe_front_of_driver_license_or_passport">Frente da carteira de habilitação ou passaporte</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">Frente da identidade</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">Frente do documento de identificação</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Frente do documento de identificação selecionada</string>
+  <!-- Description of front of passport image -->
+  <string name="stripe_front_of_passport">Frente do passaporte</string>
+  <!-- Title for scan screen when front of passport or government-issued photo ID is shown -->
+  <string name="stripe_front_of_passport_or_id">Frente do passaporte ou documento de identificação oficial com foto</string>
   <!-- Button to go back to the previous screen -->
   <string name="stripe_go_back">Voltar</string>
   <!-- display name for Government issued photo ID -->
@@ -160,16 +176,24 @@
   <string name="stripe_phone_number">Número de telefone</string>
   <!-- Instructional text when there is no document in camera frame -->
   <string name="stripe_point_camera_to_document">Nenhum documento detectado</string>
+  <!-- Instruction for positioning all ID types -->
+  <string name="stripe_position_all_id_types">Posicione sua carteira de habilitação, passaporte ou documento de identificação oficial com foto no centro da marcação</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Vire a carteira de habilitação para o outro lado</string>
   <!-- Instructional text for scanning front of a driver's license -->
   <string name="stripe_position_dl_front">Posicione a carteira de habilitação no centro do quadro</string>
+  <!-- Instruction for positioning driver's license or government-issued photo ID -->
+  <string name="stripe_position_driver_license_or_id">Posicione sua carteira de habilitação ou documento de identificação oficial com foto no centro da marcação</string>
+  <!-- Instruction for positioning driver's license or passport -->
+  <string name="stripe_position_driver_license_or_passport">Posicione sua carteira de habilitação no centro da marcação</string>
   <!-- Instructional text for scanning back of a identity card -->
   <string name="stripe_position_id_back">Vire a carteira de identidade para o outro lado</string>
   <!-- Instructional text for scanning front of a identity card -->
   <string name="stripe_position_id_front">Posicione a carteira de identidade no centro do quadro</string>
   <!-- Instructional text for scanning a passport -->
   <string name="stripe_position_passport">Posicione o passaporte no centro do quadro</string>
+  <!-- Instruction for positioning passport or government-issued photo ID -->
+  <string name="stripe_position_passport_or_id">Posicione seu passaporte ou documento de identificação oficial com foto no centro da marcação</string>
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Posicione seu rosto no centro do quadro.</string>
   <!-- Instructional text when the document is too blurry -->
