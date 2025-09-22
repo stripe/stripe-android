@@ -207,16 +207,12 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
     ): Result<T> {
         var timeOfLastRequest = System.currentTimeMillis()
         var stripeIntentResult = refreshOrRetrieveIntent(originalIntent, clientSecret, requestOptions)
-        println("YEET shouldRetry for wechat = ${shouldRetry(stripeIntentResult)}")
 
         val timeRemaining = getPollingDurationForPaymentMethod(originalIntent) -
             (System.currentTimeMillis() - initialRetrieveIntentStartTime)
 
-        println("YEET time Remaining: $timeRemaining")
-
         withTimeoutOrNull(timeRemaining) {
             while (shouldRetry(stripeIntentResult)) {
-                println("YEET retrying")
                 // We want to delay a maximum of 1s between requests, including the time the request took.
                 // e.g. if the previous request took 250ms, the delay will be 750ms
                 delay(POLLING_DELAY - (System.currentTimeMillis() - timeOfLastRequest))
@@ -226,12 +222,9 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         }
 
         if (shouldRetry(stripeIntentResult)) {
-            println("YEET final Retry")
             stripeIntentResult = refreshOrRetrieveIntent(originalIntent, clientSecret, requestOptions)
         }
 
-        println("YEET returning result ${stripeIntentResult.getOrNull()}")
-        println("YEET returning result.status ${stripeIntentResult.getOrNull()?.status}")
         return stripeIntentResult
     }
 
