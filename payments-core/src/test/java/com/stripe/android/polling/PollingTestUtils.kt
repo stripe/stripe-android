@@ -8,22 +8,9 @@ import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.PaymentIntentFactory
 import kotlinx.coroutines.CoroutineDispatcher
 
-internal fun exponentialDelayProvider(): () -> Long {
-    var attempt = 1
-    return {
-        // Add a minor offset so that we run after the delay has finished,
-        // not when it's just about to finish.
-        val offset = if (attempt == 1) 1 else 0
-        calculateDelayForExponentialBackoff(attempts = attempt++).inWholeMilliseconds + offset
-    }
-}
-
 internal fun createIntentStatusPoller(
     enqueuedStatuses: List<StripeIntent.Status>,
     dispatcher: CoroutineDispatcher,
-    pollingStrategy: IntentStatusPoller.PollingStrategy = IntentStatusPoller.PollingStrategy.ExponentialBackoff(
-        maxAttempts = 10
-    ),
 ): DefaultIntentStatusPoller {
     return DefaultIntentStatusPoller(
         stripeRepository = FakeStripeRepository(enqueuedStatuses),
@@ -35,7 +22,6 @@ internal fun createIntentStatusPoller(
         },
         config = IntentStatusPoller.Config(
             clientSecret = "secret",
-            pollingStrategy = pollingStrategy,
         ),
         dispatcher = dispatcher,
     )
