@@ -26,9 +26,11 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent.ConfirmationMethod.Manual
+import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -62,6 +64,7 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeElementsSessionRepository
+import com.stripe.android.utils.FakeElementsSessionRepository.Companion.DEFAULT_ELEMENTS_SESSION_ID
 import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -168,7 +171,11 @@ internal class DefaultPaymentElementLoaderTest {
                         canRemoveLastPaymentMethod = true,
                         canUpdateFullPaymentMethodDetails = false,
                     ),
-                    shopPayConfiguration = null
+                    shopPayConfiguration = null,
+                    clientAttributionMetadata = ClientAttributionMetadata(
+                        elementsSessionConfigId = DEFAULT_ELEMENTS_SESSION_ID,
+                        paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+                    )
                 ),
             )
         )
