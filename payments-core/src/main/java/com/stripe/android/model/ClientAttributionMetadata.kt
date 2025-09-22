@@ -17,7 +17,7 @@ data class ClientAttributionMetadata(
     override fun toParamMap(): Map<String, Any> {
         return mapOf(
             "elements_session_config_id" to elementsSessionConfigId,
-            "payment_intent_creation_flow" to paymentIntentCreationFlow.lowercaseName,
+            "payment_intent_creation_flow" to paymentIntentCreationFlow.paramValue,
             "merchant_integration_source" to "elements",
             "merchant_integration_subtype" to "mobile",
             "merchant_integration_version" to "stripe-android/${StripeSdkVersion.VERSION_NAME}",
@@ -30,9 +30,6 @@ data class ClientAttributionMetadata(
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-enum class PaymentIntentCreationFlow {
-    Standard, Deferred;
-
-    val lowercaseName: String
-        get() = name.lowercase()
+enum class PaymentIntentCreationFlow(internal val paramValue: String) {
+    Standard(paramValue = "standard"), Deferred(paramValue = "deferred")
 }

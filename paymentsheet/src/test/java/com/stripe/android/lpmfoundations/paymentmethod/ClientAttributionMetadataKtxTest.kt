@@ -7,7 +7,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import org.junit.Test
 
-class ClientAttributionMetadataKtxKtTest {
+class ClientAttributionMetadataKtxTest {
 
     @Test
     fun `payment intent creation flow is standard for payment intent`() {
