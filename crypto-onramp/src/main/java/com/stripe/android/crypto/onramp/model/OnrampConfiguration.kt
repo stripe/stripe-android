@@ -17,6 +17,6 @@ import kotlinx.parcelize.Parcelize
 class OnrampConfiguration(
     val merchantDisplayName: String,
     val publishableKey: String,
-    val stripeAccountId: String? = null,
-    val appearance: LinkAppearance
+    val appearance: LinkAppearance,
+    val cryptoCustomerId: String? = null,
 ) : Parcelable

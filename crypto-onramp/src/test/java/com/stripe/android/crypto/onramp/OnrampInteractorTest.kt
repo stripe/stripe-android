@@ -62,14 +62,7 @@ class OnrampInteractorTest {
     fun testConfigureIsSuccessful() = runTest {
         whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
 
-        val result = interactor.configure(
-            OnrampConfiguration(
-                merchantDisplayName = "merchant-display-name",
-                publishableKey = "pk_test_12345",
-                stripeAccountId = "acct_12345",
-                appearance = mock()
-            )
-        )
+        val result = interactor.configure(createConfiguration())
 
         assert(result is OnrampConfigurationResult.Completed)
     }
@@ -105,7 +98,7 @@ class OnrampInteractorTest {
         )
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
         val permissionsResult = CryptoCustomerResponse(id = "customer_123")
-        whenever(cryptoApiRepository.grantPartnerMerchantPermissions(any()))
+        whenever(cryptoApiRepository.createCryptoCustomer(any()))
             .thenReturn(Result.success(permissionsResult))
 
         interactor.onLinkControllerState(mockLinkStateWithAccount())
@@ -203,10 +196,17 @@ class OnrampInteractorTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
         interactor.onLinkControllerState(mockLinkStateWithAccount())
 
+        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        interactor.configure(createConfiguration(cryptoCustomerId = "cpt_123"))
+
         val mockPlatformSettings = mock<GetPlatformSettingsResponse>()
         doReturn("pk_platform_123").whenever(mockPlatformSettings).publishableKey
-        whenever(cryptoApiRepository.getPlatformSettings(eq("secret_123"), anyOrNull()))
-            .thenReturn(Result.success(mockPlatformSettings))
+        whenever(
+            cryptoApiRepository.getPlatformSettings(
+                cryptoCustomerId = eq("cpt_123"),
+                countryHint = anyOrNull()
+            )
+        ).thenReturn(Result.success(mockPlatformSettings))
 
         val mockPaymentMethod = createCardPaymentMethod()
 
@@ -217,11 +217,11 @@ class OnrampInteractorTest {
 
         val createPaymentTokenResponse = CreatePaymentTokenResponse(id = "crypto_token_123")
         whenever(
-            cryptoApiRepository.createPaymentToken(any(), any())
+            cryptoApiRepository.createPaymentToken(cryptoCustomerId = any(), paymentMethod = any())
         ).thenReturn(Result.success(createPaymentTokenResponse))
 
         val result = interactor.createCryptoPaymentToken()
-        assert(result is OnrampCreateCryptoPaymentTokenResult.Completed)
+        assertThat(result).isInstanceOf(OnrampCreateCryptoPaymentTokenResult.Completed::class.java)
 
         testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.CryptoPaymentTokenCreated(null))
     }
@@ -243,7 +243,7 @@ class OnrampInteractorTest {
     fun testHandleAuthenticationResultSuccess() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
         val permissionsResult = CryptoCustomerResponse(id = "customer_123")
-        whenever(cryptoApiRepository.grantPartnerMerchantPermissions(any()))
+        whenever(cryptoApiRepository.createCryptoCustomer(any()))
             .thenReturn(Result.success(permissionsResult))
 
         interactor.onLinkControllerState(mockLinkStateWithAccount())
@@ -260,7 +260,7 @@ class OnrampInteractorTest {
     fun testHandleAuthorizeResultConsented() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
         val permissionsResult = CryptoCustomerResponse(id = "customer_123")
-        whenever(cryptoApiRepository.grantPartnerMerchantPermissions(any()))
+        whenever(cryptoApiRepository.createCryptoCustomer(any()))
             .thenReturn(Result.success(permissionsResult))
 
         interactor.onLinkControllerState(mockLinkStateWithAccount())
@@ -360,4 +360,14 @@ class OnrampInteractorTest {
         createdPaymentMethod = null,
         elementsSessionId = "test-elements-session-id"
     )
+
+    private fun createConfiguration(
+        cryptoCustomerId: String? = null
+    ): OnrampConfiguration =
+        OnrampConfiguration(
+            merchantDisplayName = "merchant-display-name",
+            publishableKey = "pk_test_12345",
+            appearance = mock(),
+            cryptoCustomerId = cryptoCustomerId
+        )
 }

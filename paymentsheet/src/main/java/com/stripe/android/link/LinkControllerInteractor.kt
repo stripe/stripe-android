@@ -30,6 +30,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformToBankIcon
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.transformBankIconCodeToBankIcon
@@ -143,6 +144,7 @@ internal class LinkControllerInteractor @Inject constructor(
         present(
             launcher = launcher,
             email = email,
+            paymentMethodType = paymentMethodType,
             onConfigurationError = { error ->
                 _presentPaymentMethodsResultFlow.tryEmit(
                     LinkController.PresentPaymentMethodsResult.Failed(error)
@@ -201,15 +203,32 @@ internal class LinkControllerInteractor @Inject constructor(
 
     private fun withConfiguration(
         email: String?,
+        paymentMethodType: LinkController.PaymentMethodType?,
         onError: (Throwable) -> Unit,
         onSuccess: (LinkConfiguration) -> Unit
     ) {
         val configuration = requireLinkComponent()
             .map { it.configuration }
             .map { config ->
-                email
-                    ?.let { config.copy(customerInfo = config.customerInfo.copy(email = email)) }
-                    ?: config
+                if (email == null && paymentMethodType == null) {
+                    // No change needed.
+                    config
+                } else {
+                    val customerInfo = config.customerInfo
+                        .copy(email = email ?: config.customerInfo.email)
+                    val nameCollectionConfig =
+                        if (paymentMethodType == LinkController.PaymentMethodType.BankAccount) {
+                            PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+                        } else {
+                            config.billingDetailsCollectionConfiguration.name
+                        }
+                    val billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration
+                        .copy(name = nameCollectionConfig)
+                    config.copy(
+                        customerInfo = customerInfo,
+                        billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                    )
+                }
             }
 
         configuration.fold(
@@ -464,7 +483,6 @@ internal class LinkControllerInteractor @Inject constructor(
     ) {
         present(
             launcher = launcher,
-            email = null,
             onConfigurationError = { error ->
                 _authorizeResultFlow.tryEmit(
                     LinkController.AuthorizeResult.Failed(error)
@@ -484,7 +502,8 @@ internal class LinkControllerInteractor @Inject constructor(
 
     private fun present(
         launcher: ActivityResultLauncher<LinkActivityContract.Args>,
-        email: String?,
+        email: String? = null,
+        paymentMethodType: LinkController.PaymentMethodType? = null,
         onConfigurationError: (Throwable) -> Unit,
         getLaunchMode: (linkAccount: LinkAccount?, state: State) -> LinkLaunchMode?
     ) {
@@ -492,6 +511,7 @@ internal class LinkControllerInteractor @Inject constructor(
 
         withConfiguration(
             email = email,
+            paymentMethodType = paymentMethodType,
             onError = onConfigurationError,
             onSuccess = { configuration ->
                 updateStateOnNewEmail(email)

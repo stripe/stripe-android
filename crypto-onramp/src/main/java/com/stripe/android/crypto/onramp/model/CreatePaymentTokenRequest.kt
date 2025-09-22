@@ -5,7 +5,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 internal data class CreatePaymentTokenRequest(
-    val credentials: CryptoCustomerRequestParams.Credentials,
+    @SerialName("crypto_customer_id")
+    val cryptoCustomerId: String,
 
     @SerialName("payment_method")
     val paymentMethod: String,

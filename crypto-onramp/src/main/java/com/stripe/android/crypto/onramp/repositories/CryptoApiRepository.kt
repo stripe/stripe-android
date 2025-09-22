@@ -69,13 +69,13 @@ internal class CryptoApiRepository @Inject constructor(
      *
      * @param consumerSessionClientSecret The client session secret to attach permissions to.
      */
-    suspend fun grantPartnerMerchantPermissions(
+    suspend fun createCryptoCustomer(
         consumerSessionClientSecret: String
     ): Result<CryptoCustomerResponse> {
         val params = CryptoCustomerRequestParams(CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret))
 
-        return execute(
-            getGrantPartnerMerchantPermissionsUrl,
+        return executePost(
+            customersUrl,
             Json.encodeToJsonElement(params).jsonObject,
             CryptoCustomerResponse.serializer()
         )
@@ -95,7 +95,7 @@ internal class CryptoApiRepository @Inject constructor(
             credentials = CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret)
         )
 
-        return execute(
+        return executePost(
             collectKycDataUrl,
             Json.encodeToJsonElement(apiRequest).jsonObject,
             Unit.serializer()
@@ -120,7 +120,7 @@ internal class CryptoApiRepository @Inject constructor(
             credentials = CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret)
         )
 
-        return execute(
+        return executePost(
             setWalletAddressUrl,
             Json.encodeToJsonElement(params).jsonObject,
             Unit.serializer()
@@ -136,7 +136,7 @@ internal class CryptoApiRepository @Inject constructor(
 
         val json = Json { encodeDefaults = true }
 
-        return execute(
+        return executePost(
             startIdentityVerificationUrl,
             json.encodeToJsonElement(request).jsonObject,
             StartIdentityVerificationResponse.serializer()
@@ -144,14 +144,14 @@ internal class CryptoApiRepository @Inject constructor(
     }
 
     suspend fun getPlatformSettings(
-        consumerSessionClientSecret: String?,
+        cryptoCustomerId: String,
         countryHint: String?
     ): Result<GetPlatformSettingsResponse> {
         val request = apiRequestFactory.createGet(
             url = platformSettings,
             options = buildRequestOptions(),
             params = mapOf(
-                "credentials[consumer_session_client_secret]" to consumerSessionClientSecret,
+                "crypto_customer_id" to cryptoCustomerId,
                 "country_hint" to countryHint
             ).filterNotNullValues()
         )
@@ -163,14 +163,14 @@ internal class CryptoApiRepository @Inject constructor(
     }
 
     suspend fun createPaymentToken(
-        consumerSessionClientSecret: String,
+        cryptoCustomerId: String,
         paymentMethod: String,
     ): Result<CreatePaymentTokenResponse> {
         val params = CreatePaymentTokenRequest(
-            credentials = CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret),
+            cryptoCustomerId = cryptoCustomerId,
             paymentMethod = paymentMethod,
         )
-        return execute(
+        return executePost(
             url = paymentToken,
             paramsJson = Json.encodeToJsonElement(params).jsonObject,
             responseSerializer = CreatePaymentTokenResponse.serializer()
@@ -233,7 +233,7 @@ internal class CryptoApiRepository @Inject constructor(
         )
     }
 
-    private suspend fun <Response> execute(
+    private suspend fun <Response> executePost(
         url: String,
         paramsJson: JsonObject,
         responseSerializer: KSerializer<Response>,
@@ -272,7 +272,7 @@ internal class CryptoApiRepository @Inject constructor(
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/customers`
          */
-        internal val getGrantPartnerMerchantPermissionsUrl: String = getApiUrl("crypto/internal/customers")
+        internal val customersUrl: String = getApiUrl("crypto/internal/customers")
 
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/kyc_data_collection`

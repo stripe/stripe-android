@@ -59,7 +59,7 @@ class CryptoApiRepositoryTest {
             whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
                 .thenReturn(stripeResponse)
 
-            val result = cryptoApiRepository.grantPartnerMerchantPermissions(
+            val result = cryptoApiRepository.createCryptoCustomer(
                 consumerSessionClientSecret = "test-secret"
             )
 
@@ -95,7 +95,7 @@ class CryptoApiRepositoryTest {
             whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
                 .thenReturn(stripeResponse)
 
-            val result = cryptoApiRepository.grantPartnerMerchantPermissions(
+            val result = cryptoApiRepository.createCryptoCustomer(
                 consumerSessionClientSecret = "test-secret"
             )
 

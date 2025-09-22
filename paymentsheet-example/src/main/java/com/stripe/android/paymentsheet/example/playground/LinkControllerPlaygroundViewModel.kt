@@ -91,7 +91,7 @@ internal class LinkControllerPlaygroundViewModel(
     }
 
     fun onPaymentMethodClick(email: String, paymentMethodType: LinkController.PaymentMethodType?) {
-        linkControllerPresenter?.presentPaymentMethods(
+        linkControllerPresenter?.presentPaymentMethodsForOnramp(
             email = email.takeIf { it.isNotBlank() },
             paymentMethodType = paymentMethodType,
         )

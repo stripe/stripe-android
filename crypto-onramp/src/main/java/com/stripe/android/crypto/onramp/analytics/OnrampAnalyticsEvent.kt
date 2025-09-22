@@ -3,6 +3,7 @@ package com.stripe.android.crypto.onramp.analytics
 import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
+import com.stripe.android.utils.filterNotNullValues
 
 /**
  * Event definitions for Crypto Onramp.
@@ -82,8 +83,8 @@ internal sealed class OnrampAnalyticsEvent(
     ) : OnrampAnalyticsEvent(
         name = "collect_payment_method_started",
         params = mapOf(
-            "payment_method_type" to (paymentMethodType?.value ?: "")
-        )
+            "payment_method_type" to paymentMethodType?.value
+        ).filterNotNullValues()
     )
 
     class CollectPaymentMethodCompleted(
@@ -91,8 +92,8 @@ internal sealed class OnrampAnalyticsEvent(
     ) : OnrampAnalyticsEvent(
         name = "collect_payment_method_completed",
         params = mapOf(
-            "payment_method_type" to (paymentMethodType?.value ?: "")
-        )
+            "payment_method_type" to paymentMethodType?.value
+        ).filterNotNullValues()
     )
 
     class CryptoPaymentTokenCreated(
@@ -100,8 +101,8 @@ internal sealed class OnrampAnalyticsEvent(
     ) : OnrampAnalyticsEvent(
         name = "crypto_payment_token_created",
         params = mapOf(
-            "payment_method_type" to (paymentMethodType?.value ?: "")
-        )
+            "payment_method_type" to paymentMethodType?.value
+        ).filterNotNullValues()
     )
 
     class CheckoutStarted(
@@ -111,8 +112,8 @@ internal sealed class OnrampAnalyticsEvent(
         name = "checkout_started",
         params = mapOf(
             "onramp_session_id" to onrampSessionId,
-            "payment_method_type" to (paymentMethodType?.value ?: "")
-        )
+            "payment_method_type" to paymentMethodType?.value
+        ).filterNotNullValues()
     )
 
     class CheckoutCompleted(
@@ -123,9 +124,9 @@ internal sealed class OnrampAnalyticsEvent(
         name = "checkout_completed",
         params = mapOf(
             "onramp_session_id" to onrampSessionId,
-            "payment_method_type" to (paymentMethodType?.value ?: ""),
+            "payment_method_type" to paymentMethodType?.value,
             "required_action" to requiredAction.toString()
-        )
+        ).filterNotNullValues()
     )
 
     data object LinkLogout : OnrampAnalyticsEvent(

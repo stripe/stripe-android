@@ -507,6 +507,23 @@ class LinkControllerInteractorTest {
     }
 
     @Test
+    fun `onPresentPaymentMethods() with BankAccount payment method requires name collection`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+
+        val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
+        interactor.presentPaymentMethods(
+            launcher = launcher,
+            email = null,
+            paymentMethodType = LinkController.PaymentMethodType.BankAccount
+        )
+
+        val collectionConfig = launcher.calls.awaitItem().input.configuration.billingDetailsCollectionConfiguration
+        assertThat(collectionConfig.name)
+            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always)
+    }
+
+    @Test
     fun `onLinkActivityResult() with PaymentMethodObtained result does nothing`() = runTest {
         val interactor = createInteractor()
         configure(interactor)
