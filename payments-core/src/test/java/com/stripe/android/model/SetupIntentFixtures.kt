@@ -673,6 +673,54 @@ internal object SetupIntentFixtures {
         """.trimIndent()
     )
 
+    internal val SI_WITH_AUTOMATIC_PAYMENT_METHODS_ENABLED = JSONObject(
+        """
+        {
+            "id": "seti_1EqTSZGMT9dGPIDGVzCUs6dV",
+            "object": "setup_intent",
+            "cancellation_reason": null,
+            "client_secret": "seti_1EqTSZGMT9dGPIDGVzCUs6dV_secret_FL9mS9ILygVyGEOSmVNqHT83rxkqy0Y",
+            "created": 1561677666,
+            "description": "a description",
+            "last_setup_error": null,
+            "livemode": false,
+            "payment_method": "pm_1EqTSoGMT9dGPIDG7dgafX1H",
+            "payment_method_types": [
+                "card"
+            ],
+            "status": "requires_action",
+            "usage": "off_session",
+            "automatic_payment_methods": {
+                "enabled": true
+            }
+        }
+        """.trimIndent()
+    )
+
+    internal val SI_WITH_AUTOMATIC_PAYMENT_METHODS_NOT_ENABLED = JSONObject(
+        """
+        {
+            "id": "seti_1EqTSZGMT9dGPIDGVzCUs6dV",
+            "object": "setup_intent",
+            "cancellation_reason": null,
+            "client_secret": "seti_1EqTSZGMT9dGPIDGVzCUs6dV_secret_FL9mS9ILygVyGEOSmVNqHT83rxkqy0Y",
+            "created": 1561677666,
+            "description": "a description",
+            "last_setup_error": null,
+            "livemode": false,
+            "payment_method": "pm_1EqTSoGMT9dGPIDG7dgafX1H",
+            "payment_method_types": [
+                "card"
+            ],
+            "status": "requires_action",
+            "usage": "off_session",
+            "automatic_payment_methods": {
+                "enabled": false
+            }
+        }
+        """.trimIndent()
+    )
+
     val CASH_APP_PAY_REQUIRES_ACTION_JSON by lazy {
         JSONObject(
             """

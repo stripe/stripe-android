@@ -361,6 +361,7 @@ internal data class PaymentMethodMetadata(
                 clientAttributionMetadata = ClientAttributionMetadata.create(
                     elementsSessionConfigId = elementsSession.elementsSessionId,
                     initializationMode = initializationMode,
+                    automaticPaymentMethodsEnabled = elementsSession.stripeIntent.automaticPaymentMethodsEnabled,
                 ),
             )
         }

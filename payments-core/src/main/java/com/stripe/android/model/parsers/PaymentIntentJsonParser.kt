@@ -77,6 +77,9 @@ class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
 
         val countryCode = optString(json, FIELD_COUNTRY_CODE)
 
+        val automaticPaymentMethodsEnabled =
+            json.optJSONObject(FIELD_AUTOMATIC_PAYMENT_METHODS)?.optBoolean(FIELD_ENABLED) == true
+
         return PaymentIntent(
             id = id,
             paymentMethodTypes = paymentMethodTypes,
@@ -101,7 +104,8 @@ class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
             unactivatedPaymentMethods = unactivatedPaymentMethods,
             linkFundingSources = linkFundingSources,
             nextActionData = nextActionData,
-            paymentMethodOptionsJsonString = paymentMethodOptions
+            paymentMethodOptionsJsonString = paymentMethodOptions,
+            automaticPaymentMethodsEnabled = automaticPaymentMethodsEnabled,
         )
     }
 
@@ -163,6 +167,7 @@ class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
         private const val FIELD_ID = "id"
         private const val FIELD_OBJECT = "object"
         private const val FIELD_AMOUNT = "amount"
+        private const val FIELD_AUTOMATIC_PAYMENT_METHODS = "automatic_payment_methods"
         private const val FIELD_CREATED = "created"
         private const val FIELD_CANCELED_AT = "canceled_at"
         private const val FIELD_CANCELLATION_REASON = "cancellation_reason"
@@ -172,6 +177,7 @@ class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
         private const val FIELD_COUNTRY_CODE = "country_code"
         private const val FIELD_CURRENCY = "currency"
         private const val FIELD_DESCRIPTION = "description"
+        private const val FIELD_ENABLED = "enabled"
         private const val FIELD_LAST_PAYMENT_ERROR = "last_payment_error"
         private const val FIELD_LIVEMODE = "livemode"
         private const val FIELD_NEXT_ACTION = "next_action"

@@ -25,6 +25,7 @@ import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -1172,6 +1173,7 @@ internal class PaymentMethodMetadataTest {
             clientAttributionMetadata = ClientAttributionMetadata(
                 elementsSessionConfigId = elementsSession.elementsSessionId,
                 paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+                paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
             ),
         )
 

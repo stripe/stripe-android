@@ -109,6 +109,9 @@ constructor(
     override val nextActionData: StripeIntent.NextActionData?,
 
     private val paymentMethodOptionsJsonString: String? = null,
+
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    override val automaticPaymentMethodsEnabled: Boolean = false,
 ) : StripeIntent {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

@@ -12,9 +12,10 @@ class ClientAttributionMetadataTest {
         val clientAttributionMetadataParams = ClientAttributionMetadata(
             elementsSessionConfigId = "elements_session_123",
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+            paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
         ).toParamMap()
 
-        assertThat(clientAttributionMetadataParams).hasSize(6)
+        assertThat(clientAttributionMetadataParams).hasSize(7)
         assertThat(clientAttributionMetadataParams).containsEntry(
             "elements_session_config_id",
             "elements_session_123"
@@ -38,6 +39,10 @@ class ClientAttributionMetadataTest {
         assertThat(clientAttributionMetadataParams).containsEntry(
             "client_session_id",
             AnalyticsRequestFactory.sessionId.toString()
+        )
+        assertThat(clientAttributionMetadataParams).containsEntry(
+            "payment_method_selection_flow",
+            "merchant_specified",
         )
     }
 }

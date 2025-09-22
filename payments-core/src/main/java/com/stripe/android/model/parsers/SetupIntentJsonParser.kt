@@ -32,6 +32,9 @@ class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
 
         val paymentMethodOptions = json.optJSONObject(FIELD_PAYMENT_METHOD_OPTIONS)?.toString()
 
+        val automaticPaymentMethodsEnabled =
+            json.optJSONObject(FIELD_AUTOMATIC_PAYMENT_METHODS)?.optBoolean(FIELD_ENABLED) == true
+
         return SetupIntent(
             id = optString(json, FIELD_ID),
             created = json.optLong(FIELD_CREATED),
@@ -57,7 +60,8 @@ class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
             nextActionData = json.optJSONObject(FIELD_NEXT_ACTION)?.let {
                 NextActionDataParser().parse(it)
             },
-            paymentMethodOptionsJsonString = paymentMethodOptions
+            paymentMethodOptionsJsonString = paymentMethodOptions,
+            automaticPaymentMethodsEnabled = automaticPaymentMethodsEnabled,
         )
     }
 
@@ -92,11 +96,13 @@ class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
 
         private const val FIELD_ID = "id"
         private const val FIELD_OBJECT = "object"
+        private const val FIELD_AUTOMATIC_PAYMENT_METHODS = "automatic_payment_methods"
         private const val FIELD_CANCELLATION_REASON = "cancellation_reason"
         private const val FIELD_CREATED = "created"
         private const val FIELD_CLIENT_SECRET = "client_secret"
         private const val FIELD_COUNTRY_CODE = "country_code"
         private const val FIELD_DESCRIPTION = "description"
+        private const val FIELD_ENABLED = "enabled"
         private const val FIELD_LAST_SETUP_ERROR = "last_setup_error"
         private const val FIELD_LIVEMODE = "livemode"
         private const val FIELD_NEXT_ACTION = "next_action"
