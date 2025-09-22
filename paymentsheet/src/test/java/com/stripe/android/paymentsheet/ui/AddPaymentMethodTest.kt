@@ -608,7 +608,6 @@ internal class AddPaymentMethodTest {
         composeRule.setContent {
             AddPaymentMethod(
                 interactor = addPaymentMethodInteractor,
-                shouldTrackRenderedLPMs = false
             )
         }
 

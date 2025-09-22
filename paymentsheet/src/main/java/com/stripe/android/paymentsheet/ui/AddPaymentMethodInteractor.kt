@@ -27,6 +27,8 @@ import kotlin.coroutines.CoroutineContext
 internal interface AddPaymentMethodInteractor {
     val isLiveMode: Boolean
 
+    val shouldTrackRenderedLPMs: Boolean
+
     val state: StateFlow<State>
 
     fun handleViewAction(viewAction: ViewAction)
@@ -134,6 +136,8 @@ internal class DefaultAddPaymentMethodInteractor(
             )
         }
     }
+
+    override val shouldTrackRenderedLPMs: Boolean = true
 
     private val _selectedPaymentMethodCode: MutableStateFlow<String> =
         MutableStateFlow(initiallySelectedPaymentMethodType)
