@@ -24,6 +24,7 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.RadarOptions
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.setupFutureUsage
 import com.stripe.android.model.updateSetupFutureUsageWithPmoSfu
 import com.stripe.android.networking.StripeRepository
@@ -46,6 +47,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.withTimeoutOrNull
+import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
@@ -309,28 +311,42 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             productUsage = productUsage,
         )
 
-        return createPaymentMethod(params).fold(
-            onSuccess = { paymentMethod ->
-                handleDeferred(
-                    intentConfiguration = intentConfiguration,
-                    paymentMethod = paymentMethod,
-                    paymentMethodOptionsParams = paymentMethodOptionsParams,
-                    paymentMethodExtraParams = paymentMethodExtraParams,
-                    shippingValues = shippingValues,
-                    shouldSavePaymentMethod = customerRequestedSave || shouldSavePaymentMethod(
+        val callback = waitForIntentCallback()
+        return if (callback is CreateIntentWithConfirmationTokenCallback
+            && intentConfiguration.intentBehavior is PaymentSheet.IntentConfiguration.IntentBehavior.Default
+        ) {
+            handleDeferredIntentCreationFromConfirmationToken(
+                createIntentWithConfirmationTokenCallback = callback,
+                intentConfiguration = intentConfiguration,
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                paymentMethodOptionsParams = paymentMethodOptionsParams,
+                paymentMethodExtraParams = paymentMethodExtraParams,
+                shippingValues = shippingValues,
+            )
+        } else {
+            createPaymentMethod(params).fold(
+                onSuccess = { paymentMethod ->
+                    handleDeferred(
+                        intentConfiguration = intentConfiguration,
+                        paymentMethod = paymentMethod,
                         paymentMethodOptionsParams = paymentMethodOptionsParams,
-                        intentConfiguration = intentConfiguration
-                    ),
-                    hCaptchaToken = null
-                )
-            },
-            onFailure = { error ->
-                NextStep.Fail(
-                    cause = error,
-                    message = error.stripeErrorMessage(),
-                )
-            }
-        )
+                        paymentMethodExtraParams = paymentMethodExtraParams,
+                        shippingValues = shippingValues,
+                        shouldSavePaymentMethod = customerRequestedSave || shouldSavePaymentMethod(
+                            paymentMethodOptionsParams = paymentMethodOptionsParams,
+                            intentConfiguration = intentConfiguration
+                        ),
+                        hCaptchaToken = null
+                    )
+                },
+                onFailure = { error ->
+                    NextStep.Fail(
+                        cause = error,
+                        message = error.stripeErrorMessage(),
+                    )
+                }
+            )
+        }
     }
 
     private suspend fun handleDeferred(
@@ -606,6 +622,50 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 )
             }
         }
+    }
+
+    private suspend fun handleDeferredIntentCreationFromConfirmationToken(
+        createIntentWithConfirmationTokenCallback: CreateIntentWithConfirmationTokenCallback,
+        intentConfiguration: PaymentSheet.IntentConfiguration,
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+        paymentMethodExtraParams: PaymentMethodExtraParams?,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?,
+    ): NextStep {
+        return stripeRepository.createConfirmationToken(
+            confirmationTokenParams = ConfirmationTokenParams(
+                paymentMethodData = paymentMethodCreateParams
+            ),
+            options = requestOptions,
+        ).fold(
+            onSuccess = { confirmationToken ->
+                val paymentMethodPreview = confirmationToken.paymentMethodPreview
+                    ?: return NextStep.Fail(
+                        cause = IllegalStateException("Failed to fetch PaymentMethod"),
+                        message = "Failed to fetch PaymentMethod".resolvableString,
+                    )
+                val paymentMethod = PaymentMethodJsonParser().parse(
+                    JSONObject(paymentMethodPreview.allResponseFields
+                    )
+                )
+                handleDeferredOnConfirmationTokenCreated(
+                    callback = createIntentWithConfirmationTokenCallback,
+                    confirmationToken = confirmationToken,
+                    intentConfiguration = intentConfiguration,
+                    paymentMethod = paymentMethod,
+                    paymentMethodOptionsParams = paymentMethodOptionsParams,
+                    paymentMethodExtraParams = paymentMethodExtraParams,
+                    shippingValues = shippingValues,
+                    hCaptchaToken = null,
+                )
+            },
+            onFailure = { error ->
+                NextStep.Fail(
+                    cause = error,
+                    message = error.stripeErrorMessage(),
+                )
+            }
+        )
     }
 
     private suspend fun handleDeferredIntentCreationFromConfirmationToken(
