@@ -374,10 +374,7 @@ constructor(
             requiresMandate = false,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
-            afterRedirectAction = AfterRedirectAction.Refresh(
-                pollingDuration = MAX_POLLING_DURATION,
-                shouldRetry = true
-            ),
+            afterRedirectAction = AfterRedirectAction.Refresh(pollingDuration = MAX_POLLING_DURATION),
         ),
         Klarna(
             "klarna",
