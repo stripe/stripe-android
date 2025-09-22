@@ -236,9 +236,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
             PaymentMethod.Type.AmazonPay,
             PaymentMethod.Type.Swish,
             PaymentMethod.Type.Twint -> REDUCED_POLLING_DURATION
-            PaymentMethod.Type.Card,
-            PaymentMethod.Type.WeChatPay -> MAX_POLLING_DURATION
-            else -> 0L
+            else -> MAX_POLLING_DURATION
         }
     }
 
