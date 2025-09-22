@@ -12,6 +12,8 @@
   <string name="stripe_back_of_dl">운전 면허증 뒷면</string>
   <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
   <string name="stripe_back_of_dl_selected">운전 면허증 뒷면 선택됨</string>
+  <!-- Title for scan screen when back of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_back_of_driver_license_or_id">운전면허증 또는 정부에서 발급한 사진이 부착된 신분증의 뒷면</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">신분증 뒷면</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
@@ -102,16 +104,30 @@
   <string name="stripe_first_name">이름</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="stripe_flash_mask">셀카 애니메이션 마스크</string>
+  <!-- Instruction for flipping driver's license or government-issued photo ID -->
+  <string name="stripe_flip_driver_license_or_id">운전면허증 또는 정부에서 발급한 사진이 부착된 신분증을 반대쪽으로 뒤집으세요</string>
+  <!-- Generic back-side instruction for government-issued photo ID (no passport mention) -->
+  <string name="stripe_flip_id_document">정부에서 발급한 사진이 부착된 신분증을 반대쪽으로 뒤집으세요</string>
+  <!-- Title for scan screen when front of all ID types is shown -->
+  <string name="stripe_front_of_all_id_types">운전면허증, 여권 또는 정부에서 발급한 사진이 부착된 신분증의 앞면</string>
   <!-- Description of front of driver's license image -->
   <string name="stripe_front_of_dl">운전 면허증 앞면</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
   <string name="stripe_front_of_dl_selected">운전 면허증 앞면 선택됨</string>
+  <!-- Title for scan screen when front of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_front_of_driver_license_or_id">운전면허증 또는 정부에서 발급한 사진이 부착된 신분증의 앞면</string>
+  <!-- Title for scan screen when front of driver's license or passport is shown -->
+  <string name="stripe_front_of_driver_license_or_passport">운전면허증 또는 여권의 앞면</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">신분증 앞면</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">신분증 앞면</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">신분증 앞면 선택됨</string>
+  <!-- Description of front of passport image -->
+  <string name="stripe_front_of_passport">여권의 앞면</string>
+  <!-- Title for scan screen when front of passport or government-issued photo ID is shown -->
+  <string name="stripe_front_of_passport_or_id">여권 또는 정부에서 발급한 사진이 부착된 신분증의 앞면</string>
   <!-- Button to go back to the previous screen -->
   <string name="stripe_go_back">돌아가기</string>
   <!-- display name for Government issued photo ID -->
@@ -160,16 +176,24 @@
   <string name="stripe_phone_number">전화번호</string>
   <!-- Instructional text when there is no document in camera frame -->
   <string name="stripe_point_camera_to_document">신분증을 감지할 수 없음</string>
+  <!-- Instruction for positioning all ID types -->
+  <string name="stripe_position_all_id_types">프레임 중앙에 운전면허증, 여권 또는 정부에서 발급한 사진이 부착된 신분증을 놓으세요</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">운전 면허증 반대쪽 면이 보이게 뒤집으십시오.</string>
   <!-- Instructional text for scanning front of a driver's license -->
   <string name="stripe_position_dl_front">프레임 중앙에 운전 면허증을 놓으십시오.</string>
+  <!-- Instruction for positioning driver's license or government-issued photo ID -->
+  <string name="stripe_position_driver_license_or_id">프레임 중앙에 운전면허증 또는 정부에서 발급한 사진이 부착된 신분증을 놓으세요</string>
+  <!-- Instruction for positioning driver's license or passport -->
+  <string name="stripe_position_driver_license_or_passport">프레임 중앙에 운전면허증 또는 여권을 놓으세요</string>
   <!-- Instructional text for scanning back of a identity card -->
   <string name="stripe_position_id_back">신분증 반대쪽 면이 보이게 뒤집으십시오.</string>
   <!-- Instructional text for scanning front of a identity card -->
   <string name="stripe_position_id_front">프레임 중앙에 신분증을 놓으십시오.</string>
   <!-- Instructional text for scanning a passport -->
   <string name="stripe_position_passport">프레임 중앙에 여권을 놓으십시오.</string>
+  <!-- Instruction for positioning passport or government-issued photo ID -->
+  <string name="stripe_position_passport_or_id">프레임 중앙에 여권 또는 정부에서 발급한 사진이 부착된 신분증을 놓으세요</string>
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">프레임 중앙에 얼굴을 놓으십시오.</string>
   <!-- Instructional text when the document is too blurry -->

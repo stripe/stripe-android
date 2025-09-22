@@ -12,6 +12,8 @@
   <string name="stripe_back_of_dl">Tylna strona prawa jazdy</string>
   <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
   <string name="stripe_back_of_dl_selected">Wybrano tył prawa jazdy</string>
+  <!-- Title for scan screen when back of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_back_of_driver_license_or_id">Tył prawa jazdy, lub dokumentu tożsamości ze zdjęciem, wydanego przez organ państwowy</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">Tylna strona dokumentu tożsamości</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
@@ -102,16 +104,30 @@
   <string name="stripe_first_name">Imię</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="stripe_flash_mask">Maska do animacji selfie</string>
+  <!-- Instruction for flipping driver's license or government-issued photo ID -->
+  <string name="stripe_flip_driver_license_or_id">Odwróć swoje prawo jazdy, lub dokument tożsamości ze zdjęciem wydany przez organ państwowy, na drugą stronę</string>
+  <!-- Generic back-side instruction for government-issued photo ID (no passport mention) -->
+  <string name="stripe_flip_id_document">Odwróć swój dokument tożsamości ze zdjęciem wydany przez organ państwowy na drugą stronę</string>
+  <!-- Title for scan screen when front of all ID types is shown -->
+  <string name="stripe_front_of_all_id_types">Przód prawa jazdy, paszportu lub dowodu tożsamości ze zdjęciem wydanego przez organ państwowy</string>
   <!-- Description of front of driver's license image -->
   <string name="stripe_front_of_dl">Przednia strona prawa jazdy</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
   <string name="stripe_front_of_dl_selected">Wybrano przód prawa jazdy</string>
+  <!-- Title for scan screen when front of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_front_of_driver_license_or_id">Przód prawa jazdy lub dokument tożsamości ze zdjęciem wydany przez organ państwowy</string>
+  <!-- Title for scan screen when front of driver's license or passport is shown -->
+  <string name="stripe_front_of_driver_license_or_passport">Przód prawa jazdy lub paszportu</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">Przednia strona dokumentu tożsamości</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">Przednia strona dokumentu tożsamości</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Wybrano przód dokumentu tożsamości</string>
+  <!-- Description of front of passport image -->
+  <string name="stripe_front_of_passport">Przednia strona paszportu</string>
+  <!-- Title for scan screen when front of passport or government-issued photo ID is shown -->
+  <string name="stripe_front_of_passport_or_id">Przód paszportu, lub dokument tożsamości ze zdjęciem, wydany przez organ państwowy</string>
   <!-- Button to go back to the previous screen -->
   <string name="stripe_go_back">Wróć</string>
   <!-- display name for Government issued photo ID -->
@@ -160,16 +176,24 @@
   <string name="stripe_phone_number">Numer telefonu</string>
   <!-- Instructional text when there is no document in camera frame -->
   <string name="stripe_point_camera_to_document">Nie wykryto żadnego dokumentu</string>
+  <!-- Instruction for positioning all ID types -->
+  <string name="stripe_position_all_id_types">Umieść swoje prawo jazdy, paszport lub dokument tożsamości ze zdjęciem wydany przez organ państwowy na środku ramki</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Obróć prawo jazdy na drugą stronę</string>
   <!-- Instructional text for scanning front of a driver's license -->
   <string name="stripe_position_dl_front">Umieść prawo jazdy w centrum kadru</string>
+  <!-- Instruction for positioning driver's license or government-issued photo ID -->
+  <string name="stripe_position_driver_license_or_id">Umieść swoje prawo jazdy lub dokument tożsamości ze zdjęciem wydany przez organ państwowy na środku ramki</string>
+  <!-- Instruction for positioning driver's license or passport -->
+  <string name="stripe_position_driver_license_or_passport">Umieść swoje prawo jazdy lub paszport na środku ramki</string>
   <!-- Instructional text for scanning back of a identity card -->
   <string name="stripe_position_id_back">Obróć dowód tożsamości na drugą stronę</string>
   <!-- Instructional text for scanning front of a identity card -->
   <string name="stripe_position_id_front">Umieść dowód tożsamości w centrum kadru</string>
   <!-- Instructional text for scanning a passport -->
   <string name="stripe_position_passport">Umieść paszport w centrum kadru</string>
+  <!-- Instruction for positioning passport or government-issued photo ID -->
+  <string name="stripe_position_passport_or_id">Umieść swój paszport lub dokument tożsamości ze zdjęciem wydany przez organ państwowy na środku ramki</string>
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Umieść twarz w centrum kadru.</string>
   <!-- Instructional text when the document is too blurry -->

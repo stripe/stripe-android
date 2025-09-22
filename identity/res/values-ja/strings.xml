@@ -12,6 +12,8 @@
   <string name="stripe_back_of_dl">運転免許証の裏面</string>
   <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
   <string name="stripe_back_of_dl_selected">運転免許証の裏面が選択されました</string>
+  <!-- Title for scan screen when back of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_back_of_driver_license_or_id">運転免許証または政府発行の写真付き身分証明書の裏面</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">身分証明書の裏面</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
@@ -102,16 +104,30 @@
   <string name="stripe_first_name">名</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="stripe_flash_mask">顔写真のアニメーションのマスク</string>
+  <!-- Instruction for flipping driver's license or government-issued photo ID -->
+  <string name="stripe_flip_driver_license_or_id">運転免許証または政府発行の写真付き身分証明書を裏返してください</string>
+  <!-- Generic back-side instruction for government-issued photo ID (no passport mention) -->
+  <string name="stripe_flip_id_document">政府発行の写真付き身分証明書を裏返してください</string>
+  <!-- Title for scan screen when front of all ID types is shown -->
+  <string name="stripe_front_of_all_id_types">運転免許証、政府発行の写真付き身分証明書、またはパスポートの表面</string>
   <!-- Description of front of driver's license image -->
   <string name="stripe_front_of_dl">運転免許証の表面</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
   <string name="stripe_front_of_dl_selected">運転免許証の表面が選択されました</string>
+  <!-- Title for scan screen when front of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_front_of_driver_license_or_id">運転免許証または政府発行の写真付き身分証明書の表面</string>
+  <!-- Title for scan screen when front of driver's license or passport is shown -->
+  <string name="stripe_front_of_driver_license_or_passport">運転免許証またはパスポートの表面</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">身分証明書の表面</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">本人確認書類の表面</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">ID の表面が選択されました</string>
+  <!-- Description of front of passport image -->
+  <string name="stripe_front_of_passport">パスポートの表面</string>
+  <!-- Title for scan screen when front of passport or government-issued photo ID is shown -->
+  <string name="stripe_front_of_passport_or_id">パスポートまたは政府発行の写真付き身分証明書の表面</string>
   <!-- Button to go back to the previous screen -->
   <string name="stripe_go_back">戻る</string>
   <!-- display name for Government issued photo ID -->
@@ -160,16 +176,24 @@
   <string name="stripe_phone_number">電話番号</string>
   <!-- Instructional text when there is no document in camera frame -->
   <string name="stripe_point_camera_to_document">書類を検出できませんでした</string>
+  <!-- Instruction for positioning all ID types -->
+  <string name="stripe_position_all_id_types">運転免許証、パスポート、または政府発行の写真付き身分証明書をフレームの中央に配置してください</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">運転免許証を裏返してください</string>
   <!-- Instructional text for scanning front of a driver's license -->
   <string name="stripe_position_dl_front">運転免許証をフレームの中央に置いてください</string>
+  <!-- Instruction for positioning driver's license or government-issued photo ID -->
+  <string name="stripe_position_driver_license_or_id">運転免許証または政府発行の写真付き身分証明書をフレームの中央に配置してください</string>
+  <!-- Instruction for positioning driver's license or passport -->
+  <string name="stripe_position_driver_license_or_passport">運転免許証またはパスポートをフレームの中央に配置してください</string>
   <!-- Instructional text for scanning back of a identity card -->
   <string name="stripe_position_id_back">身分証明書を裏返してください</string>
   <!-- Instructional text for scanning front of a identity card -->
   <string name="stripe_position_id_front">身分証明書をフレームの中央に置いてください</string>
   <!-- Instructional text for scanning a passport -->
   <string name="stripe_position_passport">パスポートをフレームの中央に置いてください</string>
+  <!-- Instruction for positioning passport or government-issued photo ID -->
+  <string name="stripe_position_passport_or_id">パスポート、または政府発行の写真付き身分証明書をフレームの中央に配置してください</string>
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">フレームの中央に顔を置いてください。</string>
   <!-- Instructional text when the document is too blurry -->

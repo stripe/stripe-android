@@ -12,6 +12,8 @@
   <string name="stripe_back_of_dl">Πίσω πλευρά διπλώματος οδήγησης</string>
   <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
   <string name="stripe_back_of_dl_selected">Η πίσω πλευρά του διπλώματος οδήγησης έχει επιλεχθεί</string>
+  <!-- Title for scan screen when back of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_back_of_driver_license_or_id">Πίσω πλευρά της άδειας οδήγησης ή της ταυτότητας με φωτογραφία εκδοθείσα από την κυβέρνηση</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">Πίσω πλευρά ταυτότητας</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
@@ -102,16 +104,30 @@
   <string name="stripe_first_name">Όνομα</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="stripe_flash_mask">Μάσκα για επεξεργασία selfie</string>
+  <!-- Instruction for flipping driver's license or government-issued photo ID -->
+  <string name="stripe_flip_driver_license_or_id">Γυρίστε την άδεια οδήγησης ή την ταυτότητα με φωτογραφία εκδοθείσα από την κυβέρνηση στην άλλη πλευρά</string>
+  <!-- Generic back-side instruction for government-issued photo ID (no passport mention) -->
+  <string name="stripe_flip_id_document">Γυρίστε την ταυτότητά με φωτογραφία εκδοθείσα από την κυβέρνηση στην άλλη πλευρά</string>
+  <!-- Title for scan screen when front of all ID types is shown -->
+  <string name="stripe_front_of_all_id_types">Μπροστινό μέρος άδειας οδήγησης, διαβατηρίου ή ταυτότητας με φωτογραφία εκδοθείσας από την κυβέρνηση</string>
   <!-- Description of front of driver's license image -->
   <string name="stripe_front_of_dl">Μπροστινή πλευρά διπλώματος οδήγησης</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
   <string name="stripe_front_of_dl_selected">Η μπροστινή πλευρά του διπλώματος οδήγησης έχει επιλεχθεί</string>
+  <!-- Title for scan screen when front of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_front_of_driver_license_or_id">Μπροστινό μέρος άδειας οδήγησης ή ταυτότητας με φωτογραφία εκδοθείσα από την κυβέρνηση</string>
+  <!-- Title for scan screen when front of driver's license or passport is shown -->
+  <string name="stripe_front_of_driver_license_or_passport">Μπροστινό μέρος άδειας οδήγησης ή διαβατηρίου</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">Μπροστινή πλευρά ταυτότητας</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">Μπροστινή πλευρά εγγράφου ταυτότητας</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Η μπροστινή πλευρά της ταυτότητας έχει επιλεχθεί</string>
+  <!-- Description of front of passport image -->
+  <string name="stripe_front_of_passport">Μπροστινό μέρος διαβατηρίου</string>
+  <!-- Title for scan screen when front of passport or government-issued photo ID is shown -->
+  <string name="stripe_front_of_passport_or_id">Μπροστινό μέρος διαβατηρίου ή ταυτότητας με φωτογραφία εκδοθείσας από την κυβέρνηση</string>
   <!-- Button to go back to the previous screen -->
   <string name="stripe_go_back">Επιστροφή</string>
   <!-- display name for Government issued photo ID -->
@@ -160,16 +176,24 @@
   <string name="stripe_phone_number">Αριθμός τηλεφώνου</string>
   <!-- Instructional text when there is no document in camera frame -->
   <string name="stripe_point_camera_to_document">Δεν ανιχνεύτηκε κανένα έγγραφο</string>
+  <!-- Instruction for positioning all ID types -->
+  <string name="stripe_position_all_id_types">Τοποθετήστε την άδεια οδήγησης, το διαβατήριο ή την ταυτότητα με φωτογραφία εκδοθείσα από την κυβέρνηση στο κέντρο του πλαισίου</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Γυρίστε το δίπλωμα οδήγησής σας από την άλλη πλευρά</string>
   <!-- Instructional text for scanning front of a driver's license -->
   <string name="stripe_position_dl_front">Τοποθετήστε το δίπλωμα οδήγησής σας στο κέντρο του πλαισίου</string>
+  <!-- Instruction for positioning driver's license or government-issued photo ID -->
+  <string name="stripe_position_driver_license_or_id">Τοποθετήστε την άδεια οδήγησης ή την ταυτότητα με φωτογραφία εκδοθείσα από την κυβέρνηση στο κέντρο του πλαισίου</string>
+  <!-- Instruction for positioning driver's license or passport -->
+  <string name="stripe_position_driver_license_or_passport">Τοποθετήστε την άδεια οδήγησης ή το διαβατήριο στο κέντρο του πλαισίου</string>
   <!-- Instructional text for scanning back of a identity card -->
   <string name="stripe_position_id_back">Γυρίστε την ταυτότητά σας από την άλλη πλευρά</string>
   <!-- Instructional text for scanning front of a identity card -->
   <string name="stripe_position_id_front">Τοποθετήστε την ταυτότητά σας στο κέντρο του πλαισίου</string>
   <!-- Instructional text for scanning a passport -->
   <string name="stripe_position_passport">Τοποθετήστε το διαβατήριό σας στο κέντρο του πλαισίου</string>
+  <!-- Instruction for positioning passport or government-issued photo ID -->
+  <string name="stripe_position_passport_or_id">Τοποθετήστε το διαβατήριό σας ή την ταυτότητα με φωτογραφία εκδοθείσα από την κυβέρνηση στο κέντρο του πλαισίου</string>
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Τοποθετήστε το πρόσωπό σας στο κέντρο του πλαισίου.</string>
   <!-- Instructional text when the document is too blurry -->
