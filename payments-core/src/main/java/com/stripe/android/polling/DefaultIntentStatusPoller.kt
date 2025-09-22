@@ -5,7 +5,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.polling.IntentStatusPoller.PollingStrategy
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -15,8 +14,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
-import kotlin.math.pow
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -27,7 +24,6 @@ class DefaultIntentStatusPoller @Inject constructor(
     private val dispatcher: CoroutineDispatcher,
 ) : IntentStatusPoller {
 
-    private var attempts: Int = 0
     private var pollingJob: Job? = null
 
     private val _state = MutableStateFlow<StripeIntent.Status?>(null)
@@ -52,34 +48,10 @@ class DefaultIntentStatusPoller @Inject constructor(
             StripeIntent.Status.RequiresCapture,
             null -> {}
         }
-        when (val pollingStrategy = config.pollingStrategy) {
-            is PollingStrategy.ExponentialBackoff -> performPollWithExponentialBackoff(pollingStrategy)
-            is PollingStrategy.FixedIntervals -> performPollWithFixedIntervals(pollingStrategy)
-        }
-    }
 
-    private suspend fun performPollWithExponentialBackoff(
-        exponentialBackoff: PollingStrategy.ExponentialBackoff,
-    ) {
-        if (attempts < exponentialBackoff.maxAttempts) {
-            attempts += 1
-
-            _state.value = fetchIntentStatus()
-
-            val canTryAgain = attempts < exponentialBackoff.maxAttempts
-            if (canTryAgain) {
-                delay(calculateDelayForExponentialBackoff(attempts))
-                performPoll()
-            }
-        }
-    }
-
-    private suspend fun performPollWithFixedIntervals(
-        fixedIntervals: PollingStrategy.FixedIntervals,
-    ) {
         _state.value = fetchIntentStatus()
 
-        delay(fixedIntervals.retryIntervalInSeconds.seconds)
+        delay(1.seconds)
         performPoll()
     }
 
@@ -103,9 +75,4 @@ class DefaultIntentStatusPoller @Inject constructor(
         pollingJob?.cancel()
         pollingJob = null
     }
-}
-
-internal fun calculateDelayForExponentialBackoff(attempts: Int): Duration {
-    val delay = (1.0 + attempts).pow(2)
-    return delay.seconds
 }
