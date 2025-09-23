@@ -221,10 +221,7 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(modifier: Modifier) {
-            AddPaymentMethod(
-                interactor = interactor,
-                modifier = modifier
-            )
+            AddPaymentMethod(interactor = interactor, modifier)
         }
 
         override fun close() {
@@ -276,10 +273,7 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(modifier: Modifier) {
-            AddPaymentMethod(
-                interactor = interactor,
-                modifier = modifier
-            )
+            AddPaymentMethod(interactor = interactor, modifier)
         }
 
         override fun close() {
