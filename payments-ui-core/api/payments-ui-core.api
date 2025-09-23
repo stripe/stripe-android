@@ -22,8 +22,8 @@ public final class com/stripe/android/ui/core/BuildConfig {
 }
 
 public final class com/stripe/android/ui/core/FieldValuesToParamsMapConverter$Companion {
-	public final fun transformToPaymentMethodCreateParams (Ljava/util/Map;Ljava/lang/String;ZLcom/stripe/android/model/PaymentMethod$AllowRedisplay;)Lcom/stripe/android/model/PaymentMethodCreateParams;
-	public static synthetic fun transformToPaymentMethodCreateParams$default (Lcom/stripe/android/ui/core/FieldValuesToParamsMapConverter$Companion;Ljava/util/Map;Ljava/lang/String;ZLcom/stripe/android/model/PaymentMethod$AllowRedisplay;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun transformToPaymentMethodCreateParams (Ljava/util/Map;Ljava/lang/String;ZLcom/stripe/android/model/PaymentMethod$AllowRedisplay;Lcom/stripe/android/model/ClientAttributionMetadata;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static synthetic fun transformToPaymentMethodCreateParams$default (Lcom/stripe/android/ui/core/FieldValuesToParamsMapConverter$Companion;Ljava/util/Map;Ljava/lang/String;ZLcom/stripe/android/model/PaymentMethod$AllowRedisplay;Lcom/stripe/android/model/ClientAttributionMetadata;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 }
 
 public final class com/stripe/android/ui/core/cardscan/CardScanContract$Args$Creator : android/os/Parcelable$Creator {

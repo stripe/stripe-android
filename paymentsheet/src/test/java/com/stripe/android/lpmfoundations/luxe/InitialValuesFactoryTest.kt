@@ -52,6 +52,7 @@ class InitialValuesFactoryTest {
             )
         ),
         productUsage = emptySet(),
+        clientAttributionMetadata = null,
     )
 
     @Test

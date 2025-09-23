@@ -15,7 +15,6 @@ import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.screenshottesting.LayoutDirection
 import com.stripe.android.screenshottesting.PaparazziConfigOption
 import com.stripe.android.screenshottesting.PaparazziRule
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -98,6 +97,7 @@ class CardUiDefinitionFactoryTest {
                         ),
                     ),
                     productUsage = emptySet(),
+                    clientAttributionMetadata = null,
                 )
             )
         }
@@ -288,6 +288,7 @@ class CardUiDefinitionFactoryTest {
                         ),
                     ),
                     productUsage = emptySet(),
+                    clientAttributionMetadata = null,
                 ),
                 metadata = metadata.copy(
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -320,6 +321,7 @@ class CardUiDefinitionFactoryTest {
                         "billing_details" to emptyMap<IdentifierSpec, String?>(),
                     ),
                     productUsage = emptySet(),
+                    clientAttributionMetadata = null,
                 ),
                 metadata = metadata.copy(
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -349,6 +351,7 @@ class CardUiDefinitionFactoryTest {
                     requiresMandate = false,
                     overrideParamMap = emptyMap(),
                     productUsage = emptySet(),
+                    clientAttributionMetadata = null,
                 ),
                 metadata = metadata.copy(
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -396,6 +399,7 @@ class CardUiDefinitionFactoryTest {
                         ),
                     ),
                     productUsage = emptySet(),
+                    clientAttributionMetadata = null,
                 ),
                 metadata = metadata.copy(
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(

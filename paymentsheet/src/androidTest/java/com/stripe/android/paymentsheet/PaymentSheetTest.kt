@@ -69,6 +69,41 @@ internal class PaymentSheetTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
+            clientAttributionMetadataParamsInPaymentMethodData(),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        page.clickPrimaryButton()
+    }
+
+    @Test
+    fun testSuccessfulLpmPayment() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = defaultConfiguration,
+            )
+        }
+
+        page.clickOnLpm("cashapp")
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            clientAttributionMetadataParamsInPaymentMethodData(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }

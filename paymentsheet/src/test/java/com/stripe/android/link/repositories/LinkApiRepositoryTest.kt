@@ -856,7 +856,8 @@ class LinkApiRepositoryTest {
                 IdentifierSpec.PostalCode to FormFieldEntry("12345", true)
             ),
             "card",
-            false
+            false,
+            clientAttributionMetadata = null
         )
 
     companion object {

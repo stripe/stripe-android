@@ -74,6 +74,7 @@ internal fun FormFieldValues.transformToPaymentMethodCreateParams(
         code = paymentMethodCode,
         requiresMandate = paymentMethodMetadata.requiresMandate(paymentMethodCode),
         allowRedisplay = paymentMethodMetadata.allowRedisplay(userRequestedReuse, paymentMethodCode),
+        clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
     )
 }
 
