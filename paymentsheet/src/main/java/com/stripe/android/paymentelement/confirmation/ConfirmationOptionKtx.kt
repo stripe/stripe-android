@@ -41,7 +41,8 @@ private fun PaymentSelection.Saved.toConfirmationOption(
     return PaymentMethodConfirmationOption.Saved(
         paymentMethod = paymentMethod,
         optionsParams = paymentMethodOptionsParams,
-        passiveCaptchaParams = passiveCaptchaParams
+        passiveCaptchaParams = passiveCaptchaParams,
+        attestationRequired = false
     )
 }
 
@@ -61,7 +62,8 @@ private fun PaymentSelection.New.USBankAccount.toConfirmationOption(
         PaymentMethodConfirmationOption.Saved(
             paymentMethod = instantDebits.paymentMethod,
             optionsParams = paymentMethodOptionsParams,
-            passiveCaptchaParams = passiveCaptchaParams
+            passiveCaptchaParams = passiveCaptchaParams,
+            attestationRequired = false
         )
     } else {
         PaymentMethodConfirmationOption.New(
@@ -69,7 +71,8 @@ private fun PaymentSelection.New.USBankAccount.toConfirmationOption(
             optionsParams = paymentMethodOptionsParams,
             extraParams = paymentMethodExtraParams,
             shouldSave = customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse,
-            passiveCaptchaParams = passiveCaptchaParams
+            passiveCaptchaParams = passiveCaptchaParams,
+            attestationRequired = false
         )
     }
 }
@@ -113,7 +116,8 @@ private fun PaymentSelection.New.toConfirmationOption(
             optionsParams = paymentMethodOptionsParams,
             extraParams = paymentMethodExtraParams,
             shouldSave = customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse,
-            passiveCaptchaParams = passiveCaptchaParams
+            passiveCaptchaParams = passiveCaptchaParams,
+            attestationRequired = false
         )
     }
 }

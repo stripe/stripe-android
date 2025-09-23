@@ -85,6 +85,7 @@ internal class ElementsSessionJsonParser(
         val passiveCaptcha = json.optJSONObject(FIELD_PASSIVE_CAPTCHA)?.let {
             PassiveCaptchaJsonParser().parse(it)
         }
+        val attestation = StripeJsonUtils.optBoolean(json, FIELD_ATTESTATION)
 
         return if (stripeIntent != null) {
             ElementsSession(
@@ -102,7 +103,8 @@ internal class ElementsSessionJsonParser(
                 experimentsData = experimentsData,
                 orderedPaymentMethodTypesAndWallets = orderedPaymentMethodTypesAndWallets,
                 elementsSessionId = elementsSessionId.takeIf { it.isNotBlank() } ?: UUID.randomUUID().toString(),
-                passiveCaptcha = passiveCaptcha
+                passiveCaptcha = passiveCaptcha,
+                attestation = attestation
             )
         } else {
             null
@@ -539,6 +541,7 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_EXPERIMENTS_DATA = "experiments_data"
         private const val FIELD_EXPERIMENTS_ASSIGNMENTS = "experiment_assignments"
         private const val FIELD_PASSIVE_CAPTCHA = "passive_captcha"
+        private const val FIELD_ATTESTATION = "attestation"
         private const val ARB_ID = "arb_id"
 
         private val CUSTOM_PAYMENT_METHOD_JSON_PARSER = CustomPaymentMethodJsonParser()

@@ -78,6 +78,7 @@ internal data class PaymentMethodMetadata(
     val termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay>,
     val forceSetupFutureUseBehaviorAndNewMandate: Boolean,
     val passiveCaptchaParams: PassiveCaptchaParams?,
+    val attestationRequired: Boolean,
     val openCardScanAutomatically: Boolean,
     val clientAttributionMetadata: ClientAttributionMetadata?,
 ) : Parcelable {
@@ -357,6 +358,7 @@ internal data class PaymentMethodMetadata(
                 forceSetupFutureUseBehaviorAndNewMandate = elementsSession
                     .flags[ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT] == true,
                 passiveCaptchaParams = elementsSession.passiveCaptchaParams,
+                attestationRequired = elementsSession.attestationRequired ?: false,
                 openCardScanAutomatically = configuration.opensCardScannerAutomatically,
                 clientAttributionMetadata = ClientAttributionMetadata.create(
                     elementsSessionConfigId = elementsSession.elementsSessionId,
@@ -413,6 +415,7 @@ internal data class PaymentMethodMetadata(
                 forceSetupFutureUseBehaviorAndNewMandate = elementsSession
                     .flags[ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT] == true,
                 passiveCaptchaParams = elementsSession.passiveCaptchaParams,
+                attestationRequired = elementsSession.attestationRequired ?: false,
                 openCardScanAutomatically = configuration.opensCardScannerAutomatically,
                 clientAttributionMetadata = null,
             )
@@ -470,6 +473,7 @@ internal data class PaymentMethodMetadata(
                 termsDisplay = emptyMap(),
                 forceSetupFutureUseBehaviorAndNewMandate = configuration.forceSetupFutureUseBehaviorAndNewMandate,
                 passiveCaptchaParams = passiveCaptchaParams,
+                attestationRequired = false,
                 openCardScanAutomatically = false,
                 clientAttributionMetadata = null,
             )

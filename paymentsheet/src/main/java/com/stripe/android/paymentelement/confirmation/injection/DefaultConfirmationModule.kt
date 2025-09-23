@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.injection
 
+import com.stripe.android.paymentelement.confirmation.challenge.AttestationConfirmationModule
 import com.stripe.android.paymentelement.confirmation.challenge.PassiveChallengeConfirmationModule
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationModule
 import dagger.Module
@@ -8,6 +9,7 @@ import dagger.Module
     includes = [
         IntentConfirmationModule::class,
         PassiveChallengeConfirmationModule::class,
+        AttestationConfirmationModule::class,
         ConfirmationHandlerModule::class,
     ]
 )

@@ -53,6 +53,7 @@ internal object PaymentMethodMetadataFactory {
         termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay> = emptyMap(),
         forceSetupFutureUseBehaviorAndNewMandate: Boolean = false,
         passiveCaptchaParams: PassiveCaptchaParams? = null,
+        attestationRequired: Boolean = false,
         openCardScanAutomatically: Boolean = false,
         clientAttributionMetadata: ClientAttributionMetadata? = null,
     ): PaymentMethodMetadata {
@@ -90,6 +91,7 @@ internal object PaymentMethodMetadataFactory {
             termsDisplay = termsDisplay,
             forceSetupFutureUseBehaviorAndNewMandate = forceSetupFutureUseBehaviorAndNewMandate,
             passiveCaptchaParams = passiveCaptchaParams,
+            attestationRequired = attestationRequired,
             openCardScanAutomatically = openCardScanAutomatically,
             clientAttributionMetadata = clientAttributionMetadata,
         )
