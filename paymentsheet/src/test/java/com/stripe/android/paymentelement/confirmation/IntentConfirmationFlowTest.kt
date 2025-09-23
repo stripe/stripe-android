@@ -15,6 +15,7 @@ import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
@@ -282,6 +283,7 @@ internal class IntentConfirmationFlowTest {
         intentResult: Result<StripeIntent> =
             Result.success(SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD),
         preparePaymentMethodHandler: PreparePaymentMethodHandler? = null,
+        createIntentWithConfirmationTokenCallback: CreateIntentWithConfirmationTokenCallback? = null,
         createIntentCallback: CreateIntentCallback? = null,
     ): IntentConfirmationDefinition {
         return IntentConfirmationDefinition(
@@ -300,6 +302,9 @@ internal class IntentConfirmationFlowTest {
                 errorReporter = FakeErrorReporter(),
                 intentCreationCallbackProvider = {
                     createIntentCallback
+                },
+                intentCreationWithConfirmationTokenCallbackProvider = {
+                    createIntentWithConfirmationTokenCallback
                 },
                 preparePaymentMethodHandlerProvider = { preparePaymentMethodHandler }
             ),

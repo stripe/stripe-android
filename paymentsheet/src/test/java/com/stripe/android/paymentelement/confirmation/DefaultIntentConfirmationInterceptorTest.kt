@@ -72,6 +72,9 @@ class DefaultIntentConfirmationInterceptorTest {
             intentCreationCallbackProvider = {
                 null
             },
+            intentCreationWithConfirmationTokenCallbackProvider = {
+                null
+            },
             preparePaymentMethodHandlerProvider = {
                 null
             },
@@ -105,6 +108,9 @@ class DefaultIntentConfirmationInterceptorTest {
             errorReporter = FakeErrorReporter(),
             allowsManualConfirmation = false,
             intentCreationCallbackProvider = {
+                null
+            },
+            intentCreationWithConfirmationTokenCallbackProvider = {
                 null
             },
             preparePaymentMethodHandlerProvider = {
@@ -174,6 +180,9 @@ class DefaultIntentConfirmationInterceptorTest {
             intentCreationCallbackProvider = {
                 null
             },
+            intentCreationWithConfirmationTokenCallbackProvider = {
+                null
+            },
             preparePaymentMethodHandlerProvider = {
                 null
             },
@@ -199,6 +208,7 @@ class DefaultIntentConfirmationInterceptorTest {
 
     @Test
     fun `Fails if invoked without a confirm callback for new payment method`() = testNoProvider(
+        isNewPaymentMethod = true,
         event = ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL,
         failureMessage = CREATE_INTENT_CALLBACK_MESSAGE,
         userMessage = CREATE_INTENT_CALLBACK_MESSAGE.resolvableString,
@@ -217,6 +227,9 @@ class DefaultIntentConfirmationInterceptorTest {
             errorReporter = errorReporter,
             allowsManualConfirmation = false,
             intentCreationCallbackProvider = {
+                null
+            },
+            intentCreationWithConfirmationTokenCallbackProvider = {
                 null
             },
             preparePaymentMethodHandlerProvider = {
@@ -253,6 +266,9 @@ class DefaultIntentConfirmationInterceptorTest {
             errorReporter = errorReporter,
             allowsManualConfirmation = false,
             intentCreationCallbackProvider = {
+                null
+            },
+            intentCreationWithConfirmationTokenCallbackProvider = {
                 null
             },
             preparePaymentMethodHandlerProvider = {
@@ -309,6 +325,9 @@ class DefaultIntentConfirmationInterceptorTest {
                 allowsManualConfirmation = false,
                 intentCreationCallbackProvider = {
                     callback
+                },
+                intentCreationWithConfirmationTokenCallbackProvider = {
+                    null
                 },
                 preparePaymentMethodHandlerProvider = {
                     null
@@ -382,6 +401,9 @@ class DefaultIntentConfirmationInterceptorTest {
             intentCreationCallbackProvider = {
                 null
             },
+            intentCreationWithConfirmationTokenCallbackProvider = {
+                null
+            },
             preparePaymentMethodHandlerProvider = {
                 null
             },
@@ -437,6 +459,9 @@ class DefaultIntentConfirmationInterceptorTest {
             intentCreationCallbackProvider = {
                 succeedingCreateIntentCallback(paymentMethod)
             },
+            intentCreationWithConfirmationTokenCallbackProvider = {
+                null
+            },
             preparePaymentMethodHandlerProvider = {
                 null
             },
@@ -480,6 +505,9 @@ class DefaultIntentConfirmationInterceptorTest {
                     message = "that didn't work…"
                 )
             },
+            intentCreationWithConfirmationTokenCallbackProvider = {
+                null
+            },
             preparePaymentMethodHandlerProvider = {
                 null
             },
@@ -520,6 +548,9 @@ class DefaultIntentConfirmationInterceptorTest {
             allowsManualConfirmation = false,
             intentCreationCallbackProvider = {
                 failingCreateIntentCallback()
+            },
+            intentCreationWithConfirmationTokenCallbackProvider = {
+                null
             },
             preparePaymentMethodHandlerProvider = {
                 null
@@ -576,6 +607,9 @@ class DefaultIntentConfirmationInterceptorTest {
             intentCreationCallbackProvider = {
                 succeedingCreateIntentCallback(paymentMethod)
             },
+            intentCreationWithConfirmationTokenCallbackProvider = {
+                null
+            },
             preparePaymentMethodHandlerProvider = {
                 null
             },
@@ -621,6 +655,9 @@ class DefaultIntentConfirmationInterceptorTest {
             allowsManualConfirmation = false,
             intentCreationCallbackProvider = {
                 succeedingCreateIntentCallback(paymentMethod)
+            },
+            intentCreationWithConfirmationTokenCallbackProvider = {
+                null
             },
             preparePaymentMethodHandlerProvider = {
                 null
@@ -675,6 +712,9 @@ class DefaultIntentConfirmationInterceptorTest {
             intentCreationCallbackProvider = {
                 succeedingCreateIntentCallback(paymentMethod)
             },
+            intentCreationWithConfirmationTokenCallbackProvider = {
+                null
+            },
             preparePaymentMethodHandlerProvider = {
                 null
             },
@@ -726,6 +766,9 @@ class DefaultIntentConfirmationInterceptorTest {
                     observedValues += shouldSavePaymentMethod
                     CreateIntentResult.Success("pi_123_secret_456")
                 }
+            },
+            intentCreationWithConfirmationTokenCallbackProvider = {
+                null
             },
             preparePaymentMethodHandlerProvider = {
                 null
@@ -784,6 +827,9 @@ class DefaultIntentConfirmationInterceptorTest {
                     CreateIntentResult.Success("pi_123_secret_456")
                 }
             },
+            intentCreationWithConfirmationTokenCallbackProvider = {
+                null
+            },
             preparePaymentMethodHandlerProvider = {
                 null
             },
@@ -841,6 +887,9 @@ class DefaultIntentConfirmationInterceptorTest {
                     CreateIntentResult.Success("pi_123_secret_456")
                 }
             },
+            intentCreationWithConfirmationTokenCallbackProvider = {
+                null
+            },
             preparePaymentMethodHandlerProvider = {
                 null
             },
@@ -886,6 +935,9 @@ class DefaultIntentConfirmationInterceptorTest {
                 CreateIntentCallback { _, _ ->
                     CreateIntentResult.Success(IntentConfirmationInterceptor.COMPLETE_WITHOUT_CONFIRMING_INTENT)
                 }
+            },
+            intentCreationWithConfirmationTokenCallbackProvider = {
+                null
             },
             preparePaymentMethodHandlerProvider = {
                 null
@@ -934,6 +986,9 @@ class DefaultIntentConfirmationInterceptorTest {
                     CreateIntentCallback { _, _ ->
                         CreateIntentResult.Success(clientSecret = "pi_123")
                     }
+                },
+                intentCreationWithConfirmationTokenCallbackProvider = {
+                    null
                 },
                 preparePaymentMethodHandlerProvider = {
                     null
@@ -986,6 +1041,9 @@ class DefaultIntentConfirmationInterceptorTest {
                 intentCreationCallbackProvider = {
                     null
                 },
+                intentCreationWithConfirmationTokenCallbackProvider = {
+                    null
+                },
                 preparePaymentMethodHandlerProvider = {
                     null
                 },
@@ -1035,6 +1093,9 @@ class DefaultIntentConfirmationInterceptorTest {
                 errorReporter = FakeErrorReporter(),
                 allowsManualConfirmation = false,
                 intentCreationCallbackProvider = { null },
+                intentCreationWithConfirmationTokenCallbackProvider = {
+                    null
+                },
                 preparePaymentMethodHandlerProvider = {
                     PreparePaymentMethodHandler { paymentMethod, shippingAddress ->
                         completablePaymentMethod.complete(paymentMethod)
@@ -1107,6 +1168,9 @@ class DefaultIntentConfirmationInterceptorTest {
                 intentCreationCallbackProvider = {
                     null
                 },
+                intentCreationWithConfirmationTokenCallbackProvider = {
+                    null
+                },
                 preparePaymentMethodHandlerProvider = {
                     PreparePaymentMethodHandler { paymentMethod, shippingAddress ->
                         completablePaymentMethod.complete(paymentMethod)
@@ -1177,6 +1241,9 @@ class DefaultIntentConfirmationInterceptorTest {
                 errorReporter = eventReporter,
                 allowsManualConfirmation = false,
                 intentCreationCallbackProvider = { null },
+                intentCreationWithConfirmationTokenCallbackProvider = {
+                    null
+                },
                 preparePaymentMethodHandlerProvider = {
                     PreparePaymentMethodHandler { paymentMethod, shippingAddress ->
                         completablePaymentMethod.complete(paymentMethod)
@@ -1257,6 +1324,9 @@ class DefaultIntentConfirmationInterceptorTest {
                         CreateIntentResult.Success("pi_123_secret_456")
                     }
                 },
+                intentCreationWithConfirmationTokenCallbackProvider = {
+                    null
+                },
                 preparePaymentMethodHandlerProvider = {
                     null
                 },
@@ -1329,6 +1399,9 @@ class DefaultIntentConfirmationInterceptorTest {
                     CreateIntentCallback { _, _ ->
                         CreateIntentResult.Success("pi_123_secret_456")
                     }
+                },
+                intentCreationWithConfirmationTokenCallbackProvider = {
+                    null
                 },
                 preparePaymentMethodHandlerProvider = {
                     null
@@ -1533,6 +1606,7 @@ class DefaultIntentConfirmationInterceptorTest {
     }
 
     private fun testNoProvider(
+        isNewPaymentMethod: Boolean = false,
         event: ErrorReporter.ErrorEvent,
         failureMessage: String,
         userMessage: ResolvableString,
@@ -1556,7 +1630,13 @@ class DefaultIntentConfirmationInterceptorTest {
 
             assertThat(interceptJob.isActive).isTrue()
 
-            dispatcher.scheduler.advanceTimeBy(1)
+            if (isNewPaymentMethod) {
+                // for new PM, we do two rounds of callback polling
+                // to distinguish ConfirmationToken vs PaymentMethod intent creation callback
+                dispatcher.scheduler.advanceTimeBy(2001)
+            } else {
+                dispatcher.scheduler.advanceTimeBy(1)
+            }
 
             assertThat(interceptJob.isActive).isFalse()
 
@@ -1605,6 +1685,9 @@ class DefaultIntentConfirmationInterceptorTest {
             errorReporter = FakeErrorReporter(),
             allowsManualConfirmation = false,
             intentCreationCallbackProvider = intentCreationCallbackProvider,
+            intentCreationWithConfirmationTokenCallbackProvider = {
+                null
+            },
             preparePaymentMethodHandlerProvider = {
                 null
             },
