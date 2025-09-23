@@ -27,6 +27,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.isSaved
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.state.WalletLocation
+import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.ui.core.IsStripeCardScanAvailable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -591,6 +593,34 @@ internal class DefaultEventReporter @Inject internal constructor(
             )
         }
         fireEvent(analyticsEvent)
+    }
+
+    override fun onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
+        visiblePaymentMethods: List<String>,
+        hiddenPaymentMethods: List<String>,
+        walletsState: WalletsState?,
+    ) {
+        val isGooglePayVisible = walletsState?.googlePay(WalletLocation.HEADER) != null &&
+            walletsState.buttonsEnabled
+        val isLinkVisible = walletsState?.link(WalletLocation.HEADER) != null &&
+            walletsState.buttonsEnabled
+
+        val visiblePaymentMethodsWithWallets = buildList<String> {
+            if (isGooglePayVisible) add("google_pay")
+            if (isLinkVisible) add("link")
+            addAll(visiblePaymentMethods)
+        }
+
+        fireEvent(
+            PaymentSheetEvent.InitialDisplayedPaymentMethods(
+                visiblePaymentMethods = visiblePaymentMethodsWithWallets,
+                hiddenPaymentMethods = hiddenPaymentMethods,
+                isDeferred = isDeferred,
+                isSpt = isSpt,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
     }
 
     override fun onAnalyticsEvent(event: AnalyticsEvent) {

@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.state.WalletsState
 
 @Suppress("EmptyFunctionBlock")
 internal class FakeEventReporter : EventReporter {
@@ -292,6 +293,13 @@ internal class FakeEventReporter : EventReporter {
     }
 
     override fun onCardScanApiCheckFailed(implementation: String, error: Throwable?) {
+    }
+
+    override fun onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
+        visiblePaymentMethods: List<String>,
+        hiddenPaymentMethods: List<String>,
+        walletsState: WalletsState?
+    ) {
     }
 
     data class PaymentFailureCall(

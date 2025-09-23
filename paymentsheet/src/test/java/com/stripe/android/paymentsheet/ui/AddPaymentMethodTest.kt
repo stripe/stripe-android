@@ -606,7 +606,9 @@ internal class AddPaymentMethodTest {
         val addPaymentMethodInteractor = FakeAddPaymentMethodInteractor(initialState, viewActionRecorder)
 
         composeRule.setContent {
-            AddPaymentMethod(interactor = addPaymentMethodInteractor)
+            AddPaymentMethod(
+                interactor = addPaymentMethodInteractor,
+            )
         }
 
         viewActionRecorder.consume(
