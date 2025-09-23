@@ -1077,6 +1077,7 @@ class DefaultIntentConfirmationInterceptorTest {
         }
 
     @Test
+    @Suppress("LongMethod")
     fun `If initialized with shared payment token, should call 'onPreparePaymentMethod' with saved PM`() =
         runTest {
             val completablePaymentMethod = CompletableDeferred<PaymentMethod>()
@@ -1153,6 +1154,7 @@ class DefaultIntentConfirmationInterceptorTest {
         }
 
     @Test
+    @Suppress("LongMethod")
     fun `If initialized with shared payment token, should call 'onPreparePaymentMethod' with new PM`() =
         runTest {
             val completablePaymentMethod = CompletableDeferred<PaymentMethod>()
@@ -1224,6 +1226,7 @@ class DefaultIntentConfirmationInterceptorTest {
         }
 
     @Test
+    @Suppress("LongMethod")
     fun `If failed to make radar session, should still continue with preparing payment method`() =
         runTest {
             val completablePaymentMethod = CompletableDeferred<PaymentMethod>()

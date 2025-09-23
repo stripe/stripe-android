@@ -174,6 +174,7 @@ internal sealed class DeferredIntentCallback {
 }
 
 @OptIn(SharedPaymentTokenSessionPreview::class)
+@Suppress("LargeClass")
 internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     private val stripeRepository: StripeRepository,
     private val errorReporter: ErrorReporter,
