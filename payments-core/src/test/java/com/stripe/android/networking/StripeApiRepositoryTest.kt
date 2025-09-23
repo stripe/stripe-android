@@ -3379,7 +3379,6 @@ internal class StripeApiRepositoryTest {
     fun createConfirmationToken_withPaymentMethodData_shouldSucceed() = runTest {
         val confirmationTokenParams = ConfirmationTokenParams(
             paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-            returnUrl = "https://example.com/return"
         )
 
         val confirmationToken = stripeApiRepository.createConfirmationToken(
@@ -3387,7 +3386,9 @@ internal class StripeApiRepositoryTest {
             DEFAULT_OPTIONS
         ).getOrThrow()
 
-        assertThat(confirmationToken.returnUrl).isEqualTo("https://example.com/return")
+        assertThat(confirmationToken.returnUrl).isEqualTo(
+            "stripesdk://payment_return_url/com.stripe.android.test"
+        )
         assertThat(confirmationToken.paymentMethodPreview!!.type).isEqualTo(PaymentMethod.Type.Card)
     }
 
