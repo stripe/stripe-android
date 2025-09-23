@@ -5,7 +5,8 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.wallets.Wallet
-import com.stripe.android.payments.PaymentFlowResultProcessor.Companion.MAX_RETRIES
+import com.stripe.android.payments.PaymentFlowResultProcessor.Companion.MAX_POLLING_DURATION
+import com.stripe.android.payments.PaymentFlowResultProcessor.Companion.REDUCED_POLLING_DURATION
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
@@ -284,7 +285,7 @@ constructor(
             // About 20% of the time, the intent is still in `requires_action` status
             // after redirecting following a successful payment.
             // This allows time for the intent to transition to its terminal state.
-            afterRedirectAction = AfterRedirectAction.Poll(),
+            afterRedirectAction = AfterRedirectAction.Poll(pollingDuration = REDUCED_POLLING_DURATION),
         ),
         Bancontact(
             "bancontact",
@@ -373,7 +374,7 @@ constructor(
             requiresMandate = false,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
-            afterRedirectAction = AfterRedirectAction.Refresh(retryCount = MAX_RETRIES),
+            afterRedirectAction = AfterRedirectAction.Refresh(pollingDuration = MAX_POLLING_DURATION),
         ),
         Klarna(
             "klarna",
@@ -399,7 +400,7 @@ constructor(
             requiresMandate = true,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
-            afterRedirectAction = AfterRedirectAction.Poll(),
+            afterRedirectAction = AfterRedirectAction.Poll(pollingDuration = REDUCED_POLLING_DURATION),
         ),
         Sunbit(
             "sunbit",
@@ -440,7 +441,7 @@ constructor(
             requiresMandate = true,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
-            afterRedirectAction = AfterRedirectAction.Poll(),
+            afterRedirectAction = AfterRedirectAction.Poll(pollingDuration = REDUCED_POLLING_DURATION),
         ),
         Alma(
             "alma",
@@ -518,7 +519,7 @@ constructor(
             // About 50% of the time, the intent is still in `requires_action` status
             // after redirecting following a successful payment.
             // This allows time for the intent to transition to its terminal state.
-            afterRedirectAction = AfterRedirectAction.Poll(),
+            afterRedirectAction = AfterRedirectAction.Poll(pollingDuration = REDUCED_POLLING_DURATION),
         ),
         Twint(
             code = "twint",
@@ -531,7 +532,7 @@ constructor(
             // About 50% of the time, the intent is still in `requires_action` status
             // after redirecting following a successful payment.
             // This allows time for the intent to transition to its terminal state.
-            afterRedirectAction = AfterRedirectAction.Poll(),
+            afterRedirectAction = AfterRedirectAction.Poll(pollingDuration = REDUCED_POLLING_DURATION),
         ),
         ShopPay(
             code = "shop_pay",
@@ -568,28 +569,29 @@ constructor(
     }
 
     internal sealed interface AfterRedirectAction : Parcelable {
-        val shouldRefresh: Boolean
-        val retryCount: Int
+        val shouldRefreshOrRetrieve: Boolean
+        val pollingDuration: Long
 
         @Parcelize
         data object None : AfterRedirectAction {
-            @IgnoredOnParcel
-            override val shouldRefresh: Boolean = false
 
             @IgnoredOnParcel
-            override val retryCount: Int = MAX_RETRIES
+            override val shouldRefreshOrRetrieve: Boolean = false
+
+            @IgnoredOnParcel
+            override val pollingDuration: Long = 15000L
         }
 
         @Parcelize
-        data class Poll(override val retryCount: Int = MAX_RETRIES) : AfterRedirectAction {
+        data class Poll(override val pollingDuration: Long) : AfterRedirectAction {
             @IgnoredOnParcel
-            override val shouldRefresh: Boolean = true
+            override val shouldRefreshOrRetrieve: Boolean = true
         }
 
         @Parcelize
-        data class Refresh(override val retryCount: Int = 1) : AfterRedirectAction {
+        data class Refresh(override val pollingDuration: Long = 0L) : AfterRedirectAction {
             @IgnoredOnParcel
-            override val shouldRefresh: Boolean = true
+            override val shouldRefreshOrRetrieve: Boolean = true
         }
     }
 
