@@ -24,7 +24,6 @@ fun interface CreateIntentWithConfirmationTokenCallback {
      *
      * @return CreateIntentResult.Success with client secret, or CreateIntentResult.Failure if an error occurred.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun onCreateIntent(
         confirmationToken: ConfirmationToken
     ): CreateIntentResult
