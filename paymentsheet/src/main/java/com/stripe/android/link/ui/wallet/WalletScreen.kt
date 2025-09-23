@@ -812,31 +812,14 @@ internal fun CardDetailsRecollectionForm(
         )
     }
 
-    val errorTextRes = if (isCardExpired) {
-        R.string.stripe_wallet_update_expired_card_error
-    } else {
-        R.string.stripe_wallet_recollect_cvc_error
-    }.resolvableString
-
-    Column(modifier) {
-        ErrorText(
-            text = errorTextRes.resolve(context),
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag(WALLET_SCREEN_RECOLLECTION_FORM_ERROR)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        SectionElementUI(
-            modifier = Modifier
-                .testTag(WALLET_SCREEN_RECOLLECTION_FORM_FIELDS),
-            enabled = true,
-            element = SectionElement.wrap(rowElement),
-            hiddenIdentifiers = emptySet(),
-            lastTextFieldIdentifier = rowElement.fields.last().identifier
-        )
-    }
+    SectionElementUI(
+        modifier = modifier
+            .testTag(WALLET_SCREEN_RECOLLECTION_FORM_FIELDS),
+        enabled = true,
+        element = SectionElement.wrap(rowElement),
+        hiddenIdentifiers = emptySet(),
+        lastTextFieldIdentifier = rowElement.fields.last().identifier
+    )
 }
 
 @Composable

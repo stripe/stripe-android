@@ -326,7 +326,7 @@ internal class WalletScreenTest {
         composeTestRule.waitForIdle()
 
         onWalletPayButton().assertIsNotEnabled()
-        onWalletFormError().assertIsDisplayed()
+        onWalletFormError().assertDoesNotExist()
         onWalletFormFields().assertIsDisplayed()
         onWalletPayButton().assertIsNotEnabled()
     }
@@ -354,7 +354,7 @@ internal class WalletScreenTest {
         composeTestRule.waitForIdle()
 
         onWalletPayButton().assertIsNotEnabled()
-        onWalletFormError().assertIsDisplayed()
+        onWalletFormError().assertDoesNotExist()
         onWalletFormFields().assertIsDisplayed()
         onWalletPayButton().assertIsNotEnabled()
     }
