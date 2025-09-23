@@ -567,7 +567,10 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             }
 
             if (callback != null) {
-                errorReporter.report(ErrorReporter.SuccessEvent.FOUND_CREATE_INTENT_CALLBACK_WHILE_POLLING)
+                errorReporter.report(
+                    ErrorReporter.SuccessEvent
+                        .FOUND_CREATE_INTENT_WITH_CONFIRMATION_TOKEN_CALLBACK_WHILE_POLLING
+                )
             }
 
             callback

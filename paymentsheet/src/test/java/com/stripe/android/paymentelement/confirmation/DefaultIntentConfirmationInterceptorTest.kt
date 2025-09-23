@@ -2042,7 +2042,8 @@ class DefaultIntentConfirmationInterceptorTest {
             assertThat(nextStep).isInstanceOf<IntentConfirmationInterceptor.NextStep.Complete>()
 
             assertThat(errorReporter.getLoggedErrors()).containsExactly(
-                ErrorReporter.SuccessEvent.FOUND_CREATE_INTENT_CALLBACK_WHILE_POLLING.eventName,
+                ErrorReporter.SuccessEvent.FOUND_CREATE_INTENT_WITH_CONFIRMATION_TOKEN_CALLBACK_WHILE_POLLING
+                    .eventName,
             )
         }
     }
