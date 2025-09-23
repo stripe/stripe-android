@@ -45,7 +45,7 @@ internal data class PaymentElementCallbacks private constructor(
             this.createIntentCallback = createIntentCallback
         }
 
-        fun createIntentWithConfirmationTokenCallback(
+        fun createIntentCallback(
             createIntentWithConfirmationTokenCallback: CreateIntentWithConfirmationTokenCallback?
         ) = apply {
             this.createIntentWithConfirmationTokenCallback = createIntentWithConfirmationTokenCallback

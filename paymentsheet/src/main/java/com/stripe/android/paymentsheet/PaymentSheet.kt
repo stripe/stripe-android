@@ -332,7 +332,7 @@ class PaymentSheet internal constructor(
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun createIntentCallback(callback: CreateIntentWithConfirmationTokenCallback) = apply {
-            callbacksBuilder.createIntentWithConfirmationTokenCallback(callback)
+            callbacksBuilder.createIntentCallback(callback)
         }
 
         /**
@@ -3626,7 +3626,7 @@ class PaymentSheet internal constructor(
              */
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun createIntentCallback(callback: CreateIntentWithConfirmationTokenCallback) = apply {
-                callbacksBuilder.createIntentWithConfirmationTokenCallback(callback)
+                callbacksBuilder.createIntentCallback(callback)
             }
 
             /**
