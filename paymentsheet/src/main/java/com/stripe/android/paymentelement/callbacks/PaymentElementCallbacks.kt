@@ -89,8 +89,8 @@ internal data class PaymentElementCallbacks private constructor(
         fun build(): PaymentElementCallbacks {
             if (createIntentCallback != null && createIntentWithConfirmationTokenCallback != null) {
                 throw IllegalArgumentException(
-                    "At most one of createIntentCallback and createIntentWithConfirmationTokenCallback"
-                        + "can be non-null"
+                    "At most one of createIntentCallback and createIntentWithConfirmationTokenCallback" +
+                        "can be non-null"
                 )
             }
 

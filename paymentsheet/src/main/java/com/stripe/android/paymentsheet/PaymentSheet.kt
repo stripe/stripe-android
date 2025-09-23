@@ -335,7 +335,6 @@ class PaymentSheet internal constructor(
             callbacksBuilder.createIntentWithConfirmationTokenCallback(callback)
         }
 
-
         /**
          * @param callback Called when an analytic event occurs.
          */

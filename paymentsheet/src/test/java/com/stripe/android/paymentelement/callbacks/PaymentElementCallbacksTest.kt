@@ -75,7 +75,7 @@ class PaymentElementCallbacksTest {
     }
 
     @Test
-    fun `build throws IllegalArgumentException when setting non-null callback after setting the other non-null callback`() {
+    fun `build throws IllegalArgumentException when setting both callbacks to non-null`() {
         val intentCallback = CreateIntentCallback { _, _ ->
             CreateIntentResult.Success("pi_123_secret_456")
         }
@@ -84,7 +84,6 @@ class PaymentElementCallbacksTest {
             CreateIntentResult.Success("pi_123_secret_456")
         }
 
-        // Test setting intentCallback first, then confirmationTokenCallback
         val exception1 = kotlin.runCatching {
             PaymentElementCallbacks.Builder()
                 .createIntentCallback(intentCallback)
@@ -94,7 +93,6 @@ class PaymentElementCallbacksTest {
 
         assertThat(exception1).isInstanceOf(IllegalArgumentException::class.java)
 
-        // Test setting confirmationTokenCallback first, then intentCallback
         val exception2 = kotlin.runCatching {
             PaymentElementCallbacks.Builder()
                 .createIntentWithConfirmationTokenCallback(confirmationTokenCallback)
@@ -106,7 +104,7 @@ class PaymentElementCallbacksTest {
     }
 
     @Test
-    fun `build succeeds when setting non-null callback after setting the other to null`() {
+    fun `build succeeds when setting callback to non-null after setting other to null`() {
         val intentCallback = CreateIntentCallback { _, _ ->
             CreateIntentResult.Success("pi_123_secret_456")
         }
@@ -115,7 +113,6 @@ class PaymentElementCallbacksTest {
             CreateIntentResult.Success("pi_123_secret_456")
         }
 
-        // Set intentCallback to non-null, then set confirmationTokenCallback to non-null but intentCallback to null
         val callbacks1 = PaymentElementCallbacks.Builder()
             .createIntentCallback(intentCallback)
             .createIntentCallback(null)
@@ -125,7 +122,6 @@ class PaymentElementCallbacksTest {
         assertThat(callbacks1.createIntentCallback).isNull()
         assertThat(callbacks1.createIntentWithConfirmationTokenCallback).isEqualTo(confirmationTokenCallback)
 
-        // Set confirmationTokenCallback to non-null, then set intentCallback to non-null but confirmationTokenCallback to null
         val callbacks2 = PaymentElementCallbacks.Builder()
             .createIntentWithConfirmationTokenCallback(confirmationTokenCallback)
             .createIntentWithConfirmationTokenCallback(null)

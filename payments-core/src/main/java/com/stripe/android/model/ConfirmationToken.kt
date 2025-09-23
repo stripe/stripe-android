@@ -115,6 +115,7 @@ constructor(
         @JvmField val type: PaymentMethod.Type,
 
         @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @JvmField val allResponseFields: String,
+        @JvmField
+        val allResponseFields: String,
     ) : StripeModel
 }

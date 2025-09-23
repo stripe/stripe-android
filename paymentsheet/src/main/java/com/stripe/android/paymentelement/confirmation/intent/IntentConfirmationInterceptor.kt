@@ -178,7 +178,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     private val stripeRepository: StripeRepository,
     private val errorReporter: ErrorReporter,
     private val intentCreationCallbackProvider: Provider<CreateIntentCallback?>,
-    private val intentCreationWithConfirmationTokenCallbackProvider: Provider<CreateIntentWithConfirmationTokenCallback?>,
+    private val intentCreationWithConfirmationTokenCallbackProvider:
+    Provider<CreateIntentWithConfirmationTokenCallback?>,
     private val preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?>,
     @Named(ALLOWS_MANUAL_CONFIRMATION) private val allowsManualConfirmation: Boolean,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
@@ -324,8 +325,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         )
 
         val callback = waitForIntentCallback()
-        return if (callback is DeferredIntentCallback.CreateIntentWithConfirmationToken
-            && intentConfiguration.intentBehavior is PaymentSheet.IntentConfiguration.IntentBehavior.Default
+        return if (callback is DeferredIntentCallback.CreateIntentWithConfirmationToken &&
+            intentConfiguration.intentBehavior is PaymentSheet.IntentConfiguration.IntentBehavior.Default
         ) {
             handleDeferredIntentCreationFromConfirmationToken(
                 createIntentWithConfirmationTokenCallback = callback.delegate,
@@ -511,10 +512,12 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             val callbackWithPaymentMethod = async { waitForCreateIntentWithPaymentMethodCallback() }
             val callbackWithConfirmationToken = async { waitForCreateIntentWithConfirmationTokenCallback() }
 
-            when (val result = select {
-                callbackWithPaymentMethod.onAwait { it }
-                callbackWithConfirmationToken.onAwait { it }
-            }) {
+            when (
+                val result = select {
+                    callbackWithPaymentMethod.onAwait { it }
+                    callbackWithConfirmationToken.onAwait { it }
+                }
+            ) {
                 is CreateIntentCallback -> {
                     DeferredIntentCallback.CreateIntentWithPaymentMethod(result)
                 }
@@ -667,8 +670,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                         message = "Failed to fetch PaymentMethod".resolvableString,
                     )
                 val paymentMethod = PaymentMethodJsonParser().parse(
-                    JSONObject(paymentMethodPreview.allResponseFields
-                    )
+                    JSONObject(paymentMethodPreview.allResponseFields)
                 )
                 handleDeferredOnConfirmationTokenCreated(
                     callback = createIntentWithConfirmationTokenCallback,
