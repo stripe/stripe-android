@@ -161,6 +161,18 @@ internal class InvalidClientSecretException(
     """.trimIndent()
 }
 
+internal sealed class DeferredIntentCallback {
+    data class CreateIntentWithPaymentMethod(
+        val delegate: CreateIntentCallback
+    ) : DeferredIntentCallback()
+
+    data class CreateIntentWithConfirmationToken(
+        val delegate: CreateIntentWithConfirmationTokenCallback
+    ) : DeferredIntentCallback()
+
+    object None : DeferredIntentCallback()
+}
+
 @OptIn(SharedPaymentTokenSessionPreview::class)
 internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     private val stripeRepository: StripeRepository,
@@ -312,11 +324,11 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         )
 
         val callback = waitForIntentCallback()
-        return if (callback is CreateIntentWithConfirmationTokenCallback
+        return if (callback is DeferredIntentCallback.CreateIntentWithConfirmationToken
             && intentConfiguration.intentBehavior is PaymentSheet.IntentConfiguration.IntentBehavior.Default
         ) {
             handleDeferredIntentCreationFromConfirmationToken(
-                createIntentWithConfirmationTokenCallback = callback,
+                createIntentWithConfirmationTokenCallback = callback.delegate,
                 intentConfiguration = intentConfiguration,
                 paymentMethodCreateParams = paymentMethodCreateParams,
                 paymentMethodOptionsParams = paymentMethodOptionsParams,
@@ -385,9 +397,9 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         hCaptchaToken: String?
     ): NextStep {
         return when (val callback = waitForIntentCallback()) {
-            is CreateIntentCallback -> {
+            is DeferredIntentCallback.CreateIntentWithPaymentMethod -> {
                 handleDeferredIntentCreationFromPaymentMethod(
-                    createIntentCallback = callback,
+                    createIntentCallback = callback.delegate,
                     intentConfiguration = intentConfiguration,
                     paymentMethod = paymentMethod,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
@@ -398,9 +410,9 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 )
             }
 
-            is CreateIntentWithConfirmationTokenCallback -> {
+            is DeferredIntentCallback.CreateIntentWithConfirmationToken -> {
                 handleDeferredIntentCreationFromConfirmationToken(
-                    createIntentWithConfirmationTokenCallback = callback,
+                    createIntentWithConfirmationTokenCallback = callback.delegate,
                     intentConfiguration = intentConfiguration,
                     paymentMethod = paymentMethod,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
@@ -410,7 +422,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 )
             }
 
-            else -> {
+            is DeferredIntentCallback.None -> {
                 val error = "${CreateIntentCallback::class.java.simpleName} must be implemented " +
                     "when using IntentConfiguration with PaymentSheet"
 
@@ -494,14 +506,24 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         )
     }
 
-    private suspend fun waitForIntentCallback(): Any? {
+    private suspend fun waitForIntentCallback(): DeferredIntentCallback {
         return coroutineScope {
             val callbackWithPaymentMethod = async { waitForCreateIntentWithPaymentMethodCallback() }
             val callbackWithConfirmationToken = async { waitForCreateIntentWithConfirmationTokenCallback() }
 
-            select {
+            when (val result = select {
                 callbackWithPaymentMethod.onAwait { it }
                 callbackWithConfirmationToken.onAwait { it }
+            }) {
+                is CreateIntentCallback -> {
+                    DeferredIntentCallback.CreateIntentWithPaymentMethod(result)
+                }
+                is CreateIntentWithConfirmationTokenCallback -> {
+                    DeferredIntentCallback.CreateIntentWithConfirmationToken(result)
+                }
+                else -> {
+                    DeferredIntentCallback.None
+                }
             }
         }
     }
