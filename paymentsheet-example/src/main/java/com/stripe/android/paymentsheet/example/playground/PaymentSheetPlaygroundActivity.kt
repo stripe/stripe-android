@@ -162,6 +162,7 @@ internal class PaymentSheetPlaygroundActivity :
                     .externalPaymentMethodConfirmHandler(this)
                     .confirmCustomPaymentMethodCallback(this)
                     .createIntentCallback(viewModel::createIntentCallback)
+//                    .createIntentCallback(viewModel::createIntentWithConfirmationTokenCallback)
                     .analyticEventCallback(viewModel::analyticCallback)
             }
                 .build()
