@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.times
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.uicore.StripeTheme
@@ -117,19 +118,55 @@ private fun reportInitialPaymentMethodVisibilitySnapshot(
     innerPadding: Dp,
     callback: (List<String>, List<String>) -> Unit,
 ) {
-    // Since peek width of 1st partially visible item is never going to exceed more than 50%,
-    // the partially visible item will always be under 95% threshold, and thus considered hidden
-    val remainingWidth = screenWidth - tabWidth
-    val additionalItems = (remainingWidth / (tabWidth + innerPadding)).toInt()
-    val numberOfVisibleItems = (additionalItems + 1)
-        .coerceIn(0, paymentMethods.size)
+    val numberOfVisibleItems = calculateNumberOfVisibleItems(
+        totalItems = paymentMethods.size,
+        tabWidth = tabWidth,
+        screenWidth = screenWidth,
+        innerPadding = innerPadding
+    )
+
     val visibleLpms = paymentMethods
-        .subList(0, numberOfVisibleItems)
+        .take(numberOfVisibleItems)
         .map { pm -> pm.code }
     val hiddenLpms = paymentMethods
-        .subList(numberOfVisibleItems, paymentMethods.size)
+        .drop(numberOfVisibleItems)
         .map { pm -> pm.code }
     callback(visibleLpms, hiddenLpms)
+}
+
+/**
+ * Calculates the number of payment method tabs that are visible on screen.
+ */
+private fun calculateNumberOfVisibleItems(
+    totalItems: Int,
+    tabWidth: Dp,
+    screenWidth: Dp,
+    innerPadding: Dp,
+): Int {
+    if (totalItems <= 0) return 0
+    if (totalItems == 1) return 1
+
+    // Calculate how many items can fit with their spacing
+    val itemWithPadding = tabWidth + innerPadding
+    val maxItemsThatFit = (screenWidth / itemWithPadding).toInt()
+
+    // Check if there's enough remaining space for a partially visible item
+    val usedWidth = maxItemsThatFit * itemWithPadding
+    val remainingWidth = screenWidth - usedWidth
+
+    // Consider an item visible if at least 95% of it is shown
+    @Suppress("MagicNumber")
+    val visibilityThreshold = tabWidth * 0.95f
+    val hasPartiallyVisibleItem = remainingWidth >= visibilityThreshold
+
+    val totalVisibleItems = if (hasPartiallyVisibleItem) {
+        maxItemsThatFit + 1
+    } else {
+        maxItemsThatFit
+    }
+
+    // Ensure we don't exceed the total number of items and always show at least 1
+    return totalVisibleItems.coerceIn(1, totalItems)
 }
 
 @Composable
