@@ -3379,7 +3379,6 @@ internal class StripeApiRepositoryTest {
     fun createConfirmationToken_withPaymentMethodData_shouldSucceed() = runTest {
         val confirmationTokenParams = ConfirmationTokenParams(
             paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-            returnUrl = "https://example.com/return"
         )
 
         val confirmationToken = stripeApiRepository.createConfirmationToken(
@@ -3387,7 +3386,9 @@ internal class StripeApiRepositoryTest {
             DEFAULT_OPTIONS
         ).getOrThrow()
 
-        assertThat(confirmationToken.returnUrl).isEqualTo("https://example.com/return")
+        assertThat(confirmationToken.returnUrl).isEqualTo(
+            "stripesdk://payment_return_url/com.stripe.android.test"
+        )
         assertThat(confirmationToken.paymentMethodPreview!!.type).isEqualTo(PaymentMethod.Type.Card)
     }
 
@@ -3500,8 +3501,6 @@ internal class StripeApiRepositoryTest {
         verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
         val apiRequest = apiRequestArgumentCaptor.firstValue
         assertThat(apiRequest.params?.get("mandate_data") as Map<*, *>).isEqualTo(mandateData.toParamMap())
-
-        verifyAnalyticsRequest(PaymentAnalyticsEvent.ConfirmationTokenCreate)
     }
 
     @Test
@@ -3529,8 +3528,6 @@ internal class StripeApiRepositoryTest {
         val paymentMethodDataParams = apiRequest.params?.get("payment_method_data") as Map<*, *>
         assertThat(paymentMethodDataParams["payment_user_agent"])
             .isEqualTo("stripe-android/${StripeSdkVersion.VERSION_NAME};$productUsage")
-
-        verifyAnalyticsRequest(PaymentAnalyticsEvent.ConfirmationTokenCreate, productUsage)
     }
 
     @Test
@@ -3563,11 +3560,6 @@ internal class StripeApiRepositoryTest {
             apiRequest.params?.get("payment_method_data") as Map<*, *>
         assertThat(paymentMethodDataParams["payment_user_agent"])
             .isEqualTo("stripe-android/${StripeSdkVersion.VERSION_NAME};$productUsage;$attribution")
-
-        verifyAnalyticsRequest(
-            event = PaymentAnalyticsEvent.ConfirmationTokenCreate,
-            productUsage = "$productUsage,$attribution"
-        )
     }
 
     /**

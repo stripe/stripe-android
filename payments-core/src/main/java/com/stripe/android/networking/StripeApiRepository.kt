@@ -693,6 +693,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         confirmationTokenParams: ConfirmationTokenParams,
         options: ApiRequest.Options
     ): Result<ConfirmationToken> {
+        confirmationTokenParams.returnUrl = "stripesdk://payment_return_url/${context.packageName}"
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 confirmationTokensUrl,
@@ -703,14 +704,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 )
             ),
             ConfirmationTokenJsonParser()
-        ) {
-            fireAnalyticsRequest(
-                paymentAnalyticsRequestFactory.createRequest(
-                    PaymentAnalyticsEvent.ConfirmationTokenCreate,
-                    productUsageTokens = confirmationTokenParams.paymentMethodData?.attribution ?: emptySet(),
-                )
-            )
-        }
+        )
     }
 
     /**
