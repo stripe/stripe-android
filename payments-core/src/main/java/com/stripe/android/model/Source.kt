@@ -3,9 +3,8 @@ package com.stripe.android.model
 import androidx.annotation.Keep
 import androidx.annotation.StringDef
 import com.stripe.android.core.model.StripeModel
-import com.stripe.android.model.Source.Flow
-import com.stripe.android.model.Source.SourceType
 import com.stripe.android.model.parsers.SourceJsonParser
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 import org.json.JSONObject
@@ -236,7 +235,8 @@ data class Source internal constructor(
      * redirect ([flow] is [Flow.Redirect]).
      */
     @Parcelize
-    data class Redirect(
+    @Poko
+    class Redirect(
         /**
          * The URL you provide to redirect the customer to after they authenticated their payment.
          */
@@ -398,7 +398,8 @@ data class Source internal constructor(
     ) : StripeModel
 
     @Parcelize
-    data class Klarna(
+    @Poko
+    class Klarna(
         val firstName: String?,
         val lastName: String?,
         val purchaseCountry: String?,
