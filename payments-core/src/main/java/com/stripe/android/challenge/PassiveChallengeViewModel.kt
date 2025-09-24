@@ -13,6 +13,7 @@ import com.stripe.android.model.PassiveCaptchaParams
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 internal class PassiveChallengeViewModel @Inject constructor(
     private val passiveCaptchaParams: PassiveCaptchaParams,
@@ -25,7 +26,8 @@ internal class PassiveChallengeViewModel @Inject constructor(
         val result = hCaptchaService.performPassiveHCaptcha(
             activity = activity,
             siteKey = passiveCaptchaParams.siteKey,
-            rqData = passiveCaptchaParams.rqData
+            rqData = passiveCaptchaParams.rqData,
+            timeout = 6.seconds
         )
         when (result) {
             is HCaptchaService.Result.Failure -> {

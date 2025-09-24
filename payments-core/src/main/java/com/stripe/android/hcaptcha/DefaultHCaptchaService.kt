@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
 import kotlin.coroutines.resume
-import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Duration
 
 internal class DefaultHCaptchaService(
     private val hCaptchaProvider: HCaptchaProvider,
@@ -41,12 +41,13 @@ internal class DefaultHCaptchaService(
     override suspend fun performPassiveHCaptcha(
         activity: FragmentActivity,
         siteKey: String,
-        rqData: String?
+        rqData: String?,
+        timeout: Duration
     ): HCaptchaService.Result {
         captchaEventsReporter.attachStart()
         val isReady = cachedResult.value.isReady
         val result = runCatching {
-            withTimeout(TIMEOUT) {
+            withTimeout(timeout) {
                 transformCachedResult(activity, siteKey, rqData)
             }
         }.getOrElse { e ->
@@ -163,9 +164,5 @@ internal class DefaultHCaptchaService(
                     is Failure, is Success -> true
                 }
             }
-    }
-
-    companion object {
-        internal val TIMEOUT = 6.seconds
     }
 }

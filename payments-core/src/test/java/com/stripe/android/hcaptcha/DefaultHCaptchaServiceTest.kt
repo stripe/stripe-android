@@ -14,7 +14,10 @@ import com.stripe.hcaptcha.config.HCaptchaConfig
 import com.stripe.hcaptcha.config.HCaptchaSize
 import com.stripe.hcaptcha.task.OnFailureListener
 import com.stripe.hcaptcha.task.OnSuccessListener
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -27,6 +30,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
+import kotlin.time.Duration.Companion.seconds
 
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultHCaptchaServiceTest {
@@ -39,7 +43,8 @@ internal class DefaultHCaptchaServiceTest {
             service.performPassiveHCaptcha(
                 activity,
                 siteKey = TEST_SITE_KEY,
-                rqData = null
+                rqData = null,
+                timeout = TIMEOUT
             )
 
             hCaptchaProvider.awaitCall()
@@ -54,7 +59,8 @@ internal class DefaultHCaptchaServiceTest {
             service.performPassiveHCaptcha(
                 activity,
                 siteKey = TEST_SITE_KEY,
-                rqData = TEST_RQ_DATA
+                rqData = TEST_RQ_DATA,
+                timeout = TIMEOUT
             )
 
             val configCaptor = argumentCaptor<HCaptchaConfig>()
@@ -79,7 +85,8 @@ internal class DefaultHCaptchaServiceTest {
             val result = service.performPassiveHCaptcha(
                 activity,
                 siteKey = TEST_SITE_KEY,
-                rqData = null
+                rqData = null,
+                timeout = TIMEOUT
             )
 
             assertThat(captchaEventsReporter.awaitCall())
@@ -109,7 +116,8 @@ internal class DefaultHCaptchaServiceTest {
             val result = service.performPassiveHCaptcha(
                 activity,
                 siteKey = TEST_SITE_KEY,
-                rqData = null
+                rqData = null,
+                timeout = TIMEOUT
             )
 
             assertThat(captchaEventsReporter.awaitCall())
@@ -138,7 +146,8 @@ internal class DefaultHCaptchaServiceTest {
             service.performPassiveHCaptcha(
                 activity,
                 siteKey = TEST_SITE_KEY,
-                rqData = null
+                rqData = null,
+                timeout = TIMEOUT
             )
             verify(hCaptchaProvider.awaitCall()).reset()
         }
@@ -153,7 +162,8 @@ internal class DefaultHCaptchaServiceTest {
             service.performPassiveHCaptcha(
                 activity,
                 siteKey = TEST_SITE_KEY,
-                rqData = null
+                rqData = null,
+                timeout = TIMEOUT
             )
 
             verify(hCaptchaProvider.awaitCall()).reset()
@@ -169,7 +179,8 @@ internal class DefaultHCaptchaServiceTest {
                 service.performPassiveHCaptcha(
                     activity,
                     siteKey = TEST_SITE_KEY,
-                    rqData = null
+                    rqData = null,
+                    timeout = TIMEOUT
                 )
             }
 
@@ -190,7 +201,8 @@ internal class DefaultHCaptchaServiceTest {
             val result = service.performPassiveHCaptcha(
                 activity,
                 siteKey = TEST_SITE_KEY,
-                rqData = null
+                rqData = null,
+                timeout = TIMEOUT
             )
 
             assertThat(captchaEventsReporter.awaitCall())
@@ -227,7 +239,8 @@ internal class DefaultHCaptchaServiceTest {
             service.performPassiveHCaptcha(
                 activity,
                 siteKey = TEST_SITE_KEY,
-                rqData = null
+                rqData = null,
+                timeout = TIMEOUT
             )
 
             // Verify a subsequent warmUp call goes through (would be skipped if cache wasn't cleared)
@@ -261,7 +274,8 @@ internal class DefaultHCaptchaServiceTest {
             service.performPassiveHCaptcha(
                 activity,
                 siteKey = TEST_SITE_KEY,
-                rqData = null
+                rqData = null,
+                timeout = TIMEOUT
             )
 
             // Verify a subsequent warmUp call goes through (would be skipped if cache wasn't cleared)
@@ -287,7 +301,8 @@ internal class DefaultHCaptchaServiceTest {
             val result = service.performPassiveHCaptcha(
                 activity,
                 siteKey = TEST_SITE_KEY,
-                rqData = null
+                rqData = null,
+                timeout = TIMEOUT
             )
 
             assertThat(result).isInstanceOf(HCaptchaService.Result.Failure::class.java)
@@ -300,6 +315,30 @@ internal class DefaultHCaptchaServiceTest {
                 rqData = null
             )
             hCaptchaProvider.awaitCall() // This would not be called if cache wasn't cleared
+        }
+    }
+
+    @Test
+    fun `performPassiveHCaptcha respects timeout duration and throws timeout exception`() = runTest {
+        TestContext.test {
+            hCaptchaProvider.hCaptchaHandler = SetupHangingHCaptcha
+
+            val deferred = async {
+                service.performPassiveHCaptcha(
+                    activity,
+                    siteKey = TEST_SITE_KEY,
+                    rqData = null,
+                    timeout = TIMEOUT
+                )
+            }
+
+            advanceTimeBy(TIMEOUT.plus(1.seconds))
+
+            val result = deferred.await()
+
+            assertThat(result).isInstanceOf(HCaptchaService.Result.Failure::class.java)
+            val failure = result as HCaptchaService.Result.Failure
+            assertThat(failure.error).isInstanceOf(TimeoutCancellationException::class.java)
         }
     }
 
@@ -327,7 +366,8 @@ internal class DefaultHCaptchaServiceTest {
             val result = service.performPassiveHCaptcha(
                 activity,
                 siteKey = TEST_SITE_KEY,
-                rqData = TEST_RQ_DATA
+                rqData = TEST_RQ_DATA,
+                timeout = TIMEOUT
             )
 
             assertThat(captchaEventsReporter.awaitCall())
@@ -366,7 +406,8 @@ internal class DefaultHCaptchaServiceTest {
             val result = service.performPassiveHCaptcha(
                 activity,
                 siteKey = TEST_SITE_KEY,
-                rqData = null
+                rqData = null,
+                timeout = TIMEOUT
             )
 
             assertThat(captchaEventsReporter.awaitCall())
@@ -619,5 +660,6 @@ internal class DefaultHCaptchaServiceTest {
     companion object {
         private const val TEST_SITE_KEY = "test-site-key"
         private const val TEST_RQ_DATA = "test-rq-data"
+        private val TIMEOUT = 6.seconds
     }
 }

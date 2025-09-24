@@ -80,6 +80,7 @@ dependencies {
     androidTestImplementation testLibs.espresso.core
     androidTestImplementation testLibs.kotlin.coroutines
     androidTestImplementation testLibs.kotlin.junit
+    androidTestImplementation testLibs.truth
 
     androidTestUtil testLibs.testOrchestrator
 }

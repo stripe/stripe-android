@@ -12,6 +12,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.io.IOException
+import kotlin.time.Duration.Companion.seconds
 
 @RunWith(RobolectricTestRunner::class)
 internal class PassiveChallengeViewModelTest {
@@ -81,6 +82,7 @@ internal class PassiveChallengeViewModelTest {
         assertThat(passiveCaptcha.siteKey).isEqualTo(passiveCaptcha.siteKey)
         assertThat(passiveCaptcha.rqData).isEqualTo(passiveCaptcha.rqData)
         assertThat(passiveCaptcha.activity).isEqualTo(fakeActivity)
+        assertThat(passiveCaptcha.timeout).isEqualTo(6.seconds)
     }
 
     private fun createViewModel(

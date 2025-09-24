@@ -2,6 +2,7 @@ package com.stripe.android.hcaptcha
 
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.FragmentActivity
+import kotlin.time.Duration
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface HCaptchaService {
@@ -14,7 +15,8 @@ interface HCaptchaService {
     suspend fun performPassiveHCaptcha(
         activity: FragmentActivity,
         siteKey: String,
-        rqData: String?
+        rqData: String?,
+        timeout: Duration
     ): Result
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
