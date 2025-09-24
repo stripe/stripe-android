@@ -213,6 +213,7 @@ internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfigu
         collectMissingBillingDetailsForExistingPaymentMethods = true,
         allowUserEmailEdits = allowUserEmailEdits,
         allowLogOut = allowLogOut,
+        disallowFundingSourceCreation = emptySet(),
     ),
     shopPayConfiguration = null,
     googlePlacesApiKey = null,
