@@ -145,6 +145,11 @@ internal class CreateIntentCallbackFailureException(override val cause: Throwabl
     override fun analyticsValue(): String = "merchantReturnedCreateIntentCallbackFailure"
 }
 
+internal class CreateIntentWithConfirmationTokenCallbackFailureException(override val cause: Throwable?) :
+    StripeException() {
+    override fun analyticsValue(): String = "merchantReturnedCreateIntentWithConfirmationTokenCallbackFailure"
+}
+
 internal class InvalidClientSecretException(
     val clientSecret: String,
     val intent: StripeIntent,
@@ -721,7 +726,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             }
 
             is CreateIntentResult.Failure -> {
-                val exception = CreateIntentCallbackFailureException(result.cause)
+                val exception = CreateIntentWithConfirmationTokenCallbackFailureException(result.cause)
                 NextStep.Fail(
                     cause = exception,
                     message = result.displayMessage?.resolvableString
