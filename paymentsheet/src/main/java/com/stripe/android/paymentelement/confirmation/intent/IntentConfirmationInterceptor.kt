@@ -42,10 +42,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.utils.hasIntentToSetup
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.withTimeoutOrNull
 import org.json.JSONObject
 import javax.inject.Inject
@@ -516,72 +513,45 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     }
 
     private suspend fun waitForIntentCallback(): DeferredIntentCallback {
-        return coroutineScope {
-            val callbackWithPaymentMethod = async { waitForCreateIntentWithPaymentMethodCallback() }
-            val callbackWithConfirmationToken = async { waitForCreateIntentWithConfirmationTokenCallback() }
-
-            when (
-                val result = select {
-                    callbackWithPaymentMethod.onAwait { it }
-                    callbackWithConfirmationToken.onAwait { it }
-                }
-            ) {
-                is CreateIntentCallback -> {
-                    DeferredIntentCallback.CreateIntentWithPaymentMethod(result)
-                }
-                is CreateIntentWithConfirmationTokenCallback -> {
-                    DeferredIntentCallback.CreateIntentWithConfirmationToken(result)
-                }
-                else -> {
-                    DeferredIntentCallback.None
-                }
-            }
+        val createIntentCallback = retrieveCallback()
+        if (createIntentCallback != null) {
+            return DeferredIntentCallback.CreateIntentWithPaymentMethod(createIntentCallback)
         }
-    }
 
-    private suspend fun waitForCreateIntentWithPaymentMethodCallback(): CreateIntentCallback? {
-        return retrieveCallback() ?: run {
-            val callback = withTimeoutOrNull(PROVIDER_FETCH_TIMEOUT.seconds) {
-                var intentCallback: CreateIntentCallback? = null
+        val createIntentWithConfirmationTokenCallback = retrieveCreateIntentWithConfirmationTokenCallback()
+        if (createIntentWithConfirmationTokenCallback != null) {
+            return DeferredIntentCallback.CreateIntentWithConfirmationToken(
+                createIntentWithConfirmationTokenCallback
+            )
+        }
 
-                while (intentCallback == null) {
-                    delay(PROVIDER_FETCH_INTERVAL)
-                    intentCallback = retrieveCallback()
-                }
+        return withTimeoutOrNull(PROVIDER_FETCH_TIMEOUT.seconds) {
+            var createIntentCallback: CreateIntentCallback? = null
+            var createIntentWithConfirmationTokenCallback: CreateIntentWithConfirmationTokenCallback? = null
 
-                intentCallback
+            while (createIntentCallback == null && createIntentWithConfirmationTokenCallback == null) {
+                delay(PROVIDER_FETCH_INTERVAL)
+                createIntentCallback = retrieveCallback()
+                createIntentWithConfirmationTokenCallback = retrieveCreateIntentWithConfirmationTokenCallback()
             }
 
-            if (callback != null) {
+            val result = if (createIntentCallback != null) {
                 errorReporter.report(ErrorReporter.SuccessEvent.FOUND_CREATE_INTENT_CALLBACK_WHILE_POLLING)
-            }
-
-            callback
-        }
-    }
-
-    private suspend fun waitForCreateIntentWithConfirmationTokenCallback(): CreateIntentWithConfirmationTokenCallback? {
-        return retrieveCreateIntentWithConfirmationTokenCallback() ?: run {
-            val callback = withTimeoutOrNull(PROVIDER_FETCH_TIMEOUT.seconds) {
-                var callback: CreateIntentWithConfirmationTokenCallback? = null
-
-                while (callback == null) {
-                    delay(PROVIDER_FETCH_INTERVAL)
-                    callback = retrieveCreateIntentWithConfirmationTokenCallback()
-                }
-
-                callback
-            }
-
-            if (callback != null) {
+                DeferredIntentCallback.CreateIntentWithPaymentMethod(createIntentCallback)
+            } else if (createIntentWithConfirmationTokenCallback != null) {
                 errorReporter.report(
                     ErrorReporter.SuccessEvent
                         .FOUND_CREATE_INTENT_WITH_CONFIRMATION_TOKEN_CALLBACK_WHILE_POLLING
                 )
+                DeferredIntentCallback.CreateIntentWithConfirmationToken(
+                    createIntentWithConfirmationTokenCallback
+                )
+            } else {
+                null
             }
 
-            callback
-        }
+            result
+        } ?: DeferredIntentCallback.None
     }
 
     private suspend fun waitForPreparePaymentMethodHandler(): PreparePaymentMethodHandler? {
