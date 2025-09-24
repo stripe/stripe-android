@@ -169,7 +169,6 @@ class DefaultIntentConfirmationInterceptorTest {
 
     @Test
     fun `Fails if invoked without a confirm callback for new payment method`() = testNoProvider(
-        isNewPaymentMethod = true,
         event = ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL,
         failureMessage = CREATE_INTENT_CALLBACK_MESSAGE,
         userMessage = CREATE_INTENT_CALLBACK_MESSAGE.resolvableString,
@@ -1749,7 +1748,6 @@ class DefaultIntentConfirmationInterceptorTest {
     }
 
     private fun testNoProvider(
-        isNewPaymentMethod: Boolean = false,
         event: ErrorReporter.ErrorEvent,
         failureMessage: String,
         userMessage: ResolvableString,
@@ -1773,13 +1771,7 @@ class DefaultIntentConfirmationInterceptorTest {
 
             assertThat(interceptJob.isActive).isTrue()
 
-            if (isNewPaymentMethod) {
-                // for new PM, we do two rounds of callback polling
-                // to distinguish ConfirmationToken vs PaymentMethod intent creation callback
-                dispatcher.scheduler.advanceTimeBy(2001)
-            } else {
-                dispatcher.scheduler.advanceTimeBy(1)
-            }
+            dispatcher.scheduler.advanceTimeBy(1)
 
             assertThat(interceptJob.isActive).isFalse()
 

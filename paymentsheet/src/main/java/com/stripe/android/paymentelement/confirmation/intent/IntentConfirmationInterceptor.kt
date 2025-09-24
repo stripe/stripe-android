@@ -333,12 +333,15 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             productUsage = productUsage,
         )
 
-        val callback = waitForIntentCallback()
-        return if (callback is DeferredIntentCallback.CreateIntentWithConfirmationToken &&
-            intentConfiguration.intentBehavior is PaymentSheet.IntentConfiguration.IntentBehavior.Default
-        ) {
+        val deferredIntentCallback: DeferredIntentCallback? =
+            if (intentConfiguration.intentBehavior is PaymentSheet.IntentConfiguration.IntentBehavior.Default) {
+                waitForIntentCallback()
+            } else {
+                null
+            }
+        return if (deferredIntentCallback is DeferredIntentCallback.CreateIntentWithConfirmationToken) {
             handleDeferredIntentCreationFromConfirmationToken(
-                createIntentWithConfirmationTokenCallback = callback.delegate,
+                createIntentWithConfirmationTokenCallback = deferredIntentCallback.delegate,
                 intentConfiguration = intentConfiguration,
                 paymentMethodCreateParams = paymentMethodCreateParams,
                 paymentMethodOptionsParams = paymentMethodOptionsParams,
@@ -349,6 +352,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             createPaymentMethod(params).fold(
                 onSuccess = { paymentMethod ->
                     handleDeferred(
+                        deferredIntentCallback = deferredIntentCallback,
                         intentConfiguration = intentConfiguration,
                         paymentMethod = paymentMethod,
                         paymentMethodOptionsParams = paymentMethodOptionsParams,
@@ -372,6 +376,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     }
 
     private suspend fun handleDeferred(
+        deferredIntentCallback: DeferredIntentCallback? = null,
         intentConfiguration: PaymentSheet.IntentConfiguration,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
@@ -382,6 +387,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     ): NextStep {
         return when (intentConfiguration.intentBehavior) {
             is PaymentSheet.IntentConfiguration.IntentBehavior.Default -> handleDeferredIntent(
+                deferredIntentCallback = deferredIntentCallback ?: waitForIntentCallback(),
                 intentConfiguration = intentConfiguration,
                 paymentMethod = paymentMethod,
                 paymentMethodOptionsParams = paymentMethodOptionsParams,
@@ -398,6 +404,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     }
 
     private suspend fun handleDeferredIntent(
+        deferredIntentCallback: DeferredIntentCallback,
         intentConfiguration: PaymentSheet.IntentConfiguration,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
@@ -406,10 +413,10 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         shouldSavePaymentMethod: Boolean,
         hCaptchaToken: String?
     ): NextStep {
-        return when (val callback = waitForIntentCallback()) {
+        return when (deferredIntentCallback) {
             is DeferredIntentCallback.CreateIntentWithPaymentMethod -> {
                 handleDeferredIntentCreationFromPaymentMethod(
-                    createIntentCallback = callback.delegate,
+                    createIntentCallback = deferredIntentCallback.delegate,
                     intentConfiguration = intentConfiguration,
                     paymentMethod = paymentMethod,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
