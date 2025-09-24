@@ -131,9 +131,7 @@ class DefaultIntentConfirmationInterceptorTest {
 
     @Test
     fun `Returns confirm params with 'setup_future_usage' set to 'off_session' when requires save on confirmation`() =
-        runTest {
-            val interceptor = createIntentConfirmationInterceptor()
-
+        runInterceptorScenario { interceptor ->
             val nextStep = interceptor.intercept(
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
@@ -1415,9 +1413,8 @@ class DefaultIntentConfirmationInterceptorTest {
     }
 
     @Test
-    fun `hCaptchaToken is not set for new payment method confirmation option`() = runTest {
-        val interceptor = createIntentConfirmationInterceptor()
-
+    fun `hCaptchaToken is not set for new payment method confirmation option`() = runInterceptorScenario {
+            interceptor ->
         val nextStep = interceptor.intercept(
             confirmationOption = PaymentMethodConfirmationOption.New(
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
@@ -1592,6 +1589,30 @@ class DefaultIntentConfirmationInterceptorTest {
                 displayMessage = message
             )
         }
+    }
+
+    private data class InterceptorTestScenario(
+        val stripeRepository: StripeRepository = object : AbsFakeStripeRepository() {},
+        val publishableKeyProvider: () -> String = { "pk" },
+        val errorReporter: ErrorReporter = FakeErrorReporter(),
+        val intentCreationCallbackProvider: Provider<CreateIntentCallback?> = Provider { null },
+        val preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?> = Provider { null }
+    )
+
+    private fun runInterceptorScenario(
+        scenario: InterceptorTestScenario = InterceptorTestScenario(),
+        test: suspend (interceptor: DefaultIntentConfirmationInterceptor) -> Unit
+    ) = runTest {
+        val interceptor = DefaultIntentConfirmationInterceptor(
+            stripeRepository = scenario.stripeRepository,
+            publishableKeyProvider = scenario.publishableKeyProvider,
+            stripeAccountIdProvider = { null },
+            errorReporter = scenario.errorReporter,
+            allowsManualConfirmation = false,
+            intentCreationCallbackProvider = scenario.intentCreationCallbackProvider,
+            preparePaymentMethodHandlerProvider = scenario.preparePaymentMethodHandlerProvider,
+        )
+        test(interceptor)
     }
 
     private fun createIntentConfirmationInterceptor(
