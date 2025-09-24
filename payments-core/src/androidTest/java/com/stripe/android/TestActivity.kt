@@ -1,5 +1,5 @@
 package com.stripe.android
 
-import androidx.fragment.app.FragmentActivity
+import androidx.appcompat.app.AppCompatActivity
 
-internal class TestActivity : FragmentActivity()
+class TestActivity : AppCompatActivity()

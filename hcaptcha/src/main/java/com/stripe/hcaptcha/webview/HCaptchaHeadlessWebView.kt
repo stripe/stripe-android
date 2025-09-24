@@ -1,6 +1,8 @@
 package com.stripe.hcaptcha.webview
 
 import android.app.Activity
+import android.app.Application
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
@@ -31,6 +33,12 @@ internal class HCaptchaHeadlessWebView(
         val webView: WebView = HCaptchaWebView(activity)
         webView.id = R.id.webView
         webView.visibility = View.GONE
+
+//        if (webView.parent == null) {
+//            val rootView = activity.window.decorView.rootView as ViewGroup
+//            rootView.addView(webView)
+//        }
+//        registerActivityLifecycleCallback(activity)
 
         webViewHelper = HCaptchaWebViewHelper(
             Handler(Looper.getMainLooper()),
@@ -90,5 +98,30 @@ internal class HCaptchaHeadlessWebView(
         } else {
             shouldResetOnLoad = true
         }
+    }
+
+    private fun registerActivityLifecycleCallback(activity: Activity) {
+        activity.registerActivityLifecycleCallbacks(
+            object : Application.ActivityLifecycleCallbacks {
+                override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) = Unit
+
+                override fun onActivityStarted(activity: Activity) = Unit
+
+                override fun onActivityResumed(activity: Activity) = Unit
+
+                override fun onActivityPaused(activity: Activity) = Unit
+
+                override fun onActivityStopped(activity: Activity) = Unit
+
+                override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit
+
+                override fun onActivityDestroyed(activity: Activity) = Unit
+
+                override fun onActivityPreDestroyed(activity: Activity) {
+                    super.onActivityPreDestroyed(activity)
+                    reset()
+                }
+            }
+        )
     }
 }
