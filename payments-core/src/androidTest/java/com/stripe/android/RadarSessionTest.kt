@@ -2,6 +2,7 @@ package com.stripe.android
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.RadarSessionWithHCaptcha
 import com.stripe.android.networking.StripeRepository
@@ -12,9 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.Ignore
 import org.junit.Test
-import java.lang.RuntimeException
 
 class RadarSessionTest {
     private val mockApiRepository: StripeRepository = object : AbsFakeStripeRepository() {
@@ -52,13 +51,13 @@ class RadarSessionTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val activityScenarioFactory = ActivityScenarioFactory(context)
 
-    @Ignore("https://stripe.slack.com/archives/C02CCKZSB9R/p1758725978400489")
     @Test
     fun ensureRadarSessionsAttachHCaptchaToken(): Unit = runTest {
         activityScenarioFactory.create<TestActivity>().use { scenario ->
             scenario.onActivity { activity ->
                 launch(Dispatchers.Main) {
-                    stripe.createRadarSession(activity)
+                    val session = stripe.createRadarSession(activity)
+                    assertThat(session.id).isEqualTo("rse_id")
                 }
             }
         }

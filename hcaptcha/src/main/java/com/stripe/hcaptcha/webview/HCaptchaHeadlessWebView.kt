@@ -1,6 +1,8 @@
 package com.stripe.hcaptcha.webview
 
 import android.app.Activity
+import android.app.Application
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
@@ -32,6 +34,11 @@ internal class HCaptchaHeadlessWebView(
         webView.id = R.id.webView
         webView.visibility = View.GONE
 
+        if (webView.parent == null) {
+            val rootView = activity.window.decorView.rootView as ViewGroup
+            rootView.addView(webView)
+        }
+
         webViewHelper = HCaptchaWebViewHelper(
             Handler(Looper.getMainLooper()),
             activity,
@@ -41,6 +48,7 @@ internal class HCaptchaHeadlessWebView(
             listener,
             webView
         )
+        registerActivityLifecycleCallback(activity)
     }
 
     override fun startVerification(activity: FragmentActivity) {
@@ -81,14 +89,35 @@ internal class HCaptchaHeadlessWebView(
     }
 
     override fun reset() {
-        if (webViewLoaded) {
-            webViewHelper.reset()
-            val webView: WebView = webViewHelper.webView
-            if (webView.parent != null) {
-                (webView.parent as ViewGroup).removeView(webView)
-            }
-        } else {
-            shouldResetOnLoad = true
+        val webView: WebView = webViewHelper.webView
+        if (webView.parent != null) {
+            (webView.parent as ViewGroup).removeView(webView)
         }
+        webViewHelper.reset()
+    }
+
+    private fun registerActivityLifecycleCallback(activity: Activity) {
+        activity.registerActivityLifecycleCallbacks(
+            object : Application.ActivityLifecycleCallbacks {
+                override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) = Unit
+
+                override fun onActivityStarted(activity: Activity) = Unit
+
+                override fun onActivityResumed(activity: Activity) = Unit
+
+                override fun onActivityPaused(activity: Activity) = Unit
+
+                override fun onActivityStopped(activity: Activity) = Unit
+
+                override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit
+
+                override fun onActivityDestroyed(activity: Activity) = Unit
+
+                override fun onActivityPreDestroyed(activity: Activity) {
+                    reset()
+                    super.onActivityPreDestroyed(activity)
+                }
+            }
+        )
     }
 }
