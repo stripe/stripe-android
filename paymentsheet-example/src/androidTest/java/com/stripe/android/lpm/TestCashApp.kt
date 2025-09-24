@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaym
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.TestParameters
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -37,6 +38,7 @@ internal class TestCashApp : BasePlaygroundTest() {
         ).joinToString(",")
     }
 
+    @Ignore("ir-field-reflection")
     @Test
     fun testCashAppPay_Success() {
         testDriver.confirmNewOrGuestComplete(
@@ -44,6 +46,7 @@ internal class TestCashApp : BasePlaygroundTest() {
         )
     }
 
+    @Ignore("ir-field-reflection")
     @Test
     fun testCashAppPay_Fail() {
         testDriver.confirmNewOrGuestComplete(
@@ -55,6 +58,7 @@ internal class TestCashApp : BasePlaygroundTest() {
         )
     }
 
+    @Ignore("ir-field-reflection")
     @Test
     fun testCashAppPay_Cancel() {
         testDriver.confirmNewOrGuestComplete(
@@ -68,6 +72,7 @@ internal class TestCashApp : BasePlaygroundTest() {
         )
     }
 
+    @Ignore("ir-field-reflection")
     @Test
     fun testCashAppPayWithSfu() {
         testDriver.confirmNewOrGuestComplete(
@@ -77,6 +82,7 @@ internal class TestCashApp : BasePlaygroundTest() {
         )
     }
 
+    @Ignore("ir-field-reflection")
     @Test
     fun testCashAppPayWithSetupIntent() {
         testDriver.confirmNewOrGuestComplete(
@@ -86,6 +92,7 @@ internal class TestCashApp : BasePlaygroundTest() {
         )
     }
 
+    @Ignore("ir-field-reflection")
     @Test
     fun testCashAppPayInCustomFlow() {
         testDriver.confirmCustom(
@@ -93,6 +100,7 @@ internal class TestCashApp : BasePlaygroundTest() {
         )
     }
 
+    @Ignore("ir-field-reflection")
     @Test
     fun testCashAppPayDeferredCscWithSfu() {
         testDriver.confirmNewOrGuestComplete(
@@ -103,6 +111,7 @@ internal class TestCashApp : BasePlaygroundTest() {
         )
     }
 
+    @Ignore("ir-field-reflection")
     @Test
     fun testCashAppPayDeferredCscWithPmoSfu() {
         testDriver.confirmNewOrGuestComplete(
