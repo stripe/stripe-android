@@ -31,9 +31,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.core.Logger
 import com.stripe.android.paymentsheet.BuildConfig
+import com.stripe.android.shoppay.webview.EceAssetWebViewClient
 import com.stripe.android.shoppay.webview.EceWebView
 import com.stripe.android.shoppay.webview.PopUpWebChromeClient
-import com.stripe.android.shoppay.webview.PopUpWebViewClient
 import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
@@ -52,8 +52,7 @@ internal class ShopPayActivity : ComponentActivity() {
         val assetLoader = viewModel.assetLoader(this)
         EceWebView(
             context = this,
-            bridgeHandler = viewModel.bridgeHandler,
-            webViewClient = PopUpWebViewClient(
+            webViewClient = EceAssetWebViewClient(
                 assetLoader = assetLoader,
                 onPageLoaded = viewModel::onPageLoaded
             ),
@@ -67,7 +66,9 @@ internal class ShopPayActivity : ComponentActivity() {
                 closeWebView = viewModel::closePopup,
                 onPageLoaded = viewModel::onPageLoaded,
             )
-        )
+        ).apply {
+            viewModel.bootstrap(view = this)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

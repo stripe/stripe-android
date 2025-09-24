@@ -2,37 +2,28 @@ package com.stripe.android.shoppay.webview
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import com.stripe.android.shoppay.bridge.ShopPayBridgeHandler
 
 @SuppressLint("ViewConstructor")
 internal class EceWebView(
     context: Context,
-    bridgeHandler: ShopPayBridgeHandler,
     webViewClient: WebViewClient,
     webChromeClient: WebChromeClient
 ) : WebView(context) {
     init {
-        configureDefaultSettings(bridgeHandler)
+        configureDefaultSettings()
         this.webViewClient = webViewClient
         this.webChromeClient = webChromeClient
     }
 
-    override fun evaluateJavascript(script: String, resultCallback: ValueCallback<String>?) {
-        super.evaluateJavascript(script, resultCallback)
-    }
-
     @SuppressLint("SetJavaScriptEnabled")
-    private fun configureDefaultSettings(bridgeHandler: ShopPayBridgeHandler) {
+    private fun configureDefaultSettings() {
         settings.javaScriptEnabled = true
         settings.javaScriptCanOpenWindowsAutomatically = true
         settings.setSupportMultipleWindows(true)
         settings.userAgentString = FakeUserAgent
-
-        addJavascriptInterface(bridgeHandler, BRIDGE_NAME)
     }
 }
 

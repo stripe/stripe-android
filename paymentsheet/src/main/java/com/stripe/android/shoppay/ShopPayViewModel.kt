@@ -31,6 +31,7 @@ import com.stripe.android.shoppay.ShopPayActivity.Companion.getArgs
 import com.stripe.android.shoppay.bridge.ShopPayBridgeHandler
 import com.stripe.android.shoppay.bridge.ShopPayConfirmationState
 import com.stripe.android.shoppay.di.DaggerShopPayComponent
+import com.stripe.android.shoppay.webview.BRIDGE_NAME
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -169,6 +170,10 @@ internal class ShopPayViewModel @Inject constructor(
         viewModelScope.launch {
             _paymentResult.emit(ShopPayActivityResult.Canceled)
         }
+    }
+
+    fun bootstrap(view: WebView) {
+        view.addJavascriptInterface(bridgeHandler, BRIDGE_NAME)
     }
 
     fun assetLoader(context: Context): WebViewAssetLoader {
