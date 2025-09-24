@@ -92,6 +92,7 @@ class USBankAccountFormViewModelTest {
         termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         sellerBusinessName = null,
         forceSetupFutureUseBehavior = false,
+        clientAttributionMetadata = null,
     )
 
     private val mockCollectBankAccountLauncher = mock<CollectBankAccountLauncher>()

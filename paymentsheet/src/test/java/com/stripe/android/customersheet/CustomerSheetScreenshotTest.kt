@@ -87,6 +87,7 @@ internal class CustomerSheetScreenshotTest {
         termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         sellerBusinessName = null,
         forceSetupFutureUseBehavior = false,
+        clientAttributionMetadata = null,
     )
 
     private val selectPaymentMethodViewState = CustomerSheetViewState.SelectPaymentMethod(

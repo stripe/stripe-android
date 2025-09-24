@@ -17,6 +17,7 @@ import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.model.Address
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
@@ -708,6 +709,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     requiresMandate = true,
                     productUsage = setOf("PaymentSheet"),
                     allowRedisplay = allowRedisplay,
+                    clientAttributionMetadata = args.clientAttributionMetadata,
                 )
             }
             is ResultIdentifier.Session -> {
@@ -717,6 +719,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     ),
                     billingDetails = billingDetails,
                     allowRedisplay = allowRedisplay,
+                    clientAttributionMetadata = args.clientAttributionMetadata,
                 )
             }
         }
@@ -865,6 +868,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val termsDisplay: PaymentSheet.TermsDisplay,
         val sellerBusinessName: String?,
         val forceSetupFutureUseBehavior: Boolean,
+        val clientAttributionMetadata: ClientAttributionMetadata?,
     )
 
     private companion object {

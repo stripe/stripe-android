@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.utils.urlEncode
@@ -16,10 +17,12 @@ import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.IntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
+import com.stripe.android.paymentsheet.utils.UsBankAccountFormTestUtils
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.assertFailed
 import com.stripe.android.paymentsheet.utils.expectNoResult
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
+import com.stripe.paymentelementtestpages.FormPage
 import okhttp3.mockwebserver.SocketPolicy
 import org.junit.Rule
 import org.junit.Test
@@ -28,7 +31,9 @@ import org.junit.runner.RunWith
 @RunWith(TestParameterInjector::class)
 internal class PaymentSheetTest {
     @get:Rule
-    val testRules: TestRules = TestRules.create()
+    val testRules: TestRules = TestRules.create {
+        around(IntentsRule())
+    }
 
     private val composeTestRule = testRules.compose
     private val networkRule = testRules.networkRule
@@ -99,6 +104,51 @@ internal class PaymentSheetTest {
         }
 
         page.clickOnLpm("cashapp")
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            clientAttributionMetadataParamsInPaymentMethodData(),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        page.clickPrimaryButton()
+    }
+
+    @Test
+    fun testSuccessfulUsBankPayment() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        UsBankAccountFormTestUtils.setupSuccessfulCompletionOfUsBankAccountForm()
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = PaymentSheet.Configuration(
+                    merchantDisplayName = "Example, Inc.",
+                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    allowsDelayedPaymentMethods = true,
+                ),
+            )
+        }
+
+        page.clickOnLpm("us_bank_account")
+        val formPage = FormPage(composeTestRule)
+
+        formPage.fillOutName()
+        formPage.fillOutEmail()
+        page.clickPrimaryButton()
 
         networkRule.enqueue(
             method("POST"),
