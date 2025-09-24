@@ -307,6 +307,12 @@ internal enum class LinkHintStyle {
             Filled -> LinkTheme.colors.surfaceSecondary
             Outlined -> LinkTheme.colors.surfacePrimary
         }
+
+    val horizontalInset: Dp
+        get() = when (this) {
+            Filled -> 20.dp
+            Outlined -> 16.dp
+        }
 }
 
 @Composable
@@ -341,7 +347,7 @@ internal fun LinkHintMessageView(
 
     Row(
         modifier = finalModifier
-            .padding(horizontal = 20.dp, vertical = 12.dp),
+            .padding(horizontal = style.horizontalInset, vertical = 12.dp),
     ) {
         Icon(
             modifier = Modifier
