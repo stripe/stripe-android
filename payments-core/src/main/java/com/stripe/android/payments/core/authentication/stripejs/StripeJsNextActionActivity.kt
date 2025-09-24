@@ -75,7 +75,6 @@ internal class StripeJsNextActionActivity : AppCompatActivity() {
                             webView
                         },
                         update = { view ->
-                            view.setBackgroundColor(Color.TRANSPARENT)
                             view.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
                         }
                     )
@@ -92,11 +91,7 @@ internal class StripeJsNextActionActivity : AppCompatActivity() {
         val assetLoader = createAssetLoader()
 
         webView = WebView(this).apply {
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-
+            setBackgroundColor(Color.TRANSPARENT)
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
 
@@ -112,41 +107,7 @@ internal class StripeJsNextActionActivity : AppCompatActivity() {
                     super.onPageFinished(view, url)
                     view ?: return
                     url ?: return
-
-                    if (url.contains("stripesdk")) {
-                        val uri = Uri.parse(url)
-                        Logger.getInstance(BuildConfig.DEBUG).info("URL: $url")
-                        val redirectStatus = uri.getQueryParameter("redirect_status")
-                        val paymentIntentClientSecret = uri.getQueryParameter("payment_intent_client_secret")
-                        if (redirectStatus == "succeeded" && paymentIntentClientSecret != null) {
-                            Logger.getInstance(BuildConfig.DEBUG).info("Next action completed successfully")
-                            finishWithResult(StripeJsNextActionActivityResult.Completed(paymentIntentClientSecret))
-                            return
-                        } else {
-                            Logger.getInstance(BuildConfig.DEBUG).error("Next action failed: $url")
-                            finishWithResult(StripeJsNextActionActivityResult.Failed(Exception("Next action failed: $url")))
-                            return
-                        }
-                    }
-
-                    // First load native.js to set up the bridge
-                    val jsBridge = assets.open("www/native_stripejs.js")
-                        .bufferedReader()
-                        .use(BufferedReader::readText)
-
-                    view.evaluateJavascript(jsBridge) { result ->
-                        Logger.getInstance(BuildConfig.DEBUG).info("native.js loaded: $result")
-
-                        // After native.js loads, call initializeStripe if this is the right URL
-                        if (url.contains("pay.stripe.com")) {
-                            view.evaluateJavascript("initializeStripe()") {
-                                Logger.getInstance(BuildConfig.DEBUG).info("initializeStripe() => $it")
-                                postDelayed(1000) {
-                                    showWebView.value = true
-                                }.run()
-                            }
-                        }
-                    }
+                    showWebView.value = true
                 }
             }
 
@@ -162,16 +123,12 @@ internal class StripeJsNextActionActivity : AppCompatActivity() {
                 }
             }
 
-            addJavascriptInterface(NextActionBridge(), "androidBridge")
+            addJavascriptInterface(NextActionBridge(), "Android")
         }
     }
 
     private fun loadHtmlPage() {
-//        val htmlPage = assets.open("stripejs/index.html")
-//            .bufferedReader()
-//            .use(BufferedReader::readText)
-//        webView.loadDataWithBaseURL(null, htmlPage, "text/html", "UTF-8", null)
-        webView.loadUrl("https://pay.stripe.com/assets/www/stripejs_index.html")
+        webView.loadUrl("http://192.168.2.106:3004")
     }
 
     private fun createAssetLoader(): WebViewAssetLoader {
@@ -179,12 +136,6 @@ internal class StripeJsNextActionActivity : AppCompatActivity() {
             .setDomain("pay.stripe.com")
             .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this))
             .build()
-    }
-
-    private fun initializeStripeJs() {
-        webView.evaluateJavascript("initializeStripe();") {
-            Logger.getInstance(true).info(it)
-        }
     }
 
     private fun handleNextAction() {
@@ -208,7 +159,7 @@ internal class StripeJsNextActionActivity : AppCompatActivity() {
 
         @JavascriptInterface
         fun getInitParams(): String {
-            val result = """{"publishableKey":"${args.publishableKey}"}"""
+            val result = """{"publishableKey":"${args.publishableKey}", "clientSecret":"${args.intent.clientSecret}"}"""
             Logger.getInstance(BuildConfig.DEBUG).info("getInitParams() returning: $result")
             return result
         }
