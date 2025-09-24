@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -47,10 +48,12 @@ internal interface PaymentMethodVerticalLayoutInteractor {
 
     fun handleViewAction(viewAction: ViewAction)
 
-    fun reportInitialPaymentMethodVisibilitySnapshot(
-        visiblePaymentMethods: List<String>,
-        hiddenPaymentMethods: List<String>,
+    fun updatePaymentMethodVisibility(
+        itemCode: String,
+        layoutCoordinates: LayoutCoordinates
     )
+
+    fun cancelPaymentMethodVisibilityTracking()
 
     data class State(
         val displayablePaymentMethods: List<DisplayablePaymentMethod>,
@@ -332,11 +335,42 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         }
     }
 
-    override fun reportInitialPaymentMethodVisibilitySnapshot(
-        visiblePaymentMethods: List<String>,
-        hiddenPaymentMethods: List<String>,
-    ) {
-        onInitiallyDisplayedPaymentMethodVisibilitySnapshot(visiblePaymentMethods, hiddenPaymentMethods)
+    private var _visibilityTracker: PaymentMethodInitialVisibilityTracker? = null
+    private val visibilityTracker: PaymentMethodInitialVisibilityTracker
+        get() {
+            val currentSavedPaymentMethodCode = displayedSavedPaymentMethod.value?.paymentMethod?.type
+            val currentDisplayablePaymentMethodCodes = displayablePaymentMethods.value.map { it.code }
+
+            val expectedItems = buildList {
+                if (currentSavedPaymentMethodCode != null) {
+                    add("saved")
+                }
+                addAll(currentDisplayablePaymentMethodCodes)
+            }
+
+            // Create new tracker if none exists or if expected items have changed
+            if (_visibilityTracker == null || !_visibilityTracker!!.hasExpectedItems(expectedItems)) {
+                _visibilityTracker?.dispose()
+                _visibilityTracker = PaymentMethodInitialVisibilityTracker(
+                    expectedItems = expectedItems,
+                    renderedLpmCallback = { visibilityMap ->
+                        val visiblePaymentMethods = visibilityMap.filter { it.value }.keys.toList()
+                        val hiddenPaymentMethods = visibilityMap.filter { !it.value }.keys.toList()
+                        onInitiallyDisplayedPaymentMethodVisibilitySnapshot(visiblePaymentMethods, hiddenPaymentMethods)
+                    }
+                )
+            }
+
+            return _visibilityTracker!!
+        }
+
+    override fun updatePaymentMethodVisibility(itemCode: String, layoutCoordinates: LayoutCoordinates) {
+        visibilityTracker.updateVisibility(itemCode, layoutCoordinates)
+    }
+
+    override fun cancelPaymentMethodVisibilityTracking() {
+        _visibilityTracker?.dispose()
+        _visibilityTracker = null
     }
 
     private fun getDisplayablePaymentMethods(
