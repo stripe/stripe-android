@@ -91,6 +91,7 @@ internal fun PaymentMethodVerticalLayoutUI(
     )
 }
 
+@Suppress("LongMethod")
 @VisibleForTesting
 @Composable
 internal fun PaymentMethodVerticalLayoutUI(
