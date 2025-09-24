@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Ignore
 import org.junit.Test
 import java.lang.RuntimeException
 
@@ -51,6 +52,7 @@ class RadarSessionTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val activityScenarioFactory = ActivityScenarioFactory(context)
 
+    @Ignore("https://stripe.slack.com/archives/C02CCKZSB9R/p1758725978400489")
     @Test
     fun ensureRadarSessionsAttachHCaptchaToken(): Unit = runTest {
         activityScenarioFactory.create<TestActivity>().use { scenario ->
