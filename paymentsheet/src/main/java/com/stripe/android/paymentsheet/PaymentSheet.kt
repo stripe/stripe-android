@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment
 import com.stripe.android.CollectMissingLinkBillingDetailsPreview
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.LinkDisableFundingSourcePreview
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.core.strings.ResolvableString
@@ -3217,16 +3218,19 @@ class PaymentSheet internal constructor(
         internal val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
         internal val allowUserEmailEdits: Boolean,
         internal val allowLogOut: Boolean,
+        internal val disableFundingSources: Set<String>,
     ) : Parcelable {
 
         @JvmOverloads
         constructor(
-            display: Display = Display.Automatic
+            display: Display = Display.Automatic,
+            disableFundingSources: Set<String> = emptySet(),
         ) : this(
             display = display,
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             allowUserEmailEdits = true,
             allowLogOut = true,
+            disableFundingSources = disableFundingSources,
         )
 
         internal val shouldDisplay: Boolean
@@ -3235,9 +3239,13 @@ class PaymentSheet internal constructor(
                 Display.Never -> false
             }
 
+        internal val canDisplayBankTab: Boolean
+            get() = shouldDisplay && !disableFundingSources.contains("BANK_ACCOUNT")
+
         class Builder {
             private var display: Display = Display.Automatic
             private var collectMissingBillingDetailsForExistingPaymentMethods: Boolean = true
+            private var disableFundingSources: Set<String> = emptySet()
 
             fun display(display: Display) = apply {
                 this.display = display
@@ -3251,12 +3259,18 @@ class PaymentSheet internal constructor(
                     collectMissingBillingDetailsForExistingPaymentMethods
             }
 
+            @LinkDisableFundingSourcePreview
+            fun disableFundingSources(disableFundingSources: Set<String>) = apply {
+                this.disableFundingSources = disableFundingSources
+            }
+
             fun build() = LinkConfiguration(
                 display = display,
                 collectMissingBillingDetailsForExistingPaymentMethods =
                 collectMissingBillingDetailsForExistingPaymentMethods,
                 allowUserEmailEdits = true,
                 allowLogOut = true,
+                disableFundingSources = disableFundingSources,
             )
         }
 
