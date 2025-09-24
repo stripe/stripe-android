@@ -241,13 +241,15 @@ constructor(
         usBankAccount: USBankAccount,
         allowRedisplay: PaymentMethod.AllowRedisplay?,
         billingDetails: PaymentMethod.BillingDetails?,
-        metadata: Map<String, String>?
+        metadata: Map<String, String>?,
+        clientAttributionMetadata: ClientAttributionMetadata?,
     ) : this(
         type = PaymentMethod.Type.USBankAccount,
         usBankAccount = usBankAccount,
         allowRedisplay = allowRedisplay,
         billingDetails = billingDetails,
-        metadata = metadata
+        metadata = metadata,
+        clientAttributionMetadata = clientAttributionMetadata,
     )
 
     private constructor(
@@ -736,6 +738,7 @@ constructor(
         }
     }
 
+    @Suppress("LargeClass")
     companion object {
         private const val PARAM_TYPE = "type"
         private const val PARAM_BILLING_DETAILS = "billing_details"
@@ -890,7 +893,30 @@ constructor(
             metadata: Map<String, String>? = null,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
-            return PaymentMethodCreateParams(usBankAccount, allowRedisplay, billingDetails, metadata)
+            return PaymentMethodCreateParams(
+                usBankAccount = usBankAccount,
+                allowRedisplay = allowRedisplay,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                clientAttributionMetadata = null,
+            )
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun create(
+            usBankAccount: USBankAccount,
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+            clientAttributionMetadata: ClientAttributionMetadata? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                usBankAccount = usBankAccount,
+                allowRedisplay = allowRedisplay,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                clientAttributionMetadata = clientAttributionMetadata,
+            )
         }
 
         /**
@@ -1374,6 +1400,7 @@ constructor(
             requiresMandate: Boolean,
             productUsage: Set<String>,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+            clientAttributionMetadata: ClientAttributionMetadata? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 code = PaymentMethod.Type.Link.code,
@@ -1381,6 +1408,7 @@ constructor(
                 overrideParamMap = emptyMap(),
                 allowRedisplay = allowRedisplay,
                 productUsage = productUsage,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         }
 

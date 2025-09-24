@@ -896,6 +896,7 @@ internal class CustomerSheetViewModel(
             termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
             sellerBusinessName = null,
             forceSetupFutureUseBehavior = false,
+            clientAttributionMetadata = null,
         )
     }
 
