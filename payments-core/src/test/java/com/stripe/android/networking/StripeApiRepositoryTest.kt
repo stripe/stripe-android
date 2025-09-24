@@ -3501,6 +3501,8 @@ internal class StripeApiRepositoryTest {
         verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
         val apiRequest = apiRequestArgumentCaptor.firstValue
         assertThat(apiRequest.params?.get("mandate_data") as Map<*, *>).isEqualTo(mandateData.toParamMap())
+
+        verifyAnalyticsRequest(PaymentAnalyticsEvent.ConfirmationTokenCreate)
     }
 
     @Test
@@ -3528,6 +3530,8 @@ internal class StripeApiRepositoryTest {
         val paymentMethodDataParams = apiRequest.params?.get("payment_method_data") as Map<*, *>
         assertThat(paymentMethodDataParams["payment_user_agent"])
             .isEqualTo("stripe-android/${StripeSdkVersion.VERSION_NAME};$productUsage")
+
+        verifyAnalyticsRequest(PaymentAnalyticsEvent.ConfirmationTokenCreate, productUsage)
     }
 
     @Test
@@ -3560,6 +3564,11 @@ internal class StripeApiRepositoryTest {
             apiRequest.params?.get("payment_method_data") as Map<*, *>
         assertThat(paymentMethodDataParams["payment_user_agent"])
             .isEqualTo("stripe-android/${StripeSdkVersion.VERSION_NAME};$productUsage;$attribution")
+
+        verifyAnalyticsRequest(
+            event = PaymentAnalyticsEvent.ConfirmationTokenCreate,
+            productUsage = "$productUsage,$attribution"
+        )
     }
 
     /**
