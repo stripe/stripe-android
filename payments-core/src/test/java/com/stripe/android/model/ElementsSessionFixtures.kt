@@ -1396,7 +1396,6 @@ internal object ElementsSessionFixtures {
               },
               "flags": {
                 "elements_disable_paypal_express": true,
-                "elements_enable_blik": true,
                 "elements_enable_br_card_installments": false,
                 "elements_enable_deferred_intent": false,
                 "elements_enable_demo_pay": false,
@@ -1581,7 +1580,6 @@ internal object ElementsSessionFixtures {
                     "elements_disable_recurring_express_checkout_button_amazon_pay": false,
                     "elements_enable_affirm_unified_offer": true,
                     "elements_enable_afterpay_clearpay_unified_offer": true,
-                    "elements_enable_blik": true,
                     "elements_enable_br_card_installments": false,
                     "elements_enable_card_brand_choice_payment_element_link": false,
                     "elements_enable_card_brand_choice_payment_element_payment_method_data": true,

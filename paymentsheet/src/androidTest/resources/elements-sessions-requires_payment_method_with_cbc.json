@@ -20,7 +20,6 @@
     "elements_disable_link_email_otp": false,
     "elements_disable_payment_element_card_country_zip_validations": false,
     "elements_disable_paypal_express": false,
-    "elements_enable_blik": true,
     "elements_enable_br_card_installments": false,
     "elements_enable_card_brand_choice_payment_element": true,
     "elements_enable_deferred_intent": true,
