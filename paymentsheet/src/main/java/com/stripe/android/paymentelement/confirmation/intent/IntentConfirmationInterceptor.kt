@@ -522,6 +522,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         val result = createIntentCallback.onCreateIntent(
             paymentMethod = paymentMethod,
             shouldSavePaymentMethod = shouldSavePaymentMethod,
+            onBehalfOf = intentConfiguration.onBehalfOf,
         )
 
         return when (result) {
