@@ -14,6 +14,7 @@ data class ConfirmationTokenParams(
     val shipping: ConfirmPaymentIntentParams.Shipping? = null,
     val mandateDataParams: MandateDataParams? = null,
     val setAsDefaultPaymentMethod: Boolean? = null,
+    val cvc: String? = null,
 ) : StripeParamsModel, Parcelable {
     override fun toParamMap(): Map<String, Any> {
         return buildMap {
@@ -24,6 +25,7 @@ data class ConfirmationTokenParams(
             shipping?.let { put(PARAM_SHIPPING, it.toParamMap()) }
             mandateDataParams?.let { put(PARAM_MANDATE_DATA, it.toParamMap()) }
             setAsDefaultPaymentMethod?.let { put(PARAM_SET_AS_DEFAULT_PAYMENT_METHOD, it) }
+            cvc?.let { put("payment_method_options", mapOf("card" to mapOf("cvc" to it))) }
         }
     }
 
