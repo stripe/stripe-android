@@ -82,6 +82,7 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
                         intentConfiguration = PaymentSheet.IntentConfiguration(
                             mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
                             paymentMethodTypes = intentConfiguration.paymentMethodTypes,
+                            onBehalfOf = intentConfiguration.onBehalfOf,
                         )
                     ),
                     savedPaymentMethodSelectionId = savedSelection?.id,

@@ -377,6 +377,7 @@ class CustomerSheet internal constructor(
     @ExperimentalCustomerSessionApi
     class IntentConfiguration internal constructor(
         internal val paymentMethodTypes: List<String>,
+        internal val onBehalfOf: String?,
     ) {
         /**
          * Builder for creating a [IntentConfiguration]
@@ -384,6 +385,7 @@ class CustomerSheet internal constructor(
         @ExperimentalCustomerSessionApi
         class Builder {
             private var paymentMethodTypes = listOf<String>()
+            private var onBehalfOf: String? = null
 
             /**
              * The payment methods types to display. If empty, we dynamically determine the
@@ -394,12 +396,17 @@ class CustomerSheet internal constructor(
                 this.paymentMethodTypes = paymentMethodTypes
             }
 
+            fun onBehalfOf(connectedAccountId: String) = apply {
+                this.onBehalfOf = connectedAccountId
+            }
+
             /**
              * Creates the [IntentConfiguration] instance.
              */
             fun build(): IntentConfiguration {
                 return IntentConfiguration(
                     paymentMethodTypes = paymentMethodTypes,
+                    onBehalfOf = onBehalfOf,
                 )
             }
         }
