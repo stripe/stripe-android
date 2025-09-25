@@ -671,7 +671,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     ): NextStep {
         return stripeRepository.createConfirmationToken(
             confirmationTokenParams = ConfirmationTokenParams(
-                paymentMethodData = paymentMethodCreateParams
+                paymentMethodData = paymentMethodCreateParams,
+                setUpFutureUsage = paymentMethodOptionsParams?.setupFutureUsage(),
             ),
             options = requestOptions,
         ).fold(
