@@ -144,7 +144,8 @@ internal interface ConfirmationDefinition<
          * Shipping details that the customer filled in or the merchant has auto-filled. Can be used to make
          * confirmation flow decisions or behavior changes (ie. providing shipping details on intent confirmation).
          */
-        val shippingDetails: AddressDetails?
+        val shippingDetails: AddressDetails?,
+        val ephemeralKeySecret: String?,
     ) : Parcelable
 
     /**

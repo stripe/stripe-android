@@ -116,6 +116,7 @@ internal interface IntentConfirmationInterceptor {
         paymentMethodExtraParams: PaymentMethodExtraParams? = null,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         hCaptchaToken: String?,
+        ephemeralKeySecret: String?,
     ): NextStep
 
     companion object {
@@ -252,7 +253,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        hCaptchaToken: String?
+        hCaptchaToken: String?,
+        ephemeralKeySecret: String?,
     ): NextStep {
         return when (initializationMode) {
             is PaymentElementLoader.InitializationMode.DeferredIntent -> {
@@ -271,7 +273,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                         paymentMethodOptionsParams = updatedPaymentMethodOptionsParams,
                         intentConfiguration = initializationMode.intentConfiguration
                     ),
-                    hCaptchaToken = hCaptchaToken
+                    hCaptchaToken = hCaptchaToken,
+                    ephemeralKeySecret = ephemeralKeySecret,
                 )
             }
 
@@ -350,7 +353,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                             paymentMethodOptionsParams = paymentMethodOptionsParams,
                             intentConfiguration = intentConfiguration
                         ),
-                        hCaptchaToken = null
+                        hCaptchaToken = null,
+                        ephemeralKeySecret = null
                     )
                 },
                 onFailure = { error ->
@@ -370,7 +374,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodExtraParams: PaymentMethodExtraParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         shouldSavePaymentMethod: Boolean,
-        hCaptchaToken: String?
+        hCaptchaToken: String?,
+        ephemeralKeySecret: String?
     ): NextStep {
         return when (intentConfiguration.intentBehavior) {
             is PaymentSheet.IntentConfiguration.IntentBehavior.Default -> handleDeferredIntent(
@@ -380,7 +385,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 paymentMethodExtraParams = paymentMethodExtraParams,
                 shippingValues = shippingValues,
                 shouldSavePaymentMethod = shouldSavePaymentMethod,
-                hCaptchaToken = hCaptchaToken
+                hCaptchaToken = hCaptchaToken,
+                ephemeralKeySecret = ephemeralKeySecret,
             )
             is PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken -> handlePreparePaymentMethod(
                 paymentMethod = paymentMethod,
@@ -396,7 +402,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodExtraParams: PaymentMethodExtraParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         shouldSavePaymentMethod: Boolean,
-        hCaptchaToken: String?
+        hCaptchaToken: String?,
+        ephemeralKeySecret: String?,
     ): NextStep {
         return when (val callback = waitForIntentCallback()) {
             is DeferredIntentCallback.CreateIntentWithPaymentMethod -> {
@@ -420,7 +427,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     shippingValues = shippingValues,
-                    hCaptchaToken = hCaptchaToken
+                    hCaptchaToken = hCaptchaToken,
+                    ephemeralKeySecret = ephemeralKeySecret
                 )
             }
 
@@ -703,7 +711,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        hCaptchaToken: String?
+        hCaptchaToken: String?,
+        ephemeralKeySecret: String?
     ): NextStep {
         return stripeRepository.createConfirmationToken(
             confirmationTokenParams = ConfirmationTokenParams(
@@ -713,7 +722,14 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                         message = "PaymentMethod must have an ID".resolvableString,
                     ),
             ),
-            options = requestOptions,
+            options = ApiRequest.Options(
+                apiKey = ephemeralKeySecret
+                    ?: return NextStep.Fail(
+                        cause = IllegalStateException("Ephemeral key secret is required to confirm with saved payment method"),
+                        message = "Ephemeral key secret is required to confirm with saved payment method".resolvableString,
+                    ),
+                stripeAccount = stripeAccountIdProvider(),
+            )
         ).fold(
             onSuccess = { confirmationToken ->
                 handleDeferredOnConfirmationTokenCreated(

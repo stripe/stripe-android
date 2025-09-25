@@ -265,7 +265,8 @@ internal class DefaultConfirmationHandler(
             appearance = appearance,
             shippingDetails = shippingDetails,
             initializationMode = initializationMode,
-            intent = intent
+            intent = intent,
+            ephemeralKeySecret = ephemeralKeySecret,
         )
     }
 

@@ -40,6 +40,7 @@ internal class IntentConfirmationDefinition(
             intent = confirmationParameters.intent,
             initializationMode = confirmationParameters.initializationMode,
             shippingDetails = confirmationParameters.shippingDetails,
+            ephemeralKeySecret = confirmationParameters.ephemeralKeySecret,
         )
 
         val deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType
