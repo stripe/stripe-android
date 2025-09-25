@@ -13,6 +13,8 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.model.ConfirmationToken
+import com.stripe.android.model.ConfirmationTokenParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -22,9 +24,11 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.RadarOptions
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.setupFutureUsage
 import com.stripe.android.model.updateSetupFutureUsageWithPmoSfu
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
@@ -40,6 +44,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.utils.hasIntentToSetup
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
+import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
@@ -137,6 +142,11 @@ internal class CreateIntentCallbackFailureException(override val cause: Throwabl
     override fun analyticsValue(): String = "merchantReturnedCreateIntentCallbackFailure"
 }
 
+internal class CreateIntentWithConfirmationTokenCallbackFailureException(override val cause: Throwable?) :
+    StripeException() {
+    override fun analyticsValue(): String = "merchantReturnedCreateIntentWithConfirmationTokenCallbackFailure"
+}
+
 internal class InvalidClientSecretException(
     val clientSecret: String,
     val intent: StripeIntent,
@@ -153,11 +163,26 @@ internal class InvalidClientSecretException(
     """.trimIndent()
 }
 
+internal sealed class DeferredIntentCallback {
+    data class CreateIntentWithPaymentMethod(
+        val delegate: CreateIntentCallback
+    ) : DeferredIntentCallback()
+
+    data class CreateIntentWithConfirmationToken(
+        val delegate: CreateIntentWithConfirmationTokenCallback
+    ) : DeferredIntentCallback()
+
+    object None : DeferredIntentCallback()
+}
+
 @OptIn(SharedPaymentTokenSessionPreview::class)
+@Suppress("LargeClass")
 internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     private val stripeRepository: StripeRepository,
     private val errorReporter: ErrorReporter,
     private val intentCreationCallbackProvider: Provider<CreateIntentCallback?>,
+    private val intentCreationWithConfirmationTokenCallbackProvider:
+    Provider<CreateIntentWithConfirmationTokenCallback?>,
     private val preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?>,
     @Named(ALLOWS_MANUAL_CONFIRMATION) private val allowsManualConfirmation: Boolean,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
@@ -282,6 +307,9 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         }
     }
 
+    /**
+     * Handles the deferred intent + new PM confirmation flow.
+     */
     private suspend fun handleDeferred(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         paymentMethodCreateParams: PaymentMethodCreateParams,
@@ -302,31 +330,50 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             productUsage = productUsage,
         )
 
-        return createPaymentMethod(params).fold(
-            onSuccess = { paymentMethod ->
-                handleDeferred(
-                    intentConfiguration = intentConfiguration,
-                    paymentMethod = paymentMethod,
-                    paymentMethodOptionsParams = paymentMethodOptionsParams,
-                    paymentMethodExtraParams = paymentMethodExtraParams,
-                    shippingValues = shippingValues,
-                    shouldSavePaymentMethod = customerRequestedSave || shouldSavePaymentMethod(
-                        paymentMethodOptionsParams = paymentMethodOptionsParams,
-                        intentConfiguration = intentConfiguration
-                    ),
-                    hCaptchaToken = null
-                )
-            },
-            onFailure = { error ->
-                NextStep.Fail(
-                    cause = error,
-                    message = error.stripeErrorMessage(),
-                )
+        val deferredIntentCallback: DeferredIntentCallback? =
+            if (intentConfiguration.intentBehavior is PaymentSheet.IntentConfiguration.IntentBehavior.Default) {
+                waitForIntentCallback()
+            } else {
+                null
             }
-        )
+        return if (deferredIntentCallback is DeferredIntentCallback.CreateIntentWithConfirmationToken) {
+            handleDeferredIntentCreationFromConfirmationToken(
+                createIntentWithConfirmationTokenCallback = deferredIntentCallback.delegate,
+                intentConfiguration = intentConfiguration,
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                paymentMethodOptionsParams = paymentMethodOptionsParams,
+                paymentMethodExtraParams = paymentMethodExtraParams,
+                shippingValues = shippingValues,
+            )
+        } else {
+            createPaymentMethod(params).fold(
+                onSuccess = { paymentMethod ->
+                    handleDeferred(
+                        deferredIntentCallback = deferredIntentCallback,
+                        intentConfiguration = intentConfiguration,
+                        paymentMethod = paymentMethod,
+                        paymentMethodOptionsParams = paymentMethodOptionsParams,
+                        paymentMethodExtraParams = paymentMethodExtraParams,
+                        shippingValues = shippingValues,
+                        shouldSavePaymentMethod = customerRequestedSave || shouldSavePaymentMethod(
+                            paymentMethodOptionsParams = paymentMethodOptionsParams,
+                            intentConfiguration = intentConfiguration
+                        ),
+                        hCaptchaToken = null
+                    )
+                },
+                onFailure = { error ->
+                    NextStep.Fail(
+                        cause = error,
+                        message = error.stripeErrorMessage(),
+                    )
+                }
+            )
+        }
     }
 
     private suspend fun handleDeferred(
+        deferredIntentCallback: DeferredIntentCallback? = null,
         intentConfiguration: PaymentSheet.IntentConfiguration,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
@@ -337,6 +384,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     ): NextStep {
         return when (intentConfiguration.intentBehavior) {
             is PaymentSheet.IntentConfiguration.IntentBehavior.Default -> handleDeferredIntent(
+                deferredIntentCallback = deferredIntentCallback ?: waitForIntentCallback(),
                 intentConfiguration = intentConfiguration,
                 paymentMethod = paymentMethod,
                 paymentMethodOptionsParams = paymentMethodOptionsParams,
@@ -353,6 +401,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     }
 
     private suspend fun handleDeferredIntent(
+        deferredIntentCallback: DeferredIntentCallback,
         intentConfiguration: PaymentSheet.IntentConfiguration,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
@@ -361,10 +410,10 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         shouldSavePaymentMethod: Boolean,
         hCaptchaToken: String?
     ): NextStep {
-        return when (val callback = waitForIntentCallback()) {
-            is CreateIntentCallback -> {
+        return when (deferredIntentCallback) {
+            is DeferredIntentCallback.CreateIntentWithPaymentMethod -> {
                 handleDeferredIntentCreationFromPaymentMethod(
-                    createIntentCallback = callback,
+                    createIntentCallback = deferredIntentCallback.delegate,
                     intentConfiguration = intentConfiguration,
                     paymentMethod = paymentMethod,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
@@ -375,7 +424,11 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 )
             }
 
-            else -> {
+            is DeferredIntentCallback.CreateIntentWithConfirmationToken -> {
+                TODO("Saved PM + ConfirmationToken flow is not implemented yet")
+            }
+
+            is DeferredIntentCallback.None -> {
                 val error = "${CreateIntentCallback::class.java.simpleName} must be implemented " +
                     "when using IntentConfiguration with PaymentSheet"
 
@@ -459,25 +512,46 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         )
     }
 
-    private suspend fun waitForIntentCallback(): CreateIntentCallback? {
-        return retrieveCallback() ?: run {
-            val callback = withTimeoutOrNull(PROVIDER_FETCH_TIMEOUT.seconds) {
-                var intentCallback: CreateIntentCallback? = null
-
-                while (intentCallback == null) {
-                    delay(PROVIDER_FETCH_INTERVAL)
-                    intentCallback = retrieveCallback()
-                }
-
-                intentCallback
-            }
-
-            if (callback != null) {
-                errorReporter.report(ErrorReporter.SuccessEvent.FOUND_CREATE_INTENT_CALLBACK_WHILE_POLLING)
-            }
-
-            callback
+    private suspend fun waitForIntentCallback(): DeferredIntentCallback {
+        val createIntentCallback = retrieveCallback()
+        if (createIntentCallback != null) {
+            return DeferredIntentCallback.CreateIntentWithPaymentMethod(createIntentCallback)
         }
+
+        val createIntentWithConfirmationTokenCallback = retrieveCreateIntentWithConfirmationTokenCallback()
+        if (createIntentWithConfirmationTokenCallback != null) {
+            return DeferredIntentCallback.CreateIntentWithConfirmationToken(
+                createIntentWithConfirmationTokenCallback
+            )
+        }
+
+        return withTimeoutOrNull(PROVIDER_FETCH_TIMEOUT.seconds) {
+            var createIntentCallback: CreateIntentCallback? = null
+            var createIntentWithConfirmationTokenCallback: CreateIntentWithConfirmationTokenCallback? = null
+
+            while (createIntentCallback == null && createIntentWithConfirmationTokenCallback == null) {
+                delay(PROVIDER_FETCH_INTERVAL)
+                createIntentCallback = retrieveCallback()
+                createIntentWithConfirmationTokenCallback = retrieveCreateIntentWithConfirmationTokenCallback()
+            }
+
+            val result = if (createIntentCallback != null) {
+                errorReporter.report(ErrorReporter.SuccessEvent.FOUND_CREATE_INTENT_CALLBACK_WHILE_POLLING)
+                DeferredIntentCallback.CreateIntentWithPaymentMethod(createIntentCallback)
+            } else if (createIntentWithConfirmationTokenCallback != null) {
+                errorReporter.report(
+                    ErrorReporter.SuccessEvent
+                        .FOUND_CREATE_INTENT_WITH_CONFIRMATION_TOKEN_CALLBACK_WHILE_POLLING
+                )
+                DeferredIntentCallback.CreateIntentWithConfirmationToken(
+                    createIntentWithConfirmationTokenCallback
+                )
+            } else {
+                null
+            }
+
+            result
+        } ?: DeferredIntentCallback.None
     }
 
     private suspend fun waitForPreparePaymentMethodHandler(): PreparePaymentMethodHandler? {
@@ -503,6 +577,10 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
 
     private fun retrieveCallback(): CreateIntentCallback? {
         return intentCreationCallbackProvider.get()
+    }
+
+    private fun retrieveCreateIntentWithConfirmationTokenCallback(): CreateIntentWithConfirmationTokenCallback? {
+        return intentCreationWithConfirmationTokenCallbackProvider.get()
     }
 
     private fun retrievePreparePaymentMethodHandler(): PreparePaymentMethodHandler? {
@@ -543,6 +621,89 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
 
             is CreateIntentResult.Failure -> {
                 val exception = CreateIntentCallbackFailureException(result.cause)
+                NextStep.Fail(
+                    cause = exception,
+                    message = result.displayMessage?.resolvableString
+                        ?: exception.stripeErrorMessage(),
+                )
+            }
+        }
+    }
+
+    private suspend fun handleDeferredIntentCreationFromConfirmationToken(
+        createIntentWithConfirmationTokenCallback: CreateIntentWithConfirmationTokenCallback,
+        intentConfiguration: PaymentSheet.IntentConfiguration,
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+        paymentMethodExtraParams: PaymentMethodExtraParams?,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?,
+    ): NextStep {
+        return stripeRepository.createConfirmationToken(
+            confirmationTokenParams = ConfirmationTokenParams(
+                paymentMethodData = paymentMethodCreateParams
+            ),
+            options = requestOptions,
+        ).fold(
+            onSuccess = { confirmationToken ->
+                val paymentMethodPreview = confirmationToken.paymentMethodPreview
+                    ?: return NextStep.Fail(
+                        cause = IllegalStateException("Failed to fetch PaymentMethod"),
+                        message = "Failed to fetch PaymentMethod".resolvableString,
+                    )
+                val paymentMethod = PaymentMethodJsonParser().parse(
+                    JSONObject(paymentMethodPreview.allResponseFields)
+                )
+                handleDeferredOnConfirmationTokenCreated(
+                    callback = createIntentWithConfirmationTokenCallback,
+                    confirmationToken = confirmationToken,
+                    intentConfiguration = intentConfiguration,
+                    paymentMethod = paymentMethod,
+                    paymentMethodOptionsParams = paymentMethodOptionsParams,
+                    paymentMethodExtraParams = paymentMethodExtraParams,
+                    shippingValues = shippingValues,
+                    hCaptchaToken = null,
+                )
+            },
+            onFailure = { error ->
+                NextStep.Fail(
+                    cause = error,
+                    message = error.stripeErrorMessage(),
+                )
+            }
+        )
+    }
+
+    private suspend fun handleDeferredOnConfirmationTokenCreated(
+        callback: CreateIntentWithConfirmationTokenCallback,
+        confirmationToken: ConfirmationToken,
+        intentConfiguration: PaymentSheet.IntentConfiguration,
+        paymentMethod: PaymentMethod,
+        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+        paymentMethodExtraParams: PaymentMethodExtraParams?,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        hCaptchaToken: String?
+    ): NextStep {
+        val result = callback.onCreateIntent(confirmationToken)
+
+        return when (result) {
+            is CreateIntentResult.Success -> {
+                if (result.clientSecret == IntentConfirmationInterceptor.COMPLETE_WITHOUT_CONFIRMING_INTENT) {
+                    NextStep.Complete(isForceSuccess = true)
+                } else {
+                    handleDeferredIntentCreationSuccess(
+                        clientSecret = result.clientSecret,
+                        intentConfiguration = intentConfiguration,
+                        paymentMethod = paymentMethod,
+                        paymentMethodOptionsParams = paymentMethodOptionsParams,
+                        paymentMethodExtraParams = paymentMethodExtraParams,
+                        shippingValues = shippingValues,
+                        hCaptchaToken = hCaptchaToken
+                    )
+                }
+            }
+
+            is CreateIntentResult.Failure -> {
+                val exception = CreateIntentWithConfirmationTokenCallbackFailureException(result.cause)
                 NextStep.Fail(
                     cause = exception,
                     message = result.displayMessage?.resolvableString

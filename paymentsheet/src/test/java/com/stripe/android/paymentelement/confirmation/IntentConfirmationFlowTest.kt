@@ -8,6 +8,8 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.model.ConfirmationToken
+import com.stripe.android.model.ConfirmationTokenFixtures
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
@@ -15,6 +17,7 @@ import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
@@ -277,11 +280,85 @@ internal class IntentConfirmationFlowTest {
         assertThat(actualParams.toParamMap().get("set_as_default_payment_method")).isEqualTo(true)
     }
 
+    @Test
+    fun `On deferred intent with confirmation token callback, action should be confirm`() = runTest {
+        val intentConfirmationDefinition = createIntentConfirmationDefinition(
+            createIntentWithConfirmationTokenCallback = CreateIntentWithConfirmationTokenCallback { _ ->
+                CreateIntentResult.Success(
+                    clientSecret = "seti_123_secret_123"
+                )
+            }
+        )
+
+        val action = intentConfirmationDefinition.action(
+            confirmationOption = CONFIRMATION_OPTION,
+            confirmationParameters = DEFERRED_CONFIRMATION_PARAMETERS,
+        )
+
+        val launchAction = action.asLaunch()
+        val confirmArguments = launchAction.launcherArguments.asConfirm()
+        val setupIntentParams = confirmArguments.confirmNextParams.asSetup()
+
+        assertThat(setupIntentParams.clientSecret).isEqualTo("seti_123_secret_123")
+        assertThat(launchAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
+    }
+
+    @Test
+    fun `On deferred intent with confirmation token callback force success, action should be complete`() = runTest {
+        val intentConfirmationDefinition = createIntentConfirmationDefinition(
+            createIntentWithConfirmationTokenCallback = CreateIntentWithConfirmationTokenCallback { _ ->
+                CreateIntentResult.Success(
+                    clientSecret = "COMPLETE_WITHOUT_CONFIRMING_INTENT"
+                )
+            }
+        )
+
+        val action = intentConfirmationDefinition.action(
+            confirmationOption = CONFIRMATION_OPTION,
+            confirmationParameters = DEFERRED_CONFIRMATION_PARAMETERS,
+        )
+
+        val completeAction = action.asComplete()
+
+        assertThat(completeAction.intent).isEqualTo(SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD)
+        assertThat(completeAction.confirmationOption).isEqualTo(CONFIRMATION_OPTION)
+        assertThat(completeAction.deferredIntentConfirmationType)
+            .isEqualTo(DeferredIntentConfirmationType.None)
+        assertThat(completeAction.completedFullPaymentFlow).isTrue()
+    }
+
+    @Test
+    fun `On deferred intent, action should be fail if failed to create confirmation token`() = runTest {
+        val intentConfirmationDefinition = createIntentConfirmationDefinition(
+            createConfirmationTokenResult = Result.failure(IllegalStateException("An error occurred!")),
+            createIntentWithConfirmationTokenCallback = CreateIntentWithConfirmationTokenCallback { _ ->
+                CreateIntentResult.Success(
+                    clientSecret = "COMPLETE_WITHOUT_CONFIRMING_INTENT"
+                )
+            }
+        )
+
+        val action = intentConfirmationDefinition.action(
+            confirmationOption = CONFIRMATION_OPTION,
+            confirmationParameters = DEFERRED_CONFIRMATION_PARAMETERS,
+        )
+
+        val failAction = action.asFail()
+
+        assertThat(failAction.cause).isInstanceOf(IllegalStateException::class.java)
+        assertThat(failAction.cause.message).isEqualTo("An error occurred!")
+        assertThat(failAction.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+    }
+
     private fun createIntentConfirmationDefinition(
+        createConfirmationTokenResult: Result<ConfirmationToken> =
+            Result.success(ConfirmationTokenFixtures.CONFIRMATION_TOKEN),
         createPaymentMethodResult: Result<PaymentMethod> = Result.success(CARD_PAYMENT_METHOD),
         intentResult: Result<StripeIntent> =
             Result.success(SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD),
         preparePaymentMethodHandler: PreparePaymentMethodHandler? = null,
+        createIntentWithConfirmationTokenCallback: CreateIntentWithConfirmationTokenCallback? = null,
         createIntentCallback: CreateIntentCallback? = null,
     ): IntentConfirmationDefinition {
         return IntentConfirmationDefinition(
@@ -294,12 +371,16 @@ internal class IntentConfirmationFlowTest {
                     "acct_123"
                 },
                 stripeRepository = FakeStripeRepository(
+                    createConfirmationTokenResult = createConfirmationTokenResult,
                     createPaymentMethodResult = createPaymentMethodResult,
                     retrieveIntent = intentResult,
                 ),
                 errorReporter = FakeErrorReporter(),
                 intentCreationCallbackProvider = {
                     createIntentCallback
+                },
+                intentCreationWithConfirmationTokenCallbackProvider = {
+                    createIntentWithConfirmationTokenCallback
                 },
                 preparePaymentMethodHandlerProvider = { preparePaymentMethodHandler }
             ),

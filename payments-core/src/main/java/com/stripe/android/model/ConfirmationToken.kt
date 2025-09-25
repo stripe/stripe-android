@@ -22,7 +22,9 @@ import kotlinx.parcelize.Parcelize
 @Poko
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class ConfirmationToken internal constructor(
+class ConfirmationToken
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
     /**
      * Unique identifier for the object.
      */
@@ -84,7 +86,9 @@ class ConfirmationToken internal constructor(
     @Poko
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    class PaymentMethodPreview internal constructor(
+    class PaymentMethodPreview
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         /**
          *  This field indicates whether this payment method can be shown again to its customer in a checkout flow.
          *  Stripe products such as Checkout and Elements use this field to determine
@@ -110,6 +114,8 @@ class ConfirmationToken internal constructor(
          */
         @JvmField val type: PaymentMethod.Type,
 
-        @JvmField internal val allResponseFields: String
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @JvmField
+        val allResponseFields: String,
     ) : StripeModel
 }
