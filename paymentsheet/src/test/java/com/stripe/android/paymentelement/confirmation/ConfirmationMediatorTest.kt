@@ -159,7 +159,6 @@ class ConfirmationMediatorTest {
     @Test
     fun `On complete confirmation action, should return mediator complete action`() = test(
         action = ConfirmationDefinition.Action.Complete(
-            confirmationOption = TestConfirmationDefinition.Option,
             intent = INTENT,
             deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
             completedFullPaymentFlow = true,
@@ -184,7 +183,6 @@ class ConfirmationMediatorTest {
 
         val completeAction = action.asComplete()
 
-        assertThat(completeAction.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
         assertThat(completeAction.intent).isEqualTo(INTENT)
         assertThat(completeAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
         assertThat(completeAction.completedFullPaymentFlow).isTrue()
@@ -193,7 +191,6 @@ class ConfirmationMediatorTest {
     @Test
     fun `On complete confirmation action with uncompleted flow, should return expected action`() = test(
         action = ConfirmationDefinition.Action.Complete(
-            confirmationOption = TestConfirmationDefinition.Option,
             intent = INTENT,
             deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
             completedFullPaymentFlow = false,
@@ -218,7 +215,6 @@ class ConfirmationMediatorTest {
 
         val completeAction = action.asComplete()
 
-        assertThat(completeAction.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
         assertThat(completeAction.intent).isEqualTo(INTENT)
         assertThat(completeAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
         assertThat(completeAction.completedFullPaymentFlow).isFalse()

@@ -134,7 +134,6 @@ internal class ConfirmationMediator<
             is ConfirmationDefinition.Action.Complete -> {
                 Action.Complete(
                     intent = action.intent,
-                    confirmationOption = action.confirmationOption,
                     deferredIntentConfirmationType = action.deferredIntentConfirmationType,
                     completedFullPaymentFlow = action.completedFullPaymentFlow,
                 )
@@ -163,7 +162,6 @@ internal class ConfirmationMediator<
 
         data class Complete(
             val intent: StripeIntent,
-            val confirmationOption: ConfirmationHandler.Option,
             val deferredIntentConfirmationType: DeferredIntentConfirmationType? = null,
             val completedFullPaymentFlow: Boolean,
         ) : Action

@@ -233,10 +233,6 @@ internal interface ConfirmationDefinition<
              */
             val intent: StripeIntent,
             /**
-             * The [ConfirmationHandler.Option] used when determining the action to take
-             */
-            val confirmationOption: ConfirmationHandler.Option,
-            /**
              * DO NOT USE OUTSIDE OF INTENT CONFIRMATION
              */
             val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
