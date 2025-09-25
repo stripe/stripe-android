@@ -183,7 +183,7 @@ internal sealed interface PlaygroundState : Parcelable {
         }
 
         @OptIn(SharedPaymentTokenSessionPreview::class)
-        fun intentConfiguration(): PaymentSheet.IntentConfiguration {
+        fun intentConfiguration(amount: Long): PaymentSheet.IntentConfiguration {
             return PaymentSheet.IntentConfiguration(
                 sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = amount,
@@ -195,7 +195,7 @@ internal sealed interface PlaygroundState : Parcelable {
                     networkId = "internal",
                     externalId = "stripe_test_merchant"
                 ),
-                paymentMethodTypes = listOf("card", "link", "shop_pay")
+                paymentMethodTypes = listOf("card", "shop_pay")
             )
         }
     }
