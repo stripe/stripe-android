@@ -41,10 +41,11 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
     fun enqueueCompleteStep(
         isForceSuccess: Boolean = false,
         completedFullPaymentFlow: Boolean = true,
+        intent: StripeIntent = mock(),
     ) {
         channel.trySend(
             ConfirmationDefinition.Action.Complete(
-                intent = mock(),
+                intent = intent,
                 deferredIntentConfirmationType = if (isForceSuccess) {
                     DeferredIntentConfirmationType.None
                 } else {

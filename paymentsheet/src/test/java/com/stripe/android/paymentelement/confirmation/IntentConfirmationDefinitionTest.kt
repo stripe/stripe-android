@@ -118,7 +118,9 @@ class IntentConfirmationDefinitionTest {
     @Test
     fun `On 'IntentConfirmationInterceptor' complete, should return 'Complete' confirmation action`() = runTest {
         val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
-            enqueueCompleteStep()
+            enqueueCompleteStep(
+                intent = CONFIRMATION_PARAMETERS.intent,
+            )
         }
 
         val definition = createIntentConfirmationDefinition(
@@ -141,6 +143,7 @@ class IntentConfirmationDefinitionTest {
         runTest {
             val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
                 enqueueCompleteStep(
+                    intent = CONFIRMATION_PARAMETERS.intent,
                     completedFullPaymentFlow = false
                 )
             }
