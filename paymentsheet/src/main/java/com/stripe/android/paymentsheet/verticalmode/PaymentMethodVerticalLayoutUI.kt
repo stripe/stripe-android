@@ -108,7 +108,7 @@ internal fun PaymentMethodVerticalLayoutUI(
     updatePaymentMethodVisibility: (String, LayoutCoordinates) -> Unit = { _, _ -> },
     cancelPaymentMethodVisibilityTracking: () -> Unit = {},
 ) {
-    val paymentMethodCodes = remember(paymentMethods) {
+    val paymentMethodCodes = remember(paymentMethods, displayedSavedPaymentMethod) {
         val output = paymentMethods.map { it.code }
         if (displayedSavedPaymentMethod != null) {
             output.plus("saved_${displayedSavedPaymentMethod.paymentMethod.id}")
