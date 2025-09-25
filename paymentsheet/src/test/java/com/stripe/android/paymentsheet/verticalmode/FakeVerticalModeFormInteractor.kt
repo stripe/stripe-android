@@ -55,10 +55,11 @@ internal class FakeVerticalModeFormInteractor private constructor(
                     )!!,
                     isValidating = isValidating,
                     showsWalletHeader = showsWalletHeader,
+                    paymentMethodIncentive = null,
                     headerInformation = metadata.formHeaderInformationForCode(
                         code = paymentMethodCode,
                         customerHasSavedPaymentMethods = false,
-                    ).takeIf { !showsWalletHeader },
+                    ),
                 ),
             )
         }

@@ -60,6 +60,7 @@ internal class PaymentSheetScreenVerticalModeFormTest {
                     ),
                     formElements = emptyList(),
                     showsWalletHeader = false,
+                    paymentMethodIncentive = null,
                     headerInformation = null,
                 )
             )
@@ -85,6 +86,7 @@ internal class PaymentSheetScreenVerticalModeFormTest {
                     ),
                     formElements = emptyList(),
                     showsWalletHeader = true,
+                    paymentMethodIncentive = null,
                     headerInformation = null,
                 )
             )

@@ -258,7 +258,7 @@ internal class DefaultVerticalModeFormInteractorTest {
                 val state = awaitItem()
 
                 assertThat(state.showsWalletHeader).isFalse()
-                assertThat(state.headerInformation).isEqualTo(headerInformation)
+                assertThat(state.formHeader).isEqualTo(headerInformation)
             }
         }
     }
@@ -286,7 +286,7 @@ internal class DefaultVerticalModeFormInteractorTest {
                 val state = awaitItem()
 
                 assertThat(state.showsWalletHeader).isTrue()
-                assertThat(state.headerInformation).isNull()
+                assertThat(state.formHeader).isNull()
             }
         }
     }

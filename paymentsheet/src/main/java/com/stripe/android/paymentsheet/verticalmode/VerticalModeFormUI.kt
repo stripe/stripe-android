@@ -42,7 +42,7 @@ internal fun VerticalModeFormUI(
     val state by interactor.state.collectAsState()
 
     Column(modifier) {
-        val headerInformation = state.headerInformation
+        val headerInformation = state.formHeader
         val enabled = !state.isProcessing
         if (headerInformation != null) {
             VerticalModeFormHeaderUI(isEnabled = enabled, formHeaderInformation = headerInformation)

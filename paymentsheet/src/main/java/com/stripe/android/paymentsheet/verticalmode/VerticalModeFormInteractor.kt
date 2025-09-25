@@ -41,8 +41,13 @@ internal interface VerticalModeFormInteractor {
         val formArguments: FormArguments,
         val showsWalletHeader: Boolean,
         private val formElements: List<FormElement>,
-        val headerInformation: FormHeaderInformation?,
+        private val paymentMethodIncentive: PaymentMethodIncentive?,
+        private val headerInformation: FormHeaderInformation?,
     ) {
+        val formHeader = headerInformation?.copy(
+            promoBadge = paymentMethodIncentive?.takeIfMatches(selectedPaymentMethodCode)?.displayText,
+        )?.takeIf { !showsWalletHeader }
+
         val formUiElements = formElements.onEach { element ->
             element.onValidationStateChanged(isValidating)
         }
@@ -86,9 +91,8 @@ internal class DefaultVerticalModeFormInteractor(
             formElements = formElements,
             isValidating = isValidating,
             showsWalletHeader = showsWalletHeader,
-            headerInformation = headerInformation?.copy(
-                promoBadge = paymentMethodIncentive?.takeIfMatches(selectedPaymentMethodCode)?.displayText,
-            )?.takeIf { !showsWalletHeader },
+            paymentMethodIncentive = paymentMethodIncentive,
+            headerInformation = headerInformation,
         )
     }
 
