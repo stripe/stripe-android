@@ -1659,7 +1659,8 @@ class DefaultIntentConfirmationInterceptorTest {
 
     @Suppress("UNCHECKED_CAST")
     private fun <T : ConfirmStripeIntentParams>
-        ConfirmationDefinition.Action<IntentConfirmationDefinition.Args>.asConfirmParams(): T? {
+        ConfirmationDefinition.Action<IntentConfirmationDefinition.Args>
+        .asConfirmParams(): T? {
         return (
             (this as? ConfirmationDefinition.Action.Launch)
                 ?.launcherArguments as? IntentConfirmationDefinition.Args.Confirm
