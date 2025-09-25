@@ -80,12 +80,8 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
                 PaymentMethodVerticalLayoutInteractor.ViewAction.OnManageOneSavedPaymentMethod(it)
             )
         },
-        updatePaymentMethodVisibility = { itemCode, coordinates ->
-            interactor.updatePaymentMethodVisibility(itemCode, coordinates)
-        },
-        cancelPaymentMethodVisibilityTracking = {
-            interactor.cancelPaymentMethodVisibilityTracking()
-        },
+        updatePaymentMethodVisibility = interactor::updatePaymentMethodVisibility,
+        cancelPaymentMethodVisibilityTracking = interactor::cancelPaymentMethodVisibilityTracking,
         imageLoader = imageLoader,
         modifier = modifier
             .testTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT),
@@ -122,20 +118,12 @@ internal fun PaymentMethodEmbeddedLayoutUI(
     }
     val paymentMethodCodes = remember(paymentMethods, displayedSavedPaymentMethod) {
         val output = paymentMethods.map { it.code }
-        if (displayedSavedPaymentMethod != null) {
-            output.plus("saved_${displayedSavedPaymentMethod.paymentMethod.id}")
-        } else {
-            output
-        }
+        output.plus("saved_${displayedSavedPaymentMethod?.paymentMethod?.id}")
+            .takeIf { displayedSavedPaymentMethod != null } ?: output
     }
 
     // Cancel tracking and any pending dispatches, when the paymentMethods used change
-    DisposableEffect(paymentMethodCodes) {
-        onDispose {
-            cancelPaymentMethodVisibilityTracking.invoke()
-        }
-    }
-
+    DisposableEffect(paymentMethodCodes) { onDispose { cancelPaymentMethodVisibilityTracking.invoke() } }
     Column(modifier = modifier, verticalArrangement = arrangement) {
         if (appearance.style.topSeparatorEnabled()) OptionalEmbeddedDivider(appearance.style)
 

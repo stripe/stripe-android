@@ -341,7 +341,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         get() = _visibilityTracker
 
     private var _visibilityTracker: PaymentMethodInitialVisibilityTracker? = null
-    val visibilityTracker: PaymentMethodInitialVisibilityTracker
+    private val visibilityTracker: PaymentMethodInitialVisibilityTracker
         get() {
             val currentSavedPaymentMethodCode = displayedSavedPaymentMethod.value?.paymentMethod?.type
             val currentDisplayablePaymentMethodCodes = displayablePaymentMethods.value.map { it.code }

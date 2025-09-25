@@ -80,12 +80,8 @@ internal fun PaymentMethodVerticalLayoutUI(
             )
         },
         imageLoader = imageLoader,
-        updatePaymentMethodVisibility = { itemCode, coordinates ->
-            interactor.updatePaymentMethodVisibility(itemCode, coordinates)
-        },
-        cancelPaymentMethodVisibilityTracking = {
-            interactor.cancelPaymentMethodVisibilityTracking()
-        },
+        updatePaymentMethodVisibility = interactor::updatePaymentMethodVisibility,
+        cancelPaymentMethodVisibilityTracking = interactor::cancelPaymentMethodVisibilityTracking,
         modifier = modifier
             .testTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT)
     )
@@ -110,17 +106,10 @@ internal fun PaymentMethodVerticalLayoutUI(
 ) {
     val paymentMethodCodes = remember(paymentMethods, displayedSavedPaymentMethod) {
         val output = paymentMethods.map { it.code }
-        if (displayedSavedPaymentMethod != null) {
-            output.plus("saved_${displayedSavedPaymentMethod.paymentMethod.id}")
-        } else {
-            output
-        }
+        output.plus("saved_${displayedSavedPaymentMethod?.paymentMethod?.id}")
+            .takeIf { displayedSavedPaymentMethod != null } ?: output
     }
-    DisposableEffect(paymentMethodCodes) {
-        onDispose {
-            cancelPaymentMethodVisibilityTracking.invoke()
-        }
-    }
+    DisposableEffect(paymentMethodCodes) { onDispose { cancelPaymentMethodVisibilityTracking.invoke() } }
     Column(modifier = modifier) {
         val textStyle = MaterialTheme.typography.subtitle1
         val textColor = MaterialTheme.stripeColors.onComponent
@@ -177,9 +166,7 @@ internal fun PaymentMethodVerticalLayoutUI(
             isEnabled = isEnabled,
             imageLoader = imageLoader,
             rowStyle = rowStyle,
-            updatePaymentMethodVisibility = { itemCode, coordinates ->
-                updatePaymentMethodVisibility(itemCode, coordinates)
-            },
+            updatePaymentMethodVisibility = updatePaymentMethodVisibility
         )
     }
 }
