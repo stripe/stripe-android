@@ -29,6 +29,7 @@ internal class FakeVerticalModeFormInteractor private constructor(
             metadata: PaymentMethodMetadata,
             isProcessing: Boolean = false,
             isValidating: Boolean = false,
+            showsWalletHeader: Boolean = false,
         ): VerticalModeFormInteractor {
             val formArguments = FormArgumentsFactory.create(
                 paymentMethodCode = paymentMethodCode,
@@ -53,6 +54,8 @@ internal class FakeVerticalModeFormInteractor private constructor(
                         uiDefinitionFactoryArgumentsFactory = uiDefinitionArgumentsFactory,
                     )!!,
                     isValidating = isValidating,
+                    showsWalletHeader = showsWalletHeader,
+                    paymentMethodIncentive = null,
                     headerInformation = metadata.formHeaderInformationForCode(
                         code = paymentMethodCode,
                         customerHasSavedPaymentMethods = false,

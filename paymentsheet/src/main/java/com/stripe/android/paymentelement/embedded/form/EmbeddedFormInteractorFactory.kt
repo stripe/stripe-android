@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -81,6 +82,8 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             ),
             isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             processing = formActivityStateHelper.state.mapAsStateFlow { it.isProcessing },
+            // Should never show wallets header in Embedded form
+            showsWalletHeader = stateFlowOf(false),
             paymentMethodIncentive = PaymentMethodIncentiveInteractor(
                 paymentMethodMetadata.paymentMethodIncentive
             ).displayedIncentive,
