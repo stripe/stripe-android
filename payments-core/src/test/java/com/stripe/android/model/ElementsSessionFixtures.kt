@@ -1580,7 +1580,7 @@ internal object ElementsSessionFixtures {
                     "elements_disable_recurring_express_checkout_button_amazon_pay": false,
                     "elements_enable_affirm_unified_offer": true,
                     "elements_enable_afterpay_clearpay_unified_offer": true,
-                        "elements_enable_br_card_installments": false,
+                    "elements_enable_br_card_installments": false,
                     "elements_enable_card_brand_choice_payment_element_link": false,
                     "elements_enable_card_brand_choice_payment_element_payment_method_data": true,
                     "elements_enable_client_attribution_metadata": true,
