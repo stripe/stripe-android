@@ -722,7 +722,11 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                         cause = IllegalStateException("PaymentMethod must have an ID"),
                         message = "PaymentMethod must have an ID".resolvableString,
                     ),
-                cvc = (paymentMethodOptionsParams as? PaymentMethodOptionsParams.Card)?.cvc,
+                cvc = if (intentConfiguration.requireCvcRecollection) {
+                    (paymentMethodOptionsParams as? PaymentMethodOptionsParams.Card)?.cvc
+                } else {
+                    null
+                }
             ),
             options = ApiRequest.Options(
                 apiKey = ephemeralKeySecret ?: publishableKeyProvider(),
