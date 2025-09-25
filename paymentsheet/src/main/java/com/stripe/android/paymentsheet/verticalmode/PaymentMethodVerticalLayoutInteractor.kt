@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import org.jetbrains.annotations.VisibleForTesting
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.R as PaymentsCoreR
 
@@ -335,8 +336,12 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         }
     }
 
+    internal val visibilityTrackerForTesting: PaymentMethodInitialVisibilityTracker?
+        @VisibleForTesting
+        get() = _visibilityTracker
+
     private var _visibilityTracker: PaymentMethodInitialVisibilityTracker? = null
-    private val visibilityTracker: PaymentMethodInitialVisibilityTracker
+    val visibilityTracker: PaymentMethodInitialVisibilityTracker
         get() {
             val currentSavedPaymentMethodCode = displayedSavedPaymentMethod.value?.paymentMethod?.type
             val currentDisplayablePaymentMethodCodes = displayablePaymentMethods.value.map { it.code }
