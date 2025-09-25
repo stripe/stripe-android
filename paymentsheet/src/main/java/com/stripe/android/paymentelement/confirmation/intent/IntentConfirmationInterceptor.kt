@@ -673,9 +673,10 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         return stripeRepository.createConfirmationToken(
             confirmationTokenParams = ConfirmationTokenParams(
                 paymentMethodData = paymentMethodCreateParams,
+                setUpFutureUsage = paymentMethodOptionsParams?.setupFutureUsage(),
+                shipping = shippingValues,
                 mandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT)
                     .takeIf { paymentMethodCreateParams.requiresMandate },
-                setUpFutureUsage = paymentMethodOptionsParams?.setupFutureUsage(),
             ),
             options = requestOptions,
         ).fold(
@@ -728,6 +729,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 mandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT)
                     .takeIf { paymentMethod.type?.requiresMandate == true },
                 setUpFutureUsage = paymentMethodOptionsParams?.setupFutureUsage(),
+                shipping = shippingValues,
                 cvc = if (intentConfiguration.requireCvcRecollection) {
                     (paymentMethodOptionsParams as? PaymentMethodOptionsParams.Card)?.cvc
                 } else {
