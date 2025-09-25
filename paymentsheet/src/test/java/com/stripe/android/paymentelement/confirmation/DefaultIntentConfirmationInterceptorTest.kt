@@ -1814,6 +1814,8 @@ class DefaultIntentConfirmationInterceptorTest {
         val publishableKeyProvider: () -> String = { "pk" },
         val errorReporter: ErrorReporter = FakeErrorReporter(),
         val intentCreationCallbackProvider: Provider<CreateIntentCallback?> = Provider { null },
+        val intentCreationWithConfirmationTokenCallbackProvider: Provider<CreateIntentWithConfirmationTokenCallback?> =
+            Provider { null },
         val preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?> = Provider { null }
     )
 
@@ -1828,6 +1830,8 @@ class DefaultIntentConfirmationInterceptorTest {
             errorReporter = scenario.errorReporter,
             allowsManualConfirmation = false,
             intentCreationCallbackProvider = scenario.intentCreationCallbackProvider,
+            intentCreationWithConfirmationTokenCallbackProvider =
+                scenario.intentCreationWithConfirmationTokenCallbackProvider,
             preparePaymentMethodHandlerProvider = scenario.preparePaymentMethodHandlerProvider,
         )
         test(interceptor)
@@ -1838,6 +1842,8 @@ class DefaultIntentConfirmationInterceptorTest {
         publishableKeyProvider: () -> String = { "pk" },
         errorReporter: ErrorReporter = FakeErrorReporter(),
         intentCreationCallbackProvider: Provider<CreateIntentCallback?> = Provider { null },
+        intentCreationWithConfirmationCallbackProvider: Provider<CreateIntentWithConfirmationTokenCallback?> =
+            Provider { null },
         preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?> = Provider { null }
     ): DefaultIntentConfirmationInterceptor {
         return DefaultIntentConfirmationInterceptor(
@@ -1847,6 +1853,7 @@ class DefaultIntentConfirmationInterceptorTest {
             errorReporter = errorReporter,
             allowsManualConfirmation = false,
             intentCreationCallbackProvider = intentCreationCallbackProvider,
+            intentCreationWithConfirmationTokenCallbackProvider = intentCreationWithConfirmationCallbackProvider,
             preparePaymentMethodHandlerProvider = preparePaymentMethodHandlerProvider,
         )
     }
