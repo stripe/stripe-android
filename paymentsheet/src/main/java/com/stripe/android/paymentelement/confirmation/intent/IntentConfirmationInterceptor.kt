@@ -15,6 +15,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.ConfirmationTokenParams
+import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -672,6 +673,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         return stripeRepository.createConfirmationToken(
             confirmationTokenParams = ConfirmationTokenParams(
                 paymentMethodData = paymentMethodCreateParams,
+                mandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT)
+                    .takeIf { paymentMethodCreateParams.requiresMandate },
                 setUpFutureUsage = paymentMethodOptionsParams?.setupFutureUsage(),
             ),
             options = requestOptions,
@@ -722,6 +725,9 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                         cause = IllegalStateException("PaymentMethod must have an ID"),
                         message = "PaymentMethod must have an ID".resolvableString,
                     ),
+                mandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT)
+                    .takeIf { paymentMethod.type?.requiresMandate == true },
+                setUpFutureUsage = paymentMethodOptionsParams?.setupFutureUsage(),
                 cvc = if (intentConfiguration.requireCvcRecollection) {
                     (paymentMethodOptionsParams as? PaymentMethodOptionsParams.Card)?.cvc
                 } else {

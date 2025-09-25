@@ -23,7 +23,7 @@ data class PaymentMethodCreateParams
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
     internal val code: PaymentMethodCode,
-    internal val requiresMandate: Boolean,
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val requiresMandate: Boolean,
     val card: Card? = null,
     private val ideal: Ideal? = null,
     private val fpx: Fpx? = null,
