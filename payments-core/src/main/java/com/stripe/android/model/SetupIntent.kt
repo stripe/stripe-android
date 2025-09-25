@@ -110,6 +110,8 @@ constructor(
 
     private val paymentMethodOptionsJsonString: String? = null,
 
+    override val onBehalfOf: String? = null,
+
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     override val automaticPaymentMethodsEnabled: Boolean = false,
 ) : StripeIntent {

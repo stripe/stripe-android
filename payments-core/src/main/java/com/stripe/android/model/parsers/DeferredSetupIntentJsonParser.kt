@@ -13,6 +13,7 @@ class DeferredSetupIntentJsonParser(
     private val elementsSessionId: String?,
     private val setupMode: DeferredIntentParams.Mode.Setup,
     private val isLiveMode: Boolean,
+    private val onBehalfOf: String?,
     private val timeProvider: () -> Long
 ) : ModelJsonParser<SetupIntent> {
     override fun parse(json: JSONObject): SetupIntent {
@@ -45,6 +46,7 @@ class DeferredSetupIntentJsonParser(
             status = null,
             usage = setupMode.setupFutureUsage,
             automaticPaymentMethodsEnabled = paymentMethodTypes.isEmpty(),
+            onBehalfOf = onBehalfOf,
         )
     }
 

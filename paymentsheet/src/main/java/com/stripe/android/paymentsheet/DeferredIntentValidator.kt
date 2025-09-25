@@ -64,6 +64,10 @@ internal object DeferredIntentValidator {
             }
         }
 
+        require(stripeIntent.onBehalfOf == params.onBehalfOf) {
+            "Your PaymentIntent onBehalfOf must match the PaymentSheet.IntentConfiguration onBehalfOf"
+        }
+
         return stripeIntent
     }
 

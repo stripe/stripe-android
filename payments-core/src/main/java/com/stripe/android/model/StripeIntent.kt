@@ -79,6 +79,8 @@ sealed interface StripeIntent : StripeModel {
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     val automaticPaymentMethodsEnabled: Boolean
 
+    val onBehalfOf: String?
+
     fun requiresAction(): Boolean
 
     fun requiresConfirmation(): Boolean

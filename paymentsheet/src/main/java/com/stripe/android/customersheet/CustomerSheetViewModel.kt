@@ -866,7 +866,7 @@ internal class CustomerSheetViewModel(
             incentive = null,
             linkMode = null,
             showCheckbox = false,
-            onBehalfOf = null,
+            onBehalfOf = stripeIntent?.onBehalfOf,
             isCompleteFlow = false,
             isPaymentFlow = false,
             stripeIntentId = stripeIntent?.id,
