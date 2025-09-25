@@ -725,11 +725,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 cvc = (paymentMethodOptionsParams as? PaymentMethodOptionsParams.Card)?.cvc,
             ),
             options = ApiRequest.Options(
-                apiKey = ephemeralKeySecret
-                    ?: return NextStep.Fail(
-                        cause = IllegalStateException("Ephemeral key secret is required to confirm with saved payment method"),
-                        message = "Ephemeral key secret is required to confirm with saved payment method".resolvableString,
-                    ),
+                apiKey = ephemeralKeySecret ?: publishableKeyProvider(),
                 stripeAccount = stripeAccountIdProvider(),
             )
         ).fold(
