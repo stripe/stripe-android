@@ -182,7 +182,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         validateAnalyticsRequest(
             eventName = "mc_initial_displayed_payment_methods",
             query("hidden_payment_methods", ""),
-            query("visible_payment_methods", Uri.encode("card,cashapp")),
+            query("visible_payment_methods", Uri.encode("saved,card,cashapp")),
         )
 
         testContext.configure {

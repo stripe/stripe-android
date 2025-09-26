@@ -62,21 +62,22 @@ internal fun NewPaymentMethodTabLayoutUI(
     BoxWithConstraints(
         modifier = modifier.testTag(TEST_TAG_LIST + "1")
     ) {
-        val viewWidth = rememberViewWidth(
-            this.maxWidth,
-            paymentMethods.size
-        )
+        val viewWidth = rememberViewWidth(maxWidth = this.maxWidth, numberOfPaymentMethods = paymentMethods.size)
 
-        val configuration = LocalConfiguration.current
+        val screenWidth = LocalConfiguration.current.screenWidthDp.dp
         val innerPadding = PaymentMethodsUISpacing.carouselInnerPadding
         if (shouldTrackRenderedLPMs) {
             LaunchedEffect(paymentMethodCodes) {
-                reportInitialPaymentMethodVisibilitySnapshot(
-                    paymentMethods = paymentMethods,
+                val numberOfVisibleItems = calculateNumberOfVisibleItems(
+                    totalItems = paymentMethods.size,
                     tabWidth = viewWidth,
-                    screenWidth = configuration.screenWidthDp.dp,
-                    innerPadding = innerPadding,
-                    callback = reportInitialPaymentMethodVisibilitySnapshot
+                    screenWidth = screenWidth,
+                    innerPadding = innerPadding
+                )
+
+                reportInitialPaymentMethodVisibilitySnapshot(
+                    paymentMethods.take(numberOfVisibleItems).map { pm -> pm.code }, // visible payment methods
+                    paymentMethods.drop(numberOfVisibleItems).map { pm -> pm.code } // hidden payment methods
                 )
             }
         }
@@ -109,29 +110,6 @@ internal fun NewPaymentMethodTabLayoutUI(
             }
         }
     }
-}
-
-private fun reportInitialPaymentMethodVisibilitySnapshot(
-    paymentMethods: List<SupportedPaymentMethod>,
-    tabWidth: Dp,
-    screenWidth: Dp,
-    innerPadding: Dp,
-    callback: (List<String>, List<String>) -> Unit,
-) {
-    val numberOfVisibleItems = calculateNumberOfVisibleItems(
-        totalItems = paymentMethods.size,
-        tabWidth = tabWidth,
-        screenWidth = screenWidth,
-        innerPadding = innerPadding
-    )
-
-    val visibleLpms = paymentMethods
-        .take(numberOfVisibleItems)
-        .map { pm -> pm.code }
-    val hiddenLpms = paymentMethods
-        .drop(numberOfVisibleItems)
-        .map { pm -> pm.code }
-    callback(visibleLpms, hiddenLpms)
 }
 
 /**
