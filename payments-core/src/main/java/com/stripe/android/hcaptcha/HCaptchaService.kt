@@ -2,6 +2,7 @@ package com.stripe.android.hcaptcha
 
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.FragmentActivity
+import com.stripe.android.hcaptcha.analytics.NoOpCaptchaEventsReporter
 import kotlin.time.Duration
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -26,5 +27,14 @@ interface HCaptchaService {
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class Failure(val error: Throwable) : Result
+    }
+
+    companion object {
+        internal fun default(): HCaptchaService {
+            return DefaultHCaptchaService(
+                hCaptchaProvider = DefaultHCaptchaProvider(),
+                captchaEventsReporter = NoOpCaptchaEventsReporter
+            )
+        }
     }
 }

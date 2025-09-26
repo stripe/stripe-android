@@ -4,7 +4,6 @@ package com.stripe.android.hcaptcha
 
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.FragmentActivity
-import com.stripe.android.hcaptcha.analytics.NoOpCaptchaEventsReporter
 import com.stripe.hcaptcha.HCaptchaException
 import kotlin.time.Duration
 
@@ -16,12 +15,9 @@ import kotlin.time.Duration
 suspend fun performPassiveHCaptcha(
     activity: FragmentActivity,
     siteKey: String,
-    rqdata: String?
+    rqdata: String?,
+    hCaptchaService: HCaptchaService
 ): String {
-    val hCaptchaService = DefaultHCaptchaService(
-        hCaptchaProvider = DefaultHCaptchaProvider(),
-        captchaEventsReporter = NoOpCaptchaEventsReporter
-    )
     val result = hCaptchaService.performPassiveHCaptcha(
         activity,
         siteKey,

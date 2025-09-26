@@ -508,7 +508,8 @@ suspend fun Stripe.createRadarSession(
             val hCaptchaToken = performPassiveHCaptcha(
                 activity = activity,
                 siteKey = siteKey,
-                rqdata = radarSession.passiveCaptchaRqdata
+                rqdata = radarSession.passiveCaptchaRqdata,
+                hCaptchaService = hCaptchaService
             )
 
             return@flatMap stripeRepository.attachHCaptchaToRadarSession(

@@ -27,6 +27,7 @@ import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.exception.CardException
+import com.stripe.android.hcaptcha.HCaptchaService
 import com.stripe.android.hcaptcha.performPassiveHCaptcha
 import com.stripe.android.model.AccountParams
 import com.stripe.android.model.BankAccount
@@ -79,7 +80,8 @@ class Stripe internal constructor(
     internal val paymentController: PaymentController,
     publishableKey: String,
     internal val stripeAccountId: String? = null,
-    private val workContext: CoroutineContext = Dispatchers.IO
+    private val workContext: CoroutineContext = Dispatchers.IO,
+    internal val hCaptchaService: HCaptchaService = HCaptchaService.default()
 ) {
     internal val publishableKey: String = ApiKeyValidator().requireValid(publishableKey)
 
@@ -146,7 +148,7 @@ class Stripe internal constructor(
         paymentController,
         publishableKey,
         stripeAccountId,
-        Dispatchers.IO
+        Dispatchers.IO,
     )
 
     //
@@ -1681,7 +1683,8 @@ class Stripe internal constructor(
                 val hCaptchaToken = performPassiveHCaptcha(
                     activity = activity,
                     siteKey = siteKey,
-                    rqdata = radarSession.passiveCaptchaRqdata
+                    rqdata = radarSession.passiveCaptchaRqdata,
+                    hCaptchaService = hCaptchaService
                 )
 
                 return@flatMap stripeRepository.attachHCaptchaToRadarSession(
