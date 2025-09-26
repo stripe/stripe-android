@@ -289,14 +289,12 @@ class LinkApiRepositoryTest {
     fun `createPaymentDetails for card sends correct parameters`() = runTest {
         val secret = "secret"
         val email = "email@stripe.com"
-        val consumerKey = "key"
 
         linkRepository.createCardPaymentDetails(
             paymentMethodCreateParams = cardPaymentMethodCreateParams,
             userEmail = email,
             stripeIntent = paymentIntent,
             consumerSessionClientSecret = secret,
-            consumerPublishableKey = consumerKey,
         )
 
         verify(consumersApiService).createPaymentDetails(
@@ -318,7 +316,7 @@ class LinkApiRepositoryTest {
                 )
             },
             requestSurface = eq("android_payment_element"),
-            requestOptions = eq(ApiRequest.Options(consumerKey)),
+            requestOptions = eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID)),
         )
     }
 
@@ -326,7 +324,6 @@ class LinkApiRepositoryTest {
     fun `createPaymentDetails passes allowRedisplay correctly`() = runTest {
         val secret = "secret"
         val email = "email@stripe.com"
-        val consumerKey = "key"
 
         for (allowRedisplay in PaymentMethod.AllowRedisplay.entries) {
             val paymentDetails = PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS
@@ -346,7 +343,6 @@ class LinkApiRepositoryTest {
                 userEmail = email,
                 stripeIntent = paymentIntent,
                 consumerSessionClientSecret = secret,
-                consumerPublishableKey = consumerKey,
             ).getOrThrow()
 
             assertThat(linkDetails.paymentMethodCreateParams.allowRedisplay).isEqualTo(allowRedisplay)
@@ -364,7 +360,6 @@ class LinkApiRepositoryTest {
                 userEmail = email,
                 stripeIntent = paymentIntent,
                 consumerSessionClientSecret = secret,
-                consumerPublishableKey = null,
             )
 
             verify(consumersApiService).createPaymentDetails(
@@ -409,7 +404,6 @@ class LinkApiRepositoryTest {
             userEmail = email,
             stripeIntent = paymentIntent,
             consumerSessionClientSecret = consumerSessionSecret,
-            consumerPublishableKey = null,
         )
 
         assertThat(result.isSuccess).isTrue()
@@ -456,7 +450,6 @@ class LinkApiRepositoryTest {
             userEmail = "email@stripe.com",
             stripeIntent = paymentIntent,
             consumerSessionClientSecret = "secret",
-            consumerPublishableKey = null,
         )
         val loggedErrors = errorReporter.getLoggedErrors()
 
@@ -595,24 +588,7 @@ class LinkApiRepositoryTest {
     @Test
     fun `startVerification sends correct parameters`() = runTest {
         val secret = "secret"
-        val consumerKey = "key"
-        linkRepository.startVerification(secret, consumerKey)
-
-        verify(consumersApiService).startConsumerVerification(
-            consumerSessionClientSecret = secret,
-            locale = Locale.US,
-            requestSurface = CONSUMER_SURFACE,
-            type = VerificationType.SMS,
-            customEmailType = null,
-            connectionsMerchantName = null,
-            requestOptions = ApiRequest.Options(consumerKey),
-        )
-    }
-
-    @Test
-    fun `startVerification without consumerPublishableKey sends correct parameters`() = runTest {
-        val secret = "secret"
-        linkRepository.startVerification(secret, null)
+        linkRepository.startVerification(secret)
 
         verify(consumersApiService).startConsumerVerification(
             consumerSessionClientSecret = secret,
@@ -641,7 +617,7 @@ class LinkApiRepositoryTest {
         )
             .thenReturn(consumerSession)
 
-        val result = linkRepository.startVerification("secret", "key")
+        val result = linkRepository.startVerification("secret")
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrNull()).isEqualTo(consumerSession)
@@ -662,7 +638,7 @@ class LinkApiRepositoryTest {
         )
             .thenThrow(RuntimeException("error"))
 
-        val result = linkRepository.startVerification("secret", "key")
+        val result = linkRepository.startVerification("secret")
 
         assertThat(result.isFailure).isTrue()
     }
@@ -670,20 +646,7 @@ class LinkApiRepositoryTest {
     @Test
     fun `listPaymentDetails sends correct parameters`() = runTest {
         val secret = "secret"
-        val consumerKey = "key"
-        linkRepository.listPaymentDetails(setOf("card"), secret, consumerKey)
-
-        verify(stripeRepository).listPaymentDetails(
-            eq(secret),
-            eq(setOf("card")),
-            eq(ApiRequest.Options(consumerKey))
-        )
-    }
-
-    @Test
-    fun `listPaymentDetails without consumerPublishableKey sends correct parameters`() = runTest {
-        val secret = "secret"
-        linkRepository.listPaymentDetails(setOf("card"), secret, null)
+        linkRepository.listPaymentDetails(setOf("card"), secret)
 
         verify(stripeRepository).listPaymentDetails(
             eq(secret),
@@ -693,10 +656,10 @@ class LinkApiRepositoryTest {
     }
 
     @Test
-    fun `deletePaymentDetails without consumerPublishableKey sends correct parameters`() = runTest {
+    fun `deletePaymentDetails sends correct parameters`() = runTest {
         val secret = "secret"
         val id = "payment_details_id"
-        linkRepository.deletePaymentDetails(id, secret, null)
+        linkRepository.deletePaymentDetails(id, secret)
 
         verify(stripeRepository).deletePaymentDetails(
             eq(secret),
@@ -709,7 +672,7 @@ class LinkApiRepositoryTest {
     fun `deletePaymentDetails returns successful result`() = runTest {
         whenever(stripeRepository.deletePaymentDetails(any(), any(), any())).thenReturn(Result.success(Unit))
 
-        val result = linkRepository.deletePaymentDetails("id", "secret", "key")
+        val result = linkRepository.deletePaymentDetails("id", "secret")
 
         assertThat(result.isSuccess).isTrue()
     }
@@ -720,7 +683,7 @@ class LinkApiRepositoryTest {
         whenever(stripeRepository.deletePaymentDetails(any(), any(), any()))
             .thenReturn(Result.failure(error))
 
-        val result = linkRepository.deletePaymentDetails("id", "secret", "key")
+        val result = linkRepository.deletePaymentDetails("id", "secret")
 
         assertThat(result.exceptionOrNull()).isEqualTo(error)
     }
@@ -729,30 +692,10 @@ class LinkApiRepositoryTest {
     fun `updatePaymentDetails sends correct parameters`() = runTest {
         val secret = "secret"
         val params = ConsumerPaymentDetailsUpdateParams("id")
-        val consumerKey = "key"
 
         linkRepository.updatePaymentDetails(
             params,
             secret,
-            consumerKey
-        )
-
-        verify(stripeRepository).updatePaymentDetails(
-            eq(secret),
-            eq(params),
-            eq(ApiRequest.Options(consumerKey))
-        )
-    }
-
-    @Test
-    fun `updatePaymentDetails without consumerPublishableKey sends correct parameters`() = runTest {
-        val secret = "secret"
-        val params = ConsumerPaymentDetailsUpdateParams("id")
-
-        linkRepository.updatePaymentDetails(
-            params,
-            secret,
-            null
         )
 
         verify(stripeRepository).updatePaymentDetails(
@@ -770,7 +713,6 @@ class LinkApiRepositoryTest {
         val result = linkRepository.updatePaymentDetails(
             ConsumerPaymentDetailsUpdateParams("id"),
             "secret",
-            "key"
         )
 
         assertThat(result.getOrNull()).isEqualTo(TestFactory.CONSUMER_PAYMENT_DETAILS)
@@ -785,7 +727,6 @@ class LinkApiRepositoryTest {
         val result = linkRepository.updatePaymentDetails(
             ConsumerPaymentDetailsUpdateParams("id"),
             "secret",
-            "key"
         )
 
         assertThat(result.exceptionOrNull()).isEqualTo(error)

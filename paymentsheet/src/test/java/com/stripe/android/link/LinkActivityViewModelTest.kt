@@ -146,7 +146,7 @@ internal class LinkActivityViewModelTest {
         val mockArgs = NativeLinkArgs(
             configuration = mock(),
             requestSurface = RequestSurface.PaymentElement,
-            publishableKey = "",
+            publishableKey = "pk_123",
             stripeAccountId = null,
             linkExpressMode = LinkExpressMode.DISABLED,
             linkAccountInfo = LinkAccountUpdate.Value(
