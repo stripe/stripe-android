@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.stripe3ds2.observability.ErrorReporter
 import com.stripe.android.stripe3ds2.transaction.ChallengeAction
 import com.stripe.android.stripe3ds2.transaction.ChallengeActionHandler
@@ -18,14 +17,12 @@ import com.stripe.android.stripe3ds2.utils.ImageCache
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import kotlin.coroutines.CoroutineContext
 
 internal class ChallengeActivityViewModel(
     private val challengeActionHandler: ChallengeActionHandler,
     private val transactionTimer: TransactionTimer,
     errorReporter: ErrorReporter,
     private val imageCache: ImageCache = ImageCache.Default,
-    workContext: CoroutineContext
 ) : ViewModel() {
     private val imageRepository = ImageRepository(errorReporter, viewModelScope.coroutineContext)
 
@@ -125,7 +122,6 @@ internal class ChallengeActivityViewModel(
         private val challengeActionHandler: ChallengeActionHandler,
         private val transactionTimer: TransactionTimer,
         private val errorReporter: ErrorReporter,
-        private val workContext: CoroutineContext
     ) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
@@ -134,7 +130,6 @@ internal class ChallengeActivityViewModel(
                 challengeActionHandler,
                 transactionTimer,
                 errorReporter,
-                workContext = workContext
             ) as T
         }
     }
