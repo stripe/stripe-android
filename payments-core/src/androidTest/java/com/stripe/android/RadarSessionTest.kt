@@ -29,7 +29,7 @@ class RadarSessionTest {
             hcaptchaEKey: String?,
             requestOptions: ApiRequest.Options
         ): Result<RadarSessionWithHCaptcha> {
-            if (hcaptchaToken == "10000000-aaaa-bbbb-cccc-000000000001") {
+            if (hcaptchaToken == "20000000-aaaa-bbbb-cccc-000000000002") {
                 return Result.success(RadarSessionWithHCaptcha("rse_id", HCAPTCHA_SITE_KEY, "rqdata"))
             } else {
                 throw RuntimeException("Incorrect hCaptcha token: $hcaptchaToken")
@@ -74,6 +74,6 @@ class RadarSessionTest {
     private companion object {
         private const val FAKE_PUBLISHABLE_KEY = "pk_test_123"
         private const val TEST_STRIPE_ACCOUNT_ID = "test_account_id"
-        private const val HCAPTCHA_SITE_KEY = "10000000-ffff-ffff-ffff-000000000001"
+        private const val HCAPTCHA_SITE_KEY = "20000000-ffff-ffff-ffff-000000000002"
     }
 }
