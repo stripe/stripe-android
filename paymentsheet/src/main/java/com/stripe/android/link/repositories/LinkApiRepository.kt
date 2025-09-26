@@ -61,10 +61,11 @@ internal class LinkApiRepository @Inject constructor(
     private val fraudDetectionDataRepository: FraudDetectionDataRepository =
         DefaultFraudDetectionDataRepository(application, workContext)
 
-    private val apiRequestOptions = ApiRequest.Options(
-        publishableKeyProvider = publishableKeyProvider,
-        stripeAccountIdProvider = stripeAccountIdProvider,
-    )
+    private val apiRequestOptions: ApiRequest.Options
+        get() = ApiRequest.Options(
+            publishableKeyProvider = publishableKeyProvider,
+            stripeAccountIdProvider = stripeAccountIdProvider,
+        )
 
     init {
         fraudDetectionDataRepository.refresh()

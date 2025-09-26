@@ -156,7 +156,6 @@ internal open class FakeLinkRepository : LinkRepository {
         userEmail: String,
         stripeIntent: StripeIntent,
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?,
     ) = createCardPaymentDetailsResult
 
     override suspend fun createBankAccountPaymentDetails(
@@ -193,56 +192,47 @@ internal open class FakeLinkRepository : LinkRepository {
 
     override suspend fun startVerification(
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
     ) = startVerificationResult
 
     override suspend fun confirmVerification(
         verificationCode: String,
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?,
         consentGranted: Boolean?
     ): Result<ConsumerSession> = confirmVerificationResult
 
     override suspend fun postConsentUpdate(
         consumerSessionClientSecret: String,
         consentGranted: Boolean,
-        consumerPublishableKey: String?
     ): Result<Unit> = postConsentUpdateResult
 
     override suspend fun listPaymentDetails(
         paymentMethodTypes: Set<String>,
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
     ): Result<ConsumerPaymentDetails> = listPaymentDetailsResult
 
     override suspend fun listShippingAddresses(
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
     ): Result<ConsumerShippingAddresses> = listShippingAddressesResult
 
     override suspend fun deletePaymentDetails(
         paymentDetailsId: String,
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
     ): Result<Unit> = deletePaymentDetailsResult
 
     override suspend fun updatePaymentDetails(
         updateParams: ConsumerPaymentDetailsUpdateParams,
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
     ): Result<ConsumerPaymentDetails> = updatePaymentDetailsResult
 
     override suspend fun createLinkAccountSession(
         consumerSessionClientSecret: String,
         stripeIntent: StripeIntent,
         linkMode: LinkMode?,
-        consumerPublishableKey: String?
     ): Result<LinkAccountSession> = createLinkAccountSessionResult
 
     override suspend fun updatePhoneNumber(
         consumerSessionClientSecret: String,
         phoneNumber: String,
-        consumerPublishableKey: String?
     ): Result<ConsumerSession> = updatePhoneNumberResult
 
     suspend fun awaitMobileLookup(): MobileLookupCall {
