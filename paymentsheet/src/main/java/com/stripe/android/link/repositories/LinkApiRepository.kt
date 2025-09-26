@@ -328,11 +328,15 @@ internal class LinkApiRepository @Inject constructor(
             mapOf("allow_redisplay" to allowRedisplay)
         } ?: emptyMap()
 
+        // Allow using a custom API key so that payment methods can be created under the
+        // merchant-of-record if necessary.
+        val requestOptions = buildCustomRequestOptions(apiKey)
+
         consumersApiService.sharePaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             paymentDetailsId = paymentDetailsId,
             expectedPaymentMethodType = expectedPaymentMethodType,
-            requestOptions = buildRequestOptions(apiKey),
+            requestOptions = requestOptions,
             requestSurface = requestSurface.value,
             extraParams = paymentMethodParams + fraudParams + optionsParams + allowRedisplayParams,
             billingPhone = billingPhone,
@@ -483,7 +487,7 @@ internal class LinkApiRepository @Inject constructor(
         )
     }
 
-    private fun buildRequestOptions(
+    private fun buildCustomRequestOptions(
         apiKey: String? = null,
     ): ApiRequest.Options {
         return if (apiKey != null) {
