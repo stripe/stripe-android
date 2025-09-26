@@ -411,6 +411,78 @@ class PaymentSelectionUpdaterTest {
         assertThat(result).isEqualTo(null)
     }
 
+    @Test
+    fun `If wallet buttons are already shown and existing selection is Google Pay, should be null`() {
+        val updater = createUpdater()
+
+        val result = updater(
+            selection = PaymentSelection.GooglePay,
+            previousConfig = null,
+            newState = mockPaymentSheetStateWithPaymentIntent(),
+            newConfig = defaultPaymentSheetConfiguration,
+            walletButtonsAlreadyShown = true,
+        )
+
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `If wallet buttons are already shown and existing selection is Link, should be null`() {
+        val updater = createUpdater()
+
+        val result = updater(
+            selection = PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED),
+            previousConfig = null,
+            newState = mockPaymentSheetStateWithPaymentIntent(),
+            newConfig = defaultPaymentSheetConfiguration,
+            walletButtonsAlreadyShown = true,
+        )
+
+        assertThat(result).isNull()
+    }
+
+    @OptIn(WalletButtonsPreview::class)
+    @Test
+    fun `If using wallet buttons config option and existing selection is Google Pay, should be null`() {
+        val updater = createUpdater()
+
+        val result = updater(
+            selection = PaymentSelection.GooglePay,
+            previousConfig = null,
+            newState = mockPaymentSheetStateWithPaymentIntent(),
+            newConfig = defaultPaymentSheetConfiguration.newBuilder()
+                .walletButtons(
+                    PaymentSheet.WalletButtonsConfiguration(
+                        willDisplayExternally = true,
+                    ),
+                ).build(),
+            walletButtonsAlreadyShown = false,
+        )
+
+        assertThat(result).isNull()
+    }
+
+    @OptIn(WalletButtonsPreview::class)
+    @Test
+    fun `If using wallet buttons config option and existing selection is Link, should be null`() {
+        val updater = createUpdater()
+
+        val result = updater(
+            selection = PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED),
+            previousConfig = null,
+            newState = mockPaymentSheetStateWithPaymentIntent(),
+            newConfig = defaultPaymentSheetConfiguration.newBuilder()
+                .walletButtons(
+                    PaymentSheet.WalletButtonsConfiguration(
+                        willDisplayExternally = true,
+                    ),
+                ).build(),
+            walletButtonsAlreadyShown = false,
+        )
+
+        assertThat(result).isNull()
+    }
+
     @OptIn(WalletButtonsPreview::class)
     @Test
     fun `If using wallet buttons config option with only GPay visible and selection is Link, should be Link`() {
