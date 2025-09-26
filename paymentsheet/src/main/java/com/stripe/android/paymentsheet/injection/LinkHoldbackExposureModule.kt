@@ -6,7 +6,8 @@ import com.stripe.android.common.analytics.experiment.DefaultLogLinkHoldbackExpe
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.repositories.LinkApiRepository
@@ -18,7 +19,7 @@ import com.stripe.android.repository.ConsumersApiServiceImpl
 import dagger.Module
 import dagger.Provides
 import java.util.Locale
-import javax.inject.Provider
+import javax.inject.Named
 import javax.inject.Qualifier
 import kotlin.coroutines.CoroutineContext
 
@@ -51,7 +52,8 @@ internal class LinkHoldbackExposureModule {
     @LinkDisabledApiRepository
     fun providesLinkRepository(
         application: Application,
-        apiRequestOptionsProvider: Provider<ApiRequest.Options>,
+        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+        @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?,
         requestSurface: RequestSurface,
         stripeRepository: StripeRepository,
         @IOContext workContext: CoroutineContext,
@@ -71,7 +73,8 @@ internal class LinkHoldbackExposureModule {
         return LinkApiRepository(
             application = application,
             requestSurface = requestSurface,
-            apiRequestOptionsProvider = apiRequestOptionsProvider,
+            publishableKeyProvider = publishableKeyProvider,
+            stripeAccountIdProvider = stripeAccountIdProvider,
             stripeRepository = stripeRepository,
             consumersApiService = consumersApiService,
             workContext = workContext,

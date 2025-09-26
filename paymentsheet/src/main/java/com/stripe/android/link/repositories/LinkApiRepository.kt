@@ -5,6 +5,8 @@ import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentMethod
@@ -37,7 +39,7 @@ import com.stripe.android.repository.ConsumersApiService
 import kotlinx.coroutines.withContext
 import java.util.Locale
 import javax.inject.Inject
-import javax.inject.Provider
+import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -47,7 +49,8 @@ import kotlin.coroutines.CoroutineContext
 internal class LinkApiRepository @Inject constructor(
     application: Application,
     private val requestSurface: RequestSurface,
-    private val apiRequestOptionsProvider: Provider<ApiRequest.Options>,
+    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
+    @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
     private val stripeRepository: StripeRepository,
     private val consumersApiService: ConsumersApiService,
     @IOContext private val workContext: CoroutineContext,
@@ -58,9 +61,8 @@ internal class LinkApiRepository @Inject constructor(
     private val fraudDetectionDataRepository: FraudDetectionDataRepository =
         DefaultFraudDetectionDataRepository(application, workContext)
 
-    private val apiRequestOptions: ApiRequest.Options by lazy {
-        apiRequestOptionsProvider.get()
-    }
+    private val apiRequestOptions: ApiRequest.Options
+        get() = buildRequestOptions()
 
     init {
         fraudDetectionDataRepository.refresh()
@@ -335,7 +337,7 @@ internal class LinkApiRepository @Inject constructor(
 
         // Allow using a custom API key so that payment methods can be created under the
         // merchant-of-record if necessary.
-        val requestOptions = buildCustomRequestOptions(apiKey)
+        val requestOptions = buildRequestOptions(apiKey)
 
         consumersApiService.sharePaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
@@ -492,16 +494,19 @@ internal class LinkApiRepository @Inject constructor(
         )
     }
 
-    private fun buildCustomRequestOptions(
-        apiKey: String? = null,
+    private fun buildRequestOptions(
+        customApiKey: String? = null,
     ): ApiRequest.Options {
-        return if (apiKey != null) {
+        return if (customApiKey != null) {
             ApiRequest.Options(
-                apiKey = apiKey,
+                apiKey = customApiKey,
                 stripeAccount = null,
             )
         } else {
-            apiRequestOptions
+            ApiRequest.Options(
+                apiKey = publishableKeyProvider(),
+                stripeAccount = stripeAccountIdProvider(),
+            )
         }
     }
 

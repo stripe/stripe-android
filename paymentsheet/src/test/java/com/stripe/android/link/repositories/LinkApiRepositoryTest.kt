@@ -776,12 +776,8 @@ class LinkApiRepositoryTest {
         return LinkApiRepository(
             application = ApplicationProvider.getApplicationContext(),
             requestSurface = RequestSurface.PaymentElement,
-            apiRequestOptionsProvider = {
-                ApiRequest.Options(
-                    apiKey = PUBLISHABLE_KEY,
-                    stripeAccount = STRIPE_ACCOUNT_ID,
-                )
-            },
+            publishableKeyProvider = { PUBLISHABLE_KEY },
+            stripeAccountIdProvider = { STRIPE_ACCOUNT_ID },
             stripeRepository = stripeRepository,
             consumersApiService = consumersApiService,
             workContext = Dispatchers.IO,
