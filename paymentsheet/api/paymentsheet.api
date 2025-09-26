@@ -1398,9 +1398,6 @@ public abstract interface annotation class com/stripe/android/paymentsheet/Delic
 public abstract interface annotation class com/stripe/android/paymentsheet/ExperimentalCustomerSessionApi : java/lang/annotation/Annotation {
 }
 
-public abstract interface annotation class com/stripe/android/paymentsheet/ExperimentalPaymentSheetDecouplingApi : java/lang/annotation/Annotation {
-}
-
 public abstract interface class com/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler {
 	public abstract fun confirmExternalPaymentMethod (Ljava/lang/String;Lcom/stripe/android/model/PaymentMethod$BillingDetails;)V
 }
