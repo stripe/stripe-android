@@ -39,6 +39,6 @@ private object PromptPayUiDefinitionFactory : UiDefinitionFactory.RequiresShared
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_promptpay,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_promptpay_day,
-        iconResourceNight = R.drawable.stripe_ic_paymentsheet_pm_promptpay_night,
+        iconResourceNight = null,
     )
 }
