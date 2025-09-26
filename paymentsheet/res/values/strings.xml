@@ -213,10 +213,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Card brand was not updated. Please try again.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
   <string name="stripe_paynow_confirm_payment">Confirm the payment in your bank or payment app within %s to complete the purchase.</string>
-  <!-- Text for alert message when user needs to confirm payment in their PromptPay app -->
-  <string name="stripe_promptpay_confirm_payment">Confirm the payment in your bank or payment app within %s to complete the purchase.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Set as default payment method</string>
+  <!-- Text for alert message when user needs to confirm payment in their payment app -->
+  <string name="stripe_qrcode_lpm_confirm_payment">Confirm the payment in your bank or payment app within %s to complete the purchase.</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">Remove bank account ending in %s</string>
   <!-- Accessibility description for a button that launches Shop Pay. -->
