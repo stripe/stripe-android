@@ -1,6 +1,5 @@
 package com.stripe.hcaptcha.webview
 
-import android.app.Activity
 import android.os.Handler
 import android.os.Looper
 import android.view.View
@@ -8,6 +7,7 @@ import android.view.ViewGroup
 import android.webkit.WebView
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.DefaultLifecycleObserver
 import com.stripe.hcaptcha.HCaptchaException
 import com.stripe.hcaptcha.HCaptchaStateListener
 import com.stripe.hcaptcha.IHCaptchaVerifier
@@ -17,7 +17,7 @@ import com.stripe.hcaptcha.config.HCaptchaInternalConfig
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal class HCaptchaHeadlessWebView(
-    activity: Activity,
+    activity: FragmentActivity,
     config: HCaptchaConfig,
     internalConfig: HCaptchaInternalConfig,
     private val listener: HCaptchaStateListener
@@ -31,6 +31,12 @@ internal class HCaptchaHeadlessWebView(
         val webView: WebView = HCaptchaWebView(activity)
         webView.id = R.id.webView
         webView.visibility = View.GONE
+
+        if (webView.parent == null) {
+            val rootView = activity.window.decorView.rootView as ViewGroup
+            rootView.addView(webView)
+        }
+        registerActivityLifecycleCallback(activity)
 
         webViewHelper = HCaptchaWebViewHelper(
             Handler(Looper.getMainLooper()),
@@ -81,14 +87,22 @@ internal class HCaptchaHeadlessWebView(
     }
 
     override fun reset() {
-        if (webViewLoaded) {
-            webViewHelper.reset()
-            val webView: WebView = webViewHelper.webView
-            if (webView.parent != null) {
-                (webView.parent as ViewGroup).removeView(webView)
+        webViewHelper.reset()
+        val webView: WebView = webViewHelper.webView
+        webView.removeAllViews()
+        webView.destroy()
+    }
+
+    private fun registerActivityLifecycleCallback(activity: FragmentActivity) {
+        activity.lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onStop(owner: androidx.lifecycle.LifecycleOwner) {
+                    val webView: WebView = webViewHelper.webView
+                    if (webView.parent != null) {
+                        (webView.parent as ViewGroup).removeView(webView)
+                    }
+                }
             }
-        } else {
-            shouldResetOnLoad = true
-        }
+        )
     }
 }
