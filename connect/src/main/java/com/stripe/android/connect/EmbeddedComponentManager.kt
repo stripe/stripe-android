@@ -78,7 +78,7 @@ class EmbeddedComponentManager @JvmOverloads constructor(
      * @param listener Optional [PayoutsListener] to use for handling events from the view.
      * @param cacheKey Key to use for caching the internal WebView within an Activity across configuration changes.
      */
-    @PrivateBetaConnectSDK
+    @PreviewConnectSDK
     fun createPayoutsView(
         context: Context,
         listener: PayoutsListener? = null,
@@ -100,7 +100,7 @@ class EmbeddedComponentManager @JvmOverloads constructor(
      * @param props Optional [PaymentsProps] to use for configuring the view.
      * @param cacheKey Key to use for caching the internal WebView within an Activity across configuration changes.
      */
-    @PrivateBetaConnectSDK
+    @PreviewConnectSDK
     fun createPaymentsView(
         context: Context,
         listener: PaymentsListener? = null,

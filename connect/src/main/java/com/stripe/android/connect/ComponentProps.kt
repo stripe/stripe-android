@@ -8,7 +8,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 
-@OptIn(PrivateBetaConnectSDK::class)
+@OptIn(PreviewConnectSDK::class)
 internal fun Any.toComponentPropsJsonObject(): JsonObject {
     return when (this) {
         EmptyProps -> JsonObject(emptyMap())
