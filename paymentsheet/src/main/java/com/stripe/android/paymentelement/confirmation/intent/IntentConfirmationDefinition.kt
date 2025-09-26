@@ -50,7 +50,7 @@ internal class IntentConfirmationDefinition(
                 interceptor.intercept(
                     intent = confirmationParameters.intent,
                     confirmationOption = confirmationOption,
-                    shippingValues =  confirmationParameters.shippingDetails?.toConfirmPaymentIntentShipping(),
+                    shippingValues = confirmationParameters.shippingDetails?.toConfirmPaymentIntentShipping(),
                 )
         }
     }

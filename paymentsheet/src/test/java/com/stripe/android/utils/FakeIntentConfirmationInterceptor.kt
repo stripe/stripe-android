@@ -16,7 +16,6 @@ import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationO
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.channels.Channel
 import org.mockito.Mockito.mock
 
@@ -78,23 +77,17 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
     }
 
     override suspend fun intercept(
-        initializationMode: PaymentElementLoader.InitializationMode,
         intent: StripeIntent,
-        paymentMethodCreateParams: PaymentMethodCreateParams,
-        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
-        paymentMethodExtraParams: PaymentMethodExtraParams?,
-        shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        customerRequestedSave: Boolean,
         confirmationOption: PaymentMethodConfirmationOption.New,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> {
         _calls.add(
             InterceptCall.WithNewPaymentMethod(
-                initializationMode = initializationMode,
-                paymentMethodCreateParams = paymentMethodCreateParams,
-                paymentMethodOptionsParams = paymentMethodOptionsParams,
-                paymentMethodExtraParams = paymentMethodExtraParams,
+                paymentMethodCreateParams = confirmationOption.createParams,
+                paymentMethodOptionsParams = confirmationOption.optionsParams,
+                paymentMethodExtraParams = confirmationOption.extraParams,
                 shippingValues = shippingValues,
-                customerRequestedSave = customerRequestedSave,
+                customerRequestedSave = confirmationOption.shouldSave,
             )
         )
 
@@ -102,21 +95,16 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
     }
 
     override suspend fun intercept(
-        initializationMode: PaymentElementLoader.InitializationMode,
         intent: StripeIntent,
-        paymentMethod: PaymentMethod,
-        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
-        paymentMethodExtraParams: PaymentMethodExtraParams?,
+        confirmationOption: PaymentMethodConfirmationOption.Saved,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        hCaptchaToken: String?,
     ): ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> {
         _calls.add(
             InterceptCall.WithExistingPaymentMethod(
-                initializationMode = initializationMode,
-                paymentMethod = paymentMethod,
-                paymentMethodOptionsParams = paymentMethodOptionsParams,
+                paymentMethod = confirmationOption.paymentMethod,
+                paymentMethodOptionsParams = confirmationOption.optionsParams,
                 shippingValues = shippingValues,
-                hCaptchaToken = hCaptchaToken,
+                hCaptchaToken = confirmationOption.hCaptchaToken,
             )
         )
 
@@ -125,7 +113,6 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
 
     sealed interface InterceptCall {
         data class WithNewPaymentMethod(
-            val initializationMode: PaymentElementLoader.InitializationMode,
             val paymentMethodCreateParams: PaymentMethodCreateParams,
             val paymentMethodOptionsParams: PaymentMethodOptionsParams?,
             val paymentMethodExtraParams: PaymentMethodExtraParams?,
@@ -134,7 +121,6 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
         ) : InterceptCall
 
         data class WithExistingPaymentMethod(
-            val initializationMode: PaymentElementLoader.InitializationMode,
             val paymentMethod: PaymentMethod,
             val paymentMethodOptionsParams: PaymentMethodOptionsParams?,
             val shippingValues: ConfirmPaymentIntentParams.Shipping?,
