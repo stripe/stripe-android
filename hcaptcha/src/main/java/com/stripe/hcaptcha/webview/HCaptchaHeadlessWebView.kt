@@ -91,7 +91,8 @@ internal class HCaptchaHeadlessWebView(
         if (webView.parent != null) {
             (webView.parent as ViewGroup).removeView(webView)
         }
-        webViewHelper.reset()
+        webView.removeAllViews()
+        webView.destroy()
     }
 
     private fun registerActivityLifecycleCallback(activity: FragmentActivity) {
