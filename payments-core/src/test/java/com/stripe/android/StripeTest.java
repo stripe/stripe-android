@@ -3,9 +3,12 @@ package com.stripe.android;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory;
+import com.stripe.android.challenge.FakeHCaptchaService;
+import com.stripe.android.model.RadarSession;
 import com.stripe.android.core.AppInfo;
 import com.stripe.android.core.exception.AuthenticationException;
 import com.stripe.android.core.exception.InvalidRequestException;
@@ -106,6 +109,8 @@ public class StripeTest {
 
     @Mock
     private ApiResultCallback<PossibleBrands> possibleBrands;
+    @Mock
+    private ApiResultCallback<RadarSession> radarSessionCallback;
 
     @Captor
     private ArgumentCaptor<AnalyticsRequest> analyticsRequestArgumentCaptor;
@@ -118,6 +123,8 @@ public class StripeTest {
 
     @Captor
     private ArgumentCaptor<PossibleBrands> possibleBrandsArgumentCaptor;
+    @Captor
+    private ArgumentCaptor<RadarSession> radarSessionArgumentCaptor;
 
     @Captor
     private ArgumentCaptor<Exception> errorArgumentCaptor;
@@ -851,6 +858,41 @@ public class StripeTest {
         assertEquals(result.getMessage(), "cardNumber cannot be less than 6 characters");
     }
 
+    @Test
+    public void createRadarSession_withHCaptchaSuccess_returnsRadarSession() {
+        final Stripe stripe = HCaptchaTestHelper.createStripeWithHCaptchaSuccess(
+                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                testDispatcher
+        );
+
+        final AppCompatActivity mockActivity = mock(AppCompatActivity.class);
+        stripe.createRadarSession(null, radarSessionCallback, mockActivity);
+        idle();
+
+        verify(radarSessionCallback).onSuccess(radarSessionArgumentCaptor.capture());
+        final RadarSession result = radarSessionArgumentCaptor.getValue();
+        assertNotNull(result);
+        assertEquals("rse_id", result.getId());
+    }
+
+    @Test
+    public void createRadarSession_withHCaptchaFailure_returnsError() {
+        final Stripe stripe = HCaptchaTestHelper.createStripeWithHCaptchaFailure(
+                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                testDispatcher,
+                "HCaptcha failed"
+        );
+
+        final AppCompatActivity mockActivity = mock(AppCompatActivity.class);
+        stripe.createRadarSession(null, radarSessionCallback, mockActivity);
+        idle();
+
+        verify(radarSessionCallback).onError(errorArgumentCaptor.capture());
+        final Exception result = errorArgumentCaptor.getValue();
+        assertNotNull(result);
+        assertEquals("HCaptcha failed", result.getMessage());
+    }
+
     @NonNull
     private Source createSource() throws StripeException {
         final Stripe stripe = defaultStripe;
@@ -941,7 +983,8 @@ public class StripeTest {
                 ),
                 ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
                 null,
-                (CoroutineContext) workDispatcher
+                (CoroutineContext) workDispatcher,
+                new FakeHCaptchaService()
         );
     }
 
@@ -966,6 +1009,7 @@ public class StripeTest {
                 new DefaultCardAccountRangeRepositoryFactory(context)
         );
     }
+
 
     private void idle() {
         idleLooper();

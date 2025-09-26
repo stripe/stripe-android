@@ -29,6 +29,7 @@ interface HCaptchaService {
         data class Failure(val error: Throwable) : Result
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         internal fun default(): HCaptchaService {
             return DefaultHCaptchaService(
