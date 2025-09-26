@@ -87,10 +87,8 @@ internal class HCaptchaHeadlessWebView(
     }
 
     override fun reset() {
+        webViewHelper.reset()
         val webView: WebView = webViewHelper.webView
-        if (webView.parent != null) {
-            (webView.parent as ViewGroup).removeView(webView)
-        }
         webView.removeAllViews()
         webView.destroy()
     }
@@ -98,8 +96,11 @@ internal class HCaptchaHeadlessWebView(
     private fun registerActivityLifecycleCallback(activity: FragmentActivity) {
         activity.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
-                override fun onDestroy(owner: androidx.lifecycle.LifecycleOwner) {
-                    reset()
+                override fun onStop(owner: androidx.lifecycle.LifecycleOwner) {
+                    val webView: WebView = webViewHelper.webView
+                    if (webView.parent != null) {
+                        (webView.parent as ViewGroup).removeView(webView)
+                    }
                 }
             }
         )
