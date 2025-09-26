@@ -36,6 +36,7 @@ internal class HCaptchaHeadlessWebView(
             val rootView = activity.window.decorView.rootView as ViewGroup
             rootView.addView(webView)
         }
+        registerActivityLifecycleCallback(activity)
 
         webViewHelper = HCaptchaWebViewHelper(
             Handler(Looper.getMainLooper()),
@@ -46,7 +47,6 @@ internal class HCaptchaHeadlessWebView(
             listener,
             webView
         )
-        registerActivityLifecycleCallback(activity)
     }
 
     override fun startVerification(activity: FragmentActivity) {
