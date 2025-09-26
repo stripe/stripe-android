@@ -34,6 +34,7 @@ const val TEST_TAG_HEADER_TITLE = "TEST_TAG_HEADER_TITLE"
 @Composable
 internal fun VerticalModeFormUI(
     interactor: VerticalModeFormInteractor,
+    showsWalletHeader: Boolean,
     modifier: Modifier = Modifier
 ) {
     val horizontalPadding = StripeTheme.getOuterFormInsets()
@@ -42,9 +43,9 @@ internal fun VerticalModeFormUI(
     val state by interactor.state.collectAsState()
 
     Column(modifier) {
-        val headerInformation = state.formHeader
+        val headerInformation = state.headerInformation
         val enabled = !state.isProcessing
-        if (headerInformation != null) {
+        if (headerInformation != null && !showsWalletHeader) {
             VerticalModeFormHeaderUI(isEnabled = enabled, formHeaderInformation = headerInformation)
         }
 

@@ -61,6 +61,7 @@ internal fun FormActivityUI(
             content = {
                 VerticalModeFormUI(
                     interactor = interactor,
+                    showsWalletHeader = false
                 )
                 USBankAccountMandate(state)
                 FormActivityError(state)
