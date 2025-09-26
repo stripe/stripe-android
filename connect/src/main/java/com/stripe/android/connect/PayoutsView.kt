@@ -6,7 +6,7 @@ import androidx.annotation.RestrictTo
 import androidx.core.content.withStyledAttributes
 import com.stripe.android.connect.webview.StripeConnectWebViewContainer
 
-@PrivateBetaConnectSDK
+@PreviewConnectSDK
 internal class PayoutsView internal constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -49,6 +49,6 @@ internal class PayoutsView internal constructor(
     }
 }
 
-@PrivateBetaConnectSDK
+@PreviewConnectSDK
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface PayoutsListener : StripeEmbeddedComponentListener

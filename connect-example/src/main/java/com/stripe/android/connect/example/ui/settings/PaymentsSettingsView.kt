@@ -34,7 +34,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.connect.PaymentsProps
-import com.stripe.android.connect.PrivateBetaConnectSDK
+import com.stripe.android.connect.PreviewConnectSDK
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.data.AmountFilterType
 import com.stripe.android.connect.example.data.DateFilterType
@@ -62,7 +62,7 @@ fun PaymentsSettingsView(
 }
 
 @Suppress("LongMethod")
-@OptIn(PrivateBetaConnectSDK::class)
+@OptIn(PreviewConnectSDK::class)
 @Composable
 private fun PaymentsSettingsView(
     paymentsSettings: PaymentsSettings,
@@ -342,7 +342,7 @@ private fun DatePickerField(
 
 @Preview
 @Composable
-@OptIn(PrivateBetaConnectSDK::class)
+@OptIn(PreviewConnectSDK::class)
 private fun PaymentsSettingsViewPreview() {
     ConnectSdkExampleTheme {
         PaymentsSettingsView(

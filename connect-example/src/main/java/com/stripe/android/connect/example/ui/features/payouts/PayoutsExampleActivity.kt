@@ -5,12 +5,12 @@ import android.view.View
 import android.widget.Toast
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PayoutsListener
-import com.stripe.android.connect.PrivateBetaConnectSDK
+import com.stripe.android.connect.PreviewConnectSDK
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.ui.common.BasicExampleComponentActivity
 import dagger.hilt.android.AndroidEntryPoint
 
-@OptIn(PrivateBetaConnectSDK::class)
+@OptIn(PreviewConnectSDK::class)
 @AndroidEntryPoint
 class PayoutsExampleActivity : BasicExampleComponentActivity() {
     override val titleRes: Int = R.string.payouts

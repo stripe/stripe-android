@@ -2,7 +2,7 @@ package com.stripe.android.connect.example.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.connect.PrivateBetaConnectSDK
+import com.stripe.android.connect.PreviewConnectSDK
 import com.stripe.android.connect.example.core.Async
 import com.stripe.android.connect.example.core.Uninitialized
 import com.stripe.android.connect.example.data.EmbeddedComponentService
@@ -174,7 +174,7 @@ class SettingsViewModel @Inject constructor(
 
     // State
 
-    @OptIn(PrivateBetaConnectSDK::class)
+    @OptIn(PreviewConnectSDK::class)
     data class SettingsState(
         val serverUrl: String,
         val saveEnabled: Boolean = false,

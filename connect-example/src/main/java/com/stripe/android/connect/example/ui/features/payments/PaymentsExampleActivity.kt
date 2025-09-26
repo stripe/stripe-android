@@ -5,14 +5,14 @@ import android.view.View
 import android.widget.Toast
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PaymentsListener
-import com.stripe.android.connect.PrivateBetaConnectSDK
+import com.stripe.android.connect.PreviewConnectSDK
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.data.SettingsService
 import com.stripe.android.connect.example.ui.common.BasicExampleComponentActivity
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-@OptIn(PrivateBetaConnectSDK::class)
+@OptIn(PreviewConnectSDK::class)
 @AndroidEntryPoint
 class PaymentsExampleActivity : BasicExampleComponentActivity() {
 

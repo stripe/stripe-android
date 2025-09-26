@@ -5,7 +5,7 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.stripe.android.connect.AccountOnboardingProps
 import com.stripe.android.connect.PaymentsProps
-import com.stripe.android.connect.PrivateBetaConnectSDK
+import com.stripe.android.connect.PreviewConnectSDK
 import com.stripe.android.connect.example.ui.appearance.AppearanceInfo
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
@@ -112,7 +112,7 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
         }
     }
 
-    @OptIn(PrivateBetaConnectSDK::class)
+    @OptIn(PreviewConnectSDK::class)
     fun getPaymentsSettings(): PaymentsSettings {
         return PaymentsSettings(
             amountFilterType = AmountFilterType.valueOf(
@@ -151,7 +151,7 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
         )
     }
 
-    @OptIn(PrivateBetaConnectSDK::class)
+    @OptIn(PreviewConnectSDK::class)
     fun setPaymentsSettings(value: PaymentsSettings) {
         sharedPreferences.edit {
             putString(PAYMENTS_AMOUNT_FILTER_TYPE, value.amountFilterType.name)
@@ -302,7 +302,7 @@ enum class FieldOption { DEFAULT, CURRENTLY_DUE, EVENTUALLY_DUE }
 enum class FutureRequirement { DEFAULT, OMIT, INCLUDE }
 enum class RequirementsMode { DEFAULT, ONLY, EXCLUDE }
 
-@OptIn(PrivateBetaConnectSDK::class)
+@OptIn(PreviewConnectSDK::class)
 data class PaymentsSettings(
     val amountFilterType: AmountFilterType = AmountFilterType.NONE,
     val amountValue: Double = 0.0,

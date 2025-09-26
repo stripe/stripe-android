@@ -10,7 +10,7 @@ import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 import java.util.Date
 
-@PrivateBetaConnectSDK
+@PreviewConnectSDK
 internal class PaymentsView internal constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -55,7 +55,7 @@ internal class PaymentsView internal constructor(
     }
 }
 
-@PrivateBetaConnectSDK
+@PreviewConnectSDK
 @Parcelize
 @Poko
 class PaymentsProps(
@@ -64,7 +64,7 @@ class PaymentsProps(
      */
     internal val defaultFilters: PaymentsListDefaultFilters? = null,
 ) : Parcelable {
-    @PrivateBetaConnectSDK
+    @PreviewConnectSDK
     @Parcelize
     sealed class AmountFilter : Parcelable {
         @Poko
@@ -97,7 +97,7 @@ class PaymentsProps(
         }
     }
 
-    @PrivateBetaConnectSDK
+    @PreviewConnectSDK
     @Parcelize
     sealed class DateFilter : Parcelable {
         @Poko
@@ -124,7 +124,7 @@ class PaymentsProps(
         }
     }
 
-    @PrivateBetaConnectSDK
+    @PreviewConnectSDK
     enum class Status(internal val value: String) {
         BLOCKED("blocked"),
         CANCELED("canceled"),
@@ -140,7 +140,7 @@ class PaymentsProps(
         UNCAPTURED("uncaptured"),
     }
 
-    @PrivateBetaConnectSDK
+    @PreviewConnectSDK
     enum class PaymentMethod(internal val value: String) {
         ACH_CREDIT_TRANSFER("ach_credit_transfer"),
         ACH_DEBIT("ach_debit"),
@@ -228,7 +228,7 @@ class PaymentsProps(
         ZIP("zip"),
     }
 
-    @PrivateBetaConnectSDK
+    @PreviewConnectSDK
     @Parcelize
     @Poko
     class PaymentsListDefaultFilters(
@@ -239,6 +239,6 @@ class PaymentsProps(
     ) : Parcelable
 }
 
-@PrivateBetaConnectSDK
+@PreviewConnectSDK
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface PaymentsListener : StripeEmbeddedComponentListener
