@@ -14,60 +14,53 @@ import com.stripe.android.model.RadarOptions
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Named
 import com.stripe.android.R as PaymentsCoreR
 
-class IntentFirstConfirmationInterceptor(
+internal class IntentFirstConfirmationInterceptor(
+    val clientSecret: String,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
-) {
+) : IntentConfirmationInterceptor {
 
     private val requestOptions: ApiRequest.Options
         get() = ApiRequest.Options(
             apiKey = publishableKeyProvider(),
             stripeAccount = stripeAccountIdProvider(),
         )
-    internal fun handleNewPaymentMethod(
-        initializationMode: PaymentElementLoader.IntentFirst,
+
+    override suspend fun intercept(
         intent: StripeIntent,
-        paymentMethodCreateParams: PaymentMethodCreateParams,
-        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
-        paymentMethodExtraParams: PaymentMethodExtraParams?,
-        shippingValues: ConfirmPaymentIntentParams.Shipping?,
+        confirmationOption: PaymentMethodConfirmationOption.New,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?
     ): ConfirmationDefinition.Action<Args> {
         return createConfirmStep(
-            clientSecret = initializationMode.clientSecret,
+            clientSecret = clientSecret,
             intent = intent,
             shippingValues = shippingValues,
-            paymentMethodCreateParams = paymentMethodCreateParams,
-            paymentMethodOptionsParams = paymentMethodOptionsParams,
-            paymentMethodExtraParams = paymentMethodExtraParams,
+            paymentMethodCreateParams = confirmationOption.createParams,
+            paymentMethodOptionsParams = confirmationOption.optionsParams,
+            paymentMethodExtraParams = confirmationOption.extraParams,
         )
     }
 
-    internal fun handleSavedPaymentMethod(
-        initializationMode: PaymentElementLoader.IntentFirst,
+    override suspend fun intercept(
         intent: StripeIntent,
-        paymentMethod: PaymentMethod,
-        paymentMethodOptionsParams: PaymentMethodOptionsParams?,
-        paymentMethodExtraParams: PaymentMethodExtraParams?,
-        shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        isDeferred: Boolean,
-        intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
-        hCaptchaToken: String?,
+        confirmationOption: PaymentMethodConfirmationOption.Saved,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?
     ): ConfirmationDefinition.Action<Args> {
         return createConfirmStep(
-            clientSecret = initializationMode.clientSecret,
+            clientSecret = clientSecret,
             intent = intent,
             shippingValues = shippingValues,
-            paymentMethod = paymentMethod,
-            paymentMethodOptionsParams = paymentMethodOptionsParams,
-            paymentMethodExtraParams = paymentMethodExtraParams,
-            isDeferred = isDeferred,
-            intentConfigSetupFutureUsage = intentConfigSetupFutureUsage,
-            hCaptchaToken = hCaptchaToken,
+            paymentMethod = confirmationOption.paymentMethod,
+            paymentMethodOptionsParams = confirmationOption.optionsParams,
+            paymentMethodExtraParams = null,
+            isDeferred = false,
+            intentConfigSetupFutureUsage = null,
+            hCaptchaToken = confirmationOption.hCaptchaToken,
         )
     }
     private fun createConfirmStep(

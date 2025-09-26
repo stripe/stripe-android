@@ -96,7 +96,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 intent = PaymentIntentFactory.create(),
                 paymentMethodCreateParams = createParams,
                 shippingValues = null,
-                customerRequestedSave = false,
+                customerRequestedSave = false,,
             )
 
             val confirmParams = nextStep.asConfirmParams<ConfirmPaymentIntentParams>()
@@ -192,7 +192,7 @@ class DefaultIntentConfirmationInterceptorTest {
             intent = PaymentIntentFactory.create(),
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             shippingValues = null,
-            customerRequestedSave = false,
+            customerRequestedSave = false,,
         )
     }
 
@@ -333,7 +333,7 @@ class DefaultIntentConfirmationInterceptorTest {
             intent = PaymentIntentFactory.create(),
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             shippingValues = null,
-            customerRequestedSave = false,
+            customerRequestedSave = false,,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -995,10 +995,8 @@ class DefaultIntentConfirmationInterceptorTest {
                 ),
                 intent = intent,
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                paymentMethodOptionsParams = null,
-                paymentMethodExtraParams = null,
                 shippingValues = null,
-                customerRequestedSave = false,
+                customerRequestedSave = false,,
             )
 
             assertThat(nextStep).isEqualTo(
@@ -1063,10 +1061,8 @@ class DefaultIntentConfirmationInterceptorTest {
                 ),
                 intent = intent,
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                paymentMethodOptionsParams = null,
-                paymentMethodExtraParams = null,
                 shippingValues = null,
-                customerRequestedSave = false,
+                customerRequestedSave = false,,
             )
 
             assertThat(nextStep).isEqualTo(

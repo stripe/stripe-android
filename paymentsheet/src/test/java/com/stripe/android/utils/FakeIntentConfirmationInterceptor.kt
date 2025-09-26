@@ -12,6 +12,7 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
@@ -84,6 +85,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
         paymentMethodExtraParams: PaymentMethodExtraParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         customerRequestedSave: Boolean,
+        confirmationOption: PaymentMethodConfirmationOption.New,
     ): ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> {
         _calls.add(
             InterceptCall.WithNewPaymentMethod(
