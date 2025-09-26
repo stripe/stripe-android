@@ -26,7 +26,7 @@ internal class ChallengeActivityViewModel(
     private val imageCache: ImageCache = ImageCache.Default,
     workContext: CoroutineContext
 ) : ViewModel() {
-    private val imageRepository = ImageRepository(errorReporter, workContext)
+    private val imageRepository = ImageRepository(errorReporter, viewModelScope.coroutineContext)
 
     private val _refreshUi = MutableLiveData<Unit>()
     val refreshUi: LiveData<Unit> = _refreshUi
