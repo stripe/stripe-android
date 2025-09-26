@@ -420,6 +420,7 @@ internal class PaymentSheetAnalyticsTest {
                             ephemeralKeySecret = "ek_123",
                         )
                     )
+                    .allowsDelayedPaymentMethods(false)
                     .build()
             )
         }
@@ -478,7 +479,9 @@ internal class PaymentSheetAnalyticsTest {
                             id = "cus_1",
                             ephemeralKeySecret = "ek_123",
                         )
-                    ).build(),
+                    )
+                    .allowsDelayedPaymentMethods(false)
+                    .build(),
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
