@@ -20,6 +20,8 @@ private const val BLIK_TIME_LIMIT_IN_SECONDS = 60
 private const val BLIK_INITIAL_DELAY_IN_SECONDS = 5
 private const val PAYNOW_TIME_LIMIT_IN_SECONDS = 60 * 60
 private const val PAYNOW_INITIAL_DELAY_IN_SECONDS = 5
+private const val PROMPTPAY_TIME_LIMIT_IN_SECONDS = 60 * 60
+private const val PROMPTPAY_INITIAL_DELAY_IN_SECONDS = 5
 
 internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>() {
 
@@ -61,6 +63,16 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                     stripeAccountId = requestOptions.stripeAccount,
                     qrCodeUrl = getQrCodeForPayNow(actionable),
                 )
+            PaymentMethod.Type.PromptPay ->
+                PollingContract.Args(
+                    clientSecret = requireNotNull(actionable.clientSecret),
+                    statusBarColor = host.statusBarColor,
+                    timeLimitInSeconds = PROMPTPAY_TIME_LIMIT_IN_SECONDS,
+                    initialDelayInSeconds = PROMPTPAY_INITIAL_DELAY_IN_SECONDS,
+                    ctaText = R.string.stripe_promptpay_confirm_payment,
+                    stripeAccountId = requestOptions.stripeAccount,
+                    qrCodeUrl = getQrCodeForPromptPay(actionable),
+                )
             else ->
                 error(
                     "Received invalid payment method type " +
@@ -86,6 +98,10 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
 
     private fun getQrCodeForPayNow(actionable: StripeIntent): String {
         return requireNotNull((actionable.nextActionData as StripeIntent.NextActionData.DisplayPayNowDetails).qrCodeUrl)
+    }
+
+    private fun getQrCodeForPromptPay(actionable: StripeIntent): String {
+        return requireNotNull((actionable.nextActionData as StripeIntent.NextActionData.DisplayPromptPayDetails).qrCodeUrl)
     }
 
     override fun onNewActivityResultCaller(

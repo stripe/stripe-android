@@ -559,6 +559,7 @@ internal class PlaygroundSettings private constructor(
                 )
             ),
             PassiveCaptchaDefinition,
+            EnablePromptPaySettingsDefinition,
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(

@@ -549,6 +549,14 @@ constructor(
             requiresMandate = false,
             hasDelayedSettlement = false,
             requiresMandateForPaymentIntent = false,
+        ),
+        PromptPay(
+            "promptpay",
+            isReusable = false,
+            isVoucher = true,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            requiresMandateForPaymentIntent = false,
         );
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
