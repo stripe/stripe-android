@@ -1,5 +1,6 @@
 package com.stripe.android.link.theme
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.runtime.Composable
@@ -64,6 +65,16 @@ internal data class LinkColors(
 ) {
     val buttonLinkBrand: Color get() = Brand200
     val onButtonLinkBrand: Color get() = Neutral900
+
+    val hintMessageBorder: Color
+        @Composable
+        get() = if (isSystemInDarkTheme()) {
+            // This color isn't semantically correct, but borderDefault is the same as the background
+            // in dark mode and we want to make the border stand out.
+            surfaceTertiary
+        } else {
+            borderDefault
+        }
 }
 
 internal object LinkThemeConfig {

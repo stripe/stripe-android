@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -38,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -84,6 +86,7 @@ import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.text.Html
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
+import com.stripe.android.ui.core.R as PaymentsUiCoreR
 import com.stripe.android.uicore.R as StripeUiCoreR
 
 @Composable
@@ -256,9 +259,10 @@ private fun PaymentDetailsSection(
             onLogoutClicked = onLogoutClicked,
         )
         if (state.paymentSelectionHint != null) {
-            PaymentSelectionHint(
+            LinkHintMessageView(
                 modifier = Modifier.padding(top = 12.dp),
-                hint = state.paymentSelectionHint
+                hint = state.paymentSelectionHint,
+                style = LinkHintStyle.Filled,
             )
         }
 
@@ -286,36 +290,79 @@ private fun PaymentDetailsSection(
     }
 }
 
+internal enum class LinkHintStyle {
+    Filled,
+    Outlined;
+
+    val textColor: Color
+        @Composable
+        get() = when (this) {
+            Filled -> LinkTheme.colors.textTertiary
+            Outlined -> LinkTheme.colors.textSecondary
+        }
+
+    val backgroundColor: Color
+        @Composable
+        get() = when (this) {
+            Filled -> LinkTheme.colors.surfaceSecondary
+            Outlined -> LinkTheme.colors.surfacePrimary
+        }
+
+    val horizontalInset: Dp
+        get() = when (this) {
+            Filled -> 20.dp
+            Outlined -> 16.dp
+        }
+}
+
 @Composable
-private fun PaymentSelectionHint(
-    hint: ResolvableString?,
+internal fun LinkHintMessageView(
+    hint: ResolvableString,
+    style: LinkHintStyle,
     modifier: Modifier = Modifier,
 ) {
-    if (hint != null) {
-        Row(
-            modifier = modifier
-                .fillMaxWidth()
-                .background(
-                    color = LinkTheme.colors.surfaceSecondary,
-                    shape = RoundedCornerShape(12.dp)
+    val baseModifier = modifier
+        .fillMaxWidth()
+        .background(
+            color = style.backgroundColor,
+            shape = RoundedCornerShape(12.dp),
+        )
+
+    val borderColor = LinkTheme.colors.hintMessageBorder
+
+    val finalModifier = remember(style) {
+        when (style) {
+            LinkHintStyle.Filled -> {
+                baseModifier
+            }
+            LinkHintStyle.Outlined -> {
+                baseModifier.border(
+                    width = 1.dp,
+                    color = borderColor,
+                    shape = RoundedCornerShape(12.dp),
                 )
-                .padding(horizontal = 20.dp, vertical = 12.dp),
-        ) {
-            Icon(
-                modifier = Modifier
-                    .padding(top = 2.dp)
-                    .size(16.dp),
-                painter = painterResource(com.stripe.android.ui.core.R.drawable.stripe_ic_info_outlined),
-                tint = LinkTheme.colors.iconTertiary,
-                contentDescription = null,
-            )
-            Text(
-                modifier = Modifier.padding(start = 8.dp),
-                text = hint.resolve(),
-                style = LinkTheme.typography.detail,
-                color = LinkTheme.colors.textTertiary,
-            )
+            }
         }
+    }
+
+    Row(
+        modifier = finalModifier
+            .padding(horizontal = style.horizontalInset, vertical = 12.dp),
+    ) {
+        Icon(
+            modifier = Modifier
+                .padding(top = 2.dp)
+                .size(16.dp),
+            painter = painterResource(PaymentsUiCoreR.drawable.stripe_ic_info_outlined),
+            tint = LinkTheme.colors.iconTertiary,
+            contentDescription = null,
+        )
+        Text(
+            modifier = Modifier.padding(start = 8.dp),
+            text = hint.resolve(),
+            style = LinkTheme.typography.detail,
+            color = LinkTheme.colors.textTertiary,
+        )
     }
 }
 
