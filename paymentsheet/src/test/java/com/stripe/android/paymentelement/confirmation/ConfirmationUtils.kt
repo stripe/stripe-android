@@ -30,7 +30,7 @@ import kotlinx.coroutines.Dispatchers
 
 internal fun createTestConfirmationHandlerFactory(
     paymentElementCallbackIdentifier: String,
-    intentConfirmationInterceptor: IntentConfirmationInterceptor,
+    intentConfirmationInterceptorFactory: IntentConfirmationInterceptor.Factory,
     savedStateHandle: SavedStateHandle,
     bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
     stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
@@ -46,7 +46,7 @@ internal fun createTestConfirmationHandlerFactory(
         registry = ConfirmationRegistry(
             confirmationDefinitions = listOf(
                 IntentConfirmationDefinition(
-                    intentConfirmationInterceptor = intentConfirmationInterceptor,
+                    intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
                     paymentLauncherFactory = { launcher ->
                         stripePaymentLauncherAssistedFactory.create(
                             publishableKey = { paymentConfiguration.publishableKey },

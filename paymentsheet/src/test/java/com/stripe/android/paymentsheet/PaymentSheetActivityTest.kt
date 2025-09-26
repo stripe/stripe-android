@@ -57,6 +57,7 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.createTestConfirmationHandlerFactory
+import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
@@ -1254,7 +1255,14 @@ internal class PaymentSheetActivityTest {
                 linkHandler = linkHandler,
                 confirmationHandlerFactory = confirmationHandlerFactory ?: createTestConfirmationHandlerFactory(
                     paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
-                    intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
+                    intentConfirmationInterceptorFactory =
+                    object : IntentConfirmationInterceptor.Factory {
+                        override fun create(
+                            initializationMode: PaymentElementLoader.InitializationMode
+                        ): IntentConfirmationInterceptor {
+                            return fakeIntentConfirmationInterceptor
+                        }
+                    },
                     savedStateHandle = savedStateHandle,
                     stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,
                     bacsMandateConfirmationLauncherFactory = { FakeBacsMandateConfirmationLauncher() },

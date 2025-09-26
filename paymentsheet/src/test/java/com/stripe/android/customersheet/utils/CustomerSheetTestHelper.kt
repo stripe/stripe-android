@@ -41,6 +41,7 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssisted
 import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.CompletableSingle
@@ -83,9 +84,16 @@ internal object CustomerSheetTestHelper {
             googlePayEnabled = isGooglePayAvailable,
         ),
         eventReporter: CustomerSheetEventReporter = mock(),
-        intentConfirmationInterceptor: IntentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
-            enqueueCompleteStep(true)
-        },
+        intentConfirmationInterceptorFactory: IntentConfirmationInterceptor.Factory =
+            object : IntentConfirmationInterceptor.Factory {
+                override fun create(
+                    initializationMode: PaymentElementLoader.InitializationMode
+                ): IntentConfirmationInterceptor {
+                    return FakeIntentConfirmationInterceptor().apply {
+                        enqueueCompleteStep(true)
+                    }
+                }
+            },
         paymentMethodDataSource: CustomerSheetPaymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
             paymentMethods = CustomerSheetDataResult.success(customerPaymentMethods)
         ),
@@ -119,7 +127,7 @@ internal object CustomerSheetTestHelper {
             productUsage = emptySet(),
             confirmationHandlerFactory = confirmationHandlerFactory ?: createTestConfirmationHandlerFactory(
                 paymentElementCallbackIdentifier = "CustomerSheetTestIdentifier",
-                intentConfirmationInterceptor = intentConfirmationInterceptor,
+                intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
                 paymentConfiguration = paymentConfiguration,
                 bacsMandateConfirmationLauncherFactory = {
                     FakeBacsMandateConfirmationLauncher()

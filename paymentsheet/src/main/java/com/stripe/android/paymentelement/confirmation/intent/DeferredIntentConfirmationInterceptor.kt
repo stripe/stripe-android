@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DeferredIntentValidator
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.utils.hasIntentToSetup
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
@@ -343,7 +344,7 @@ internal class DeferredIntentConfirmationInterceptor constructor(
         }.getOrElse {
             ConfirmationDefinition.Action.Fail(
                 cause = InvalidDeferredIntentUsageException(),
-                message = resolvableString(com.stripe.android.paymentsheet.R.string.stripe_paymentsheet_invalid_deferred_intent_usage),
+                message = resolvableString(R.string.stripe_paymentsheet_invalid_deferred_intent_usage),
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
             )
         }
@@ -488,5 +489,4 @@ internal class DeferredIntentConfirmationInterceptor constructor(
             (intentConfiguration.mode as? PaymentSheet.IntentConfiguration.Mode.Payment)
                 ?.setupFutureUse?.toConfirmParamsSetupFutureUsage()?.hasIntentToSetup() == true
     }
-
 }

@@ -68,7 +68,7 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
                  * `PaymentSheet.Configuration` in order to populate `Payment Element` data.
                  */
                 if (initializationMode.intentConfiguration.intentBehavior is
-                        PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken
+                    PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken
                 ) {
                     SharedPaymentTokenConfirmationInterceptor(
                         initializationMode = initializationMode,
@@ -98,7 +98,6 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
                     stripeAccountIdProvider = stripeAccountIdProvider,
                 )
             }
-
         }
     }
 }
