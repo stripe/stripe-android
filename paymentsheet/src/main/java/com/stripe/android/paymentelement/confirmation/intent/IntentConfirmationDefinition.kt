@@ -15,9 +15,10 @@ import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationO
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
+import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 
 internal class IntentConfirmationDefinition(
-    private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
+    private val intentConfirmationInterceptorFactory: IntentConfirmationInterceptor.Factory,
     private val paymentLauncherFactory: (ActivityResultLauncher<PaymentLauncherContract.Args>) -> PaymentLauncher,
 ) : ConfirmationDefinition<
     PaymentMethodConfirmationOption,
@@ -35,12 +36,23 @@ internal class IntentConfirmationDefinition(
         confirmationOption: PaymentMethodConfirmationOption,
         confirmationParameters: ConfirmationDefinition.Parameters,
     ): ConfirmationDefinition.Action<Args> {
-        return intentConfirmationInterceptor.intercept(
-            confirmationOption = confirmationOption,
-            intent = confirmationParameters.intent,
+        val interceptor = intentConfirmationInterceptorFactory.create(
             initializationMode = confirmationParameters.initializationMode,
-            shippingDetails = confirmationParameters.shippingDetails,
         )
+        return when (confirmationOption) {
+            is PaymentMethodConfirmationOption.New ->
+                interceptor.intercept(
+                    intent = confirmationParameters.intent,
+                    confirmationOption = confirmationOption,
+                    shippingValues = confirmationParameters.shippingDetails?.toConfirmPaymentIntentShipping(),
+                )
+            is PaymentMethodConfirmationOption.Saved ->
+                interceptor.intercept(
+                    intent = confirmationParameters.intent,
+                    confirmationOption = confirmationOption,
+                    shippingValues = confirmationParameters.shippingDetails?.toConfirmPaymentIntentShipping(),
+                )
+        }
     }
 
     override fun createLauncher(
