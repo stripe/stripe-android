@@ -34,10 +34,10 @@ internal class HCaptchaHeadlessWebView(
         webView.id = R.id.webView
         webView.visibility = View.GONE
 
-//        if (webView.parent == null) {
-//            val rootView = activity.window.decorView.rootView as ViewGroup
-//            rootView.addView(webView)
-//        }
+        if (webView.parent == null) {
+            val rootView = activity.window.decorView.rootView as ViewGroup
+            rootView.addView(webView)
+        }
 //        registerActivityLifecycleCallback(activity)
 
         webViewHelper = HCaptchaWebViewHelper(
