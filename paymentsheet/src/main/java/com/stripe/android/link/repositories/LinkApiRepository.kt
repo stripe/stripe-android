@@ -37,6 +37,7 @@ import com.stripe.android.repository.ConsumersApiService
 import kotlinx.coroutines.withContext
 import java.util.Locale
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -46,7 +47,7 @@ import kotlin.coroutines.CoroutineContext
 internal class LinkApiRepository @Inject constructor(
     application: Application,
     private val requestSurface: RequestSurface,
-    private val apiRequestOptions: ApiRequest.Options,
+    private val apiRequestOptionsProvider: Provider<ApiRequest.Options>,
     private val stripeRepository: StripeRepository,
     private val consumersApiService: ConsumersApiService,
     @IOContext private val workContext: CoroutineContext,
@@ -56,6 +57,10 @@ internal class LinkApiRepository @Inject constructor(
 
     private val fraudDetectionDataRepository: FraudDetectionDataRepository =
         DefaultFraudDetectionDataRepository(application, workContext)
+
+    private val apiRequestOptions: ApiRequest.Options by lazy {
+        apiRequestOptionsProvider.get()
+    }
 
     init {
         fraudDetectionDataRepository.refresh()
