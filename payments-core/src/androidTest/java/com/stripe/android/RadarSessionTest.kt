@@ -1,20 +1,19 @@
 package com.stripe.android
 
-import android.content.Context
-import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.rules.ActivityScenarioRule
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.RadarSessionWithHCaptcha
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.AbsPaymentController
-import com.stripe.android.view.ActivityScenarioFactory
-import kotlinx.coroutines.Dispatchers
+import com.stripe.android.testing.CoroutineTestRule
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.Ignore
+import org.junit.Rule
 import org.junit.Test
-import java.lang.RuntimeException
 
 class RadarSessionTest {
     private val mockApiRepository: StripeRepository = object : AbsFakeStripeRepository() {
@@ -36,7 +35,7 @@ class RadarSessionTest {
         }
     }
 
-    private val mockPaymentController: PaymentController = object : AbsPaymentController() { }
+    private val mockPaymentController: PaymentController = object : AbsPaymentController() {}
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
@@ -49,19 +48,23 @@ class RadarSessionTest {
             testDispatcher
         )
 
-    private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val activityScenarioFactory = ActivityScenarioFactory(context)
+    @get:Rule
+    val scenarioRule = ActivityScenarioRule(TestActivity::class.java)
 
-    @Ignore("https://stripe.slack.com/archives/C02CCKZSB9R/p1758725978400489")
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(testDispatcher)
+
     @Test
-    fun ensureRadarSessionsAttachHCaptchaToken(): Unit = runTest {
-        activityScenarioFactory.create<TestActivity>().use { scenario ->
-            scenario.onActivity { activity ->
-                launch(Dispatchers.Main) {
-                    stripe.createRadarSession(activity)
-                }
+    fun ensureRadarSessionsAttachHCaptchaToken(): Unit = runTest(testDispatcher) {
+        val result = CompletableDeferred<String>()
+        scenarioRule.scenario.onActivity { activity ->
+            launch(testDispatcher) {
+                val session = stripe.createRadarSession(activity)
+                result.complete(session.id)
             }
         }
+        testScheduler.advanceUntilIdle()
+        assertThat(result.await()).isEqualTo("rse_id")
     }
 
     private companion object {
