@@ -224,7 +224,6 @@ class DefaultConfirmationHandlerTest {
     fun `On complete action, should complete with success result`() = test(
         someDefinitionAction = ConfirmationDefinition.Action.Complete(
             intent = UPDATED_PAYMENT_INTENT,
-            confirmationOption = SomeConfirmationDefinition.Option,
             deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
             completedFullPaymentFlow = true,
         ),
@@ -253,7 +252,6 @@ class DefaultConfirmationHandlerTest {
     fun `On complete action with uncompleted flow, should complete with success result`() = test(
         someDefinitionAction = ConfirmationDefinition.Action.Complete(
             intent = UPDATED_PAYMENT_INTENT,
-            confirmationOption = SomeConfirmationDefinition.Option,
             deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
             completedFullPaymentFlow = false,
         ),

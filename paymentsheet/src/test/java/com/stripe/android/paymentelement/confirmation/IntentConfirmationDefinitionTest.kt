@@ -118,7 +118,9 @@ class IntentConfirmationDefinitionTest {
     @Test
     fun `On 'IntentConfirmationInterceptor' complete, should return 'Complete' confirmation action`() = runTest {
         val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
-            enqueueCompleteStep()
+            enqueueCompleteStep(
+                intent = CONFIRMATION_PARAMETERS.intent,
+            )
         }
 
         val definition = createIntentConfirmationDefinition(
@@ -133,7 +135,6 @@ class IntentConfirmationDefinitionTest {
         val completeAction = action.asComplete()
 
         assertThat(completeAction.intent).isEqualTo(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
-        assertThat(completeAction.confirmationOption).isEqualTo(SAVED_PAYMENT_CONFIRMATION_OPTION)
         assertThat(completeAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Server)
     }
 
@@ -142,6 +143,7 @@ class IntentConfirmationDefinitionTest {
         runTest {
             val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
                 enqueueCompleteStep(
+                    intent = CONFIRMATION_PARAMETERS.intent,
                     completedFullPaymentFlow = false
                 )
             }
@@ -158,7 +160,6 @@ class IntentConfirmationDefinitionTest {
             val completeAction = action.asComplete()
 
             assertThat(completeAction.intent).isEqualTo(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
-            assertThat(completeAction.confirmationOption).isEqualTo(SAVED_PAYMENT_CONFIRMATION_OPTION)
             assertThat(completeAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Server)
             assertThat(completeAction.completedFullPaymentFlow).isFalse()
         }

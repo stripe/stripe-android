@@ -35,46 +35,12 @@ internal class IntentConfirmationDefinition(
         confirmationOption: PaymentMethodConfirmationOption,
         confirmationParameters: ConfirmationDefinition.Parameters,
     ): ConfirmationDefinition.Action<Args> {
-        val nextStep = intentConfirmationInterceptor.intercept(
+        return intentConfirmationInterceptor.intercept(
             confirmationOption = confirmationOption,
             intent = confirmationParameters.intent,
             initializationMode = confirmationParameters.initializationMode,
             shippingDetails = confirmationParameters.shippingDetails,
         )
-
-        val deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType
-
-        return when (nextStep) {
-            is IntentConfirmationInterceptor.NextStep.HandleNextAction -> {
-                ConfirmationDefinition.Action.Launch(
-                    launcherArguments = Args.NextAction(nextStep.clientSecret),
-                    deferredIntentConfirmationType = deferredIntentConfirmationType,
-                    receivesResultInProcess = false,
-                )
-            }
-            is IntentConfirmationInterceptor.NextStep.Confirm -> {
-                ConfirmationDefinition.Action.Launch(
-                    launcherArguments = Args.Confirm(nextStep.confirmParams),
-                    deferredIntentConfirmationType = deferredIntentConfirmationType,
-                    receivesResultInProcess = false,
-                )
-            }
-            is IntentConfirmationInterceptor.NextStep.Fail -> {
-                ConfirmationDefinition.Action.Fail(
-                    cause = nextStep.cause,
-                    message = nextStep.message,
-                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                )
-            }
-            is IntentConfirmationInterceptor.NextStep.Complete -> {
-                ConfirmationDefinition.Action.Complete(
-                    intent = confirmationParameters.intent,
-                    confirmationOption = confirmationOption,
-                    deferredIntentConfirmationType = deferredIntentConfirmationType,
-                    completedFullPaymentFlow = nextStep.completedFullPaymentFlow,
-                )
-            }
-        }
     }
 
     override fun createLauncher(

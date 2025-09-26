@@ -115,7 +115,6 @@ internal class IntentConfirmationFlowTest {
         val completeAction = action.asComplete()
 
         assertThat(completeAction.intent).isEqualTo(SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD)
-        assertThat(completeAction.confirmationOption).isEqualTo(CONFIRMATION_OPTION)
         assertThat(completeAction.deferredIntentConfirmationType)
             .isEqualTo(DeferredIntentConfirmationType.None)
         assertThat(completeAction.completedFullPaymentFlow).isTrue()
@@ -146,7 +145,6 @@ internal class IntentConfirmationFlowTest {
         val completeAction = action.asComplete()
 
         assertThat(completeAction.intent).isEqualTo(SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD)
-        assertThat(completeAction.confirmationOption).isEqualTo(CONFIRMATION_OPTION)
         assertThat(completeAction.deferredIntentConfirmationType)
             .isEqualTo(DeferredIntentConfirmationType.None)
         assertThat(completeAction.completedFullPaymentFlow).isFalse()

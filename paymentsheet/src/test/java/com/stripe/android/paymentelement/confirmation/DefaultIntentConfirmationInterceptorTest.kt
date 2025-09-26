@@ -28,6 +28,8 @@ import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePre
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.confirmation.intent.CreateIntentCallbackFailureException
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationInterceptor
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.InvalidDeferredIntentUsageException
 import com.stripe.android.paymentelement.confirmation.intent.intercept
@@ -77,8 +79,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 hCaptchaToken = null,
             )
 
-            val confirmNextStep = nextStep as? IntentConfirmationInterceptor.NextStep.Confirm
-            val confirmParams = confirmNextStep?.confirmParams as? ConfirmPaymentIntentParams
+            val confirmParams = nextStep.asConfirmParams<ConfirmPaymentIntentParams>()
 
             assertThat(confirmParams?.paymentMethodId).isEqualTo(paymentMethod.id)
             assertThat(confirmParams?.paymentMethodCreateParams).isNull()
@@ -98,8 +99,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 customerRequestedSave = false,
             )
 
-            val confirmNextStep = nextStep as? IntentConfirmationInterceptor.NextStep.Confirm
-            val confirmParams = confirmNextStep?.confirmParams as? ConfirmPaymentIntentParams
+            val confirmParams = nextStep.asConfirmParams<ConfirmPaymentIntentParams>()
 
             assertThat(confirmParams?.paymentMethodId).isNull()
             assertThat(confirmParams?.paymentMethodCreateParams).isEqualTo(createParams)
@@ -121,8 +121,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 shippingDetails = null,
             )
 
-            val confirmNextStep = nextStep as? IntentConfirmationInterceptor.NextStep.Confirm
-            val confirmParams = confirmNextStep?.confirmParams as? ConfirmPaymentIntentParams
+            val confirmParams = nextStep.asConfirmParams<ConfirmPaymentIntentParams>()
 
             assertThat(
                 confirmParams?.paymentMethodOptions
@@ -289,7 +288,9 @@ class DefaultIntentConfirmationInterceptorTest {
 
             val nextStep = interceptJob.await()
 
-            assertThat(nextStep).isInstanceOf<IntentConfirmationInterceptor.NextStep.Complete>()
+            assertThat(nextStep).isInstanceOf<
+                ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>
+                >()
 
             assertThat(errorReporter.getLoggedErrors()).containsExactly(
                 ErrorReporter.SuccessEvent.FOUND_CREATE_INTENT_CALLBACK_WHILE_POLLING.eventName,
@@ -336,9 +337,10 @@ class DefaultIntentConfirmationInterceptorTest {
         )
 
         assertThat(nextStep).isEqualTo(
-            IntentConfirmationInterceptor.NextStep.Fail(
+            ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>(
                 cause = invalidRequestException,
                 message = "Your card is not supported.".resolvableString,
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
             )
         )
     }
@@ -386,9 +388,10 @@ class DefaultIntentConfirmationInterceptorTest {
         )
 
         assertThat(nextStep).isEqualTo(
-            IntentConfirmationInterceptor.NextStep.Fail(
+            ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>(
                 cause = apiException,
                 message = resolvableString(R.string.stripe_something_went_wrong),
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
             )
         )
     }
@@ -423,9 +426,10 @@ class DefaultIntentConfirmationInterceptorTest {
         )
 
         assertThat(nextStep).isEqualTo(
-            IntentConfirmationInterceptor.NextStep.Fail(
+            ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>(
                 cause = CreateIntentCallbackFailureException(TestException("that didn't work…")),
                 message = resolvableString("that didn't work…"),
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
             )
         )
     }
@@ -457,9 +461,10 @@ class DefaultIntentConfirmationInterceptorTest {
         )
 
         assertThat(nextStep).isEqualTo(
-            IntentConfirmationInterceptor.NextStep.Fail(
+            ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>(
                 cause = CreateIntentCallbackFailureException(TestException()),
                 message = resolvableString(R.string.stripe_something_went_wrong),
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
             )
         )
     }
@@ -505,7 +510,7 @@ class DefaultIntentConfirmationInterceptorTest {
             hCaptchaToken = null,
         )
 
-        assertThat(nextStep).isInstanceOf<IntentConfirmationInterceptor.NextStep.Confirm>()
+        assertThat(nextStep).isInstanceOf<ConfirmationDefinition.Action.Launch<IntentConfirmationDefinition.Args>>()
     }
 
     @Test
@@ -546,7 +551,11 @@ class DefaultIntentConfirmationInterceptorTest {
         )
 
         assertThat(nextStep).isEqualTo(
-            IntentConfirmationInterceptor.NextStep.Complete(isForceSuccess = false)
+            ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
+                intent = PaymentIntentFixtures.PI_SUCCEEDED,
+                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                completedFullPaymentFlow = true,
+            )
         )
     }
 
@@ -595,7 +604,11 @@ class DefaultIntentConfirmationInterceptorTest {
             )
 
             assertThat(nextStep).isEqualTo(
-                IntentConfirmationInterceptor.NextStep.HandleNextAction("pi_123_secret_456")
+                ConfirmationDefinition.Action.Launch<IntentConfirmationDefinition.Args>(
+                    launcherArguments = IntentConfirmationDefinition.Args.NextAction("pi_123_secret_456"),
+                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    receivesResultInProcess = false,
+                )
             )
         }
 
@@ -761,6 +774,7 @@ class DefaultIntentConfirmationInterceptorTest {
             },
         )
 
+        val intent = PaymentIntentFactory.create()
         val nextStep = interceptor.intercept(
             initializationMode = InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
@@ -770,7 +784,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     ),
                 ),
             ),
-            intent = PaymentIntentFactory.create(),
+            intent = intent,
             paymentMethod = paymentMethod,
             paymentMethodOptionsParams = null,
             paymentMethodExtraParams = null,
@@ -781,7 +795,11 @@ class DefaultIntentConfirmationInterceptorTest {
         verify(stripeRepository, never()).retrieveStripeIntent(any(), any(), any())
 
         assertThat(nextStep).isEqualTo(
-            IntentConfirmationInterceptor.NextStep.Complete(isForceSuccess = true)
+            ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
+                intent = intent,
+                deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
+                completedFullPaymentFlow = true,
+            )
         )
     }
 
@@ -819,7 +837,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 hCaptchaToken = null,
             )
 
-            val failedStep = nextStep.asFail()
+            val failedStep = nextStep as ConfirmationDefinition.Action.Fail
 
             assertThat(failedStep.cause).isInstanceOf(InvalidDeferredIntentUsageException::class.java)
             assertThat(failedStep.message).isEqualTo(
@@ -891,6 +909,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 },
             )
 
+            val intent = PaymentIntentFactory.create()
             val nextStep = interceptor.intercept(
                 initializationMode = InitializationMode.DeferredIntent(
                     intentConfiguration = PaymentSheet.IntentConfiguration(
@@ -905,7 +924,7 @@ class DefaultIntentConfirmationInterceptorTest {
                         )
                     ),
                 ),
-                intent = PaymentIntentFactory.create(),
+                intent = intent,
                 paymentMethod = providedPaymentMethod,
                 paymentMethodOptionsParams = null,
                 paymentMethodExtraParams = null,
@@ -914,8 +933,9 @@ class DefaultIntentConfirmationInterceptorTest {
             )
 
             assertThat(nextStep).isEqualTo(
-                IntentConfirmationInterceptor.NextStep.Complete(
-                    isForceSuccess = true,
+                ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
+                    intent = intent,
+                    deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
                     completedFullPaymentFlow = false,
                 )
             )
@@ -958,6 +978,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 },
             )
 
+            val intent = PaymentIntentFactory.create()
             val nextStep = interceptor.intercept(
                 initializationMode = InitializationMode.DeferredIntent(
                     intentConfiguration = PaymentSheet.IntentConfiguration(
@@ -972,7 +993,7 @@ class DefaultIntentConfirmationInterceptorTest {
                         )
                     ),
                 ),
-                intent = PaymentIntentFactory.create(),
+                intent = intent,
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 paymentMethodOptionsParams = null,
                 paymentMethodExtraParams = null,
@@ -981,8 +1002,9 @@ class DefaultIntentConfirmationInterceptorTest {
             )
 
             assertThat(nextStep).isEqualTo(
-                IntentConfirmationInterceptor.NextStep.Complete(
-                    isForceSuccess = true,
+                ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
+                    intent = intent,
+                    deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
                     completedFullPaymentFlow = false,
                 )
             )
@@ -1024,6 +1046,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 },
             )
 
+            val intent = PaymentIntentFactory.create()
             val nextStep = interceptor.intercept(
                 initializationMode = InitializationMode.DeferredIntent(
                     intentConfiguration = PaymentSheet.IntentConfiguration(
@@ -1038,7 +1061,7 @@ class DefaultIntentConfirmationInterceptorTest {
                         )
                     ),
                 ),
-                intent = PaymentIntentFactory.create(),
+                intent = intent,
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 paymentMethodOptionsParams = null,
                 paymentMethodExtraParams = null,
@@ -1047,8 +1070,9 @@ class DefaultIntentConfirmationInterceptorTest {
             )
 
             assertThat(nextStep).isEqualTo(
-                IntentConfirmationInterceptor.NextStep.Complete(
-                    isForceSuccess = true,
+                ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
+                    intent = intent,
+                    deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
                     completedFullPaymentFlow = false,
                 )
             )
@@ -1123,8 +1147,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 shippingDetails = null,
             )
 
-            val confirmNextStep = nextStep as? IntentConfirmationInterceptor.NextStep.Confirm
-            val confirmParams = confirmNextStep?.confirmParams as? ConfirmPaymentIntentParams
+            val confirmParams = nextStep.asConfirmParams<ConfirmPaymentIntentParams>()
 
             assertThat(
                 confirmParams?.setupFutureUsage
@@ -1188,8 +1211,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 shippingDetails = null,
             )
 
-            val confirmNextStep = nextStep as? IntentConfirmationInterceptor.NextStep.Confirm
-            val confirmParams = confirmNextStep?.confirmParams as? ConfirmPaymentIntentParams
+            val confirmParams = nextStep.asConfirmParams<ConfirmPaymentIntentParams>()
 
             assertThat(
                 confirmParams?.paymentMethodOptions
@@ -1362,7 +1384,8 @@ class DefaultIntentConfirmationInterceptorTest {
         event: ErrorReporter.ErrorEvent,
         failureMessage: String,
         userMessage: ResolvableString,
-        interceptCall: suspend (errorReporter: ErrorReporter) -> IntentConfirmationInterceptor.NextStep
+        interceptCall: suspend (errorReporter: ErrorReporter) ->
+        ConfirmationDefinition.Action<IntentConfirmationDefinition.Args>
     ) {
         val errorReporter = FakeErrorReporter()
         val dispatcher = StandardTestDispatcher()
@@ -1388,9 +1411,9 @@ class DefaultIntentConfirmationInterceptorTest {
 
             val nextStep = interceptJob.await()
 
-            assertThat(nextStep).isInstanceOf<IntentConfirmationInterceptor.NextStep.Fail>()
+            assertThat(nextStep).isInstanceOf<ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>>()
 
-            val failedStep = nextStep.asFail()
+            val failedStep = nextStep as ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>
 
             assertThat(failedStep.cause).isInstanceOf<IllegalStateException>()
             assertThat(failedStep.cause.message).isEqualTo(failureMessage)
@@ -1547,10 +1570,6 @@ class DefaultIntentConfirmationInterceptorTest {
         ensureAllEventsConsumed()
     }
 
-    private fun IntentConfirmationInterceptor.NextStep.asFail(): IntentConfirmationInterceptor.NextStep.Fail {
-        return this as IntentConfirmationInterceptor.NextStep.Fail
-    }
-
     private class TestException(message: String? = null) : Exception(message) {
 
         override fun hashCode(): Int {
@@ -1639,9 +1658,12 @@ class DefaultIntentConfirmationInterceptorTest {
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun <T : ConfirmStripeIntentParams> IntentConfirmationInterceptor.NextStep.asConfirmParams(): T? {
-        val confirmNextStep = this as? IntentConfirmationInterceptor.NextStep.Confirm
-        return confirmNextStep?.confirmParams as? T
+    private fun <T : ConfirmStripeIntentParams>
+        ConfirmationDefinition.Action<IntentConfirmationDefinition.Args>.asConfirmParams(): T? {
+        return (
+            (this as? ConfirmationDefinition.Action.Launch)
+                ?.launcherArguments as? IntentConfirmationDefinition.Args.Confirm
+            ) ?.confirmNextParams as? T
     }
 
     private fun ConfirmStripeIntentParams.radarOptions(): RadarOptions? {
