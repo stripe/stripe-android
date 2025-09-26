@@ -21,7 +21,6 @@ import com.stripe.android.stripe3ds2.transaction.TransactionTimer
 import com.stripe.android.stripe3ds2.transactions.ChallengeResponseData
 import com.stripe.android.stripe3ds2.transactions.UiType
 import com.stripe.android.stripe3ds2.utils.FakeAnalyticsDelegate
-import kotlinx.coroutines.test.StandardTestDispatcher
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -37,8 +36,6 @@ import kotlin.test.assertTrue
 class ChallengeFragmentTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
-
-    private val testDispatcher = StandardTestDispatcher()
 
     private val transactionTimer: TransactionTimer = FakeTransactionTimer(false)
     private val errorReporter: ErrorReporter = FakeErrorReporter()
@@ -373,7 +370,6 @@ class ChallengeFragmentTest {
                 challengeActionHandler = challengeActionHandler,
                 intentData = IntentDataFixtures.DEFAULT,
                 initialUiType = UiType.Text,
-                workContext = testDispatcher
             )
         ).onFragment(onFragment)
     }
