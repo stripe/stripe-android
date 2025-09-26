@@ -89,12 +89,13 @@ internal class HCaptchaHeadlessWebView(
     }
 
     override fun reset() {
+        val webView: WebView = webViewHelper.webView
+        if (webView.parent != null) {
+            (webView.parent as ViewGroup).removeView(webView)
+        }
         if (webViewLoaded) {
             webViewHelper.reset()
-            val webView: WebView = webViewHelper.webView
-            if (webView.parent != null) {
-                (webView.parent as ViewGroup).removeView(webView)
-            }
+
         } else {
             shouldResetOnLoad = true
         }
@@ -118,8 +119,8 @@ internal class HCaptchaHeadlessWebView(
                 override fun onActivityDestroyed(activity: Activity) = Unit
 
                 override fun onActivityPreDestroyed(activity: Activity) {
-                    super.onActivityPreDestroyed(activity)
                     reset()
+                    super.onActivityPreDestroyed(activity)
                 }
             }
         )
