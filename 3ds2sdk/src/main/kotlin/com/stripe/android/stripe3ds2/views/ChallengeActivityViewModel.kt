@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.stripe3ds2.observability.ErrorReporter
 import com.stripe.android.stripe3ds2.transaction.ChallengeAction
 import com.stripe.android.stripe3ds2.transaction.ChallengeActionHandler
@@ -26,7 +27,7 @@ internal class ChallengeActivityViewModel(
     private val imageCache: ImageCache = ImageCache.Default,
     workContext: CoroutineContext
 ) : ViewModel() {
-    private val imageRepository = ImageRepository(errorReporter, workContext)
+    private val imageRepository = ImageRepository(errorReporter, viewModelScope.coroutineContext)
 
     private val _refreshUi = MutableLiveData<Unit>()
     val refreshUi: LiveData<Unit> = _refreshUi
