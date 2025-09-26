@@ -3,7 +3,7 @@
 ## XX.XX.XX - 20XX-XX-XX
 
 ### Connect
-* [Fixed]  Renamed `PrivateBetaConnectSDK` to `PreviewConnectSDK`.
+* [Fixed] Renamed `PrivateBetaConnectSDK` to `PreviewConnectSDK`.
 
 ## 21.27.0 - 2025-09-22
 
