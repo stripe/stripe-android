@@ -103,6 +103,7 @@ sealed interface StripeIntent : StripeModel {
         DisplayKonbiniDetails("konbini_display_details"),
         DisplayMultibancoDetails("multibanco_display_details"),
         DisplayPayNowDetails("paynow_display_qr_code"),
+        DisplayPromptPayDetails("promptpay_display_qr_code"),
         SwishRedirect("swish_handle_redirect_or_display_qr_code");
 
         @Keep
@@ -230,6 +231,15 @@ sealed interface StripeIntent : StripeModel {
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class DisplayPayNowDetails(
+            /**
+             * URL of a webpage containing the QR code for this payment.
+             */
+            val qrCodeUrl: String? = null,
+        ) : NextActionData()
+
+        @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class DisplayPromptPayDetails(
             /**
              * URL of a webpage containing the QR code for this payment.
              */

@@ -151,6 +151,7 @@ constructor(
             is StripeIntent.NextActionData.UpiAwaitNotification,
             is StripeIntent.NextActionData.SwishRedirect,
             is StripeIntent.NextActionData.DisplayPayNowDetails,
+            is StripeIntent.NextActionData.DisplayPromptPayDetails,
             null -> {
                 null
             }
