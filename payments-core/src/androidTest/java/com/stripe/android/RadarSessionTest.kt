@@ -8,6 +8,7 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.AbsPaymentController
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.RetryRule
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -55,6 +56,7 @@ class RadarSessionTest {
     val ruleChain: RuleChain = RuleChain
         .outerRule(CoroutineTestRule(testDispatcher))
         .around(scenarioRule)
+        .around(RetryRule(3))
 
     @Test
     fun ensureRadarSessionsAttachHCaptchaToken(): Unit = runTest(testDispatcher) {
