@@ -21,9 +21,10 @@ import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePre
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationInterceptor.Companion.PROVIDER_FETCH_INTERVAL
-import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationInterceptor.Companion.PROVIDER_FETCH_TIMEOUT
+import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
+import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor.Companion.PROVIDER_FETCH_INTERVAL
+import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor.Companion.PROVIDER_FETCH_TIMEOUT
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
@@ -38,18 +39,51 @@ import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.R as PaymentsCoreR
 
 internal class DeferredIntentConfirmationInterceptor constructor(
+    private val intentConfiguration: PaymentSheet.IntentConfiguration,
     private val stripeRepository: StripeRepository,
     private val errorReporter: ErrorReporter,
     private val intentCreationCallbackProvider: Provider<CreateIntentCallback?>,
     @Named(ALLOWS_MANUAL_CONFIRMATION) private val allowsManualConfirmation: Boolean,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
-) {
+) : IntentConfirmationInterceptor {
     private val requestOptions: ApiRequest.Options
         get() = ApiRequest.Options(
             apiKey = publishableKeyProvider(),
             stripeAccount = stripeAccountIdProvider(),
         )
+
+    override suspend fun intercept(
+        intent: StripeIntent,
+        confirmationOption: PaymentMethodConfirmationOption.New,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?,
+    ): ConfirmationDefinition.Action<Args> {
+        return handleNewPaymentMethod(
+            intentConfiguration = intentConfiguration,
+            intent = intent,
+            paymentMethodCreateParams = confirmationOption.createParams,
+            paymentMethodOptionsParams = confirmationOption.optionsParams,
+            paymentMethodExtraParams = confirmationOption.extraParams,
+            shippingValues = shippingValues,
+            customerRequestedSave = confirmationOption.shouldSave,
+        )
+    }
+
+    override suspend fun intercept(
+        intent: StripeIntent,
+        confirmationOption: PaymentMethodConfirmationOption.Saved,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?,
+    ): ConfirmationDefinition.Action<Args> {
+        return handleSavedPaymentMethod(
+            intentConfiguration = intentConfiguration,
+            intent = intent,
+            paymentMethod = confirmationOption.paymentMethod,
+            paymentMethodOptionsParams = confirmationOption.optionsParams,
+            paymentMethodExtraParams = null,
+            shippingValues = shippingValues,
+            hCaptchaToken = confirmationOption.hCaptchaToken
+        )
+    }
 
     internal suspend fun handleNewPaymentMethod(
         intentConfiguration: PaymentSheet.IntentConfiguration,

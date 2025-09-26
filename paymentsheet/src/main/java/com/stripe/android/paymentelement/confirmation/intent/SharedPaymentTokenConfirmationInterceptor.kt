@@ -11,18 +11,19 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationInterceptor.Companion.PROVIDER_FETCH_INTERVAL
-import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationInterceptor.Companion.PROVIDER_FETCH_TIMEOUT
+import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
+import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor.Companion.PROVIDER_FETCH_INTERVAL
+import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor.Companion.PROVIDER_FETCH_TIMEOUT
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
@@ -33,12 +34,13 @@ import com.stripe.android.R as PaymentsCoreR
 
 @OptIn(SharedPaymentTokenSessionPreview::class)
 internal class SharedPaymentTokenConfirmationInterceptor @Inject constructor(
+    private val initializationMode: PaymentElementLoader.InitializationMode.DeferredIntent,
     private val stripeRepository: StripeRepository,
     private val errorReporter: ErrorReporter,
     private val preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?>,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
-) {
+) : IntentConfirmationInterceptor {
 
     private val requestOptions: ApiRequest.Options
         get() = ApiRequest.Options(
@@ -46,12 +48,13 @@ internal class SharedPaymentTokenConfirmationInterceptor @Inject constructor(
             stripeAccount = stripeAccountIdProvider(),
         )
 
-    internal suspend fun handlePrepareNewPaymentMethod(
+    override suspend fun intercept(
         intent: StripeIntent,
-        intentConfiguration: PaymentSheet.IntentConfiguration,
-        paymentMethodCreateParams: PaymentMethodCreateParams,
+        confirmationOption: PaymentMethodConfirmationOption.New,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): ConfirmationDefinition.Action<Args> {
+        val intentConfiguration = initializationMode.intentConfiguration
+        val paymentMethodCreateParams = confirmationOption.createParams
         val productUsage = buildSet {
             addAll(paymentMethodCreateParams.attribution)
             add("deferred-intent")
@@ -66,7 +69,7 @@ internal class SharedPaymentTokenConfirmationInterceptor @Inject constructor(
 
         return stripeRepository.createPaymentMethod(params, requestOptions).fold(
             onSuccess = { paymentMethod ->
-                handlePrepareNewPaymentMethod(
+                intercept(
                     intent = intent,
                     paymentMethod = paymentMethod,
                     shippingValues = shippingValues,
@@ -82,7 +85,19 @@ internal class SharedPaymentTokenConfirmationInterceptor @Inject constructor(
         )
     }
 
-    internal suspend fun handlePrepareNewPaymentMethod(
+    override suspend fun intercept(
+        intent: StripeIntent,
+        confirmationOption: PaymentMethodConfirmationOption.Saved,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?,
+    ): ConfirmationDefinition.Action<Args> {
+        return intercept(
+            intent = intent,
+            paymentMethod = confirmationOption.paymentMethod,
+            shippingValues = shippingValues,
+        )
+    }
+
+    private suspend fun intercept(
         intent: StripeIntent,
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
