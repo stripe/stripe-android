@@ -38,7 +38,7 @@ internal class HCaptchaHeadlessWebView(
             val rootView = activity.window.decorView.rootView as ViewGroup
             rootView.addView(webView)
         }
-//        registerActivityLifecycleCallback(activity)
+        registerActivityLifecycleCallback(activity)
 
         webViewHelper = HCaptchaWebViewHelper(
             Handler(Looper.getMainLooper()),
