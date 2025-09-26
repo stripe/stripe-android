@@ -14,6 +14,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 
 class RadarSessionTest {
     private val mockApiRepository: StripeRepository = object : AbsFakeStripeRepository() {
@@ -48,11 +49,12 @@ class RadarSessionTest {
             testDispatcher
         )
 
-    @get:Rule
-    val scenarioRule = ActivityScenarioRule(TestActivity::class.java)
+    private val scenarioRule = ActivityScenarioRule(TestActivity::class.java)
 
     @get:Rule
-    val coroutineTestRule = CoroutineTestRule(testDispatcher)
+    val ruleChain: RuleChain = RuleChain
+        .outerRule(CoroutineTestRule(testDispatcher))
+        .around(scenarioRule)
 
     @Test
     fun ensureRadarSessionsAttachHCaptchaToken(): Unit = runTest(testDispatcher) {
