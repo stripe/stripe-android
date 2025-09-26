@@ -5,7 +5,6 @@ package com.stripe.android.hcaptcha
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.FragmentActivity
 import com.stripe.hcaptcha.HCaptchaException
-import kotlin.time.Duration
 
 /**
  * Proxy to access hcaptcha android sdk code safely
@@ -22,7 +21,7 @@ suspend fun performPassiveHCaptcha(
         activity,
         siteKey,
         rqdata,
-        timeout = Duration.INFINITE
+        timeout = null
     )
     return when (result) {
         is HCaptchaService.Result.Failure -> {

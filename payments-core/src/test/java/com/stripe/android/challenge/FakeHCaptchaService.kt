@@ -20,7 +20,7 @@ internal class FakeHCaptchaService : HCaptchaService {
         activity: FragmentActivity,
         siteKey: String,
         rqData: String?,
-        timeout: Duration
+        timeout: Duration?
     ): HCaptchaService.Result {
         performPassiveHCaptchaCalls.add(Call(activity, siteKey, rqData, timeout))
         return result ?: HCaptchaService.Result.Success("default_token")

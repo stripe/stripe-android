@@ -42,12 +42,12 @@ internal class DefaultHCaptchaService(
         activity: FragmentActivity,
         siteKey: String,
         rqData: String?,
-        timeout: Duration
+        timeout: Duration?
     ): HCaptchaService.Result {
         captchaEventsReporter.attachStart()
         val isReady = cachedResult.value.isReady
         val result = runCatching {
-            withTimeout(timeout) {
+            withOptionalTimeout(timeout) {
                 transformCachedResult(activity, siteKey, rqData)
             }
         }.getOrElse { e ->
@@ -56,6 +56,16 @@ internal class DefaultHCaptchaService(
         cachedResult.emit(CachedResult.Idle)
         captchaEventsReporter.attachEnd(siteKey, isReady)
         return result
+    }
+
+    private suspend fun withOptionalTimeout(
+        duration: Duration?,
+        block: suspend () -> HCaptchaService.Result
+    ): HCaptchaService.Result {
+        if (duration == null) return block()
+        return withTimeout(duration) {
+            block()
+        }
     }
 
     private suspend fun startVerification(

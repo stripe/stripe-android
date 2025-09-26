@@ -1,6 +1,5 @@
 package com.stripe.android
 
-import androidx.lifecycle.lifecycleScope
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.ApiRequest
@@ -8,6 +7,7 @@ import com.stripe.android.model.RadarSessionWithHCaptcha
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.AbsPaymentController
+import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -35,7 +35,7 @@ class RadarSessionTest {
         }
     }
 
-    private val mockPaymentController: PaymentController = object : AbsPaymentController() { }
+    private val mockPaymentController: PaymentController = object : AbsPaymentController() {}
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
@@ -51,15 +51,19 @@ class RadarSessionTest {
     @get:Rule
     val scenarioRule = ActivityScenarioRule(TestActivity::class.java)
 
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(testDispatcher)
+
     @Test
-    fun ensureRadarSessionsAttachHCaptchaToken(): Unit = runTest {
+    fun ensureRadarSessionsAttachHCaptchaToken(): Unit = runTest(testDispatcher) {
         val result = CompletableDeferred<String>()
         scenarioRule.scenario.onActivity { activity ->
-            activity.lifecycleScope.launch {
+            launch(testDispatcher) {
                 val session = stripe.createRadarSession(activity)
                 result.complete(session.id)
             }
         }
+        testScheduler.advanceUntilIdle()
         assertThat(result.await()).isEqualTo("rse_id")
     }
 

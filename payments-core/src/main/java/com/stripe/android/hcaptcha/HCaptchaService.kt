@@ -17,7 +17,7 @@ interface HCaptchaService {
         activity: FragmentActivity,
         siteKey: String,
         rqData: String?,
-        timeout: Duration
+        timeout: Duration?
     ): Result
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
