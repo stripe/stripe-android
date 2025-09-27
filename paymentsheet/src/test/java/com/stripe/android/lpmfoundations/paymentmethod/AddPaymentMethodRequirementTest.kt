@@ -292,6 +292,42 @@ internal class AddPaymentMethodRequirementTest {
     }
 
     @Test
+    fun testInstantDebitsReturnsFalseWhenBankAccountDisabledInFundingSources() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = createValidInstantDebitsPaymentIntent(),
+            linkConfiguration = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.Automatic,
+                disableFundingSources = listOf("BANK_ACCOUNT"),
+            ),
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
+        )
+
+        assertThat(InstantDebits.isMetBy(metadata, "")).isFalse()
+    }
+
+    @Test
+    fun testInstantDebitsReturnsTrueWhenBankAccountNotInDisabledFundingSources() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = createValidInstantDebitsPaymentIntent(),
+            linkConfiguration = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.Automatic,
+                disableFundingSources = listOf("CARD"), // Disable something else, not BANK_ACCOUNT
+            ),
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
+        )
+
+        assertThat(InstantDebits.isMetBy(metadata, "")).isTrue()
+    }
+
+    @Test
     fun testLinkCardBrandReturnsTrueForCorrectLinkMode() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = createValidInstantDebitsPaymentIntent(),

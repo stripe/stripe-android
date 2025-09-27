@@ -47,6 +47,7 @@ internal data class LinkConfiguration(
     val saveConsentBehavior: PaymentMethodSaveConsentBehavior,
     val forceSetupFutureUseBehaviorAndNewMandate: Boolean,
     val linkSupportedPaymentMethodsOnboardingEnabled: List<String>,
+    val disableFundingSources: List<String>,
 ) : Parcelable {
 
     val customerIdForEceDefaultValues: String?
