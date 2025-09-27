@@ -80,6 +80,8 @@ class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
         val automaticPaymentMethodsEnabled =
             json.optJSONObject(FIELD_AUTOMATIC_PAYMENT_METHODS)?.optBoolean(FIELD_ENABLED) == true
 
+        val onBehalfOf = optString(json, FIELD_ON_BEHALF_OF)
+
         return PaymentIntent(
             id = id,
             paymentMethodTypes = paymentMethodTypes,
@@ -106,6 +108,7 @@ class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
             nextActionData = nextActionData,
             paymentMethodOptionsJsonString = paymentMethodOptions,
             automaticPaymentMethodsEnabled = automaticPaymentMethodsEnabled,
+            onBehalfOf = onBehalfOf,
         )
     }
 
@@ -191,5 +194,6 @@ class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
         private const val FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES =
             "unactivated_payment_method_types"
         private const val FIELD_LINK_FUNDING_SOURCES = "link_funding_sources"
+        private const val FIELD_ON_BEHALF_OF = "on_behalf_of"
     }
 }
