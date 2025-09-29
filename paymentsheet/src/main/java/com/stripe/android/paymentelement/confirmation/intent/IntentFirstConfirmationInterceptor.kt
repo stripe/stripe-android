@@ -36,7 +36,7 @@ internal class IntentFirstConfirmationInterceptor(
         confirmationOption: PaymentMethodConfirmationOption.New,
         shippingValues: ConfirmPaymentIntentParams.Shipping?
     ): ConfirmationDefinition.Action<Args> {
-        return createConfirmStep(
+        return createConfirmAction(
             clientSecret = clientSecret,
             intent = intent,
             shippingValues = shippingValues,
@@ -51,7 +51,7 @@ internal class IntentFirstConfirmationInterceptor(
         confirmationOption: PaymentMethodConfirmationOption.Saved,
         shippingValues: ConfirmPaymentIntentParams.Shipping?
     ): ConfirmationDefinition.Action<Args> {
-        return createConfirmStep(
+        return createConfirmAction(
             clientSecret = clientSecret,
             intent = intent,
             shippingValues = shippingValues,
@@ -63,7 +63,7 @@ internal class IntentFirstConfirmationInterceptor(
             hCaptchaToken = confirmationOption.hCaptchaToken,
         )
     }
-    private fun createConfirmStep(
+    private fun createConfirmAction(
         clientSecret: String,
         intent: StripeIntent,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
@@ -81,7 +81,7 @@ internal class IntentFirstConfirmationInterceptor(
         ) ?: run {
             val exception = InvalidClientSecretException(clientSecret, intent)
 
-            return createFailStep(exception, exception.message)
+            return createFailAction(exception, exception.message)
         }
 
         val confirmParams = factory.create(
@@ -98,7 +98,7 @@ internal class IntentFirstConfirmationInterceptor(
         )
     }
 
-    private fun createConfirmStep(
+    private fun createConfirmAction(
         clientSecret: String,
         intent: StripeIntent,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
@@ -113,7 +113,7 @@ internal class IntentFirstConfirmationInterceptor(
         ) ?: run {
             val exception = InvalidClientSecretException(clientSecret, intent)
 
-            return createFailStep(exception, exception.message)
+            return createFailAction(exception, exception.message)
         }
 
         val confirmParams = paramsFactory.create(
@@ -129,7 +129,7 @@ internal class IntentFirstConfirmationInterceptor(
         )
     }
 
-    private fun createFailStep(
+    private fun createFailAction(
         exception: Exception,
         message: String,
     ): ConfirmationDefinition.Action<Args> {

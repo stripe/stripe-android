@@ -107,7 +107,10 @@ internal class DeferredIntentConfirmationInterceptor constructor(
             productUsage = productUsage,
         )
 
-        return createPaymentMethod(params).fold(
+        return stripeRepository.createPaymentMethod(
+            paymentMethodCreateParams = params,
+            options = requestOptions,
+        ).fold(
             onSuccess = { paymentMethod ->
                 handleDeferredIntent(
                     intent = intent,
@@ -289,7 +292,10 @@ internal class DeferredIntentConfirmationInterceptor constructor(
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         hCaptchaToken: String?
     ): ConfirmationDefinition.Action<Args> {
-        return retrieveStripeIntent(clientSecret).mapCatching { intent ->
+        return stripeRepository.retrieveStripeIntent(
+            clientSecret = clientSecret,
+            options = requestOptions,
+        ).mapCatching { intent ->
             if (intent.isConfirmed) {
                 failIfSetAsDefaultFeatureIsEnabled(paymentMethodExtraParams)
 
@@ -299,10 +305,10 @@ internal class DeferredIntentConfirmationInterceptor constructor(
                     completedFullPaymentFlow = true,
                 )
             } else if (intent.requiresAction()) {
-                createHandleNextActionStep(clientSecret, intent, paymentMethod)
+                createNextAction(clientSecret, intent, paymentMethod)
             } else {
                 DeferredIntentValidator.validate(intent, intentConfiguration, allowsManualConfirmation, paymentMethod)
-                createConfirmStep(
+                createConfirmAction(
                     clientSecret,
                     intent,
                     shippingValues,
@@ -324,7 +330,7 @@ internal class DeferredIntentConfirmationInterceptor constructor(
         }
     }
 
-    private fun createHandleNextActionStep(
+    private fun createNextAction(
         clientSecret: String,
         intent: StripeIntent,
         paymentMethod: PaymentMethod
@@ -346,14 +352,7 @@ internal class DeferredIntentConfirmationInterceptor constructor(
         }
     }
 
-    private suspend fun retrieveStripeIntent(clientSecret: String): Result<StripeIntent> {
-        return stripeRepository.retrieveStripeIntent(
-            clientSecret = clientSecret,
-            options = requestOptions,
-        )
-    }
-
-    private fun createConfirmStep(
+    private fun createConfirmAction(
         clientSecret: String,
         intent: StripeIntent,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
@@ -371,7 +370,7 @@ internal class DeferredIntentConfirmationInterceptor constructor(
         ) ?: run {
             val exception = InvalidClientSecretException(clientSecret, intent)
 
-            return createFailStep(exception, exception.message)
+            return createFailAction(exception, exception.message)
         }
 
         val confirmParams = factory.create(
@@ -388,7 +387,7 @@ internal class DeferredIntentConfirmationInterceptor constructor(
         )
     }
 
-    private fun createFailStep(
+    private fun createFailAction(
         exception: Exception,
         message: String,
     ): ConfirmationDefinition.Action<Args> {
@@ -439,15 +438,6 @@ internal class DeferredIntentConfirmationInterceptor constructor(
                 ConfirmPaymentIntentParams.SetupFutureUsage.None
             }
         }
-    }
-
-    private suspend fun createPaymentMethod(
-        params: PaymentMethodCreateParams,
-    ): Result<PaymentMethod> {
-        return stripeRepository.createPaymentMethod(
-            paymentMethodCreateParams = params,
-            options = requestOptions,
-        )
     }
 
     /**
