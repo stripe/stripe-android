@@ -87,7 +87,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 consumerSessionClientSecret = linkAccount.clientSecret,
                 stripeIntent = config.stripeIntent,
                 linkMode = config.linkMode,
-                consumerPublishableKey = linkAccount.consumerPublishableKey,
             ).getOrThrow()
         }
     }
@@ -212,7 +211,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     userEmail = account.email,
                     stripeIntent = config.stripeIntent,
                     consumerSessionClientSecret = account.clientSecret,
-                    consumerPublishableKey = account.consumerPublishableKey.takeIf { !config.passthroughModeEnabled },
                 ).onSuccess {
                     errorReporter.report(ErrorReporter.SuccessEvent.LINK_CREATE_CARD_SUCCESS)
                 }
@@ -346,7 +344,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
         linkEventsReporter.on2FAStart()
         return linkRepository.startVerification(
             consumerSessionClientSecret = linkAccount.clientSecret,
-            consumerPublishableKey = linkAccount.consumerPublishableKey
         )
             .onFailure {
                 linkEventsReporter.on2FAStartFailure()
@@ -364,7 +361,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
         return linkRepository.confirmVerification(
             verificationCode = code,
             consumerSessionClientSecret = linkAccount.clientSecret,
-            consumerPublishableKey = linkAccount.consumerPublishableKey,
             consentGranted = consentGranted,
         )
             .onSuccess {
@@ -383,7 +379,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
         return linkRepository.postConsentUpdate(
             consumerSessionClientSecret = linkAccount.clientSecret,
             consentGranted = consentGranted,
-            consumerPublishableKey = linkAccount.consumerPublishableKey
         )
     }
 
@@ -393,7 +388,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
         return linkRepository.listPaymentDetails(
             paymentMethodTypes = paymentMethodTypes,
             consumerSessionClientSecret = linkAccount.clientSecret,
-            consumerPublishableKey = linkAccount.consumerPublishableKey
         ).onSuccess { paymentDetailsList ->
             _consumerState.value = _consumerState.value
                 ?.withPaymentDetailsResponse(paymentDetailsList)
@@ -406,7 +400,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
             ?: return Result.failure(NoLinkAccountFoundException())
         return linkRepository.listShippingAddresses(
             consumerSessionClientSecret = linkAccount.clientSecret,
-            consumerPublishableKey = linkAccount.consumerPublishableKey,
         )
     }
 
@@ -416,7 +409,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
         return linkRepository.deletePaymentDetails(
             paymentDetailsId = paymentDetailsId,
             consumerSessionClientSecret = linkAccount.clientSecret,
-            consumerPublishableKey = linkAccount.consumerPublishableKey
         )
     }
 
@@ -429,7 +421,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
         return linkRepository.updatePaymentDetails(
             updateParams = updateParams,
             consumerSessionClientSecret = linkAccount.clientSecret,
-            consumerPublishableKey = linkAccount.consumerPublishableKey
         ).map { updatedPaymentDetails ->
             updatedPaymentDetails.also {
                 _consumerState.value = _consumerState.value?.withUpdatedPaymentDetail(
@@ -446,7 +437,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
         return linkRepository.updatePhoneNumber(
             consumerSessionClientSecret = linkAccount.clientSecret,
             phoneNumber = phoneNumber,
-            consumerPublishableKey = linkAccount.consumerPublishableKey
         ).map { consumerSession ->
             setAccount(consumerSession = consumerSession)
         }

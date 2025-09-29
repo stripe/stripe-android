@@ -96,10 +96,6 @@ internal class LinkTest {
              * 2-digit shorthand (should send "2034", not "34")
              */
             bodyPart(urlEncode("card[exp_year]"), "2034"),
-            /*
-             * Should use the consumer's publishable key when creating payment details
-             */
-            header("Authorization", "Bearer pk_545454676767898989"),
         ) { response ->
             response.testBodyFromFile("consumer-payment-details-success.json")
         }
@@ -289,10 +285,6 @@ internal class LinkTest {
              * Ensures card brand choice is passed properly.
              */
             bodyPart(urlEncode("card[preferred_network]"), "cartes_bancaires"),
-            /*
-             * Should use the consumer's publishable key when creating payment details
-             */
-            header("Authorization", "Bearer pk_545454676767898989"),
         ) { response ->
             response.testBodyFromFile("consumer-payment-details-success.json")
         }
