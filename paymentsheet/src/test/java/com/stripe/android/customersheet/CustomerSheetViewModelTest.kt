@@ -44,7 +44,6 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.cardParamsUpdateAction
@@ -3310,11 +3309,6 @@ class CustomerSheetViewModelTest {
     fun `When setting up with intent, should call 'IntentConfirmationInterceptor' with expected params`() =
         runTest(testDispatcher) {
             val intentConfirmationInterceptorFactory = FakeIntentConfirmationInterceptorFactory()
-            val intentConfirmationInterceptor = intentConfirmationInterceptorFactory.create(
-                initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
-                    clientSecret = "seti_123"
-                ),
-            ) as FakeIntentConfirmationInterceptor
 
             val viewModel = createViewModel(
                 workContext = testDispatcher,
@@ -3341,6 +3335,7 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
 
+            val intentConfirmationInterceptor = intentConfirmationInterceptorFactory.interceptor
             val call = intentConfirmationInterceptor.calls.awaitItem()
 
             assertThat(call).isEqualTo(
