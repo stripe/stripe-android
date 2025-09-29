@@ -120,44 +120,40 @@ internal class SharedPaymentTokenConfirmationInterceptor @Inject constructor(
             )
         }
 
-        return when (val handler = waitForPreparePaymentMethodHandler()) {
-            is PreparePaymentMethodHandler -> {
-                try {
-                    handler.onPreparePaymentMethod(
-                        paymentMethod = paymentMethod,
-                        shippingAddress = shippingValues?.toAddressDetails(),
-                    )
+        return waitForPreparePaymentMethodHandler()?.let { handler ->
+            try {
+                handler.onPreparePaymentMethod(
+                    paymentMethod = paymentMethod,
+                    shippingAddress = shippingValues?.toAddressDetails(),
+                )
 
-                    ConfirmationDefinition.Action.Complete(
-                        intent = intent,
-                        deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
-                        completedFullPaymentFlow = false,
-                    )
-                } catch (@Suppress("TooGenericExceptionCaught") exception: Exception) {
-                    ConfirmationDefinition.Action.Fail(
-                        cause = exception,
-                        message = exception.errorMessage,
-                        errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                    )
-                }
-            }
-
-            else -> {
-                val error = "${PreparePaymentMethodHandler::class.java.simpleName} must be implemented " +
-                    "when using IntentConfiguration with shared payment tokens!"
-
-                errorReporter.report(ErrorReporter.ExpectedErrorEvent.PREPARE_PAYMENT_METHOD_HANDLER_NULL)
-
+                ConfirmationDefinition.Action.Complete(
+                    intent = intent,
+                    deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
+                    completedFullPaymentFlow = false,
+                )
+            } catch (@Suppress("TooGenericExceptionCaught") exception: Exception) {
                 ConfirmationDefinition.Action.Fail(
-                    cause = IllegalStateException(error),
-                    message = if (requestOptions.apiKeyIsLiveMode) {
-                        PaymentsCoreR.string.stripe_internal_error.resolvableString
-                    } else {
-                        error.resolvableString
-                    },
+                    cause = exception,
+                    message = exception.errorMessage,
                     errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
                 )
             }
+        } ?: run {
+            val error = "${PreparePaymentMethodHandler::class.java.simpleName} must be implemented " +
+                "when using IntentConfiguration with shared payment tokens!"
+
+            errorReporter.report(ErrorReporter.ExpectedErrorEvent.PREPARE_PAYMENT_METHOD_HANDLER_NULL)
+
+            ConfirmationDefinition.Action.Fail(
+                cause = IllegalStateException(error),
+                message = if (requestOptions.apiKeyIsLiveMode) {
+                    PaymentsCoreR.string.stripe_internal_error.resolvableString
+                } else {
+                    error.resolvableString
+                },
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            )
         }
     }
 

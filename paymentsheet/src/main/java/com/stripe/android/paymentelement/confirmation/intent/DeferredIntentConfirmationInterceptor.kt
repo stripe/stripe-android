@@ -176,37 +176,33 @@ internal class DeferredIntentConfirmationInterceptor constructor(
         shouldSavePaymentMethod: Boolean,
         hCaptchaToken: String?
     ): ConfirmationDefinition.Action<Args> {
-        return when (val callback = waitForIntentCallback()) {
-            is CreateIntentCallback -> {
-                handleDeferredIntentCreationFromPaymentMethod(
-                    intent = intent,
-                    createIntentCallback = callback,
-                    intentConfiguration = intentConfiguration,
-                    paymentMethod = paymentMethod,
-                    paymentMethodOptionsParams = paymentMethodOptionsParams,
-                    paymentMethodExtraParams = paymentMethodExtraParams,
-                    shouldSavePaymentMethod = shouldSavePaymentMethod,
-                    shippingValues = shippingValues,
-                    hCaptchaToken = hCaptchaToken
-                )
-            }
+        return waitForIntentCallback()?.let { callback ->
+            handleDeferredIntentCreationFromPaymentMethod(
+                intent = intent,
+                createIntentCallback = callback,
+                intentConfiguration = intentConfiguration,
+                paymentMethod = paymentMethod,
+                paymentMethodOptionsParams = paymentMethodOptionsParams,
+                paymentMethodExtraParams = paymentMethodExtraParams,
+                shouldSavePaymentMethod = shouldSavePaymentMethod,
+                shippingValues = shippingValues,
+                hCaptchaToken = hCaptchaToken
+            )
+        } ?: run {
+            val error = "${CreateIntentCallback::class.java.simpleName} must be implemented " +
+                "when using IntentConfiguration with PaymentSheet"
 
-            else -> {
-                val error = "${CreateIntentCallback::class.java.simpleName} must be implemented " +
-                    "when using IntentConfiguration with PaymentSheet"
+            errorReporter.report(ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL)
 
-                errorReporter.report(ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL)
-
-                ConfirmationDefinition.Action.Fail(
-                    cause = IllegalStateException(error),
-                    message = if (requestOptions.apiKeyIsLiveMode) {
-                        PaymentsCoreR.string.stripe_internal_error.resolvableString
-                    } else {
-                        error.resolvableString
-                    },
-                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                )
-            }
+            return ConfirmationDefinition.Action.Fail(
+                cause = IllegalStateException(error),
+                message = if (requestOptions.apiKeyIsLiveMode) {
+                    PaymentsCoreR.string.stripe_internal_error.resolvableString
+                } else {
+                    error.resolvableString
+                },
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            )
         }
     }
 
