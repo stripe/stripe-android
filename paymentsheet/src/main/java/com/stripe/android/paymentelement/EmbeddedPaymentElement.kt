@@ -143,6 +143,21 @@ class EmbeddedPaymentElement @Inject internal constructor(
             resultCallback = resultCallback,
         )
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        constructor(
+            /**
+             * Called with the ConfirmationToken when the customer confirms the payment or setup.
+             */
+            createIntentCallback: CreateIntentWithConfirmationTokenCallback,
+            /**
+             * Called with the result of the payment.
+             */
+            resultCallback: ResultCallback,
+        ) : this(
+            deferredHandler = DeferredHandler.ConfirmationToken(createIntentCallback),
+            resultCallback = resultCallback,
+        )
+
         @SharedPaymentTokenSessionPreview
         constructor(
             /**
@@ -208,6 +223,10 @@ class EmbeddedPaymentElement @Inject internal constructor(
         @OptIn(SharedPaymentTokenSessionPreview::class)
         internal sealed interface DeferredHandler {
             class Intent(val createIntentCallback: CreateIntentCallback) : DeferredHandler
+
+            class ConfirmationToken(
+                val createIntentWithConfirmationTokenCallback: CreateIntentWithConfirmationTokenCallback
+            ) : DeferredHandler
 
             class SharedPaymentToken constructor(
                 val preparePaymentMethodHandler: PreparePaymentMethodHandler

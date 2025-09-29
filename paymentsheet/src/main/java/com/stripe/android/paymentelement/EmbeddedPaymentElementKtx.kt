@@ -69,6 +69,11 @@ fun rememberEmbeddedPaymentElement(
                     is EmbeddedPaymentElement.Builder.DeferredHandler.Intent -> {
                         createIntentCallback(deferredHandler.createIntentCallback)
                     }
+                    is EmbeddedPaymentElement.Builder.DeferredHandler.ConfirmationToken -> {
+                        createIntentCallback(
+                            deferredHandler.createIntentWithConfirmationTokenCallback
+                        )
+                    }
                     is EmbeddedPaymentElement.Builder.DeferredHandler.SharedPaymentToken -> {
                         preparePaymentMethodHandler(deferredHandler.preparePaymentMethodHandler)
                     }

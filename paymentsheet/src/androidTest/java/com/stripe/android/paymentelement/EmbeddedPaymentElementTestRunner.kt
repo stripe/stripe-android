@@ -103,6 +103,15 @@ internal fun runEmbeddedPaymentElementTest(
                     createIntentCallback = builderInstance.deferredHandler.createIntentCallback,
                 )
             }
+            is EmbeddedPaymentElement.Builder.DeferredHandler.ConfirmationToken -> {
+                EmbeddedPaymentElement.Builder(
+                    resultCallback = { result ->
+                        builderInstance.resultCallback.onResult(result)
+                        countDownLatch.countDown()
+                    },
+                    createIntentCallback = builderInstance.deferredHandler.createIntentWithConfirmationTokenCallback,
+                )
+            }
             is EmbeddedPaymentElement.Builder.DeferredHandler.SharedPaymentToken -> {
                 EmbeddedPaymentElement.Builder(
                     resultCallback = { result ->
