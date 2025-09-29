@@ -889,7 +889,7 @@ internal class DefaultPaymentElementLoaderTest {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
             linkSettings = ElementsSession.LinkSettings(
-                linkFundingSources = emptyList(),
+                linkFundingSources = listOf("card", "bank_account"),
                 linkPassthroughModeEnabled = true,
                 linkMode = LinkMode.Passthrough,
                 linkFlags = emptyMap(),
@@ -922,7 +922,7 @@ internal class DefaultPaymentElementLoaderTest {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             linkSettings = ElementsSession.LinkSettings(
-                linkFundingSources = emptyList(),
+                linkFundingSources = listOf("card", "bank_account"),
                 linkPassthroughModeEnabled = false,
                 linkMode = LinkMode.LinkPaymentMethod,
                 linkFlags = mapOf(
