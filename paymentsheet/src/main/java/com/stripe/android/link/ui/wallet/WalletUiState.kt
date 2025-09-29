@@ -40,6 +40,7 @@ internal data class WalletUiState(
     val hasAttemptedAutoSelection: Boolean = false,
     val signupToggleEnabled: Boolean,
     val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+    val isValidating: Boolean = false,
 ) {
 
     val selectedItem: ConsumerPaymentDetails.PaymentDetails?

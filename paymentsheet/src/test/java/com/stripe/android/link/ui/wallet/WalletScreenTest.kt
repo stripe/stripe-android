@@ -773,6 +773,7 @@ internal class WalletScreenTest {
             onItemSelected = {},
             onExpandedChanged = {},
             onPrimaryButtonClick = {},
+            onDisabledButtonClick = {},
             onPayAnotherWayClicked = {},
             onRemoveClicked = onRemoveClicked,
             onSetDefaultClicked = onSetDefaultClicked,
