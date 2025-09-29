@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.28.0 - 2025-09-29
+
 ### Connect
 * [Fixed] Renamed `PrivateBetaConnectSDK` to `PreviewConnectSDK`.
 
