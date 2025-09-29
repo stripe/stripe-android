@@ -398,7 +398,7 @@ public final class com/stripe/android/connect/PaymentsProps$Status : java/lang/E
 	public static fun values ()[Lcom/stripe/android/connect/PaymentsProps$Status;
 }
 
-public abstract interface annotation class com/stripe/android/connect/PrivateBetaConnectSDK : java/lang/annotation/Annotation {
+public abstract interface annotation class com/stripe/android/connect/PreviewConnectSDK : java/lang/annotation/Annotation {
 }
 
 public abstract class com/stripe/android/connect/StripeComponentController {
