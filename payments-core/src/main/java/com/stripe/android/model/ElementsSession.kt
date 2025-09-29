@@ -37,7 +37,7 @@ data class ElementsSession(
         get() = linkSettings?.disableLinkSignup ?: false
 
     val isLinkEnabled: Boolean
-        get() = linkSettings?.linkMode != null
+        get() = linkSettings?.linkMode != null && linkSettings.fundingSourcesSupportedByClient
 
     val useAttestationEndpointsForLink: Boolean
         get() = linkSettings?.useAttestationEndpoints ?: false
@@ -91,7 +91,11 @@ data class ElementsSession(
         val linkSignUpOptInFeatureEnabled: Boolean,
         val linkSignUpOptInInitialValue: Boolean,
         val linkSupportedPaymentMethodsOnboardingEnabled: List<String>,
-    ) : StripeModel
+    ) : StripeModel {
+
+        val fundingSourcesSupportedByClient: Boolean
+            get() = linkFundingSources.any { it.lowercase() in ConsumerPaymentDetails.supportedFundingSources }
+    }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize

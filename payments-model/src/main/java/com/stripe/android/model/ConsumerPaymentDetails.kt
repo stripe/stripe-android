@@ -22,8 +22,10 @@ data class ConsumerPaymentDetails(
         open val billingAddress: BillingAddress?,
         open val billingEmailAddress: String?,
     ) : Parcelable {
-
         abstract val last4: String
+
+        val isCard: Boolean
+            get() = type == "card"
     }
 
     @Parcelize
@@ -127,4 +129,9 @@ data class ConsumerPaymentDetails(
         val postalCode: String?,
         val countryCode: CountryCode?,
     ) : Parcelable
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
+        val supportedFundingSources = listOf("card", "bank_account")
+    }
 }
