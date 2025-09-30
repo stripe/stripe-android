@@ -1,6 +1,7 @@
 package com.stripe.android.link.gate
 
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.model.ElementsSession
 
 /**
  * Provider interface for Link feature settings and behaviors, handling
@@ -14,7 +15,8 @@ internal interface LinkGate {
     val useInlineOtpInWalletButtons: Boolean
     val showRuxInFlowController: Boolean
 
-    fun interface Factory {
+    interface Factory {
+        fun create(elementsSession: ElementsSession): LinkGate
         fun create(configuration: LinkConfiguration): LinkGate
     }
 }

@@ -32,6 +32,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.toPaymentMethodIncentive
+import com.stripe.android.paymentsheet.state.LinkSignupModeResult
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.Amount
@@ -457,7 +458,7 @@ internal data class PaymentMethodMetadata(
                 linkMode = null,
                 linkState = LinkState(
                     configuration = configuration,
-                    signupMode = null,
+                    signupModeResult = LinkSignupModeResult.NotSignedOut,
                     loginState = LinkState.LoginState.LoggedIn
                 ),
                 paymentMethodIncentive = null,
