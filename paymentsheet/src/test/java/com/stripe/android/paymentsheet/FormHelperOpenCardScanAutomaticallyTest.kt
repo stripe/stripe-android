@@ -155,7 +155,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 savedStateHandle = thisSavedStateHandle,
                 linkHandler = linkHandler,
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
-                linkGateFactory = { FakeLinkGate() },
+                linkGateFactory = FakeLinkGate.Factory(),
                 linkPaymentLauncher = mock<LinkPaymentLauncher>(),
                 linkAccountHolder = LinkAccountHolder(SavedStateHandle())
             )

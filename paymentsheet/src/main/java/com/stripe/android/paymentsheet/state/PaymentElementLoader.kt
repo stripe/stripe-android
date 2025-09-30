@@ -198,7 +198,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 configuration = configuration,
                 customer = customerInfo?.toCustomerInfo(),
                 initializationMode = initializationMode,
-                linkAppearance = configuration.linkAppearance
             )
         }
 
@@ -208,7 +207,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 elementsSession = elementsSession,
                 customerInfo = customerInfo,
                 isGooglePayReady = isGooglePayReady,
-                linkState = linkState.await(),
+                linkState = linkState.await().linkState,
                 initializationMode = initializationMode,
             )
         }
@@ -491,7 +490,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             paymentMethod.hasExpectedDetails()
         }
     }
-
 
     private suspend fun isGooglePayReady(
         configuration: CommonConfiguration,

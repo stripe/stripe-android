@@ -1301,7 +1301,7 @@ internal class PaymentOptionsViewModelTest {
             savedStateHandle = savedStateHandle,
             linkHandler = linkHandler,
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
-            linkGateFactory = { linkGate },
+            linkGateFactory = FakeLinkGate.Factory(linkGate),
             linkPaymentLauncher = linkPaymentLauncher,
             linkAccountHolder = LinkAccountHolder(SavedStateHandle())
         )

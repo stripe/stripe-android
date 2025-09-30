@@ -44,9 +44,7 @@ import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
-import com.stripe.android.paymentsheet.state.CreateLinkConfiguration
 import com.stripe.android.paymentsheet.state.CreateLinkState
-import com.stripe.android.paymentsheet.state.DefaultCreateLinkConfiguration
 import com.stripe.android.paymentsheet.state.DefaultCreateLinkState
 import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.DefaultPaymentElementLoader
@@ -111,11 +109,6 @@ internal abstract class PaymentSheetCommonModule {
     abstract fun bindsCreateLinkState(
         impl: DefaultCreateLinkState,
     ): CreateLinkState
-
-    @Binds
-    abstract fun bindsCreateLinkConfiguration(
-        impl: DefaultCreateLinkConfiguration,
-    ): CreateLinkConfiguration
 
     @Binds
     abstract fun bindsPaymentSheetUpdater(
