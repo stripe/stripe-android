@@ -17,7 +17,6 @@ import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationOption
@@ -116,7 +115,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
             }
             is LinkPaymentDetails.Saved -> {
                 savedConfirmationArgs(
-                    paymentDetails = paymentDetails,
+                    paymentMethod = paymentDetails.paymentMethod,
                     cvc = cvc
                 )
             }
@@ -185,25 +184,16 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
     }
 
     private fun savedConfirmationArgs(
-        paymentDetails: LinkPaymentDetails.Saved,
+        paymentMethod: PaymentMethod,
         cvc: String?
     ): ConfirmationHandler.Args {
         return ConfirmationHandler.Args(
             intent = configuration.stripeIntent,
             confirmationOption = PaymentMethodConfirmationOption.Saved(
-                paymentMethod = PaymentMethod.Builder()
-                    .setId(paymentDetails.paymentDetails.paymentMethodId)
-                    .setCode(paymentDetails.paymentMethodCreateParams.typeCode)
-                    .setCard(
-                        PaymentMethod.Card(
-                            last4 = paymentDetails.paymentDetails.last4,
-                            wallet = Wallet.LinkWallet(paymentDetails.paymentDetails.last4),
-                        )
-                    )
-                    .setType(PaymentMethod.Type.Card)
-                    .build(),
+                paymentMethod = paymentMethod,
                 optionsParams = PaymentMethodOptionsParams.Card(
                     setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+                    // TODO: Do we need CVC here?
                     cvc = cvc?.takeIf {
                         configuration.passthroughModeEnabled.not()
                     }
@@ -271,7 +261,6 @@ internal fun computeExpectedPaymentMethodType(
     return when (paymentDetails) {
         is ConsumerPaymentDetails.BankAccount -> computeBankAccountExpectedPaymentMethodType(configuration)
         is ConsumerPaymentDetails.Card -> ConsumerPaymentDetails.Card.TYPE
-        is ConsumerPaymentDetails.Passthrough -> ConsumerPaymentDetails.Card.TYPE
     }
 }
 

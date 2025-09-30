@@ -41,7 +41,6 @@ internal object PaymentMethodWithLinkDetailsJsonParser : ModelJsonParser<Payment
                     last4 = consumerPaymentDetails.last4,
                 )
             }
-            is ConsumerPaymentDetails.Passthrough,
             null -> {
                 null
             }

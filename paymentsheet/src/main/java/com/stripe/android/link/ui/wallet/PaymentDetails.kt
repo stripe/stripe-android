@@ -328,14 +328,6 @@ internal fun RowScope.PaymentDetails(
         is BankAccount -> {
             BankAccountInfo(bankAccount = paymentDetails)
         }
-        is ConsumerPaymentDetails.Passthrough -> {
-            CardInfo(
-                modifier = modifier,
-                title = paymentDetails.displayName.resolve(),
-                subtitle = null,
-                icon = CardBrand.Unknown.getCardBrandIconForVerticalMode(),
-            )
-        }
     }
 }
 
