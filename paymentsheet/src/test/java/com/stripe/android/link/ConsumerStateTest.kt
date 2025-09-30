@@ -4,7 +4,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
-import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
@@ -80,7 +79,6 @@ class ConsumerStateTest {
             paymentDetails = listOf(
                 updatedCard,
                 CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
-                CONSUMER_PAYMENT_DETAILS_PASSTHROUGH
             )
         )
 
@@ -95,9 +93,6 @@ class ConsumerStateTest {
         assertThat(result.paymentDetails[1].details).isEqualTo(CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT)
         assertThat(result.paymentDetails[1].collectedCvc).isNull()
         assertThat(result.paymentDetails[1].billingPhone).isNull()
-        assertThat(result.paymentDetails[2].details).isEqualTo(CONSUMER_PAYMENT_DETAILS_PASSTHROUGH)
-        assertThat(result.paymentDetails[2].collectedCvc).isNull()
-        assertThat(result.paymentDetails[2].billingPhone).isNull()
     }
 
     @Test
@@ -172,11 +167,6 @@ class ConsumerStateTest {
                 collectedCvc = null,
                 billingPhone = "+0987654321"
             ),
-            LinkPaymentMethod.ConsumerPaymentDetails(
-                details = CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
-                collectedCvc = null,
-                billingPhone = "+5555555555"
-            )
         )
         val existingState = ConsumerState(existingPaymentDetails)
 
@@ -200,7 +190,6 @@ class ConsumerStateTest {
             paymentDetails = listOf(
                 CONSUMER_PAYMENT_DETAILS_CARD,
                 CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
-                CONSUMER_PAYMENT_DETAILS_PASSTHROUGH
             )
         )
 
@@ -213,9 +202,6 @@ class ConsumerStateTest {
         assertThat(result.paymentDetails[1].details).isEqualTo(CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT)
         assertThat(result.paymentDetails[1].collectedCvc).isNull()
         assertThat(result.paymentDetails[1].billingPhone).isNull()
-        assertThat(result.paymentDetails[2].details).isEqualTo(CONSUMER_PAYMENT_DETAILS_PASSTHROUGH)
-        assertThat(result.paymentDetails[2].collectedCvc).isNull()
-        assertThat(result.paymentDetails[2].billingPhone).isNull()
     }
 
     @Test
@@ -378,11 +364,6 @@ class ConsumerStateTest {
                 collectedCvc = null,
                 billingPhone = null // No phone
             ),
-            LinkPaymentMethod.ConsumerPaymentDetails(
-                details = CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
-                collectedCvc = null,
-                billingPhone = null // No phone
-            )
         )
         val existingState = ConsumerState(existingPaymentDetails)
 
@@ -403,10 +384,6 @@ class ConsumerStateTest {
         assertThat(result.paymentDetails[1].details).isEqualTo(CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT)
         assertThat(result.paymentDetails[1].billingPhone).isEqualTo(newPhone) // Applied
         assertThat(result.paymentDetails[1].collectedCvc).isNull()
-        // Passthrough should get the new phone (was null)
-        assertThat(result.paymentDetails[2].details).isEqualTo(CONSUMER_PAYMENT_DETAILS_PASSTHROUGH)
-        assertThat(result.paymentDetails[2].billingPhone).isEqualTo(newPhone) // Applied
-        assertThat(result.paymentDetails[2].collectedCvc).isNull()
     }
 
     @Test

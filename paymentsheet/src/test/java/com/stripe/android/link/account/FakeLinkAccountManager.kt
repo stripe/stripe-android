@@ -19,6 +19,7 @@ import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.LinkAccountSession
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SharePaymentDetails
@@ -85,8 +86,8 @@ internal open class FakeLinkAccountManager(
     var createCardPaymentDetailsResult: Result<LinkPaymentDetails.New> = Result.success(
         value = TestFactory.LINK_NEW_PAYMENT_DETAILS
     )
-    var shareCardPaymentDetailsResult: Result<LinkPaymentDetails.Saved> = Result.success(
-        value = TestFactory.LINK_SAVED_PAYMENT_DETAILS
+    var shareCardPaymentDetailsResult: Result<PaymentMethod> = Result.success(
+        value = TestFactory.LINK_SAVED_PAYMENT_DETAILS.paymentMethod
     )
     var createBankAccountPaymentDetailsResult: Result<ConsumerPaymentDetails.BankAccount> = Result.success(
         value = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
@@ -193,7 +194,7 @@ internal open class FakeLinkAccountManager(
 
     override suspend fun shareCardPaymentDetails(
         cardPaymentDetails: LinkPaymentDetails.New
-    ): Result<LinkPaymentDetails.Saved> {
+    ): Result<PaymentMethod> {
         return shareCardPaymentDetailsResult
     }
 

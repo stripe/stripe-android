@@ -3,7 +3,6 @@ package com.stripe.android.link
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
-import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH
 import com.stripe.android.model.CvcCheck
 import org.junit.Test
 
@@ -14,17 +13,6 @@ class LinkPaymentMethodTest {
         val bankAccount = CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
         val paymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(
             bankAccount,
-            collectedCvc = null,
-            billingPhone = null
-        )
-        assertThat(paymentMethod.readyForConfirmation()).isTrue()
-    }
-
-    @Test
-    fun `readyForConfirmation returns true for Passthrough`() {
-        val passthrough = CONSUMER_PAYMENT_DETAILS_PASSTHROUGH
-        val paymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(
-            passthrough,
             collectedCvc = null,
             billingPhone = null
         )

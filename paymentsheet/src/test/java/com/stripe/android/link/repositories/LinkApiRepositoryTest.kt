@@ -2,13 +2,11 @@ package com.stripe.android.link.repositories
 
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.FakeConsumersApiService
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.PaymentDetailsFixtures
-import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
@@ -522,33 +520,8 @@ class LinkApiRepositoryTest {
             ),
             requestOptions = ApiRequest.Options(apiKey = PUBLISHABLE_KEY, stripeAccount = STRIPE_ACCOUNT_ID)
         )
-        assertThat(savedLinkPaymentDetails.paymentDetails)
-            .isEqualTo(
-                ConsumerPaymentDetails.Passthrough(
-                    id = paymentDetailsId,
-                    last4 = cardPaymentMethodCreateParams.cardLast4().orEmpty(),
-                    paymentMethodId = PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!,
-                    billingEmailAddress = "jenny.rosen@example.com",
-                    billingAddress = ConsumerPaymentDetails.BillingAddress(
-                        name = "Jenny Rosen",
-                        line1 = "1234 Main Street",
-                        line2 = null,
-                        administrativeArea = "CA",
-                        locality = "San Francisco",
-                        postalCode = "94111",
-                        countryCode = CountryCode.create("US")
-                    )
-                )
-            )
-        assertThat(savedLinkPaymentDetails.paymentMethodCreateParams)
-            .isEqualTo(
-                PaymentMethodCreateParams.createLink(
-                    PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!,
-                    consumerSessionSecret,
-                    null,
-                    mapOf("card" to mapOf("cvc" to "123"))
-                )
-            )
+        assertThat(savedLinkPaymentDetails.paymentMethod)
+            .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
     }
 
     @Test
