@@ -32,6 +32,9 @@ import com.stripe.android.paymentsheet.DeferredIntentValidator
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.utils.hasIntentToSetup
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Named
@@ -39,8 +42,8 @@ import javax.inject.Provider
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.R as PaymentsCoreR
 
-internal class DeferredIntentConfirmationInterceptor constructor(
-    private val intentConfiguration: PaymentSheet.IntentConfiguration,
+internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor(
+    @Assisted private val intentConfiguration: PaymentSheet.IntentConfiguration,
     private val stripeRepository: StripeRepository,
     private val errorReporter: ErrorReporter,
     private val intentCreationCallbackProvider: Provider<CreateIntentCallback?>,
@@ -474,5 +477,10 @@ internal class DeferredIntentConfirmationInterceptor constructor(
         return paymentMethodOptionsParams?.setupFutureUsage()?.hasIntentToSetup() == true ||
             (intentConfiguration.mode as? PaymentSheet.IntentConfiguration.Mode.Payment)
                 ?.setupFutureUse?.toConfirmParamsSetupFutureUsage()?.hasIntentToSetup() == true
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(intentConfiguration: PaymentSheet.IntentConfiguration): DeferredIntentConfirmationInterceptor
     }
 }

@@ -16,11 +16,14 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import javax.inject.Named
 import com.stripe.android.R as PaymentsCoreR
 
-internal class IntentFirstConfirmationInterceptor(
-    val clientSecret: String,
+internal class IntentFirstConfirmationInterceptor @AssistedInject constructor(
+    @Assisted val clientSecret: String,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
 ) : IntentConfirmationInterceptor {
@@ -142,5 +145,10 @@ internal class IntentFirstConfirmationInterceptor(
             },
             errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
         )
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(clientSecret: String): IntentFirstConfirmationInterceptor
     }
 }

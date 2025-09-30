@@ -24,17 +24,19 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
-import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.R as PaymentsCoreR
 
 @OptIn(SharedPaymentTokenSessionPreview::class)
-internal class SharedPaymentTokenConfirmationInterceptor @Inject constructor(
-    private val initializationMode: PaymentElementLoader.InitializationMode.DeferredIntent,
+internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constructor(
+    @Assisted private val initializationMode: PaymentElementLoader.InitializationMode.DeferredIntent,
     private val stripeRepository: StripeRepository,
     private val errorReporter: ErrorReporter,
     private val preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?>,
@@ -197,5 +199,11 @@ internal class SharedPaymentTokenConfirmationInterceptor @Inject constructor(
                 )
             }
         )
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(initializationMode: PaymentElementLoader.InitializationMode.DeferredIntent):
+            SharedPaymentTokenConfirmationInterceptor
     }
 }
