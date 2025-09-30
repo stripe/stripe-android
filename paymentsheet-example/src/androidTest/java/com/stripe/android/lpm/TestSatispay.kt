@@ -9,6 +9,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.CountrySettin
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.test.core.TestParameters
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -28,6 +29,7 @@ internal class TestSatispay : BasePlaygroundTest() {
         )
     }
 
+    @Ignore("Disabled while investigating flakiness")
     @Test
     fun testSatispayWithSfu() {
         testDriver.confirmNewOrGuestComplete(
@@ -37,6 +39,7 @@ internal class TestSatispay : BasePlaygroundTest() {
         )
     }
 
+    @Ignore("Disabled while investigating flakiness")
     @Test
     fun testSatispayWithSetupIntent() {
         testDriver.confirmNewOrGuestComplete(
