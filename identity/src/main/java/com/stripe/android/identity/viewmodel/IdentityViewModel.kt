@@ -994,7 +994,12 @@ internal class IdentityViewModel(
                  * Only navigates to success when both submitted and closed are true.
                  */
                 submittedVerificationPageData.submittedAndClosed() -> {
-                    navController.navigateTo(ConfirmationDestination)
+                    val skipSuccessPage = _verificationPage.value?.data?.skipSuccessPage ?: false
+                    if (skipSuccessPage) {
+                        finishWithResult(IdentityVerificationSheet.VerificationFlowResult.Completed)
+                    } else {
+                        navController.navigateTo(ConfirmationDestination)
+                    }
                 }
 
                 else -> {
