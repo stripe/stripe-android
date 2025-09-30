@@ -2,8 +2,6 @@ package com.stripe.android.paymentelement.confirmation.intent
 
 import com.stripe.android.ConfirmStripeIntentParamsFactory
 import com.stripe.android.common.exception.stripeErrorMessage
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -47,15 +45,9 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
     private val stripeRepository: StripeRepository,
     private val errorReporter: ErrorReporter,
     private val intentCreationCallbackProvider: Provider<CreateIntentCallback?>,
+    private val requestOptions: ApiRequest.Options,
     @Named(ALLOWS_MANUAL_CONFIRMATION) private val allowsManualConfirmation: Boolean,
-    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
-    @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
 ) : IntentConfirmationInterceptor {
-    private val requestOptions: ApiRequest.Options
-        get() = ApiRequest.Options(
-            apiKey = publishableKeyProvider(),
-            stripeAccount = stripeAccountIdProvider(),
-        )
 
     override suspend fun intercept(
         intent: StripeIntent,

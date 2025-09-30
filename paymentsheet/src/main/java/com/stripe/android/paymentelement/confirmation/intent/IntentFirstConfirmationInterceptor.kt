@@ -1,8 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
 import com.stripe.android.ConfirmStripeIntentParamsFactory
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -19,20 +17,12 @@ import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationD
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import javax.inject.Named
 import com.stripe.android.R as PaymentsCoreR
 
 internal class IntentFirstConfirmationInterceptor @AssistedInject constructor(
     @Assisted val clientSecret: String,
-    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
-    @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
+    private val requestOptions: ApiRequest.Options,
 ) : IntentConfirmationInterceptor {
-
-    private val requestOptions: ApiRequest.Options
-        get() = ApiRequest.Options(
-            apiKey = publishableKeyProvider(),
-            stripeAccount = stripeAccountIdProvider(),
-        )
 
     override suspend fun intercept(
         intent: StripeIntent,

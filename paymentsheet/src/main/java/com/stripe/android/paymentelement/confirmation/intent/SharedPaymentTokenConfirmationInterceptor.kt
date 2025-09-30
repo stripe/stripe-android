@@ -4,8 +4,6 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.GenericStripeException
 import com.stripe.android.core.exception.StripeException
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.utils.errorMessage
@@ -29,7 +27,6 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
-import javax.inject.Named
 import javax.inject.Provider
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.R as PaymentsCoreR
@@ -40,15 +37,8 @@ internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constru
     private val stripeRepository: StripeRepository,
     private val errorReporter: ErrorReporter,
     private val preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?>,
-    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
-    @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
+    private val requestOptions: ApiRequest.Options,
 ) : IntentConfirmationInterceptor {
-
-    private val requestOptions: ApiRequest.Options
-        get() = ApiRequest.Options(
-            apiKey = publishableKeyProvider(),
-            stripeAccount = stripeAccountIdProvider(),
-        )
 
     override suspend fun intercept(
         intent: StripeIntent,
