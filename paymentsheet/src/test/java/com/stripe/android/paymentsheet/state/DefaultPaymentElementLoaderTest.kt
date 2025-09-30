@@ -2103,9 +2103,9 @@ internal class DefaultPaymentElementLoaderTest {
                     session = createElementsSessionCustomerSession(
                         createEnabledMobilePaymentElement(
                             paymentMethodRemove =
-                            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
+                                ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
                             paymentMethodRemoveLast =
-                            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
+                                ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
                             isPaymentMethodSaveEnabled = false,
                             allowRedisplayOverride = null,
                         )
@@ -2150,10 +2150,10 @@ internal class DefaultPaymentElementLoaderTest {
                     session = createElementsSessionCustomerSession(
                         createEnabledMobilePaymentElement(
                             paymentMethodRemove =
-                            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled,
+                                ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled,
                             isPaymentMethodSaveEnabled = false,
                             paymentMethodRemoveLast =
-                            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
+                                ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
                             allowRedisplayOverride = null,
                         )
                     ),
@@ -2197,10 +2197,10 @@ internal class DefaultPaymentElementLoaderTest {
                     session = createElementsSessionCustomerSession(
                         createEnabledMobilePaymentElement(
                             paymentMethodRemove =
-                            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled,
+                                ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled,
                             isPaymentMethodSaveEnabled = false,
                             paymentMethodRemoveLast =
-                            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
+                                ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
                             allowRedisplayOverride = null,
                         )
                     ),
@@ -2244,10 +2244,10 @@ internal class DefaultPaymentElementLoaderTest {
                     session = createElementsSessionCustomerSession(
                         createEnabledMobilePaymentElement(
                             paymentMethodRemove =
-                            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Partial,
+                                ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Partial,
                             isPaymentMethodSaveEnabled = false,
                             paymentMethodRemoveLast =
-                            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
+                                ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
                             allowRedisplayOverride = null,
                         )
                     ),
@@ -2291,10 +2291,10 @@ internal class DefaultPaymentElementLoaderTest {
                     session = createElementsSessionCustomerSession(
                         createEnabledMobilePaymentElement(
                             paymentMethodRemove =
-                            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled,
+                                ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled,
                             isPaymentMethodSaveEnabled = false,
                             paymentMethodRemoveLast =
-                            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
+                                ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
                             allowRedisplayOverride = null,
                         )
                     ),
@@ -3183,7 +3183,7 @@ internal class DefaultPaymentElementLoaderTest {
                 clientSecret = "cuss_123",
             ),
             paymentMethodRemoveLastFeature =
-            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
+                ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
             canRemoveLastPaymentMethodFromConfig = true,
         ) { permissions ->
             assertThat(permissions.canRemoveLastPaymentMethod).isTrue()
@@ -3198,7 +3198,7 @@ internal class DefaultPaymentElementLoaderTest {
                 clientSecret = "cuss_123",
             ),
             paymentMethodRemoveLastFeature =
-            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided,
+                ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided,
             canRemoveLastPaymentMethodFromConfig = true,
         ) { permissions ->
             assertThat(permissions.canRemoveLastPaymentMethod).isTrue()
@@ -3593,7 +3593,7 @@ internal class DefaultPaymentElementLoaderTest {
                     } else {
                         createEnabledMobilePaymentElement(
                             paymentMethodRemove =
-                            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled,
+                                ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled,
                             isPaymentMethodSaveEnabled = false,
                             paymentMethodRemoveLast = paymentMethodRemoveLastFeature,
                             allowRedisplayOverride = null,
@@ -3825,7 +3825,7 @@ internal class DefaultPaymentElementLoaderTest {
                     isPaymentMethodSaveEnabled = it,
                     paymentMethodRemove = ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
                     paymentMethodRemoveLast =
-                    ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided,
+                        ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided,
                     allowRedisplayOverride = null,
                     isPaymentMethodSetAsDefaultEnabled = false,
                 )
@@ -3918,6 +3918,17 @@ internal class DefaultPaymentElementLoaderTest {
         userFacingLogger: FakeUserFacingLogger = FakeUserFacingLogger(),
         integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
     ): PaymentElementLoader {
+        val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(customerRepo)
+        val createLinkConfiguration = DefaultCreateLinkConfiguration(
+            retrieveCustomerEmail = retrieveCustomerEmailImpl,
+            linkGateFactory = { linkGate },
+        )
+        val createLinkState = DefaultCreateLinkState(
+            createLinkConfiguration = createLinkConfiguration,
+            accountStatusProvider = { linkAccountState },
+            linkStore = linkStore,
+        )
+
         return DefaultPaymentElementLoader(
             prefsRepositoryFactory = { prefsRepository },
             googlePayRepositoryFactory = {
@@ -3930,11 +3941,8 @@ internal class DefaultPaymentElementLoaderTest {
             eventReporter = eventReporter,
             errorReporter = errorReporter,
             workContext = testDispatcher,
-            retrieveCustomerEmail = DefaultRetrieveCustomerEmail(customerRepo),
-            accountStatusProvider = { linkAccountState },
+            createLinkState = createLinkState,
             logLinkHoldbackExperiment = logLinkHoldbackExperiment,
-            linkStore = linkStore,
-            linkGateFactory = { linkGate },
             externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter = FakeErrorReporter()),
             userFacingLogger = userFacingLogger,
             cvcRecollectionHandler = CvcRecollectionHandlerImpl(),
@@ -4021,7 +4029,7 @@ internal class DefaultPaymentElementLoaderTest {
                         isPaymentMethodSaveEnabled = true,
                         paymentMethodRemove = ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
                         paymentMethodRemoveLast =
-                        ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided,
+                            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided,
                         allowRedisplayOverride = null,
                     ),
                 ),
