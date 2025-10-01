@@ -22,7 +22,6 @@
     <ID>LargeClass:DefaultConfirmationHandlerTest.kt$DefaultConfirmationHandlerTest</ID>
     <ID>LargeClass:DefaultEventReporterTest.kt$DefaultEventReporterTest</ID>
     <ID>LargeClass:DefaultFlowControllerTest.kt$DefaultFlowControllerTest</ID>
-    <ID>LargeClass:DefaultIntentConfirmationInterceptorTest.kt$DefaultIntentConfirmationInterceptorTest</ID>
     <ID>LargeClass:DefaultPaymentElementLoaderTest.kt$DefaultPaymentElementLoaderTest</ID>
     <ID>LargeClass:InputAddressViewModelTest.kt$InputAddressViewModelTest</ID>
     <ID>LargeClass:PaymentMethodMetadataTest.kt$PaymentMethodMetadataTest</ID>
@@ -40,6 +39,7 @@
     <ID>LongMethod:CardDefinition.kt$CardUiDefinitionFactory$override fun createFormElements( metadata: PaymentMethodMetadata, arguments: UiDefinitionFactory.Arguments, ): List&lt;FormElement></ID>
     <ID>LongMethod:CustomerSheetScreen.kt$@Composable internal fun SelectPaymentMethod( viewState: CustomerSheetViewState.SelectPaymentMethod, viewActionHandler: (CustomerSheetViewAction) -> Unit, paymentMethodNameProvider: (PaymentMethodCode?) -> ResolvableString, modifier: Modifier = Modifier, )</ID>
     <ID>LongMethod:DefaultConfirmationHandlerTest.kt$DefaultConfirmationHandlerTest$private fun test( someDefinitionAction: ConfirmationDefinition.Action&lt;SomeConfirmationDefinition.LauncherArgs> = ConfirmationDefinition.Action.Fail( cause = IllegalStateException("Failed!"), message = R.string.stripe_something_went_wrong.resolvableString, errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal, ), someDefinitionResult: ConfirmationDefinition.Result = ConfirmationDefinition.Result.Failed( cause = IllegalStateException("Failed!"), message = R.string.stripe_something_went_wrong.resolvableString, type = ConfirmationHandler.Result.Failed.ErrorType.Internal, ), someDefinitionIsConfirmable: Boolean = true, someOtherDefinitionAction: ConfirmationDefinition.Action&lt;SomeOtherConfirmationDefinition.LauncherArgs> = ConfirmationDefinition.Action.Fail( cause = IllegalStateException("Failed!"), message = R.string.stripe_something_went_wrong.resolvableString, errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal, ), someOtherDefinitionResult: ConfirmationDefinition.Result = ConfirmationDefinition.Result.Failed( cause = IllegalStateException("Failed!"), message = R.string.stripe_something_went_wrong.resolvableString, type = ConfirmationHandler.Result.Failed.ErrorType.Internal, ), shouldRegister: Boolean = true, savedStateHandle: SavedStateHandle = SavedStateHandle(), dispatcher: CoroutineDispatcher = StandardTestDispatcher(), scenarioTest: suspend Scenario.() -> Unit )</ID>
+    <ID>LongMethod:ElementsSessionRepositoryTest.kt$ElementsSessionRepositoryTest$@OptIn(SharedPaymentTokenSessionPreview::class) @Test fun `Verify seller details is passed to 'StripeRepository'`()</ID>
     <ID>LongMethod:EmbeddedConfigurationHandler.kt$DefaultEmbeddedConfigurationHandler$override suspend fun configure( intentConfiguration: PaymentSheet.IntentConfiguration, configuration: EmbeddedPaymentElement.Configuration, ): Result&lt;PaymentElementLoader.State></ID>
     <ID>LongMethod:EmbeddedContentHelper.kt$DefaultEmbeddedContentHelper$private fun createInteractor( coroutineScope: CoroutineScope, paymentMethodMetadata: PaymentMethodMetadata, walletsState: StateFlow&lt;WalletsState?>, isImmediateAction: Boolean, embeddedViewDisplaysMandateText: Boolean, ): PaymentMethodVerticalLayoutInteractor</ID>
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when element address fields are complete`()</ID>
@@ -95,7 +95,6 @@
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.IntentConfiguration.SetupFutureUse$*</ID>
     <ID>MaxLineLength:PrimaryButtonTest.kt$PrimaryButtonTest$primaryButton.setAppearanceConfiguration(StripeThemeDefaults.primaryButtonStyle, ColorStateList.valueOf(Color.BLACK))</ID>
     <ID>MaxLineLength:SupportedPaymentMethod.kt$SupportedPaymentMethod$/** This describes the image in the LPM selector. These can be found internally [here](https://www.figma.com/file/2b9r3CJbyeVAmKi1VHV2h9/Mobile-Payment-Element?node-id=1128%3A0) */</ID>
-    <ID>TooGenericExceptionCaught:IntentConfirmationInterceptor.kt$DefaultIntentConfirmationInterceptor$exception: Exception</ID>
     <ID>TooManyFunctions:CustomerSheetEventReporter.kt$CustomerSheetEventReporter</ID>
     <ID>TooManyFunctions:DefaultCustomerSheetEventReporter.kt$DefaultCustomerSheetEventReporter : CustomerSheetEventReporter</ID>
     <ID>TooManyFunctions:DefaultFlowController.kt$DefaultFlowController : FlowController</ID>
