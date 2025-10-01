@@ -207,7 +207,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 elementsSession = elementsSession,
                 customerInfo = customerInfo,
                 isGooglePayReady = isGooglePayReady,
-                linkState = linkState.await().linkState,
+                linkStateResult = linkState.await(),
                 initializationMode = initializationMode,
             )
         }
@@ -315,7 +315,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         configuration: CommonConfiguration,
         elementsSession: ElementsSession,
         customerInfo: CustomerInfo?,
-        linkState: LinkState?,
+        linkStateResult: LinkStateResult,
         isGooglePayReady: Boolean,
         initializationMode: PaymentElementLoader.InitializationMode,
     ): PaymentMethodMetadata {
@@ -345,7 +345,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = isGooglePayReady,
-            linkState = linkState,
+            linkStateResult = linkStateResult,
             customerMetadata = getCustomerMetadata(
                 configuration = configuration,
                 elementsSession = elementsSession,
@@ -680,9 +680,16 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         if (state.validationError != null && treatValidationErrorAsFailure) {
             eventReporter.onLoadFailed(state.validationError)
         } else {
+            val linkState =
+                state.paymentMethodMetadata.linkState
+            val linkDisabledReasons =
+                (state.paymentMethodMetadata.linkStateResult as? LinkDisabledState)?.linkDisabledReasons
+
             eventReporter.onLoadSucceeded(
-                linkEnabled = state.paymentMethodMetadata.linkState != null,
+                linkEnabled = linkState != null,
                 linkMode = elementsSession.linkSettings?.linkMode,
+                linkDisabledReasons = linkDisabledReasons,
+                linkSignupDisabledReasons = linkState?.signupModeResult?.disabledReasons,
                 googlePaySupported = isGooglePaySupported,
                 linkDisplay = linkDisplay,
                 currency = elementsSession.stripeIntent.currency,
