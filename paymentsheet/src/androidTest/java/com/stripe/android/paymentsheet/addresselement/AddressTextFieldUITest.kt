@@ -21,9 +21,9 @@ class AddressTextFieldUITest {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun clicking_address_should_trigger_on_cick() {
+    fun clicking_address_should_trigger_on_click() {
         var count = 0
-        setContent {
+        setContent(enabled = true) {
             count++
         }
 
@@ -32,7 +32,20 @@ class AddressTextFieldUITest {
         Truth.assertThat(count).isEqualTo(1)
     }
 
+    @Test
+    fun clicking_disabled_address_should_not_trigger_on_click() {
+        var count = 0
+        setContent(enabled = false) {
+            count++
+        }
+
+        composeTestRule.onNodeWithText("Address").performClick()
+
+        Truth.assertThat(count).isEqualTo(0)
+    }
+
     private fun setContent(
+        enabled: Boolean = true,
         onClick: () -> Unit
     ) {
         composeTestRule.setContent {
@@ -41,6 +54,7 @@ class AddressTextFieldUITest {
                     controller = AddressTextFieldController(
                         label = resolvableString(UiCoreR.string.stripe_address_label_address),
                     ),
+                    enabled = enabled,
                     onClick = onClick
                 )
             }

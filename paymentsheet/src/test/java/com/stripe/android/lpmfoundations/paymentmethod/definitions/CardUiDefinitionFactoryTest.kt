@@ -342,6 +342,36 @@ class CardUiDefinitionFactoryTest {
     }
 
     @Test
+    fun testCondensedAutocompleteFormWithInsets() {
+        customTextFieldsPaparazziRule.snapshot {
+            CardDefinition.CreateFormUi(
+                paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
+                    code = "card",
+                    billingDetails = null,
+                    requiresMandate = false,
+                    overrideParamMap = mapOf(),
+                    productUsage = emptySet(),
+                    clientAttributionMetadata = null,
+                ),
+                metadata = metadata.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    ),
+                ),
+                autocompleteAddressInteractorFactory = {
+                    TestAutocompleteAddressInteractor.noOp(
+                        autocompleteConfig = AutocompleteAddressInteractor.Config(
+                            googlePlacesApiKey = "123",
+                            autocompleteCountries = setOf("US"),
+                            isPlacesAvailable = true,
+                        )
+                    )
+                }
+            )
+        }
+    }
+
+    @Test
     fun testCondensedAutocompleteFormWithValidation() {
         paparazziRule.snapshot {
             CardDefinition.CreateFormUi(
