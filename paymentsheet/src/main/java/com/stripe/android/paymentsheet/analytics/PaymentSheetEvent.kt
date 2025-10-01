@@ -9,7 +9,9 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.utils.mapOfDurationInSeconds
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkDisabledReason
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.LinkSignupDisabledReason
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -90,6 +92,8 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         orderedLpms: List<String>,
         duration: Duration?,
         linkMode: LinkMode?,
+        linkDisabledReasons: List<LinkDisabledReason>?,
+        linkSignupDisabledReasons: List<LinkSignupDisabledReason>?,
         override val linkEnabled: Boolean,
         override val isDeferred: Boolean,
         override val isSpt: Boolean,
@@ -121,6 +125,8 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             }
             put(FIELD_OPEN_CARD_SCAN_AUTOMATICALLY, openCardScanAutomatically)
             put(FIELD_LINK_DISPLAY, linkDisplay.analyticsValue)
+            putIfNotEmpty(FIELD_LINK_DISABLED_REASONS, linkDisabledReasons?.map { it.value })
+            putIfNotEmpty(FIELD_LINK_SIGNUP_DISABLED_REASONS, linkSignupDisabledReasons?.map { it.value })
             if (setAsDefaultEnabled == true && hasDefaultPaymentMethod != null) {
                 put(FIELD_HAS_DEFAULT_PAYMENT_METHOD, hasDefaultPaymentMethod)
             }
@@ -846,6 +852,12 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             return "mc_${mode}_$eventName"
         }
 
+        private fun MutableMap<String, Any?>.putIfNotEmpty(key: String, values: List<String>?) {
+            if (!values.isNullOrEmpty()) {
+                put(key, values.joinToString(","))
+            }
+        }
+
         const val FIELD_CUSTOMER = "customer"
         const val FIELD_CUSTOMER_ACCESS_PROVIDER = "customer_access_provider"
         const val FIELD_GOOGLE_PAY = "googlepay"
@@ -897,6 +909,8 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_CARD_SCAN_AVAILABLE = "card_scan_available"
         const val FIELD_ANALYTIC_CALLBACK_SET = "analytic_callback_set"
         const val FIELD_LINK_DISPLAY = "link_display"
+        const val FIELD_LINK_DISABLED_REASONS = "link_disabled_reasons"
+        const val FIELD_LINK_SIGNUP_DISABLED_REASONS = "link_signup_disabled_reasons"
         const val FIELD_PAYMENT_METHOD_OPTIONS_SETUP_FUTURE_USAGE = "payment_method_options_setup_future_usage"
         const val FIELD_SETUP_FUTURE_USAGE = "setup_future_usage"
         const val FIELD_ROW_SELECTION_BEHAVIOR = "row_selection_behavior"

@@ -23,7 +23,8 @@ enum class LinkSignupDisabledReason(val value: String) {
     DisabledInElementsSession("disabled_in_elements_session"),
 
     /**
-     * Link signup opt-in feature is enabled, but the merchant didn't provide an email address via the customer or billing details.
+     * Link signup opt-in feature is enabled, but the merchant didn't provide an email address
+     * via the customer or billing details.
      */
     SignupOptInFeatureNoEmailProvided("signup_opt_in_feature_no_email_provided"),
 

@@ -30,23 +30,28 @@ internal interface CreateLinkState {
         configuration: CommonConfiguration,
         customer: CustomerRepository.CustomerInfo?,
         initializationMode: PaymentElementLoader.InitializationMode,
-    ): CreateLinkStateResult
+    ): LinkStateResult
 }
 
-internal data class CreateLinkStateResult(
-    val linkState: LinkState? = null,
-    val linkDisabledReasons: Set<LinkDisabledReason> = emptySet(),
-)
-
 internal sealed interface LinkSignupModeResult : Parcelable {
-    @Parcelize
-    data object NotSignedOut : LinkSignupModeResult
+    val mode: LinkSignupMode?
+    val disabledReasons: List<LinkSignupDisabledReason>?
 
     @Parcelize
-    data class Enabled(val mode: LinkSignupMode) : LinkSignupModeResult
+    data object NotSignedOut : LinkSignupModeResult {
+        override val mode: LinkSignupMode? get() = null
+        override val disabledReasons: List<LinkSignupDisabledReason>? get() = null
+    }
 
     @Parcelize
-    data class Disabled(val reasons: List<LinkSignupDisabledReason>) : LinkSignupModeResult
+    data class Enabled(override val mode: LinkSignupMode) : LinkSignupModeResult {
+        override val disabledReasons: List<LinkSignupDisabledReason>? get() = null
+    }
+
+    @Parcelize
+    data class Disabled(override val disabledReasons: List<LinkSignupDisabledReason>) : LinkSignupModeResult {
+        override val mode: LinkSignupMode? get() = null
+    }
 }
 
 internal class DefaultCreateLinkState @Inject constructor(
@@ -61,16 +66,14 @@ internal class DefaultCreateLinkState @Inject constructor(
         configuration: CommonConfiguration,
         customer: CustomerRepository.CustomerInfo?,
         initializationMode: PaymentElementLoader.InitializationMode,
-    ): CreateLinkStateResult {
+    ): LinkStateResult {
         val linkDisabledReasons = getLinkDisabledReasons(
             elementsSession = elementsSession,
             configuration = configuration
         )
 
         if (linkDisabledReasons.isNotEmpty()) {
-            return CreateLinkStateResult(
-                linkDisabledReasons = linkDisabledReasons,
-            )
+            return LinkDisabledState(linkDisabledReasons)
         }
 
         val linkConfiguration = createLinkConfigurationWithoutValidation(
@@ -81,7 +84,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         )
         val accountStatus = accountStatusProvider(linkConfiguration)
         val loginState = accountStatus.toLoginState()
-        val linkState = LinkState(
+        return LinkState(
             configuration = linkConfiguration,
             loginState = loginState,
             signupModeResult = getLinkSignupMode(
@@ -90,9 +93,6 @@ internal class DefaultCreateLinkState @Inject constructor(
                 configuration = configuration,
                 linkConfiguration = linkConfiguration,
             )
-        )
-        return CreateLinkStateResult(
-            linkState = linkState,
         )
     }
 
@@ -109,7 +109,7 @@ internal class DefaultCreateLinkState @Inject constructor(
     private fun getLinkDisabledReasons(
         elementsSession: ElementsSession,
         configuration: CommonConfiguration,
-    ): Set<LinkDisabledReason> = LinkedHashSet<LinkDisabledReason>().apply {
+    ): List<LinkDisabledReason> = buildList {
         if (!elementsSession.isLinkEnabled) {
             add(LinkDisabledReason.NotSupportedInElementsSession)
         }
