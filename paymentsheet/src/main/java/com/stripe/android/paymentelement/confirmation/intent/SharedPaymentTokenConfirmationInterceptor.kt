@@ -18,6 +18,7 @@ import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationO
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor.Companion.PROVIDER_FETCH_INTERVAL
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor.Companion.PROVIDER_FETCH_TIMEOUT
+import com.stripe.android.paymentelement.confirmation.utils.updatedWithProductUsage
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -46,20 +47,10 @@ internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constru
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): ConfirmationDefinition.Action<Args> {
         val intentConfiguration = initializationMode.intentConfiguration
-        val paymentMethodCreateParams = confirmationOption.createParams
-        val productUsage = buildSet {
-            addAll(paymentMethodCreateParams.attribution)
-            add("deferred-intent")
-            if (intentConfiguration.paymentMethodTypes.isEmpty()) {
-                add("autopm")
-            }
-        }
-
-        val params = paymentMethodCreateParams.copy(
-            productUsage = productUsage,
-        )
-
-        return stripeRepository.createPaymentMethod(params, requestOptions).fold(
+        return stripeRepository.createPaymentMethod(
+            confirmationOption.createParams.updatedWithProductUsage(intentConfiguration),
+            requestOptions
+        ).fold(
             onSuccess = { paymentMethod ->
                 intercept(
                     intent = intent,

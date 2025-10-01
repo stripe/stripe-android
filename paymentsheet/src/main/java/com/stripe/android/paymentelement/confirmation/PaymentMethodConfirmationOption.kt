@@ -8,11 +8,12 @@ import kotlinx.parcelize.Parcelize
 
 internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.Option {
     val passiveCaptchaParams: PassiveCaptchaParams?
+    val optionsParams: PaymentMethodOptionsParams?
 
     @Parcelize
     data class Saved(
         val paymentMethod: com.stripe.android.model.PaymentMethod,
-        val optionsParams: PaymentMethodOptionsParams?,
+        override val optionsParams: PaymentMethodOptionsParams?,
         val originatedFromWallet: Boolean = false,
         override val passiveCaptchaParams: PassiveCaptchaParams?,
         val hCaptchaToken: String? = null,
@@ -21,7 +22,7 @@ internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.
     @Parcelize
     data class New(
         val createParams: PaymentMethodCreateParams,
-        val optionsParams: PaymentMethodOptionsParams?,
+        override val optionsParams: PaymentMethodOptionsParams?,
         val extraParams: PaymentMethodExtraParams?,
         val shouldSave: Boolean,
         override val passiveCaptchaParams: PassiveCaptchaParams?,
