@@ -15,6 +15,7 @@ import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController.Companion.EXPAND_PAYMENT_METHOD
+import com.stripe.android.analytics.FakeDurationProvider
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
@@ -42,6 +43,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -77,6 +79,7 @@ class PaymentLauncherViewModelTest {
     private val activityResultCaller = mock<ActivityResultCaller>()
     private val lifecycleOwner = TestLifecycleOwner()
     private val savedStateHandle = mock<SavedStateHandle>()
+    private val durationProvider = FakeDurationProvider()
 
     private val confirmPaymentIntentParams = ConfirmPaymentIntentParams(
         clientSecret = CLIENT_SECRET,
@@ -109,7 +112,8 @@ class PaymentLauncherViewModelTest {
 
     private fun createViewModel(
         isPaymentIntent: Boolean = true,
-        isInstantApp: Boolean = false
+        isInstantApp: Boolean = false,
+        savedStateHandle: SavedStateHandle = this.savedStateHandle,
     ) =
         PaymentLauncherViewModel(
             isPaymentIntent,
@@ -124,7 +128,8 @@ class PaymentLauncherViewModelTest {
             analyticsRequestFactory,
             uiContext,
             savedStateHandle,
-            isInstantApp
+            isInstantApp,
+            durationProvider,
         ).apply {
             register(activityResultCaller, lifecycleOwner)
         }
@@ -552,6 +557,50 @@ class PaymentLauncherViewModelTest {
                 )
             )
         }
+    }
+
+    @Test
+    fun `verify confirm finished analytics includes duration parameter`() = runTest {
+        whenever(paymentIntent.requiresAction()).thenReturn(false)
+
+        val viewModel = createViewModel()
+        viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
+        verify(analyticsRequestFactory).createRequest(
+            eq(PaymentAnalyticsEvent.PaymentLauncherConfirmStarted),
+            additionalParams = any(),
+        )
+
+        verify(analyticsRequestFactory).createRequest(
+            eq(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished),
+            additionalParams = argThat { params ->
+                params.containsKey("duration") && params["duration"] == 1L
+            }
+        )
+    }
+
+    @Test
+    fun `verify next action finished analytics includes duration parameter`() = runTest {
+        val savedStateHandle = SavedStateHandle()
+        val viewModel = createViewModel(savedStateHandle = savedStateHandle)
+        viewModel.handleNextActionForStripeIntent(CLIENT_SECRET, authHost)
+
+        val paymentFlowResult = mock<PaymentFlowResult.Unvalidated>()
+        whenever(paymentIntentFlowResultProcessor.processResult(eq(paymentFlowResult)))
+            .thenReturn(Result.success(succeededPaymentResult))
+
+        verify(analyticsRequestFactory).createRequest(
+            eq(PaymentAnalyticsEvent.PaymentLauncherNextActionStarted),
+            additionalParams = any(),
+        )
+
+        viewModel.onPaymentFlowResult(paymentFlowResult)
+
+        verify(analyticsRequestFactory).createRequest(
+            eq(PaymentAnalyticsEvent.PaymentLauncherNextActionFinished),
+            additionalParams = argThat { params ->
+                params.containsKey("duration") && params["duration"] == 1L
+            }
+        )
     }
 
     companion object {

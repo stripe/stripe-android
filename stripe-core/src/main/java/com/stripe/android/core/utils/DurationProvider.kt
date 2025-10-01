@@ -19,7 +19,8 @@ interface DurationProvider {
         ConfirmButtonClicked,
         CardScan,
         Captcha,
-        CaptchaAttach
+        CaptchaAttach,
+        PaymentLauncher
     }
 }
 
