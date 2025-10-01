@@ -27,7 +27,6 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.confirmation.intent.CreateIntentCallbackFailureException
-import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationInterceptorFactory
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
@@ -1387,35 +1386,15 @@ class DefaultIntentConfirmationInterceptorTest {
         scenario: InterceptorTestScenario = InterceptorTestScenario(),
         test: suspend (interceptor: IntentConfirmationInterceptor) -> Unit
     ) = runTest {
-        val interceptor = DefaultIntentConfirmationInterceptorFactory(
+        val interceptor = createIntentConfirmationInterceptor(
+            initializationMode = initializationMode,
             stripeRepository = scenario.stripeRepository,
             publishableKeyProvider = scenario.publishableKeyProvider,
-            stripeAccountIdProvider = { null },
             errorReporter = scenario.errorReporter,
-            allowsManualConfirmation = false,
             intentCreationCallbackProvider = scenario.intentCreationCallbackProvider,
             preparePaymentMethodHandlerProvider = scenario.preparePaymentMethodHandlerProvider,
-        ).create(initializationMode)
+        )
         test(interceptor)
-    }
-
-    private fun createIntentConfirmationInterceptor(
-        initializationMode: InitializationMode,
-        stripeRepository: StripeRepository = object : AbsFakeStripeRepository() {},
-        publishableKeyProvider: () -> String = { "pk" },
-        errorReporter: ErrorReporter = FakeErrorReporter(),
-        intentCreationCallbackProvider: Provider<CreateIntentCallback?> = Provider { null },
-        preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?> = Provider { null }
-    ): IntentConfirmationInterceptor {
-        return DefaultIntentConfirmationInterceptorFactory(
-            stripeRepository = stripeRepository,
-            publishableKeyProvider = publishableKeyProvider,
-            stripeAccountIdProvider = { null },
-            errorReporter = errorReporter,
-            allowsManualConfirmation = false,
-            intentCreationCallbackProvider = intentCreationCallbackProvider,
-            preparePaymentMethodHandlerProvider = preparePaymentMethodHandlerProvider,
-        ).create(initializationMode)
     }
 
     private fun stripeRepositoryReturning(

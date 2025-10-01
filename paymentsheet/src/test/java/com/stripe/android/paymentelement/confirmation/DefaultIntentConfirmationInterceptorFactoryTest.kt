@@ -2,15 +2,12 @@ package com.stripe.android.paymentelement.confirmation
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.SharedPaymentTokenSessionPreview
-import com.stripe.android.customersheet.FakeStripeRepository
-import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationInterceptorFactory
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.IntentFirstConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.SharedPaymentTokenConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
-import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
@@ -77,15 +74,7 @@ internal class DefaultIntentConfirmationInterceptorFactoryTest {
         block: suspend Scenario.() -> Unit,
     ) {
         val scenario = Scenario(
-            interceptor = DefaultIntentConfirmationInterceptorFactory(
-                stripeRepository = FakeStripeRepository(),
-                errorReporter = FakeErrorReporter(),
-                intentCreationCallbackProvider = { null },
-                preparePaymentMethodHandlerProvider = { null },
-                allowsManualConfirmation = false,
-                publishableKeyProvider = { "pk_test_12345" },
-                stripeAccountIdProvider = { null },
-            ).create(initializationMode)
+            interceptor = createIntentConfirmationInterceptor(initializationMode)
         )
         runTest {
             scenario.block()
