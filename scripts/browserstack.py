@@ -292,6 +292,35 @@ def executeTestsForFailure(appUrl, testUrl, device, testClasses):
     }
     return executeTestsWithAddedParams(appUrl, testUrl, [device], addedParams)
 
+def executeSelectedTests(appUrl, testUrl, testClasses, isNightly):
+    """Execute a specific set of test classes on Browserstack."""
+    devices = []
+    if isNightly:
+        devices = [
+            "Google Pixel 8-14.0",
+            "Google Pixel 7-13.0",
+            "Samsung Galaxy S22-12.0",
+            "Google Pixel 5-11.0",
+            "Google Pixel 4 XL-10.0",
+            "Google Pixel 3-9.0",
+            "Samsung Galaxy S9-8.0",
+        ]
+    else:
+        devices = [
+            "Samsung Galaxy S22-12.0",
+        ]
+
+    # Use fewer shards for selected tests
+    numberOfShards = 1.0 if isNightly else 3.0
+
+    addedParams = {
+        "class": testClasses,
+        "shards": {
+            "numberOfShards": numberOfShards,
+        },
+    }
+    return executeTestsWithAddedParams(appUrl, testUrl, devices, addedParams)
+
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/builds#get-build-status
 def get_build_status(buildId):
     url = (
@@ -405,6 +434,17 @@ def runTests(appUrl, testUrl, isNightly):
 def runTestsForFailure(appUrl, testUrl, device, testClasses):
     print(f"RUNNING {str(len(testClasses))} test cases on {device}")
     buildId = executeTestsForFailure(appUrl, testUrl, device, testClasses)
+    exitStatus = 1
+    if buildId != None:
+        exitStatus = waitForBuildComplete(buildId)
+    else:
+        deleteTestSuite(testUrl.replace("bs://", ""))
+    return {"exitStatus": exitStatus, "buildId": buildId}
+
+def runSelectedTests(appUrl, testUrl, testClasses, isNightly):
+    """Run a specific set of test classes."""
+    print(f"RUNNING {str(len(testClasses))} selected test cases")
+    buildId = executeSelectedTests(appUrl, testUrl, testClasses, isNightly)
     exitStatus = 1
     if buildId != None:
         exitStatus = waitForBuildComplete(buildId)
@@ -531,6 +571,8 @@ if __name__ == "__main__":
         "-f", "--force", help="Force delete with no prompt", action="store_true"
     )
     parser.add_argument("-n", "--num-retries", help="Retry failed tests")
+    parser.add_argument("--test-classes", help="JSON file containing test classes to run")
+    parser.add_argument("--selected-tests", action="store_true", help="Run selected test classes from JSON file")
 
     args = parser.parse_args()
     print("\n")
@@ -558,6 +600,40 @@ if __name__ == "__main__":
         appUrl = uploadAppLiveApk(args.upload)
         print("Uploaded app live apk url: " + appUrl)
         sys.exit(0)
+
+    elif args.selected_tests:
+        if args.espresso == None or args.apk == None or args.test_classes == None:
+            parser.print_help()
+            sys.exit(2)
+        else:
+            # Load test classes from JSON file
+            import json
+            with open(args.test_classes, 'r') as f:
+                test_classes = json.load(f)
+            
+            print(
+                "Running selected tests with:\nApp under test: {apk}\nEspresso test suite: {testSuite}\nTest classes: {classes}".format(
+                    apk=args.apk, testSuite=args.espresso, classes=test_classes
+                )
+            )
+            print("-----------------")
+            appUrl = uploadApk(args.apk)
+            print("-----------------")
+            testUrl = uploadEspressoApk(args.espresso)
+            print("-----------------")
+            numRetries = int(args.num_retries) if args.num_retries is not None else 0
+
+            exitStatus = 1
+            testResults = runSelectedTests(appUrl, testUrl, test_classes, args.is_nightly)
+            print("-----------------")
+            exitStatus = testResults["exitStatus"]
+            updateObservabilityWithResults(testResults["buildId"])
+            if exitStatus != 0 and numRetries > 0:
+                os.environ["BROWSERSTACK_RERUN"] = "true"
+                exitStatus = retryFailedTests(testResults["buildId"], numRetries)
+
+            os.environ["BROWSERSTACK_RERUN"] = "false"
+            sys.exit(exitStatus)
 
     elif args.test:
         if args.espresso == None or args.apk == None:  # or args.name == None):

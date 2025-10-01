@@ -42,7 +42,8 @@ stages:
       - run-connections-e2e-token-tests-on-push: { }
       - run-connections-e2e-data-tests-on-push: { }
       - run-cardscan-instrumentation-tests: { }
-      - run-paymentsheet-end-to-end-tests: { }
+      - run-paymentsheet-e2e-browserstack-tests: { }
+      - run-paymentsheet-e2e-emulator-tests: { }
       - check-dependencies: { }
   stage-run-connect-e2e-tests:
     workflows:
@@ -438,6 +439,39 @@ workflows:
           inputs:
             - push: 'true'
             - validation_level: warning
+  run-paymentsheet-e2e-browserstack-tests:
+    before_run:
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - script@1:
+          timeout: 1200
+          inputs:
+            - content: ./gradlew :paymentsheet-example:assembleDebugAndroidTest :paymentsheet-example:assembleDebug -PIS_BROWSERSTACK_BUILD=true -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN
+      - script@1:
+          timeout: 120
+          inputs:
+            - content: pip3 install requests_toolbelt requests
+      - script@1:
+          timeout: 60
+          inputs:
+            - content: python3 scripts/select_tests.py --count 15 --output-dir test_selection
+      - script@1:
+          timeout: 2400
+          inputs:
+            - content: python3 scripts/browserstack.py --selected-tests --test-classes test_selection/browserstack_tests.json --apk paymentsheet-example/build/outputs/apk/debug/paymentsheet-example-debug.apk --espresso paymentsheet-example/build/outputs/apk/androidTest/debug/paymentsheet-example-debug-androidTest.apk --num-retries 2
+  run-paymentsheet-e2e-emulator-tests:
+    before_run:
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - script@1:
+          title: Execute instrumentation tests
+          timeout: 1200
+          inputs:
+            - content: ./scripts/retry.sh 3 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 :paymentsheet-example:e2eTestsDebugAndroidTest
   conclude_all:
     steps:
       - script-runner@0:
