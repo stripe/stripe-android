@@ -151,6 +151,7 @@ internal class ElementsSessionJsonParser(
                                 elementsSessionId = elementsSessionId,
                                 paymentMode = params.deferredIntentParams.mode,
                                 isLiveMode = isLiveMode,
+                                onBehalfOf = params.deferredIntentParams.onBehalfOf,
                                 timeProvider = timeProvider
                             ).parse(json)
                         }
@@ -159,6 +160,7 @@ internal class ElementsSessionJsonParser(
                                 elementsSessionId = elementsSessionId,
                                 setupMode = params.deferredIntentParams.mode,
                                 isLiveMode = isLiveMode,
+                                onBehalfOf = params.deferredIntentParams.onBehalfOf,
                                 timeProvider = timeProvider
                             ).parse(json)
                         }

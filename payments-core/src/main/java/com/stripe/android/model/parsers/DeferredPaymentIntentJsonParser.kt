@@ -13,6 +13,7 @@ class DeferredPaymentIntentJsonParser(
     private val elementsSessionId: String?,
     private val paymentMode: DeferredIntentParams.Mode.Payment,
     private val isLiveMode: Boolean,
+    private val onBehalfOf: String?,
     private val timeProvider: () -> Long
 ) : ModelJsonParser<PaymentIntent> {
     override fun parse(json: JSONObject): PaymentIntent {
@@ -50,6 +51,7 @@ class DeferredPaymentIntentJsonParser(
             currency = paymentMode.currency,
             paymentMethodOptionsJsonString = paymentMode.paymentMethodOptionsJsonString,
             automaticPaymentMethodsEnabled = paymentMethodTypes.isEmpty(),
+            onBehalfOf = onBehalfOf,
         )
     }
 

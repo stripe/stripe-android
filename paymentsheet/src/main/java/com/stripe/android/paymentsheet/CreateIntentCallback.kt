@@ -31,6 +31,7 @@ fun interface CreateIntentCallback {
     suspend fun onCreateIntent(
         paymentMethod: PaymentMethod,
         shouldSavePaymentMethod: Boolean,
+        onBehalfOf: String?,
     ): CreateIntentResult
 }
 
