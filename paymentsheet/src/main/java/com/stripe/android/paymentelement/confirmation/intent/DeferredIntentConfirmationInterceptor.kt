@@ -257,7 +257,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
         ).mapCatching { intent ->
             if (intent.isConfirmed) {
                 failIfSetAsDefaultFeatureIsEnabled(
-                (confirmationOption as? PaymentMethodConfirmationOption.New)?.extraParams
+                    (confirmationOption as? PaymentMethodConfirmationOption.New)?.extraParams
                 )
 
                 ConfirmationDefinition.Action.Complete(

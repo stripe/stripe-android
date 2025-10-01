@@ -36,7 +36,6 @@ internal fun PaymentMethodConfirmationOption.Saved.updatedForDeferredIntent(
     )
 }
 
-
 internal fun PaymentMethodCreateParams.updatedWithProductUsage(
     intentConfiguration: PaymentSheet.IntentConfiguration,
 ): PaymentMethodCreateParams {
@@ -93,4 +92,3 @@ internal fun PaymentSheet.IntentConfiguration.SetupFutureUse.toConfirmParamsSetu
         }
     }
 }
-

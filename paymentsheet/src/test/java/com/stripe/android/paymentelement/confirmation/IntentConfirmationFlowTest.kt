@@ -283,21 +283,23 @@ internal class IntentConfirmationFlowTest {
     ): IntentConfirmationDefinition {
         return IntentConfirmationDefinition(
             intentConfirmationInterceptorFactory =
-                object : IntentConfirmationInterceptor.Factory {
-                    override fun create(initializationMode: PaymentElementLoader.InitializationMode): IntentConfirmationInterceptor {
-                        return createIntentConfirmationInterceptor(
-                            initializationMode = initializationMode,
-                            stripeRepository = FakeStripeRepository(
-                                createPaymentMethodResult = createPaymentMethodResult,
-                                retrieveIntent = intentResult,
-                            ),
-                            intentCreationCallbackProvider = {
-                                createIntentCallback
-                            },
-                            preparePaymentMethodHandlerProvider = { preparePaymentMethodHandler }
-                        )
-                    }
-                },
+            object : IntentConfirmationInterceptor.Factory {
+                override fun create(
+                    initializationMode: PaymentElementLoader.InitializationMode
+                ): IntentConfirmationInterceptor {
+                    return createIntentConfirmationInterceptor(
+                        initializationMode = initializationMode,
+                        stripeRepository = FakeStripeRepository(
+                            createPaymentMethodResult = createPaymentMethodResult,
+                            retrieveIntent = intentResult,
+                        ),
+                        intentCreationCallbackProvider = {
+                            createIntentCallback
+                        },
+                        preparePaymentMethodHandlerProvider = { preparePaymentMethodHandler }
+                    )
+                }
+            },
             paymentLauncherFactory = {
                 FakePaymentLauncher()
             }

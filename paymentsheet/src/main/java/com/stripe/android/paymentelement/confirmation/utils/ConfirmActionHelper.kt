@@ -16,7 +16,6 @@ import com.stripe.android.paymentsheet.DeferredIntentValidator
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.R as PaymentsCoreR
 
-
 internal class ConfirmActionHelper(val isLiveMode: Boolean) {
     fun createNextAction(
         clientSecret: String,
