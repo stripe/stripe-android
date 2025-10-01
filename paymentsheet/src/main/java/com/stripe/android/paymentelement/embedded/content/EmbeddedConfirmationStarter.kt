@@ -37,10 +37,7 @@ internal class EmbeddedConfirmationStarter @Inject constructor(
         activityResultCaller: ActivityResultCaller,
         lifecycleOwner: LifecycleOwner,
     ) {
-        confirmationHandler.register(
-            activityResultCaller = activityResultCaller,
-            lifecycleOwner = lifecycleOwner,
-        )
+        confirmationHandler.register(activityResultCaller, lifecycleOwner)
     }
 
     fun start(args: ConfirmationHandler.Args) {

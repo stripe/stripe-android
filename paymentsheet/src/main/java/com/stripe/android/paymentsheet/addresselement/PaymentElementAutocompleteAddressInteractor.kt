@@ -23,7 +23,7 @@ internal class PaymentElementAutocompleteAddressInteractor(
     }
 
     override fun onAutocompleteLauncherResult(result: AutocompleteLauncher.Result) {
-        val values = result.addressDetails?.toIdentifierMap()
+        val values = result.address?.toIdentifierMap()
 
         val event = when (result) {
             is AutocompleteLauncher.Result.EnterManually -> {

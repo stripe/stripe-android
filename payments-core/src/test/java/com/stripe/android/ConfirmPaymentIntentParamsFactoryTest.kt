@@ -11,6 +11,7 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.model.RadarOptions
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
@@ -31,7 +32,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 optionsParams = PaymentMethodOptionsParams.Card(
                     setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
-                )
+                ),
+                radarOptions = null
             )
         ).isEqualTo(
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
@@ -52,7 +54,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 optionsParams = PaymentMethodOptionsParams.Card(
                     setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
-                )
+                ),
+                radarOptions = null
             )
         ).isEqualTo(
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
@@ -72,6 +75,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
             factory.create(
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 optionsParams = PaymentMethodOptionsParams.Card(),
+                radarOptions = null
             )
         ).isEqualTo(
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
@@ -92,7 +96,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
             ),
             extraParams = PaymentMethodExtraParams.Card(
                 setAsDefault = true
-            )
+            ),
+            radarOptions = null
         )
         assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isTrue()
     }
@@ -106,7 +111,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
             ),
             extraParams = PaymentMethodExtraParams.Card(
                 setAsDefault = false
-            )
+            ),
+            radarOptions = null
         )
         assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isFalse()
     }
@@ -121,7 +127,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
             extraParams = PaymentMethodExtraParams.Card(
                 setAsDefault = true
             ),
-            intentConfigSetupFutureUsage = null
+            intentConfigSetupFutureUsage = null,
+            radarOptions = null
         )
         assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isTrue()
     }
@@ -136,7 +143,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
             extraParams = PaymentMethodExtraParams.Card(
                 setAsDefault = false
             ),
-            intentConfigSetupFutureUsage = null
+            intentConfigSetupFutureUsage = null,
+            radarOptions = null
         )
         assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isFalse()
     }
@@ -148,7 +156,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
             optionsParams = null,
             extraParams = PaymentMethodExtraParams.SepaDebit(
                 setAsDefault = true
-            )
+            ),
+            radarOptions = null
         )
         assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isTrue()
     }
@@ -160,7 +169,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
             optionsParams = null,
             extraParams = PaymentMethodExtraParams.SepaDebit(
                 setAsDefault = false
-            )
+            ),
+            radarOptions = null
         )
         assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isFalse()
     }
@@ -173,7 +183,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
             extraParams = PaymentMethodExtraParams.SepaDebit(
                 setAsDefault = true
             ),
-            intentConfigSetupFutureUsage = null
+            intentConfigSetupFutureUsage = null,
+            radarOptions = null
         )
         assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isTrue()
     }
@@ -186,7 +197,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
             extraParams = PaymentMethodExtraParams.SepaDebit(
                 setAsDefault = false
             ),
-            intentConfigSetupFutureUsage = null
+            intentConfigSetupFutureUsage = null,
+            radarOptions = null
         )
         assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isFalse()
     }
@@ -212,7 +224,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = null,
             extraParams = null,
-            intentConfigSetupFutureUsage = null
+            intentConfigSetupFutureUsage = null,
+            radarOptions = null
         )
         assertThat(result.shipping).isEqualTo(shippingDetails)
     }
@@ -236,6 +249,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
 
         val result = factoryWithConfig.create(
             createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            radarOptions = null
         )
 
         assertThat(result.shipping).isEqualTo(shippingDetails)
@@ -255,7 +269,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
             ),
             extraParams = null,
-            intentConfigSetupFutureUsage = null
+            intentConfigSetupFutureUsage = null,
+            radarOptions = null
         )
 
         assertThat(result.paymentMethodOptions).isEqualTo(
@@ -279,7 +294,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
             ),
             extraParams = null,
-            intentConfigSetupFutureUsage = null
+            intentConfigSetupFutureUsage = null,
+            radarOptions = null
         )
 
         assertThat(result.paymentMethodOptions).isEqualTo(
@@ -306,7 +322,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.None
             ),
             extraParams = null,
-            intentConfigSetupFutureUsage = null
+            intentConfigSetupFutureUsage = null,
+            radarOptions = null
         )
 
         assertThat(result.paymentMethodOptions).isEqualTo(
@@ -329,7 +346,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = null,
             extraParams = null,
-            intentConfigSetupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            intentConfigSetupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+            radarOptions = null
         )
 
         assertThat(result.setupFutureUsage).isEqualTo(
@@ -424,7 +442,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
             paymentMethod = paymentMethod,
             optionsParams = null,
             extraParams = null,
-            intentConfigSetupFutureUsage = intentConfigSetupFutureUsage
+            intentConfigSetupFutureUsage = intentConfigSetupFutureUsage,
+            radarOptions = null
         )
 
         assertThat(result).isInstanceOf(ConfirmPaymentIntentParams::class.java)
@@ -452,6 +471,26 @@ class ConfirmPaymentIntentParamsFactoryTest {
                     }
                 }
         """.trimIndent()
+    }
+
+    @Test
+    fun `create() with radarOptions should include radarOptions in result`() {
+        val radarOptions = RadarOptions(hCaptchaToken = "test_token")
+        val factoryWithConfig = ConfirmPaymentIntentParamsFactory(
+            clientSecret = CLIENT_SECRET,
+            intent = createPaymentIntent(),
+            shipping = null,
+        )
+
+        val result = factoryWithConfig.create(
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            optionsParams = null,
+            extraParams = null,
+            intentConfigSetupFutureUsage = null,
+            radarOptions = radarOptions
+        )
+
+        assertThat(result.radarOptions).isEqualTo(radarOptions)
     }
 
     private fun ConfirmStripeIntentParams.asConfirmPaymentIntentParams(): ConfirmPaymentIntentParams {

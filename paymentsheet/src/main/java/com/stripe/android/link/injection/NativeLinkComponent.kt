@@ -15,10 +15,14 @@ import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.WebLinkActivityContract
+import com.stripe.android.link.WebLinkAuthChannel
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
+import com.stripe.android.link.ui.oauth.OAuthConsentViewModelComponent
+import com.stripe.android.link.ui.wallet.AddPaymentMethodOptions
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
@@ -42,7 +46,6 @@ internal annotation class NativeLinkScope
 @Component(
     modules = [
         NativeLinkModule::class,
-        LinkViewModelModule::class,
         ApplicationIdModule::class,
         DefaultConfirmationModule::class,
         LinkPassthroughConfirmationModule::class,
@@ -50,15 +53,16 @@ internal annotation class NativeLinkScope
     ]
 )
 internal interface NativeLinkComponent {
+    val linkAccountHolder: LinkAccountHolder
     val linkAccountManager: LinkAccountManager
     val configuration: LinkConfiguration
+    val passiveCaptchaParams: PassiveCaptchaParams?
     val linkEventsReporter: LinkEventsReporter
     val errorReporter: ErrorReporter
     val logger: Logger
     val linkConfirmationHandlerFactory: LinkConfirmationHandler.Factory
     val webLinkActivityContract: WebLinkActivityContract
     val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory
-    val linkAuth: LinkAuth
     val savedStateHandle: SavedStateHandle
     val viewModel: LinkActivityViewModel
     val eventReporter: EventReporter
@@ -66,11 +70,17 @@ internal interface NativeLinkComponent {
     val dismissalCoordinator: LinkDismissalCoordinator
     val linkLaunchMode: LinkLaunchMode
     val autocompleteLauncher: AutocompleteLauncher
+    val addPaymentMethodOptionsFactory: AddPaymentMethodOptions.Factory
+    val oAuthConsentViewModelComponentFactory: OAuthConsentViewModelComponent.Factory
+    val webLinkAuthChannel: WebLinkAuthChannel
 
     @Component.Builder
     interface Builder {
         @BindsInstance
         fun configuration(configuration: LinkConfiguration): Builder
+
+        @BindsInstance
+        fun passiveCaptchaParams(passiveCaptchaParams: PassiveCaptchaParams?): Builder
 
         @BindsInstance
         fun publishableKeyProvider(@Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String): Builder

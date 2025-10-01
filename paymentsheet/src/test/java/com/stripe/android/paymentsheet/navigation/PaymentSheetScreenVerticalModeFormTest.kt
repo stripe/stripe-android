@@ -2,6 +2,8 @@ package com.stripe.android.paymentsheet.navigation
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
@@ -41,6 +43,58 @@ internal class PaymentSheetScreenVerticalModeFormTest {
         val interactor = FakeVerticalModeFormInteractor(onClose = { hasCalledOnClose = true })
         PaymentSheetScreen.VerticalModeForm(interactor).close()
         assertThat(hasCalledOnClose).isTrue()
+    }
+
+    @Test
+    fun `showWalletsHeader is true when interactor state is true`() = runTest {
+        val interactor = FakeVerticalModeFormInteractor(
+            state = stateFlowOf(
+                VerticalModeFormInteractor.State(
+                    selectedPaymentMethodCode = "card",
+                    isProcessing = false,
+                    isValidating = false,
+                    usBankAccountFormArguments = mock(),
+                    formArguments = FormArgumentsFactory.create(
+                        paymentMethodCode = "card",
+                        metadata = PaymentMethodMetadataFactory.create(),
+                    ),
+                    formElements = emptyList(),
+                    showsWalletHeader = false,
+                    paymentMethodIncentive = null,
+                    headerInformation = null,
+                )
+            )
+        )
+
+        PaymentSheetScreen.VerticalModeForm(interactor).showsWalletsHeader(isCompleteFlow = true).test {
+            assertThat(awaitItem()).isFalse()
+        }
+    }
+
+    @Test
+    fun `showWalletsHeader is false when interactor state is false`() = runTest {
+        val interactor = FakeVerticalModeFormInteractor(
+            state = stateFlowOf(
+                VerticalModeFormInteractor.State(
+                    selectedPaymentMethodCode = "card",
+                    isProcessing = false,
+                    isValidating = false,
+                    usBankAccountFormArguments = mock(),
+                    formArguments = FormArgumentsFactory.create(
+                        paymentMethodCode = "card",
+                        metadata = PaymentMethodMetadataFactory.create(),
+                    ),
+                    formElements = emptyList(),
+                    showsWalletHeader = true,
+                    paymentMethodIncentive = null,
+                    headerInformation = null,
+                )
+            )
+        )
+
+        PaymentSheetScreen.VerticalModeForm(interactor).showsWalletsHeader(isCompleteFlow = true).test {
+            assertThat(awaitItem()).isTrue()
+        }
     }
 
     private class FakeVerticalModeFormInteractor(

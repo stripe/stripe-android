@@ -48,10 +48,14 @@ class AutocompleteAddressElement(
     override fun sectionFieldErrorController() = controller
 
     override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
-        controller.addressElementFlow.value.setRawValue(rawValuesMap)
+        controller.setRawValue(rawValuesMap)
     }
 
     override fun getFormFieldValueFlow() = controller.formFieldValues
 
     override fun getTextFieldIdentifiers() = controller.textFieldIdentifiers
+
+    override fun onValidationStateChanged(isValidating: Boolean) {
+        controller.onValidationStateChanged(isValidating)
+    }
 }

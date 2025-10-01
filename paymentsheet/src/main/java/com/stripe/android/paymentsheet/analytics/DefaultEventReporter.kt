@@ -27,6 +27,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.isSaved
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.state.WalletLocation
+import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.ui.core.IsStripeCardScanAvailable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -34,6 +36,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
+@Suppress("LargeClass", "TooManyFunctions")
 @OptIn(ExperimentalAnalyticEventCallbackApi::class)
 internal class DefaultEventReporter @Inject internal constructor(
     context: Context,
@@ -115,7 +118,8 @@ internal class DefaultEventReporter @Inject internal constructor(
         hasDefaultPaymentMethod: Boolean?,
         setAsDefaultEnabled: Boolean?,
         paymentMethodOptionsSetupFutureUsage: Boolean,
-        setupFutureUsage: StripeIntent.Usage?
+        setupFutureUsage: StripeIntent.Usage?,
+        openCardScanAutomatically: Boolean,
     ) {
         this.currency = currency
         this.linkEnabled = linkEnabled
@@ -147,7 +151,8 @@ internal class DefaultEventReporter @Inject internal constructor(
                 financialConnectionsAvailability = financialConnectionsAvailability,
                 setAsDefaultEnabled = setAsDefaultEnabled,
                 paymentMethodOptionsSetupFutureUsage = paymentMethodOptionsSetupFutureUsage,
-                setupFutureUsage = setupFutureUsage
+                setupFutureUsage = setupFutureUsage,
+                openCardScanAutomatically = openCardScanAutomatically,
             )
         )
     }
@@ -590,6 +595,34 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(analyticsEvent)
     }
 
+    override fun onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
+        visiblePaymentMethods: List<String>,
+        hiddenPaymentMethods: List<String>,
+        walletsState: WalletsState?,
+    ) {
+        val isGooglePayVisible = walletsState?.googlePay(WalletLocation.HEADER) != null &&
+            walletsState.buttonsEnabled
+        val isLinkVisible = walletsState?.link(WalletLocation.HEADER) != null &&
+            walletsState.buttonsEnabled
+
+        val visiblePaymentMethodsWithWallets = buildList<String> {
+            if (isGooglePayVisible) add("google_pay")
+            if (isLinkVisible) add("link")
+            addAll(visiblePaymentMethods)
+        }
+
+        fireEvent(
+            PaymentSheetEvent.InitialDisplayedPaymentMethods(
+                visiblePaymentMethods = visiblePaymentMethodsWithWallets,
+                hiddenPaymentMethods = hiddenPaymentMethods,
+                isDeferred = isDeferred,
+                isSpt = isSpt,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
     override fun onAnalyticsEvent(event: AnalyticsEvent) {
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
@@ -631,6 +664,89 @@ internal class DefaultEventReporter @Inject internal constructor(
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
                 didReceiveECEClick = didReceiveECEClick,
+            )
+        )
+    }
+
+    override fun onCardScanStarted(implementation: String) {
+        durationProvider.start(DurationProvider.Key.CardScan)
+        fireEvent(
+            PaymentSheetEvent.CardScanStarted(
+                implementation = implementation,
+                isDeferred = isDeferred,
+                isSpt = isSpt,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
+    override fun onCardScanSucceeded(implementation: String) {
+        val duration = durationProvider.end(DurationProvider.Key.CardScan)
+        fireEvent(
+            PaymentSheetEvent.CardScanSucceeded(
+                implementation = implementation,
+                duration = duration,
+                isDeferred = isDeferred,
+                isSpt = isSpt,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
+    override fun onCardScanFailed(implementation: String, error: Throwable?) {
+        val duration = durationProvider.end(DurationProvider.Key.CardScan)
+        fireEvent(
+            PaymentSheetEvent.CardScanFailed(
+                implementation = implementation,
+                duration = duration,
+                error = error,
+                isDeferred = isDeferred,
+                isSpt = isSpt,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
+    override fun onCardScanCancelled(
+        implementation: String
+    ) {
+        val duration = durationProvider.end(DurationProvider.Key.CardScan)
+        fireEvent(
+            PaymentSheetEvent.CardScanCancelled(
+                implementation = implementation,
+                duration = duration,
+                isDeferred = isDeferred,
+                isSpt = isSpt,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
+    override fun onCardScanApiCheckSucceeded(implementation: String) {
+        fireEvent(
+            PaymentSheetEvent.CardScanApiCheckSucceeded(
+                implementation = implementation,
+                isDeferred = isDeferred,
+                isSpt = isSpt,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
+    override fun onCardScanApiCheckFailed(implementation: String, error: Throwable?) {
+        fireEvent(
+            PaymentSheetEvent.CardScanApiCheckFailed(
+                implementation = implementation,
+                error = error,
+                isDeferred = isDeferred,
+                isSpt = isSpt,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
             )
         )
     }

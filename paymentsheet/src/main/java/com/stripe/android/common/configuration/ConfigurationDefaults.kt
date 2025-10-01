@@ -31,6 +31,7 @@ internal object ConfigurationDefaults {
     val walletButtons: PaymentSheet.WalletButtonsConfiguration = PaymentSheet.WalletButtonsConfiguration()
     val shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = null
     val googlePlacesApiKey: String? = null
+    const val opensCardScannerAutomatically: Boolean = false
 
     const val embeddedViewDisplaysMandateText: Boolean = true
 }

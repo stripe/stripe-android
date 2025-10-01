@@ -30,7 +30,7 @@ import javax.inject.Singleton
         ApplicationIdModule::class,
         MobileSessionIdModule::class,
         CardScanModule::class,
-        LinkHoldbackExposureModule::class,
+        LinkHoldbackExposureModule::class
     ]
 )
 internal interface PaymentSheetLauncherComponent {

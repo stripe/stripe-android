@@ -235,6 +235,8 @@ class PaymentSelectionTest {
         ).isEqualTo(
             USBankAccountTextBuilder.buildMandateText(
                 merchantName = metadata.merchantName,
+                sellerBusinessName = null,
+                forceSetupFutureUseBehavior = false,
                 isSaveForFutureUseSelected = false,
                 isInstantDebits = false,
                 isSetupFlow = true

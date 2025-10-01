@@ -29,6 +29,9 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">Αποθήκευση των στοιχείων μου για ταχύτερη ολοκλήρωση αγοράς με το Link</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_toggle">Δημιουργήστε λογαριασμό με το Link για ταχύτερη ολοκλήρωση αγοράς σε όλο το διαδίκτυο</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">Πιστωτική κάρτα %1$s</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -176,6 +179,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_remove_card">Αφαίρεση κάρτας</string>
   <!-- Title for confirmation alert to remove a card -->
   <string name="stripe_paymentsheet_remove_card_title">Αφαίρεση κάρτας;</string>
+  <!-- Description for a confirmation alert indicating to the customer that their payment method will be removed but still available to the merchant for subscriptions -->
+  <string name="stripe_paymentsheet_remove_partial_description">Αυτή η μέθοδος πληρωμής θα καταργηθεί, αλλά θα παραμείνει διαθέσιμη για %s συνδρομές.</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Αφαίρεση %s</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
@@ -206,8 +211,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_total_amount">Σύνολο: %s</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Η επωνυμία κάρτας δεν ενημερώθηκε. Δοκιμάστε ξανά.</string>
+  <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
+  <string name="stripe_paynow_confirm_payment">Επιβεβαιώστε την πληρωμή στην εφαρμογή τράπεζας ή πληρωμής εντός %s για να ολοκληρώσετε την αγορά.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Ορισμός ως προεπιλεγμένη μέθοδος πληρωμής</string>
+  <!-- Text for alert message when user needs to confirm payment in their payment app -->
+  <string name="stripe_qrcode_lpm_confirm_payment">Επιβεβαιώστε την πληρωμή στην τράπεζα ή στην εφαρμογή πληρωμών εντός %s για να ολοκληρώσετε την αγορά.</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">Αφαίρεση του τραπεζικού λογαριασμού που λήγει σε %s</string>
   <!-- Accessibility description for a button that launches Shop Pay. -->
@@ -268,6 +277,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">Προβολή περισσότερων</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Εάν συνεχίσετε, συμφωνείτε να εξουσιοδοτείτε πληρωμές με βάση αυτούς τους <terms>όρους</terms>.]]></string>
+  <!-- Text providing link to terms for bank payments when seller information is provided -->
+  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[Υποβάλλοντας την παραγγελία σας σε %1$s και σε %2$s, συμφωνείτε στην αποθήκευση των στοιχείων σας στο %3$s για μελλοντικές αγορές και συμφωνείτε στην εξουσιοδότηση πληρωμών σύμφωνα με <terms>αυτούς τους όρους</terms>.]]></string>
+  <!-- Text providing link to terms for bank payments -->
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Υποβάλλοντας την παραγγελία σας σε %s, συμφωνείτε στην εξουσιοδότηση πληρωμών σύμφωνα με <terms>αυτούς τους όρους</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Πληρωμή</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
@@ -281,6 +294,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_passthrough_description">Passthrough</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
   <string name="stripe_wallet_pay_another_way">Πληρωμή με άλλον τρόπο</string>
+  <!-- Hint shown when selecting a payment method indicating debit cards are preferred. -->
+  <string name="stripe_wallet_prefer_debit_card_hint">Οι χρεωστικές κάρτες είναι πιο πιθανό να γίνουν αποδεκτές.</string>
   <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
   <string name="stripe_wallet_recollect_cvc_error">Για λόγους ασφάλειας, εισαγάγετε πάλι τον κωδικό ασφαλείας της κάρτας σας.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->

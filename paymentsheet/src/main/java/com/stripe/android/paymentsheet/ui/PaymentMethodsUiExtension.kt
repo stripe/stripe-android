@@ -20,6 +20,7 @@ import com.stripe.android.ui.core.R as PaymentsUiCoreR
 @DrawableRes
 internal fun PaymentMethod.getSavedPaymentMethodIcon(
     forVerticalMode: Boolean = false,
+    forPaymentOption: Boolean = false,
     showNightIcon: Boolean? = null,
 ): Int {
     return when (type) {
@@ -28,7 +29,7 @@ internal fun PaymentMethod.getSavedPaymentMethodIcon(
                 // Link card brand or passthrough mode
                 getLinkIcon(
                     showNightIcon = showNightIcon,
-                    iconOnly = forVerticalMode
+                    iconOnly = forVerticalMode || forPaymentOption,
                 )
             } else {
                 card?.getSavedPaymentMethodIcon(
@@ -43,13 +44,15 @@ internal fun PaymentMethod.getSavedPaymentMethodIcon(
                 // Link passthrough mode for US bank account
                 getLinkIcon(
                     showNightIcon = showNightIcon,
-                    iconOnly = forVerticalMode
+                    iconOnly = forVerticalMode || forPaymentOption,
                 )
             } else {
                 TransformToBankIcon(usBankAccount?.bankName)
             }
         }
-        PaymentMethod.Type.Link -> getLinkIcon(showNightIcon = showNightIcon, iconOnly = forVerticalMode)
+        PaymentMethod.Type.Link -> {
+            getLinkIcon(showNightIcon = showNightIcon, iconOnly = forVerticalMode || forPaymentOption)
+        }
         else -> null
     } ?: R.drawable.stripe_ic_paymentsheet_card_unknown_ref
 }

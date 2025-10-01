@@ -154,6 +154,9 @@ constructor(
 
     private val paymentMethodOptionsJsonString: String? = null,
 
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    override val automaticPaymentMethodsEnabled: Boolean = false,
+
 ) : StripeIntent {
 
     override fun getPaymentMethodOptions() = paymentMethodOptionsJsonString?.let {
@@ -179,6 +182,12 @@ constructor(
             }
             is StripeIntent.NextActionData.DisplayMultibancoDetails -> {
                 StripeIntent.NextActionType.DisplayMultibancoDetails
+            }
+            is StripeIntent.NextActionData.DisplayPayNowDetails -> {
+                StripeIntent.NextActionType.DisplayPayNowDetails
+            }
+            is StripeIntent.NextActionData.DisplayPromptPayDetails -> {
+                StripeIntent.NextActionType.DisplayPromptPayDetails
             }
             is StripeIntent.NextActionData.VerifyWithMicrodeposits -> {
                 StripeIntent.NextActionType.VerifyWithMicrodeposits

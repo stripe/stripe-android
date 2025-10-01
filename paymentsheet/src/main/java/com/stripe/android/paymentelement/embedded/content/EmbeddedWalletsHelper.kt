@@ -33,7 +33,8 @@ internal class DefaultEmbeddedWalletsHelper @Inject constructor(
                 googlePayButtonType = GooglePayButtonType.Pay, // The actual google pay button isn't shown for embedded.
                 onGooglePayPressed = { throw IllegalStateException("Not possible.") },
                 onLinkPressed = { throw IllegalStateException("Not possible.") },
-                isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent
+                isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent,
+                walletsAllowedInHeader = emptyList() // Embedded: all wallets inline, none in header
             )
         }
     }

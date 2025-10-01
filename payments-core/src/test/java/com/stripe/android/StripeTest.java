@@ -516,7 +516,7 @@ public class StripeTest {
                 CardException.class,
                 () -> defaultStripe.createCardTokenSynchronous(cardParams)
         );
-        assertEquals("Your card number is incorrect.", cardException.getMessage());
+        assertEquals("Your card's number is invalid.", cardException.getMessage());
     }
 
     @Test

@@ -85,6 +85,9 @@ internal class CustomerSheetScreenshotTest {
         setAsDefaultMatchesSaveForFutureUse = false,
         autocompleteAddressInteractorFactory = null,
         termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        sellerBusinessName = null,
+        forceSetupFutureUseBehavior = false,
+        clientAttributionMetadata = null,
     )
 
     private val selectPaymentMethodViewState = CustomerSheetViewState.SelectPaymentMethod(
@@ -373,6 +376,7 @@ internal class CustomerSheetScreenshotTest {
                 shouldShowSetAsDefaultCheckbox = false,
                 isDefaultPaymentMethod = false,
                 allowedBillingCountries = emptySet(),
+                removeMessage = null,
                 onUpdateSuccess = {},
             ),
             isLiveMode = true,

@@ -2,8 +2,10 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
+import org.json.JSONObject
 
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -52,6 +54,9 @@ data class DeferredIntentParams(
             "deferred_intent[capture_method]" to (mode as? Mode.Payment)?.captureMethod?.code,
             "deferred_intent[payment_method_configuration][id]" to paymentMethodConfigurationId,
             "deferred_intent[on_behalf_of]" to onBehalfOf,
+            "deferred_intent[payment_method_options]" to (mode as? Mode.Payment)?.paymentMethodOptionsJsonString?.let {
+                StripeJsonUtils.jsonObjectToMap(JSONObject(it))
+            },
         ) + paymentMethodTypes.mapIndexed { index, paymentMethodType ->
             "deferred_intent[payment_method_types][$index]" to paymentMethodType
         }

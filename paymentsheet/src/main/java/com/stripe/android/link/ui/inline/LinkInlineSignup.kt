@@ -5,6 +5,7 @@ package com.stripe.android.link.ui.inline
 import androidx.annotation.RestrictTo
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -12,10 +13,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -34,11 +38,20 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.onFocusEvent
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -66,6 +79,7 @@ import kotlinx.coroutines.launch
 import com.stripe.android.uicore.R as StripeUiCoreR
 
 internal const val ProgressIndicatorTestTag = "CircularProgressIndicator"
+private const val LINK_LOGO_SCALE = 0.95f
 
 @Composable
 internal fun LinkInlineSignup(
@@ -169,6 +183,7 @@ internal fun LinkInlineSignup(
                 enabled = enabled,
                 contentAlpha = contentAlpha,
                 simplifiedCheckbox = simplifiedCheckbox,
+                useLinkLogoInCheckboxText = linkSignUpOptInFeatureEnabled,
                 toggleExpanded = toggleExpanded
             )
 
@@ -226,12 +241,9 @@ private fun LinkCheckbox(
     contentAlpha: Float,
     simplifiedCheckbox: Boolean,
     toggleExpanded: () -> Unit,
+    useLinkLogoInCheckboxText: Boolean,
 ) {
-    val label = if (simplifiedCheckbox) {
-        stringResource(id = R.string.stripe_inline_sign_up_header_default_opt_in)
-    } else {
-        stringResource(id = R.string.stripe_inline_sign_up_header)
-    }
+    val label = stringResource(id = R.string.stripe_inline_sign_up_header_default_opt_in)
 
     val sublabel = if (!simplifiedCheckbox) {
         stringResource(R.string.stripe_sign_up_message, merchantName)
@@ -252,11 +264,18 @@ private fun LinkCheckbox(
             enabled = enabled
         )
         Column {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colors.onSurface.copy(alpha = contentAlpha)
-            )
+            if (useLinkLogoInCheckboxText) {
+                TextWithLinkLogo(
+                    style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Medium),
+                    color = MaterialTheme.colors.onSurface.copy(alpha = contentAlpha),
+                )
+            } else {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colors.onSurface.copy(alpha = contentAlpha)
+                )
+            }
             if (sublabel != null) {
                 Text(
                     text = sublabel,
@@ -268,6 +287,54 @@ private fun LinkCheckbox(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun TextWithLinkLogo(
+    style: TextStyle,
+    color: Color,
+) {
+    val label = stringResource(R.string.stripe_inline_sign_up_toggle)
+    val painter = painterResource(R.drawable.stripe_link_logo_knockout)
+    // Slightly smaller Link logo for better visual balance
+    val logoHeight = style.fontSize * LINK_LOGO_SCALE
+    val logoWidth = logoHeight * (painter.intrinsicSize.width / painter.intrinsicSize.height)
+    Text(
+        text = label.buildLinkLogoAnnotatedString(),
+        style = style,
+        color = color,
+        inlineContent = mapOf(
+            "link_logo" to InlineTextContent(
+                placeholder = Placeholder(
+                    width = logoWidth,
+                    height = logoHeight,
+                    placeholderVerticalAlign = PlaceholderVerticalAlign.Center
+                )
+            ) {
+                Image(
+                    painter = painter,
+                    contentDescription = stringResource(com.stripe.android.R.string.stripe_link),
+                    colorFilter = ColorFilter.tint(color, BlendMode.SrcIn),
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        )
+    )
+}
+
+@Composable
+private fun String.buildLinkLogoAnnotatedString(): AnnotatedString = buildAnnotatedString {
+    val parts = split("Link")
+    val preLinkText = parts.getOrNull(0)
+    val postLinkText = parts.getOrNull(1)
+    if (preLinkText == null || postLinkText == null) {
+        // "Link" not found, just show the label as-is
+        append(this@buildLinkLogoAnnotatedString)
+    } else {
+        append(preLinkText)
+        appendInlineContent(id = "link_logo")
+        append(postLinkText)
     }
 }
 
@@ -444,24 +511,22 @@ private fun PreviewDOI() {
 @Composable
 private fun PreviewSignInFeature() {
     DefaultLinkTheme {
-        Surface {
-            LinkInlineSignup(
-                merchantName = "Example, Inc.",
-                sectionController = SectionController(null, emptyList()),
-                emailController = EmailConfig.createController(""),
-                phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
-                nameController = NameConfig.createController("My Name"),
-                signUpState = InputtingRemainingFields,
-                enabled = true,
-                expanded = true,
-                requiresNameCollection = false,
-                allowsDefaultOptIn = false,
-                linkSignUpOptInFeatureEnabled = true,
-                didAskToChangeSignupDetails = false,
-                errorMessage = null,
-                toggleExpanded = {},
-                changeSignupDetails = {},
-            )
-        }
+        LinkInlineSignup(
+            merchantName = "Example, Inc.",
+            sectionController = SectionController(null, emptyList()),
+            emailController = EmailConfig.createController(""),
+            phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
+            nameController = NameConfig.createController("My Name"),
+            signUpState = InputtingRemainingFields,
+            enabled = true,
+            expanded = true,
+            requiresNameCollection = false,
+            allowsDefaultOptIn = false,
+            linkSignUpOptInFeatureEnabled = true,
+            didAskToChangeSignupDetails = false,
+            errorMessage = null,
+            toggleExpanded = {},
+            changeSignupDetails = {},
+        )
     }
 }

@@ -226,7 +226,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
                 // client secret is null for deferred intents.
                 Result.success(null)
             } else {
-                retrieveStripeIntent(args.publishableKey, clientSecret)
+                retrieveStripeIntent(args.publishableKey, args.stripeAccountId, clientSecret)
             }
 
             retrieveIntentResult.onFailure {

@@ -305,6 +305,7 @@ class WalletUiStateTest {
         return WalletUiState(
             paymentDetailsList = paymentDetailsList,
             email = "email@stripe.com",
+            allowLogOut = true,
             selectedItemId = selectedItem?.id,
             cardBrandFilter = cardBrandFilter,
             hasCompleted = hasCompleted,
@@ -318,6 +319,7 @@ class WalletUiStateTest {
             cardBeingUpdated = cardBeingUpdated,
             isSettingUp = isSettingUp,
             merchantName = merchantName,
+            sellerBusinessName = null,
             collectMissingBillingDetailsForExistingPaymentMethods =
             collectMissingBillingDetailsForExistingPaymentMethods,
             signupToggleEnabled = signupToggleEnabled,

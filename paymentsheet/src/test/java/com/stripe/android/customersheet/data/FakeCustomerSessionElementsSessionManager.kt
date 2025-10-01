@@ -20,8 +20,10 @@ internal class FakeCustomerSessionElementsSessionManager(
     private val isPaymentMethodSyncDefaultEnabled: Boolean = false,
     private val customerSheetComponent: ElementsSession.Customer.Components.CustomerSheet =
         ElementsSession.Customer.Components.CustomerSheet.Enabled(
-            isPaymentMethodRemoveEnabled = true,
-            canRemoveLastPaymentMethod = true,
+            paymentMethodRemove =
+            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
+            paymentMethodRemoveLast =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided,
             isPaymentMethodSyncDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
         ),
     private val customer: ElementsSession.Customer = ElementsSession.Customer(
@@ -56,7 +58,8 @@ internal class FakeCustomerSessionElementsSessionManager(
                 elementsSessionId = "session_1234",
                 flags = emptyMap(),
                 experimentsData = null,
-                passiveCaptcha = null
+                passiveCaptcha = null,
+                merchantLogoUrl = null
             ),
             customer = customer,
             ephemeralKey = CachedCustomerEphemeralKey(

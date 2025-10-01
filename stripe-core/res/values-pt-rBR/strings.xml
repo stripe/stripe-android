@@ -24,4 +24,6 @@
   <string name="stripe_address_label_state">Estado</string>
   <!-- Label for input requesting zip code, used for US based addreses -->
   <string name="stripe_address_label_zip_code">Código postal</string>
+  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
+  <string name="stripe_unexpected_error_try_again">Erro inesperado – tente novamente em alguns segundos</string>
 </resources>

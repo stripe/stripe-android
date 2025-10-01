@@ -29,6 +29,9 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">บันทึกข้อมูลของฉันเพื่อให้ชำระเงินด้วย Link ได้รวดเร็วขึ้น</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_toggle">สร้างบัญชีด้วย Link เพื่อการชำระเงินบนเว็บที่รวดเร็วขึ้น</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">บัตรเครดิต %1$s</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -176,6 +179,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_remove_card">นำบัตรออก</string>
   <!-- Title for confirmation alert to remove a card -->
   <string name="stripe_paymentsheet_remove_card_title">นำบัตรออกไหม</string>
+  <!-- Description for a confirmation alert indicating to the customer that their payment method will be removed but still available to the merchant for subscriptions -->
+  <string name="stripe_paymentsheet_remove_partial_description">วิธีการชำระเงินนี้จะถูกนำออกไปแต่จะยังคงใช้ได้สำหรับการชำระเงินตามรอบบิล %s</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">นำ %s ออก</string>
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
@@ -206,6 +211,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_total_amount">รวม: %s</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">ระบบไม่ได้อัปเดตแบรนด์ของบัตร โปรดลองอีกครั้ง</string>
+  <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
+  <string name="stripe_paynow_confirm_payment">ยืนยันการชำระเงินในแอปของธนาคารหรือแอปชำระเงินภายใน %s เพื่อชำระเงินให้เสร็จสิ้น</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">ตั้งเป็นวิธีการชำระเงินเริ่มต้น</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -268,6 +275,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_view_more">ดูเพิ่มเติม</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[การดำเนินการต่อหมายความว่าคุณตกลงที่จะอนุมัติการชำระเงินซึ่งดำเนินการตาม<terms>ข้อกำหนด</terms>เหล่านี้]]></string>
+  <!-- Text providing link to terms for bank payments when seller information is provided -->
+  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[การส่งคำสั่งซื้อของคุณไปยัง %1$s และ %2$s หมายความว่าคุณตกลงที่จะบันทึกข้อมูลไว้กับ %3$s สำหรับการซื้อในอนาคต และตกลงที่จะอนุมัติการชำระเงินตาม<terms>ข้อกำหนดเหล่านี้</terms>]]></string>
+  <!-- Text providing link to terms for bank payments -->
+  <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[การส่งคำสั่งซื้อให้ %s หมายความว่าคุณตกลงที่จะอนุมัติการชำระเงินตาม<terms>ข้อกำหนดเหล่านี้</terms>]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">การชำระเงิน</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
@@ -281,6 +292,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_passthrough_description">การผ่าน</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
   <string name="stripe_wallet_pay_another_way">ชำระด้วยวิธีอื่น</string>
+  <!-- Hint shown when selecting a payment method indicating debit cards are preferred. -->
+  <string name="stripe_wallet_prefer_debit_card_hint">บัตรเดบิตเป็นบัตรที่มีแนวโน้มสูงสุดว่าจะได้รับการยอมรับ</string>
   <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
   <string name="stripe_wallet_recollect_cvc_error">โปรดป้อนรหัสรักษาความปลอดภัยของบัตรอีกครั้งเพื่อความปลอดภัย</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->

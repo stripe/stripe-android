@@ -144,6 +144,10 @@ internal class UpdateCardScreenViewModel @Inject constructor(
         }
     }
 
+    fun onDisabledUpdateClicked() {
+        interactor.value?.handleViewAction(EditCardDetailsInteractor.ViewAction.Validate)
+    }
+
     private fun CardUpdateParams.toApiParams(): PaymentMethodCreateParams = PaymentMethodCreateParams.create(
         card = PaymentMethodCreateParams.Card.Builder().apply {
             setExpiryMonth(this@toApiParams.expiryMonth)
@@ -203,7 +207,18 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                     defaultConfiguration.address
                 },
                 attachDefaultsToPaymentMethod = defaultConfiguration.attachDefaultsToPaymentMethod,
-                allowedCountries = defaultConfiguration.allowedBillingCountries,
+                // Country filtering behavior depends on the update flow type:
+                // - Regular edit flow: Allow all countries. When updating your card, you can select any
+                //   country. You'll get back to the wallet and that card won't be selectable if the
+                //   country is not allowed, but users can still update existing cards.
+                // - Billing details update flow: Apply country filtering. This flow triggers when there's
+                //   missing billing details and directly confirms the payment there, so we don't want to
+                //   allow changing the country to an unallowed one.
+                allowedCountries = if (state.value.isBillingDetailsUpdateFlow) {
+                    defaultConfiguration.allowedBillingCountries
+                } else {
+                    emptySet()
+                },
             ),
             onCardUpdateParamsChanged = ::onCardUpdateParamsChanged,
             onBrandChoiceChanged = ::onBrandChoiceChanged,

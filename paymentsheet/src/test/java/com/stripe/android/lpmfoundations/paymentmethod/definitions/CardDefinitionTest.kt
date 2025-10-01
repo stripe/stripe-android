@@ -1,7 +1,9 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
+import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
@@ -21,11 +23,13 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
+import com.stripe.android.ui.core.elements.CardDetailsSectionController
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
-import com.stripe.android.uicore.elements.AutocompleteAddressController
+import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SameAsShippingElement
@@ -283,9 +287,10 @@ class CardDefinitionTest {
     fun `createFormElements returns mandate when has intent to setup`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+            forceSetupFutureUseBehaviorAndNewMandate = true,
             linkState = LinkState(
                 signupMode = null,
-                configuration = createLinkConfiguration().copy(linkSignUpOptInFeatureEnabled = true),
+                configuration = createLinkConfiguration(),
                 loginState = LinkState.LoginState.LoggedOut,
             ),
         )
@@ -297,17 +302,17 @@ class CardDefinitionTest {
 
         assertThat(formElements).hasSize(3)
 
-        testStaticMandateElement(metadata, formElements[2])
+        testCombinedLinkMandateElement(formElements[2])
     }
 
     @Test
-    fun `createFormElements returns no mandate if linkSignUpOptInFeatureEnabled but no email passed in`() {
+    fun `createFormElements returns mandate when forceSetupFutureUseBehaviorAndNewMandate even with no email`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            forceSetupFutureUseBehaviorAndNewMandate = true,
             linkState = LinkState(
                 signupMode = null,
                 configuration = createLinkConfiguration().copy(
-                    linkSignUpOptInFeatureEnabled = true,
                     customerInfo = LinkConfiguration.CustomerInfo(
                         name = null,
                         email = null,
@@ -324,8 +329,8 @@ class CardDefinitionTest {
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
         )
 
-        assertThat(formElements).hasSize(2)
-        assertThat(formElements.filterIsInstance<CombinedLinkMandateElement>()).isEmpty()
+        assertThat(formElements).hasSize(3)
+        testCombinedLinkMandateElement(formElements[2])
     }
 
     @Test
@@ -366,9 +371,10 @@ class CardDefinitionTest {
     fun `createFormElements returns mandate below link_form when has intent to setup`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+            forceSetupFutureUseBehaviorAndNewMandate = true,
             linkState = LinkState(
                 signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
-                configuration = createLinkConfiguration().copy(linkSignUpOptInFeatureEnabled = true),
+                configuration = createLinkConfiguration(),
                 loginState = LinkState.LoginState.LoggedOut,
             ),
         )
@@ -402,8 +408,8 @@ class CardDefinitionTest {
         }
 
         assertThat(cardBillingAddressElements).hasSize(1)
-        assertThat(cardBillingAddressElements.firstOrNull()?.sectionFieldErrorController())
-            .isInstanceOf<AutocompleteAddressController>()
+        assertThat(cardBillingAddressElements.firstOrNull()?.addressElement)
+            .isInstanceOf<AutocompleteAddressElement>()
     }
 
     @Test
@@ -516,11 +522,10 @@ class CardDefinitionTest {
         )
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+            forceSetupFutureUseBehaviorAndNewMandate = true,
             termsDisplay = termsDisplay,
             linkState = LinkState(
-                configuration = TestFactory.LINK_CONFIGURATION.copy(
-                    linkSignUpOptInFeatureEnabled = true,
-                ),
+                configuration = TestFactory.LINK_CONFIGURATION,
                 loginState = LinkState.LoginState.LoggedOut,
                 signupMode = LinkSignupMode.AlongsideSaveForFutureUse,
             )
@@ -531,13 +536,12 @@ class CardDefinitionTest {
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
         )
 
-        // Should only include card_details and billing section, no mandate
+        // Should include card_details, billing section, link_form, and combined mandate (Link enabled)
         assertThat(formElements).hasSize(4)
         assertThat(formElements[0].identifier.v1).isEqualTo("card_details")
         assertThat(formElements[1].identifier.v1).isEqualTo("credit_billing_section")
         assertThat(formElements[2].identifier.v1).isEqualTo("link_form")
-        assertThat(formElements[3].identifier.v1).isEqualTo("card_mandate")
-        assertThat(formElements[3]).isInstanceOf<CombinedLinkMandateElement>()
+        testCombinedLinkMandateElement(formElements[3])
     }
 
     @Test
@@ -557,6 +561,78 @@ class CardDefinitionTest {
         assertThat(formElements[0].identifier.v1).isEqualTo("card_details")
         assertThat(formElements[1].identifier.v1).isEqualTo("credit_billing_section")
         testStaticMandateElement(metadata, formElements[2])
+    }
+
+    @Test
+    fun `createFormElements shouldAutomaticallyLaunchCardScan in CardDetailsSectionController`() {
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
+        val formElements = CardDefinition.formElements(
+            metadata = PaymentMethodMetadataFactory.create(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+                )
+            ),
+            automaticallyLaunchedCardScanFormDataHelper = AutomaticallyLaunchedCardScanFormDataHelper(
+                hasAutomaticallyLaunchedCardScanInitialValue = false,
+                openCardScanAutomaticallyConfig = true,
+                savedStateHandle = SavedStateHandle()
+            )
+        )
+        assertThat(formElements[0].controller).isInstanceOf<CardDetailsSectionController>()
+
+        assertThat(
+            (formElements[0].controller as CardDetailsSectionController).shouldAutomaticallyLaunchCardScan()
+        ).isTrue()
+
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
+    }
+
+    @Test
+    fun `createFormElements should not automaticallyLaunchCardScan when config is false`() {
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
+        val formElements = CardDefinition.formElements(
+            metadata = PaymentMethodMetadataFactory.create(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+                )
+            ),
+            automaticallyLaunchedCardScanFormDataHelper = AutomaticallyLaunchedCardScanFormDataHelper(
+                hasAutomaticallyLaunchedCardScanInitialValue = false,
+                openCardScanAutomaticallyConfig = false,
+                savedStateHandle = SavedStateHandle()
+            )
+        )
+        assertThat(formElements[0].controller).isInstanceOf<CardDetailsSectionController>()
+
+        assertThat(
+            (formElements[0].controller as CardDetailsSectionController).shouldAutomaticallyLaunchCardScan()
+        ).isFalse()
+
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
+    }
+
+    @Test
+    fun `createFormElements should not automaticallyLaunchCardScan when has automaticallyLaunchedCardScan`() {
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
+        val formElements = CardDefinition.formElements(
+            metadata = PaymentMethodMetadataFactory.create(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+                )
+            ),
+            automaticallyLaunchedCardScanFormDataHelper = AutomaticallyLaunchedCardScanFormDataHelper(
+                hasAutomaticallyLaunchedCardScanInitialValue = true,
+                openCardScanAutomaticallyConfig = true,
+                savedStateHandle = SavedStateHandle()
+            )
+        )
+        assertThat(formElements[0].controller).isInstanceOf<CardDetailsSectionController>()
+
+        assertThat(
+            (formElements[0].controller as CardDetailsSectionController).shouldAutomaticallyLaunchCardScan()
+        ).isFalse()
+
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     private fun createLinkConfiguration(): LinkConfiguration {

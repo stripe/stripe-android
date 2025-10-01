@@ -6,5 +6,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class PassiveChallengeArgs(
-    val passiveCaptchaParams: PassiveCaptchaParams
+    val passiveCaptchaParams: PassiveCaptchaParams,
+    val publishableKey: String,
+    val productUsage: List<String>
 ) : Parcelable

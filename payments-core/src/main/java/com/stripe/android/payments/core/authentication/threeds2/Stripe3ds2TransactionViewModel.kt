@@ -1,5 +1,6 @@
 package com.stripe.android.payments.core.authentication.threeds2
 
+import android.content.Context
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -7,6 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.google.android.instantapps.InstantApps
+import com.stripe.android.R
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.core.exception.StripeException
@@ -23,6 +25,7 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.injection.DaggerStripe3ds2TransactionViewModelFactoryComponent
 import com.stripe.android.payments.core.injection.IS_INSTANT_APP
+import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
 import com.stripe.android.stripe3ds2.transaction.ChallengeParameters
 import com.stripe.android.stripe3ds2.transaction.ChallengeResult
@@ -38,6 +41,7 @@ import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
 internal class Stripe3ds2TransactionViewModel @Inject constructor(
+    private val context: Context,
     private val args: Stripe3ds2TransactionContract.Args,
     private val stripeRepository: StripeRepository,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
@@ -226,7 +230,10 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
                 shouldCancelSource = true,
                 statusBarColor = args.statusBarColor,
                 publishableKey = threeDS2RequestOptions.apiKey,
-                isInstantApp = isInstantApp
+                isInstantApp = isInstantApp,
+                toolbarCustomization = StripeToolbarCustomization().apply {
+                    setButtonText(context.getString(R.string.stripe_cancel))
+                },
             )
         )
     }

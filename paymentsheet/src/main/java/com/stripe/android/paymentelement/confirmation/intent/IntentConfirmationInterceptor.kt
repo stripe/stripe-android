@@ -8,17 +8,16 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.model.RadarOptions
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.setupFutureUsage
@@ -27,7 +26,9 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
-import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor.NextStep
+import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
@@ -47,48 +48,6 @@ import com.stripe.android.R as PaymentsCoreR
 
 internal interface IntentConfirmationInterceptor {
 
-    sealed interface NextStep {
-
-        val deferredIntentConfirmationType: DeferredIntentConfirmationType?
-
-        data class Fail(
-            val cause: Throwable,
-            val message: ResolvableString,
-        ) : NextStep {
-
-            override val deferredIntentConfirmationType: DeferredIntentConfirmationType?
-                get() = null
-        }
-
-        data class Confirm(
-            val confirmParams: ConfirmStripeIntentParams,
-            val isDeferred: Boolean,
-        ) : NextStep {
-
-            override val deferredIntentConfirmationType: DeferredIntentConfirmationType?
-                get() = DeferredIntentConfirmationType.Client.takeIf { isDeferred }
-        }
-
-        data class HandleNextAction(val clientSecret: String) : NextStep {
-
-            override val deferredIntentConfirmationType: DeferredIntentConfirmationType
-                get() = DeferredIntentConfirmationType.Server
-        }
-
-        data class Complete(
-            val isForceSuccess: Boolean,
-            val completedFullPaymentFlow: Boolean = true,
-        ) : NextStep {
-
-            override val deferredIntentConfirmationType: DeferredIntentConfirmationType
-                get() = if (isForceSuccess) {
-                    DeferredIntentConfirmationType.None
-                } else {
-                    DeferredIntentConfirmationType.Server
-                }
-        }
-    }
-
     suspend fun intercept(
         initializationMode: PaymentElementLoader.InitializationMode,
         intent: StripeIntent,
@@ -97,7 +56,7 @@ internal interface IntentConfirmationInterceptor {
         paymentMethodExtraParams: PaymentMethodExtraParams? = null,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         customerRequestedSave: Boolean,
-    ): NextStep
+    ): ConfirmationDefinition.Action<Args>
 
     suspend fun intercept(
         initializationMode: PaymentElementLoader.InitializationMode,
@@ -106,7 +65,8 @@ internal interface IntentConfirmationInterceptor {
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams? = null,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-    ): NextStep
+        hCaptchaToken: String?,
+    ): ConfirmationDefinition.Action<Args>
 
     companion object {
         var createIntentCallback: CreateIntentCallback? = null
@@ -175,7 +135,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodExtraParams: PaymentMethodExtraParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         customerRequestedSave: Boolean,
-    ): NextStep {
+    ): ConfirmationDefinition.Action<Args> {
         return when (initializationMode) {
             is PaymentElementLoader.InitializationMode.DeferredIntent -> {
                 /*
@@ -184,6 +144,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                  * `PaymentSheet.Configuration` in order to populate `Payment Element` data.
                  */
                 handleDeferred(
+                    intent = intent,
                     intentConfiguration = initializationMode.intentConfiguration,
                     shippingValues = shippingValues,
                     paymentMethodCreateParams = paymentMethodCreateParams,
@@ -227,7 +188,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-    ): NextStep {
+        hCaptchaToken: String?
+    ): ConfirmationDefinition.Action<Args> {
         return when (initializationMode) {
             is PaymentElementLoader.InitializationMode.DeferredIntent -> {
                 val updatedPaymentMethodOptionsParams = updatePaymentMethodOptionsParams(
@@ -236,6 +198,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethodOptionsParams = paymentMethodOptionsParams
                 )
                 handleDeferred(
+                    intent = intent,
                     intentConfiguration = initializationMode.intentConfiguration,
                     paymentMethod = paymentMethod,
                     paymentMethodOptionsParams = updatedPaymentMethodOptionsParams,
@@ -245,6 +208,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                         paymentMethodOptionsParams = updatedPaymentMethodOptionsParams,
                         intentConfiguration = initializationMode.intentConfiguration
                     ),
+                    hCaptchaToken = hCaptchaToken
                 )
             }
 
@@ -257,7 +221,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     isDeferred = false,
-                    intentConfigSetupFutureUsage = null
+                    intentConfigSetupFutureUsage = null,
+                    hCaptchaToken = hCaptchaToken
                 )
             }
 
@@ -270,20 +235,22 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     isDeferred = false,
-                    intentConfigSetupFutureUsage = null
+                    intentConfigSetupFutureUsage = null,
+                    hCaptchaToken = hCaptchaToken
                 )
             }
         }
     }
 
     private suspend fun handleDeferred(
+        intent: StripeIntent,
         intentConfiguration: PaymentSheet.IntentConfiguration,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         customerRequestedSave: Boolean,
-    ): NextStep {
+    ): ConfirmationDefinition.Action<Args> {
         val productUsage = buildSet {
             addAll(paymentMethodCreateParams.attribution)
             add("deferred-intent")
@@ -299,6 +266,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         return createPaymentMethod(params).fold(
             onSuccess = { paymentMethod ->
                 handleDeferred(
+                    intent = intent,
                     intentConfiguration = intentConfiguration,
                     paymentMethod = paymentMethod,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
@@ -308,35 +276,42 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                         paymentMethodOptionsParams = paymentMethodOptionsParams,
                         intentConfiguration = intentConfiguration
                     ),
+                    hCaptchaToken = null
                 )
             },
             onFailure = { error ->
-                NextStep.Fail(
+                ConfirmationDefinition.Action.Fail(
                     cause = error,
                     message = error.stripeErrorMessage(),
+                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
                 )
             }
         )
     }
 
     private suspend fun handleDeferred(
+        intent: StripeIntent,
         intentConfiguration: PaymentSheet.IntentConfiguration,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         shouldSavePaymentMethod: Boolean,
-    ): NextStep {
+        hCaptchaToken: String?
+    ): ConfirmationDefinition.Action<Args> {
         return when (intentConfiguration.intentBehavior) {
             is PaymentSheet.IntentConfiguration.IntentBehavior.Default -> handleDeferredIntent(
+                intent = intent,
                 intentConfiguration = intentConfiguration,
                 paymentMethod = paymentMethod,
                 paymentMethodOptionsParams = paymentMethodOptionsParams,
                 paymentMethodExtraParams = paymentMethodExtraParams,
                 shippingValues = shippingValues,
                 shouldSavePaymentMethod = shouldSavePaymentMethod,
+                hCaptchaToken = hCaptchaToken
             )
             is PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken -> handlePreparePaymentMethod(
+                intent = intent,
                 paymentMethod = paymentMethod,
                 shippingValues = shippingValues,
             )
@@ -344,16 +319,19 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     }
 
     private suspend fun handleDeferredIntent(
+        intent: StripeIntent,
         intentConfiguration: PaymentSheet.IntentConfiguration,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         shouldSavePaymentMethod: Boolean,
-    ): NextStep {
+        hCaptchaToken: String?
+    ): ConfirmationDefinition.Action<Args> {
         return when (val callback = waitForIntentCallback()) {
             is CreateIntentCallback -> {
                 handleDeferredIntentCreationFromPaymentMethod(
+                    intent = intent,
                     createIntentCallback = callback,
                     intentConfiguration = intentConfiguration,
                     paymentMethod = paymentMethod,
@@ -361,6 +339,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     shouldSavePaymentMethod = shouldSavePaymentMethod,
                     shippingValues = shippingValues,
+                    hCaptchaToken = hCaptchaToken
                 )
             }
 
@@ -370,22 +349,24 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
 
                 errorReporter.report(ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL)
 
-                NextStep.Fail(
+                ConfirmationDefinition.Action.Fail(
                     cause = IllegalStateException(error),
                     message = if (requestOptions.apiKeyIsLiveMode) {
                         PaymentsCoreR.string.stripe_internal_error.resolvableString
                     } else {
                         error.resolvableString
-                    }
+                    },
+                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
                 )
             }
         }
     }
 
     private suspend fun handlePreparePaymentMethod(
+        intent: StripeIntent,
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-    ): NextStep {
+    ): ConfirmationDefinition.Action<Args> {
         runCatching {
             stripeRepository.createSavedPaymentMethodRadarSession(
                 paymentMethodId = paymentMethod.id
@@ -412,11 +393,16 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                         shippingAddress = shippingValues?.toAddressDetails(),
                     )
 
-                    NextStep.Complete(isForceSuccess = true, completedFullPaymentFlow = false)
+                    ConfirmationDefinition.Action.Complete(
+                        intent = intent,
+                        deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
+                        completedFullPaymentFlow = false,
+                    )
                 } catch (exception: Exception) {
-                    NextStep.Fail(
+                    ConfirmationDefinition.Action.Fail(
                         cause = exception,
                         message = exception.errorMessage,
+                        errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
                     )
                 }
             }
@@ -427,13 +413,14 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
 
                 errorReporter.report(ErrorReporter.ExpectedErrorEvent.PREPARE_PAYMENT_METHOD_HANDLER_NULL)
 
-                NextStep.Fail(
+                ConfirmationDefinition.Action.Fail(
                     cause = IllegalStateException(error),
                     message = if (requestOptions.apiKeyIsLiveMode) {
                         PaymentsCoreR.string.stripe_internal_error.resolvableString
                     } else {
                         error.resolvableString
-                    }
+                    },
+                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
                 )
             }
         }
@@ -499,6 +486,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     }
 
     private suspend fun handleDeferredIntentCreationFromPaymentMethod(
+        intent: StripeIntent,
         createIntentCallback: CreateIntentCallback,
         intentConfiguration: PaymentSheet.IntentConfiguration,
         paymentMethod: PaymentMethod,
@@ -506,7 +494,8 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodExtraParams: PaymentMethodExtraParams?,
         shouldSavePaymentMethod: Boolean,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-    ): NextStep {
+        hCaptchaToken: String?
+    ): ConfirmationDefinition.Action<Args> {
         val result = createIntentCallback.onCreateIntent(
             paymentMethod = paymentMethod,
             shouldSavePaymentMethod = shouldSavePaymentMethod,
@@ -515,7 +504,11 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         return when (result) {
             is CreateIntentResult.Success -> {
                 if (result.clientSecret == IntentConfirmationInterceptor.COMPLETE_WITHOUT_CONFIRMING_INTENT) {
-                    NextStep.Complete(isForceSuccess = true)
+                    ConfirmationDefinition.Action.Complete(
+                        intent = intent,
+                        deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
+                        completedFullPaymentFlow = true,
+                    )
                 } else {
                     handleDeferredIntentCreationSuccess(
                         clientSecret = result.clientSecret,
@@ -524,16 +517,18 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                         paymentMethodOptionsParams = paymentMethodOptionsParams,
                         paymentMethodExtraParams = paymentMethodExtraParams,
                         shippingValues = shippingValues,
+                        hCaptchaToken = hCaptchaToken
                     )
                 }
             }
 
             is CreateIntentResult.Failure -> {
                 val exception = CreateIntentCallbackFailureException(result.cause)
-                NextStep.Fail(
+                ConfirmationDefinition.Action.Fail(
                     cause = exception,
                     message = result.displayMessage?.resolvableString
                         ?: exception.stripeErrorMessage(),
+                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
                 )
             }
         }
@@ -546,11 +541,17 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-    ): NextStep {
+        hCaptchaToken: String?
+    ): ConfirmationDefinition.Action<Args> {
         return retrieveStripeIntent(clientSecret).mapCatching { intent ->
             if (intent.isConfirmed) {
                 failIfSetAsDefaultFeatureIsEnabled(paymentMethodExtraParams)
-                NextStep.Complete(isForceSuccess = false)
+
+                ConfirmationDefinition.Action.Complete(
+                    intent = intent,
+                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    completedFullPaymentFlow = true,
+                )
             } else if (intent.requiresAction()) {
                 createHandleNextActionStep(clientSecret, intent, paymentMethod)
             } else {
@@ -564,13 +565,15 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethodExtraParams = paymentMethodExtraParams,
                     isDeferred = true,
                     intentConfigSetupFutureUsage = intentConfiguration
-                        .mode.setupFutureUse?.toConfirmParamsSetupFutureUsage()
+                        .mode.setupFutureUse?.toConfirmParamsSetupFutureUsage(),
+                    hCaptchaToken = hCaptchaToken
                 )
             }
         }.getOrElse { error ->
-            NextStep.Fail(
+            ConfirmationDefinition.Action.Fail(
                 cause = error,
                 message = error.stripeErrorMessage(),
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
             )
         }
     }
@@ -579,14 +582,20 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         clientSecret: String,
         intent: StripeIntent,
         paymentMethod: PaymentMethod
-    ): NextStep {
-        return runCatching {
+    ): ConfirmationDefinition.Action<Args> {
+        return runCatching<ConfirmationDefinition.Action<Args>> {
             DeferredIntentValidator.validatePaymentMethod(intent, paymentMethod)
-            NextStep.HandleNextAction(clientSecret)
+
+            ConfirmationDefinition.Action.Launch(
+                launcherArguments = Args.NextAction(clientSecret),
+                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                receivesResultInProcess = false,
+            )
         }.getOrElse {
-            NextStep.Fail(
+            ConfirmationDefinition.Action.Fail(
                 cause = InvalidDeferredIntentUsageException(),
                 message = resolvableString(R.string.stripe_paymentsheet_invalid_deferred_intent_usage),
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
             )
         }
     }
@@ -606,8 +615,9 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams?,
         isDeferred: Boolean,
-        intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?
-    ): NextStep {
+        intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+        hCaptchaToken: String?
+    ): ConfirmationDefinition.Action<Args> {
         val factory = ConfirmStripeIntentParamsFactory.createFactory(
             clientSecret = clientSecret,
             intent = intent,
@@ -622,11 +632,13 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             paymentMethod = paymentMethod,
             optionsParams = paymentMethodOptionsParams,
             extraParams = paymentMethodExtraParams,
-            intentConfigSetupFutureUsage = intentConfigSetupFutureUsage
+            intentConfigSetupFutureUsage = intentConfigSetupFutureUsage,
+            radarOptions = hCaptchaToken?.let { RadarOptions(it) }
         )
-        return NextStep.Confirm(
-            confirmParams = confirmParams,
-            isDeferred = isDeferred,
+        return ConfirmationDefinition.Action.Launch(
+            launcherArguments = Args.Confirm(confirmParams),
+            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client.takeIf { isDeferred },
+            receivesResultInProcess = false,
         )
     }
 
@@ -637,7 +649,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
         paymentMethodExtraParams: PaymentMethodExtraParams? = null,
-    ): NextStep {
+    ): ConfirmationDefinition.Action<Args> {
         val paramsFactory = ConfirmStripeIntentParamsFactory.createFactory(
             clientSecret = clientSecret,
             intent = intent,
@@ -654,23 +666,25 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             paymentMethodExtraParams,
         )
 
-        return NextStep.Confirm(
-            confirmParams = confirmParams,
-            isDeferred = false,
+        return ConfirmationDefinition.Action.Launch(
+            launcherArguments = Args.Confirm(confirmParams),
+            deferredIntentConfirmationType = null,
+            receivesResultInProcess = false,
         )
     }
 
     private fun createFailStep(
         exception: Exception,
         message: String,
-    ): NextStep.Fail {
-        return NextStep.Fail(
+    ): ConfirmationDefinition.Action<Args> {
+        return ConfirmationDefinition.Action.Fail(
             cause = exception,
             message = if (requestOptions.apiKeyIsLiveMode) {
                 PaymentsCoreR.string.stripe_internal_error.resolvableString
             } else {
                 message.resolvableString
-            }
+            },
+            errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
         )
     }
 

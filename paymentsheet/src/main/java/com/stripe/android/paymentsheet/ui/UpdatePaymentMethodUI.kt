@@ -281,8 +281,12 @@ private fun UpdatePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
     PrimaryButton(
         label = stringResource(id = PaymentSheetR.string.stripe_paymentsheet_save),
         isLoading = isLoading,
-        isEnabled = state.isSaveButtonEnabled,
+        isEnabled = isEnabled,
+        canClickWhileDisabled = true,
         onButtonClick = { interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed) },
+        onDisabledButtonClick = {
+            interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.DisabledSaveButtonPressed)
+        },
         modifier = Modifier
             .testTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG)
             .testMetadata("isLoading=$isLoading")
@@ -304,12 +308,17 @@ private fun DeletePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
     )
 
     if (openDialogValue.value) {
-        RemovePaymentMethodDialogUI(paymentMethod = interactor.displayableSavedPaymentMethod, onConfirmListener = {
-            openDialogValue.value = false
-            interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.RemovePaymentMethod)
-        }, onDismissListener = {
-            openDialogValue.value = false
-        })
+        RemovePaymentMethodDialogUI(
+            paymentMethod = interactor.displayableSavedPaymentMethod,
+            removeMessage = interactor.removeMessage?.resolve(),
+            onConfirmListener = {
+                openDialogValue.value = false
+                interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.RemovePaymentMethod)
+            },
+            onDismissListener = {
+                openDialogValue.value = false
+            }
+        )
     }
 }
 
@@ -339,6 +348,7 @@ private fun PreviewUpdatePaymentMethodUI() {
             updatePaymentMethodExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
             setDefaultPaymentMethodExecutor = { _ -> Result.success(Unit) },
             cardBrandFilter = DefaultCardBrandFilter,
+            removeMessage = null,
             onBrandChoiceSelected = {},
             shouldShowSetAsDefaultCheckbox = true,
             isDefaultPaymentMethod = false,

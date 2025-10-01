@@ -133,6 +133,7 @@ public final class com/stripe/android/uicore/elements/IdentifierSpec$Companion {
 	public final fun getName ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getOneLineAddress ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getPhone ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
+	public final fun getPhoneNumberCountry ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getPostalCode ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getPreferredCardBrand ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getSameAsShipping ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
@@ -171,13 +172,6 @@ public final class com/stripe/android/uicore/elements/ParameterDestination$Local
 
 public final class com/stripe/android/uicore/elements/SameAsShippingElementUIKt {
 	public static final field SAME_AS_SHIPPING_CHECKBOX_TEST_TAG Ljava/lang/String;
-}
-
-public final class com/stripe/android/uicore/elements/TextFieldStateConstants$Error$Blank : com/stripe/android/uicore/elements/TextFieldStateConstants$Error {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/uicore/elements/TextFieldStateConstants$Error$Blank;
-	public fun isBlank ()Z
-	public fun shouldShowError (Z)Z
 }
 
 public final class com/stripe/android/uicore/elements/TextFieldUIKt {

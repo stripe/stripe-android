@@ -60,7 +60,7 @@ class InputAddressViewModelTest {
 
     @Test
     fun `autocomplete address passed is collected to start`() = runTest(UnconfinedTestDispatcher()) {
-        val expectedAddress = AddressDetails(name = "skyler", address = PaymentSheet.Address(country = "US"))
+        val expectedAddress = PaymentSheet.Address(country = "US")
         val flow = MutableStateFlow<AddressElementNavigator.AutocompleteEvent?>(
             AddressElementNavigator.AutocompleteEvent.OnBack(expectedAddress)
         )
@@ -71,12 +71,16 @@ class InputAddressViewModelTest {
         ).thenReturn(flow)
 
         val viewModel = createViewModel()
-        assertThat(viewModel.collectedAddress.value).isEqualTo(expectedAddress)
+        assertThat(viewModel.collectedAddress.value).isEqualTo(
+            AddressDetails(
+                address = expectedAddress
+            )
+        )
     }
 
     @Test
     fun `takes only fields in new address`() = runTest(UnconfinedTestDispatcher()) {
-        val usAddress = AddressDetails(name = "skyler", address = PaymentSheet.Address(country = "US"))
+        val usAddress = PaymentSheet.Address(country = "US")
         val flow = MutableStateFlow<AddressElementNavigator.AutocompleteEvent?>(
             AddressElementNavigator.AutocompleteEvent.OnBack(usAddress)
         )
@@ -87,14 +91,19 @@ class InputAddressViewModelTest {
         ).thenReturn(flow)
 
         val viewModel = createViewModel()
-        assertThat(viewModel.collectedAddress.value).isEqualTo(usAddress)
-
-        val expectedAddress = AddressDetails(
-            name = "skyler",
-            address = PaymentSheet.Address(country = "CAN", line1 = "foobar")
+        assertThat(viewModel.collectedAddress.value).isEqualTo(
+            AddressDetails(
+                address = usAddress,
+            )
         )
+
+        val expectedAddress = PaymentSheet.Address(country = "CAN", line1 = "foobar")
         flow.tryEmit(AddressElementNavigator.AutocompleteEvent.OnBack(expectedAddress))
-        assertThat(viewModel.collectedAddress.value).isEqualTo(expectedAddress)
+        assertThat(viewModel.collectedAddress.value).isEqualTo(
+            AddressDetails(
+                address = expectedAddress,
+            )
+        )
     }
 
     @Test
@@ -779,6 +788,55 @@ class InputAddressViewModelTest {
             )
             .build()
     )
+
+    @OptIn(AddressElementSameAsBillingPreview::class)
+    @Test
+    fun `Billing same as shipping box is checked even if initial inputs have slightly different formatting`() =
+        runTest {
+            val viewModel = createViewModel(
+                config = AddressLauncher.Configuration.Builder()
+                    .allowedCountries(setOf("US"))
+                    .address(
+                        AddressDetails(
+                            name = "John Doe",
+                            address = PaymentSheet.Address(
+                                line1 = "123 Apple Street",
+                                line2 = "",
+                                city = "San Francisco",
+                                country = "US",
+                                state = "CA",
+                                postalCode = "99999 "
+                            ),
+                            phoneNumber = "+12347682350"
+                        )
+                    )
+                    .billingAddress(
+                        PaymentSheet.BillingDetails(
+                            name = "John Doe",
+                            address = PaymentSheet.Address(
+                                line1 = "123 Apple Street",
+                                line2 = null,
+                                city = "San Francisco",
+                                country = "US",
+                                state = "CA",
+                                postalCode = "99999"
+                            ),
+                            phone = "(234) 768-2350"
+                        )
+                    )
+                    .additionalFields(
+                        AddressLauncher.AdditionalFieldsConfiguration(
+                            phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.REQUIRED,
+                        )
+                    )
+                    .build()
+            )
+
+            viewModel.shippingSameAsBillingState.test {
+                // Should be checked
+                assertThat(awaitItem()).isEqualTo(createShowState(isChecked = true))
+            }
+        }
 
     private fun doesNotUseAddressTest(
         config: AddressLauncher.Configuration,

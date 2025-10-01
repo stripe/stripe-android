@@ -79,7 +79,6 @@ internal class WalletScreenScreenshotTest {
         snapshot(
             state = walletUiState(
                 userSetIsExpanded = false,
-
             ),
         )
     }
@@ -184,10 +183,41 @@ internal class WalletScreenScreenshotTest {
         )
     }
 
+    @Test
+    fun testPaymentSelectionHint() {
+        snapshot(
+            state = walletUiState(
+                paymentSelectionHint = "Lorem ipsum dolor sit amet".resolvableString,
+            ),
+        )
+    }
+
+    @Test
+    fun testDisallowLogout() {
+        snapshot(
+            state = walletUiState(
+                allowLogOut = false
+            ),
+        )
+    }
+
+    @Test
+    fun testPaymentSelectionHintLong() {
+        snapshot(
+            state = walletUiState(
+                paymentSelectionHint = buildString {
+                    append("Lorem ipsum dolor sit amet, consectetur adipiscing elit, ")
+                    append("sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")
+                }.resolvableString
+            )
+        )
+    }
+
     private fun walletUiState(
         paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails> =
             TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
         selectedItem: ConsumerPaymentDetails.PaymentDetails? = paymentDetailsList.firstOrNull(),
+        allowLogOut: Boolean = true,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
         hasCompleted: Boolean = false,
         isProcessing: Boolean = false,
@@ -197,15 +227,18 @@ internal class WalletScreenScreenshotTest {
         addPaymentMethodOptions: List<AddPaymentMethodOption> = listOf(AddPaymentMethodOption.Card),
         userSetIsExpanded: Boolean = false,
         signupToggleEnabled: Boolean = false,
+        paymentSelectionHint: ResolvableString? = null,
     ): WalletUiState {
         return WalletUiState(
             paymentDetailsList = paymentDetailsList,
             email = "email@email.com",
+            allowLogOut = allowLogOut,
             cardBrandFilter = cardBrandFilter,
             selectedItemId = selectedItem?.id,
             isProcessing = isProcessing,
             isSettingUp = false,
             merchantName = "Example Inc.",
+            sellerBusinessName = null,
             primaryButtonLabel = primaryButtonLabel,
             secondaryButtonLabel = secondaryButtonLabel,
             hasCompleted = hasCompleted,
@@ -214,6 +247,7 @@ internal class WalletScreenScreenshotTest {
             expiryDateInput = expiryDateInput,
             cvcInput = cvcInput,
             alertMessage = alertMessage,
+            paymentSelectionHint = paymentSelectionHint,
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             signupToggleEnabled = signupToggleEnabled,
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),

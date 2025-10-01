@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.paymentdatacollection.polling
 import android.os.Build
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -10,7 +11,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onIdle
+import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.Espresso.pressBack
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.matcher.ViewMatchers.withContentDescription
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.StripeIntentResult
@@ -42,6 +46,17 @@ internal class PollingActivityTest {
             composeTestRule
                 .onNodeWithText("Approve payment")
                 .assertIsDisplayed()
+        }
+    }
+
+    @Test
+    fun `Displays qr code screen when activity is opened and qr code url available`() {
+        val scenario = pollingScenario(
+            args = defaultArgs.copy(qrCodeUrl = "valid_url")
+        )
+
+        scenario.onActivity {
+            assertQrCodeWebViewIsDisplayed()
         }
     }
 
@@ -170,6 +185,41 @@ internal class PollingActivityTest {
         }
     }
 
+    @Test
+    fun `Preserves QR code display state across configuration change`() {
+        val scenario = pollingScenario(
+            args = defaultArgs.copy(qrCodeUrl = "test_qr_url")
+        )
+
+        scenario.onActivity {
+            assertQrCodeWebViewIsDisplayed()
+
+            scenario.recreate()
+
+            assertQrCodeWebViewIsDisplayed()
+        }
+    }
+
+    @Test
+    fun `Doesn't re-display QR code after configuration change`() {
+        val scenario = pollingScenario(
+            args = defaultArgs.copy(qrCodeUrl = "test_qr_url")
+        )
+
+        scenario.onActivity {
+            assertQrCodeWebViewIsDisplayed()
+
+            // Close the QR code web view.
+            onView(withContentDescription("Close")).perform(click())
+
+            assertQrCodeWebViewIsNotDisplayed()
+
+            scenario.recreate()
+
+            assertQrCodeWebViewIsNotDisplayed()
+        }
+    }
+
     private fun pollingScenario(
         args: PollingContract.Args = defaultArgs,
         poller: IntentStatusPoller = FakeIntentStatusPoller(),
@@ -187,9 +237,9 @@ internal class PollingActivityTest {
                 args.clientSecret,
                 args.timeLimitInSeconds.seconds,
                 args.initialDelayInSeconds.seconds,
-                args.maxAttempts,
                 args.ctaText,
-                args.stripeAccountId
+                args.stripeAccountId,
+                args.qrCodeUrl,
             ),
             poller = poller,
             timeProvider = timeProvider,
@@ -221,16 +271,34 @@ internal class PollingActivityTest {
         composeTestRule.waitForIdle()
     }
 
+    private fun assertQrCodeWebViewIsDisplayed() {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            composeTestRule
+                .onAllNodesWithTag(QR_CODE_WEB_VIEW_TEST_TAG)
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+    }
+
+    private fun assertQrCodeWebViewIsNotDisplayed() {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            composeTestRule
+                .onAllNodesWithTag(QR_CODE_WEB_VIEW_TEST_TAG)
+                .fetchSemanticsNodes()
+                .isEmpty()
+        }
+    }
+
     private companion object {
 
         val defaultArgs = PollingContract.Args(
             clientSecret = "client_secret",
-            initialDelayInSeconds = 0,
-            timeLimitInSeconds = 60,
-            maxAttempts = 3,
             statusBarColor = null,
+            timeLimitInSeconds = 60,
+            initialDelayInSeconds = 0,
             ctaText = R.string.stripe_upi_polling_message,
-            stripeAccountId = null
+            stripeAccountId = null,
+            qrCodeUrl = null,
         )
     }
 }

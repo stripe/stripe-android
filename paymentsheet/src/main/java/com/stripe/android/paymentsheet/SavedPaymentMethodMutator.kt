@@ -286,7 +286,9 @@ internal class SavedPaymentMethodMutator(
                 expiryYear = cardUpdateParams.expiryYear,
                 productUsageTokens = setOf("PaymentSheet"),
             )
-        ).onSuccess { updatedMethod ->
+        ).map { updatedMethod ->
+            updatedMethod.withUpdatedLocalFields(original = paymentMethod)
+        }.onSuccess { updatedMethod ->
             withContext(uiContext) {
                 customerStateHolder.updateMostRecentlySelectedSavedPaymentMethod(updatedMethod)
                 customerStateHolder.setCustomerState(
@@ -376,6 +378,7 @@ internal class SavedPaymentMethodMutator(
         ) {
             if (displayableSavedPaymentMethod.savedPaymentMethod != SavedPaymentMethod.Unexpected) {
                 val isLiveMode = requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode
+                val paymentMethodMetadata = viewModel.paymentMethodMetadata.value
                 viewModel.navigationHandler.transitionTo(
                     PaymentSheetScreen.UpdatePaymentMethod(
                         DefaultUpdatePaymentMethodInteractor(
@@ -402,9 +405,7 @@ internal class SavedPaymentMethodMutator(
                                 )
                             },
                             shouldShowSetAsDefaultCheckbox = (
-                                viewModel
-                                    .paymentMethodMetadata
-                                    .value?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true
+                                paymentMethodMetadata?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true
                                 ),
                             isDefaultPaymentMethod = (
                                 displayableSavedPaymentMethod.isDefaultPaymentMethod(
@@ -412,6 +413,8 @@ internal class SavedPaymentMethodMutator(
                                     viewModel.customerStateHolder.customer.value?.defaultPaymentMethodId
                                 )
                                 ),
+                            removeMessage = paymentMethodMetadata?.customerMetadata?.permissions?.removePaymentMethod
+                                ?.removeMessage(paymentMethodMetadata.merchantName),
                             onUpdateSuccess = viewModel.navigationHandler::pop,
                         )
                     )
@@ -469,4 +472,12 @@ internal class SavedPaymentMethodMutator(
             }
         }
     }
+}
+
+private fun PaymentMethod.withUpdatedLocalFields(original: PaymentMethod): PaymentMethod {
+    // We don't receive the following fields as part of the update response, so we need to copy them over
+    return copy(
+        linkPaymentDetails = original.linkPaymentDetails,
+        isLinkPassthroughMode = original.isLinkPassthroughMode,
+    )
 }

@@ -31,6 +31,7 @@ import com.stripe.android.paymentelement.AddressAutocompletePreview
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
+import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
@@ -315,6 +316,22 @@ class PaymentSheet internal constructor(
          * Only used when [presentWithIntentConfiguration] is called for a deferred flow.
          */
         fun createIntentCallback(callback: CreateIntentCallback) = apply {
+            callbacksBuilder.createIntentCallback(callback)
+        }
+
+        /**
+         * @param callback Called with the ConfirmationToken when the customer confirms
+         * the payment or setup. Use this for payment confirmation workflows
+         * where the SDK generates ConfirmationTokens and then continues to confirm the intent.
+         *
+         * The callback should process the ConfirmationToken on the server and return a
+         * CreateIntentResult with the client secret.
+         *
+         * @throws IllegalStateException if CreateIntentCallback is already set.
+         * Callbacks are mutually exclusive - only one should be configured.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun createIntentCallback(callback: CreateIntentWithConfirmationTokenCallback) = apply {
             callbacksBuilder.createIntentCallback(callback)
         }
 
@@ -807,6 +824,8 @@ class PaymentSheet internal constructor(
         internal val googlePlacesApiKey: String? = ConfigurationDefaults.googlePlacesApiKey,
 
         internal val termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap(),
+
+        internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
     ) : Parcelable {
 
         @JvmOverloads
@@ -963,6 +982,8 @@ class PaymentSheet internal constructor(
             private var shopPayConfiguration: ShopPayConfiguration? = ConfigurationDefaults.shopPayConfiguration
             private var googlePlacesApiKey: String? = ConfigurationDefaults.googlePlacesApiKey
             private var termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap()
+            private var opensCardScannerAutomatically: Boolean =
+                ConfigurationDefaults.opensCardScannerAutomatically
 
             private var customPaymentMethods: List<CustomPaymentMethod> =
                 ConfigurationDefaults.customPaymentMethods
@@ -1127,6 +1148,17 @@ class PaymentSheet internal constructor(
                 this.termsDisplay = termsDisplay
             }
 
+            /**
+             * By default, the payment sheet offers a card scan button within the new card entry form.
+             * When opensCardScannerAutomatically is set to true, the card entry form will
+             * initialize with the card scanner already open.
+             * **Note**: The stripecardscan dependency must be added to set `opensCardScannerAutomatically` to true
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun opensCardScannerAutomatically(opensCardScannerAutomatically: Boolean) = apply {
+                this.opensCardScannerAutomatically = opensCardScannerAutomatically
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -1151,6 +1183,7 @@ class PaymentSheet internal constructor(
                 shopPayConfiguration = shopPayConfiguration,
                 googlePlacesApiKey = googlePlacesApiKey,
                 termsDisplay = termsDisplay,
+                opensCardScannerAutomatically = opensCardScannerAutomatically,
             )
         }
 
@@ -3200,6 +3233,7 @@ class PaymentSheet internal constructor(
         internal val display: Display,
         internal val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
         internal val allowUserEmailEdits: Boolean,
+        internal val allowLogOut: Boolean,
     ) : Parcelable {
 
         @JvmOverloads
@@ -3209,6 +3243,7 @@ class PaymentSheet internal constructor(
             display = display,
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             allowUserEmailEdits = true,
+            allowLogOut = true,
         )
 
         internal val shouldDisplay: Boolean
@@ -3238,6 +3273,7 @@ class PaymentSheet internal constructor(
                 collectMissingBillingDetailsForExistingPaymentMethods =
                 collectMissingBillingDetailsForExistingPaymentMethods,
                 allowUserEmailEdits = true,
+                allowLogOut = true,
             )
         }
 
@@ -3264,6 +3300,34 @@ class PaymentSheet internal constructor(
     }
 
     /**
+     * Theme configuration for wallet buttons
+     */
+    @Poko
+    @Parcelize
+    class ButtonThemes(
+        /**
+         * Theme configuration for Link button
+         */
+        val link: LinkButtonTheme = LinkButtonTheme.WHITE,
+    ) : Parcelable {
+
+        /**
+         * Link button theme options
+         */
+        enum class LinkButtonTheme {
+            /**
+             * Default green theme
+             */
+            DEFAULT,
+
+            /**
+             * White theme
+             */
+            WHITE
+        }
+    }
+
+    /**
      * Configuration for wallet buttons
      */
     @Poko
@@ -3277,12 +3341,79 @@ class PaymentSheet internal constructor(
         val willDisplayExternally: Boolean = false,
 
         /**
-         * Identifies the list of wallets that can be shown in `WalletButtons`. Wallets
-         * are identified by their wallet identifier (google_pay, link, shop_pay). An
-         * empty list means all wallets will be shown.
+         * Controls visibility of wallets within Payment Element and `WalletButtons`.
          */
-        val walletsToShow: List<String> = emptyList(),
-    ) : Parcelable
+        val visibility: Visibility = Visibility(),
+
+        /**
+         * Theme configuration for wallet buttons
+         */
+        val buttonThemes: ButtonThemes = ButtonThemes(),
+    ) : Parcelable {
+        @Poko
+        @Parcelize
+        class Visibility(
+            /**
+             * Configures how wallets are shown in Payment Element. Wallets that don't have a provided visibility will
+             * have theirs automatically determined.
+             *
+             * Defaults to an empty map.
+             */
+            val paymentElement: Map<Wallet, PaymentElementVisibility> = emptyMap(),
+
+            /**
+             * Configures how wallets are shown in the wallet buttons view. Wallets that don't have a provided
+             * visibility will have theirs automatically determined.
+             *
+             * Defaults to an empty map.
+             */
+            val walletButtonsView: Map<Wallet, WalletButtonsViewVisibility> = emptyMap(),
+        ) : Parcelable
+
+        /**
+         * Available visibility options within the wallet buttons view
+         */
+        enum class WalletButtonsViewVisibility {
+            /**
+             * Wallet is always shown when the wallet buttons view is rendered.
+             */
+            Always,
+
+            /**
+             * Wallet is never shown when the wallet buttons view is rendered.
+             */
+            Never,
+        }
+
+        /**
+         * Available visibility options for a wallet within Payment Element
+         */
+        enum class PaymentElementVisibility {
+            /**
+             * Wallet visibility is automatically determined based on if the wallet buttons view is rendered.
+             */
+            Automatic,
+
+            /**
+             * Wallet is always shown regardless of if the wallet buttons view is rendered.
+             */
+            Always,
+
+            /**
+             * Wallet is never shown regardless of if the wallet buttons view is rendered.
+             */
+            Never,
+        }
+
+        /**
+         * Definition for a wallet available for use with Payment Element.
+         */
+        enum class Wallet {
+            Link,
+            GooglePay,
+            ShopPay
+        }
+    }
 
     /**
      * Configuration related to Shop Pay, which only applies when using wallet buttons.
@@ -3482,6 +3613,19 @@ class PaymentSheet internal constructor(
              * @param callback If specified, called when the customer confirms the payment or setup.
              */
             fun createIntentCallback(callback: CreateIntentCallback) = apply {
+                callbacksBuilder.createIntentCallback(callback)
+            }
+
+            /**
+             * @param callback Called with the ConfirmationToken result when the customer confirms
+             * the payment or setup. Use this for payment confirmation workflows
+             * where the SDK generates ConfirmationTokens and then continues to confirm the intent.
+             *
+             * @throws IllegalStateException if CreateIntentCallback is already set.
+             * Callbacks are mutually exclusive - only one should be configured.
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun createIntentCallback(callback: CreateIntentWithConfirmationTokenCallback) = apply {
                 callbacksBuilder.createIntentCallback(callback)
             }
 

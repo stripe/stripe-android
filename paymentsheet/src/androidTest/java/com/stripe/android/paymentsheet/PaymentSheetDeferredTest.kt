@@ -79,6 +79,7 @@ internal class PaymentSheetDeferredTest {
                 "payment_user_agent",
                 Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
             ),
+            clientAttributionMetadataParamsForDeferredIntent(),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
         }
@@ -145,6 +146,7 @@ internal class PaymentSheetDeferredTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_methods"),
+            clientAttributionMetadataParamsForDeferredIntent(),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
         }
@@ -483,6 +485,7 @@ internal class PaymentSheetDeferredTest {
                 "payment_user_agent",
                 Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
             ),
+            clientAttributionMetadataParamsForDeferredIntent(),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
         }

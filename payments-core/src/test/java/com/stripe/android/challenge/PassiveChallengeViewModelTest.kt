@@ -77,7 +77,7 @@ internal class PassiveChallengeViewModelTest {
 
         viewModel.startPassiveChallenge(fakeActivity)
 
-        val passiveCaptcha = hCaptchaService.awaitCall()
+        val passiveCaptcha = hCaptchaService.awaitPerformPassiveHCaptchaCall()
         assertThat(passiveCaptcha.siteKey).isEqualTo(passiveCaptcha.siteKey)
         assertThat(passiveCaptcha.rqData).isEqualTo(passiveCaptcha.rqData)
         assertThat(passiveCaptcha.activity).isEqualTo(fakeActivity)

@@ -15,7 +15,6 @@ import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.screenshottesting.LayoutDirection
 import com.stripe.android.screenshottesting.PaparazziConfigOption
 import com.stripe.android.screenshottesting.PaparazziRule
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -59,6 +58,23 @@ class CardUiDefinitionFactoryTest {
     }
 
     @Test
+    fun testCardWithValidation() {
+        paparazziRule.snapshot {
+            CardDefinition.CreateFormUi(
+                metadata = metadata.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                    )
+                ),
+                isValidating = true,
+            )
+        }
+    }
+
+    @Test
     fun testCardWithDefaultValues() {
         paparazziRule.snapshot {
             CardDefinition.CreateFormUi(
@@ -81,6 +97,7 @@ class CardUiDefinitionFactoryTest {
                         ),
                     ),
                     productUsage = emptySet(),
+                    clientAttributionMetadata = null,
                 )
             )
         }
@@ -98,6 +115,23 @@ class CardUiDefinitionFactoryTest {
                         address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                     )
                 )
+            )
+        }
+    }
+
+    @Test
+    fun testCardWithBillingDetailsCollectionConfigurationAndValidation() {
+        paparazziRule.snapshot {
+            CardDefinition.CreateFormUi(
+                metadata = metadata.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    )
+                ),
+                isValidating = true,
             )
         }
     }
@@ -254,6 +288,7 @@ class CardUiDefinitionFactoryTest {
                         ),
                     ),
                     productUsage = emptySet(),
+                    clientAttributionMetadata = null,
                 ),
                 metadata = metadata.copy(
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -286,6 +321,7 @@ class CardUiDefinitionFactoryTest {
                         "billing_details" to emptyMap<IdentifierSpec, String?>(),
                     ),
                     productUsage = emptySet(),
+                    clientAttributionMetadata = null,
                 ),
                 metadata = metadata.copy(
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -301,6 +337,37 @@ class CardUiDefinitionFactoryTest {
                         )
                     )
                 }
+            )
+        }
+    }
+
+    @Test
+    fun testCondensedAutocompleteFormWithValidation() {
+        paparazziRule.snapshot {
+            CardDefinition.CreateFormUi(
+                paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
+                    code = "card",
+                    billingDetails = null,
+                    requiresMandate = false,
+                    overrideParamMap = emptyMap(),
+                    productUsage = emptySet(),
+                    clientAttributionMetadata = null,
+                ),
+                metadata = metadata.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    ),
+                ),
+                autocompleteAddressInteractorFactory = {
+                    TestAutocompleteAddressInteractor.noOp(
+                        autocompleteConfig = AutocompleteAddressInteractor.Config(
+                            googlePlacesApiKey = "123",
+                            autocompleteCountries = setOf("US"),
+                            isPlacesAvailable = true,
+                        )
+                    )
+                },
+                isValidating = true,
             )
         }
     }
@@ -332,6 +399,7 @@ class CardUiDefinitionFactoryTest {
                         ),
                     ),
                     productUsage = emptySet(),
+                    clientAttributionMetadata = null,
                 ),
                 metadata = metadata.copy(
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(

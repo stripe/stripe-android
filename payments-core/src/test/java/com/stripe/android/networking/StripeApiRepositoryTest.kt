@@ -15,6 +15,7 @@ import com.stripe.android.core.frauddetection.FraudDetectionDataParamsUtils
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.model.StripeFilePurpose
+import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
@@ -24,6 +25,7 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.model.AddressFixtures
 import com.stripe.android.model.BankAccountTokenParamsFixtures
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.CardParams
@@ -31,6 +33,7 @@ import com.stripe.android.model.CardParamsFixtures
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.model.ConfirmationTokenParams
 import com.stripe.android.model.ConsumerFixtures
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
@@ -40,11 +43,13 @@ import com.stripe.android.model.ElementsSessionFixtures
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.ListPaymentMethodsParams
+import com.stripe.android.model.MandateDataParamsFixtures
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
+import com.stripe.android.model.PaymentMethodCreateParamsFixtures.BILLING_DETAILS
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodMessageFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -59,6 +64,7 @@ import com.stripe.android.model.TokenFixtures
 import com.stripe.android.model.VerificationMethodParam
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
@@ -3278,6 +3284,290 @@ internal class StripeApiRepositoryTest {
                 assertThat(this["postal_code"]).isEqualTo("94111")
             }
         }
+    }
+
+    @Test
+    fun `elements session accepts PMO SFU params`() = runTest {
+        val pmMap = mutableMapOf<String, Map<String, String>>()
+        PaymentMethod.Type.entries.forEach {
+            pmMap[it.code] = mapOf(
+                "setup_future_usage" to "off_session"
+            )
+        }
+
+        val session = stripeApiRepository.retrieveElementsSession(
+            params = ElementsSessionParams.DeferredIntentType(
+                deferredIntentParams = DeferredIntentParams(
+                    mode = DeferredIntentParams.Mode.Payment(
+                        amount = 5000,
+                        currency = "usd",
+                        setupFutureUsage = null,
+                        captureMethod = PaymentIntent.CaptureMethod.Automatic,
+                        paymentMethodOptionsJsonString = StripeJsonUtils.mapToJsonObject(pmMap)?.toString()
+                    ),
+                    paymentMethodTypes = listOf(),
+                    paymentMethodConfigurationId = null,
+                    onBehalfOf = null
+                ),
+                customPaymentMethods = listOf(),
+                externalPaymentMethods = listOf(),
+                appId = APP_ID,
+            ),
+            options = ApiRequest.Options(ApiKeyFixtures.MULTIBANCO_PUBLISHABLE_KEY)
+        )
+
+        assertThat(session.isSuccess).isTrue()
+    }
+
+    @Test
+    fun `PaymentMethodOptions params are sent to elements session`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            "",
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
+        val pmMap = mapOf(
+            "card" to mapOf(
+                "setup_future_usage" to "on_session"
+            ),
+            "affirm" to mapOf(
+                "setup_future_usage" to "none"
+            ),
+            "amazon_pay" to mapOf(
+                "setup_future_usage" to "off_session"
+            ),
+        )
+
+        create().retrieveElementsSession(
+            params = ElementsSessionParams.DeferredIntentType(
+                deferredIntentParams = DeferredIntentParams(
+                    mode = DeferredIntentParams.Mode.Payment(
+                        amount = 5000,
+                        currency = "usd",
+                        setupFutureUsage = null,
+                        captureMethod = PaymentIntent.CaptureMethod.Automatic,
+                        paymentMethodOptionsJsonString = StripeJsonUtils.mapToJsonObject(pmMap)?.toString()
+                    ),
+                    paymentMethodTypes = listOf(),
+                    paymentMethodConfigurationId = null,
+                    onBehalfOf = null
+                ),
+                customPaymentMethods = listOf(),
+                externalPaymentMethods = listOf(),
+                appId = APP_ID,
+            ),
+            options = DEFAULT_OPTIONS
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        assertThat(params["deferred_intent[payment_method_options]"]).isEqualTo(pmMap)
+    }
+
+    @Test
+    fun testConfirmationTokensUrl() {
+        assertThat(StripeApiRepository.confirmationTokensUrl)
+            .isEqualTo("https://api.stripe.com/v1/confirmation_tokens")
+    }
+
+    @Test
+    fun createConfirmationToken_withPaymentMethodData_shouldSucceed() = runTest {
+        val confirmationTokenParams = ConfirmationTokenParams(
+            paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            returnUrl = "https://example.com/return"
+        )
+
+        val confirmationToken = stripeApiRepository.createConfirmationToken(
+            confirmationTokenParams,
+            DEFAULT_OPTIONS
+        ).getOrThrow()
+
+        assertThat(confirmationToken.returnUrl).isEqualTo("https://example.com/return")
+        assertThat(confirmationToken.paymentMethodPreview!!.type).isEqualTo(PaymentMethod.Type.Card)
+    }
+
+    @Test
+    fun createConfirmationToken_withExistingPaymentMethod_shouldSucceed() = runTest {
+        val defaultCard = PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+        val paymentMethodId = stripeApiRepository.createPaymentMethod(
+            defaultCard,
+            DEFAULT_OPTIONS
+        ).getOrThrow().id
+
+        val confirmationTokenParams = ConfirmationTokenParams(
+            paymentMethodId = paymentMethodId
+        )
+
+        val confirmationToken = stripeApiRepository.createConfirmationToken(
+            confirmationTokenParams,
+            DEFAULT_OPTIONS
+        ).getOrThrow()
+
+        val cardTruth = defaultCard.card!!
+        val card = JSONObject(confirmationToken.paymentMethodPreview!!.allResponseFields)
+            .optJSONObject("card")!!
+        assertThat(card.optString("last4")).isEqualTo(cardTruth.number!!.takeLast(4))
+        assertThat(card.optInt("exp_month")).isEqualTo(cardTruth.expiryMonth!!)
+        assertThat(card.optInt("exp_year")).isEqualTo(cardTruth.expiryYear!!)
+
+        val billingDetailsTruth = defaultCard.billingDetails!!
+        val billingDetails = confirmationToken.paymentMethodPreview.billingDetails!!
+        assertThat(billingDetails.email).isEqualTo(billingDetailsTruth.email)
+        assertThat(billingDetails.name).isEqualTo(billingDetailsTruth.name)
+        assertThat(billingDetails.phone).isEqualTo(billingDetailsTruth.phone)
+        assertThat(billingDetails.address).isEqualTo(billingDetailsTruth.address)
+    }
+
+    @Test
+    fun createConfirmationToken_withShipping_shouldSucceed() = runTest {
+        val shipping = ConfirmPaymentIntentParams.Shipping(
+            address = AddressFixtures.ADDRESS,
+            name = "Jenny Rosen"
+        )
+        val sepaParams = PaymentMethodCreateParams.create(
+            sepaDebit = PaymentMethodCreateParams.SepaDebit(iban = "DE89370400440532013000"),
+            billingDetails = BILLING_DETAILS
+        )
+        val mandateData = MandateDataParamsFixtures.DEFAULT
+
+        val confirmationTokenParams = ConfirmationTokenParams(
+            paymentMethodData = sepaParams,
+            shipping = shipping,
+            mandateDataParams = mandateData,
+            setUpFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+        )
+
+        val confirmationToken = stripeApiRepository.createConfirmationToken(
+            confirmationTokenParams,
+            DEFAULT_OPTIONS
+        ).getOrThrow()
+
+        assertThat(confirmationToken.paymentMethodPreview!!.type).isEqualTo(PaymentMethod.Type.SepaDebit)
+        with(confirmationToken.shipping!!) {
+            assertThat(name).isEqualTo(shipping.name)
+            assertThat(address).isEqualTo(shipping.address)
+            assertThat(phone).isEqualTo(shipping.phone)
+        }
+        assertThat(confirmationToken.setupFutureUsage)
+            .isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.OffSession)
+    }
+
+    @Test
+    fun createConfirmationToken_withSetAsDefaultPaymentMethod_shouldSucceed() = runTest {
+        val confirmationTokenParams = ConfirmationTokenParams(
+            paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            returnUrl = "https://example.com/return",
+            setUpFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+            setAsDefaultPaymentMethod = true
+        )
+
+        val confirmationToken = stripeApiRepository.createConfirmationToken(
+            confirmationTokenParams,
+            DEFAULT_OPTIONS
+        ).getOrThrow()
+
+        // set_as_default_payment_method is not returned in the response,
+        // we only need to check the creation is successful
+        assertThat(confirmationToken).isNotNull()
+    }
+
+    @Test
+    fun createConfirmationToken_setsCorrectMandateData() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            "",
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
+        val mandateData = MandateDataParamsFixtures.DEFAULT
+
+        val confirmationTokenParams = ConfirmationTokenParams(
+            paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            mandateDataParams = mandateData,
+        )
+        create().createConfirmationToken(
+            confirmationTokenParams,
+            DEFAULT_OPTIONS
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        val apiRequest = apiRequestArgumentCaptor.firstValue
+        assertThat(apiRequest.params?.get("mandate_data") as Map<*, *>).isEqualTo(mandateData.toParamMap())
+
+        verifyAnalyticsRequest(PaymentAnalyticsEvent.ConfirmationTokenCreate)
+    }
+
+    @Test
+    fun createConfirmationToken_setsCorrectPaymentUserAgent() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            "",
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
+        val productUsage = "TestProductUsage"
+        val confirmationTokenParams = ConfirmationTokenParams(
+            paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+        )
+
+        create(setOf(productUsage)).createConfirmationToken(
+            confirmationTokenParams,
+            DEFAULT_OPTIONS
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        val apiRequest = apiRequestArgumentCaptor.firstValue
+        val paymentMethodDataParams = apiRequest.params?.get("payment_method_data") as Map<*, *>
+        assertThat(paymentMethodDataParams["payment_user_agent"])
+            .isEqualTo("stripe-android/${StripeSdkVersion.VERSION_NAME};$productUsage")
+
+        verifyAnalyticsRequest(PaymentAnalyticsEvent.ConfirmationTokenCreate, productUsage)
+    }
+
+    @Test
+    fun createConfirmationToken_withAttribution_setsCorrectPaymentUserAgent() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            "",
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
+        val productUsage = "TestProductUsage"
+        val attribution = "example_product_usage"
+        val confirmationTokenParams = ConfirmationTokenParams(
+            paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD.copy(
+                productUsage = setOf(attribution)
+            ),
+            returnUrl = "https://example.com/return"
+        )
+
+        create(setOf(productUsage)).createConfirmationToken(
+            confirmationTokenParams,
+            DEFAULT_OPTIONS
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        val apiRequest = apiRequestArgumentCaptor.firstValue
+        val paymentMethodDataParams =
+            apiRequest.params?.get("payment_method_data") as Map<*, *>
+        assertThat(paymentMethodDataParams["payment_user_agent"])
+            .isEqualTo("stripe-android/${StripeSdkVersion.VERSION_NAME};$productUsage;$attribution")
+
+        verifyAnalyticsRequest(
+            event = PaymentAnalyticsEvent.ConfirmationTokenCreate,
+            productUsage = "$productUsage,$attribution"
+        )
     }
 
     /**

@@ -3,6 +3,7 @@ package com.stripe.android.customersheet.state
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.coroutines.Single
+import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
@@ -37,6 +38,7 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
+import com.stripe.android.ui.core.cardscan.CardScanEvent
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.CompletableSingle
 import com.stripe.android.utils.FakeElementsSessionRepository
@@ -113,7 +115,7 @@ internal class DefaultCustomerSheetLoaderTest {
             PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             PaymentMethodFixtures.US_BANK_ACCOUNT,
         )
-        assertThat(state.customerPermissions.canRemovePaymentMethods).isTrue()
+        assertThat(state.customerPermissions.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.Full)
         assertThat(state.customerPermissions.canRemoveLastPaymentMethod).isTrue()
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
         assertThat(state.paymentSelection).isEqualTo(
@@ -147,7 +149,7 @@ internal class DefaultCustomerSheetLoaderTest {
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
         ).inOrder()
-        assertThat(state.customerPermissions.canRemovePaymentMethods).isTrue()
+        assertThat(state.customerPermissions.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.Full)
         assertThat(state.customerPermissions.canRemoveLastPaymentMethod).isTrue()
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
         assertThat(state.paymentSelection).isEqualTo(
@@ -182,7 +184,7 @@ internal class DefaultCustomerSheetLoaderTest {
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
         ).inOrder()
-        assertThat(state.customerPermissions.canRemovePaymentMethods).isTrue()
+        assertThat(state.customerPermissions.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.Full)
         assertThat(state.customerPermissions.canRemoveLastPaymentMethod).isTrue()
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
         assertThat(state.paymentSelection).isNull()
@@ -651,7 +653,7 @@ internal class DefaultCustomerSheetLoaderTest {
                         savedSelection = savedSelection,
                         paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
                         permissions = CustomerPermissions(
-                            canRemovePaymentMethods = true,
+                            removePaymentMethod = PaymentMethodRemovePermission.Full,
                             canRemoveLastPaymentMethod = true,
                             canUpdateFullPaymentMethodDetails = true,
                         ),
@@ -696,8 +698,10 @@ internal class DefaultCustomerSheetLoaderTest {
                     components = ElementsSession.Customer.Components(
                         mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
                         customerSheet = ElementsSession.Customer.Components.CustomerSheet.Enabled(
-                            isPaymentMethodRemoveEnabled = false,
-                            canRemoveLastPaymentMethod = true,
+                            paymentMethodRemove =
+                            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled,
+                            paymentMethodRemoveLast =
+                            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided,
                             isPaymentMethodSyncDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
                         ),
                     )
@@ -712,7 +716,8 @@ internal class DefaultCustomerSheetLoaderTest {
             elementsSessionId = "session_1234",
             orderedPaymentMethodTypesAndWallets = intent.paymentMethodTypes,
             experimentsData = null,
-            passiveCaptcha = null
+            passiveCaptcha = null,
+            merchantLogoUrl = null
         )
     }
 
@@ -867,4 +872,6 @@ private class FakeCustomerSheetEventReporter : CustomerSheetEventReporter {
     override fun onDisallowedCardBrandEntered(brand: CardBrand) = Unit
 
     override fun onAnalyticsEvent(event: AnalyticsEvent) = Unit
+
+    override fun onCardScanEvent(event: CardScanEvent) = Unit
 }

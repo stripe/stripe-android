@@ -19,7 +19,6 @@ import com.stripe.android.paymentsheet.ui.PaymentMethodForm
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
 import java.util.UUID
-import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 @Composable
 internal fun PaymentMethodScreen(
@@ -31,6 +30,7 @@ internal fun PaymentMethodScreen(
         state = state,
         onFormFieldValuesChanged = viewModel::formValuesChanged,
         onPayClicked = viewModel::onPayClicked,
+        onDisabledPayClicked = viewModel::onDisabledPayClicked,
     )
 }
 
@@ -39,6 +39,7 @@ internal fun PaymentMethodBody(
     state: PaymentMethodState,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
     onPayClicked: () -> Unit,
+    onDisabledPayClicked: () -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
     val uuid = rememberSaveable { UUID.randomUUID().toString() }
@@ -50,7 +51,7 @@ internal fun PaymentMethodBody(
                 args = state.formArguments,
                 enabled = true,
                 onFormFieldValuesChanged = onFormFieldValuesChanged,
-                formElements = state.formElements,
+                formElements = state.formUiElements,
             )
         }
 
@@ -71,11 +72,12 @@ internal fun PaymentMethodBody(
             modifier = Modifier.padding(vertical = 16.dp),
             label = state.primaryButtonLabel.resolve(),
             state = state.primaryButtonState,
+            allowedDisabledClicks = true,
+            onDisabledButtonClick = onDisabledPayClicked,
             onButtonClick = {
                 focusManager.clearFocus()
                 onPayClicked()
             },
-            iconEnd = PaymentsUiCoreR.drawable.stripe_ic_lock
         )
     }
 }

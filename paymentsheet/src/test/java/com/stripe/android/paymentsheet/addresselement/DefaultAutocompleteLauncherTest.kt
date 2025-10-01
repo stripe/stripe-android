@@ -21,18 +21,13 @@ class DefaultAutocompleteLauncherTest {
         .colorsLight(PaymentSheet.Colors.defaultDark)
         .build()
 
-    private val addressDetails = AddressDetails(
-        name = "John Doe",
-        address = PaymentSheet.Address(
-            line1 = "123 Main Street",
-            line2 = "Apt 4B",
-            city = "San Francisco",
-            state = "CA",
-            postalCode = "94105",
-            country = "US"
-        ),
-        phoneNumber = "555-123-4567",
-        isCheckboxSelected = true
+    private val address = PaymentSheet.Address(
+        line1 = "123 Main Street",
+        line2 = "Apt 4B",
+        city = "San Francisco",
+        state = "CA",
+        postalCode = "94105",
+        country = "US"
     )
 
     @Test
@@ -198,7 +193,7 @@ class DefaultAutocompleteLauncherTest {
 
         val result = AutocompleteContract.Result.EnterManually(
             id = autocompleteArgs.id,
-            addressDetails = addressDetails
+            address = address
         )
 
         registerCall.callback.asCallbackFor<AutocompleteContract.Result>().onActivityResult(result)
@@ -207,7 +202,7 @@ class DefaultAutocompleteLauncherTest {
 
         val enterManuallyResult = capturedResult as AutocompleteLauncher.Result.EnterManually
 
-        assertThat(enterManuallyResult.addressDetails).isEqualTo(addressDetails)
+        assertThat(enterManuallyResult.address).isEqualTo(address)
     }
 
     @Test
@@ -235,7 +230,7 @@ class DefaultAutocompleteLauncherTest {
 
         val result = AutocompleteContract.Result.Address(
             id = autocompleteArgs.id,
-            addressDetails = addressDetails
+            address = address
         )
 
         registerCall.callback.asCallbackFor<AutocompleteContract.Result>().onActivityResult(result)
@@ -244,7 +239,7 @@ class DefaultAutocompleteLauncherTest {
 
         val onBackResult = capturedResult as AutocompleteLauncher.Result.OnBack
 
-        assertThat(onBackResult.addressDetails).isEqualTo(addressDetails)
+        assertThat(onBackResult.address).isEqualTo(address)
     }
 
     @Test
@@ -271,7 +266,7 @@ class DefaultAutocompleteLauncherTest {
 
         val result = AutocompleteContract.Result.EnterManually(
             id = autocompleteArgs.id,
-            addressDetails = addressDetails
+            address = address,
         )
 
         val callback = registerCall.callback.asCallbackFor<AutocompleteContract.Result>()
@@ -355,14 +350,14 @@ class DefaultAutocompleteLauncherTest {
 
         val firstAutocompleteResult = AutocompleteContract.Result.EnterManually(
             id = firstAutocompleteArgs.id,
-            addressDetails = addressDetails
+            address = address,
         )
 
         callback.onActivityResult(firstAutocompleteResult)
 
         val secondAutocompleteResult = AutocompleteContract.Result.Address(
             id = secondAutocompleteArgs.id,
-            addressDetails = addressDetails
+            address = address,
         )
         callback.onActivityResult(secondAutocompleteResult)
 

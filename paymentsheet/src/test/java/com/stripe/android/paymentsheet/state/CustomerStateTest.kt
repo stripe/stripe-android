@@ -82,8 +82,9 @@ class CustomerStateTest {
                 ),
                 mobilePaymentElementComponent = createEnabledMobilePaymentElement(
                     isPaymentMethodSaveEnabled = false,
-                    isPaymentMethodRemoveEnabled = false,
-                    canRemoveLastPaymentMethod = false,
+                    paymentMethodRemove = ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled,
+                    paymentMethodRemoveLast =
+                    ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Disabled,
                     allowRedisplayOverride = null,
                 ),
             )
@@ -99,15 +100,17 @@ class CustomerStateTest {
 
     private fun createEnabledMobilePaymentElement(
         isPaymentMethodSaveEnabled: Boolean = true,
-        isPaymentMethodRemoveEnabled: Boolean = false,
-        canRemoveLastPaymentMethod: Boolean = false,
+        paymentMethodRemove: ElementsSession.Customer.Components.PaymentMethodRemoveFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled,
+        paymentMethodRemoveLast: ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Disabled,
         allowRedisplayOverride: PaymentMethod.AllowRedisplay? = null,
         isPaymentMethodSetAsDefaultEnabled: Boolean = false,
     ): ElementsSession.Customer.Components.MobilePaymentElement {
         return ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
             isPaymentMethodSaveEnabled = isPaymentMethodSaveEnabled,
-            isPaymentMethodRemoveEnabled = isPaymentMethodRemoveEnabled,
-            canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+            paymentMethodRemove = paymentMethodRemove,
+            paymentMethodRemoveLast = paymentMethodRemoveLast,
             allowRedisplayOverride = allowRedisplayOverride,
             isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
         )

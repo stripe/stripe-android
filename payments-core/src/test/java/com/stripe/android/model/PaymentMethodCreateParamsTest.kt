@@ -474,6 +474,32 @@ class PaymentMethodCreateParamsTest {
         ).containsEntry("allow_redisplay", "always")
     }
 
+    @Test
+    fun `toParamMap() includes ClientAttributionMetadata if not null`() {
+        val clientAttributionMetadata = ClientAttributionMetadata(
+            elementsSessionConfigId = "elements_session_123",
+            paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+            paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
+        )
+        val paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
+            code = "card",
+            overrideParamMap = mapOf(
+                "billing_details" to mapOf(
+                    "email" to "johndoe@email.com"
+                )
+            ),
+            productUsage = setOf(),
+            billingDetails = null,
+            requiresMandate = false,
+            clientAttributionMetadata = clientAttributionMetadata,
+        )
+
+        assertThat(paymentMethodCreateParams.toParamMap()).containsEntry(
+            "client_attribution_metadata",
+            clientAttributionMetadata.toParamMap(),
+        )
+    }
+
     private fun createFpx(): PaymentMethodCreateParams {
         return PaymentMethodCreateParams.create(
             PaymentMethodCreateParams.Fpx(bank = "hsbc"),

@@ -488,6 +488,7 @@ class PaymentSheetEventTest {
                 "fc_sdk_availability" to "FULL",
                 "payment_method_options_setup_future_usage" to false,
                 "setup_future_usage" to null,
+                "open_card_scan_automatically" to false,
             )
         )
     }
@@ -654,6 +655,18 @@ class PaymentSheetEventTest {
         assertThat(event.params).containsEntry(
             "setup_future_usage",
             "off_session"
+        )
+    }
+
+    @Test
+    fun `LoadSucceeded with openCardScanAutomatically should return expected params`() {
+        val event = createLoadSucceededEvent(
+            openCardScanAutomatically = true
+        )
+
+        assertThat(event.params).containsEntry(
+            "open_card_scan_automatically",
+            true
         )
     }
 
@@ -1898,6 +1911,32 @@ class PaymentSheetEventTest {
         )
     }
 
+    @Test
+    fun `InitialDisplayedPaymentMethods event created correctly`() {
+        val visiblePaymentMethods = listOf("link", "saved", "card", "affirm")
+        val hiddenPaymentMethods = listOf("crypto", "klarna", "alipay")
+
+        val initialDisplayedPaymentMethodsEvent = PaymentSheetEvent.InitialDisplayedPaymentMethods(
+            visiblePaymentMethods = visiblePaymentMethods,
+            hiddenPaymentMethods = hiddenPaymentMethods,
+            isDeferred = true,
+            isSpt = false,
+            linkEnabled = true,
+            googlePaySupported = true,
+        )
+
+        assertThat(initialDisplayedPaymentMethodsEvent.params).isEqualTo(
+            mapOf(
+                "is_decoupled" to true,
+                "is_spt" to false,
+                "link_enabled" to true,
+                "google_pay_enabled" to true,
+                "visible_payment_methods" to "link,saved,card,affirm",
+                "hidden_payment_methods" to "crypto,klarna,alipay"
+            )
+        )
+    }
+
     private fun newCardPaymentMethod(
         paymentMethodExtraParams: PaymentMethodExtraParams? = null,
         result: PaymentSheetEvent.Payment.Result
@@ -1969,7 +2008,8 @@ class PaymentSheetEventTest {
         financialConnectionsAvailability: FinancialConnectionsAvailability = FinancialConnectionsAvailability.Full,
         linkDisplay: PaymentSheet.LinkConfiguration.Display = PaymentSheet.LinkConfiguration.Display.Automatic,
         paymentMethodOptionsSetupfutureUsage: Boolean = false,
-        setupFutureUsage: StripeIntent.Usage? = null
+        setupFutureUsage: StripeIntent.Usage? = null,
+        openCardScanAutomatically: Boolean = false,
     ): PaymentSheetEvent.LoadSucceeded {
         return PaymentSheetEvent.LoadSucceeded(
             isDeferred = isDeferred,
@@ -1986,7 +2026,8 @@ class PaymentSheetEventTest {
             linkDisplay = linkDisplay,
             financialConnectionsAvailability = financialConnectionsAvailability,
             paymentMethodOptionsSetupFutureUsage = paymentMethodOptionsSetupfutureUsage,
-            setupFutureUsage = setupFutureUsage
+            setupFutureUsage = setupFutureUsage,
+            openCardScanAutomatically = openCardScanAutomatically
         )
     }
 

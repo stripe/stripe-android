@@ -34,7 +34,7 @@ internal fun AddPaymentMethod(
         supportedPaymentMethods = state.supportedPaymentMethods,
         selectedItemCode = state.selectedPaymentMethodCode,
         incentive = state.incentive,
-        formElements = state.formElements,
+        formElements = state.formUiElements,
         onItemSelectedListener = { selectedLpm ->
             interactor.handleViewAction(
                 AddPaymentMethodInteractor.ViewAction.OnPaymentMethodSelected(
@@ -60,6 +60,8 @@ internal fun AddPaymentMethod(
                 )
             )
         },
+        shouldTrackRenderedLPMs = interactor.shouldTrackRenderedLPMs,
+        reportInitialPaymentMethodVisibilitySnapshot = interactor::reportInitialPaymentMethodVisibilitySnapshot
     )
 }
 
@@ -72,6 +74,7 @@ internal fun FormFieldValues.transformToPaymentMethodCreateParams(
         code = paymentMethodCode,
         requiresMandate = paymentMethodMetadata.requiresMandate(paymentMethodCode),
         allowRedisplay = paymentMethodMetadata.allowRedisplay(userRequestedReuse, paymentMethodCode),
+        clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
     )
 }
 
@@ -134,6 +137,7 @@ internal fun FormFieldValues.transformToPaymentSelection(
         PaymentSelection.New.GenericPaymentMethod(
             label = paymentMethod.displayName,
             iconResource = paymentMethod.iconResource,
+            iconResourceNight = paymentMethod.iconResourceNight,
             lightThemeIconUrl = paymentMethod.lightThemeIconUrl,
             darkThemeIconUrl = paymentMethod.darkThemeIconUrl,
             paymentMethodCreateParams = params,

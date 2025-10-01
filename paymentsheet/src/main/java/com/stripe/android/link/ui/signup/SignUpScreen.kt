@@ -55,6 +55,7 @@ import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.delay
+import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 @Composable
 internal fun SignUpScreen(
@@ -143,7 +144,7 @@ internal fun SignUpBody(
         PrimaryButton(
             modifier = Modifier.padding(vertical = 16.dp),
             label = if (isSigningUp) {
-                stringResource(R.string.stripe_link_sign_up)
+                stringResource(PaymentsUiCoreR.string.stripe_continue_button_label)
             } else {
                 stringResource(R.string.stripe_link_log_in_or_sign_up)
             },

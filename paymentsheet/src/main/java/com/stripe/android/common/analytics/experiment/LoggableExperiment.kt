@@ -22,7 +22,10 @@ internal sealed class LoggableExperiment(
         val providedDefaultValues: ProvidedDefaultValues,
         val spmEnabled: Boolean,
         val integrationShape: String,
-        val linkDisplayed: Boolean
+        val linkDisplayed: Boolean,
+        val elementsSessionId: String,
+        val mobileSdkVersion: String,
+        val mobileSessionId: String
     ) : LoggableExperiment(
         arbId = arbId,
         group = group,
@@ -36,6 +39,9 @@ internal sealed class LoggableExperiment(
             "has_spms" to spmEnabled.toString(),
             "integration_shape" to integrationShape,
             "link_displayed" to linkDisplayed.toString(),
+            "mobile_sdk_version" to mobileSdkVersion,
+            "elements_session_id" to elementsSessionId,
+            "mobile_session_id" to mobileSessionId
         ).filterNotNullValues()
     ) {
         enum class EmailRecognitionSource(val dimension: String) {

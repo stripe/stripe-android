@@ -859,6 +859,13 @@ internal class IdentityViewModel(
                     _missingRequirements.updateStateAndSave {
                         verificationPage.requirements.missing.toSet()
                     }
+
+                    val missingSet = verificationPage.requirements.missing.toSet()
+                    if (missingSet.contains(Requirement.IDDOCUMENTFRONT)) {
+                        _collectedData.updateStateAndSave { it.clearData(Requirement.IDDOCUMENTFRONT) }
+                        _documentFrontUploadedState.updateStateAndSave { SingleSideDocumentUploadState() }
+                    }
+
                     if (shouldRetrieveModel) {
                         downloadModelAndPost(
                             verificationPage.documentCapture.models.idDetectorUrl,

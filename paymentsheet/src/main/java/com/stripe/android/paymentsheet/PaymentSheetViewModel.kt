@@ -23,6 +23,7 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -91,7 +92,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val errorReporter: ErrorReporter,
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
-    @Named(IS_LIVE_MODE) val isLiveModeProvider: () -> Boolean
+    @Named(IS_LIVE_MODE) val isLiveModeProvider: () -> Boolean,
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -118,6 +119,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
             checkout()
         },
+        onDisabledClick = ::onDisabledClick,
     )
 
     private val _paymentSheetResult = MutableSharedFlow<PaymentSheetResult>(replay = 1)
@@ -193,7 +195,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             googlePayButtonType = args.googlePayConfig?.buttonType.asGooglePayButtonType,
             onGooglePayPressed = this::checkoutWithGooglePay,
             onLinkPressed = this::checkoutWithLink,
-            isSetupIntent = paymentMethodMetadata?.stripeIntent is SetupIntent
+            isSetupIntent = paymentMethodMetadata?.stripeIntent is SetupIntent,
+            walletsAllowedInHeader = WalletType.entries // PaymentSheet: all wallets in header
         )
     }
 
@@ -275,6 +278,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             handlePaymentSheetStateLoadFailure(state.validationError)
         } else {
             initializeWithState(state)
+            confirmationHandler.bootstrap(state.paymentMethodMetadata)
         }
     }
 
@@ -491,6 +495,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
+    private fun onDisabledClick() {
+        viewModelScope.launch {
+            validationRequested.emit(Unit)
+        }
+    }
+
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
         viewModelScope.launch(workContext) {
             val confirmationOption = withContext(viewModelScope.coroutineContext) {
@@ -500,6 +510,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     ?.toConfirmationOption(
                         configuration = config.asCommonConfiguration(),
                         linkConfiguration = linkHandler.linkConfiguration.value,
+                        passiveCaptchaParams = paymentMethodMetadata.value?.passiveCaptchaParams,
                     )
             }
 

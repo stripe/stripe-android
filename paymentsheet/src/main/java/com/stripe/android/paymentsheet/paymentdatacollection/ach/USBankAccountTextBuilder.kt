@@ -14,6 +14,8 @@ internal object USBankAccountTextBuilder {
 
     fun buildMandateAndMicrodepositsText(
         merchantName: String,
+        sellerBusinessName: String?,
+        forceSetupFutureUseBehavior: Boolean,
         isVerifyingMicrodeposits: Boolean,
         isSaveForFutureUseSelected: Boolean,
         isInstantDebits: Boolean,
@@ -21,6 +23,8 @@ internal object USBankAccountTextBuilder {
     ): ResolvableString {
         val mandateText = buildMandateText(
             merchantName = merchantName,
+            sellerBusinessName = sellerBusinessName,
+            forceSetupFutureUseBehavior = forceSetupFutureUseBehavior,
             isSaveForFutureUseSelected = isSaveForFutureUseSelected,
             isInstantDebits = isInstantDebits,
             isSetupFlow = isSetupFlow,
@@ -42,6 +46,8 @@ internal object USBankAccountTextBuilder {
     @VisibleForTesting
     fun buildMandateText(
         merchantName: String,
+        sellerBusinessName: String?,
+        forceSetupFutureUseBehavior: Boolean,
         isSaveForFutureUseSelected: Boolean,
         isInstantDebits: Boolean,
         isSetupFlow: Boolean,
@@ -56,7 +62,22 @@ internal object USBankAccountTextBuilder {
                 replacement = "</a>",
             ),
         )
-        val text = if (isSaveForFutureUseSelected || isSetupFlow) {
+
+        val text = if (forceSetupFutureUseBehavior && sellerBusinessName != null) {
+            resolvableString(
+                R.string.stripe_wallet_bank_account_terms_merchant_and_seller,
+                merchantName,
+                sellerBusinessName,
+                merchantName,
+                transformations = transforms
+            )
+        } else if (sellerBusinessName != null) {
+            resolvableString(
+                R.string.stripe_wallet_bank_account_terms_seller,
+                sellerBusinessName,
+                transformations = transforms
+            )
+        } else if (isSaveForFutureUseSelected || isSetupFlow) {
             resolvableString(R.string.stripe_paymentsheet_ach_save_mandate, merchantName, transformations = transforms)
         } else {
             resolvableString(R.string.stripe_paymentsheet_ach_continue_mandate, transformations = transforms)

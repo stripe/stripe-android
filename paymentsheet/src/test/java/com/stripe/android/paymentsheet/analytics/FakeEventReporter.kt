@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.state.WalletsState
 
 @Suppress("EmptyFunctionBlock")
 internal class FakeEventReporter : EventReporter {
@@ -111,13 +112,14 @@ internal class FakeEventReporter : EventReporter {
         linkDisplay: PaymentSheet.LinkConfiguration.Display,
         currency: String?,
         initializationMode: PaymentElementLoader.InitializationMode,
-        financialConectionsAvailability: FinancialConnectionsAvailability?,
+        financialConnectionsAvailability: FinancialConnectionsAvailability?,
         orderedLpms: List<String>,
         requireCvcRecollection: Boolean,
         hasDefaultPaymentMethod: Boolean?,
         setAsDefaultEnabled: Boolean?,
         paymentMethodOptionsSetupFutureUsage: Boolean,
-        setupFutureUsage: StripeIntent.Usage?
+        setupFutureUsage: StripeIntent.Usage?,
+        openCardScanAutomatically: Boolean,
     ) {
     }
 
@@ -273,6 +275,31 @@ internal class FakeEventReporter : EventReporter {
     }
 
     override fun onShopPayWebViewCancelled(didReceiveECEClick: Boolean) {
+    }
+
+    override fun onCardScanStarted(implementation: String) {
+    }
+
+    override fun onCardScanSucceeded(implementation: String) {
+    }
+
+    override fun onCardScanFailed(implementation: String, error: Throwable?) {
+    }
+
+    override fun onCardScanCancelled(implementation: String) {
+    }
+
+    override fun onCardScanApiCheckSucceeded(implementation: String) {
+    }
+
+    override fun onCardScanApiCheckFailed(implementation: String, error: Throwable?) {
+    }
+
+    override fun onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
+        visiblePaymentMethods: List<String>,
+        hiddenPaymentMethods: List<String>,
+        walletsState: WalletsState?
+    ) {
     }
 
     data class PaymentFailureCall(

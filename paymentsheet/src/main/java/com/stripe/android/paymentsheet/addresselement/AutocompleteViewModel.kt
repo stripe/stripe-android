@@ -118,22 +118,20 @@ internal class AutocompleteViewModel @Inject constructor(
 
                     _event.emit(
                         Event.GoBack(
-                            addressDetails = AddressDetails(
-                                address = PaymentSheet.Address(
-                                    city = address.city,
-                                    country = address.country,
-                                    line1 = address.line1,
-                                    line2 = address.line2,
-                                    postalCode = address.postalCode,
-                                    state = address.state
-                                )
+                            address = PaymentSheet.Address(
+                                city = address.city,
+                                country = address.country,
+                                line1 = address.line1,
+                                line2 = address.line2,
+                                postalCode = address.postalCode,
+                                state = address.state
                             )
                         )
                     )
                 },
                 onFailure = {
                     _loading.value = false
-                    _event.emit(Event.GoBack(addressDetails = null))
+                    _event.emit(Event.GoBack(address = null))
                 }
             )
         }
@@ -150,10 +148,8 @@ internal class AutocompleteViewModel @Inject constructor(
             _event.emit(
                 Event.EnterManually(
                     if (queryFlow.value.isNotBlank()) {
-                        AddressDetails(
-                            address = PaymentSheet.Address(
-                                line1 = queryFlow.value,
-                            )
+                        PaymentSheet.Address(
+                            line1 = queryFlow.value,
                         )
                     } else {
                         null
@@ -251,11 +247,11 @@ internal class AutocompleteViewModel @Inject constructor(
     }
 
     sealed interface Event {
-        val addressDetails: AddressDetails?
+        val address: PaymentSheet.Address?
 
-        data class EnterManually(override val addressDetails: AddressDetails?) : Event
+        data class EnterManually(override val address: PaymentSheet.Address?) : Event
 
-        data class GoBack(override val addressDetails: AddressDetails?) : Event
+        data class GoBack(override val address: PaymentSheet.Address?) : Event
     }
 
     data class Args(

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground
 
+import android.content.Context
 import android.os.Parcelable
 import androidx.compose.runtime.Stable
 import com.stripe.android.SharedPaymentTokenSessionPreview
@@ -106,8 +107,8 @@ internal sealed interface PlaygroundState : Parcelable {
             return snapshot.embeddedConfiguration(this)
         }
 
-        fun linkControllerConfiguration(): LinkController.Configuration {
-            return snapshot.linkControllerConfiguration(this)
+        fun linkControllerConfiguration(context: Context): LinkController.Configuration {
+            return snapshot.linkControllerConfiguration(context, this)
         }
 
         fun displaysShippingAddressButton(): Boolean {
@@ -182,7 +183,7 @@ internal sealed interface PlaygroundState : Parcelable {
         }
 
         @OptIn(SharedPaymentTokenSessionPreview::class)
-        fun intentConfiguration(): PaymentSheet.IntentConfiguration {
+        fun intentConfiguration(amount: Long): PaymentSheet.IntentConfiguration {
             return PaymentSheet.IntentConfiguration(
                 sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = amount,
@@ -194,7 +195,7 @@ internal sealed interface PlaygroundState : Parcelable {
                     networkId = "internal",
                     externalId = "stripe_test_merchant"
                 ),
-                paymentMethodTypes = listOf("card", "link", "shop_pay")
+                paymentMethodTypes = listOf("card", "shop_pay")
             )
         }
     }

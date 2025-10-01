@@ -101,6 +101,7 @@ fun DropDown(
     val shouldEnable = enabled && !shouldDisableDropdownWithSingleItem
 
     var expanded by remember { mutableStateOf(false) }
+    val error by controller.error.collectAsState()
     val selectedItemIndex by controller.selectedIndex.collectAsState()
     val selectedItemLabel = remember(selectedItemIndex) {
         controller.getSelectedItemLabel(selectedIndex)
@@ -150,6 +151,7 @@ fun DropDown(
             } else {
                 LargeDropdownLabel(
                     label = label,
+                    isError = error != null,
                     selectedItemLabel = selectedItemLabel,
                     currentTextColor = currentTextColor,
                     shouldDisableDropdownWithSingleItem = shouldDisableDropdownWithSingleItem,
@@ -200,6 +202,7 @@ fun DropDown(
 @Composable
 private fun LargeDropdownLabel(
     label: ResolvableString,
+    isError: Boolean,
     selectedItemLabel: String?,
     currentTextColor: Color,
     shouldDisableDropdownWithSingleItem: Boolean,
@@ -212,6 +215,7 @@ private fun LargeDropdownLabel(
         enabled = false,
         onValueChange = {},
         errorMessage = null,
+        isError = isError,
         label = {
             FormLabel(label.resolve())
         },
@@ -229,6 +233,12 @@ private fun LargeDropdownLabel(
         },
         contentPadding = textFieldInsets.asPaddingValues(),
         colors = TextFieldColors(
+            shouldShowError = isError,
+            disabledIndicatorColor = if (isError) {
+                MaterialTheme.colors.error
+            } else {
+                Color.Transparent
+            },
             textColor = currentTextColor,
             disabledTextColor = currentTextColor,
         ),

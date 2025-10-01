@@ -12,11 +12,17 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFo
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 internal interface VerticalModeFormInteractor {
     val isLiveMode: Boolean
@@ -30,11 +36,22 @@ internal interface VerticalModeFormInteractor {
     data class State(
         val selectedPaymentMethodCode: String,
         val isProcessing: Boolean,
+        private val isValidating: Boolean,
         val usBankAccountFormArguments: USBankAccountFormArguments,
         val formArguments: FormArguments,
-        val formElements: List<FormElement>,
-        val headerInformation: FormHeaderInformation?,
-    )
+        val showsWalletHeader: Boolean,
+        private val formElements: List<FormElement>,
+        private val paymentMethodIncentive: PaymentMethodIncentive?,
+        private val headerInformation: FormHeaderInformation?,
+    ) {
+        val formHeader = headerInformation?.copy(
+            promoBadge = paymentMethodIncentive?.takeIfMatches(selectedPaymentMethodCode)?.displayText,
+        )?.takeIf { !showsWalletHeader }
+
+        val formUiElements = formElements.onEach { element ->
+            element.onValidationStateChanged(isValidating)
+        }
+    }
 
     sealed interface ViewAction {
         data object FieldInteraction : ViewAction
@@ -49,26 +66,44 @@ internal class DefaultVerticalModeFormInteractor(
     private val onFormFieldValuesChanged: (formValues: FormFieldValues?, selectedPaymentMethodCode: String) -> Unit,
     private val usBankAccountArguments: USBankAccountFormArguments,
     private val reportFieldInteraction: (String) -> Unit,
+    private val showsWalletHeader: StateFlow<Boolean>,
     private val headerInformation: FormHeaderInformation?,
     override val isLiveMode: Boolean,
     processing: StateFlow<Boolean>,
+    validationRequested: SharedFlow<Unit>,
     paymentMethodIncentive: StateFlow<PaymentMethodIncentive?>,
     private val coroutineScope: CoroutineScope,
+    private val uiContext: CoroutineContext,
 ) : VerticalModeFormInteractor {
+    private val isValidating = MutableStateFlow(false)
+
     override val state: StateFlow<VerticalModeFormInteractor.State> = combineAsStateFlow(
         processing,
         paymentMethodIncentive,
-    ) { isProcessing, paymentMethodIncentive ->
+        isValidating,
+        showsWalletHeader,
+    ) { isProcessing, paymentMethodIncentive, isValidating, showsWalletHeader ->
         VerticalModeFormInteractor.State(
             selectedPaymentMethodCode = selectedPaymentMethodCode,
             isProcessing = isProcessing,
             usBankAccountFormArguments = usBankAccountArguments,
             formArguments = formArguments,
             formElements = formElements,
-            headerInformation = headerInformation?.copy(
-                promoBadge = paymentMethodIncentive?.takeIfMatches(selectedPaymentMethodCode)?.displayText,
-            ),
+            isValidating = isValidating,
+            showsWalletHeader = showsWalletHeader,
+            paymentMethodIncentive = paymentMethodIncentive,
+            headerInformation = headerInformation,
         )
+    }
+
+    init {
+        coroutineScope.launch {
+            validationRequested.collect {
+                withContext(uiContext) {
+                    isValidating.value = true
+                }
+            }
+        }
     }
 
     override fun handleViewAction(viewAction: VerticalModeFormInteractor.ViewAction) {
@@ -97,7 +132,8 @@ internal class DefaultVerticalModeFormInteractor(
             val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
             val formHelper = DefaultFormHelper.create(
                 viewModel = viewModel,
-                paymentMethodMetadata = paymentMethodMetadata
+                paymentMethodMetadata = paymentMethodMetadata,
+                shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = true,
             )
             return DefaultVerticalModeFormInteractor(
                 selectedPaymentMethodCode = selectedPaymentMethodCode,
@@ -111,6 +147,7 @@ internal class DefaultVerticalModeFormInteractor(
                     selectedPaymentMethodCode = selectedPaymentMethodCode,
                     bankFormInteractor = bankFormInteractor,
                 ),
+                showsWalletHeader = viewModel.walletsState.mapAsStateFlow { it != null },
                 headerInformation = paymentMethodMetadata.formHeaderInformationForCode(
                     selectedPaymentMethodCode,
                     customerHasSavedPaymentMethods = customerStateHolder.paymentMethods.value.any {
@@ -121,7 +158,9 @@ internal class DefaultVerticalModeFormInteractor(
                 processing = viewModel.processing,
                 paymentMethodIncentive = bankFormInteractor.paymentMethodIncentiveInteractor.displayedIncentive,
                 reportFieldInteraction = viewModel.analyticsListener::reportFieldInteraction,
+                validationRequested = viewModel.validationRequested,
                 coroutineScope = coroutineScope,
+                uiContext = Dispatchers.Main,
             )
         }
     }

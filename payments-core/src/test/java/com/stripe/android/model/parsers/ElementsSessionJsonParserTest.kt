@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.isInstanceOf
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
@@ -30,6 +31,12 @@ class ElementsSessionJsonParserTest {
     val incentivesFeatureFlagRule = FeatureFlagTestRule(
         featureFlag = FeatureFlags.instantDebitsIncentives,
         isEnabled = false,
+    )
+
+    @get:Rule
+    val enablePassiveCaptchaRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.enablePassiveCaptcha,
+        isEnabled = true
     )
 
     @Test
@@ -712,14 +719,18 @@ class ElementsSessionJsonParserTest {
                     components = ElementsSession.Customer.Components(
                         mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                             isPaymentMethodSaveEnabled = false,
-                            isPaymentMethodRemoveEnabled = true,
-                            canRemoveLastPaymentMethod = true,
+                            paymentMethodRemove =
+                            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
+                            paymentMethodRemoveLast =
+                            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
                             allowRedisplayOverride = PaymentMethod.AllowRedisplay.LIMITED,
                             isPaymentMethodSetAsDefaultEnabled = false,
                         ),
                         customerSheet = ElementsSession.Customer.Components.CustomerSheet.Enabled(
-                            isPaymentMethodRemoveEnabled = true,
-                            canRemoveLastPaymentMethod = true,
+                            paymentMethodRemove =
+                            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
+                            paymentMethodRemoveLast =
+                            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
                             isPaymentMethodSyncDefaultEnabled = false,
                         ),
                     )
@@ -758,6 +769,44 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
+    fun `ElementsSession sets remove last permissions to 'NotProvided' if null`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                customerSessionClientSecret = "customer_session_client_secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            isLiveMode = false,
+        )
+
+        val intent = createPaymentIntentWithCustomerSession(
+            paymentMethodRemoveLastFeature = "null",
+        )
+        val elementsSession = parser.parse(intent)
+
+        val mobilePaymentElement = elementsSession?.customer?.session?.components?.mobilePaymentElement
+        val customerSheet = elementsSession?.customer?.session?.components?.customerSheet
+
+        assertThat(mobilePaymentElement).isNotNull()
+        assertThat(mobilePaymentElement)
+            .isInstanceOf<ElementsSession.Customer.Components.MobilePaymentElement.Enabled>()
+        assertThat(customerSheet).isNotNull()
+        assertThat(customerSheet).isInstanceOf<ElementsSession.Customer.Components.CustomerSheet.Enabled>()
+
+        val enabledMobilePaymentElement =
+            mobilePaymentElement as ElementsSession.Customer.Components.MobilePaymentElement.Enabled
+        val enabledCustomerSheet =
+            customerSheet as ElementsSession.Customer.Components.CustomerSheet.Enabled
+
+        assertThat(enabledMobilePaymentElement.paymentMethodRemoveLast)
+            .isEqualTo(ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided)
+        assertThat(enabledCustomerSheet.paymentMethodRemoveLast)
+            .isEqualTo(ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided)
+    }
+
+    @Test
     fun `ElementsSession has expected CS information in the response if 'mobile_payment_element' is null`() {
         val parser = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
@@ -786,8 +835,10 @@ class ElementsSessionJsonParserTest {
                     components = ElementsSession.Customer.Components(
                         mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
                         customerSheet = ElementsSession.Customer.Components.CustomerSheet.Enabled(
-                            isPaymentMethodRemoveEnabled = true,
-                            canRemoveLastPaymentMethod = true,
+                            paymentMethodRemove =
+                            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
+                            paymentMethodRemoveLast =
+                            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
                             isPaymentMethodSyncDefaultEnabled = false,
                         ),
                     )
@@ -854,8 +905,10 @@ class ElementsSessionJsonParserTest {
                     components = ElementsSession.Customer.Components(
                         mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                             isPaymentMethodSaveEnabled = false,
-                            isPaymentMethodRemoveEnabled = true,
-                            canRemoveLastPaymentMethod = true,
+                            paymentMethodRemove =
+                            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
+                            paymentMethodRemoveLast =
+                            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
                             allowRedisplayOverride = PaymentMethod.AllowRedisplay.LIMITED,
                             isPaymentMethodSetAsDefaultEnabled = false,
                         ),
@@ -928,26 +981,26 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
-    fun `when 'payment_method_remove' is 'enabled', 'canRemovePaymentMethods' should be true`() {
+    fun `when 'payment_method_remove' is 'enabled', 'paymentMethodRemove' should be 'Disabled' & helper true`() {
         permissionsTest(
             paymentMethodRemoveFeatureValue = "enabled",
-            canRemovePaymentMethods = true,
+            paymentMethodRemoveFeature = ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
         )
     }
 
     @Test
-    fun `when 'payment_method_remove' is 'partial', 'canRemovePaymentMethods' should be true`() {
+    fun `when 'payment_method_remove' is 'partial', 'paymentMethodRemove' should be 'Partial' & helper true`() {
         permissionsTest(
             paymentMethodRemoveFeatureValue = "partial",
-            canRemovePaymentMethods = true,
+            paymentMethodRemoveFeature = ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Partial,
         )
     }
 
     @Test
-    fun `when 'payment_method_remove' is 'disabled', 'canRemovePaymentMethods' should be false`() {
+    fun `when 'payment_method_remove' is 'disabled', 'paymentMethodRemove' should be 'Disabled' & helper false`() {
         permissionsTest(
             paymentMethodRemoveFeatureValue = "disabled",
-            canRemovePaymentMethods = false,
+            paymentMethodRemoveFeature = ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled,
         )
     }
 
@@ -955,7 +1008,7 @@ class ElementsSessionJsonParserTest {
     fun `when 'payment_method_remove' is unknown value, 'canRemovePaymentMethods' should be false`() {
         permissionsTest(
             paymentMethodRemoveFeatureValue = "something",
-            canRemovePaymentMethods = false,
+            paymentMethodRemoveFeature = ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled,
         )
     }
 
@@ -1127,8 +1180,10 @@ class ElementsSessionJsonParserTest {
                     components = ElementsSession.Customer.Components(
                         mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
                         customerSheet = ElementsSession.Customer.Components.CustomerSheet.Enabled(
-                            isPaymentMethodRemoveEnabled = true,
-                            canRemoveLastPaymentMethod = true,
+                            paymentMethodRemove =
+                            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
+                            paymentMethodRemoveLast =
+                            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
                             isPaymentMethodSyncDefaultEnabled = false,
                         ),
                     )
@@ -1381,7 +1436,8 @@ class ElementsSessionJsonParserTest {
     private fun permissionsTest(
         paymentMethodRemoveFeatureValue: String? = "enabled",
         paymentMethodRemoveLastFeatureValue: String? = "enabled",
-        canRemovePaymentMethods: Boolean = true,
+        paymentMethodRemoveFeature: ElementsSession.Customer.Components.PaymentMethodRemoveFeature =
+            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
         canRemoveLastPaymentMethod: Boolean = true,
     ) {
         val parser = ElementsSessionJsonParser(
@@ -1410,7 +1466,7 @@ class ElementsSessionJsonParserTest {
         val enabledPaymentElementComponent = mobilePaymentElementComponent as?
             ElementsSession.Customer.Components.MobilePaymentElement.Enabled
 
-        assertThat(enabledPaymentElementComponent?.isPaymentMethodRemoveEnabled).isEqualTo(canRemovePaymentMethods)
+        assertThat(enabledPaymentElementComponent?.paymentMethodRemove).isEqualTo(paymentMethodRemoveFeature)
         assertThat(enabledPaymentElementComponent?.canRemoveLastPaymentMethod).isEqualTo(canRemoveLastPaymentMethod)
 
         val customerSheetComponent = elementsSession?.customer?.session?.components?.customerSheet
@@ -1421,7 +1477,7 @@ class ElementsSessionJsonParserTest {
         val enabledCustomerSheetComponent = customerSheetComponent as?
             ElementsSession.Customer.Components.CustomerSheet.Enabled
 
-        assertThat(enabledCustomerSheetComponent?.isPaymentMethodRemoveEnabled).isEqualTo(canRemovePaymentMethods)
+        assertThat(enabledCustomerSheetComponent?.paymentMethodRemove).isEqualTo(paymentMethodRemoveFeature)
         assertThat(enabledCustomerSheetComponent?.canRemoveLastPaymentMethod).isEqualTo(canRemoveLastPaymentMethod)
     }
 

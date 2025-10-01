@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -118,6 +119,8 @@ internal interface ConfirmationDefinition<
         result: TLauncherResult,
     ): Result
 
+    fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {}
+
     /**
      * A set of general parameters that can be used to make confirmation decisions
      */
@@ -229,10 +232,6 @@ internal interface ConfirmationDefinition<
              * The [StripeIntent] that may or may not have been confirmed
              */
             val intent: StripeIntent,
-            /**
-             * The [ConfirmationHandler.Option] used when determining the action to take
-             */
-            val confirmationOption: ConfirmationHandler.Option,
             /**
              * DO NOT USE OUTSIDE OF INTENT CONFIRMATION
              */

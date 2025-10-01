@@ -3,8 +3,10 @@ package com.stripe.android.paymentelement.confirmation.challenge
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.challenge.PassiveChallengeActivityContract
 import com.stripe.android.challenge.PassiveChallengeActivityResult
+import com.stripe.android.challenge.warmer.PassiveChallengeWarmer
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.RadarOptions
@@ -24,6 +26,7 @@ import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeActivityResultLauncher
+import com.stripe.android.utils.FakePassiveChallengeWarmer
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
@@ -45,6 +48,14 @@ internal class PassiveChallengeConfirmationDefinitionTest {
     }
 
     @Test
+    fun `'option' return casted 'PaymentMethodConfirmationOption Saved'`() {
+        val definition = createPassiveChallengeConfirmationDefinition()
+
+        assertThat(definition.option(PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED))
+            .isEqualTo(PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED)
+    }
+
+    @Test
     fun `'option' return null for unknown option`() {
         val definition = createPassiveChallengeConfirmationDefinition()
 
@@ -52,18 +63,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'option' return null for Saved PaymentMethodConfirmationOption`() {
-        val definition = createPassiveChallengeConfirmationDefinition()
-        val savedOption = PaymentMethodConfirmationOption.Saved(
-            paymentMethod = PaymentIntentFactory.create().paymentMethod!!,
-            optionsParams = null
-        )
-
-        assertThat(definition.option(savedOption)).isNull()
-    }
-
-    @Test
-    fun `'canConfirm' should return true when passiveCaptchaParams is not null`() {
+    fun `'canConfirm' should return true when passiveCaptchaParams is not null for New option`() {
         val definition = createPassiveChallengeConfirmationDefinition()
 
         val result = definition.canConfirm(
@@ -75,9 +75,36 @@ internal class PassiveChallengeConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'canConfirm' should return false when passiveCaptchaParams is null`() {
+    fun `'canConfirm' should return true when passiveCaptchaParams is not null for Saved option`() {
+        val definition = createPassiveChallengeConfirmationDefinition()
+
+        val result = definition.canConfirm(
+            confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED,
+            confirmationParameters = CONFIRMATION_PARAMETERS
+        )
+
+        assertThat(result).isTrue()
+    }
+
+    @Test
+    fun `'canConfirm' should return false when passiveCaptchaParams is null for New option`() {
         val definition = createPassiveChallengeConfirmationDefinition()
         val optionWithoutCaptcha = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(
+            passiveCaptchaParams = null
+        )
+
+        val result = definition.canConfirm(
+            confirmationOption = optionWithoutCaptcha,
+            confirmationParameters = CONFIRMATION_PARAMETERS
+        )
+
+        assertThat(result).isFalse()
+    }
+
+    @Test
+    fun `'canConfirm' should return false when passiveCaptchaParams is null for Saved option`() {
+        val definition = createPassiveChallengeConfirmationDefinition()
+        val optionWithoutCaptcha = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.copy(
             passiveCaptchaParams = null
         )
 
@@ -113,6 +140,27 @@ internal class PassiveChallengeConfirmationDefinitionTest {
             callback.onActivityResult(PassiveChallengeActivityResult.Success("test_token"))
 
             assertThat(onResultCalled).isTrue()
+        }
+    }
+
+    @Test
+    fun `'createLauncher' should call passiveChallengeWarmer register`() = runTest {
+        val fakePassiveChallengeWarmer = FakePassiveChallengeWarmer()
+        val definition = createPassiveChallengeConfirmationDefinition(
+            passiveChallengeWarmer = fakePassiveChallengeWarmer
+        )
+
+        DummyActivityResultCaller.test {
+            definition.createLauncher(
+                activityResultCaller = activityResultCaller,
+                onResult = {},
+            )
+
+            awaitRegisterCall()
+            awaitNextRegisteredLauncher()
+
+            val registerCall = fakePassiveChallengeWarmer.awaitRegisterCall()
+            assertThat(registerCall.activityResultCaller).isEqualTo(activityResultCaller)
         }
     }
 
@@ -188,7 +236,6 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         val definition = createPassiveChallengeConfirmationDefinition()
 
         val launcher = FakeActivityResultLauncher<PassiveChallengeActivityContract.Args>()
-        val launcherArgs = PassiveChallengeActivityContract.Args(PASSIVE_CAPTCHA_PARAMS)
 
         definition.launch(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
@@ -206,11 +253,6 @@ internal class PassiveChallengeConfirmationDefinitionTest {
     @Test
     fun `'launch' should launch properly with launcher arguments`() = runTest {
         val definition = createPassiveChallengeConfirmationDefinition()
-        val passiveCaptchaParams = PassiveCaptchaParams(
-            siteKey = "test_site_key",
-            rqData = "test_rq_data"
-        )
-        val launcherArgs = PassiveChallengeActivityContract.Args(passiveCaptchaParams)
 
         val launcher = FakeActivityResultLauncher<PassiveChallengeActivityContract.Args>()
 
@@ -223,11 +265,13 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
         val launchCall = launcher.calls.awaitItem()
 
-        assertThat(launchCall.input.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
+        assertThat(launchCall.input.passiveCaptchaParams).isEqualTo(PASSIVE_CAPTCHA_PARAMS)
+        assertThat(launchCall.input.publishableKey).isEqualTo(launcherArgs.publishableKey)
+        assertThat(launchCall.input.productUsage).isEqualTo(launcherArgs.productUsage)
     }
 
     @Test
-    fun `'toResult' should return 'NextStep' with passiveCaptchaParams removed for Success result`() {
+    fun `'toResult' should return 'NextStep' with passiveCaptchaParams removed for Success result with New option`() {
         val definition = createPassiveChallengeConfirmationDefinition()
         val testToken = "test_token"
 
@@ -254,7 +298,32 @@ internal class PassiveChallengeConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'toResult' should return 'NextStep' with passiveCaptchaParams removed for Failed result`() {
+    fun `'toResult' should return 'NextStep' with passiveCaptchaParams removed for Success result with Saved option`() {
+        val definition = createPassiveChallengeConfirmationDefinition()
+        val testToken = "test_token"
+
+        val result = definition.toResult(
+            confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED,
+            confirmationParameters = CONFIRMATION_PARAMETERS,
+            deferredIntentConfirmationType = null,
+            result = PassiveChallengeActivityResult.Success(testToken),
+        )
+
+        assertThat(result).isInstanceOf<ConfirmationDefinition.Result.NextStep>()
+
+        val nextStepResult = result.asNextStep()
+
+        val expectedOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.copy(
+            passiveCaptchaParams = null,
+            hCaptchaToken = testToken
+        )
+
+        assertThat(nextStepResult.confirmationOption).isEqualTo(expectedOption)
+        assertThat(nextStepResult.parameters).isEqualTo(CONFIRMATION_PARAMETERS)
+    }
+
+    @Test
+    fun `'toResult' should return 'NextStep' with passiveCaptchaParams removed for Failed result with New option`() {
         val definition = createPassiveChallengeConfirmationDefinition()
         val exception = RuntimeException("Captcha failed")
 
@@ -275,10 +344,130 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         assertThat(nextStepResult.parameters).isEqualTo(CONFIRMATION_PARAMETERS)
     }
 
+    @Test
+    fun `'toResult' should return 'NextStep' with passiveCaptchaParams removed for Failed result with Saved option`() {
+        val definition = createPassiveChallengeConfirmationDefinition()
+        val exception = RuntimeException("Captcha failed")
+
+        val result = definition.toResult(
+            confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED,
+            confirmationParameters = CONFIRMATION_PARAMETERS,
+            deferredIntentConfirmationType = null,
+            result = PassiveChallengeActivityResult.Failed(exception),
+        )
+
+        assertThat(result).isInstanceOf<ConfirmationDefinition.Result.NextStep>()
+
+        val nextStepResult = result.asNextStep()
+
+        assertThat(nextStepResult.confirmationOption).isEqualTo(
+            PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.copy(passiveCaptchaParams = null, hCaptchaToken = null)
+        )
+        assertThat(nextStepResult.parameters).isEqualTo(CONFIRMATION_PARAMETERS)
+    }
+
+    @Test
+    fun `'action' should work with Saved PaymentMethodConfirmationOption when passiveCaptchaParams is not null`() =
+        runTest {
+            val definition = createPassiveChallengeConfirmationDefinition()
+
+            val action = definition.action(
+                confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED,
+                confirmationParameters = CONFIRMATION_PARAMETERS,
+            )
+
+            assertThat(action)
+                .isInstanceOf<ConfirmationDefinition.Action.Launch<PassiveChallengeActivityContract.Args>>()
+
+            val launchAction = action.asLaunch()
+
+            assertThat(launchAction.launcherArguments.passiveCaptchaParams).isEqualTo(PASSIVE_CAPTCHA_PARAMS)
+            assertThat(launchAction.receivesResultInProcess).isFalse()
+            assertThat(launchAction.deferredIntentConfirmationType).isNull()
+        }
+
+    @Test
+    fun `'launch' should work with Saved PaymentMethodConfirmationOption`() = runTest {
+        val definition = createPassiveChallengeConfirmationDefinition()
+
+        val launcher = FakeActivityResultLauncher<PassiveChallengeActivityContract.Args>()
+
+        definition.launch(
+            confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED,
+            confirmationParameters = CONFIRMATION_PARAMETERS,
+            launcher = launcher,
+            arguments = launcherArgs,
+        )
+
+        val launchCall = launcher.calls.awaitItem()
+
+        assertThat(launchCall.input.passiveCaptchaParams)
+            .isEqualTo(PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.passiveCaptchaParams)
+    }
+
+    @Test
+    fun `'bootstrap' should start passive challenge warmer with passiveCaptchaParams`() = runTest {
+        val fakePassiveChallengeWarmer = FakePassiveChallengeWarmer()
+        val definition = createPassiveChallengeConfirmationDefinition(
+            passiveChallengeWarmer = fakePassiveChallengeWarmer
+        )
+
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            passiveCaptchaParams = PASSIVE_CAPTCHA_PARAMS
+        )
+
+        definition.bootstrap(paymentMethodMetadata)
+
+        val startCall = fakePassiveChallengeWarmer.awaitStartCall()
+
+        assertThat(startCall.passiveCaptchaParams).isEqualTo(PASSIVE_CAPTCHA_PARAMS)
+        assertThat(startCall.publishableKey).isEqualTo(launcherArgs.publishableKey)
+        assertThat(startCall.productUsage).isEqualTo(launcherArgs.productUsage)
+    }
+
+    @Test
+    fun `'bootstrap' should not start warmer if passiveCaptchaParams is null`() {
+        val fakePassiveChallengeWarmer = FakePassiveChallengeWarmer()
+        val definition = createPassiveChallengeConfirmationDefinition(
+            passiveChallengeWarmer = fakePassiveChallengeWarmer
+        )
+
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            passiveCaptchaParams = null
+        )
+
+        definition.bootstrap(paymentMethodMetadata)
+
+        fakePassiveChallengeWarmer.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `'unregister' should call passiveChallengeWarmer unregister`() = runTest {
+        val fakePassiveChallengeWarmer = FakePassiveChallengeWarmer()
+        val definition = createPassiveChallengeConfirmationDefinition(
+            passiveChallengeWarmer = fakePassiveChallengeWarmer
+        )
+
+        val launcher = FakeActivityResultLauncher<PassiveChallengeActivityContract.Args>()
+
+        definition.unregister(launcher)
+
+        fakePassiveChallengeWarmer.awaitUnregisterCall()
+        fakePassiveChallengeWarmer.ensureAllEventsConsumed()
+    }
+
     private fun createPassiveChallengeConfirmationDefinition(
-        errorReporter: ErrorReporter = FakeErrorReporter()
+        errorReporter: ErrorReporter = FakeErrorReporter(),
+        passiveChallengeWarmer: PassiveChallengeWarmer = FakePassiveChallengeWarmer(),
+        publishableKey: String = launcherArgs.publishableKey,
+        productUsage: Set<String> = launcherArgs.productUsage
     ): PassiveChallengeConfirmationDefinition {
-        return PassiveChallengeConfirmationDefinition(errorReporter)
+        return PassiveChallengeConfirmationDefinition(
+            errorReporter = errorReporter,
+            publishableKeyProvider = { publishableKey },
+            productUsage = productUsage,
+            passiveChallengeWarmer = passiveChallengeWarmer
+        )
     }
 
     private companion object {
@@ -304,6 +493,20 @@ internal class PassiveChallengeConfirmationDefinitionTest {
             extraParams = null,
             shouldSave = false,
             passiveCaptchaParams = PASSIVE_CAPTCHA_PARAMS,
+        )
+
+        private val PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED = PaymentMethodConfirmationOption.Saved(
+            paymentMethod = PAYMENT_INTENT.paymentMethod!!,
+            optionsParams = null,
+            originatedFromWallet = false,
+            passiveCaptchaParams = PASSIVE_CAPTCHA_PARAMS,
+            hCaptchaToken = null,
+        )
+
+        private val launcherArgs = PassiveChallengeActivityContract.Args(
+            passiveCaptchaParams = PASSIVE_CAPTCHA_PARAMS,
+            publishableKey = "pk_123",
+            productUsage = setOf("PaymentSheet")
         )
     }
 }

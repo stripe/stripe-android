@@ -1,7 +1,6 @@
-
 import android.os.Parcelable
+import com.stripe.android.core.networking.MarkdownToHtmlSerializer
 import com.stripe.android.financialconnections.model.serializer.BodyEntrySerializer
-import com.stripe.android.financialconnections.model.serializer.MarkdownToHtmlSerializer
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

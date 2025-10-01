@@ -31,6 +31,6 @@ internal object TransformToBankIcon {
             .filter { it.key.findAll(bankName).any() }
             .firstNotNullOfOrNull {
                 transformBankIconCodeToBankIcon(it.value, fallbackIcon)
-            } ?: R.drawable.stripe_ic_fc_bank
+            } ?: fallbackIcon
     }
 }

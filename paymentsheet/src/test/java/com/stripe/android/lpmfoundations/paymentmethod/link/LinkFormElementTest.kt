@@ -25,6 +25,7 @@ import com.stripe.android.link.ui.inline.LINK_INLINE_SIGNUP_REMAINING_FIELDS_TES
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -122,6 +123,7 @@ class LinkFormElementTest {
             initialLinkUserInput = initialLinkUserInput,
             linkConfigurationCoordinator = createLinkConfigurationCoordinator(),
             onLinkInlineSignupStateChanged = {},
+            previousLinkSignupCheckboxSelection = null,
         )
     }
 
@@ -129,7 +131,9 @@ class LinkFormElementTest {
         return LinkConfiguration(
             stripeIntent = PaymentIntentFactory.create(),
             merchantName = "Merchant, Inc.",
+            sellerBusinessName = null,
             merchantCountryCode = "CA",
+            merchantLogoUrl = null,
             customerInfo = LinkConfiguration.CustomerInfo(
                 name = "John Doe",
                 email = null,
@@ -155,12 +159,16 @@ class LinkFormElementTest {
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             allowUserEmailEdits = true,
+            allowLogOut = true,
             enableDisplayableDefaultValuesInEce = false,
             skipWalletInFlowController = false,
             linkAppearance = null,
             linkSignUpOptInFeatureEnabled = false,
             linkSignUpOptInInitialValue = false,
-            customerId = null
+            customerId = null,
+            saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+            forceSetupFutureUseBehaviorAndNewMandate = false,
+            linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
         )
     }
 
@@ -221,7 +229,11 @@ class LinkFormElementTest {
         private val linkAccountManager: LinkAccountManager,
         private val configuration: LinkConfiguration,
     ) : LinkInlineSignupAssistedViewModelFactory {
-        override fun create(signupMode: LinkSignupMode, initialUserInput: UserInput?): InlineSignupViewModel {
+        override fun create(
+            signupMode: LinkSignupMode,
+            initialUserInput: UserInput?,
+            previousLinkSignupCheckboxSelection: Boolean?
+        ): InlineSignupViewModel {
             return InlineSignupViewModel(
                 signupMode = signupMode,
                 config = configuration,
@@ -230,6 +242,7 @@ class LinkFormElementTest {
                 linkEventsReporter = FakeLinkInlineSignupEventsReporter,
                 logger = Logger.noop(),
                 lookupDelay = 0L,
+                previousLinkSignupCheckboxSelection = previousLinkSignupCheckboxSelection,
             )
         }
     }

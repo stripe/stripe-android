@@ -77,6 +77,18 @@ internal fun PaymentMethodVerticalLayoutUI(
             )
         },
         imageLoader = imageLoader,
+        reportInitialPaymentMethodVisibilitySnapshot = { visibilityMap ->
+            val visiblePaymentMethods = visibilityMap.filter { it.value }.keys.toList()
+            val hiddenPaymentMethods = visibilityMap.filter { !it.value }.keys.toList()
+
+            interactor.reportInitialPaymentMethodVisibilitySnapshot(
+                visiblePaymentMethods = buildList {
+                    if (state.displayedSavedPaymentMethod != null) add("saved")
+                    addAll(visiblePaymentMethods)
+                },
+                hiddenPaymentMethods = hiddenPaymentMethods,
+            )
+        },
         modifier = modifier
             .testTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT)
     )
@@ -95,6 +107,7 @@ internal fun PaymentMethodVerticalLayoutUI(
     onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
+    reportInitialPaymentMethodVisibilitySnapshot: (Map<String, Boolean>) -> Unit = {},
 ) {
     Column(modifier = modifier) {
         val textStyle = MaterialTheme.typography.subtitle1
@@ -149,6 +162,7 @@ internal fun PaymentMethodVerticalLayoutUI(
             isEnabled = isEnabled,
             imageLoader = imageLoader,
             rowStyle = rowStyle,
+            reportInitialPaymentMethodVisibilitySnapshot = reportInitialPaymentMethodVisibilitySnapshot,
         )
     }
 }

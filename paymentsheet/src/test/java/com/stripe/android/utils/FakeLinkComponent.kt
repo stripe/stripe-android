@@ -2,9 +2,7 @@ package com.stripe.android.utils
 
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.FakeLinkAccountManager
-import com.stripe.android.link.account.FakeLinkAuth
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.attestation.FakeLinkAttestationCheck
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.gate.FakeLinkGate
@@ -22,12 +20,12 @@ internal class FakeLinkComponent(
     override val linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
     override val linkGate: LinkGate = FakeLinkGate(),
     override val linkAttestationCheck: LinkAttestationCheck = FakeLinkAttestationCheck(),
-    override val linkAuth: LinkAuth = FakeLinkAuth(),
     override val inlineSignupViewModelFactory: LinkInlineSignupAssistedViewModelFactory = object :
         LinkInlineSignupAssistedViewModelFactory {
         override fun create(
             signupMode: LinkSignupMode,
-            initialUserInput: UserInput?
+            initialUserInput: UserInput?,
+            previousLinkSignupCheckboxSelection: Boolean?
         ): InlineSignupViewModel = mock<InlineSignupViewModel>()
     }
 ) : LinkComponent() {

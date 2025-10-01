@@ -1,120 +1,168 @@
 package com.stripe.android.link.account
 
 import com.stripe.android.common.di.APPLICATION_ID
-import com.stripe.android.core.exception.APIException
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkEventException
 import com.stripe.android.link.gate.LinkGate
-import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.inline.SignUpConsentAction
+import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSessionRefresh
+import com.stripe.android.model.ConsumerSessionSignup
+import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.EmailSource
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.attestation.AttestationError
+import com.stripe.android.paymentsheet.model.amount
+import com.stripe.android.paymentsheet.model.currency
 import com.stripe.attestation.IntegrityRequestManager
 import javax.inject.Inject
 import javax.inject.Named
 
+/**
+ * Default implementation of LinkAuth that handles low-level Link authentication operations.
+ */
 internal class DefaultLinkAuth @Inject constructor(
     private val linkGate: LinkGate,
-    private val linkAccountManager: LinkAccountManager,
+    private val linkRepository: LinkRepository,
     private val integrityRequestManager: IntegrityRequestManager,
     private val errorReporter: ErrorReporter,
+    private val config: LinkConfiguration,
     @Named(APPLICATION_ID) private val applicationId: String
 ) : LinkAuth {
-    override suspend fun signUp(
+
+    override suspend fun lookup(
+        email: String?,
+        emailSource: EmailSource?,
+        linkAuthIntentId: String?,
+        customerId: String?,
+        sessionId: String,
+        supportedVerificationTypes: List<String>?
+    ): Result<ConsumerSessionLookup> {
+        val hasEmailAndSource = email != null && emailSource != null
+        val hasAuthIntent = linkAuthIntentId != null
+
+        if (!hasEmailAndSource && !hasAuthIntent) {
+            return Result.failure(
+                IllegalArgumentException(
+                    "Either email+emailSource or linkAuthIntentId must be provided"
+                )
+            )
+        }
+        return if (linkGate.useAttestationEndpoints) {
+            mobileLookupWithAttestation(
+                email = email,
+                emailSource = emailSource,
+                sessionId = sessionId,
+                linkAuthIntentId = linkAuthIntentId,
+                customerId = customerId,
+                supportedVerificationTypes = supportedVerificationTypes
+            )
+        } else {
+            linkRepository.lookupConsumer(
+                email = email,
+                linkAuthIntentId = linkAuthIntentId,
+                sessionId = sessionId,
+                customerId = customerId,
+                supportedVerificationTypes = supportedVerificationTypes
+            )
+        }
+    }
+
+    override suspend fun signup(
         email: String,
-        phoneNumber: String,
-        country: String,
+        phoneNumber: String?,
+        country: String?,
+        countryInferringMethod: String,
         name: String?,
-        consentAction: SignUpConsentAction
-    ): LinkAuthResult {
-        val signupResult = if (linkGate.useAttestationEndpoints) {
-            mobileSignUp(
+        consentAction: SignUpConsentAction,
+    ): Result<ConsumerSessionSignup> {
+        return if (linkGate.useAttestationEndpoints) {
+            mobileSignUpWithAttestation(
                 email = email,
                 phoneNumber = phoneNumber,
                 country = country,
+                countryInferringMethod = countryInferringMethod,
                 name = name,
                 consentAction = consentAction
             )
         } else {
-            linkAccountManager.signUp(
+            linkRepository.consumerSignUp(
                 email = email,
                 phone = phoneNumber,
                 country = country,
+                countryInferringMethod = countryInferringMethod,
                 name = name,
-                consentAction = consentAction
+                consentAction = consentAction.consumerAction,
             )
         }
-        return signupResult.toLinkAuthResult()
     }
 
-    override suspend fun lookUp(
-        email: String,
-        emailSource: EmailSource,
-        startSession: Boolean,
-        customerId: String?
-    ): LinkAuthResult {
-        val lookupResult = if (linkGate.useAttestationEndpoints) {
-            mobileLookUp(
-                email = email,
-                emailSource = emailSource,
-                startSession = startSession,
-                customerId = customerId
-            )
-        } else {
-            linkAccountManager.lookupConsumer(
-                email = email,
-                startSession = startSession,
-                customerId = customerId
-            )
-        }
-        return lookupResult.toLinkAuthResult()
+    override suspend fun refreshConsumer(
+        consumerSessionClientSecret: String,
+        supportedVerificationTypes: List<String>?
+    ): Result<ConsumerSessionRefresh> {
+        return linkRepository.refreshConsumer(
+            appId = applicationId,
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            supportedVerificationTypes = supportedVerificationTypes
+        )
     }
 
-    private suspend fun mobileSignUp(
-        email: String,
-        phoneNumber: String,
-        country: String,
-        name: String?,
-        consentAction: SignUpConsentAction
-    ): Result<LinkAccount> {
+    private suspend fun mobileLookupWithAttestation(
+        email: String?,
+        emailSource: EmailSource?,
+        linkAuthIntentId: String?,
+        customerId: String?,
+        sessionId: String,
+        supportedVerificationTypes: List<String>?
+    ): Result<ConsumerSessionLookup> {
         return runCatching {
             val verificationToken = integrityRequestManager.requestToken().getOrThrow()
-            linkAccountManager.mobileSignUp(
-                email = email,
-                phone = phoneNumber,
-                country = country,
-                name = name,
-                consentAction = consentAction,
-                verificationToken = verificationToken,
-                appId = applicationId
-            ).getOrThrow()
-        }.onFailure { error ->
-            reportError(error, operation = "signup")
-        }
-    }
-
-    private suspend fun mobileLookUp(
-        email: String,
-        emailSource: EmailSource,
-        startSession: Boolean,
-        customerId: String?
-    ): Result<LinkAccount?> {
-        return runCatching {
-            val verificationToken = integrityRequestManager.requestToken().getOrThrow()
-            linkAccountManager.mobileLookupConsumer(
-                email = email,
-                emailSource = emailSource,
+            linkRepository.mobileLookupConsumer(
                 verificationToken = verificationToken,
                 appId = applicationId,
-                startSession = startSession,
-                customerId = customerId
+                email = email,
+                linkAuthIntentId = linkAuthIntentId,
+                sessionId = sessionId,
+                emailSource = emailSource,
+                customerId = customerId,
+                supportedVerificationTypes = supportedVerificationTypes
             ).getOrThrow()
         }.onFailure { error ->
-            reportError(error, operation = "lookup")
+            val operation = if (email != null) "lookup" else "lookupByAuthIntent"
+            reportAttestationError(error, operation = operation)
         }
     }
 
-    private fun reportError(error: Throwable, operation: String) {
+    private suspend fun mobileSignUpWithAttestation(
+        email: String,
+        phoneNumber: String?,
+        country: String?,
+        countryInferringMethod: String,
+        name: String?,
+        consentAction: SignUpConsentAction
+    ): Result<ConsumerSessionSignup> {
+        return runCatching {
+            val verificationToken = integrityRequestManager.requestToken().getOrThrow()
+            linkRepository.mobileSignUp(
+                name = name,
+                email = email,
+                phoneNumber = phoneNumber,
+                country = country,
+                countryInferringMethod = countryInferringMethod,
+                consentAction = consentAction.consumerAction,
+                verificationToken = verificationToken,
+                appId = applicationId,
+                amount = config.stripeIntent.amount,
+                currency = config.stripeIntent.currency,
+                incentiveEligibilitySession = null,
+            ).getOrThrow()
+        }.onFailure { error ->
+            reportAttestationError(error, operation = "signup")
+        }
+    }
+
+    private fun reportAttestationError(error: Throwable, operation: String) {
         val errorEvent = when {
             error.isBackendAttestationError -> {
                 ErrorReporter.ExpectedErrorEvent.LINK_NATIVE_FAILED_TO_ATTEST_REQUEST
@@ -124,6 +172,7 @@ internal class DefaultLinkAuth @Inject constructor(
             }
             else -> return
         }
+
         errorReporter.report(
             errorEvent = errorEvent,
             stripeException = LinkEventException(error),
@@ -133,48 +182,27 @@ internal class DefaultLinkAuth @Inject constructor(
         )
     }
 
-    private fun Result<LinkAccount?>.toLinkAuthResult(): LinkAuthResult {
-        return runCatching {
-            val linkAccount = getOrThrow()
-            return if (linkAccount != null) {
-                LinkAuthResult.Success(linkAccount)
-            } else {
-                LinkAuthResult.NoLinkAccountFound
-            }
-        }.getOrElse { error ->
-            error.toLinkAuthResult()
-        }
-    }
-
-    private fun Throwable.toLinkAuthResult(): LinkAuthResult {
-        return when {
-            isAttestationError -> {
-                LinkAuthResult.AttestationFailed(this)
-            }
-            isAccountError -> {
-                LinkAuthResult.AccountError(this)
-            }
-            else -> {
-                LinkAuthResult.Error(this)
-            }
-        }
-    }
-
-    private val Throwable.isAttestationError: Boolean
-        get() = isIntegrityManagerError || isBackendAttestationError
-
-    // Interaction with Integrity API to generate tokens resulted in a failure
-    private val Throwable.isIntegrityManagerError: Boolean
-        get() = this is AttestationError
-
-    // Stripe backend could not verify the integrity of the request
-    private val Throwable.isBackendAttestationError: Boolean
-        get() = this is APIException && stripeError?.code == "link_failed_to_attest_request"
-
-    private val Throwable.isAccountError: Boolean
+    private val SignUpConsentAction.consumerAction: ConsumerSignUpConsentAction
         get() = when (this) {
-            // This happens when account is suspended or banned
-            is APIException -> stripeError?.code == "link_consumer_details_not_available"
-            else -> false
+            SignUpConsentAction.Checkbox ->
+                ConsumerSignUpConsentAction.Checkbox
+            SignUpConsentAction.CheckboxWithPrefilledEmail ->
+                ConsumerSignUpConsentAction.CheckboxWithPrefilledEmail
+            SignUpConsentAction.CheckboxWithPrefilledEmailAndPhone ->
+                ConsumerSignUpConsentAction.CheckboxWithPrefilledEmailAndPhone
+            SignUpConsentAction.Implied ->
+                ConsumerSignUpConsentAction.Implied
+            SignUpConsentAction.ImpliedWithPrefilledEmail ->
+                ConsumerSignUpConsentAction.ImpliedWithPrefilledEmail
+            SignUpConsentAction.DefaultOptInWithAllPrefilled ->
+                ConsumerSignUpConsentAction.PrecheckedOptInBoxPrefilledAll
+            SignUpConsentAction.DefaultOptInWithSomePrefilled ->
+                ConsumerSignUpConsentAction.PrecheckedOptInBoxPrefilledSome
+            SignUpConsentAction.DefaultOptInWithNonePrefilled ->
+                ConsumerSignUpConsentAction.PrecheckedOptInBoxPrefilledNone
+            SignUpConsentAction.SignUpOptInMobileChecked ->
+                ConsumerSignUpConsentAction.SignUpOptInMobileChecked
+            SignUpConsentAction.SignUpOptInMobilePrechecked ->
+                ConsumerSignUpConsentAction.SignUpOptInMobilePrechecked
         }
 }

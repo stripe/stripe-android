@@ -67,7 +67,7 @@ import kotlin.coroutines.CoroutineContext
     ],
     includes = [
         LinkCommonModule::class,
-        PaymentsIntegrityModule::class,
+        PaymentsIntegrityModule::class
     ]
 )
 internal abstract class PaymentSheetCommonModule {

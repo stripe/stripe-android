@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+@Suppress("TooManyFunctions")
 internal class LinkControllerPlaygroundViewModel(
     application: Application,
     savedStateHandle: SavedStateHandle,
@@ -28,6 +29,7 @@ internal class LinkControllerPlaygroundViewModel(
             activity = activity,
             presentPaymentMethodsCallback = this::onLinkControllerPresentPaymentMethod,
             authenticationCallback = this::onLinkControllerAuthentication,
+            authorizeCallback = this::onLinkControllerAuthorization,
         )
         activity.lifecycleScope.launch {
             linkController.state(activity).collect { controllerState ->
@@ -74,6 +76,13 @@ internal class LinkControllerPlaygroundViewModel(
         }
     }
 
+    fun onUpdatePhoneNumberClick(phoneNumber: String) {
+        viewModelScope.launch {
+            val result = linkController.updatePhoneNumber(phoneNumber)
+            state.update { it.copy(updatePhoneNumberResult = result) }
+        }
+    }
+
     fun onCreatePaymentMethodClick() {
         viewModelScope.launch {
             val result = linkController.createPaymentMethod()
@@ -81,10 +90,11 @@ internal class LinkControllerPlaygroundViewModel(
         }
     }
 
-    fun onPaymentMethodClick(email: String) {
-        linkControllerPresenter?.paymentSelectionHint =
-            "Lorem ipsum dolor sit amet consectetur adipiscing elit."
-        linkControllerPresenter?.presentPaymentMethods(email = email.takeIf { it.isNotBlank() })
+    fun onPaymentMethodClick(email: String, paymentMethodType: LinkController.PaymentMethodType?) {
+        linkControllerPresenter?.presentPaymentMethodsForOnramp(
+            email = email.takeIf { it.isNotBlank() },
+            paymentMethodType = paymentMethodType,
+        )
     }
 
     fun onAuthenticateClick(email: String, existingOnly: Boolean) {
@@ -96,7 +106,24 @@ internal class LinkControllerPlaygroundViewModel(
         }
     }
 
+    fun onAuthorizeClick(linkAuthIntentId: String) {
+        linkControllerPresenter?.authorize(
+            linkAuthIntentId = linkAuthIntentId
+        )
+    }
+
     private fun onLinkControllerAuthentication(result: LinkController.AuthenticationResult) {
         state.update { it.copy(authenticationResult = result) }
+    }
+
+    private fun onLinkControllerAuthorization(result: LinkController.AuthorizeResult) {
+        state.update { it.copy(authorizeResult = result) }
+    }
+
+    fun onLogOutClick() {
+        viewModelScope.launch {
+            val result = linkController.logOut()
+            state.update { it.copy(logOutResult = result) }
+        }
     }
 }

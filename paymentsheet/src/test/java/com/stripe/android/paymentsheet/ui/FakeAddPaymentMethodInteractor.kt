@@ -1,11 +1,13 @@
 package com.stripe.android.paymentsheet.ui
 
+import com.stripe.android.link.TestFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.flow.StateFlow
@@ -17,9 +19,17 @@ internal class FakeAddPaymentMethodInteractor(
 ) : AddPaymentMethodInteractor {
     override val state: StateFlow<AddPaymentMethodInteractor.State> = stateFlowOf(initialState)
     override val isLiveMode: Boolean = true
+    override val shouldTrackRenderedLPMs: Boolean = true
 
     override fun handleViewAction(viewAction: AddPaymentMethodInteractor.ViewAction) {
         viewActionRecorder.record(viewAction)
+    }
+
+    override fun reportInitialPaymentMethodVisibilitySnapshot(
+        visiblePaymentMethods: List<String>,
+        hiddenPaymentMethods: List<String>
+    ) {
+        // Do nothing
     }
 
     override fun close() {
@@ -28,8 +38,15 @@ internal class FakeAddPaymentMethodInteractor(
 
     companion object {
         fun createState(
-            metadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            metadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                linkState = LinkState(
+                    configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
+                    loginState = LinkState.LoginState.LoggedOut,
+                    signupMode = null,
+                ),
+            ),
             paymentMethodCode: PaymentMethodCode = metadata.supportedPaymentMethodTypes().first(),
+            isValidating: Boolean = false,
         ): AddPaymentMethodInteractor.State {
             val formArguments = FormArgumentsFactory.create(
                 paymentMethodCode = paymentMethodCode,
@@ -50,10 +67,11 @@ internal class FakeAddPaymentMethodInteractor(
                 formElements = metadata.formElementsForCode(
                     code = paymentMethodCode,
                     uiDefinitionFactoryArgumentsFactory = uiDefinitionArgumentsFactory,
-                ) ?: mock(),
+                ) ?: emptyList(),
                 paymentSelection = null,
                 processing = false,
                 usBankAccountFormArguments = mock(),
+                validating = isValidating,
                 incentive = null,
             )
         }

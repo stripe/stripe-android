@@ -1262,6 +1262,7 @@ internal class PlaygroundTestDriver(
      */
     private fun waitForPlaygroundActivity() {
         while (currentActivity !is PaymentSheetPlaygroundActivity) {
+            composeTestRule.waitForIdle()
             TimeUnit.MILLISECONDS.sleep(250)
         }
         Espresso.onIdle()
@@ -1532,6 +1533,25 @@ internal class PlaygroundTestDriver(
                             isEnabled()
                             isDisplayed()
                         }
+                    }
+                    is AuthorizeAction.ShowQrCodeThenPoll -> {
+                        val simulateScanText = UiAutomatorText(
+                            "Simulate scan",
+                            labelMatchesExactly = true,
+                            device = device
+                        )
+                        simulateScanText.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
+                        simulateScanText.click()
+
+                        val authorizeTestPaymentText = UiAutomatorText(
+                            "AUTHORIZE TEST PAYMENT",
+                            labelMatchesExactly = true,
+                            device = device
+                        )
+                        authorizeTestPaymentText.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
+                        authorizeTestPaymentText.click()
+
+                        waitForPollingToFinish()
                     }
                     null -> {}
                 }

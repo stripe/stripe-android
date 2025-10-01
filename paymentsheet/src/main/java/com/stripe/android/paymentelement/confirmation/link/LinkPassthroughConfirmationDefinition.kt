@@ -87,6 +87,7 @@ internal class LinkPassthroughConfirmationDefinition @Inject constructor(
             expectedPaymentMethodType = confirmationOption.expectedPaymentMethodType,
             billingPhone = confirmationOption.billingPhone,
             cvc = confirmationOption.cvc,
+            allowRedisplay = confirmationOption.allowRedisplay?.value,
         ).mapCatching {
             requireNotNull(it.encodedPaymentMethod.parsePaymentMethod())
         }.map { paymentMethod ->
@@ -94,6 +95,7 @@ internal class LinkPassthroughConfirmationDefinition @Inject constructor(
                 paymentMethod = paymentMethod,
                 optionsParams = null,
                 originatedFromWallet = true,
+                passiveCaptchaParams = confirmationOption.passiveCaptchaParams
             )
         }
     }

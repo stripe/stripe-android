@@ -12,6 +12,8 @@
   <string name="stripe_back_of_dl">Zadní strana řidičského průkazu</string>
   <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
   <string name="stripe_back_of_dl_selected">Je vybrána zadní strana řidičského průkazu</string>
+  <!-- Title for scan screen when back of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_back_of_driver_license_or_id">Zadní strana řidičského průkazu nebo státem vydaného průkazu totožnosti s fotografií</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">Zadní strana průkazu totožnosti</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
@@ -102,16 +104,30 @@
   <string name="stripe_first_name">Jméno</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="stripe_flash_mask">Maska pro animaci selfie</string>
+  <!-- Instruction for flipping driver's license or government-issued photo ID -->
+  <string name="stripe_flip_driver_license_or_id">Otočte řidičský průkaz nebo státem vydaný průkaz totožnosti s fotografií na druhou stranu</string>
+  <!-- Generic back-side instruction for government-issued photo ID (no passport mention) -->
+  <string name="stripe_flip_id_document">Otočte státem vydaný průkaz totožnosti s fotografií na druhou stranu</string>
+  <!-- Title for scan screen when front of all ID types is shown -->
+  <string name="stripe_front_of_all_id_types">Přední strana řidičského průkazu, pasu nebo státem vydaného průkazu totožnosti s fotografií</string>
   <!-- Description of front of driver's license image -->
   <string name="stripe_front_of_dl">Přední strana řidičského průkazu</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
   <string name="stripe_front_of_dl_selected">Je vybrána přední strana řidičského průkazu</string>
+  <!-- Title for scan screen when front of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_front_of_driver_license_or_id">Přední strana řidičského průkazu nebo státem vydaného průkazu totožnosti s fotografií</string>
+  <!-- Title for scan screen when front of driver's license or passport is shown -->
+  <string name="stripe_front_of_driver_license_or_passport">Přední strana řidičského průkazu nebo pasu</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">Přední strana průkazu totožnosti</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">Přední strana průkazu totožnosti</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Je vybrána přední strana průkazu totožnosti</string>
+  <!-- Description of front of passport image -->
+  <string name="stripe_front_of_passport">Přední strana pasu</string>
+  <!-- Title for scan screen when front of passport or government-issued photo ID is shown -->
+  <string name="stripe_front_of_passport_or_id">Přední strana pasu nebo státem vydaného průkazu totožnosti s fotografií</string>
   <!-- Button to go back to the previous screen -->
   <string name="stripe_go_back">Zpět</string>
   <!-- display name for Government issued photo ID -->
@@ -160,16 +176,24 @@
   <string name="stripe_phone_number">Telefonní číslo</string>
   <!-- Instructional text when there is no document in camera frame -->
   <string name="stripe_point_camera_to_document">Nebyl zjištěn žádný dokument</string>
+  <!-- Instruction for positioning all ID types -->
+  <string name="stripe_position_all_id_types">Umístěte řidičský průkaz, pas nebo státem vydaný průkaz totožnosti s fotografií do středu rámečku</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Převraťte řidičský průkaz na druhou stranu</string>
   <!-- Instructional text for scanning front of a driver's license -->
   <string name="stripe_position_dl_front">Umístěte řidičský průkaz do středu rámečku</string>
+  <!-- Instruction for positioning driver's license or government-issued photo ID -->
+  <string name="stripe_position_driver_license_or_id">Umístěte řidičský průkaz nebo státem vydaný průkaz totožnosti s fotografií do středu rámečku</string>
+  <!-- Instruction for positioning driver's license or passport -->
+  <string name="stripe_position_driver_license_or_passport">Umístěte řidičský průkaz nebo pas do středu rámečku</string>
   <!-- Instructional text for scanning back of a identity card -->
   <string name="stripe_position_id_back">Převraťte průkaz totožnosti na druhou stranu</string>
   <!-- Instructional text for scanning front of a identity card -->
   <string name="stripe_position_id_front">Umístěte průkaz totožnosti do středu rámečku</string>
   <!-- Instructional text for scanning a passport -->
   <string name="stripe_position_passport">Umístěte pas do středu rámečku</string>
+  <!-- Instruction for positioning passport or government-issued photo ID -->
+  <string name="stripe_position_passport_or_id">Umístěte pas nebo státem vydaný průkaz totožnosti s fotografií do středu rámečku</string>
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Svoji tvář umístěte do středu rámečku.</string>
   <!-- Instructional text when the document is too blurry -->
@@ -205,8 +229,6 @@
   <string name="stripe_test_model_title">Aktuálně se nacházíte ve zkušebním režimu</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Zkusit znovu</string>
-  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
-  <string name="stripe_unexpected_error_try_again">Došlo k neočekávané chybě -- zkuste to znovu za několik sekund</string>
   <!-- Description to upload a photo -->
   <string name="stripe_upload_a_photo">Nahrát fotografii</string>
   <!-- Title of dialog to upload back of driver license -->

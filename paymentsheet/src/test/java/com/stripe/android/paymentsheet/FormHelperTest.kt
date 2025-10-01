@@ -83,6 +83,7 @@ internal class FormHelperTest {
                     PaymentSelection.New.GenericPaymentMethod(
                         label = "Cash App".resolvableString,
                         iconResource = 0,
+                        iconResourceNight = null,
                         lightThemeIconUrl = null,
                         darkThemeIconUrl = null,
                         paymentMethodCreateParams = PaymentMethodCreateParams.createCashAppPay(
@@ -114,6 +115,7 @@ internal class FormHelperTest {
                     PaymentSelection.New.GenericPaymentMethod(
                         label = "Klarna".resolvableString,
                         iconResource = 0,
+                        iconResourceNight = null,
                         lightThemeIconUrl = null,
                         darkThemeIconUrl = null,
                         paymentMethodCreateParams = PaymentMethodCreateParams.createKlarna(
@@ -424,6 +426,7 @@ internal class FormHelperTest {
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
                     label = resolvableString(R.string.stripe_paymentsheet_payment_method_bancontact),
                     iconResource = R.drawable.stripe_ic_paymentsheet_pm_bancontact,
+                    iconResourceNight = null,
                     lightThemeIconUrl = null,
                     darkThemeIconUrl = null,
                 )
@@ -634,6 +637,7 @@ internal class FormHelperTest {
             eventReporter = eventReporter,
             savedStateHandle = SavedStateHandle(),
             autocompleteAddressInteractorFactory = null,
+            automaticallyLaunchedCardScanFormDataHelper = null,
         )
     }
 

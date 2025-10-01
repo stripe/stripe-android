@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Context
+import android.net.Uri
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.core.networking.AnalyticsRequest
@@ -74,6 +75,11 @@ class CustomPaymentMethodsAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_load_succeeded")
         validateAnalyticsRequest(eventName = "mc_complete_sheet_newpm_show")
         validateAnalyticsRequest(eventName = "mc_form_shown")
+        validateAnalyticsRequest(
+            eventName = "mc_initial_displayed_payment_methods",
+            query("hidden_payment_methods", ""),
+            query("visible_payment_methods", Uri.encode("cpmt_123,card"))
+        )
 
         context.presentPaymentSheet {
             presentWithPaymentIntent(

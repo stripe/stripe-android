@@ -7,6 +7,7 @@ import com.stripe.android.common.analytics.toAnalyticsMap
 import com.stripe.android.common.analytics.toAnalyticsValue
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
+import com.stripe.android.core.utils.mapOfDurationInSeconds
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
@@ -100,6 +101,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         setAsDefaultEnabled: Boolean? = null,
         setupFutureUsage: StripeIntent.Usage? = null,
         paymentMethodOptionsSetupFutureUsage: Boolean,
+        openCardScanAutomatically: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_succeeded"
         override val additionalParams: Map<String, Any?> = buildMap {
@@ -117,6 +119,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             setAsDefaultEnabled?.let {
                 put(FIELD_SET_AS_DEFAULT_ENABLED, it)
             }
+            put(FIELD_OPEN_CARD_SCAN_AUTOMATICALLY, openCardScanAutomatically)
             put(FIELD_LINK_DISPLAY, linkDisplay.analyticsValue)
             if (setAsDefaultEnabled == true && hasDefaultPaymentMethod != null) {
                 put(FIELD_HAS_DEFAULT_PAYMENT_METHOD, hasDefaultPaymentMethod)
@@ -706,6 +709,112 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         )
     }
 
+    class CardScanStarted(
+        implementation: String,
+        override val isDeferred: Boolean,
+        override val isSpt: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_cardscan_scan_started"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            "implementation" to implementation
+        )
+    }
+
+    class CardScanSucceeded(
+        implementation: String,
+        duration: Duration?,
+        override val isDeferred: Boolean,
+        override val isSpt: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_cardscan_success"
+        override val additionalParams: Map<String, Any?> =
+            duration.mapOfDurationInSeconds() +
+                mapOf(
+                    "implementation" to implementation
+                )
+    }
+
+    class CardScanFailed(
+        implementation: String,
+        duration: Duration?,
+        error: Throwable?,
+        override val isDeferred: Boolean,
+        override val isSpt: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_cardscan_failed"
+        override val additionalParams: Map<String, Any?> =
+            duration.mapOfDurationInSeconds() +
+                mapOf(
+                    "implementation" to implementation,
+                    FIELD_ERROR_MESSAGE to error?.javaClass?.simpleName
+                )
+    }
+
+    class CardScanCancelled(
+        implementation: String,
+        duration: Duration?,
+        override val isDeferred: Boolean,
+        override val isSpt: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_cardscan_cancel"
+        override val additionalParams: Map<String, Any?> =
+            duration.mapOfDurationInSeconds() +
+                mapOf(
+                    "implementation" to implementation
+                )
+    }
+
+    class CardScanApiCheckSucceeded(
+        implementation: String,
+        override val isDeferred: Boolean,
+        override val isSpt: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_cardscan_api_check_succeeded"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            "implementation" to implementation
+        )
+    }
+
+    class CardScanApiCheckFailed(
+        implementation: String,
+        error: Throwable?,
+        override val isDeferred: Boolean,
+        override val isSpt: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_cardscan_api_check_failed"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            "implementation" to implementation,
+            FIELD_ERROR_MESSAGE to error?.javaClass?.simpleName
+        )
+    }
+
+    class InitialDisplayedPaymentMethods(
+        visiblePaymentMethods: List<String>,
+        hiddenPaymentMethods: List<String>,
+        override val isDeferred: Boolean,
+        override val isSpt: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_initial_displayed_payment_methods"
+        override val additionalParams: Map<String, Any?> = buildMap {
+            put(FIELD_VISIBLE_PAYMENT_METHODS, visiblePaymentMethods.joinToString(","))
+            put(FIELD_HIDDEN_PAYMENT_METHODS, hiddenPaymentMethods.joinToString(","))
+        }
+    }
+
     private fun standardParams(
         isDecoupled: Boolean,
         isSpt: Boolean,
@@ -767,6 +876,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_CBC_EVENT_SOURCE = "cbc_event_source"
         const val FIELD_PAYMENT_METHOD_TYPE = "payment_method_type"
         const val FIELD_SET_AS_DEFAULT_ENABLED = "set_as_default_enabled"
+        const val FIELD_OPEN_CARD_SCAN_AUTOMATICALLY = "open_card_scan_automatically"
         const val FIELD_HAS_DEFAULT_PAYMENT_METHOD = "has_default_payment_method"
         const val FIELD_SELECTED_CARD_BRAND = "selected_card_brand"
         const val FIELD_SET_AS_DEFAULT = "set_as_default"
@@ -790,6 +900,8 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_PAYMENT_METHOD_OPTIONS_SETUP_FUTURE_USAGE = "payment_method_options_setup_future_usage"
         const val FIELD_SETUP_FUTURE_USAGE = "setup_future_usage"
         const val FIELD_ROW_SELECTION_BEHAVIOR = "row_selection_behavior"
+        const val FIELD_VISIBLE_PAYMENT_METHODS = "visible_payment_methods"
+        const val FIELD_HIDDEN_PAYMENT_METHODS = "hidden_payment_methods"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"

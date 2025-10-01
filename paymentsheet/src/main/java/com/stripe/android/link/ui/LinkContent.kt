@@ -22,6 +22,8 @@ import com.stripe.android.link.linkViewModel
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
+import com.stripe.android.link.ui.oauth.OAuthConsentScreen
+import com.stripe.android.link.ui.oauth.OAuthConsentViewModel
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodScreen
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodViewModel
 import com.stripe.android.link.ui.signup.SignUpScreen
@@ -101,6 +103,7 @@ internal fun LinkContent(
     }
 }
 
+@SuppressWarnings("LongMethod")
 @Composable
 private fun Screens(
     navController: NavHostController,
@@ -154,7 +157,6 @@ private fun Screens(
                 VerificationRoute(
                     linkAccount = linkAccount,
                     changeEmail = changeEmail,
-                    navigateAndClearStack = navigateAndClearStack,
                     goBack = goBack,
                     dismissWithResult = dismissWithResult
                 )
@@ -163,6 +165,7 @@ private fun Screens(
 
         composable(LinkScreen.Wallet.route) {
             val linkAccount = getLinkAccount() ?: return@composable dismissWithResult(noLinkAccountResult())
+
             WalletRoute(
                 linkAccount = linkAccount,
                 navigateAndClearStack = navigateAndClearStack,
@@ -176,6 +179,14 @@ private fun Screens(
         composable(LinkScreen.PaymentMethod.route) {
             val linkAccount = getLinkAccount() ?: return@composable dismissWithResult(noLinkAccountResult())
             PaymentMethodRoute(
+                linkAccount = linkAccount,
+                dismissWithResult = dismissWithResult,
+            )
+        }
+
+        composable(LinkScreen.OAuthConsent.route) {
+            val linkAccount = getLinkAccount() ?: return@composable dismissWithResult(noLinkAccountResult())
+            OAuthConsentRoute(
                 linkAccount = linkAccount,
                 dismissWithResult = dismissWithResult,
             )
@@ -205,7 +216,6 @@ private fun SignUpRoute(
 @Composable
 private fun VerificationRoute(
     linkAccount: LinkAccount,
-    navigateAndClearStack: (route: LinkScreen) -> Unit,
     changeEmail: () -> Unit,
     goBack: () -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit
@@ -216,9 +226,6 @@ private fun VerificationRoute(
             onDismissClicked = goBack,
             linkAccount = linkAccount,
             isDialog = false,
-            onVerificationSucceeded = {
-                navigateAndClearStack(LinkScreen.Wallet)
-            },
             onChangeEmailClicked = changeEmail,
             dismissWithResult = dismissWithResult
         )
@@ -284,6 +291,23 @@ private fun WalletRoute(
         showBottomSheetContent = showBottomSheetContent,
         hideBottomSheetContent = hideBottomSheetContent,
         onLogoutClicked = onLogoutClicked,
+    )
+}
+
+@Composable
+private fun OAuthConsentRoute(
+    linkAccount: LinkAccount,
+    dismissWithResult: (LinkActivityResult) -> Unit,
+) {
+    val viewModel: OAuthConsentViewModel = linkViewModel { parentComponent ->
+        OAuthConsentViewModel.factory(
+            parentComponent = parentComponent,
+            linkAccount = linkAccount,
+            dismissWithResult = dismissWithResult,
+        )
+    }
+    OAuthConsentScreen(
+        viewModel = viewModel,
     )
 }
 

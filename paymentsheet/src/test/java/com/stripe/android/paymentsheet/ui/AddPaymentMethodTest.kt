@@ -596,6 +596,7 @@ internal class AddPaymentMethodTest {
             ),
             paymentSelection = null,
             processing = false,
+            validating = false,
             usBankAccountFormArguments = mock(),
             incentive = null,
         )
@@ -605,7 +606,9 @@ internal class AddPaymentMethodTest {
         val addPaymentMethodInteractor = FakeAddPaymentMethodInteractor(initialState, viewActionRecorder)
 
         composeRule.setContent {
-            AddPaymentMethod(interactor = addPaymentMethodInteractor)
+            AddPaymentMethod(
+                interactor = addPaymentMethodInteractor,
+            )
         }
 
         viewActionRecorder.consume(

@@ -146,6 +146,7 @@ internal interface EditCardDetailsInteractor {
     )
 
     sealed interface ViewAction {
+        data object Validate : ViewAction
         data class BrandChoiceChanged(val cardBrandChoice: CardBrandChoice) : ViewAction
         data class DateChanged(val text: String) : ViewAction
         data class BillingDetailsChanged(val billingDetailsFormState: BillingDetailsFormState) : ViewAction
@@ -285,6 +286,19 @@ internal class DefaultEditCardDetailsInteractor(
         )
     }
 
+    private fun onValidate() {
+        cardDetailsEntry.update { entry ->
+            entry?.copy(
+                expiryDateState = entry.expiryDateState.validate()
+            )
+        }
+
+        billingDetailsForm?.run {
+            nameElement?.onValidationStateChanged(isValidating = true)
+            addressSectionElement.onValidationStateChanged(isValidating = true)
+        }
+    }
+
     override fun handleViewAction(viewAction: EditCardDetailsInteractor.ViewAction) {
         when (viewAction) {
             is EditCardDetailsInteractor.ViewAction.BrandChoiceChanged -> {
@@ -295,6 +309,9 @@ internal class DefaultEditCardDetailsInteractor(
             }
             is EditCardDetailsInteractor.ViewAction.BillingDetailsChanged -> {
                 onBillingAddressFormChanged(viewAction.billingDetailsFormState)
+            }
+            is EditCardDetailsInteractor.ViewAction.Validate -> {
+                onValidate()
             }
         }
     }

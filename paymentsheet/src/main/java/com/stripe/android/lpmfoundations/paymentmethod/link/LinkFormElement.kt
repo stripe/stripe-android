@@ -23,6 +23,7 @@ internal class LinkFormElement(
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val initialLinkUserInput: UserInput?,
     private val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
+    private val previousLinkSignupCheckboxSelection: Boolean?,
 ) : RenderableFormElement(
     allowsUserInteraction = true,
     identifier = IdentifierSpec.Generic("link_form")
@@ -49,6 +50,7 @@ internal class LinkFormElement(
             enabled = enabled,
             onLinkSignupStateChanged = onLinkInlineSignupStateChanged,
             modifier = modifier,
+            previousLinkSignupCheckboxSelection = previousLinkSignupCheckboxSelection,
         )
     }
 }

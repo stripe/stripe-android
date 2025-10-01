@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.PaymentMethod.Type.Link
 import kotlinx.parcelize.Parcelize
 import java.util.UUID
@@ -20,6 +21,7 @@ data class ElementsSession(
     val experimentsData: ExperimentsData?,
     val customer: Customer?,
     val merchantCountry: String?,
+    val merchantLogoUrl: String?,
     val cardBrandChoice: CardBrandChoice?,
     val isGooglePayEnabled: Boolean,
     val sessionsError: Throwable? = null,
@@ -66,7 +68,12 @@ data class ElementsSession(
         get() = linkSettings?.linkMobileSkipWalletInFlowController ?: false
 
     val passiveCaptchaParams: PassiveCaptchaParams?
-        get() = passiveCaptcha.takeIf { flags[Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA] == true }
+        get() {
+            return passiveCaptcha.takeIf {
+                flags[Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA] == true &&
+                    FeatureFlags.enablePassiveCaptcha.isEnabled
+            }
+        }
 
     val linkSignUpOptInFeatureEnabled: Boolean
         get() = linkSettings?.linkSignUpOptInFeatureEnabled ?: false
@@ -89,7 +96,8 @@ data class ElementsSession(
         val linkEnableDisplayableDefaultValuesInEce: Boolean,
         val linkMobileSkipWalletInFlowController: Boolean,
         val linkSignUpOptInFeatureEnabled: Boolean,
-        val linkSignUpOptInInitialValue: Boolean
+        val linkSignUpOptInInitialValue: Boolean,
+        val linkSupportedPaymentMethodsOnboardingEnabled: List<String>,
     ) : StripeModel
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -161,11 +169,14 @@ data class ElementsSession(
                 @Parcelize
                 data class Enabled(
                     val isPaymentMethodSaveEnabled: Boolean,
-                    val isPaymentMethodRemoveEnabled: Boolean,
-                    val canRemoveLastPaymentMethod: Boolean,
+                    val paymentMethodRemove: PaymentMethodRemoveFeature,
+                    val paymentMethodRemoveLast: PaymentMethodRemoveLastFeature,
                     val allowRedisplayOverride: PaymentMethod.AllowRedisplay?,
                     val isPaymentMethodSetAsDefaultEnabled: Boolean,
-                ) : MobilePaymentElement
+                ) : MobilePaymentElement {
+                    val canRemoveLastPaymentMethod: Boolean
+                        get() = paymentMethodRemoveLast.canRemoveLastPaymentMethod
+                }
             }
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -177,10 +188,30 @@ data class ElementsSession(
                 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 @Parcelize
                 data class Enabled(
-                    val isPaymentMethodRemoveEnabled: Boolean,
-                    val canRemoveLastPaymentMethod: Boolean,
+                    val paymentMethodRemove: PaymentMethodRemoveFeature,
+                    val paymentMethodRemoveLast: PaymentMethodRemoveLastFeature,
                     val isPaymentMethodSyncDefaultEnabled: Boolean,
-                ) : CustomerSheet
+                ) : CustomerSheet {
+                    val canRemoveLastPaymentMethod: Boolean
+                        get() = paymentMethodRemoveLast.canRemoveLastPaymentMethod
+                }
+            }
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            enum class PaymentMethodRemoveFeature {
+                Enabled,
+                Partial,
+                Disabled,
+            }
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            enum class PaymentMethodRemoveLastFeature {
+                Enabled,
+                Disabled,
+                NotProvided;
+
+                val canRemoveLastPaymentMethod: Boolean
+                    get() = this == Enabled || this == NotProvided
             }
         }
     }
@@ -194,7 +225,10 @@ data class ElementsSession(
         ELEMENTS_PREFER_FC_LITE("elements_prefer_fc_lite"),
         ELEMENTS_DISABLE_LINK_GLOBAL_HOLDBACK_LOOKUP("elements_disable_link_global_holdback_lookup"),
         ELEMENTS_ENABLE_LINK_SPM("elements_enable_link_spm"),
-        ELEMENTS_ENABLE_PASSIVE_CAPTCHA("elements_enable_passive_captcha")
+        ELEMENTS_ENABLE_PASSIVE_CAPTCHA("elements_enable_passive_captcha"),
+        ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT(
+            "elements_mobile_force_setup_future_use_behavior_and_new_mandate_text"
+        )
     }
 
     /**
@@ -203,6 +237,7 @@ data class ElementsSession(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class ExperimentAssignment(val experimentValue: String) {
         LINK_GLOBAL_HOLD_BACK("link_global_holdback"),
+        LINK_GLOBAL_HOLD_BACK_AA("link_global_holdback_aa"),
         LINK_AB_TEST("link_ab_test"),
     }
 
@@ -224,6 +259,7 @@ data class ElementsSession(
                 customer = null,
                 customPaymentMethods = listOf(),
                 merchantCountry = null,
+                merchantLogoUrl = null,
                 cardBrandChoice = null,
                 isGooglePayEnabled = true,
                 sessionsError = sessionsError,

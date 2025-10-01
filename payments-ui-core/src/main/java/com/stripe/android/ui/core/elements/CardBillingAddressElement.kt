@@ -1,6 +1,9 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.uicore.address.FieldType
@@ -14,8 +17,15 @@ import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.DropdownFieldController
+import com.stripe.android.uicore.elements.FieldError
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SameAsShippingElement
+import com.stripe.android.uicore.elements.SectionFieldComposable
+import com.stripe.android.uicore.elements.SectionFieldElement
+import com.stripe.android.uicore.elements.SectionFieldErrorController
+import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -58,7 +68,8 @@ class CardBillingAddressElement(
         AddressFieldConfiguration.HIDDEN
     }
 
-    private val addressElement = autocompleteAddressInteractorFactory?.takeIf {
+    @VisibleForTesting
+    val addressElement = autocompleteAddressInteractorFactory?.takeIf {
         collectionConfiguration.address == BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
     }?.let { factory ->
         AutocompleteAddressElement(
@@ -93,6 +104,56 @@ class CardBillingAddressElement(
                 collectionConfiguration.address == BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
         )
     }
+
+    private val addressElementSectionController = addressElement.sectionFieldErrorController()
+    private val cardBillingAddressElementSectionErrorController =
+        object : SectionFieldErrorController by addressElementSectionController, SectionFieldComposable {
+            override val error: StateFlow<FieldError?> =
+                addressElement.addressController
+                    .flatMapLatestAsStateFlow { addressController ->
+                        combineAsStateFlow(
+                            addressController.fieldsFlowable,
+                            hiddenIdentifiers
+                        ) { fields, hiddenIdentifiers ->
+                            fields.flatMap { field ->
+                                when (field) {
+                                    is RowElement -> field.fields.filterNot { rowField ->
+                                        hiddenIdentifiers.contains(rowField.identifier)
+                                    }
+                                    else -> listOf(field).takeUnless {
+                                        hiddenIdentifiers.contains(field.identifier)
+                                    } ?: emptyList()
+                                }
+                            }
+                        }
+                    }
+                    .flatMapLatestAsStateFlow { fields ->
+                        combineAsStateFlow(
+                            fields.map { it.sectionFieldErrorController().error }
+                        ) { fieldErrors ->
+                            fieldErrors.filterNotNull().firstOrNull()
+                        }
+                    }
+
+            @Composable
+            override fun ComposeUI(
+                enabled: Boolean,
+                field: SectionFieldElement,
+                modifier: Modifier,
+                hiddenIdentifiers: Set<IdentifierSpec>,
+                lastTextFieldIdentifier: IdentifierSpec?
+            ) {
+                if (addressElementSectionController is SectionFieldComposable) {
+                    addressElementSectionController.ComposeUI(
+                        enabled = enabled,
+                        field = field,
+                        modifier = modifier,
+                        hiddenIdentifiers = hiddenIdentifiers,
+                        lastTextFieldIdentifier = lastTextFieldIdentifier,
+                    )
+                }
+            }
+        }
 
     override val addressController: StateFlow<AddressController> = addressElement.addressController
 
@@ -141,9 +202,14 @@ class CardBillingAddressElement(
 
     override fun getFormFieldValueFlow() = addressElement.getFormFieldValueFlow()
 
-    override fun sectionFieldErrorController() = addressElement.sectionFieldErrorController()
+    override fun sectionFieldErrorController(): SectionFieldErrorController =
+        cardBillingAddressElementSectionErrorController
 
     override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) = addressElement.setRawValue(rawValuesMap)
 
     override fun getTextFieldIdentifiers() = addressElement.getTextFieldIdentifiers()
+
+    override fun onValidationStateChanged(isValidating: Boolean) {
+        addressElement.onValidationStateChanged(isValidating)
+    }
 }

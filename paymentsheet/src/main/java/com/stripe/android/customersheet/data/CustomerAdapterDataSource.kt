@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet.data
 
 import com.stripe.android.common.coroutines.runCatching
+import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.CustomerAdapter
@@ -63,8 +64,8 @@ internal class CustomerAdapterDataSource @Inject constructor(
                 savedSelection = savedSelection,
                 permissions = CustomerPermissions(
                     canRemoveLastPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
-                    // Always `true` for `Adapter` use case
-                    canRemovePaymentMethods = true,
+                    // Always `Full` for `Adapter` use case
+                    removePaymentMethod = PaymentMethodRemovePermission.Full,
                     // Payment Method Update is customer sessions-only feature, so this value is unused.
                     canUpdateFullPaymentMethodDetails = false,
                 ),

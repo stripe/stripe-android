@@ -19,13 +19,18 @@ import com.stripe.android.link.verification.VerificationState.Render2FA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
+import com.stripe.android.paymentelement.AnalyticEvent
+import com.stripe.android.paymentelement.AnalyticEventCallback
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
+import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedLinkHelper
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.allowedWalletTypes
+import com.stripe.android.paymentsheet.PaymentSheet.ButtonThemes.LinkButtonTheme
+import com.stripe.android.paymentsheet.configType
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerViewModel
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -43,6 +48,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
+import javax.inject.Provider
 
 internal interface WalletButtonsInteractor {
     val state: StateFlow<State>
@@ -64,13 +70,17 @@ internal interface WalletButtonsInteractor {
     fun handleViewAction(action: ViewAction)
 
     sealed interface WalletButton {
+        val walletType: WalletType
         fun createSelection(): PaymentSelection
 
         @Immutable
         @Stable
         data class Link(
             val state: LinkButtonState,
+            val theme: LinkButtonTheme = LinkButtonTheme.DEFAULT,
         ) : WalletButton {
+            override val walletType = WalletType.Link
+
             override fun createSelection(): PaymentSelection {
                 return PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED)
             }
@@ -84,6 +94,8 @@ internal interface WalletButtonsInteractor {
             val allowCreditCards: Boolean,
             val cardBrandFilter: CardBrandFilter,
         ) : WalletButton {
+            override val walletType = WalletType.GooglePay
+
             constructor(
                 buttonType: PaymentSheet.GooglePayConfiguration.ButtonType?,
                 billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
@@ -102,6 +114,8 @@ internal interface WalletButtonsInteractor {
         }
 
         data object ShopPay : WalletButton {
+            override val walletType = WalletType.ShopPay
+
             override fun createSelection(): PaymentSelection {
                 return PaymentSelection.ShopPay
             }
@@ -117,7 +131,8 @@ internal interface WalletButtonsInteractor {
     }
 }
 
-internal class DefaultWalletButtonsInteractor(
+@OptIn(ExperimentalAnalyticEventCallbackApi::class)
+internal class DefaultWalletButtonsInteractor constructor(
     private val arguments: StateFlow<Arguments?>,
     private val confirmationHandler: ConfirmationHandler,
     private val coroutineScope: CoroutineScope,
@@ -125,6 +140,7 @@ internal class DefaultWalletButtonsInteractor(
     private val linkInlineInteractor: LinkInlineInteractor,
     private val linkPaymentLauncher: LinkPaymentLauncher,
     private val linkAccountHolder: LinkAccountHolder,
+    private val analyticsCallbackProvider: Provider<AnalyticEventCallback?>,
     private val onWalletButtonsRenderStateChanged: (isRendered: Boolean) -> Unit
 ) : WalletButtonsInteractor {
 
@@ -141,6 +157,7 @@ internal class DefaultWalletButtonsInteractor(
         linkInlineInteractor.state,
         linkAccountHolder.linkAccountInfo
     ) { arguments, confirmationState, linkEmbeddedState, linkAccountInfo ->
+        val walletsAllowedByMerchant = arguments?.let(::visibleWallets) ?: emptyList()
         val walletButtons = arguments?.run {
             arguments.paymentMethodMetadata.availableWallets.mapNotNull { wallet ->
                 when (wallet) {
@@ -162,7 +179,8 @@ internal class DefaultWalletButtonsInteractor(
                                 enableDefaultValues = linkConfiguration?.enableDisplayableDefaultValuesInEce == true,
                                 linkEmail = arguments.linkEmail,
                                 paymentDetails = linkAccountInfo.account?.displayablePaymentDetails
-                            )
+                            ),
+                            theme = arguments.configuration.walletButtons?.buttonThemes?.link ?: LinkButtonTheme.DEFAULT
                         ).takeIf {
                             // Only show Link button if the Link verification state is resolved.
                             linkEmbeddedState.verificationState is VerificationState.RenderButton &&
@@ -202,9 +220,14 @@ internal class DefaultWalletButtonsInteractor(
         )
     }
 
+    @OptIn(WalletButtonsPreview::class)
     override fun handleViewAction(action: WalletButtonsInteractor.ViewAction) {
         when (action) {
             is OnButtonPressed -> {
+                analyticsCallbackProvider.get()?.onEvent(
+                    AnalyticEvent.TapsButtonInWalletsButtonsView(action.button.walletType.code)
+                )
+
                 arguments.value?.let { arguments ->
                     when (action.button) {
                         is WalletButton.Link -> handleLinkButtonPressed(arguments)
@@ -233,12 +256,15 @@ internal class DefaultWalletButtonsInteractor(
                 configuration = linkConfiguration,
                 linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                 launchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment?.details),
-                linkExpressMode = LinkExpressMode.ENABLED
+                linkExpressMode = LinkExpressMode.ENABLED,
+                passiveCaptchaParams = arguments.paymentMethodMetadata.passiveCaptchaParams
             )
         } else {
             handleButtonPressed(
                 WalletButton.Link(
-                    state = LinkButtonState.Default
+                    state = LinkButtonState.Default,
+                    theme = arguments.configuration.walletButtons?.buttonThemes?.link
+                        ?: LinkButtonTheme.DEFAULT
                 ),
                 arguments
             )
@@ -257,6 +283,17 @@ internal class DefaultWalletButtonsInteractor(
         }
     }
 
+    private fun visibleWallets(arguments: Arguments): List<WalletType> {
+        val walletVisibility = arguments.configuration.walletButtons?.visibility?.walletButtonsView ?: emptyMap()
+
+        return WalletType.entries.filter { walletType ->
+            val configuredVisibility = walletVisibility[walletType.configType]
+
+            configuredVisibility == null || configuredVisibility ==
+                PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always
+        }
+    }
+
     private fun confirmationArgs(
         selection: PaymentSelection,
         arguments: Arguments,
@@ -264,6 +301,7 @@ internal class DefaultWalletButtonsInteractor(
         val confirmationOption = selection.toConfirmationOption(
             configuration = arguments.configuration,
             linkConfiguration = arguments.paymentMethodMetadata.linkState?.configuration,
+            passiveCaptchaParams = arguments.paymentMethodMetadata.passiveCaptchaParams
         ) ?: return null
 
         return ConfirmationHandler.Args(
@@ -281,7 +319,6 @@ internal class DefaultWalletButtonsInteractor(
         val configuration: CommonConfiguration,
         val appearance: PaymentSheet.Appearance,
         val initializationMode: PaymentElementLoader.InitializationMode,
-        val walletsAllowedByMerchant: List<WalletType>,
         val paymentSelection: PaymentSelection?,
     )
 
@@ -306,10 +343,6 @@ internal class DefaultWalletButtonsInteractor(
                             paymentMethodMetadata = flowControllerState.paymentSheetState.paymentMethodMetadata,
                             appearance = configureRequest.configuration.appearance,
                             initializationMode = configureRequest.initializationMode,
-                            walletsAllowedByMerchant = configureRequest
-                                .configuration
-                                .walletButtons
-                                .allowedWalletTypes,
                             paymentSelection = flowControllerViewModel.paymentSelection
                         )
                     } else {
@@ -321,6 +354,8 @@ internal class DefaultWalletButtonsInteractor(
                 linkInlineInteractor = flowControllerViewModel.flowControllerStateComponent.linkInlineInteractor,
                 linkPaymentLauncher = walletsButtonLinkLauncher,
                 linkAccountHolder = flowControllerViewModel.flowControllerStateComponent.linkAccountHolder,
+                analyticsCallbackProvider =
+                flowControllerViewModel.flowControllerStateComponent.analyticEventCallbackProvider,
                 onWalletButtonsRenderStateChanged = { isRendered ->
                     flowControllerViewModel.walletButtonsRendered = isRendered
                 }
@@ -336,6 +371,7 @@ internal class DefaultWalletButtonsInteractor(
             errorReporter: ErrorReporter,
             linkPaymentLauncher: LinkPaymentLauncher,
             linkAccountHolder: LinkAccountHolder,
+            analyticsCallbackProvider: Provider<AnalyticEventCallback?>,
         ): WalletButtonsInteractor {
             return DefaultWalletButtonsInteractor(
                 errorReporter = errorReporter,
@@ -350,7 +386,6 @@ internal class DefaultWalletButtonsInteractor(
                             paymentMethodMetadata = state.paymentMethodMetadata,
                             appearance = state.configuration.appearance,
                             initializationMode = state.initializationMode,
-                            walletsAllowedByMerchant = WalletType.entries,
                             paymentSelection = state.selection
                         )
                     }
@@ -360,6 +395,7 @@ internal class DefaultWalletButtonsInteractor(
                 linkInlineInteractor = linkInlineInteractor,
                 linkPaymentLauncher = linkPaymentLauncher,
                 linkAccountHolder = linkAccountHolder,
+                analyticsCallbackProvider = analyticsCallbackProvider,
                 onWalletButtonsRenderStateChanged = {
                     // No-op, not supported for Embedded
                 }

@@ -169,6 +169,7 @@ internal class FinancialConnectionsPlaygroundViewModel(
                                     phone = null,
                                     phoneCountryCode = null,
                                 ),
+                                allowRedisplay = ElementsSessionContext.AllowRedisplay.Unspecified,
                                 incentiveEligibilitySession = null,
                             ),
                             experience = settings.get<ExperienceSetting>().selectedOption,

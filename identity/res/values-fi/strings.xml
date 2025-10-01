@@ -12,6 +12,8 @@
   <string name="stripe_back_of_dl">Ajokortin takapuoli</string>
   <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
   <string name="stripe_back_of_dl_selected">Ajokortin takapuoli valittu</string>
+  <!-- Title for scan screen when back of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_back_of_driver_license_or_id">Ajokortin tai valtion myöntämän kuvallisen henkilötodistuksen kääntöpuoli</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">Henkilökortin takapuoli</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
@@ -102,16 +104,30 @@
   <string name="stripe_first_name">Etunimi</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="stripe_flash_mask">Maski selfieanimaatiota varten</string>
+  <!-- Instruction for flipping driver's license or government-issued photo ID -->
+  <string name="stripe_flip_driver_license_or_id">Käännä ajokortti tai valtion myöntämä kuvallinen henkilötodistus toisin päin</string>
+  <!-- Generic back-side instruction for government-issued photo ID (no passport mention) -->
+  <string name="stripe_flip_id_document">Käännä valtion myöntämä kuvallinen henkilötodistus toisin päin</string>
+  <!-- Title for scan screen when front of all ID types is shown -->
+  <string name="stripe_front_of_all_id_types">Ajokortin, passin tai valtion myöntämän kuvallisen henkilötodistuksen etupuoli</string>
   <!-- Description of front of driver's license image -->
   <string name="stripe_front_of_dl">Ajokortin etupuoli</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
   <string name="stripe_front_of_dl_selected">Ajokortin etupuoli valittu</string>
+  <!-- Title for scan screen when front of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_front_of_driver_license_or_id">Ajokortin tai valtion myöntämän kuvallisen henkilötodistuksen etupuoli</string>
+  <!-- Title for scan screen when front of driver's license or passport is shown -->
+  <string name="stripe_front_of_driver_license_or_passport">Ajokortin tai passin etupuoli</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">Henkilökortin etupuoli</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">Henkilötodistuksen etupuoli</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Henkilökortin etupuoli valittu</string>
+  <!-- Description of front of passport image -->
+  <string name="stripe_front_of_passport">Passin etupuoli</string>
+  <!-- Title for scan screen when front of passport or government-issued photo ID is shown -->
+  <string name="stripe_front_of_passport_or_id">Passin tai valtion myöntämän kuvallisen henkilötodistuksen etupuoli</string>
   <!-- Button to go back to the previous screen -->
   <string name="stripe_go_back">Siirry takaisin</string>
   <!-- display name for Government issued photo ID -->
@@ -160,16 +176,24 @@
   <string name="stripe_phone_number">Puhelinnumero</string>
   <!-- Instructional text when there is no document in camera frame -->
   <string name="stripe_point_camera_to_document">Ei havaittuja asiakirjoja</string>
+  <!-- Instruction for positioning all ID types -->
+  <string name="stripe_position_all_id_types">Aseta ajokortti, passi tai valtion myöntämä kuvallinen henkilötodistus kehyksen keskelle</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Käännä ajokortti toisinpäin</string>
   <!-- Instructional text for scanning front of a driver's license -->
   <string name="stripe_position_dl_front">Aseta ajokortti kehyksen keskelle</string>
+  <!-- Instruction for positioning driver's license or government-issued photo ID -->
+  <string name="stripe_position_driver_license_or_id">Aseta ajokortti tai valtion myöntämä kuvallinen henkilötodistus kehyksen keskelle</string>
+  <!-- Instruction for positioning driver's license or passport -->
+  <string name="stripe_position_driver_license_or_passport">Aseta ajokortti tai passi kehyksen keskelle</string>
   <!-- Instructional text for scanning back of a identity card -->
   <string name="stripe_position_id_back">Käännä henkilökortti toisinpäin</string>
   <!-- Instructional text for scanning front of a identity card -->
   <string name="stripe_position_id_front">Aseta henkilökortti kehyksen keskelle</string>
   <!-- Instructional text for scanning a passport -->
   <string name="stripe_position_passport">Aseta passi kehyksen keskelle</string>
+  <!-- Instruction for positioning passport or government-issued photo ID -->
+  <string name="stripe_position_passport_or_id">Aseta passi tai valtion myöntämä kuvallinen henkilötodistus kehyksen keskelle</string>
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Aseta kasvosi kuvan keskelle.</string>
   <!-- Instructional text when the document is too blurry -->
@@ -205,8 +229,6 @@
   <string name="stripe_test_model_title">Käytät tällä hetkellä testitilaa</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Yritä uudelleen</string>
-  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
-  <string name="stripe_unexpected_error_try_again">Odottamaton virhe – kokeile uudelleen muutaman sekunnin kuluttua</string>
   <!-- Description to upload a photo -->
   <string name="stripe_upload_a_photo">Lataa kuva</string>
   <!-- Title of dialog to upload back of driver license -->

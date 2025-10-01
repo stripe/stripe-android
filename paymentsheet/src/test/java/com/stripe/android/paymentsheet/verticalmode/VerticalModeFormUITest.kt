@@ -127,7 +127,7 @@ internal class VerticalModeFormUITest {
                 LocalCardNumberCompletedEventReporter provides { },
                 LocalCardBrandDisallowedReporter provides { }
             ) {
-                VerticalModeFormUI(interactor, showsWalletHeader = false)
+                VerticalModeFormUI(interactor)
             }
         }
 
@@ -174,6 +174,9 @@ internal class VerticalModeFormUITest {
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             ),
             formElements = CardDefinition.formElements(),
+            isValidating = false,
+            showsWalletHeader = false,
+            paymentMethodIncentive = null,
             headerInformation = headerInformation,
         )
     }
@@ -203,6 +206,9 @@ internal class VerticalModeFormUITest {
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             ),
             formElements = emptyList(),
+            isValidating = false,
+            showsWalletHeader = false,
+            paymentMethodIncentive = null,
             headerInformation = headerInformation,
         )
     }
@@ -236,6 +242,9 @@ internal class VerticalModeFormUITest {
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             ),
             formElements = KlarnaDefinition.formElements(paymentMethodMetadata),
+            isValidating = false,
+            showsWalletHeader = false,
+            paymentMethodIncentive = null,
             headerInformation = headerInformation,
         )
     }

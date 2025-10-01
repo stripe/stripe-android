@@ -1,19 +1,24 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.TestFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.state.CustomerState
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import kotlin.test.Test
 
@@ -22,15 +27,22 @@ class VerticalModeInitialScreenFactoryTest {
     val coroutineTestRule = CoroutineTestRule()
 
     @Test
-    fun `returns form screen when only one payment method available`() = runScenario(
+    fun `returns form screen when only one payment method available and has interactable elements`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("cashapp"),
+            ),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
             )
         )
     ) {
         assertThat(screens).hasSize(1)
         assertThat(screens[0]).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
+
+        screens[0].showsWalletsHeader(isCompleteFlow = false).test {
+            assertThat(awaitItem()).isFalse()
+        }
     }
 
     @Test
@@ -55,12 +67,31 @@ class VerticalModeInitialScreenFactoryTest {
         assertThat(screens[1]).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
     }
 
+    @Test
+    fun `returns list screen when only one payment method available with no interactable elements`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("alipay"),
+            )
+        ),
+        hasSavedPaymentMethods = false
+    ) {
+        assertThat(screens).hasSize(1)
+        assertThat(screens[0]).isInstanceOf<PaymentSheetScreen.VerticalMode>()
+    }
+
     private fun runScenario(
-        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
+        ),
         hasSavedPaymentMethods: Boolean = false,
         selection: PaymentSelection? = null,
-        block: Scenario.() -> Unit,
-    ) {
+        block: suspend Scenario.() -> Unit,
+    ) = runTest {
         val fakeViewModel = FakeBaseSheetViewModel.create(
             paymentMethodMetadata = paymentMethodMetadata,
             initialScreen = PaymentSheetScreen.Loading,
@@ -93,9 +124,12 @@ class VerticalModeInitialScreenFactoryTest {
             paymentMethodMetadata = paymentMethodMetadata,
             customerStateHolder = customerStateHolder,
         )
-        Scenario(
-            screens = screens
-        ).apply(block)
+
+        block(
+            Scenario(
+                screens = screens
+            )
+        )
     }
 
     private class Scenario(

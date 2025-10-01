@@ -53,6 +53,18 @@ class PassiveCaptchaJsonParserTest {
     }
 
     @Test
+    fun `parse returns PassiveCaptchaParams with null rq_data when rq_data is string null`() {
+        val result = parser.parse(ElementsSessionFixtures.PASSIVE_CAPTCHA_JSON_WITH_NULL_RQ_DATA)
+
+        assertThat(result).isEqualTo(
+            PassiveCaptchaParams(
+                siteKey = "test_site_key",
+                rqData = null
+            )
+        )
+    }
+
+    @Test
     fun `parse returns null when JSON is empty`() {
         val result = parser.parse(JSONObject("{}"))
 

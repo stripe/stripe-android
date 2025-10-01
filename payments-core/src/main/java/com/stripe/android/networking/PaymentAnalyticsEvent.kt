@@ -9,6 +9,9 @@ enum class PaymentAnalyticsEvent(val code: String) : AnalyticsEvent {
     // Token
     TokenCreate("token_creation"),
 
+    // Confirmation Token
+    ConfirmationTokenCreate("confirmation_token_creation"),
+
     // Payment Methods
     PaymentMethodCreate("payment_method_creation"),
     PaymentMethodUpdate("payment_method_update"),

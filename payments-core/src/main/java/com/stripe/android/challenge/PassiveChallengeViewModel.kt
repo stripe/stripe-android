@@ -1,7 +1,9 @@
 package com.stripe.android.challenge
 
+import android.app.Application
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -46,9 +48,13 @@ internal class PassiveChallengeViewModel @Inject constructor(
             initializer {
                 val args: PassiveChallengeArgs = getArgs(createSavedStateHandle())
                     ?: throw NoArgsException()
+                val app = this[APPLICATION_KEY] as Application
                 DaggerPassiveChallengeComponent
                     .builder()
                     .passiveCaptchaParams(args.passiveCaptchaParams)
+                    .context(app)
+                    .publishableKeyProvider { args.publishableKey }
+                    .productUsage(args.productUsage.toSet())
                     .build()
                     .passiveChallengeViewModel
             }

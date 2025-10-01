@@ -2,6 +2,62 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.28.0 - 2025-09-29
+
+### Connect
+* [Fixed] Renamed `PrivateBetaConnectSDK` to `PreviewConnectSDK`.
+
+## 21.27.0 - 2025-09-22
+
+### Connect
+* [Added] Payments and Payouts embedded components are available to use in public preview.
+
+### PaymentSheet
+* [ADDED][11571](https://github.com/stripe/stripe-android/pull/11571) Adds support for non-phone two-factor authentication (2FA) methods in Link.
+
+## 21.26.1 - 2025-09-15
+
+### PaymentSheet
+* [FIXED][11568](https://github.com/stripe/stripe-android/pull/11568) Fixed an issue where linking a bank account would fail for Stripe Connect accounts.
+
+## 21.26.0 - 2025-09-08
+
+### PaymentSheet
+* [ADDED][11539](https://github.com/stripe/stripe-android/pull/11539) Added support for [PayNow](https://stripe.com/payment-method/paynow) to PaymentSheet.
+
+## 21.25.0 - 2025-09-02
+
+### Payments
+* [ADDED][11419](https://github.com/stripe/stripe-android/pull/11491) Added `declineCode` parameter to `StripeErrorLocalizations` to allow for handling decline code localizations.
+
+## 21.24.4 - 2025-08-29
+
+### CryptoOnramp
+[Added] Additional APIs and improvements to support the development of the React Native CryptoOnramp SDK.
+
+## 21.24.3 - 2025-08-27
+
+Bug fixes and improvements.
+
+## 21.24.2 - 2025-08-26
+
+Bug fixes and improvements.
+
+## 21.24.1 - 2025-08-25
+
+Bug fixes and improvements.
+
+## 21.24.0 - 2025-08-25
+
+### CardScan
+* [DEPRECATED][11419](https://github.com/stripe/stripe-android/pull/11419) Deprecated stripecardscan Module Public APIs.
+
+### PaymentSheet
+* [ADDED][11398](https://github.com/stripe/stripe-android/pull/11398) Added form validation when adding payment methods in PaymentSheet & Link
+* [ADDED][11437](https://github.com/stripe/stripe-android/pull/11437) Added form validation when updating payment methods in PaymentSheet & Link
+
+## 21.23.1 - 2025-08-18
+
 ### PaymentSheet
 * [FIXED][11332](https://github.com/stripe/stripe-android/pull/11332) Added additional spacing between the section title and section content for payment form screens.
 

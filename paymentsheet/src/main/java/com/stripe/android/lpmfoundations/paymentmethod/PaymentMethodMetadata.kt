@@ -14,13 +14,17 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.CustomPayment
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.LinkCardBrandDefinition
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.confirmation.utils.sellerBusinessName
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -29,6 +33,7 @@ import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.toPaymentMethodIncentive
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
@@ -53,6 +58,7 @@ internal data class PaymentMethodMetadata(
     val paymentMethodOrder: List<String>,
     val cbcEligibility: CardBrandChoiceEligibility,
     val merchantName: String,
+    val sellerBusinessName: String?,
     val defaultBillingDetails: PaymentSheet.BillingDetails?,
     val shippingDetails: AddressDetails?,
     val sharedDataSpecs: List<SharedDataSpec>,
@@ -70,7 +76,12 @@ internal data class PaymentMethodMetadata(
     val elementsSessionId: String,
     val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
     val termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay>,
+    val forceSetupFutureUseBehaviorAndNewMandate: Boolean,
+    val passiveCaptchaParams: PassiveCaptchaParams?,
+    val openCardScanAutomatically: Boolean,
+    val clientAttributionMetadata: ClientAttributionMetadata?,
 ) : Parcelable {
+
     fun hasIntentToSetup(code: PaymentMethodCode): Boolean {
         return when (stripeIntent) {
             is PaymentIntent -> stripeIntent.isSetupFutureUsageSet(code)
@@ -287,8 +298,9 @@ internal data class PaymentMethodMetadata(
         customerRequestedSave: PaymentSelection.CustomerRequestedSave,
         code: PaymentMethodCode
     ): PaymentMethod.AllowRedisplay {
+        val isSettingUp = hasIntentToSetup(code) || forceSetupFutureUseBehaviorAndNewMandate
         return paymentMethodSaveConsentBehavior.allowRedisplay(
-            isSetupIntent = hasIntentToSetup(code),
+            isSetupIntent = isSettingUp,
             customerRequestedSave = customerRequestedSave,
         )
     }
@@ -302,6 +314,7 @@ internal data class PaymentMethodMetadata(
             isGooglePayReady: Boolean,
             linkState: LinkState?,
             customerMetadata: CustomerMetadata,
+            initializationMode: PaymentElementLoader.InitializationMode,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
             return PaymentMethodMetadata(
@@ -323,6 +336,7 @@ internal data class PaymentMethodMetadata(
                     preferredNetworks = configuration.preferredNetworks,
                 ),
                 merchantName = configuration.merchantDisplayName,
+                sellerBusinessName = initializationMode.sellerBusinessName,
                 defaultBillingDetails = configuration.defaultBillingDetails,
                 shippingDetails = configuration.shippingDetails,
                 customerMetadata = customerMetadata,
@@ -340,6 +354,15 @@ internal data class PaymentMethodMetadata(
                 elementsSessionId = elementsSession.elementsSessionId,
                 shopPayConfiguration = configuration.shopPayConfiguration,
                 termsDisplay = configuration.termsDisplay,
+                forceSetupFutureUseBehaviorAndNewMandate = elementsSession
+                    .flags[ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT] == true,
+                passiveCaptchaParams = elementsSession.passiveCaptchaParams,
+                openCardScanAutomatically = configuration.opensCardScannerAutomatically,
+                clientAttributionMetadata = ClientAttributionMetadata.create(
+                    elementsSessionConfigId = elementsSession.elementsSessionId,
+                    initializationMode = initializationMode,
+                    automaticPaymentMethodsEnabled = elementsSession.stripeIntent.automaticPaymentMethodsEnabled,
+                ),
             )
         }
 
@@ -369,6 +392,7 @@ internal data class PaymentMethodMetadata(
                     preferredNetworks = configuration.preferredNetworks,
                 ),
                 merchantName = configuration.merchantDisplayName,
+                sellerBusinessName = null,
                 defaultBillingDetails = configuration.defaultBillingDetails,
                 shippingDetails = null,
                 customerMetadata = customerMetadata,
@@ -386,12 +410,18 @@ internal data class PaymentMethodMetadata(
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession),
                 shopPayConfiguration = null,
                 termsDisplay = emptyMap(),
+                forceSetupFutureUseBehaviorAndNewMandate = elementsSession
+                    .flags[ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT] == true,
+                passiveCaptchaParams = elementsSession.passiveCaptchaParams,
+                openCardScanAutomatically = configuration.opensCardScannerAutomatically,
+                clientAttributionMetadata = null,
             )
         }
 
         internal fun createForNativeLink(
             configuration: LinkConfiguration,
             linkAccount: LinkAccount,
+            passiveCaptchaParams: PassiveCaptchaParams?
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
                 stripeIntent = configuration.stripeIntent,
@@ -408,6 +438,7 @@ internal data class PaymentMethodMetadata(
                     }.orEmpty(),
                 ),
                 merchantName = configuration.merchantName,
+                sellerBusinessName = configuration.sellerBusinessName,
                 // Use effective billing details to prefill billing details in new card flows
                 defaultBillingDetails = effectiveBillingDetails(
                     configuration = configuration,
@@ -437,6 +468,10 @@ internal data class PaymentMethodMetadata(
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),
                 shopPayConfiguration = null,
                 termsDisplay = emptyMap(),
+                forceSetupFutureUseBehaviorAndNewMandate = configuration.forceSetupFutureUseBehaviorAndNewMandate,
+                passiveCaptchaParams = passiveCaptchaParams,
+                openCardScanAutomatically = false,
+                clientAttributionMetadata = null,
             )
         }
     }

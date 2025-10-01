@@ -3,9 +3,7 @@ package com.stripe.android.paymentsheet.flowcontroller
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.model.containsVolatileDifferences
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.allowedWalletTypes
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import javax.inject.Inject
@@ -37,20 +35,16 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
         val potentialSelection = selection ?: newState.paymentSelection
 
         return potentialSelection?.takeIf {
-            canUseSelection(it, newState, newConfig, walletButtonsAlreadyShown, selection) &&
-                previousConfig?.let { previousConfig ->
-                    !previousConfig.asCommonConfiguration()
-                        .containsVolatileDifferences(newConfig.asCommonConfiguration())
-                } != false
+            canUseSelection(it, newState) && previousConfig?.let { previousConfig ->
+                !previousConfig.asCommonConfiguration()
+                    .containsVolatileDifferences(newConfig.asCommonConfiguration())
+            } != false
         }
     }
 
     private fun canUseSelection(
         potentialSelection: PaymentSelection,
         state: PaymentSheetState.Full,
-        configuration: PaymentSheet.Configuration,
-        walletButtonsAlreadyShown: Boolean,
-        selection: PaymentSelection?,
     ): Boolean {
         // The types that are allowed for this intent, as returned by the backend
         val allowedTypes = state.paymentMethodMetadata.supportedPaymentMethodTypes()
@@ -70,12 +64,10 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
                 code in allowedTypes && paymentMethod in (state.customer?.paymentMethods ?: emptyList())
             }
             is PaymentSelection.GooglePay -> {
-                state.paymentMethodMetadata.isGooglePayReady &&
-                    walletCanBeUsed(potentialSelection, configuration, walletButtonsAlreadyShown, selection)
+                state.paymentMethodMetadata.isGooglePayReady
             }
             is PaymentSelection.Link -> {
-                state.paymentMethodMetadata.linkState != null &&
-                    walletCanBeUsed(potentialSelection, configuration, walletButtonsAlreadyShown, selection)
+                state.paymentMethodMetadata.linkState != null
             }
             is PaymentSelection.ExternalPaymentMethod -> {
                 state.paymentMethodMetadata.isExternalPaymentMethod(potentialSelection.type)
@@ -87,38 +79,6 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
                 false
             }
         }
-    }
-
-    private fun walletCanBeUsed(
-        potentialSelection: PaymentSelection,
-        configuration: PaymentSheet.Configuration,
-        walletButtonsAlreadyShown: Boolean,
-        selection: PaymentSelection?
-    ): Boolean {
-        if (!configuration.walletButtons.willDisplayExternally && !walletButtonsAlreadyShown) {
-            return true
-        }
-
-        val walletTypesDisplayedExternally = configuration.walletButtons.allowedWalletTypes
-
-        val walletType = when (potentialSelection) {
-            is PaymentSelection.GooglePay -> WalletType.GooglePay
-            is PaymentSelection.Link -> WalletType.Link
-            else -> null
-        }
-
-        // If this selection is the existing selection (likely selected externally)
-        // AND specific wallets are configured externally, preserve it
-        if (potentialSelection == selection &&
-            walletType in walletTypesDisplayedExternally &&
-            configuration.walletButtons.walletsToShow.isNotEmpty()
-        ) {
-            return true
-        }
-
-        // Allow wallets that are NOT in the external list
-        // (because external wallets are handled separately to avoid duplication)
-        return walletType != null && !walletTypesDisplayedExternally.contains(walletType)
     }
 
     private fun shouldAskForMandate(

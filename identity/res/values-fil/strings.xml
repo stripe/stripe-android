@@ -12,6 +12,8 @@
   <string name="stripe_back_of_dl">Likod ng lisensya sa pagmamaneho</string>
   <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
   <string name="stripe_back_of_dl_selected">Napili ang likod ng lisensya sa pagmamaneho</string>
+  <!-- Title for scan screen when back of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_back_of_driver_license_or_id">Likod ng lisensya sa pagmamaneho o photo ID na inisyu ng gobyerno</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">Likod ng kard ng pagkakakilanlan</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
@@ -102,16 +104,30 @@
   <string name="stripe_first_name">Pangalan</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="stripe_flash_mask">Mask para sa selfie na animasyon</string>
+  <!-- Instruction for flipping driver's license or government-issued photo ID -->
+  <string name="stripe_flip_driver_license_or_id">Baliktarin ang iyong lisensya sa pagmamaneho o photo ID na inisyu ng gobyerno</string>
+  <!-- Generic back-side instruction for government-issued photo ID (no passport mention) -->
+  <string name="stripe_flip_id_document">Baliktarin ang iyong ID na inisyu ng gobyerno</string>
+  <!-- Title for scan screen when front of all ID types is shown -->
+  <string name="stripe_front_of_all_id_types">Harap ng lisensya sa pagmamaneho, pasaporte, o photo ID na inisyu ng gobyerno</string>
   <!-- Description of front of driver's license image -->
   <string name="stripe_front_of_dl">Harap ng lisensya sa pagmamaneho</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
   <string name="stripe_front_of_dl_selected">Napili ang harap ng lisensya sa pagmamaneho</string>
+  <!-- Title for scan screen when front of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_front_of_driver_license_or_id">Harap ng lisensya sa pagmamaneho o photo ID na inisyu ng gobyerno</string>
+  <!-- Title for scan screen when front of driver's license or passport is shown -->
+  <string name="stripe_front_of_driver_license_or_passport">Harap ng lisensya sa pagmamaneho o pasaporte</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">Harap ng card ng pagkakakilanlan</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">Harap ng dokumento ng pagkakakilanlan</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Napili ang harap ng ID</string>
+  <!-- Description of front of passport image -->
+  <string name="stripe_front_of_passport">Harap ng pasaporte</string>
+  <!-- Title for scan screen when front of passport or government-issued photo ID is shown -->
+  <string name="stripe_front_of_passport_or_id">Harap ng pasaporte o photo ID na inisyu ng gobyerno</string>
   <!-- Button to go back to the previous screen -->
   <string name="stripe_go_back">Bumalik</string>
   <!-- display name for Government issued photo ID -->
@@ -160,16 +176,24 @@
   <string name="stripe_phone_number">Numero ng Telepono</string>
   <!-- Instructional text when there is no document in camera frame -->
   <string name="stripe_point_camera_to_document">Walang nakitang dokumento</string>
+  <!-- Instruction for positioning all ID types -->
+  <string name="stripe_position_all_id_types">Ilagay ang iyong lisensya sa pagmamaneho, pasaporte, o photo ID na inisyu ng gobyerno sa gitna ng frame</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Baliktarin ang iyong lisensya sa pagmamaneho</string>
   <!-- Instructional text for scanning front of a driver's license -->
   <string name="stripe_position_dl_front">Iposisyon ang iyong lisensya sa pagmamaneho sa gitna ng frame</string>
+  <!-- Instruction for positioning driver's license or government-issued photo ID -->
+  <string name="stripe_position_driver_license_or_id">Ilagay ang iyong lisensya sa pagmamaneho o photo ID na inisyu ng gobyerno sa gitna ng frame</string>
+  <!-- Instruction for positioning driver's license or passport -->
+  <string name="stripe_position_driver_license_or_passport">Ilagay ang iyong lisensya sa pagmamaneho o pasaporte sa gitna ng frame</string>
   <!-- Instructional text for scanning back of a identity card -->
   <string name="stripe_position_id_back">Baliktarin ang iyong kard ng pagkakakilanlan</string>
   <!-- Instructional text for scanning front of a identity card -->
   <string name="stripe_position_id_front">Iposisyon ang iyong kard ng pagkakakilanlan sa gitna ng frame</string>
   <!-- Instructional text for scanning a passport -->
   <string name="stripe_position_passport">Iposisyon ang iyong pasaporte sa gitna ng frame</string>
+  <!-- Instruction for positioning passport or government-issued photo ID -->
+  <string name="stripe_position_passport_or_id">Ilagay ang iyong pasaporte o photo ID na inisyu ng gobyerno sa gitna ng frame</string>
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Iposisyon ang iyong mukha sa gitna ng frame.</string>
   <!-- Instructional text when the document is too blurry -->
@@ -205,8 +229,6 @@
   <string name="stripe_test_model_title">Kasalukuyan kang nasa testmode</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Subukan Muli</string>
-  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
-  <string name="stripe_unexpected_error_try_again">Nagkaroon ng di-inaasahang kamalian -- subukin muli sa ilang segundo</string>
   <!-- Description to upload a photo -->
   <string name="stripe_upload_a_photo">Mag-upload ng larawan</string>
   <!-- Title of dialog to upload back of driver license -->

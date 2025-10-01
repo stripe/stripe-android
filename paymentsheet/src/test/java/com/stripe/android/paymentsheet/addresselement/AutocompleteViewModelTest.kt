@@ -105,15 +105,13 @@ class AutocompleteViewModelTest {
 
             assertThat(awaitItem()).isEqualTo(
                 AutocompleteViewModel.Event.GoBack(
-                    addressDetails = AddressDetails(
-                        address = PaymentSheet.Address(
-                            city = "South San Francisco",
-                            country = "US",
-                            line1 = "123 King Street",
-                            line2 = null,
-                            postalCode = "99999",
-                            state = "CA"
-                        )
+                    address = PaymentSheet.Address(
+                        city = "South San Francisco",
+                        country = "US",
+                        line1 = "123 King Street",
+                        line2 = null,
+                        postalCode = "99999",
+                        state = "CA"
                     )
                 )
             )
@@ -141,7 +139,7 @@ class AutocompleteViewModelTest {
 
             assertThat(viewModel.loading.value).isEqualTo(false)
 
-            assertThat(awaitItem()).isEqualTo(AutocompleteViewModel.Event.GoBack(addressDetails = null))
+            assertThat(awaitItem()).isEqualTo(AutocompleteViewModel.Event.GoBack(address = null))
         }
     }
 
@@ -169,10 +167,8 @@ class AutocompleteViewModelTest {
 
             assertThat(awaitItem()).isEqualTo(
                 AutocompleteViewModel.Event.EnterManually(
-                    addressDetails = AddressDetails(
-                        address = PaymentSheet.Address(
-                            line1 = "Some query"
-                        )
+                    address = PaymentSheet.Address(
+                        line1 = "Some query"
                     )
                 )
             )
@@ -188,7 +184,7 @@ class AutocompleteViewModelTest {
 
             assertThat(awaitItem()).isEqualTo(
                 AutocompleteViewModel.Event.EnterManually(
-                    addressDetails = null,
+                    address = null,
                 )
             )
         }
@@ -299,7 +295,7 @@ class AutocompleteViewModelTest {
             viewModel.onBackPressed()
 
             assertThat(awaitItem()).isEqualTo(
-                AutocompleteViewModel.Event.GoBack(addressDetails = null)
+                AutocompleteViewModel.Event.GoBack(address = null)
             )
         }
     }
@@ -313,7 +309,7 @@ class AutocompleteViewModelTest {
             viewModel.onBackPressed()
 
             assertThat(awaitItem()).isEqualTo(
-                AutocompleteViewModel.Event.GoBack(addressDetails = null)
+                AutocompleteViewModel.Event.GoBack(address = null)
             )
         }
     }

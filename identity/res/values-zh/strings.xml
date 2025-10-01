@@ -12,6 +12,8 @@
   <string name="stripe_back_of_dl">驾驶证背面</string>
   <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
   <string name="stripe_back_of_dl_selected">已选择驾驶证背面</string>
+  <!-- Title for scan screen when back of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_back_of_driver_license_or_id">驾驶证或政府签发的带照片身份证件的背面</string>
   <!-- Description of back of identity card image -->
   <string name="stripe_back_of_id">身份证背面</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
@@ -102,16 +104,30 @@
   <string name="stripe_first_name">名字</string>
   <!-- Content description of selfie flash animation mask -->
   <string name="stripe_flash_mask">自拍动画蒙版</string>
+  <!-- Instruction for flipping driver's license or government-issued photo ID -->
+  <string name="stripe_flip_driver_license_or_id">将您的驾驶证或政府签发的带照片身份证件翻转到另一面</string>
+  <!-- Generic back-side instruction for government-issued photo ID (no passport mention) -->
+  <string name="stripe_flip_id_document">将政府签发的带照片身份证件翻转到另一面</string>
+  <!-- Title for scan screen when front of all ID types is shown -->
+  <string name="stripe_front_of_all_id_types">驾驶证、护照或政府签发的带照片身份证件的正面</string>
   <!-- Description of front of driver's license image -->
   <string name="stripe_front_of_dl">驾驶证正面</string>
   <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
   <string name="stripe_front_of_dl_selected">已选择驾驶证正面</string>
+  <!-- Title for scan screen when front of driver's license or government-issued photo ID is shown -->
+  <string name="stripe_front_of_driver_license_or_id">驾驶证或政府签发的带照片身份证件的正面</string>
+  <!-- Title for scan screen when front of driver's license or passport is shown -->
+  <string name="stripe_front_of_driver_license_or_passport">驾驶证或护照的正面</string>
   <!-- Description of front of identity card image -->
   <string name="stripe_front_of_id">身份证正面</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">身份证件正面</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">已选择身份证正面</string>
+  <!-- Description of front of passport image -->
+  <string name="stripe_front_of_passport">护照的正面</string>
+  <!-- Title for scan screen when front of passport or government-issued photo ID is shown -->
+  <string name="stripe_front_of_passport_or_id">护照或政府签发的带照片身份证件的正面</string>
   <!-- Button to go back to the previous screen -->
   <string name="stripe_go_back">返回</string>
   <!-- display name for Government issued photo ID -->
@@ -160,16 +176,24 @@
   <string name="stripe_phone_number">电话号码</string>
   <!-- Instructional text when there is no document in camera frame -->
   <string name="stripe_point_camera_to_document">未检测到证件</string>
+  <!-- Instruction for positioning all ID types -->
+  <string name="stripe_position_all_id_types">将您的驾驶证、护照或政府签发的带照片身份证件放在画面正中间</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">将驾驶证翻到另一面</string>
   <!-- Instructional text for scanning front of a driver's license -->
   <string name="stripe_position_dl_front">将驾驶证放在画面正中间</string>
+  <!-- Instruction for positioning driver's license or government-issued photo ID -->
+  <string name="stripe_position_driver_license_or_id">将您的驾驶证或政府签发的带照片身份证件放在画面正中间</string>
+  <!-- Instruction for positioning driver's license or passport -->
+  <string name="stripe_position_driver_license_or_passport">将您的驾驶证或护照放在画面正中间</string>
   <!-- Instructional text for scanning back of a identity card -->
   <string name="stripe_position_id_back">将身份证翻到另一面</string>
   <!-- Instructional text for scanning front of a identity card -->
   <string name="stripe_position_id_front">将身份证放在画面正中间</string>
   <!-- Instructional text for scanning a passport -->
   <string name="stripe_position_passport">将护照放在画面正中间</string>
+  <!-- Instruction for positioning passport or government-issued photo ID -->
+  <string name="stripe_position_passport_or_id">将您的护照或政府签发的带照片身份证件放在画面正中间</string>
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">将脸放在画面正中间。</string>
   <!-- Instructional text when the document is too blurry -->
@@ -205,8 +229,6 @@
   <string name="stripe_test_model_title">您当前处于测试模式</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">重试</string>
-  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
-  <string name="stripe_unexpected_error_try_again">发生了意外错误 —— 请过几秒钟再试</string>
   <!-- Description to upload a photo -->
   <string name="stripe_upload_a_photo">上传照片</string>
   <!-- Title of dialog to upload back of driver license -->

@@ -90,6 +90,11 @@ internal class PaymentSheetAnalyticsTest {
         testContext.validateAnalyticsRequest(eventName = "mc_load_succeeded")
         testContext.validateAnalyticsRequest(eventName = "mc_complete_sheet_newpm_show")
         testContext.validateAnalyticsRequest(eventName = "mc_form_shown")
+        testContext.validateAnalyticsRequest(
+            eventName = "mc_initial_displayed_payment_methods",
+            query("hidden_payment_methods", Uri.encode("cashapp,alipay")),
+            query("visible_payment_methods", Uri.encode("link,card,afterpay_clearpay,klarna")),
+        )
 
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
@@ -164,6 +169,11 @@ internal class PaymentSheetAnalyticsTest {
         testContext.validateAnalyticsRequest(eventName = "mc_load_succeeded")
         testContext.validateAnalyticsRequest(eventName = "mc_custom_sheet_newpm_show")
         testContext.validateAnalyticsRequest(eventName = "mc_form_shown")
+        testContext.validateAnalyticsRequest(
+            eventName = "mc_initial_displayed_payment_methods",
+            query("hidden_payment_methods", Uri.encode("cashapp,alipay")),
+            query("visible_payment_methods", Uri.encode("card,afterpay_clearpay,klarna")),
+        )
 
         testContext.configureFlowController {
             configureWithPaymentIntent(

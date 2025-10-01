@@ -13,11 +13,13 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -77,6 +79,18 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
                 PaymentMethodVerticalLayoutInteractor.ViewAction.OnManageOneSavedPaymentMethod(it)
             )
         },
+        reportInitialPaymentMethodVisibilitySnapshot = { visibilityMap ->
+            val visiblePaymentMethods = visibilityMap.filter { it.value }.keys.toList()
+            val hiddenPaymentMethods = visibilityMap.filter { !it.value }.keys.toList()
+
+            interactor.reportInitialPaymentMethodVisibilitySnapshot(
+                visiblePaymentMethods = buildList {
+                    if (state.displayedSavedPaymentMethod != null) add("saved")
+                    addAll(visiblePaymentMethods)
+                },
+                hiddenPaymentMethods = hiddenPaymentMethods,
+            )
+        },
         imageLoader = imageLoader,
         modifier = modifier
             .testTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT),
@@ -100,6 +114,7 @@ internal fun PaymentMethodEmbeddedLayoutUI(
     onViewMorePaymentMethods: () -> Unit,
     onManageOneSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    reportInitialPaymentMethodVisibilitySnapshot: (Map<String, Boolean>) -> Unit = {},
     imageLoader: StripeImageLoader,
     appearance: Embedded,
     modifier: Modifier = Modifier,
@@ -130,6 +145,7 @@ internal fun PaymentMethodEmbeddedLayoutUI(
             isEnabled = isEnabled,
             imageLoader = imageLoader,
             appearance = appearance,
+            reportInitialPaymentMethodVisibilitySnapshot = reportInitialPaymentMethodVisibilitySnapshot,
         )
 
         if (appearance.style.bottomSeparatorEnabled()) OptionalEmbeddedDivider(appearance.style)
@@ -262,6 +278,7 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
     isEnabled: Boolean,
     imageLoader: StripeImageLoader,
     appearance: Embedded,
+    reportInitialPaymentMethodVisibilitySnapshot: (Map<String, Boolean>) -> Unit = {},
 ) {
     val selectedIndex = remember(selection, paymentMethods) {
         if (selection is PaymentMethodVerticalLayoutInteractor.Selection.New) {
@@ -269,6 +286,22 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
             paymentMethods.indexOfFirst { it.code == code }
         } else {
             -1
+        }
+    }
+
+    val paymentMethodCodes = remember(paymentMethods) { paymentMethods.map { it.code } }
+    val visibilityTracker = remember(paymentMethodCodes) {
+        PaymentMethodInitialVisibilityTracker(
+            expectedItems = paymentMethodCodes,
+            renderedLpmCallback = reportInitialPaymentMethodVisibilitySnapshot,
+        )
+    }
+
+    // Add cleanup when composable is disposed
+    DisposableEffect(visibilityTracker) {
+        onDispose {
+            // Cancel any running coroutines when UI is disposed
+            visibilityTracker.dispose()
         }
     }
 
@@ -291,7 +324,10 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
                             showChevron = appearance.style !is RowStyle.FlatWithCheckmark,
                         )
                     }
-                }
+                },
+                modifier = Modifier.onGloballyPositioned { coordinates ->
+                    visibilityTracker.updateVisibility(item.code, coordinates)
+                },
             )
         } else {
             NewPaymentMethodRowButton(
@@ -299,7 +335,10 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
                 isSelected = isSelected,
                 displayablePaymentMethod = item,
                 imageLoader = imageLoader,
-                appearance = appearance
+                appearance = appearance,
+                modifier = Modifier.onGloballyPositioned { coordinates ->
+                    visibilityTracker.updateVisibility(item.code, coordinates)
+                },
             )
         }
 

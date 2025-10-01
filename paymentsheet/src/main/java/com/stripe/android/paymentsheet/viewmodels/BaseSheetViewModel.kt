@@ -38,6 +38,7 @@ import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.drop
@@ -80,6 +81,8 @@ internal abstract class BaseSheetViewModel(
                 autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
             )
         )
+
+    internal val validationRequested = MutableSharedFlow<Unit>()
 
     abstract val walletsState: StateFlow<WalletsState?>
     abstract val walletsProcessingState: StateFlow<WalletsProcessingState?>
