@@ -40,7 +40,8 @@ interface StripeConnection<ResponseBodyType> : Closeable {
                 return StripeResponse(
                     code = responseCode,
                     body = createBodyFromResponseStream(responseStream),
-                    headers = conn.headerFields
+                    headers = conn.headerFields,
+                    endpoint = conn.url.path,
                 )
             }
 
