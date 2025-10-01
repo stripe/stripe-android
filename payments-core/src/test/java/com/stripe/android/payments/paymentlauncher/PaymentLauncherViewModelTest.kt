@@ -582,17 +582,16 @@ class PaymentLauncherViewModelTest {
     fun `verify next action finished analytics includes duration parameter`() = runTest {
         val savedStateHandle = SavedStateHandle()
         val viewModel = createViewModel(savedStateHandle = savedStateHandle)
+
         viewModel.handleNextActionForStripeIntent(CLIENT_SECRET, authHost)
-
-        val paymentFlowResult = mock<PaymentFlowResult.Unvalidated>()
-        whenever(paymentIntentFlowResultProcessor.processResult(eq(paymentFlowResult)))
-            .thenReturn(Result.success(succeededPaymentResult))
-
         verify(analyticsRequestFactory).createRequest(
             eq(PaymentAnalyticsEvent.PaymentLauncherNextActionStarted),
             additionalParams = any(),
         )
 
+        val paymentFlowResult = mock<PaymentFlowResult.Unvalidated>()
+        whenever(paymentIntentFlowResultProcessor.processResult(eq(paymentFlowResult)))
+            .thenReturn(Result.success(succeededPaymentResult))
         viewModel.onPaymentFlowResult(paymentFlowResult)
 
         verify(analyticsRequestFactory).createRequest(

@@ -33,14 +33,14 @@ internal object CustomerSettingsDefinition :
         value: CustomerType,
         checkoutRequestBuilder: CheckoutRequest.Builder,
     ) {
-        checkoutRequestBuilder.customer(value.backendParamValue)
+        checkoutRequestBuilder.customer(value.value)
     }
 
     override fun configure(
         value: CustomerType,
         customerEphemeralKeyRequestBuilder: CustomerEphemeralKeyRequest.Builder
     ) {
-        customerEphemeralKeyRequestBuilder.customerType(value.backendParamValue)
+        customerEphemeralKeyRequestBuilder.customerType(value.value)
     }
 
     override fun configure(
@@ -111,10 +111,4 @@ sealed class CustomerType(val value: String) {
             return customerId
         }
     }
-
-    val backendParamValue: String
-        get() = when (this) {
-            is Existing -> customerId
-            else -> value
-        }
 }

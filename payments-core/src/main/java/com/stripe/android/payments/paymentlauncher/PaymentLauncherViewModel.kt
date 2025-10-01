@@ -46,7 +46,6 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
-import kotlin.time.DurationUnit
 
 /**
  * [ViewModel] for [PaymentLauncherConfirmationActivity].
