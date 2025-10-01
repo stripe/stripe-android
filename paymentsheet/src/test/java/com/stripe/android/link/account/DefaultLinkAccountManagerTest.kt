@@ -486,7 +486,7 @@ class DefaultLinkAccountManagerTest {
 
         val result = accountManager.shareCardPaymentDetails(newPaymentDetails).getOrThrow()
 
-        // TODO: revisit this
+        // TODO(tillh-stripe): revisit this
         assertThat(result.id).isEqualTo(TestFactory.LINK_SAVED_PAYMENT_DETAILS.paymentMethod.id)
 
 //        assertThat(result.isSuccess).isTrue()

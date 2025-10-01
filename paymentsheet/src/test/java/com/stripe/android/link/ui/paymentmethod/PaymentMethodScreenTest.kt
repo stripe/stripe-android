@@ -103,8 +103,7 @@ internal class PaymentMethodScreenTest {
     fun `error message should be displayed on payment confirmation failure`() = runScenario {
         fillCardDetails()
 
-        linkConfirmationHandler.confirmWithLinkPaymentDetailsResult =
-            LinkConfirmationResult.Failed("oops".resolvableString)
+        linkConfirmationHandler.confirmResult = LinkConfirmationResult.Failed("oops".resolvableString)
 
         onPayButton()
             .scrollToAndAssertDisplayed()

@@ -84,7 +84,7 @@ class ConsumerStateTest {
 
         val result = existingState.withPaymentDetailsResponse(response)
 
-        assertThat(result.paymentDetails).hasSize(3)
+        assertThat(result.paymentDetails).hasSize(2)
         // Existing payment detail should preserve local data
         assertThat(result.paymentDetails[0].details).isEqualTo(updatedCard)
         assertThat(result.paymentDetails[0].collectedCvc).isEqualTo("123")
@@ -195,7 +195,7 @@ class ConsumerStateTest {
 
         val result = ConsumerState.fromResponse(response)
 
-        assertThat(result.paymentDetails).hasSize(3)
+        assertThat(result.paymentDetails).hasSize(2)
         assertThat(result.paymentDetails[0].details).isEqualTo(CONSUMER_PAYMENT_DETAILS_CARD)
         assertThat(result.paymentDetails[0].collectedCvc).isNull()
         assertThat(result.paymentDetails[0].billingPhone).isNull()
@@ -375,7 +375,7 @@ class ConsumerStateTest {
             billingPhone = newPhone
         )
 
-        assertThat(result.paymentDetails).hasSize(3)
+        assertThat(result.paymentDetails).hasSize(2)
         // Updated payment detail
         assertThat(result.paymentDetails[0].details).isEqualTo(updatedCard)
         assertThat(result.paymentDetails[0].billingPhone).isEqualTo(newPhone)

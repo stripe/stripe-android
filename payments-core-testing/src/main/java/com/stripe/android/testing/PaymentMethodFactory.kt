@@ -2,6 +2,7 @@ package com.stripe.android.testing
 
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.wallets.Wallet
 import org.json.JSONArray
 import org.json.JSONObject
 import kotlin.random.Random
@@ -70,7 +71,7 @@ object PaymentMethodFactory {
         return card(id = id)
     }
 
-    fun card(id: String?): PaymentMethod {
+    fun card(id: String?, isLinkOrigin: Boolean = false): PaymentMethod {
         return PaymentMethod(
             id = id,
             created = 123456789L,
@@ -81,7 +82,22 @@ object PaymentMethodFactory {
                 last4 = "4242",
                 expiryMonth = 3,
                 expiryYear = 2027,
+                wallet = if (isLinkOrigin) {
+                    Wallet.LinkWallet(dynamicLast4 = "4242")
+                } else {
+                    null
+                },
             ),
+        )
+    }
+
+    fun link(id: String): PaymentMethod {
+        return PaymentMethod(
+            id = id,
+            created = 123456789L,
+            liveMode = false,
+            type = PaymentMethod.Type.Link,
+            code = PaymentMethod.Type.Link.code,
         )
     }
 

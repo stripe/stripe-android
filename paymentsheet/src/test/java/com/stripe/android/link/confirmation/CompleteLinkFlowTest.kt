@@ -18,7 +18,6 @@ internal class CompleteLinkFlowTest {
 
     private val linkAccount = TestFactory.LINK_ACCOUNT
     private val consumerPaymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
-    private val linkPaymentDetails = TestFactory.LINK_NEW_PAYMENT_DETAILS
     private val cvc = "123"
 
     val consumerPaymentMethod = ConsumerPaymentDetails(
@@ -252,8 +251,8 @@ internal class CompleteLinkFlowTest {
         )
 
         // Verify confirmation was called with null cvc
-        assertThat(linkConfirmationHandler.confirmWithLinkPaymentDetailsCall).hasSize(1)
-        assertThat(linkConfirmationHandler.confirmWithLinkPaymentDetailsCall[0].cvc).isNull()
+        assertThat(linkConfirmationHandler.calls).hasSize(1)
+        assertThat(linkConfirmationHandler.calls[0].cvc).isNull()
 
         // Verify result is successful
         assertThat(result).isInstanceOf(Result.Completed::class.java)
