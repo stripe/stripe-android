@@ -6,7 +6,9 @@ import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkDisabledReason
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.LinkSignupDisabledReason
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
@@ -1998,6 +2000,8 @@ class PaymentSheetEventTest {
         isSpt: Boolean = false,
         linkEnabled: Boolean = false,
         linkMode: LinkMode? = null,
+        linkDisabledReasons: List<LinkDisabledReason>? = null,
+        linkSignupDisabledReasons: List<LinkSignupDisabledReason>? = null,
         googlePaySupported: Boolean = false,
         duration: Duration = (5L).seconds,
         paymentSelection: PaymentSelection? = null,
@@ -2016,6 +2020,8 @@ class PaymentSheetEventTest {
             isSpt = isSpt,
             linkEnabled = linkEnabled,
             linkMode = linkMode,
+            linkDisabledReasons = linkDisabledReasons,
+            linkSignupDisabledReasons = linkSignupDisabledReasons,
             googlePaySupported = googlePaySupported,
             duration = duration,
             paymentSelection = paymentSelection,

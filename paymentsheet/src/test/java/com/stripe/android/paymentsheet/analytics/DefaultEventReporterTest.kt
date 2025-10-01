@@ -20,7 +20,9 @@ import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK
+import com.stripe.android.model.LinkDisabledReason
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.LinkSignupDisabledReason
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
@@ -1505,6 +1507,8 @@ class DefaultEventReporterTest {
         paymentSelection: PaymentSelection = PaymentSelection.GooglePay,
         linkEnabled: Boolean = true,
         linkMode: LinkMode? = LinkMode.LinkPaymentMethod,
+        linkDisabledReasons: List<LinkDisabledReason>? = null,
+        linkSignupDisabledReasons: List<LinkSignupDisabledReason>? = null,
         googlePayReady: Boolean = true,
         currency: String? = "usd",
         initializationMode: PaymentElementLoader.InitializationMode =
@@ -1527,6 +1531,8 @@ class DefaultEventReporterTest {
             googlePaySupported = googlePayReady,
             linkEnabled = linkEnabled,
             linkMode = linkMode,
+            linkDisabledReasons = linkDisabledReasons,
+            linkSignupDisabledReasons = linkSignupDisabledReasons,
             currency = currency,
             initializationMode = initializationMode,
             orderedLpms = listOf("card", "klarna"),

@@ -1291,7 +1291,7 @@ internal class PaymentOptionsViewModelTest {
             args = args.copy(
                 state = args.state.copy(
                     paymentMethodMetadata = args.state.paymentMethodMetadata.copy(
-                        linkState = linkState
+                        linkStateResult = linkState
                     )
                 )
             ),
