@@ -36,6 +36,7 @@ import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.image.getDrawableFromUri
 import com.stripe.android.uicore.image.rememberDrawablePainter
 
+@Suppress("LongMethod")
 @Composable
 internal fun ConsentWelcomeHeader(
     modifier: Modifier = Modifier,

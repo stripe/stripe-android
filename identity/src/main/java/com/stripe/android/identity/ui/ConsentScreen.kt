@@ -116,6 +116,7 @@ internal fun ConsentScreen(
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun SuccessUI(
     merchantLogoUri: Uri,
