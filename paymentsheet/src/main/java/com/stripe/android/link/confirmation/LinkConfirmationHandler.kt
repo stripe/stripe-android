@@ -1,7 +1,6 @@
 package com.stripe.android.link.confirmation
 
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -13,13 +12,6 @@ internal interface LinkConfirmationHandler {
         cvc: String?,
         billingPhone: String?
     ): Result
-
-//    suspend fun confirm(
-//        paymentDetails: LinkPaymentDetails,
-//        linkAccount: LinkAccount,
-//        cvc: String?,
-//        billingPhone: String?
-//    ): Result
 
     fun interface Factory {
         fun create(confirmationHandler: ConfirmationHandler): LinkConfirmationHandler
