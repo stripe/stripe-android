@@ -16,6 +16,7 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -62,7 +63,8 @@ internal class PaymentLauncherViewModel @Inject constructor(
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     @UIContext private val uiContext: CoroutineContext,
     private val savedStateHandle: SavedStateHandle,
-    @Named(IS_INSTANT_APP) private val isInstantApp: Boolean
+    @Named(IS_INSTANT_APP) private val isInstantApp: Boolean,
+    private val durationProvider: DurationProvider,
 ) : ViewModel() {
 
     /**
@@ -114,6 +116,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
         viewModelScope.launch {
             savedStateHandle[KEY_HAS_STARTED] = true
             savedStateHandle[KEY_CONFIRM_ACTION_REQUESTED] = true
+            durationProvider.start(DurationProvider.Key.PaymentLauncher)
 
             val analyticsParams = logConfirmStarted(confirmStripeIntentParams)
             logReturnUrl(confirmStripeIntentParams.returnUrl)
@@ -209,6 +212,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
         viewModelScope.launch {
             savedStateHandle[KEY_HAS_STARTED] = true
             savedStateHandle[KEY_CONFIRM_ACTION_REQUESTED] = false
+            durationProvider.start(DurationProvider.Key.PaymentLauncher)
 
             val analyticsParams = logHandleNextActionStarted(clientSecret)
 
@@ -341,10 +345,15 @@ internal class PaymentLauncherViewModel @Inject constructor(
                 emptyMap()
             }
 
+            val duration = durationProvider.end(DurationProvider.Key.PaymentLauncher)
+            val durationParams: Map<String, Long> = duration?.let {
+                mapOf("duration" to it.inWholeSeconds)
+            } ?: emptyMap()
+
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
                     event = event,
-                    additionalParams = analyticsParams + intentParams + errorParams,
+                    additionalParams = analyticsParams + intentParams + errorParams + durationParams,
                 )
             )
         }
