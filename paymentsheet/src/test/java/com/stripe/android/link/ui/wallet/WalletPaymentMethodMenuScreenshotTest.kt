@@ -63,11 +63,6 @@ internal class WalletPaymentMethodMenuScreenshotTest {
         )
     }
 
-    @Test
-    fun testPassthrough() {
-        snapshot(TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH)
-    }
-
     private fun snapshot(
         paymentDetails: ConsumerPaymentDetails.PaymentDetails
     ) {

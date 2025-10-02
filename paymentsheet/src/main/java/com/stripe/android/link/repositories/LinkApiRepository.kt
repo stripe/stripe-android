@@ -11,7 +11,6 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.confirmation.createPaymentMethodCreateParams
-import com.stripe.android.link.utils.toConsumerBillingAddress
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams.Card.Companion.extraConfirmationParams
@@ -276,7 +275,7 @@ internal class LinkApiRepository @Inject constructor(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         id: String,
         consumerSessionClientSecret: String,
-    ): Result<LinkPaymentDetails.Saved> = withContext(workContext) {
+    ): Result<PaymentMethod> = withContext(workContext) {
         val allowRedisplay = paymentMethodCreateParams.allowRedisplay?.let {
             mapOf(ALLOW_REDISPLAY_PARAM to it.value)
         } ?: emptyMap()
@@ -296,22 +295,6 @@ internal class LinkApiRepository @Inject constructor(
             requestOptions = buildRequestOptions(),
         ).onFailure {
             errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_SHARE_CARD_FAILURE, StripeException.create(it))
-        }.map { paymentMethod ->
-            val paymentMethodId = requireNotNull(paymentMethod.id)
-            LinkPaymentDetails.Saved(
-                paymentDetails = ConsumerPaymentDetails.Passthrough(
-                    id = id,
-                    last4 = paymentMethodCreateParams.cardLast4().orEmpty(),
-                    paymentMethodId = paymentMethodId,
-                    billingEmailAddress = paymentMethod.billingDetails?.email,
-                    billingAddress = paymentMethod.billingDetails?.toConsumerBillingAddress(),
-                ),
-                paymentMethodCreateParams = PaymentMethodCreateParams.createLink(
-                    paymentDetailsId = paymentMethodId,
-                    consumerSessionClientSecret = consumerSessionClientSecret,
-                    extraParams = extraConfirmationParams(paymentMethodCreateParams.toParamMap())
-                ),
-            )
         }
     }
 
