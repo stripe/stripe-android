@@ -13,6 +13,10 @@ internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.
     val passiveCaptchaParams: PassiveCaptchaParams?
     val optionsParams: PaymentMethodOptionsParams?
 
+    fun updatedForDeferredIntent(
+        intentConfiguration: PaymentSheet.IntentConfiguration,
+    ): PaymentMethodConfirmationOption
+
     @Parcelize
     data class Saved(
         val paymentMethod: com.stripe.android.model.PaymentMethod,
@@ -21,7 +25,7 @@ internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.
         override val passiveCaptchaParams: PassiveCaptchaParams?,
         val hCaptchaToken: String? = null,
     ) : PaymentMethodConfirmationOption {
-        internal fun updatedForDeferredIntent(
+        override fun updatedForDeferredIntent(
             intentConfiguration: PaymentSheet.IntentConfiguration,
         ): Saved {
             val updatedOptionsParams = optionsParams.updatedWithPmoSfu(
@@ -42,7 +46,7 @@ internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.
         val shouldSave: Boolean,
         override val passiveCaptchaParams: PassiveCaptchaParams?,
     ) : PaymentMethodConfirmationOption {
-        internal fun updatedForDeferredIntent(
+        override fun updatedForDeferredIntent(
             intentConfiguration: PaymentSheet.IntentConfiguration,
         ): New {
             val updatedCreateParams = createParams.updatedWithProductUsage(intentConfiguration)
