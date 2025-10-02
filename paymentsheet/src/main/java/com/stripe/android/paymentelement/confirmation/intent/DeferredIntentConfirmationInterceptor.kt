@@ -20,7 +20,6 @@ import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationI
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor.Companion.PROVIDER_FETCH_TIMEOUT
 import com.stripe.android.paymentelement.confirmation.utils.ConfirmActionHelper
 import com.stripe.android.paymentelement.confirmation.utils.toConfirmParamsSetupFutureUsage
-import com.stripe.android.paymentelement.confirmation.utils.updatedForDeferredIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
@@ -45,7 +44,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
     private val requestOptions: ApiRequest.Options,
     @Named(ALLOWS_MANUAL_CONFIRMATION) private val allowsManualConfirmation: Boolean,
 ) : IntentConfirmationInterceptor {
-    val confirmActionHelper: ConfirmActionHelper = ConfirmActionHelper(requestOptions.apiKeyIsLiveMode)
+    private val confirmActionHelper: ConfirmActionHelper = ConfirmActionHelper(requestOptions.apiKeyIsLiveMode)
 
     override suspend fun intercept(
         intent: StripeIntent,
@@ -76,7 +75,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
         )
     }
 
-    internal suspend fun handleNewPaymentMethod(
+    private suspend fun handleNewPaymentMethod(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         intent: StripeIntent,
         confirmationOption: PaymentMethodConfirmationOption.New,
@@ -111,7 +110,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
         )
     }
 
-    internal suspend fun handleSavedPaymentMethod(
+    private suspend fun handleSavedPaymentMethod(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         intent: StripeIntent,
         paymentMethod: PaymentMethod,
@@ -133,7 +132,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
         )
     }
 
-    internal suspend fun handleDeferredIntent(
+    private suspend fun handleDeferredIntent(
         intent: StripeIntent,
         intentConfiguration: PaymentSheet.IntentConfiguration,
         confirmationOption: PaymentMethodConfirmationOption,

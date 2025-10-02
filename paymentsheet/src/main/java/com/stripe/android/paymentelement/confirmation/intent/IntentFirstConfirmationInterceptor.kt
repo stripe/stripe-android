@@ -13,10 +13,10 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 
 internal class IntentFirstConfirmationInterceptor @AssistedInject constructor(
-    @Assisted val clientSecret: String,
-    private val requestOptions: ApiRequest.Options,
+    @Assisted private val clientSecret: String,
+    requestOptions: ApiRequest.Options,
 ) : IntentConfirmationInterceptor {
-    val confirmActionHelper: ConfirmActionHelper = ConfirmActionHelper(requestOptions.apiKeyIsLiveMode)
+    private val confirmActionHelper: ConfirmActionHelper = ConfirmActionHelper(requestOptions.apiKeyIsLiveMode)
 
     override suspend fun intercept(
         intent: StripeIntent,

@@ -7,34 +7,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.updateSetupFutureUsageWithPmoSfu
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
-import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentsheet.PaymentSheet
-
-internal fun PaymentMethodConfirmationOption.New.updatedForDeferredIntent(
-    intentConfiguration: PaymentSheet.IntentConfiguration,
-): PaymentMethodConfirmationOption.New {
-    val updatedCreateParams = createParams.updatedWithProductUsage(intentConfiguration)
-    val updatedOptionsParams = optionsParams.updatedWithPmoSfu(
-        code = updatedCreateParams.typeCode,
-        intentConfiguration = intentConfiguration,
-    )
-    return copy(
-        createParams = updatedCreateParams,
-        optionsParams = updatedOptionsParams,
-    )
-}
-
-internal fun PaymentMethodConfirmationOption.Saved.updatedForDeferredIntent(
-    intentConfiguration: PaymentSheet.IntentConfiguration,
-): PaymentMethodConfirmationOption.Saved {
-    val updatedOptionsParams = optionsParams.updatedWithPmoSfu(
-        code = paymentMethod.type?.code,
-        intentConfiguration = intentConfiguration,
-    )
-    return copy(
-        optionsParams = updatedOptionsParams,
-    )
-}
 
 internal fun PaymentMethodCreateParams.updatedWithProductUsage(
     intentConfiguration: PaymentSheet.IntentConfiguration,

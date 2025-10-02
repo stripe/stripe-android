@@ -31,7 +31,7 @@ import com.stripe.android.R as PaymentsCoreR
 @RunWith(RobolectricTestRunner::class)
 class SharedPaymentTokenConfirmationInterceptorTest {
     @Test
-    fun `If initialized with shared payment token, should fail if 'preparePaymentMethodHandler' in null`() =
+    fun `If initialized with shared payment token, should fail if 'preparePaymentMethodHandler' is null`() =
         testNoProvider(
             event = ErrorReporter.ExpectedErrorEvent.PREPARE_PAYMENT_METHOD_HANDLER_NULL,
             failureMessage = PREPARE_PAYMENT_METHOD_HANDLER_MESSAGE,
