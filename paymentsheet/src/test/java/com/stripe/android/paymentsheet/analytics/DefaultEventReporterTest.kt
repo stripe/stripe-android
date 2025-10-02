@@ -922,6 +922,64 @@ class DefaultEventReporterTest {
         }
 
     @Test
+    fun `Don't send link_disabled_reasons nor link_signup_disabled_reasons when none`() {
+        val eventReporter = createEventReporter(EventReporter.Mode.Complete)
+
+        eventReporter.simulateSuccessfulSetup(
+            linkDisabledReasons = listOf(),
+            linkSignupDisabledReasons = listOf(),
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_load_succeeded" &&
+                    req.params["link_disabled_reasons"] == null &&
+                    req.params["link_sign_up_disabled_reasons"] == null
+            }
+        )
+    }
+
+    @Test
+    fun `Send link_disabled_reasons when present`() {
+        val eventReporter = createEventReporter(EventReporter.Mode.Complete)
+
+        eventReporter.simulateSuccessfulSetup(
+            linkDisabledReasons = listOf(
+                LinkDisabledReason.NotSupportedInElementsSession,
+                LinkDisabledReason.BillingDetailsCollection,
+            ),
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_load_succeeded" &&
+                    req.params["link_disabled_reasons"] ==
+                    "not_supported_in_elements_session,billing_details_collection"
+            }
+        )
+    }
+
+    @Test
+    fun `Send link_signup_disabled_reasons when present`() {
+        val eventReporter = createEventReporter(EventReporter.Mode.Complete)
+
+        eventReporter.simulateSuccessfulSetup(
+            linkSignupDisabledReasons = listOf(
+                LinkSignupDisabledReason.LinkNotEnabled,
+                LinkSignupDisabledReason.LinkCardNotSupported
+            )
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_load_succeeded" &&
+                    req.params["link_signup_disabled_reasons"] ==
+                    "link_not_enabled,link_card_not_supported"
+            }
+        )
+    }
+
+    @Test
     fun `Send correct link_context when pressing confirm button for Instant Debits`() = runTest(testDispatcher) {
         val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
             simulateInit()
