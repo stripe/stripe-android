@@ -13,7 +13,7 @@ def generate_dokka()
     begin
         execute_or_fail("rm -rf docs/")
         execute_or_fail("./gradlew clean")
-        execute_or_fail("./gradlew dokkaHtmlMultiModule")
+        execute_or_fail("./gradlew :dokkaGenerate")
 
         if docs_did_not_change
             rputs "Skipping updating dokka because there are no dokka changes."

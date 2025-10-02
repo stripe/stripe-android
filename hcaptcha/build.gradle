@@ -39,17 +39,28 @@ android.libraryVariants.all { variant ->
     def variantName = variant.name.capitalize()
     def packageName = "com.stripe.hcaptcha"
     def outputDir = file("${project.buildDir}/generated/source/hcaptcha/${variant.name}/${packageName.replaceAll('\\.', '/')}")
-    def generateTask = project.task("generate${variantName}JavaClassFromStaticHtml") {
+    def generateTask = project.tasks.register("generate${variantName}JavaClassFromStaticHtml") {
         group 'Generate'
         description "Generate HTML java class"
 
+        def outputJavaClass = file("$outputDir/HCaptchaHtml.kt")
+        def templateFile = file("$projectDir/src/main/html/HCaptchaHtml.java.tml")
+        def htmlFile = file("$projectDir/src/main/html/hcaptcha.html")
+
+        outputs.file(outputJavaClass)
+
         doFirst {
-            def outputJavaClass = file("$outputDir/HCaptchaHtml.kt")
-            def template = file("$projectDir/src/main/html/HCaptchaHtml.java.tml").text
-            def html = file("$projectDir/src/main/html/hcaptcha.html")
-                    .readLines()
-                    .stream()
-                    .collect(Collectors.joining("\n"))
+            if (!htmlFile.exists() || !templateFile.exists()) {
+                throw new GradleException(
+                        "Required source files not found: ${templateFile} or ${htmlFile}"
+                )
+            }
+
+            def template = templateFile.text
+            def html = htmlFile
+                .readLines()
+                .stream()
+                .collect(Collectors.joining("\n"))
 
             def engine = new SimpleTemplateEngine()
             def src = engine.createTemplate(template).make([
