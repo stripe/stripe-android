@@ -32,9 +32,8 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import com.stripe.android.paymentsheet.example.Settings
-import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentRequest
+import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentRequestParams
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentResponse
-import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentWithConfirmationTokenRequest
 import com.stripe.android.paymentsheet.example.playground.model.CreateSetupIntentRequest
 import com.stripe.android.paymentsheet.example.playground.model.CreateSetupIntentResponse
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
@@ -514,8 +513,10 @@ internal class PaymentSheetPlaygroundViewModel(
             displayMessage = "No payment playground state"
         )
         return createAndConfirmIntent(
-            paymentMethodId = paymentMethod.id!!,
-            shouldSavePaymentMethod = shouldSavePaymentMethod,
+            confirmationParams = ConfirmationParams.PaymentMethod(
+                id = paymentMethod.id!!,
+                shouldSavePaymentMethod = shouldSavePaymentMethod,
+            ),
             playgroundState = playgroundState,
         )
     }
@@ -528,7 +529,9 @@ internal class PaymentSheetPlaygroundViewModel(
             displayMessage = "No payment playground state"
         )
         return createAndConfirmIntentInternal(
-            confirmationTokenId = confirmationToken.id,
+            confirmationParams = ConfirmationParams.ConfirmationToken(
+                id = confirmationToken.id,
+            ),
             playgroundState = playgroundState,
         )
     }
@@ -540,8 +543,7 @@ internal class PaymentSheetPlaygroundViewModel(
 
     @OptIn(DelicatePaymentSheetApi::class)
     private suspend fun createAndConfirmIntent(
-        paymentMethodId: String,
-        shouldSavePaymentMethod: Boolean,
+        confirmationParams: ConfirmationParams,
         playgroundState: PlaygroundState.Payment,
     ): CreateIntentResult {
         return when (playgroundState.initializationType) {
@@ -556,8 +558,7 @@ internal class PaymentSheetPlaygroundViewModel(
             InitializationType.DeferredServerSideConfirmation,
             InitializationType.DeferredManualConfirmation -> {
                 createAndConfirmIntentInternal(
-                    paymentMethodId = paymentMethodId,
-                    shouldSavePaymentMethod = shouldSavePaymentMethod,
+                    confirmationParams = confirmationParams,
                     playgroundState = playgroundState,
                 )
             }
@@ -569,73 +570,37 @@ internal class PaymentSheetPlaygroundViewModel(
     }
 
     private suspend fun createAndConfirmIntentInternal(
-        paymentMethodId: String,
-        shouldSavePaymentMethod: Boolean,
+        confirmationParams: ConfirmationParams,
         playgroundState: PlaygroundState.Payment,
     ): CreateIntentResult {
         // Note: This is not how you'd do this in a real application. You wouldn't have a client
         // secret available at this point, but you'd call your backend to create (and optionally
         // confirm) a payment or setup intent.
-        val request = ConfirmIntentRequest(
-            clientSecret = playgroundState.clientSecret,
-            paymentMethodId = paymentMethodId,
-            shouldSavePaymentMethod = shouldSavePaymentMethod,
-            merchantCountryCode = playgroundState.countryCode.value,
-            mode = playgroundState.checkoutMode.value,
-            returnUrl = RETURN_URL,
-        )
-
-        val result = Fuel.post(baseUrl + "confirm_intent")
-            .jsonBody(Json.encodeToString(ConfirmIntentRequest.serializer(), request))
-            .suspendable()
-            .awaitModel(ConfirmIntentResponse.serializer())
-        val createIntentResult = when (result) {
-            is Result.Failure -> {
-                val message = "Creating intent failed:\n${result.getException().message}"
-                status.value = StatusMessage(message)
-
-                val error = if (result.error.cause is IOException) {
-                    ConfirmIntentNetworkException()
-                } else {
-                    ConfirmIntentEndpointException()
-                }
-
-                CreateIntentResult.Failure(
-                    cause = error,
-                    displayMessage = message
+        val request: ConfirmIntentRequestParams
+        when (confirmationParams) {
+            is ConfirmationParams.PaymentMethod -> {
+                request = ConfirmIntentRequestParams.PaymentMethod(
+                    clientSecret = playgroundState.clientSecret,
+                    paymentMethodId = confirmationParams.id,
+                    shouldSavePaymentMethod = confirmationParams.shouldSavePaymentMethod,
+                    merchantCountryCode = playgroundState.countryCode.value,
+                    mode = playgroundState.checkoutMode.value,
+                    returnUrl = RETURN_URL,
                 )
             }
 
-            is Result.Success -> {
-                CreateIntentResult.Success(
-                    clientSecret = result.value.clientSecret,
+            is ConfirmationParams.ConfirmationToken -> {
+                request = ConfirmIntentRequestParams.ConfirmationToken(
+                    clientSecret = playgroundState.clientSecret,
+                    confirmationTokenId = confirmationParams.id,
+                    merchantCountryCode = playgroundState.countryCode.value,
+                    mode = playgroundState.checkoutMode.value,
                 )
             }
         }
-        return createIntentResult
-    }
-
-    private suspend fun createAndConfirmIntentInternal(
-        confirmationTokenId: String,
-        playgroundState: PlaygroundState.Payment,
-    ): CreateIntentResult {
-        // Note: This is not how you'd do this in a real application. You wouldn't have a client
-        // secret available at this point, but you'd call your backend to create (and optionally
-        // confirm) a payment or setup intent.
-        val request = ConfirmIntentWithConfirmationTokenRequest(
-            clientSecret = playgroundState.clientSecret,
-            confirmationTokenId = confirmationTokenId,
-            merchantCountryCode = playgroundState.countryCode.value,
-            mode = playgroundState.checkoutMode.value,
-        )
 
         val result = Fuel.post(baseUrl + "confirm_intent")
-            .jsonBody(
-                Json.encodeToString(
-                    ConfirmIntentWithConfirmationTokenRequest.serializer(),
-                    request
-                )
-            )
+            .jsonBody(Json.encodeToString(ConfirmIntentRequestParams.serializer(), request))
             .suspendable()
             .awaitModel(ConfirmIntentResponse.serializer())
         val createIntentResult = when (result) {
@@ -783,3 +748,14 @@ data class StatusMessage(
     val message: String?,
     val hasBeenDisplayed: Boolean = false
 )
+
+sealed class ConfirmationParams {
+    data class PaymentMethod(
+        val id: String,
+        val shouldSavePaymentMethod: Boolean,
+    ) : ConfirmationParams()
+
+    data class ConfirmationToken(
+        val id: String,
+    ) : ConfirmationParams()
+}
