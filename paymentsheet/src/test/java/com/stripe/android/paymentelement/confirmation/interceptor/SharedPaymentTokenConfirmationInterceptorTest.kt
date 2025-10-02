@@ -39,19 +39,7 @@ class SharedPaymentTokenConfirmationInterceptorTest {
         ) { errorReporter ->
 
             val interceptor = createIntentConfirmationInterceptor(
-                initializationMode = InitializationMode.DeferredIntent(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                            amount = 1099L,
-                            currency = "usd",
-                        ),
-                        sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
-                            businessName = "My business, Inc.",
-                            networkId = "network_id",
-                            externalId = "external_id"
-                        )
-                    ),
-                ),
+                initializationMode = DEFAULT_SPT_INTENT,
                 stripeRepository = stripeRepositoryReturning(
                     onCreatePaymentMethodId = "pm_1234",
                     onRetrievePaymentMethodId = "pm_5678"
@@ -63,7 +51,6 @@ class SharedPaymentTokenConfirmationInterceptorTest {
         }
 
     @Test
-    @Suppress("LongMethod")
     fun `If initialized with shared payment token, should call 'onPreparePaymentMethod' with saved PM`() =
         runTest {
             val completablePaymentMethod = CompletableDeferred<PaymentMethod>()
@@ -74,19 +61,7 @@ class SharedPaymentTokenConfirmationInterceptorTest {
             val providedShippingAddress = SHIPPING_ADDRESS
 
             val interceptor = createIntentConfirmationInterceptor(
-                initializationMode = InitializationMode.DeferredIntent(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                            amount = 1099L,
-                            currency = "usd"
-                        ),
-                        sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
-                            businessName = "My business, Inc.",
-                            networkId = "network_id",
-                            externalId = "external_id"
-                        )
-                    ),
-                ),
+                initializationMode = DEFAULT_SPT_INTENT,
                 stripeRepository = stripeRepositoryReturning(
                     onCreatePaymentMethodId = "pm_1234",
                     onRetrievePaymentMethodId = "pm_5678",
@@ -121,15 +96,12 @@ class SharedPaymentTokenConfirmationInterceptorTest {
             )
 
             val paymentMethod = completablePaymentMethod.await()
-
             assertThat(paymentMethod).isEqualTo(providedPaymentMethod)
 
             val shippingAddress = completableShippingAddress.await()
-
             verifyShipping(providedShippingAddress, shippingAddress)
 
             val createRadarSessionCall = createSavedPaymentMethodRadarSessionCalls.awaitItem()
-
             assertThat(createRadarSessionCall.paymentMethodId).isEqualTo("pm_123456789")
             assertThat(createRadarSessionCall.requestOptions.apiKey).isEqualTo("pk")
             assertThat(createRadarSessionCall.requestOptions.stripeAccount).isNull()
@@ -145,19 +117,7 @@ class SharedPaymentTokenConfirmationInterceptorTest {
             val createSavedPaymentMethodRadarSessionCalls = Turbine<CreateSavedPaymentMethodRadarSessionCall>()
 
             val interceptor = createIntentConfirmationInterceptor(
-                initializationMode = InitializationMode.DeferredIntent(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                            amount = 1099L,
-                            currency = "usd",
-                        ),
-                        sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
-                            businessName = "My business, Inc.",
-                            networkId = "network_id",
-                            externalId = "external_id"
-                        )
-                    ),
-                ),
+                initializationMode = DEFAULT_SPT_INTENT,
                 stripeRepository = stripeRepositoryReturning(
                     onCreatePaymentMethodId = "pm_1234",
                     onRetrievePaymentMethodId = "pm_5678",
@@ -204,19 +164,7 @@ class SharedPaymentTokenConfirmationInterceptorTest {
             val eventReporter = FakeErrorReporter()
 
             val interceptor = createIntentConfirmationInterceptor(
-                initializationMode = InitializationMode.DeferredIntent(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                            amount = 1099L,
-                            currency = "usd",
-                        ),
-                        sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
-                            businessName = "My business, Inc.",
-                            networkId = "network_id",
-                            externalId = "external_id"
-                        )
-                    ),
-                ),
+                initializationMode = DEFAULT_SPT_INTENT,
                 stripeRepository = stripeRepositoryReturning(
                     onCreatePaymentMethodId = "pm_1234",
                     onRetrievePaymentMethodId = "pm_5678",
@@ -296,6 +244,20 @@ class SharedPaymentTokenConfirmationInterceptorTest {
         const val PREPARE_PAYMENT_METHOD_HANDLER_MESSAGE =
             "PreparePaymentMethodHandler must be implemented when using IntentConfiguration with " +
                 "shared payment tokens!"
+
+        val DEFAULT_SPT_INTENT = InitializationMode.DeferredIntent(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    amount = 1099L,
+                    currency = "usd",
+                ),
+                sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                    businessName = "My business, Inc.",
+                    networkId = "network_id",
+                    externalId = "external_id"
+                )
+            ),
+        )
 
         val SHIPPING_ADDRESS = ConfirmPaymentIntentParams.Shipping(
             address = Address(

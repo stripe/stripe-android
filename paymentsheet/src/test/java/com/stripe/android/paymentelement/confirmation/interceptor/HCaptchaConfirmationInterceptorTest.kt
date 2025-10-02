@@ -153,5 +153,4 @@ class HCaptchaConfirmationInterceptorTest : DeferredIntentConfirmationIntercepto
             CreateIntentResult.Success(clientSecret = "seti_123_secret_456")
         }
     }
-
 }

@@ -71,7 +71,6 @@ class PaymentMethodOptionsSetupFutureUsageConfirmationInterceptorTest :
 
     @Test
     fun `Sets shouldSavePaymentMethod to true for CreateIntentCallback if PMO SFU is set`() = runTest {
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         var observedValue = false
 
         val interceptor = createIntentConfirmationInterceptor(
