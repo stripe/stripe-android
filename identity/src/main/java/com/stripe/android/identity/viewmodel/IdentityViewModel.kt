@@ -996,6 +996,7 @@ internal class IdentityViewModel(
                 submittedVerificationPageData.submittedAndClosed() -> {
                     val skipSuccessPage = _verificationPage.value?.data?.skipSuccessPage ?: false
                     if (skipSuccessPage) {
+                        sendSucceededAnalyticsRequestForNative()
                         finishWithResult(IdentityVerificationSheet.VerificationFlowResult.Completed)
                     } else {
                         navController.navigateTo(ConfirmationDestination)
