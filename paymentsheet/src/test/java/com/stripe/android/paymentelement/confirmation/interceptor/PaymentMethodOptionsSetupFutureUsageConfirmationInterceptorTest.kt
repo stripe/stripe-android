@@ -26,8 +26,7 @@ import org.junit.Test
     PaymentMethodOptionsSetupFutureUsagePreview::class,
     SharedPaymentTokenSessionPreview::class
 )
-class PaymentMethodOptionsSetupFutureUsageConfirmationInterceptorTest :
-    DeferredIntentConfirmationInterceptorTest() {
+class PaymentMethodOptionsSetupFutureUsageConfirmationInterceptorTest {
     @Test
     fun `Sets shouldSavePaymentMethod to true for CreateIntentCallback if top level SFU is set with PMO`() = runTest {
         var observedValue = false

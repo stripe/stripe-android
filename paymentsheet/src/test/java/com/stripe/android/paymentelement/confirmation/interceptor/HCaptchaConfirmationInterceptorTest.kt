@@ -22,7 +22,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 @OptIn(SharedPaymentTokenSessionPreview::class)
-class HCaptchaConfirmationInterceptorTest : DeferredIntentConfirmationInterceptorTest() {
+class HCaptchaConfirmationInterceptorTest {
     @Test
     fun `Returns confirm params with hCaptchaToken for deferred intent confirmation`() = runTest {
         val hCaptchaToken = "deferred-hcaptcha-token"

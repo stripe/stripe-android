@@ -50,7 +50,7 @@ import com.stripe.android.R as PaymentsCoreR
 
 @RunWith(RobolectricTestRunner::class)
 @OptIn(SharedPaymentTokenSessionPreview::class)
-open class DeferredIntentConfirmationInterceptorTest {
+class DeferredIntentConfirmationInterceptorTest {
     @Test
     fun `Fails if invoked without a confirm callback for existing payment method`() = testNoProvider(
         event = ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL,
@@ -484,26 +484,6 @@ open class DeferredIntentConfirmationInterceptorTest {
             )
         }
 
-    protected fun succeedingCreateIntentCallback(
-        expectedPaymentMethod: PaymentMethod,
-    ): CreateIntentCallback {
-        return CreateIntentCallback { paymentMethod, _ ->
-            assertThat(paymentMethod).isEqualTo(expectedPaymentMethod)
-            CreateIntentResult.Success(clientSecret = "pi_123_secret_456")
-        }
-    }
-
-    private fun failingCreateIntentCallback(
-        message: String? = null
-    ): CreateIntentCallback {
-        return CreateIntentCallback { _, _ ->
-            CreateIntentResult.Failure(
-                cause = TestException(message),
-                displayMessage = message
-            )
-        }
-    }
-
     companion object {
         private const val CREATE_INTENT_CALLBACK_MESSAGE =
             "CreateIntentCallback must be implemented when using IntentConfiguration with PaymentSheet"
@@ -527,5 +507,25 @@ private class TestException(message: String? = null) : Exception(message) {
 
     override fun equals(other: Any?): Boolean {
         return other is TestException && other.message == message
+    }
+}
+
+internal fun succeedingCreateIntentCallback(
+    expectedPaymentMethod: PaymentMethod,
+): CreateIntentCallback {
+    return CreateIntentCallback { paymentMethod, _ ->
+        assertThat(paymentMethod).isEqualTo(expectedPaymentMethod)
+        CreateIntentResult.Success(clientSecret = "pi_123_secret_456")
+    }
+}
+
+private fun failingCreateIntentCallback(
+    message: String? = null
+): CreateIntentCallback {
+    return CreateIntentCallback { _, _ ->
+        CreateIntentResult.Failure(
+            cause = TestException(message),
+            displayMessage = message
+        )
     }
 }
