@@ -431,7 +431,6 @@ class DeferredIntentConfirmationInterceptorTest {
 
     @Test
     fun `Returns success as next step if merchant is forcing success`() = runTest {
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         val stripeRepository = mock<StripeRepository>()
 
         val interceptor = createIntentConfirmationInterceptor(
