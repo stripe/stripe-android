@@ -126,6 +126,12 @@ internal class DefaultCreateLinkState @Inject constructor(
             // CBF isn't currently supported in the web flow.
             add(LinkDisabledReason.CardBrandFiltering)
         }
+
+        val collectsExtraBillingDetails = configuration.billingDetailsCollectionConfiguration.collectsAnything
+        if (collectsExtraBillingDetails && useWebLink) {
+            // Extra billing details collection isn't currently supported in the web flow.
+            add(LinkDisabledReason.BillingDetailsCollection)
+        }
     }
 
     private fun getLinkSignupDisabledReasons(
