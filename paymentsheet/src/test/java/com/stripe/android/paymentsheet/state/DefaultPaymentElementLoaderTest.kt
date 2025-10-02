@@ -79,6 +79,7 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.capture
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
@@ -3278,7 +3279,7 @@ internal class DefaultPaymentElementLoaderTest {
             linkEnabled = eq(true),
             linkMode = anyOrNull(),
             linkDisabledReasons = anyOrNull(),
-            linkSignupDisabledReasons = anyOrNull(),
+            linkSignupDisabledReasons = isNull(),
             googlePaySupported = any(),
             linkDisplay = eq(PaymentSheet.LinkConfiguration.Display.Automatic),
             currency = anyOrNull(),
@@ -3382,8 +3383,8 @@ internal class DefaultPaymentElementLoaderTest {
             paymentSelection = anyOrNull(),
             linkEnabled = eq(false),
             linkMode = anyOrNull(),
-            linkDisabledReasons = anyOrNull(),
-            linkSignupDisabledReasons = anyOrNull(),
+            linkDisabledReasons = eq(listOf(LinkDisabledReason.LinkConfiguration)),
+            linkSignupDisabledReasons = isNull(),
             googlePaySupported = any(),
             linkDisplay = eq(PaymentSheet.LinkConfiguration.Display.Never),
             currency = anyOrNull(),
