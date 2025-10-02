@@ -37,13 +37,13 @@ import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.interceptor.FakeIntentConfirmationInterceptorFactory
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.cardParamsUpdateAction
@@ -1881,7 +1881,7 @@ class CustomerSheetViewModelTest {
                 },
                 canCreateSetupIntents = true,
             ),
-            intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
+            intentConfirmationInterceptorFactory = FakeIntentConfirmationInterceptorFactory {
                 enqueueFailureStep(
                     cause = Exception("Unable to confirm setup intent"),
                     message = "Something went wrong"
@@ -3308,7 +3308,7 @@ class CustomerSheetViewModelTest {
     @Test
     fun `When setting up with intent, should call 'IntentConfirmationInterceptor' with expected params`() =
         runTest(testDispatcher) {
-            val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
+            val intentConfirmationInterceptorFactory = FakeIntentConfirmationInterceptorFactory()
 
             val viewModel = createViewModel(
                 workContext = testDispatcher,
@@ -3324,7 +3324,7 @@ class CustomerSheetViewModelTest {
                     },
                     canCreateSetupIntents = true,
                 ),
-                intentConfirmationInterceptor = intentConfirmationInterceptor,
+                intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
             )
 
             viewModel.handleViewAction(
@@ -3335,13 +3335,11 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
 
+            val intentConfirmationInterceptor = intentConfirmationInterceptorFactory.interceptor
             val call = intentConfirmationInterceptor.calls.awaitItem()
 
             assertThat(call).isEqualTo(
                 FakeIntentConfirmationInterceptor.InterceptCall.WithExistingPaymentMethod(
-                    initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
-                        clientSecret = "seti_123"
-                    ),
                     paymentMethod = CARD_PAYMENT_METHOD,
                     shippingValues = null,
                     paymentMethodOptionsParams = null,

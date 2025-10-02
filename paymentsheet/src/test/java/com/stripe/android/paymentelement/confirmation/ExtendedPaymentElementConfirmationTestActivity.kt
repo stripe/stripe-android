@@ -21,6 +21,7 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.core.utils.requireApplication
@@ -227,5 +228,13 @@ internal interface ExtendedPaymentElementConfirmationTestModule {
         fun providesLinkEventsReporter(): LinkEventsReporter = FakeLinkEventsReporterForConfirmation(
             FakeLinkEventsReporter()
         )
+
+        @Provides
+        fun providesApiRequestOptions(config: PaymentConfiguration): ApiRequest.Options {
+            return ApiRequest.Options(
+                apiKey = config.publishableKey,
+                stripeAccount = config.stripeAccountId
+            )
+        }
     }
 }
