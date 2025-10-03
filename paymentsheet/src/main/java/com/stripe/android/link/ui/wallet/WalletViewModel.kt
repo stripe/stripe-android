@@ -301,6 +301,12 @@ internal class WalletViewModel(
         }
     }
 
+    fun handleDisabledButtonClick() {
+        _uiState.update {
+            it.copy(isValidating = true)
+        }
+    }
+
     private fun setProcessingState(isProcessing: Boolean, errorMessage: ResolvableString? = null) {
         _uiState.update {
             it.copy(

@@ -125,6 +125,7 @@ internal fun WalletScreen(
         onItemSelected = viewModel::onItemSelected,
         onExpandedChanged = viewModel::onExpandedChanged,
         onPrimaryButtonClick = viewModel::onPrimaryButtonClicked,
+        onDisabledButtonClick = viewModel::handleDisabledButtonClick,
         onPayAnotherWayClicked = viewModel::onPayAnotherWayClicked,
         onRemoveClicked = viewModel::onRemoveClicked,
         onUpdateClicked = viewModel::onUpdateClicked,
@@ -146,6 +147,7 @@ internal fun WalletBody(
     onExpandedChanged: (Boolean) -> Unit,
     onAddPaymentMethodOptionClicked: (AddPaymentMethodOption) -> Unit,
     onPrimaryButtonClick: () -> Unit,
+    onDisabledButtonClick: () -> Unit,
     onPayAnotherWayClicked: () -> Unit,
     onDismissAlert: () -> Unit,
     onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
@@ -218,6 +220,7 @@ internal fun WalletBody(
                 ActionSection(
                     state = state,
                     onPrimaryButtonClick = onPrimaryButtonClick,
+                    onDisabledButtonClick = onDisabledButtonClick,
                     onPayAnotherWayClicked = onPayAnotherWayClicked
                 )
             }
@@ -282,7 +285,8 @@ private fun PaymentDetailsSection(
                         paymentDetails = selectedCard,
                         expiryDateController = expiryDateController,
                         cvcController = cvcController,
-                        isCardExpired = selectedCard.isExpired
+                        isCardExpired = selectedCard.isExpired,
+                        isValidating = state.isValidating,
                     )
                 }
             }
@@ -387,6 +391,7 @@ private fun ErrorSection(errorMessage: ResolvableString?) {
 private fun ActionSection(
     state: WalletUiState,
     onPrimaryButtonClick: () -> Unit,
+    onDisabledButtonClick: () -> Unit,
     onPayAnotherWayClicked: () -> Unit
 ) {
     Column {
@@ -397,6 +402,8 @@ private fun ActionSection(
             label = state.primaryButtonLabel.resolve(),
             state = state.primaryButtonState,
             onButtonClick = onPrimaryButtonClick,
+            allowedDisabledClicks = true,
+            onDisabledButtonClick = onDisabledButtonClick,
         )
         state.secondaryButtonLabel?.let { secondaryButtonLabel ->
             SecondaryButton(
@@ -783,9 +790,9 @@ internal fun CardDetailsRecollectionForm(
     expiryDateController: TextFieldController,
     cvcController: CvcController,
     isCardExpired: Boolean,
+    isValidating: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
     val rowElement = remember(paymentDetails) {
         val rowFields = buildList {
             if (isCardExpired) {
@@ -812,31 +819,24 @@ internal fun CardDetailsRecollectionForm(
         )
     }
 
-    val errorTextRes = if (isCardExpired) {
-        R.string.stripe_wallet_update_expired_card_error
-    } else {
-        R.string.stripe_wallet_recollect_cvc_error
-    }.resolvableString
-
-    Column(modifier) {
-        ErrorText(
-            text = errorTextRes.resolve(context),
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag(WALLET_SCREEN_RECOLLECTION_FORM_ERROR)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        SectionElementUI(
-            modifier = Modifier
-                .testTag(WALLET_SCREEN_RECOLLECTION_FORM_FIELDS),
-            enabled = true,
-            element = SectionElement.wrap(rowElement),
-            hiddenIdentifiers = emptySet(),
-            lastTextFieldIdentifier = rowElement.fields.last().identifier
-        )
+    val sectionElement = remember(rowElement) {
+        SectionElement.wrap(rowElement)
     }
+
+    LaunchedEffect(isValidating) {
+        sectionElement.fields.forEach {
+            it.onValidationStateChanged(isValidating)
+        }
+    }
+
+    SectionElementUI(
+        modifier = modifier
+            .testTag(WALLET_SCREEN_RECOLLECTION_FORM_FIELDS),
+        enabled = true,
+        element = sectionElement,
+        hiddenIdentifiers = emptySet(),
+        lastTextFieldIdentifier = rowElement.fields.last().identifier
+    )
 }
 
 @Composable
