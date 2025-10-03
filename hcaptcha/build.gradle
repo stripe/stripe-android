@@ -39,7 +39,7 @@ android.libraryVariants.all { variant ->
     def variantName = variant.name.capitalize()
     def packageName = "com.stripe.hcaptcha"
     def outputDir = file("${project.buildDir}/generated/source/hcaptcha/${variant.name}/${packageName.replaceAll('\\.', '/')}")
-    def generateTask = project.tasks.register("generate${variantName}JavaClassFromStaticHtml") {
+    def generateTask = project.task("generate${variantName}JavaClassFromStaticHtml") {
         group 'Generate'
         description "Generate HTML java class"
 

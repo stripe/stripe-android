@@ -17,4 +17,4 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/stripe_setup
       - name: Generate Dokka Documentation
-        run: ./gradlew :dokkaGenerate
+        run: ./gradlew dokkaHtmlMultiModule

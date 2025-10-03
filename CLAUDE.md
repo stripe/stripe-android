@@ -18,7 +18,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `./gradlew ktlint` - Run Android lint
 
 **Documentation**
-- `./gradlew :dokkaGenerate` - Generate API documentation (outputs to docs/)
+- `./gradlew dokkaHtmlMultiModule` - Generate API documentation (outputs to docs/)
 
 **Testing Individual Modules**
 - Use module names from settings.gradle: `:payments-core`, `:paymentsheet`, `:financial-connections`, `:identity`, `:connect`, etc.
