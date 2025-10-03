@@ -119,7 +119,7 @@ internal class BillingDetailsCollectionScreenshotTest {
                 ),
             ),
             nameControllerInitialValue = "John Doe",
-            emailControllerInitialValue = "email@email.com",
+            emailControllerInitialValue = "example@email.com",
             fillAddress = true,
         )
     }
