@@ -12,6 +12,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
+import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
@@ -164,6 +165,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
         sheetLauncher = null
     }
 
+    @OptIn(WalletButtonsPreview::class)
     private fun createWalletButtonsInteractor(
         coroutineScope: CoroutineScope,
     ): WalletButtonsInteractor {
@@ -177,6 +179,8 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             linkAccountHolder = linkAccountHolder,
             linkInlineInteractor = NoOpLinkInlineInteractor(),
             analyticsCallbackProvider = analyticsCallbackProvider,
+            // Not supported with Embedded
+            walletButtonsViewClickHandlerProvider = { null },
         )
     }
 

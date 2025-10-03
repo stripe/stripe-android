@@ -9,6 +9,7 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
+import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
@@ -39,6 +40,7 @@ import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
+@OptIn(WalletButtonsPreview::class)
 internal class EmbeddedContentUiTest {
     @get:Rule
     val composeRule = createComposeRule()
@@ -180,7 +182,7 @@ internal class EmbeddedContentUiTest {
                 internalRowSelectionCallback = { internalRowSelectionCallback },
                 linkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
                 analyticsCallbackProvider = { AnalyticEventCallbackRule() },
-                linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+                linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,

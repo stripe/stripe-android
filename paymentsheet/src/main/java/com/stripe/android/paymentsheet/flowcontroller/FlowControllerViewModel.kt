@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 internal class FlowControllerViewModel(
     application: Application,
     val handle: SavedStateHandle,
-    paymentElementCallbackIdentifier: String,
+    val paymentElementCallbackIdentifier: String,
     @ColorInt statusBarColor: Int?,
 ) : AndroidViewModel(application) {
 
