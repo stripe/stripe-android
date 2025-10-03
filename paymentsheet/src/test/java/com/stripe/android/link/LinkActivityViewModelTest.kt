@@ -144,7 +144,7 @@ internal class LinkActivityViewModelTest {
     @Test
     fun `initializer creates ViewModel when args are valid`() {
         val mockArgs = NativeLinkArgs(
-            configuration = mock(),
+            configuration = TestFactory.LINK_CONFIGURATION,
             requestSurface = RequestSurface.PaymentElement,
             publishableKey = "pk_123",
             stripeAccountId = null,

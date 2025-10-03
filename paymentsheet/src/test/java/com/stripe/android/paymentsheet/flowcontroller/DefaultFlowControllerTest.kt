@@ -2595,7 +2595,7 @@ internal class DefaultFlowControllerTest {
             flowControllerLinkLauncher = flowControllerLinkPaymentLauncher,
             walletsButtonLinkLauncher = walletsButtonLinkPaymentLauncher,
             activityResultRegistryOwner = mock(),
-            linkGateFactory = { linkGate },
+            linkGateFactory = FakeLinkGate.Factory(linkGate),
             confirmationHandler = confirmationHandler ?: FakeFlowControllerConfirmationHandler(),
         )
     }

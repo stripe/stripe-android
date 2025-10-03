@@ -1291,7 +1291,7 @@ internal class PaymentOptionsViewModelTest {
             args = args.copy(
                 state = args.state.copy(
                     paymentMethodMetadata = args.state.paymentMethodMetadata.copy(
-                        linkState = linkState
+                        linkStateResult = linkState
                     )
                 )
             ),
@@ -1301,7 +1301,7 @@ internal class PaymentOptionsViewModelTest {
             savedStateHandle = savedStateHandle,
             linkHandler = linkHandler,
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
-            linkGateFactory = { linkGate },
+            linkGateFactory = FakeLinkGate.Factory(linkGate),
             linkPaymentLauncher = linkPaymentLauncher,
             linkAccountHolder = LinkAccountHolder(SavedStateHandle())
         )

@@ -34,6 +34,8 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
+import com.stripe.android.paymentsheet.state.CreateLinkState
+import com.stripe.android.paymentsheet.state.DefaultCreateLinkState
 import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.DefaultPaymentElementLoader
 import com.stripe.android.paymentsheet.state.DefaultRetrieveCustomerEmail
@@ -130,6 +132,11 @@ internal interface EmbeddedPaymentElementViewModelModule {
 
     @Binds
     fun bindPaymentElementLoader(loader: DefaultPaymentElementLoader): PaymentElementLoader
+
+    @Binds
+    fun bindsCreateLinkState(
+        impl: DefaultCreateLinkState,
+    ): CreateLinkState
 
     @Binds
     fun bindRetrieveCustomerEmail(

@@ -1,5 +1,8 @@
 package com.stripe.android.link.gate
 
+import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.model.ElementsSession
+
 internal class FakeLinkGate : LinkGate {
     private var _useNativeLink = true
     override val useNativeLink: Boolean
@@ -39,5 +42,10 @@ internal class FakeLinkGate : LinkGate {
 
     fun setShowRuxInFlowController(value: Boolean) {
         _showRuxInFlowController = value
+    }
+
+    class Factory(val linkGate: LinkGate = FakeLinkGate()) : LinkGate.Factory {
+        override fun create(elementsSession: ElementsSession): LinkGate = linkGate
+        override fun create(configuration: LinkConfiguration): LinkGate = linkGate
     }
 }

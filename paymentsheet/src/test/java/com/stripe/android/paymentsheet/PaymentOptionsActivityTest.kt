@@ -466,7 +466,7 @@ internal class PaymentOptionsActivityTest {
                 workContext = testDispatcher,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
-                linkGateFactory = { FakeLinkGate() },
+                linkGateFactory = FakeLinkGate.Factory(),
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
                 linkPaymentLauncher = mock(),
