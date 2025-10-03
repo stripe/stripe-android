@@ -24,7 +24,8 @@ internal class FakeElementsSessionRepository(
         val customer: PaymentSheet.CustomerConfiguration?,
         val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         val externalPaymentMethods: List<String>,
-        val savedPaymentMethodSelectionId: String?
+        val savedPaymentMethodSelectionId: String?,
+        val userOverrideCountry: String?,
     )
 
     var lastParams: Params? = null
@@ -35,6 +36,7 @@ internal class FakeElementsSessionRepository(
         customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
+        userOverrideCountry: String?,
     ): Result<ElementsSession> {
         lastParams = Params(
             initializationMode = initializationMode,
@@ -42,6 +44,7 @@ internal class FakeElementsSessionRepository(
             externalPaymentMethods = externalPaymentMethods,
             customPaymentMethods = customPaymentMethods,
             savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
+            userOverrideCountry = userOverrideCountry,
         )
         return if (error != null) {
             Result.failure(error)

@@ -826,6 +826,8 @@ class PaymentSheet internal constructor(
         internal val termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap(),
 
         internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
+
+        internal val userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry,
     ) : Parcelable {
 
         @JvmOverloads
@@ -984,6 +986,7 @@ class PaymentSheet internal constructor(
             private var termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap()
             private var opensCardScannerAutomatically: Boolean =
                 ConfigurationDefaults.opensCardScannerAutomatically
+            private var userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry
 
             private var customPaymentMethods: List<CustomPaymentMethod> =
                 ConfigurationDefaults.customPaymentMethods
@@ -1159,6 +1162,11 @@ class PaymentSheet internal constructor(
                 this.opensCardScannerAutomatically = opensCardScannerAutomatically
             }
 
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun userOverrideCountry(userOverrideCountry: String?) = apply {
+                this.userOverrideCountry = userOverrideCountry
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -1184,6 +1192,7 @@ class PaymentSheet internal constructor(
                 googlePlacesApiKey = googlePlacesApiKey,
                 termsDisplay = termsDisplay,
                 opensCardScannerAutomatically = opensCardScannerAutomatically,
+                userOverrideCountry = userOverrideCountry,
             )
         }
 

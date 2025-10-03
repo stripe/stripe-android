@@ -13,7 +13,6 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.withContext
-import java.lang.IllegalArgumentException
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
@@ -91,6 +90,7 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
                     ),
                     customPaymentMethods = listOf(),
                     externalPaymentMethods = listOf(),
+                    countryOverride = null,
                 ).onSuccess {
                     reportSuccessfulElementsSessionLoad()
                 }.onFailure {

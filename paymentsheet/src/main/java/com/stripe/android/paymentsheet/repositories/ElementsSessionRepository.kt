@@ -31,6 +31,7 @@ internal interface ElementsSessionRepository {
         customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
+        countryOverride: String?,
     ): Result<ElementsSession>
 }
 
@@ -59,6 +60,7 @@ internal class RealElementsSessionRepository @Inject constructor(
         customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
+        countryOverride: String?,
     ): Result<ElementsSession> {
         val params = initializationMode.toElementsSessionParams(
             customer = customer,
@@ -66,7 +68,8 @@ internal class RealElementsSessionRepository @Inject constructor(
             externalPaymentMethods = externalPaymentMethods,
             savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
             mobileSessionId = mobileSessionIdProvider.get(),
-            appId = appId
+            appId = appId,
+            countryOverride = countryOverride,
         )
 
         val elementsSession = stripeRepository.retrieveElementsSession(
@@ -127,7 +130,8 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
     externalPaymentMethods: List<String>,
     savedPaymentMethodSelectionId: String?,
     mobileSessionId: String,
-    appId: String
+    appId: String,
+    countryOverride: String?,
 ): ElementsSessionParams {
     val customerSessionClientSecret = customer?.customerSessionClientSecret
     val legacyCustomerEphemeralKey = customer?.legacyCustomerEphemeralKey
@@ -143,7 +147,8 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 externalPaymentMethods = externalPaymentMethods,
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
                 mobileSessionId = mobileSessionId,
-                appId = appId
+                appId = appId,
+                countryOverride = countryOverride,
             )
         }
 
@@ -156,7 +161,8 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 customPaymentMethods = customPaymentMethodIds,
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
                 mobileSessionId = mobileSessionId,
-                appId = appId
+                appId = appId,
+                countryOverride = countryOverride,
             )
         }
 
@@ -170,7 +176,8 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
                 mobileSessionId = mobileSessionId,
                 sellerDetails = intentConfiguration.toSellerDetails(),
-                appId = appId
+                appId = appId,
+                countryOverride = countryOverride,
             )
         }
     }
