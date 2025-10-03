@@ -86,9 +86,10 @@ nexusPublishing {
 apply plugin: 'binary-compatibility-validator'
 apply plugin: 'org.jetbrains.dokka'
 
-
-tasks.dokkaHtmlMultiModule.configure {
-    outputDirectory = new File("${project.rootDir}/docs")
+dokka {
+    dokkaPublications.html {
+        outputDirectory = new File("${project.rootDir}/docs")
+    }
 }
 
 apiValidation {
