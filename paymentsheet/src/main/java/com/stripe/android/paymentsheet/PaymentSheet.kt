@@ -38,6 +38,7 @@ import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePre
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
@@ -3663,6 +3664,15 @@ class PaymentSheet internal constructor(
                 handler: PreparePaymentMethodHandler
             ) = apply {
                 callbacksBuilder.preparePaymentMethodHandler(handler)
+            }
+
+            /**
+             * @param handler Called when a wallet button is clicked. Return true if the action has been
+             * handled and should not continue, or false if the action should continue with default behavior.
+             */
+            @WalletButtonsPreview
+            fun walletButtonsViewClickHandler(handler: WalletButtonsViewClickHandler) = apply {
+                callbacksBuilder.walletButtonsViewClickHandler(handler)
             }
 
             /**

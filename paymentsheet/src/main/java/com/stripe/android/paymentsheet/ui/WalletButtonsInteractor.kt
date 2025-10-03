@@ -23,6 +23,8 @@ import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateHolder
@@ -131,7 +133,7 @@ internal interface WalletButtonsInteractor {
     }
 }
 
-@OptIn(ExperimentalAnalyticEventCallbackApi::class)
+@OptIn(ExperimentalAnalyticEventCallbackApi::class, WalletButtonsPreview::class)
 internal class DefaultWalletButtonsInteractor constructor(
     private val arguments: StateFlow<Arguments?>,
     private val confirmationHandler: ConfirmationHandler,
@@ -141,6 +143,7 @@ internal class DefaultWalletButtonsInteractor constructor(
     private val linkPaymentLauncher: LinkPaymentLauncher,
     private val linkAccountHolder: LinkAccountHolder,
     private val analyticsCallbackProvider: Provider<AnalyticEventCallback?>,
+    private val walletButtonsViewClickHandlerProvider: Provider<WalletButtonsViewClickHandler?>,
     private val onWalletButtonsRenderStateChanged: (isRendered: Boolean) -> Unit
 ) : WalletButtonsInteractor {
 
@@ -227,6 +230,15 @@ internal class DefaultWalletButtonsInteractor constructor(
                 analyticsCallbackProvider.get()?.onEvent(
                     AnalyticEvent.TapsButtonInWalletsButtonsView(action.button.walletType.code)
                 )
+
+                val walletButtonsViewClickHandler = walletButtonsViewClickHandlerProvider.get()
+                val isHandled = walletButtonsViewClickHandler?.onWalletButtonClick(
+                    wallet = action.button.walletType.code
+                ) ?: false
+
+                if (isHandled) {
+                    return
+                }
 
                 arguments.value?.let { arguments ->
                     when (action.button) {
@@ -357,6 +369,10 @@ internal class DefaultWalletButtonsInteractor constructor(
                 linkAccountHolder = flowControllerViewModel.flowControllerStateComponent.linkAccountHolder,
                 analyticsCallbackProvider =
                 flowControllerViewModel.flowControllerStateComponent.analyticEventCallbackProvider,
+                walletButtonsViewClickHandlerProvider = Provider {
+                    PaymentElementCallbackReferences[flowControllerViewModel.paymentElementCallbackIdentifier]
+                        ?.walletButtonsViewClickHandler
+                },
                 onWalletButtonsRenderStateChanged = { isRendered ->
                     flowControllerViewModel.walletButtonsRendered = isRendered
                 }
@@ -373,6 +389,7 @@ internal class DefaultWalletButtonsInteractor constructor(
             linkPaymentLauncher: LinkPaymentLauncher,
             linkAccountHolder: LinkAccountHolder,
             analyticsCallbackProvider: Provider<AnalyticEventCallback?>,
+            walletButtonsViewClickHandlerProvider: Provider<WalletButtonsViewClickHandler?>,
         ): WalletButtonsInteractor {
             return DefaultWalletButtonsInteractor(
                 errorReporter = errorReporter,
@@ -397,6 +414,7 @@ internal class DefaultWalletButtonsInteractor constructor(
                 linkPaymentLauncher = linkPaymentLauncher,
                 linkAccountHolder = linkAccountHolder,
                 analyticsCallbackProvider = analyticsCallbackProvider,
+                walletButtonsViewClickHandlerProvider = walletButtonsViewClickHandlerProvider,
                 onWalletButtonsRenderStateChanged = {
                     // No-op, not supported for Embedded
                 }
