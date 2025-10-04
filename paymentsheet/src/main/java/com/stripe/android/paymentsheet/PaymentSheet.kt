@@ -3234,16 +3234,22 @@ class PaymentSheet internal constructor(
         internal val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
         internal val allowUserEmailEdits: Boolean,
         internal val allowLogOut: Boolean,
+        /**
+         * The Link funding sources that should be disabled. Defaults to an empty list.
+         */
+        val disableFundingSources: List<String>,
     ) : Parcelable {
 
         @JvmOverloads
         constructor(
-            display: Display = Display.Automatic
+            display: Display = Display.Automatic,
+            disableFundingSources: List<String> = emptyList()
         ) : this(
             display = display,
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             allowUserEmailEdits = true,
             allowLogOut = true,
+            disableFundingSources = disableFundingSources,
         )
 
         internal val shouldDisplay: Boolean
@@ -3255,6 +3261,7 @@ class PaymentSheet internal constructor(
         class Builder {
             private var display: Display = Display.Automatic
             private var collectMissingBillingDetailsForExistingPaymentMethods: Boolean = true
+            private var disableFundingSources: List<String> = emptyList()
 
             fun display(display: Display) = apply {
                 this.display = display
@@ -3268,12 +3275,17 @@ class PaymentSheet internal constructor(
                     collectMissingBillingDetailsForExistingPaymentMethods
             }
 
+            fun disableFundingSources(disableFundingSources: List<String>) = apply {
+                this.disableFundingSources = disableFundingSources
+            }
+
             fun build() = LinkConfiguration(
                 display = display,
                 collectMissingBillingDetailsForExistingPaymentMethods =
                 collectMissingBillingDetailsForExistingPaymentMethods,
                 allowUserEmailEdits = true,
                 allowLogOut = true,
+                disableFundingSources = disableFundingSources,
             )
         }
 
