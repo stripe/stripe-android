@@ -9,17 +9,22 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.utils.RecordingLinkStore
 import com.stripe.attestation.AttestationError
 import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 
 internal class DefaultLinkAttestationCheckTest {
     private val dispatcher = UnconfinedTestDispatcher()
@@ -166,18 +171,65 @@ internal class DefaultLinkAttestationCheckTest {
             .isEqualTo(LinkAttestationCheck.Result.Successful)
     }
 
+    @Test
+    fun `when attestation already passed in store, skips prepare and lookup`() = runTest {
+        val mockLinkStore = mock<LinkStore> {
+            on { hasPassedAttestationChecksRecently() }.thenReturn(true)
+        }
+        val mockIntegrityManager = mock<IntegrityRequestManager>()
+        val mockLinkAccountManager = mock<LinkAccountManager>()
+
+        val check = attestationCheck(
+            linkStore = mockLinkStore,
+            integrityRequestManager = mockIntegrityManager,
+            linkAccountManager = mockLinkAccountManager
+        )
+        val result = check.invoke()
+
+        assertThat(result).isEqualTo(LinkAttestationCheck.Result.Successful)
+        verify(mockIntegrityManager, never()).prepare()
+        verify(mockLinkAccountManager, never()).lookupByEmail(
+            email = org.mockito.kotlin.any(),
+            emailSource = org.mockito.kotlin.any(),
+            startSession = org.mockito.kotlin.any(),
+            customerId = org.mockito.kotlin.any()
+        )
+    }
+
+    @Test
+    fun `when attestation succeeds, marks as passed in store`() = runTest {
+        val mockLinkStore = mock<LinkStore> {
+            on { hasPassedAttestationChecksRecently() }.thenReturn(false)
+        }
+        val fakeIntegrityManager = FakeIntegrityRequestManager()
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.lookupResult = Result.success(TestFactory.LINK_ACCOUNT)
+
+        val check = attestationCheck(
+            linkStore = mockLinkStore,
+            integrityRequestManager = fakeIntegrityManager,
+            linkAccountManager = linkAccountManager
+        )
+        val result = check.invoke()
+
+        assertThat(result).isEqualTo(LinkAttestationCheck.Result.Successful)
+        verify(mockLinkStore).markAttestationCheckAsPassed()
+    }
+
     private fun attestationCheck(
         linkGate: LinkGate = FakeLinkGate(),
         integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
         linkConfiguration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
+        linkStore: LinkStore = RecordingLinkStore.noOp(),
     ): DefaultLinkAttestationCheck {
         return DefaultLinkAttestationCheck(
             linkGate = linkGate,
             linkAccountManager = linkAccountManager,
             integrityRequestManager = integrityRequestManager,
             linkConfiguration = linkConfiguration,
+            linkStore = linkStore,
             errorReporter = errorReporter,
             workContext = dispatcher.scheduler
         )
