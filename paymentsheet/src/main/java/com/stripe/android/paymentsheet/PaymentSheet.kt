@@ -3264,9 +3264,6 @@ class PaymentSheet internal constructor(
                 Display.Never -> false
             }
 
-        internal val canDisplayBankTab: Boolean
-            get() = shouldDisplay && !disallowFundingSourceCreation.contains("usInstantBankPayment")
-
         class Builder {
             private var display: Display = Display.Automatic
             private var collectMissingBillingDetailsForExistingPaymentMethods: Boolean = true

@@ -1,7 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.link.TestFactory
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement.InstantDebits
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement.LinkCardBrand
@@ -292,25 +291,6 @@ internal class AddPaymentMethodRequirementTest {
         assertThat(InstantDebits.isMetBy(metadata, "")).isFalse()
     }
 
-    @OptIn(LinkDisallowFundingSourceCreationPreview::class)
-    @Test
-    fun testInstantDebitsReturnsFalseIfFundingSourceCreationIsDisallowed() {
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = createValidInstantDebitsPaymentIntent(),
-            linkConfiguration = PaymentSheet.LinkConfiguration.Builder()
-                .display(PaymentSheet.LinkConfiguration.Display.Automatic)
-                .disallowFundingSourceCreation(setOf("usInstantBankPayment"))
-                .build(),
-            linkState = LinkState(
-                configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
-                loginState = LinkState.LoginState.LoggedOut,
-                signupMode = null,
-            ),
-        )
-
-        assertThat(InstantDebits.isMetBy(metadata, "")).isFalse()
-    }
-
     @Test
     fun testLinkCardBrandReturnsTrueForCorrectLinkMode() {
         val metadata = PaymentMethodMetadataFactory.create(
@@ -421,26 +401,6 @@ internal class AddPaymentMethodRequirementTest {
             linkConfiguration = PaymentSheet.LinkConfiguration(
                 display = PaymentSheet.LinkConfiguration.Display.Never,
             ),
-        )
-
-        assertThat(LinkCardBrand.isMetBy(metadata, "")).isFalse()
-    }
-
-    @OptIn(LinkDisallowFundingSourceCreationPreview::class)
-    @Test
-    fun testLinkCardBrandReturnsFalseIfFundingSourceCreationIsDisallowed() {
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = createValidInstantDebitsPaymentIntent(),
-            linkMode = LinkMode.LinkCardBrand,
-            linkState = LinkState(
-                configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
-                loginState = LinkState.LoginState.LoggedOut,
-                signupMode = null,
-            ),
-            linkConfiguration = PaymentSheet.LinkConfiguration.Builder()
-                .display(PaymentSheet.LinkConfiguration.Display.Automatic)
-                .disallowFundingSourceCreation(setOf("usInstantBankPayment"))
-                .build(),
         )
 
         assertThat(LinkCardBrand.isMetBy(metadata, "")).isFalse()

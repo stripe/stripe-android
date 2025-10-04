@@ -183,6 +183,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             customPaymentMethods = configuration.customPaymentMethods,
             externalPaymentMethods = configuration.externalPaymentMethods,
             savedPaymentMethodSelectionId = savedPaymentMethodSelection?.id,
+            link = configuration.link,
             countryOverride = configuration.userOverrideCountry,
         ).getOrThrow()
 
@@ -315,6 +316,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
+        link: PaymentSheet.LinkConfiguration,
         countryOverride: String?,
     ): Result<ElementsSession> {
         return elementsSessionRepository.get(
@@ -324,6 +326,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             customPaymentMethods = customPaymentMethods,
             savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
             countryOverride = countryOverride,
+            linkDisallowedFundingSourceCreation = link.disallowFundingSourceCreation,
         )
     }
 
