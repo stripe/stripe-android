@@ -31,6 +31,7 @@ internal interface ElementsSessionRepository {
         customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
+        linkDisallowedFundingSourceCreation: Set<String> = emptySet(),
     ): Result<ElementsSession>
 }
 
@@ -59,6 +60,7 @@ internal class RealElementsSessionRepository @Inject constructor(
         customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
+        linkDisallowedFundingSourceCreation: Set<String>,
     ): Result<ElementsSession> {
         val params = initializationMode.toElementsSessionParams(
             customer = customer,
@@ -66,7 +68,8 @@ internal class RealElementsSessionRepository @Inject constructor(
             externalPaymentMethods = externalPaymentMethods,
             savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
             mobileSessionId = mobileSessionIdProvider.get(),
-            appId = appId
+            appId = appId,
+            linkDisallowedFundingSourceCreation = linkDisallowedFundingSourceCreation,
         )
 
         val elementsSession = stripeRepository.retrieveElementsSession(
@@ -127,11 +130,16 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
     externalPaymentMethods: List<String>,
     savedPaymentMethodSelectionId: String?,
     mobileSessionId: String,
-    appId: String
+    appId: String,
+    linkDisallowedFundingSourceCreation: Set<String>,
 ): ElementsSessionParams {
     val customerSessionClientSecret = customer?.customerSessionClientSecret
     val legacyCustomerEphemeralKey = customer?.legacyCustomerEphemeralKey
     val customPaymentMethodIds = customPaymentMethods.toElementSessionParam()
+
+    val linkParams = ElementsSessionParams.Link(
+        disallowFundingSourceCreation = linkDisallowedFundingSourceCreation
+    )
 
     return when (this) {
         is PaymentElementLoader.InitializationMode.PaymentIntent -> {
@@ -143,7 +151,8 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 externalPaymentMethods = externalPaymentMethods,
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
                 mobileSessionId = mobileSessionId,
-                appId = appId
+                appId = appId,
+                link = linkParams,
             )
         }
 
@@ -156,7 +165,8 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 customPaymentMethods = customPaymentMethodIds,
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
                 mobileSessionId = mobileSessionId,
-                appId = appId
+                appId = appId,
+                link = linkParams,
             )
         }
 
@@ -170,7 +180,8 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
                 mobileSessionId = mobileSessionId,
                 sellerDetails = intentConfiguration.toSellerDetails(),
-                appId = appId
+                appId = appId,
+                link = linkParams,
             )
         }
     }
