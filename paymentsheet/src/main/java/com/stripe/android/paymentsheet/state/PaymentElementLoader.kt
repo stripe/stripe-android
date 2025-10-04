@@ -179,6 +179,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             customPaymentMethods = configuration.customPaymentMethods,
             externalPaymentMethods = configuration.externalPaymentMethods,
             savedPaymentMethodSelectionId = savedPaymentMethodSelection?.id,
+            link = configuration.link,
         ).getOrThrow()
 
         // Preemptively prepare Integrity asynchronously if needed, as warm up can take
@@ -310,13 +311,15 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
+        link: PaymentSheet.LinkConfiguration,
     ): Result<ElementsSession> {
         return elementsSessionRepository.get(
             initializationMode = initializationMode,
             customer = customer,
             externalPaymentMethods = externalPaymentMethods,
             customPaymentMethods = customPaymentMethods,
-            savedPaymentMethodSelectionId = savedPaymentMethodSelectionId
+            savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
+            linkDisallowedFundingSourceCreation = link.disallowFundingSourceCreation,
         )
     }
 
