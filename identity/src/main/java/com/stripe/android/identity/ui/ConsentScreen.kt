@@ -89,6 +89,7 @@ internal fun ConsentScreen(
             verificationPage.biometricConsent,
             verificationPage.bottomSheet,
             visitedIndividualWelcomePage,
+            showStripeLogo = !verificationPage.isStripe,
             onConsentAgreed = {
                 coroutineScope.launch {
                     identityViewModel.postVerificationPageDataAndMaybeNavigate(
@@ -115,12 +116,14 @@ internal fun ConsentScreen(
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun SuccessUI(
     merchantLogoUri: Uri,
     consentPage: VerificationPageStaticContentConsentPage,
     bottomSheets: Map<String, VerificationPageStaticContentBottomSheetContent>?,
     visitedIndividualWelcomePage: Boolean,
+    showStripeLogo: Boolean = true,
     onConsentAgreed: () -> Unit,
     onConsentDeclined: () -> Unit
 ) {
@@ -148,7 +151,8 @@ private fun SuccessUI(
                 modifier = Modifier.testTag(CONSENT_HEADER_TAG),
                 merchantLogoUri = merchantLogoUri,
                 title = consentPage.title,
-                showLogos = visitedIndividualWelcomePage.not()
+                showLogos = visitedIndividualWelcomePage.not(),
+                showStripeLogo = showStripeLogo
             )
             ConsentLines(lines = consentPage.lines, bottomSheets = bottomSheets)
 
