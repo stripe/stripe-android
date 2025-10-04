@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.activity.ComponentActivity
-import androidx.annotation.RestrictTo
 import androidx.annotation.Size
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
@@ -35,8 +34,6 @@ import com.stripe.android.model.Card
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
-import com.stripe.android.model.ConfirmationToken
-import com.stripe.android.model.ConfirmationTokenParams
 import com.stripe.android.model.CvcTokenParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -1556,26 +1553,6 @@ class Stripe internal constructor(
         executeAsyncForResult(callback) {
             stripeRepository.createToken(
                 tokenParams,
-                ApiRequest.Options(
-                    apiKey = publishableKey,
-                    stripeAccount = stripeAccountId,
-                    idempotencyKey = idempotencyKey
-                )
-            )
-        }
-    }
-
-    @JvmOverloads
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun createConfirmationToken(
-        confirmationTokenParams: ConfirmationTokenParams,
-        idempotencyKey: String? = null,
-        stripeAccountId: String? = this.stripeAccountId,
-        callback: ApiResultCallback<ConfirmationToken>
-    ) {
-        executeAsyncForResult(callback) {
-            stripeRepository.createConfirmationToken(
-                confirmationTokenParams,
                 ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId,
