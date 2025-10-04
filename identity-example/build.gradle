@@ -54,6 +54,15 @@ android {
             applicationIdSuffix = ".theme2"
             versionNameSuffix = "-theme2"
         }
+        create("appcompat") {
+            manifestPlaceholders["appTheme"] = "@style/Theme.AppCompatTest"
+            manifestPlaceholders["appIcon"] = "@drawable/merchant_logo_purple"
+            manifestPlaceholders["appIconRound"] = "@drawable/merchant_logo_purple"
+
+            dimension = "theme"
+            applicationIdSuffix = ".appcompat"
+            versionNameSuffix = "-appcompat"
+        }
     }
 }
 

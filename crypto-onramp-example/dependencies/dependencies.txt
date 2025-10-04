@@ -1130,6 +1130,8 @@
 |    |    |    +--- androidx.annotation:annotation:1.9.1 (*)
 |    |    |    \--- com.google.ai.edge.litert:litert:1.4.0 (*)
 |    |    +--- com.google.accompanist:accompanist-themeadapter-material:0.36.0 (*)
+|    |    +--- com.google.accompanist:accompanist-themeadapter-appcompat:0.36.0 (*)
+|    |    +--- com.google.accompanist:accompanist-themeadapter-material3:0.36.0 (*)
 |    |    +--- androidx.activity:activity-ktx:1.9.3 (*)
 |    |    +--- androidx.appcompat:appcompat:1.7.0 (*)
 |    |    +--- androidx.browser:browser:1.8.0 (*)
