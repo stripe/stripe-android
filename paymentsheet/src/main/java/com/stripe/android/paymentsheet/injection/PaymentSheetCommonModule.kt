@@ -26,6 +26,8 @@ import com.stripe.android.link.injection.PaymentsIntegrityModule
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
+import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -192,6 +194,14 @@ internal abstract class PaymentSheetCommonModule {
             @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
         ): AnalyticEventCallback? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.analyticEventCallback
+        }
+
+        @OptIn(WalletButtonsPreview::class)
+        @Provides
+        fun providesWalletButtonsViewClickHandler(
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+        ): WalletButtonsViewClickHandler? {
+            return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.walletButtonsViewClickHandler
         }
     }
 }

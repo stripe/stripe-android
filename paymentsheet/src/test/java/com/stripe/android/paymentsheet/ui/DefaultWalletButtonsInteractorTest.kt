@@ -24,6 +24,7 @@ import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
@@ -847,6 +848,129 @@ class DefaultWalletButtonsInteractorTest {
         }
     }
 
+    @Test
+    fun `when click handler returns true, should not proceed with default action`() = runTest {
+        val confirmationHandler = FakeConfirmationHandler()
+        var handlerCalled = false
+        var receivedWalletType: String? = null
+
+        val walletButtonsViewClickHandler = WalletButtonsViewClickHandler { walletType ->
+            handlerCalled = true
+            receivedWalletType = walletType
+            true // Indicate that we've handled the action
+        }
+
+        val interactor = createInteractor(
+            arguments = createArguments(
+                availableWallets = listOf(WalletType.GooglePay),
+                googlePay = PaymentSheet.GooglePayConfiguration(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    amount = 0L,
+                    countryCode = "CA",
+                ),
+            ),
+            confirmationHandler = confirmationHandler,
+            walletButtonsViewClickHandler = walletButtonsViewClickHandler,
+        )
+
+        interactor.state.test {
+            val state = awaitItem()
+            val googlePayButton = state.walletButtons.first()
+
+            interactor.handleViewAction(
+                WalletButtonsInteractor.ViewAction.OnButtonPressed(googlePayButton)
+            )
+
+            assertThat(handlerCalled).isTrue()
+            assertThat(receivedWalletType).isEqualTo("google_pay")
+
+            analyticsEventCallbackRule.assertMatchesExpectedEvent(
+                AnalyticEvent.TapsButtonInWalletsButtonsView(walletType = "google_pay")
+            )
+
+            confirmationHandler.startTurbine.expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `when click handler returns false, should proceed with default action`() = runTest {
+        val confirmationHandler = FakeConfirmationHandler()
+        var handlerCalled = false
+        var receivedWalletType: String? = null
+
+        val walletButtonsViewClickHandler = WalletButtonsViewClickHandler { walletType ->
+            handlerCalled = true
+            receivedWalletType = walletType
+            false // Indicate that we have NOT handled the action, continue with default
+        }
+
+        val interactor = createInteractor(
+            arguments = createArguments(
+                availableWallets = listOf(WalletType.GooglePay),
+                googlePay = PaymentSheet.GooglePayConfiguration(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    amount = 0L,
+                    countryCode = "CA",
+                ),
+            ),
+            confirmationHandler = confirmationHandler,
+            walletButtonsViewClickHandler = walletButtonsViewClickHandler,
+        )
+
+        interactor.state.test {
+            val state = awaitItem()
+            val googlePayButton = state.walletButtons.first()
+
+            interactor.handleViewAction(
+                WalletButtonsInteractor.ViewAction.OnButtonPressed(googlePayButton)
+            )
+
+            assertThat(handlerCalled).isTrue()
+            assertThat(receivedWalletType).isEqualTo("google_pay")
+
+            analyticsEventCallbackRule.assertMatchesExpectedEvent(
+                AnalyticEvent.TapsButtonInWalletsButtonsView(walletType = "google_pay")
+            )
+
+            val arguments = confirmationHandler.startTurbine.awaitItem()
+            assertThat(arguments.confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
+        }
+    }
+
+    @Test
+    fun `when WalletButtonsViewClickHandler is null, should proceed with default action`() = runTest {
+        val confirmationHandler = FakeConfirmationHandler()
+
+        val interactor = createInteractor(
+            arguments = createArguments(
+                availableWallets = listOf(WalletType.GooglePay),
+                googlePay = PaymentSheet.GooglePayConfiguration(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    amount = 0L,
+                    countryCode = "CA",
+                ),
+            ),
+            confirmationHandler = confirmationHandler,
+            walletButtonsViewClickHandler = null, // No handler provided
+        )
+
+        interactor.state.test {
+            val state = awaitItem()
+            val googlePayButton = state.walletButtons.first()
+
+            interactor.handleViewAction(
+                WalletButtonsInteractor.ViewAction.OnButtonPressed(googlePayButton)
+            )
+
+            analyticsEventCallbackRule.assertMatchesExpectedEvent(
+                AnalyticEvent.TapsButtonInWalletsButtonsView(walletType = "google_pay")
+            )
+
+            val arguments = confirmationHandler.startTurbine.awaitItem()
+            assertThat(arguments.confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
+        }
+    }
+
     private fun walletsVisibilityTest(
         availableWallets: List<WalletType>,
         walletButtonsViewVisibility: Map<
@@ -938,6 +1062,7 @@ class DefaultWalletButtonsInteractorTest {
         errorReporter: ErrorReporter = FakeErrorReporter(),
         linkPaymentLauncher: LinkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
         linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+        walletButtonsViewClickHandler: WalletButtonsViewClickHandler? = null,
         onWalletButtonsRenderStateChanged: (isRendered: Boolean) -> Unit = {
             error("Should not be called!")
         },
@@ -951,6 +1076,7 @@ class DefaultWalletButtonsInteractorTest {
             linkPaymentLauncher = linkPaymentLauncher,
             linkAccountHolder = linkAccountHolder,
             analyticsCallbackProvider = { analyticsEventCallbackRule },
+            walletButtonsViewClickHandlerProvider = { walletButtonsViewClickHandler },
             onWalletButtonsRenderStateChanged = onWalletButtonsRenderStateChanged,
         )
     }
