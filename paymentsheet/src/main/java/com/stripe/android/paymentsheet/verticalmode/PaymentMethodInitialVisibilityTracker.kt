@@ -129,6 +129,10 @@ internal class PaymentMethodInitialVisibilityTracker(
         }
     }
 
+    fun hasExpectedItems(items: List<String>): Boolean {
+        return expectedItems == items
+    }
+
     fun dispose() {
         dispatchEventJob?.cancel()
         coroutineScope.cancel() // Cancel the entire scope

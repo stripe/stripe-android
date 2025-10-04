@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -79,18 +80,8 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
                 PaymentMethodVerticalLayoutInteractor.ViewAction.OnManageOneSavedPaymentMethod(it)
             )
         },
-        reportInitialPaymentMethodVisibilitySnapshot = { visibilityMap ->
-            val visiblePaymentMethods = visibilityMap.filter { it.value }.keys.toList()
-            val hiddenPaymentMethods = visibilityMap.filter { !it.value }.keys.toList()
-
-            interactor.reportInitialPaymentMethodVisibilitySnapshot(
-                visiblePaymentMethods = buildList {
-                    if (state.displayedSavedPaymentMethod != null) add("saved")
-                    addAll(visiblePaymentMethods)
-                },
-                hiddenPaymentMethods = hiddenPaymentMethods,
-            )
-        },
+        updatePaymentMethodVisibility = interactor::updatePaymentMethodVisibility,
+        cancelPaymentMethodVisibilityTracking = interactor::cancelPaymentMethodVisibilityTracking,
         imageLoader = imageLoader,
         modifier = modifier
             .testTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT),
@@ -114,7 +105,8 @@ internal fun PaymentMethodEmbeddedLayoutUI(
     onViewMorePaymentMethods: () -> Unit,
     onManageOneSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
-    reportInitialPaymentMethodVisibilitySnapshot: (Map<String, Boolean>) -> Unit = {},
+    updatePaymentMethodVisibility: (String, LayoutCoordinates) -> Unit = { _, _ -> },
+    cancelPaymentMethodVisibilityTracking: () -> Unit = {},
     imageLoader: StripeImageLoader,
     appearance: Embedded,
     modifier: Modifier = Modifier,
@@ -124,6 +116,14 @@ internal fun PaymentMethodEmbeddedLayoutUI(
     } else {
         Arrangement.Top
     }
+    val paymentMethodCodes = remember(paymentMethods, displayedSavedPaymentMethod) {
+        val output = paymentMethods.map { it.code }
+        output.plus("saved_${displayedSavedPaymentMethod?.paymentMethod?.id}")
+            .takeIf { displayedSavedPaymentMethod != null } ?: output
+    }
+
+    // Cancel tracking and any pending dispatches, when the paymentMethods used change
+    DisposableEffect(paymentMethodCodes) { onDispose { cancelPaymentMethodVisibilityTracking.invoke() } }
     Column(modifier = modifier, verticalArrangement = arrangement) {
         if (appearance.style.topSeparatorEnabled()) OptionalEmbeddedDivider(appearance.style)
 
@@ -136,6 +136,7 @@ internal fun PaymentMethodEmbeddedLayoutUI(
             onViewMorePaymentMethods = onViewMorePaymentMethods,
             onManageOneSavedPaymentMethod = onManageOneSavedPaymentMethod,
             onSelectSavedPaymentMethod = onSelectSavedPaymentMethod,
+            updatePaymentMethodVisibility = updatePaymentMethodVisibility,
             appearance = appearance
         )
 
@@ -145,7 +146,7 @@ internal fun PaymentMethodEmbeddedLayoutUI(
             isEnabled = isEnabled,
             imageLoader = imageLoader,
             appearance = appearance,
-            reportInitialPaymentMethodVisibilitySnapshot = reportInitialPaymentMethodVisibilitySnapshot,
+            updatePaymentMethodVisibility = updatePaymentMethodVisibility
         )
 
         if (appearance.style.bottomSeparatorEnabled()) OptionalEmbeddedDivider(appearance.style)
@@ -248,6 +249,7 @@ internal fun EmbeddedSavedPaymentMethodRowButton(
     onViewMorePaymentMethods: () -> Unit,
     onManageOneSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    updatePaymentMethodVisibility: (String, LayoutCoordinates) -> Unit = { _, _ -> },
     appearance: Embedded,
 ) {
     if (displayedSavedPaymentMethod != null) {
@@ -262,6 +264,9 @@ internal fun EmbeddedSavedPaymentMethodRowButton(
                     onViewMorePaymentMethods = onViewMorePaymentMethods,
                     onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
                 )
+            },
+            modifier = Modifier.onGloballyPositioned { coordinates ->
+                updatePaymentMethodVisibility("saved", coordinates)
             },
             onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },
             appearance = appearance
@@ -278,7 +283,7 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
     isEnabled: Boolean,
     imageLoader: StripeImageLoader,
     appearance: Embedded,
-    reportInitialPaymentMethodVisibilitySnapshot: (Map<String, Boolean>) -> Unit = {},
+    updatePaymentMethodVisibility: (String, LayoutCoordinates) -> Unit = { _, _ -> },
 ) {
     val selectedIndex = remember(selection, paymentMethods) {
         if (selection is PaymentMethodVerticalLayoutInteractor.Selection.New) {
@@ -286,22 +291,6 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
             paymentMethods.indexOfFirst { it.code == code }
         } else {
             -1
-        }
-    }
-
-    val paymentMethodCodes = remember(paymentMethods) { paymentMethods.map { it.code } }
-    val visibilityTracker = remember(paymentMethodCodes) {
-        PaymentMethodInitialVisibilityTracker(
-            expectedItems = paymentMethodCodes,
-            renderedLpmCallback = reportInitialPaymentMethodVisibilitySnapshot,
-        )
-    }
-
-    // Add cleanup when composable is disposed
-    DisposableEffect(visibilityTracker) {
-        onDispose {
-            // Cancel any running coroutines when UI is disposed
-            visibilityTracker.dispose()
         }
     }
 
@@ -326,7 +315,7 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
                     }
                 },
                 modifier = Modifier.onGloballyPositioned { coordinates ->
-                    visibilityTracker.updateVisibility(item.code, coordinates)
+                    updatePaymentMethodVisibility(item.code, coordinates)
                 },
             )
         } else {
@@ -337,7 +326,7 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
                 imageLoader = imageLoader,
                 appearance = appearance,
                 modifier = Modifier.onGloballyPositioned { coordinates ->
-                    visibilityTracker.updateVisibility(item.code, coordinates)
+                    updatePaymentMethodVisibility(item.code, coordinates)
                 },
             )
         }
