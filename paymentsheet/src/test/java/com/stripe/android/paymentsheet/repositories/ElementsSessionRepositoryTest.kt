@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.repositories
 import androidx.core.os.LocaleListCompat
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.exception.APIException
@@ -294,6 +295,7 @@ internal class ElementsSessionRepositoryTest {
                     savedPaymentMethodSelectionId = null,
                     appId = APP_ID,
                     mobileSessionId = MOBILE_SESSION_ID,
+                    link = ElementsSessionParams.Link(disallowFundingSourceCreation = emptySet()),
                 )
             ),
             options = any()
@@ -387,6 +389,7 @@ internal class ElementsSessionRepositoryTest {
                     savedPaymentMethodSelectionId = "pm_123",
                     appId = APP_ID,
                     mobileSessionId = MOBILE_SESSION_ID,
+                    link = ElementsSessionParams.Link(disallowFundingSourceCreation = emptySet()),
                 )
             ),
             options = any()
@@ -450,6 +453,7 @@ internal class ElementsSessionRepositoryTest {
                     savedPaymentMethodSelectionId = "pm_123",
                     appId = APP_ID,
                     mobileSessionId = MOBILE_SESSION_ID,
+                    link = ElementsSessionParams.Link(disallowFundingSourceCreation = emptySet()),
                 )
             ),
             options = any()
@@ -515,7 +519,8 @@ internal class ElementsSessionRepositoryTest {
                     sellerDetails = ElementsSessionParams.SellerDetails(
                         networkId = "network_123",
                         externalId = "external_123",
-                    )
+                    ),
+                    link = ElementsSessionParams.Link(disallowFundingSourceCreation = emptySet()),
                 )
             ),
             options = any()
@@ -580,7 +585,8 @@ internal class ElementsSessionRepositoryTest {
                     customPaymentMethods = listOf("cpmt_123", "cpmt_456", "cpmt_789"),
                     savedPaymentMethodSelectionId = "pm_123",
                     mobileSessionId = MOBILE_SESSION_ID,
-                    appId = APP_ID
+                    appId = APP_ID,
+                    link = ElementsSessionParams.Link(disallowFundingSourceCreation = emptySet()),
                 )
             ),
             options = any()
@@ -645,11 +651,46 @@ internal class ElementsSessionRepositoryTest {
                     customPaymentMethods = listOf(),
                     savedPaymentMethodSelectionId = null,
                     mobileSessionId = MOBILE_SESSION_ID,
-                    appId = APP_ID
+                    appId = APP_ID,
+                    link = ElementsSessionParams.Link(disallowFundingSourceCreation = emptySet()),
                 )
             ),
             options = any()
         )
+    }
+
+    @OptIn(LinkDisallowFundingSourceCreationPreview::class)
+    @Test
+    fun `Link disallowedFundingSourceCreation is passed through correctly`() = runTest {
+        whenever(stripeRepository.retrieveElementsSession(any(), any())).thenReturn(
+            Result.success(
+                ElementsSession.createFromFallback(
+                    stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
+                    sessionsError = null,
+                )
+            )
+        )
+
+        val linkConfiguration = PaymentSheet.LinkConfiguration.Builder()
+            .display(PaymentSheet.LinkConfiguration.Display.Automatic)
+            .disallowFundingSourceCreation(setOf("somethingThatsNotAllowed"))
+            .build()
+
+        createRepository().get(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "client_secret",
+            ),
+            customer = null,
+            customPaymentMethods = emptyList(),
+            externalPaymentMethods = emptyList(),
+            savedPaymentMethodSelectionId = null,
+            countryOverride = null,
+            linkDisallowedFundingSourceCreation = setOf("somethingThatsNotAllowed"),
+        )
+
+        val argCaptor = argumentCaptor<ElementsSessionParams>()
+        verify(stripeRepository).retrieveElementsSession(argCaptor.capture(), any())
+        assertThat(argCaptor.firstValue.link.disallowFundingSourceCreation).containsExactly("somethingThatsNotAllowed")
     }
 
     private fun createRepository() = RealElementsSessionRepository(
