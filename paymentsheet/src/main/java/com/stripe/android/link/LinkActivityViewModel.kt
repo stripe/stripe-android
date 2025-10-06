@@ -306,12 +306,6 @@ internal class LinkActivityViewModel @Inject constructor(
                 billingPhone = selectedPayment.billingPhone,
                 linkAccount = linkAccount,
             )
-            is LinkPaymentMethod.LinkPaymentDetails -> linkConfirmationHandler.confirm(
-                paymentDetails = selectedPayment.linkPaymentDetails,
-                cvc = selectedPayment.collectedCvc,
-                billingPhone = selectedPayment.billingPhone,
-                linkAccount = linkAccount,
-            )
         }
     }.onSuccess { confirmResult ->
         dismissWithResult(

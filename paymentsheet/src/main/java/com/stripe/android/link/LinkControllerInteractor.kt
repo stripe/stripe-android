@@ -36,7 +36,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformToBank
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.transformBankIconCodeToBankIcon
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.getCardBrandIconForVerticalMode
-import com.stripe.android.paymentsheet.ui.getLinkIcon
 import com.stripe.android.uicore.isSystemDarkTheme
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -666,9 +665,7 @@ internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
     val label = context.getString(com.stripe.android.R.string.stripe_link)
     val sublabel = buildString {
         // It should never be `Passthrough`, but handling it here just in case.
-        if (this@toPreview !is ConsumerPaymentDetails.Passthrough) {
-            append(displayName.resolve(context))
-        }
+        append(displayName.resolve(context))
         append(" •••• ")
         append(last4)
     }
@@ -688,8 +685,6 @@ internal fun ConsumerPaymentDetails.PaymentDetails.getIconDrawableRes(isDarkThem
             getIconDrawableRes(PaymentMethodPreviewDetails.BankAccount(bankIconCode, bankName, last4), isDarkTheme)
         is ConsumerPaymentDetails.Card ->
             getIconDrawableRes(PaymentMethodPreviewDetails.Card(brand, funding, last4), isDarkTheme)
-        is ConsumerPaymentDetails.Passthrough ->
-            getLinkIcon(iconOnly = true)
     }
 }
 

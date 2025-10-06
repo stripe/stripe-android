@@ -7,7 +7,6 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
-import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH
 import com.stripe.android.link.ui.LinkScreenshotSurface
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -107,7 +106,6 @@ internal class WalletScreenScreenshotTest {
                 expiryYear = 1999
             ),
             CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
-            CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
         )
         snapshot(
             state = walletUiState(
@@ -125,7 +123,6 @@ internal class WalletScreenScreenshotTest {
                 cvcCheck = CvcCheck.Fail
             ),
             CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
-            CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
         )
         snapshot(
             state = walletUiState(

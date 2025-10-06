@@ -122,9 +122,9 @@ class PaymentMethodViewModelTest {
 
         viewModel.onPayClicked()
 
-        assertThat(linkConfirmationHandler.confirmWithLinkPaymentDetailsCall).hasSize(1)
-        val call = linkConfirmationHandler.confirmWithLinkPaymentDetailsCall.first()
-        val paymentDetails = TestFactory.LINK_NEW_PAYMENT_DETAILS
+        assertThat(linkConfirmationHandler.calls).hasSize(1)
+        val call = linkConfirmationHandler.calls.first()
+        val paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
         assertThat(call.paymentDetails).isEqualTo(paymentDetails)
         assertThat(call.cvc).isEqualTo("111")
         assertThat(result)
@@ -160,7 +160,7 @@ class PaymentMethodViewModelTest {
 
         viewModel.onPayClicked()
 
-        assertThat(linkConfirmationHandler.confirmWithLinkPaymentDetailsCall).isEmpty()
+        assertThat(linkConfirmationHandler.calls).isEmpty()
 
         assertThat(result).isEqualTo(null)
         assertThat(viewModel.state.value.primaryButtonState).isEqualTo(PrimaryButtonState.Enabled)
@@ -174,7 +174,7 @@ class PaymentMethodViewModelTest {
     fun `onPayClicked handles confirmation failure`() = runTest {
         val linkConfirmationHandler = FakeLinkConfirmationHandler()
 
-        linkConfirmationHandler.confirmWithLinkPaymentDetailsResult =
+        linkConfirmationHandler.confirmResult =
             LinkConfirmationResult.Failed("Payment failed".resolvableString)
 
         val viewModel = createViewModel(
@@ -187,7 +187,7 @@ class PaymentMethodViewModelTest {
 
         viewModel.onPayClicked()
 
-        assertThat(linkConfirmationHandler.confirmWithLinkPaymentDetailsCall).hasSize(1)
+        assertThat(linkConfirmationHandler.calls).hasSize(1)
         assertThat(viewModel.state.value.primaryButtonState).isEqualTo(PrimaryButtonState.Enabled)
         assertThat(viewModel.state.value.errorMessage).isEqualTo("Payment failed".resolvableString)
     }
@@ -195,7 +195,7 @@ class PaymentMethodViewModelTest {
     @Test
     fun `onPayClicked handles cancellation`() = runTest {
         val linkConfirmationHandler = FakeLinkConfirmationHandler()
-        linkConfirmationHandler.confirmWithLinkPaymentDetailsResult = LinkConfirmationResult.Canceled
+        linkConfirmationHandler.confirmResult = LinkConfirmationResult.Canceled
 
         val viewModel = createViewModel(
             linkConfirmationHandler = linkConfirmationHandler
@@ -207,7 +207,7 @@ class PaymentMethodViewModelTest {
 
         viewModel.onPayClicked()
 
-        assertThat(linkConfirmationHandler.confirmWithLinkPaymentDetailsCall).hasSize(1)
+        assertThat(linkConfirmationHandler.calls).hasSize(1)
         assertThat(viewModel.state.value.primaryButtonState).isEqualTo(PrimaryButtonState.Enabled)
         assertThat(viewModel.state.value.errorMessage).isNull()
     }
@@ -224,7 +224,7 @@ class PaymentMethodViewModelTest {
 
         viewModel.onPayClicked()
 
-        assertThat(linkConfirmationHandler.confirmWithLinkPaymentDetailsCall).isEmpty()
+        assertThat(linkConfirmationHandler.calls).isEmpty()
         assertThat(viewModel.state.value.primaryButtonState).isEqualTo(PrimaryButtonState.Disabled)
         assertThat(logger.errorLogs)
             .containsExactly("PaymentMethodViewModel: onPayClicked without paymentMethodCreateParams" to null)

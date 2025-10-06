@@ -203,17 +203,15 @@ internal class DefaultLinkAccountManager @Inject constructor(
     override suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails.New> {
-        val linkAccountValue = linkAccountHolder.linkAccountInfo.value.account
-        return if (linkAccountValue != null) {
-            linkAccountValue.let { account ->
-                linkRepository.createCardPaymentDetails(
-                    paymentMethodCreateParams = paymentMethodCreateParams,
-                    userEmail = account.email,
-                    stripeIntent = config.stripeIntent,
-                    consumerSessionClientSecret = account.clientSecret,
-                ).onSuccess {
-                    errorReporter.report(ErrorReporter.SuccessEvent.LINK_CREATE_CARD_SUCCESS)
-                }
+        val account = linkAccountHolder.linkAccountInfo.value.account
+        return if (account != null) {
+            linkRepository.createCardPaymentDetails(
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                userEmail = account.email,
+                stripeIntent = config.stripeIntent,
+                consumerSessionClientSecret = account.clientSecret,
+            ).onSuccess {
+                errorReporter.report(ErrorReporter.SuccessEvent.LINK_CREATE_CARD_SUCCESS)
             }
         } else {
             errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_CARD_WITH_NULL_ACCOUNT)
@@ -226,16 +224,20 @@ internal class DefaultLinkAccountManager @Inject constructor(
     override suspend fun shareCardPaymentDetails(
         cardPaymentDetails: LinkPaymentDetails.New
     ): Result<LinkPaymentDetails.Saved> {
+        val paymentDetails = cardPaymentDetails.paymentDetails
         return runCatching {
             requireNotNull(linkAccountHolder.linkAccountInfo.value.account)
         }.mapCatching { account ->
-            val paymentDetails = cardPaymentDetails.paymentDetails
-            val paymentMethodCreateParams = cardPaymentDetails.originalParams
             linkRepository.shareCardPaymentDetails(
                 id = paymentDetails.id,
+                paymentMethodCreateParams = cardPaymentDetails.originalParams,
                 consumerSessionClientSecret = account.clientSecret,
-                paymentMethodCreateParams = paymentMethodCreateParams,
             ).getOrThrow()
+        }.map { paymentMethod ->
+            LinkPaymentDetails.Saved(
+                paymentMethod = paymentMethod,
+                paymentDetails = paymentDetails,
+            )
         }
     }
 

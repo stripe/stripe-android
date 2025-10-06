@@ -93,7 +93,6 @@ internal fun PaymentDetails.withEffectiveBillingDetails(
             billingAddress = effectiveBillingAddress,
             billingEmailAddress = effectiveEmailAddress
         )
-        is ConsumerPaymentDetails.Passthrough -> this
     }
 }
 

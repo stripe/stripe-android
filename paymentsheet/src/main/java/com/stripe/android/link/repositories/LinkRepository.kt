@@ -121,7 +121,7 @@ internal interface LinkRepository {
         paymentMethodCreateParams: PaymentMethodCreateParams,
         id: String,
         consumerSessionClientSecret: String,
-    ): Result<LinkPaymentDetails.Saved>
+    ): Result<PaymentMethod>
 
     suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,

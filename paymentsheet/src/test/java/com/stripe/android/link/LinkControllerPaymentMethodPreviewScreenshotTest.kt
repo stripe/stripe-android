@@ -41,8 +41,6 @@ class LinkControllerPaymentMethodPreviewScreenshotTest {
                     .copy(bankName = null, bankIconCode = "pnc"),
                 TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
                     .copy(bankName = "Foobar"),
-                // Should never be passthrough.
-                TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
             )
             MaterialTheme {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {

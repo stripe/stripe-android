@@ -28,6 +28,7 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.StripeIntent
@@ -461,7 +462,7 @@ class DefaultLinkAccountManagerTest {
                 paymentMethodCreateParams: PaymentMethodCreateParams,
                 id: String,
                 consumerSessionClientSecret: String
-            ): Result<LinkPaymentDetails.Saved> {
+            ): Result<PaymentMethod> {
                 val paymentDetailsMatch = paymentMethodCreateParams == newPaymentDetails.originalParams &&
                     id == newPaymentDetails.paymentDetails.id
                 if (paymentDetailsMatch && consumerSessionClientSecret == TestFactory.CLIENT_SECRET) {
@@ -482,12 +483,15 @@ class DefaultLinkAccountManagerTest {
             linkAuthIntentId = null,
         )
 
-        val result = accountManager.shareCardPaymentDetails(newPaymentDetails)
+        val result = accountManager.shareCardPaymentDetails(newPaymentDetails).getOrThrow()
 
-        assertThat(result.isSuccess).isTrue()
-        val linkPaymentDetails = result.getOrThrow()
-        assertThat(linkPaymentDetails.paymentDetails.id)
-            .isEqualTo(TestFactory.LINK_SAVED_PAYMENT_DETAILS.paymentDetails.id)
+        // TODO(tillh-stripe): revisit this
+        assertThat(result.id).isEqualTo(TestFactory.LINK_SAVED_PAYMENT_DETAILS.paymentMethod.id)
+
+//        assertThat(result.isSuccess).isTrue()
+//        val linkPaymentDetails = result.getOrThrow()
+//        assertThat(linkPaymentDetails.paymentDetails.id)
+//            .isEqualTo(TestFactory.LINK_SAVED_PAYMENT_DETAILS.paymentDetails.id)
 
         assertThat(linkRepository.shareCardPaymentDetailsCallCount).isEqualTo(1)
         assertThat(accountManager.linkAccountInfo.value.account).isNotNull()
