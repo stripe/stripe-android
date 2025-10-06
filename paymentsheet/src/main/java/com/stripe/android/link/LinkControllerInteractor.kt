@@ -72,7 +72,8 @@ internal class LinkControllerInteractor @Inject constructor(
                 sessionState = when (account.accountStatus.toLoginState()) {
                     LinkState.LoginState.LoggedOut ->
                         LinkController.SessionState.LoggedOut
-                    LinkState.LoginState.NeedsVerification ->
+                    LinkState.LoginState.NeedsVerification,
+                    LinkState.LoginState.NeedsWebVerification ->
                         LinkController.SessionState.NeedsVerification
                     LinkState.LoginState.LoggedIn ->
                         LinkController.SessionState.LoggedIn

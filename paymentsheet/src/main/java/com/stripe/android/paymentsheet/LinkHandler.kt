@@ -47,6 +47,7 @@ internal class LinkHandler @Inject constructor(
             LinkState.LoginState.NeedsVerification -> {
                 attestationCheckPassed(configuration)
             }
+            LinkState.LoginState.NeedsWebVerification,
             LinkState.LoginState.LoggedOut -> {
                 false
             }
