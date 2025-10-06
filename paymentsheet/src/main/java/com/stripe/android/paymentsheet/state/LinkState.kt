@@ -13,6 +13,9 @@ internal data class LinkState(
 ) : Parcelable {
 
     enum class LoginState {
-        LoggedIn, NeedsVerification, LoggedOut,
+        LoggedIn,
+        NeedsVerification,
+        NeedsWebVerification,
+        LoggedOut,
     }
 }

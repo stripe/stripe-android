@@ -19,7 +19,12 @@ internal fun AccountStatus.toLoginState(): LinkState.LoginState {
     return when (this) {
         is AccountStatus.Verified ->
             LinkState.LoginState.LoggedIn
-        is AccountStatus.NeedsVerification,
+        is AccountStatus.NeedsVerification ->
+            if (webviewOpenUrl != null) {
+                LinkState.LoginState.NeedsWebVerification
+            } else {
+                LinkState.LoginState.NeedsVerification
+            }
         AccountStatus.VerificationStarted ->
             LinkState.LoginState.NeedsVerification
         AccountStatus.SignedOut,
