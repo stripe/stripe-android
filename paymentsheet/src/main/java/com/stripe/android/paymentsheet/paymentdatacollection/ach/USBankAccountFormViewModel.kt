@@ -264,7 +264,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         state.updateWithMandate(mandateText)
     }
 
-    private val _analyticsEvent = MutableSharedFlow<AnalyticsEvent>()
+    private val _analyticsEvent = MutableSharedFlow<AnalyticsEvent>(extraBufferCapacity = 1)
     val analyticsEvent: SharedFlow<AnalyticsEvent> = _analyticsEvent.asSharedFlow()
 
     val linkedAccount: StateFlow<PaymentSelection.New.USBankAccount?> = combineAsStateFlow(
@@ -538,6 +538,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         if (hasLaunched) return
         hasLaunched = true
 
+        _analyticsEvent.tryEmit(AnalyticsEvent.Started)
+
         if (clientSecret != null) {
             collectBankAccountForIntent(clientSecret)
         } else {
@@ -551,7 +553,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         } else {
             createUSBankAccountConfiguration()
         }
-        _analyticsEvent.tryEmit(AnalyticsEvent.Started)
+
         if (args.isPaymentFlow) {
             collectBankAccountLauncher?.presentWithPaymentIntent(
                 publishableKey = lazyPaymentConfig.get().publishableKey,
