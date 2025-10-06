@@ -65,7 +65,8 @@ internal fun createIntentConfirmationInterceptor(
         },
         deferredIntentConfirmationInterceptorFactory = object : DeferredIntentConfirmationInterceptor.Factory {
             override fun create(
-                intentConfiguration: PaymentSheet.IntentConfiguration
+                intentConfiguration: PaymentSheet.IntentConfiguration,
+                createIntentCallback: CreateIntentCallback
             ): DeferredIntentConfirmationInterceptor {
                 return DeferredIntentConfirmationInterceptor(
                     intentConfiguration = intentConfiguration,

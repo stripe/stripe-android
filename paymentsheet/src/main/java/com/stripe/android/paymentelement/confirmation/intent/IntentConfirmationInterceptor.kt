@@ -9,7 +9,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject
 
@@ -48,13 +47,21 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
     ): IntentConfirmationInterceptor {
         return when (initializationMode) {
             is PaymentElementLoader.InitializationMode.DeferredIntent -> {
-                val intentBehavior = initializationMode.intentConfiguration.intentBehavior
-                val deferredIntentCallback =
-                    deferredIntentCallbackRetriever.waitForDeferredIntentCallback(intentBehavior)
-                if (intentBehavior is PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken) {
-                    sharedPaymentTokenConfirmationInterceptorFactory.create(initializationMode)
-                } else {
-                    deferredIntentConfirmationInterceptorFactory.create(initializationMode.intentConfiguration)
+                when (
+                    val deferredIntentCallback = deferredIntentCallbackRetriever.waitForDeferredIntentCallback(
+                        initializationMode.intentConfiguration.intentBehavior
+                    )
+                ) {
+                    is DeferredIntentCallback.ConfirmationToken -> TODO()
+                    is DeferredIntentCallback.PaymentMethod -> {
+                        deferredIntentConfirmationInterceptorFactory.create(
+                            initializationMode.intentConfiguration,
+                            deferredIntentCallback.callback,
+                        )
+                    }
+                    is DeferredIntentCallback.SharedPaymentToken -> {
+                        sharedPaymentTokenConfirmationInterceptorFactory.create(initializationMode)
+                    }
                 }
             }
             is PaymentElementLoader.InitializationMode.PaymentIntent,
