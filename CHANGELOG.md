@@ -4,6 +4,8 @@
 
 ## 21.28.1 - 2025-10-06
 
+Bug fixes and improvements.
+
 ## 21.28.0 - 2025-09-29
 
 ### Connect
