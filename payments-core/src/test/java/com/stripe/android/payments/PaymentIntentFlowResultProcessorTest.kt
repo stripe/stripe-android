@@ -142,7 +142,7 @@ internal class PaymentIntentFlowResultProcessorTest {
 
             verify(
                 mockStripeRepository,
-                atLeast(2)
+                atLeast(MINIMUM_RETRIEVE_CALLS)
             ).retrievePaymentIntent(
                 eq(clientSecret),
                 eq(requestOptions),
