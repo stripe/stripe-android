@@ -75,7 +75,6 @@ internal class LinkControllerInteractor @Inject constructor(
                     LinkState.LoginState.NeedsVerification,
                     LinkState.LoginState.NeedsWebVerification ->
                         LinkController.SessionState.NeedsVerification
-
                     LinkState.LoginState.LoggedIn ->
                         LinkController.SessionState.LoggedIn
                 },
