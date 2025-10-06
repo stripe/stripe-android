@@ -80,7 +80,8 @@ internal fun createIntentConfirmationInterceptor(
         },
         sharedPaymentTokenConfirmationInterceptorFactory = object : SharedPaymentTokenConfirmationInterceptor.Factory {
             override fun create(
-                initializationMode: InitializationMode.DeferredIntent
+                initializationMode: InitializationMode.DeferredIntent,
+                handler: PreparePaymentMethodHandler
             ): SharedPaymentTokenConfirmationInterceptor {
                 return SharedPaymentTokenConfirmationInterceptor(
                     initializationMode = initializationMode,
