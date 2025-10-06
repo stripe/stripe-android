@@ -28,6 +28,7 @@ internal object CommonConfigurationFactory {
         termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay> = emptyMap(),
         walletButtons: PaymentSheet.WalletButtonsConfiguration? = null,
         opensCardScannerAutomatically: Boolean = false,
+        userOverrideCountry: String? = null,
     ): CommonConfiguration = CommonConfiguration(
         merchantDisplayName = merchantDisplayName,
         customer = customer,
@@ -48,6 +49,7 @@ internal object CommonConfigurationFactory {
         googlePlacesApiKey = googlePlacesApiKey,
         termsDisplay = termsDisplay,
         walletButtons = walletButtons,
-        opensCardScannerAutomatically = opensCardScannerAutomatically
+        opensCardScannerAutomatically = opensCardScannerAutomatically,
+        userOverrideCountry = userOverrideCountry,
     )
 }

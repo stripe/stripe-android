@@ -65,6 +65,7 @@ internal class ElementsSessionRepositoryTest {
                 externalPaymentMethods = emptyList(),
                 customPaymentMethods = emptyList(),
                 savedPaymentMethodSelectionId = null,
+                countryOverride = null,
             ).getOrThrow()
         }
 
@@ -97,6 +98,7 @@ internal class ElementsSessionRepositoryTest {
                     externalPaymentMethods = emptyList(),
                     customPaymentMethods = emptyList(),
                     savedPaymentMethodSelectionId = null,
+                    countryOverride = null,
                 ).getOrThrow()
             }
 
@@ -124,6 +126,7 @@ internal class ElementsSessionRepositoryTest {
                     externalPaymentMethods = emptyList(),
                     customPaymentMethods = emptyList(),
                     savedPaymentMethodSelectionId = null,
+                    countryOverride = null,
                 ).getOrThrow()
             }
 
@@ -159,6 +162,7 @@ internal class ElementsSessionRepositoryTest {
             externalPaymentMethods = emptyList(),
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
+            countryOverride = null,
         ).getOrThrow()
 
         val argumentCaptor: KArgumentCaptor<ElementsSessionParams> = argumentCaptor()
@@ -200,6 +204,7 @@ internal class ElementsSessionRepositoryTest {
             externalPaymentMethods = emptyList(),
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
+            countryOverride = null,
         )
 
         assertThat(session.isSuccess).isTrue()
@@ -236,6 +241,7 @@ internal class ElementsSessionRepositoryTest {
             externalPaymentMethods = emptyList(),
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
+            countryOverride = null,
         )
 
         assertThat(session.isSuccess).isTrue()
@@ -275,6 +281,7 @@ internal class ElementsSessionRepositoryTest {
             externalPaymentMethods = emptyList(),
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
+            countryOverride = null,
         )
 
         verify(stripeRepository).retrieveElementsSession(
@@ -326,6 +333,7 @@ internal class ElementsSessionRepositoryTest {
             externalPaymentMethods = emptyList(),
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
+            countryOverride = null,
         )
 
         val captor = argumentCaptor<ElementsSessionParams.PaymentIntentType>()
@@ -367,6 +375,7 @@ internal class ElementsSessionRepositoryTest {
             externalPaymentMethods = emptyList(),
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = "pm_123",
+            countryOverride = null,
         )
 
         verify(stripeRepository).retrieveElementsSession(
@@ -429,6 +438,7 @@ internal class ElementsSessionRepositoryTest {
                 ),
             ),
             savedPaymentMethodSelectionId = "pm_123",
+            countryOverride = null,
         )
 
         verify(stripeRepository).retrieveElementsSession(
@@ -479,6 +489,7 @@ internal class ElementsSessionRepositoryTest {
             externalPaymentMethods = emptyList(),
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
+            countryOverride = null,
         )
 
         verify(stripeRepository).retrieveElementsSession(
@@ -558,6 +569,7 @@ internal class ElementsSessionRepositoryTest {
                 ),
             ),
             savedPaymentMethodSelectionId = "pm_123",
+            countryOverride = null,
         )
 
         verify(stripeRepository).retrieveElementsSession(
@@ -611,6 +623,7 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = listOf(),
             externalPaymentMethods = listOf(),
             savedPaymentMethodSelectionId = null,
+            countryOverride = null,
         )
 
         verify(stripeRepository).retrieveElementsSession(

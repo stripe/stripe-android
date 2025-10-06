@@ -32,6 +32,7 @@ internal object ConfigurationDefaults {
     val shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = null
     val googlePlacesApiKey: String? = null
     const val opensCardScannerAutomatically: Boolean = false
+    val userOverrideCountry: String? = null
 
     const val embeddedViewDisplaysMandateText: Boolean = true
 }
