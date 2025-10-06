@@ -671,11 +671,6 @@ internal class ElementsSessionRepositoryTest {
             )
         )
 
-        val linkConfiguration = PaymentSheet.LinkConfiguration.Builder()
-            .display(PaymentSheet.LinkConfiguration.Display.Automatic)
-            .disallowFundingSourceCreation(setOf("somethingThatsNotAllowed"))
-            .build()
-
         createRepository().get(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "client_secret",
