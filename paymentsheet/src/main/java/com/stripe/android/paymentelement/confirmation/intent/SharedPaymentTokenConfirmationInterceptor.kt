@@ -28,7 +28,6 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
-import javax.inject.Provider
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.R as PaymentsCoreR
 
@@ -36,8 +35,6 @@ import com.stripe.android.R as PaymentsCoreR
 internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val initializationMode: PaymentElementLoader.InitializationMode.DeferredIntent,
     private val stripeRepository: StripeRepository,
-    private val errorReporter: ErrorReporter,
-    private val preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?>,
     private val requestOptions: ApiRequest.Options,
 ) : IntentConfirmationInterceptor {
 
