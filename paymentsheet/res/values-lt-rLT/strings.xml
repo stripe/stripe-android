@@ -215,6 +215,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paynow_confirm_payment">Per %s banke ar mokėjimo programėlėje patvirtinkite mokėjimą, kad užbaigtumėte pirkimą.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Nustatyti kaip numatytąjį mokėjimo būdą</string>
+  <!-- Text for alert message when user needs to confirm payment in their payment app -->
+  <string name="stripe_qrcode_lpm_confirm_payment">Per %s banke ar mokėjimo programėlėje patvirtinkite mokėjimą, kad užbaigtumėte pirkimą.</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">Pašalinti banko sąskaitą, kurios paskutiniai skaičiai %s</string>
   <!-- Accessibility description for a button that launches Shop Pay. -->
