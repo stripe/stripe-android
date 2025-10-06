@@ -241,14 +241,6 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         return stripeIntentResult as Result<T>
     }
 
-    private fun shouldRetry(stripeIntentResult: Result<StripeIntent>?): Boolean {
-        val stripeIntent = stripeIntentResult?.getOrNull() ?: return true
-        val requiresAction = stripeIntent.requiresAction()
-        val isCardPaymentProcessing = stripeIntent.status == StripeIntent.Status.Processing &&
-            stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card
-        return requiresAction || isCardPaymentProcessing
-    }
-
     private fun getPollingDurationForPaymentMethod(stripeIntent: StripeIntent): Long {
         return stripeIntent.paymentMethod?.type?.afterRedirectAction?.pollingDuration ?: MAX_POLLING_DURATION
     }
@@ -269,15 +261,12 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         failureMessage: String?
     ): S
 
-    private fun shouldRetry(stripeIntentResult: Result<StripeIntent>): Boolean {
-        val stripeIntent = stripeIntentResult.getOrNull() ?: return true
+    private fun shouldRetry(stripeIntentResult: Result<StripeIntent>?): Boolean {
+        val stripeIntent = stripeIntentResult?.getOrNull() ?: return true
         val requiresAction = stripeIntent.requiresAction()
         val isCardPaymentProcessing = stripeIntent.status == StripeIntent.Status.Processing &&
             stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card
-        // Payment methods with AfterRedirectAction.Refresh should only call refresh endpoint once
-        val isNotRefreshPm =
-            stripeIntent.paymentMethod?.type?.afterRedirectAction !is PaymentMethod.AfterRedirectAction.Refresh
-        return (requiresAction && isNotRefreshPm) || isCardPaymentProcessing
+        return requiresAction || isCardPaymentProcessing
     }
 
     internal companion object {
