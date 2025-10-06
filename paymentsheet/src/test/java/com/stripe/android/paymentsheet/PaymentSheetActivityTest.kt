@@ -1257,7 +1257,7 @@ internal class PaymentSheetActivityTest {
                     paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
                     intentConfirmationInterceptorFactory =
                     object : IntentConfirmationInterceptor.Factory {
-                        override fun create(
+                        override suspend fun create(
                             initializationMode: PaymentElementLoader.InitializationMode
                         ): IntentConfirmationInterceptor {
                             return fakeIntentConfirmationInterceptor

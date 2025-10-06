@@ -3,7 +3,6 @@ package com.stripe.android.paymentelement.confirmation.interceptor
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.SharedPaymentTokenSessionPreview
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
@@ -25,31 +24,10 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import com.stripe.android.R as PaymentsCoreR
 
 @OptIn(SharedPaymentTokenSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
 class SharedPaymentTokenConfirmationInterceptorTest {
-    @Test
-    fun `If initialized with shared payment token, should fail if 'preparePaymentMethodHandler' is null`() =
-        testNoProvider(
-            event = ErrorReporter.ExpectedErrorEvent.PREPARE_PAYMENT_METHOD_HANDLER_NULL,
-            failureMessage = PREPARE_PAYMENT_METHOD_HANDLER_MESSAGE,
-            userMessage = PaymentsCoreR.string.stripe_internal_error.resolvableString,
-        ) { errorReporter ->
-
-            val interceptor = createIntentConfirmationInterceptor(
-                initializationMode = DEFAULT_SPT_INTENT,
-                stripeRepository = stripeRepositoryReturning(
-                    onCreatePaymentMethodId = "pm_1234",
-                    onRetrievePaymentMethodId = "pm_5678"
-                ),
-                errorReporter = errorReporter,
-            )
-
-            interceptor.interceptDefaultSavedPaymentMethod()
-        }
-
     @Test
     fun `If initialized with shared payment token, should call 'onPreparePaymentMethod' with saved PM`() =
         runTest {

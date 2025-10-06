@@ -8,7 +8,7 @@ internal open class FakeIntentConfirmationInterceptorFactory(
     val enqueueStep: FakeIntentConfirmationInterceptor.() -> Unit = {}
 ) : IntentConfirmationInterceptor.Factory {
     lateinit var interceptor: FakeIntentConfirmationInterceptor
-    override fun create(initializationMode: PaymentElementLoader.InitializationMode): IntentConfirmationInterceptor {
+    override suspend fun create(initializationMode: PaymentElementLoader.InitializationMode): IntentConfirmationInterceptor {
         interceptor = FakeIntentConfirmationInterceptor().apply(enqueueStep)
         return interceptor
     }

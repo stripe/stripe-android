@@ -64,19 +64,19 @@ internal class DeferredIntentCallbackRetriever @Inject constructor(
             val errorMessage: String
             when (behavior) {
                 is PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken -> {
-                    errorMessage = "One of ${CreateIntentCallback::class.java.simpleName} or " +
-                        "${CreateIntentWithConfirmationTokenCallback::class.java.simpleName} must be implemented " +
-                        "when using IntentConfiguration with PaymentSheet"
-
-                    errorReporter.report(ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL)
-                }
-                is PaymentSheet.IntentConfiguration.IntentBehavior.Default -> {
                     errorMessage = "${PreparePaymentMethodHandler::class.java.simpleName} must be implemented " +
                         "when using IntentConfiguration with shared payment tokens!"
 
                     errorReporter.report(
                         ErrorReporter.ExpectedErrorEvent.PREPARE_PAYMENT_METHOD_HANDLER_NULL
                     )
+                }
+                is PaymentSheet.IntentConfiguration.IntentBehavior.Default -> {
+                    errorMessage = "One of ${CreateIntentCallback::class.java.simpleName} or " +
+                        "${CreateIntentWithConfirmationTokenCallback::class.java.simpleName} must be implemented " +
+                        "when using IntentConfiguration with PaymentSheet"
+
+                    errorReporter.report(ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL)
                 }
             }
             throw DeferredIntentCallbackNotFoundException(

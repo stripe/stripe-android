@@ -25,18 +25,13 @@ import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfi
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.InvalidDeferredIntentUsageException
-import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import com.stripe.android.testing.AbsFakeStripeRepository
-import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
-import com.stripe.android.testing.PaymentMethodFactory
-import kotlinx.coroutines.async
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -46,132 +41,11 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import java.util.Objects
-import com.stripe.android.R as PaymentsCoreR
+import javax.inject.Provider
 
 @RunWith(RobolectricTestRunner::class)
 @OptIn(SharedPaymentTokenSessionPreview::class)
 class DeferredIntentConfirmationInterceptorTest {
-    @Test
-    fun `Fails if invoked without a confirm callback for existing payment method`() = testNoProvider(
-        event = ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL,
-        failureMessage = CREATE_INTENT_CALLBACK_MESSAGE,
-        userMessage = CREATE_INTENT_CALLBACK_MESSAGE.resolvableString,
-    ) { errorReporter ->
-        val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
-            publishableKeyProvider = { "pk_test_123" },
-            errorReporter = errorReporter,
-        )
-
-        interceptor.interceptDefaultSavedPaymentMethod()
-    }
-
-    @Test
-    fun `Fails if invoked without a confirm callback for new payment method`() = testNoProvider(
-        event = ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL,
-        failureMessage = CREATE_INTENT_CALLBACK_MESSAGE,
-        userMessage = CREATE_INTENT_CALLBACK_MESSAGE.resolvableString,
-    ) { errorReporter ->
-        val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
-            stripeRepository = object : AbsFakeStripeRepository() {
-                override suspend fun createPaymentMethod(
-                    paymentMethodCreateParams: PaymentMethodCreateParams,
-                    options: ApiRequest.Options
-                ): Result<PaymentMethod> {
-                    return Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-                }
-            },
-            publishableKeyProvider = { "pk_test_123" },
-            errorReporter = errorReporter,
-        )
-
-        interceptor.interceptDefaultNewPaymentMethod()
-    }
-
-    @Test
-    fun `Message for live key when error without confirm callback is user friendly`() = testNoProvider(
-        event = ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL,
-        failureMessage = CREATE_INTENT_CALLBACK_MESSAGE,
-        userMessage = PaymentsCoreR.string.stripe_internal_error.resolvableString,
-    ) { errorReporter ->
-        val interceptor = createIntentConfirmationInterceptor(
-            initializationMode = DEFAULT_DEFERRED_INTENT,
-            publishableKeyProvider = { "pk_live_123" },
-            errorReporter = errorReporter,
-        )
-
-        interceptor.interceptDefaultSavedPaymentMethod()
-    }
-
-    @Test
-    fun `Succeeds if callback is found before timeout time`() {
-        val dispatcher = StandardTestDispatcher()
-        var callback: CreateIntentCallback? = null
-
-        runTest(dispatcher) {
-            val errorReporter = FakeErrorReporter()
-            val paymentMethod = PaymentMethodFactory.card()
-            val interceptor = createIntentConfirmationInterceptor(
-                initializationMode = DEFAULT_DEFERRED_INTENT,
-                stripeRepository = object : AbsFakeStripeRepository() {
-                    override suspend fun createPaymentMethod(
-                        paymentMethodCreateParams: PaymentMethodCreateParams,
-                        options: ApiRequest.Options
-                    ): Result<PaymentMethod> {
-                        return Result.success(paymentMethod)
-                    }
-
-                    override suspend fun retrieveStripeIntent(
-                        clientSecret: String,
-                        options: ApiRequest.Options,
-                        expandFields: List<String>
-                    ): Result<StripeIntent> {
-                        return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
-                    }
-                },
-                publishableKeyProvider = { "pk_live_123" },
-                errorReporter = errorReporter,
-                intentCreationCallbackProvider = {
-                    callback
-                },
-            )
-
-            val interceptJob = async {
-                interceptor.intercept(
-                    intent = PaymentIntentFactory.create(),
-                    confirmationOption = PaymentMethodConfirmationOption.Saved(
-                        paymentMethod = paymentMethod,
-                        optionsParams = null,
-                        passiveCaptchaParams = null,
-                        hCaptchaToken = null,
-                    ),
-                    shippingValues = null,
-                )
-            }
-
-            dispatcher.scheduler.advanceTimeBy(1000)
-            assertThat(interceptJob.isActive).isTrue()
-
-            callback = succeedingCreateIntentCallback(paymentMethod)
-
-            dispatcher.scheduler.advanceTimeBy(1001)
-
-            assertThat(interceptJob.isActive).isFalse()
-            assertThat(interceptJob.isCompleted).isTrue()
-
-            val nextStep = interceptJob.await()
-
-            assertThat(nextStep).isInstanceOf<
-                ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>
-                >()
-
-            assertThat(errorReporter.getLoggedErrors()).containsExactly(
-                ErrorReporter.SuccessEvent.FOUND_CREATE_INTENT_CALLBACK_WHILE_POLLING.eventName,
-            )
-        }
-    }
-
     @Test
     fun `Fails if creating payment method did not succeed`() = runTest {
         val invalidRequestException = InvalidRequestException(
@@ -192,6 +66,11 @@ class DeferredIntentConfirmationInterceptorTest {
                     options: ApiRequest.Options
                 ): Result<PaymentMethod> {
                     return Result.failure(invalidRequestException)
+                }
+            },
+            intentCreationCallbackProvider = Provider {
+                CreateIntentCallback { _, _ ->
+                    CreateIntentResult.Success(clientSecret = "pi_123")
                 }
             },
         )
@@ -487,7 +366,7 @@ class DeferredIntentConfirmationInterceptorTest {
         private const val CREATE_INTENT_CALLBACK_MESSAGE =
             "CreateIntentCallback must be implemented when using IntentConfiguration with PaymentSheet"
 
-        private val DEFAULT_DEFERRED_INTENT = InitializationMode.DeferredIntent(
+        internal val DEFAULT_DEFERRED_INTENT = InitializationMode.DeferredIntent(
             intentConfiguration = PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = 1099L,
