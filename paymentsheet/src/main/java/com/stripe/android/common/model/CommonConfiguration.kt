@@ -36,6 +36,7 @@ internal data class CommonConfiguration(
     val termsDisplay: Map<PaymentMethod.Type, TermsDisplay>,
     val walletButtons: PaymentSheet.WalletButtonsConfiguration?,
     val opensCardScannerAutomatically: Boolean,
+    val userOverrideCountry: String?,
 ) : Parcelable {
 
     fun validate(isLiveMode: Boolean) {
@@ -168,6 +169,7 @@ internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfigura
     termsDisplay = termsDisplay,
     walletButtons = walletButtons,
     opensCardScannerAutomatically = opensCardScannerAutomatically,
+    userOverrideCountry = userOverrideCountry,
 )
 
 internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
@@ -191,6 +193,7 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
     termsDisplay = termsDisplay,
     walletButtons = null,
     opensCardScannerAutomatically = opensCardScannerAutomatically,
+    userOverrideCountry = userOverrideCountry,
 )
 
 internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
@@ -220,6 +223,7 @@ internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfigu
     termsDisplay = emptyMap(),
     walletButtons = null,
     opensCardScannerAutomatically = false,
+    userOverrideCountry = null,
 )
 
 private fun String.isEKClientSecretValid(): Boolean {

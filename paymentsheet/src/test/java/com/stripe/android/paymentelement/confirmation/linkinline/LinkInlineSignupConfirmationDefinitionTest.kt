@@ -222,19 +222,16 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
     fun `'action' should return 'Launch' after successful sign-in & attach`() = test(
         attachNewCardToAccountResult = Result.success(
             LinkPaymentDetails.Saved(
-                paymentDetails = ConsumerPaymentDetails.Passthrough(
-                    id = "csmrpd_123",
-                    last4 = "4242",
-                    paymentMethodId = "pm_1",
-                ),
-                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                paymentMethod = PaymentMethodFactory.card(id = "pm_1", isLinkOrigin = true),
             )
         ),
         signInResult = Result.success(true),
         initialAccountStatus = AccountStatus.SignedOut,
         accountStatusOnSignIn = AccountStatus.Verified(true, null),
     ) {
-        val confirmationOption = createLinkInlineSignupConfirmationOption()
+        val confirmationOption = createLinkInlineSignupConfirmationOption(
+            passthroughMode = true,
+        )
 
         val action = definition.action(
             confirmationOption = confirmationOption,
@@ -482,12 +479,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         actionTest(
             attachNewCardToAccountResult = Result.success(
                 LinkPaymentDetails.Saved(
-                    paymentDetails = ConsumerPaymentDetails.Passthrough(
-                        id = "csmrpd_123",
-                        last4 = "4242",
-                        paymentMethodId = "pm_1",
-                    ),
-                    paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    paymentMethod = PaymentMethodFactory.link(id = "pm_1"),
                 )
             ),
             signInResult = Result.success(true),
@@ -517,9 +509,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
             val paymentMethod = savedConfirmationOption.paymentMethod
 
             assertThat(paymentMethod.id).isEqualTo("pm_1")
-            assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.Card)
-            assertThat(paymentMethod.card?.last4).isEqualTo("4242")
-            assertThat(paymentMethod.card?.wallet).isEqualTo(Wallet.LinkWallet(dynamicLast4 = "4242"))
+            assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.Link)
 
             assertThat(launchAction.receivesResultInProcess).isTrue()
             assertThat(launchAction.deferredIntentConfirmationType).isNull()

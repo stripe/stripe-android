@@ -28,6 +28,7 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.StripeIntent
@@ -407,7 +408,6 @@ class DefaultLinkAccountManagerTest {
                 userEmail: String,
                 stripeIntent: StripeIntent,
                 consumerSessionClientSecret: String,
-                consumerPublishableKey: String?,
             ): Result<LinkPaymentDetails.New> {
                 val details = result.first()
                 if (result.size > 1) {
@@ -462,7 +462,7 @@ class DefaultLinkAccountManagerTest {
                 paymentMethodCreateParams: PaymentMethodCreateParams,
                 id: String,
                 consumerSessionClientSecret: String
-            ): Result<LinkPaymentDetails.Saved> {
+            ): Result<PaymentMethod> {
                 val paymentDetailsMatch = paymentMethodCreateParams == newPaymentDetails.originalParams &&
                     id == newPaymentDetails.paymentDetails.id
                 if (paymentDetailsMatch && consumerSessionClientSecret == TestFactory.CLIENT_SECRET) {
@@ -483,12 +483,15 @@ class DefaultLinkAccountManagerTest {
             linkAuthIntentId = null,
         )
 
-        val result = accountManager.shareCardPaymentDetails(newPaymentDetails)
+        val result = accountManager.shareCardPaymentDetails(newPaymentDetails).getOrThrow()
 
-        assertThat(result.isSuccess).isTrue()
-        val linkPaymentDetails = result.getOrThrow()
-        assertThat(linkPaymentDetails.paymentDetails.id)
-            .isEqualTo(TestFactory.LINK_SAVED_PAYMENT_DETAILS.paymentDetails.id)
+        // TODO(tillh-stripe): revisit this
+        assertThat(result.id).isEqualTo(TestFactory.LINK_SAVED_PAYMENT_DETAILS.paymentMethod.id)
+
+//        assertThat(result.isSuccess).isTrue()
+//        val linkPaymentDetails = result.getOrThrow()
+//        assertThat(linkPaymentDetails.paymentDetails.id)
+//            .isEqualTo(TestFactory.LINK_SAVED_PAYMENT_DETAILS.paymentDetails.id)
 
         assertThat(linkRepository.shareCardPaymentDetailsCallCount).isEqualTo(1)
         assertThat(accountManager.linkAccountInfo.value.account).isNotNull()
@@ -500,10 +503,9 @@ class DefaultLinkAccountManagerTest {
             var callCount = 0
             override suspend fun startVerification(
                 consumerSessionClientSecret: String,
-                consumerPublishableKey: String?
             ): Result<ConsumerSession> {
                 callCount += 1
-                return super.startVerification(consumerSessionClientSecret, consumerPublishableKey)
+                return super.startVerification(consumerSessionClientSecret)
             }
         }
         val accountManager = accountManager(linkRepository = linkRepository)
@@ -534,29 +536,6 @@ class DefaultLinkAccountManagerTest {
 
         assertThat(accountManager.linkAccountInfo.value.account).isNotNull()
         assertThat(linkEventsReporter.callCount).isEqualTo(1)
-    }
-
-    @Test
-    fun `startVerification uses consumerPublishableKey`() = runSuspendTest {
-        val linkRepository = object : FakeLinkRepository() {
-            var consumerPublishableKey: String? = null
-            var callCount = 0
-            override suspend fun startVerification(
-                consumerSessionClientSecret: String,
-                consumerPublishableKey: String?
-            ): Result<ConsumerSession> {
-                callCount += 1
-                this.consumerPublishableKey = consumerPublishableKey
-                return super.startVerification(consumerSessionClientSecret, consumerPublishableKey)
-            }
-        }
-        val accountManager = accountManager(linkRepository = linkRepository)
-        accountManager.setTestAccount(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
-
-        accountManager.startVerification()
-
-        assertThat(linkRepository.callCount).isEqualTo(1)
-        assertThat(linkRepository.consumerPublishableKey).isEqualTo(TestFactory.PUBLISHABLE_KEY)
     }
 
     @Test
@@ -599,14 +578,12 @@ class DefaultLinkAccountManagerTest {
             override suspend fun confirmVerification(
                 verificationCode: String,
                 consumerSessionClientSecret: String,
-                consumerPublishableKey: String?,
                 consentGranted: Boolean?
             ): Result<ConsumerSession> {
                 callCount += 1
                 return super.confirmVerification(
                     verificationCode = verificationCode,
                     consumerSessionClientSecret = consumerSessionClientSecret,
-                    consumerPublishableKey = consumerPublishableKey,
                     consentGranted = consentGranted
                 )
             }
@@ -637,7 +614,6 @@ class DefaultLinkAccountManagerTest {
             override suspend fun confirmVerification(
                 verificationCode: String,
                 consumerSessionClientSecret: String,
-                consumerPublishableKey: String?,
                 consentGranted: Boolean?
             ): Result<ConsumerSession> {
                 callCount += 1
@@ -668,7 +644,6 @@ class DefaultLinkAccountManagerTest {
             override suspend fun listPaymentDetails(
                 paymentMethodTypes: Set<String>,
                 consumerSessionClientSecret: String,
-                consumerPublishableKey: String?
             ): Result<ConsumerPaymentDetails> {
                 this.paymentMethodTypes = paymentMethodTypes
                 return Result.failure(error)
@@ -691,7 +666,6 @@ class DefaultLinkAccountManagerTest {
             override suspend fun listPaymentDetails(
                 paymentMethodTypes: Set<String>,
                 consumerSessionClientSecret: String,
-                consumerPublishableKey: String?
             ): Result<ConsumerPaymentDetails> {
                 this.paymentMethodTypes = paymentMethodTypes
                 return Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
@@ -892,7 +866,6 @@ class DefaultLinkAccountManagerTest {
                 consumerSessionClientSecret: String,
                 stripeIntent: StripeIntent,
                 linkMode: LinkMode?,
-                consumerPublishableKey: String?
             ): Result<LinkAccountSession> {
                 return Result.success(TestFactory.LINK_ACCOUNT_SESSION)
             }

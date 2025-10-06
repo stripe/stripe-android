@@ -8,7 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.TextFieldValue
 import com.stripe.android.uicore.LocalTextFieldInsets
 import com.stripe.android.uicore.elements.compat.CompatTextField
 import com.stripe.android.uicore.strings.resolve
@@ -19,6 +18,7 @@ import com.stripe.android.uicore.utils.collectAsState
 fun AddressTextFieldUI(
     controller: AddressTextFieldController,
     modifier: Modifier = Modifier,
+    enabled: Boolean,
     onClick: () -> Unit = {
         controller.launchAutocompleteScreen()
     }
@@ -31,7 +31,7 @@ fun AddressTextFieldUI(
     val isError = error != null
 
     CompatTextField(
-        value = TextFieldValue(""),
+        value = "",
         enabled = false,
         onValueChange = {},
         errorMessage = null,
@@ -39,6 +39,9 @@ fun AddressTextFieldUI(
         label = {
             FormLabel(label.resolve())
         },
+        placeholder = null,
+        trailingIcon = null,
+        singleLine = true,
         contentPadding = textFieldInsets.asPaddingValues(),
         colors = TextFieldColors(
             shouldShowError = isError,
@@ -49,7 +52,7 @@ fun AddressTextFieldUI(
             },
         ),
         modifier = modifier
-            .clickable { onClick() }
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .clickable(enabled = enabled) { onClick() },
     )
 }

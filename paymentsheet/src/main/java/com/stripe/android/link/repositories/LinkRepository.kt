@@ -109,7 +109,6 @@ internal interface LinkRepository {
         userEmail: String,
         stripeIntent: StripeIntent,
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?,
     ): Result<LinkPaymentDetails.New>
 
     suspend fun createBankAccountPaymentDetails(
@@ -122,7 +121,7 @@ internal interface LinkRepository {
         paymentMethodCreateParams: PaymentMethodCreateParams,
         id: String,
         consumerSessionClientSecret: String,
-    ): Result<LinkPaymentDetails.Saved>
+    ): Result<PaymentMethod>
 
     suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,
@@ -149,7 +148,6 @@ internal interface LinkRepository {
      */
     suspend fun startVerification(
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?,
     ): Result<ConsumerSession>
 
     /**
@@ -158,7 +156,6 @@ internal interface LinkRepository {
     suspend fun confirmVerification(
         verificationCode: String,
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?,
         consentGranted: Boolean?,
     ): Result<ConsumerSession>
 
@@ -168,7 +165,6 @@ internal interface LinkRepository {
     suspend fun postConsentUpdate(
         consumerSessionClientSecret: String,
         consentGranted: Boolean,
-        consumerPublishableKey: String?
     ): Result<Unit>
 
     /**
@@ -177,7 +173,6 @@ internal interface LinkRepository {
     suspend fun listPaymentDetails(
         paymentMethodTypes: Set<String>,
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
     ): Result<ConsumerPaymentDetails>
 
     /**
@@ -185,7 +180,6 @@ internal interface LinkRepository {
      */
     suspend fun listShippingAddresses(
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
     ): Result<ConsumerShippingAddresses>
 
     /**
@@ -194,7 +188,6 @@ internal interface LinkRepository {
     suspend fun deletePaymentDetails(
         paymentDetailsId: String,
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
     ): Result<Unit>
 
     /**
@@ -203,14 +196,12 @@ internal interface LinkRepository {
     suspend fun updatePaymentDetails(
         updateParams: ConsumerPaymentDetailsUpdateParams,
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
     ): Result<ConsumerPaymentDetails>
 
     suspend fun createLinkAccountSession(
         consumerSessionClientSecret: String,
         stripeIntent: StripeIntent,
         linkMode: LinkMode?,
-        consumerPublishableKey: String?
     ): Result<LinkAccountSession>
 
     /**
@@ -219,6 +210,5 @@ internal interface LinkRepository {
     suspend fun updatePhoneNumber(
         consumerSessionClientSecret: String,
         phoneNumber: String,
-        consumerPublishableKey: String?
     ): Result<ConsumerSession>
 }

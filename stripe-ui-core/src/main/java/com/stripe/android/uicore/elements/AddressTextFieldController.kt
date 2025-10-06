@@ -50,7 +50,7 @@ class AddressTextFieldController(
         hiddenIdentifiers: Set<IdentifierSpec>,
         lastTextFieldIdentifier: IdentifierSpec?
     ) {
-        AddressTextFieldUI(this, modifier)
+        AddressTextFieldUI(controller = this, enabled = enabled)
     }
 
     fun launchAutocompleteScreen() {

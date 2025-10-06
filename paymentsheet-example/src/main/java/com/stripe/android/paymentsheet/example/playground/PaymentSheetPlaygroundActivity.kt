@@ -76,6 +76,7 @@ import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivit
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundOneStepContract
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundTwoStepContract
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
+import com.stripe.android.paymentsheet.example.playground.settings.ConfirmationTokenSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedTwoStepSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
@@ -157,12 +158,24 @@ internal class PaymentSheetPlaygroundActivity :
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 window.isNavigationBarContrastEnforced = false
             }
+
+            val playgroundSettings: PlaygroundSettings? by viewModel.playgroundSettingsFlow.collectAsState()
+            val localPlaygroundSettings = playgroundSettings ?: return@setContent
+
+            val playgroundState by viewModel.state.collectAsState()
+
             val paymentSheet = remember {
                 PaymentSheet.Builder(viewModel::onPaymentSheetResult)
                     .externalPaymentMethodConfirmHandler(this)
                     .confirmCustomPaymentMethodCallback(this)
-                    .createIntentCallback(viewModel::createIntentCallback)
                     .analyticEventCallback(viewModel::analyticCallback)
+                    .also {
+                        if (playgroundState?.snapshot[ConfirmationTokenSettingsDefinition] == true) {
+                            it.createIntentCallback(viewModel::createIntentWithConfirmationTokenCallback)
+                        } else {
+                            it.createIntentCallback(viewModel::createIntentCallback)
+                        }
+                    }
             }
                 .build()
             val flowController = remember {
@@ -188,10 +201,6 @@ internal class PaymentSheetPlaygroundActivity :
                 callback = viewModel::onAddressLauncherResult
             )
 
-            val playgroundSettings: PlaygroundSettings? by viewModel.playgroundSettingsFlow.collectAsState()
-            val localPlaygroundSettings = playgroundSettings ?: return@setContent
-
-            val playgroundState by viewModel.state.collectAsState()
             var showCustomEndpointDialog by remember { mutableStateOf(false) }
             val endpoint = playgroundState?.endpoint
 

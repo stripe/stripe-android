@@ -492,6 +492,7 @@ internal class PlaygroundSettings private constructor(
             CustomerSessionOverrideRedisplaySettingsDefinition,
             CustomerSettingsDefinition,
             CheckoutModeSettingsDefinition,
+            UserCountryOverrideSettingsDefinition,
             LinkSettingsDefinition,
             LinkTypeSettingsDefinition,
             CountrySettingsDefinition,
@@ -559,12 +560,14 @@ internal class PlaygroundSettings private constructor(
                 )
             ),
             PassiveCaptchaDefinition,
+            EnablePromptPaySettingsDefinition,
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
             AppearanceSettingsDefinition,
             CustomEndpointDefinition,
             ShippingAddressSettingsDefinition,
+            ConfirmationTokenSettingsDefinition,
         )
 
         private val allSettingDefinitions: List<PlaygroundSettingDefinition<*>> =

@@ -87,7 +87,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 consumerSessionClientSecret = linkAccount.clientSecret,
                 stripeIntent = config.stripeIntent,
                 linkMode = config.linkMode,
-                consumerPublishableKey = linkAccount.consumerPublishableKey,
             ).getOrThrow()
         }
     }
@@ -204,18 +203,15 @@ internal class DefaultLinkAccountManager @Inject constructor(
     override suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails.New> {
-        val linkAccountValue = linkAccountHolder.linkAccountInfo.value.account
-        return if (linkAccountValue != null) {
-            linkAccountValue.let { account ->
-                linkRepository.createCardPaymentDetails(
-                    paymentMethodCreateParams = paymentMethodCreateParams,
-                    userEmail = account.email,
-                    stripeIntent = config.stripeIntent,
-                    consumerSessionClientSecret = account.clientSecret,
-                    consumerPublishableKey = account.consumerPublishableKey.takeIf { !config.passthroughModeEnabled },
-                ).onSuccess {
-                    errorReporter.report(ErrorReporter.SuccessEvent.LINK_CREATE_CARD_SUCCESS)
-                }
+        val account = linkAccountHolder.linkAccountInfo.value.account
+        return if (account != null) {
+            linkRepository.createCardPaymentDetails(
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                userEmail = account.email,
+                stripeIntent = config.stripeIntent,
+                consumerSessionClientSecret = account.clientSecret,
+            ).onSuccess {
+                errorReporter.report(ErrorReporter.SuccessEvent.LINK_CREATE_CARD_SUCCESS)
             }
         } else {
             errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_CARD_WITH_NULL_ACCOUNT)
@@ -228,16 +224,20 @@ internal class DefaultLinkAccountManager @Inject constructor(
     override suspend fun shareCardPaymentDetails(
         cardPaymentDetails: LinkPaymentDetails.New
     ): Result<LinkPaymentDetails.Saved> {
+        val paymentDetails = cardPaymentDetails.paymentDetails
         return runCatching {
             requireNotNull(linkAccountHolder.linkAccountInfo.value.account)
         }.mapCatching { account ->
-            val paymentDetails = cardPaymentDetails.paymentDetails
-            val paymentMethodCreateParams = cardPaymentDetails.originalParams
             linkRepository.shareCardPaymentDetails(
                 id = paymentDetails.id,
+                paymentMethodCreateParams = cardPaymentDetails.originalParams,
                 consumerSessionClientSecret = account.clientSecret,
-                paymentMethodCreateParams = paymentMethodCreateParams,
             ).getOrThrow()
+        }.map { paymentMethod ->
+            LinkPaymentDetails.Saved(
+                paymentMethod = paymentMethod,
+                paymentDetails = paymentDetails,
+            )
         }
     }
 
@@ -346,7 +346,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
         linkEventsReporter.on2FAStart()
         return linkRepository.startVerification(
             consumerSessionClientSecret = linkAccount.clientSecret,
-            consumerPublishableKey = linkAccount.consumerPublishableKey
         )
             .onFailure {
                 linkEventsReporter.on2FAStartFailure()
@@ -364,7 +363,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
         return linkRepository.confirmVerification(
             verificationCode = code,
             consumerSessionClientSecret = linkAccount.clientSecret,
-            consumerPublishableKey = linkAccount.consumerPublishableKey,
             consentGranted = consentGranted,
         )
             .onSuccess {
@@ -383,7 +381,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
         return linkRepository.postConsentUpdate(
             consumerSessionClientSecret = linkAccount.clientSecret,
             consentGranted = consentGranted,
-            consumerPublishableKey = linkAccount.consumerPublishableKey
         )
     }
 
@@ -393,7 +390,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
         return linkRepository.listPaymentDetails(
             paymentMethodTypes = paymentMethodTypes,
             consumerSessionClientSecret = linkAccount.clientSecret,
-            consumerPublishableKey = linkAccount.consumerPublishableKey
         ).onSuccess { paymentDetailsList ->
             _consumerState.value = _consumerState.value
                 ?.withPaymentDetailsResponse(paymentDetailsList)
@@ -406,7 +402,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
             ?: return Result.failure(NoLinkAccountFoundException())
         return linkRepository.listShippingAddresses(
             consumerSessionClientSecret = linkAccount.clientSecret,
-            consumerPublishableKey = linkAccount.consumerPublishableKey,
         )
     }
 
@@ -416,7 +411,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
         return linkRepository.deletePaymentDetails(
             paymentDetailsId = paymentDetailsId,
             consumerSessionClientSecret = linkAccount.clientSecret,
-            consumerPublishableKey = linkAccount.consumerPublishableKey
         )
     }
 
@@ -429,7 +423,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
         return linkRepository.updatePaymentDetails(
             updateParams = updateParams,
             consumerSessionClientSecret = linkAccount.clientSecret,
-            consumerPublishableKey = linkAccount.consumerPublishableKey
         ).map { updatedPaymentDetails ->
             updatedPaymentDetails.also {
                 _consumerState.value = _consumerState.value?.withUpdatedPaymentDetail(
@@ -446,7 +439,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
         return linkRepository.updatePhoneNumber(
             consumerSessionClientSecret = linkAccount.clientSecret,
             phoneNumber = phoneNumber,
-            consumerPublishableKey = linkAccount.consumerPublishableKey
         ).map { consumerSession ->
             setAccount(consumerSession = consumerSession)
         }

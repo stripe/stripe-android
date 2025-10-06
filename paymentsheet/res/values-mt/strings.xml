@@ -215,6 +215,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paynow_confirm_payment">Ikkonferma l-pagament fil-bank jew fl-app tal-pagament tiegħek fi żmien %s biex tlesti x-xiri.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Qiegħed bħala l-metodu tal-pagament standard</string>
+  <!-- Text for alert message when user needs to confirm payment in their payment app -->
+  <string name="stripe_qrcode_lpm_confirm_payment">Ikkonferma l-pagament fil-bank jew fl-app tal-pagament tiegħek fi żmien %s biex tlesti x-xiri.</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">Neħħi l-kont tal-bank li jispiċċa b\'%s</string>
   <!-- Accessibility description for a button that launches Shop Pay. -->

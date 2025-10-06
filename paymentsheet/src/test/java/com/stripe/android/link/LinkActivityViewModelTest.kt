@@ -146,7 +146,7 @@ internal class LinkActivityViewModelTest {
         val mockArgs = NativeLinkArgs(
             configuration = mock(),
             requestSurface = RequestSurface.PaymentElement,
-            publishableKey = "",
+            publishableKey = "pk_123",
             stripeAccountId = null,
             linkExpressMode = LinkExpressMode.DISABLED,
             linkAccountInfo = LinkAccountUpdate.Value(
@@ -252,7 +252,7 @@ internal class LinkActivityViewModelTest {
         linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
 
         val confirmationHandler = FakeLinkConfirmationHandler()
-        confirmationHandler.confirmWithLinkPaymentDetailsResult = LinkConfirmationResult.Succeeded
+        confirmationHandler.confirmResult = LinkConfirmationResult.Succeeded
 
         val vm = createViewModel(
             linkLaunchMode = LinkLaunchMode.Confirmation(selectedPayment = selectedPayment),
@@ -279,8 +279,6 @@ internal class LinkActivityViewModelTest {
         linkAccountManager.setAccountStatus(AccountStatus.SignedOut)
 
         val linkConfirmationHandler = FakeLinkConfirmationHandler()
-        linkConfirmationHandler.confirmWithLinkPaymentDetailsResult =
-            LinkConfirmationResult.Failed("something went wrong".resolvableString)
         linkConfirmationHandler.confirmResult = LinkConfirmationResult.Failed("something went wrong".resolvableString)
 
         val vm = createViewModel(

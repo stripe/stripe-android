@@ -301,6 +301,12 @@ internal class WalletViewModel(
         }
     }
 
+    fun handleDisabledButtonClick() {
+        _uiState.update {
+            it.copy(isValidating = true)
+        }
+    }
+
     private fun setProcessingState(isProcessing: Boolean, errorMessage: ResolvableString? = null) {
         _uiState.update {
             it.copy(
@@ -458,7 +464,6 @@ internal class WalletViewModel(
                                         is ConsumerPaymentDetails.Card -> {
                                             details.copy(isDefault = item.id == details.id)
                                         }
-                                        is ConsumerPaymentDetails.Passthrough -> details
                                     }
                                 },
                                 cardBeingUpdated = null

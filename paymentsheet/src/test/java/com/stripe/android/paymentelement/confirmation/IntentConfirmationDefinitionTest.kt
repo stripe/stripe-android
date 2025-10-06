@@ -13,6 +13,7 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
+import com.stripe.android.paymentelement.confirmation.interceptor.FakeIntentConfirmationInterceptorFactory
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
@@ -53,15 +54,13 @@ class IntentConfirmationDefinitionTest {
     @Test
     fun `On 'action' with new payment method, should call 'IntentConfirmationInterceptor' with expected params`() =
         runTest {
-            val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
+            val intentConfirmationInterceptorFactory = FakeIntentConfirmationInterceptorFactory {
                 enqueueCompleteStep()
             }
-
             val definition = createIntentConfirmationDefinition(
-                intentConfirmationInterceptor = intentConfirmationInterceptor,
+                intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
             )
 
-            val initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(clientSecret = "pi_123")
             val createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD
             val shippingDetails = AddressDetails(name = "John Doe")
 
@@ -76,10 +75,9 @@ class IntentConfirmationDefinitionTest {
                 confirmationParameters = CONFIRMATION_PARAMETERS,
             )
 
-            val result = intentConfirmationInterceptor
+            val result = intentConfirmationInterceptorFactory.interceptor
                 .await<FakeIntentConfirmationInterceptor.InterceptCall.WithNewPaymentMethod>()
 
-            assertThat(result.initializationMode).isEqualTo(initializationMode)
             assertThat(result.paymentMethodCreateParams).isEqualTo(createParams)
             assertThat(result.paymentMethodOptionsParams).isNull()
             assertThat(result.shippingValues).isEqualTo(shippingDetails.toConfirmPaymentIntentShipping())
@@ -89,12 +87,11 @@ class IntentConfirmationDefinitionTest {
     @Test
     fun `On 'action' with saved payment method, should call 'IntentConfirmationInterceptor' with expected params`() =
         runTest {
-            val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
+            val intentConfirmationInterceptorFactory = FakeIntentConfirmationInterceptorFactory {
                 enqueueCompleteStep()
             }
-
             val definition = createIntentConfirmationDefinition(
-                intentConfirmationInterceptor = intentConfirmationInterceptor,
+                intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
             )
 
             val confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION
@@ -104,10 +101,9 @@ class IntentConfirmationDefinitionTest {
                 confirmationParameters = CONFIRMATION_PARAMETERS,
             )
 
-            val result = intentConfirmationInterceptor
+            val result = intentConfirmationInterceptorFactory.interceptor
                 .await<FakeIntentConfirmationInterceptor.InterceptCall.WithExistingPaymentMethod>()
 
-            assertThat(result.initializationMode).isEqualTo(CONFIRMATION_PARAMETERS.initializationMode)
             assertThat(result.paymentMethod).isEqualTo(confirmationOption.paymentMethod)
             assertThat(result.paymentMethodOptionsParams).isEqualTo(confirmationOption.optionsParams)
             assertThat(result.shippingValues).isEqualTo(
@@ -117,14 +113,13 @@ class IntentConfirmationDefinitionTest {
 
     @Test
     fun `On 'IntentConfirmationInterceptor' complete, should return 'Complete' confirmation action`() = runTest {
-        val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
+        val intentConfirmationInterceptorFactory = FakeIntentConfirmationInterceptorFactory {
             enqueueCompleteStep(
                 intent = CONFIRMATION_PARAMETERS.intent,
             )
         }
-
         val definition = createIntentConfirmationDefinition(
-            intentConfirmationInterceptor = intentConfirmationInterceptor,
+            intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
         )
 
         val action = definition.action(
@@ -141,15 +136,14 @@ class IntentConfirmationDefinitionTest {
     @Test
     fun `On 'IntentConfirmationInterceptor' complete with uncompleted flow, should return expected action`() =
         runTest {
-            val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
+            val intentConfirmationInterceptorFactory = FakeIntentConfirmationInterceptorFactory {
                 enqueueCompleteStep(
                     intent = CONFIRMATION_PARAMETERS.intent,
                     completedFullPaymentFlow = false
                 )
             }
-
             val definition = createIntentConfirmationDefinition(
-                intentConfirmationInterceptor = intentConfirmationInterceptor,
+                intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
             )
 
             val action = definition.action(
@@ -169,15 +163,14 @@ class IntentConfirmationDefinitionTest {
         val message = "Failed!"
         val cause = IllegalStateException("Failed with exception!")
 
-        val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
+        val intentConfirmationInterceptorFactory = FakeIntentConfirmationInterceptorFactory {
             enqueueFailureStep(
                 cause = cause,
                 message = message
             )
         }
-
         val definition = createIntentConfirmationDefinition(
-            intentConfirmationInterceptor = intentConfirmationInterceptor,
+            intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
         )
 
         val action = definition.action(
@@ -194,12 +187,11 @@ class IntentConfirmationDefinitionTest {
 
     @Test
     fun `On 'IntentConfirmationInterceptor' next step, should return 'Launch' confirmation action`() = runTest {
-        val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
+        val intentConfirmationInterceptorFactory = FakeIntentConfirmationInterceptorFactory {
             enqueueNextActionStep(clientSecret = "pi_123")
         }
-
         val definition = createIntentConfirmationDefinition(
-            intentConfirmationInterceptor = intentConfirmationInterceptor,
+            intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
         )
 
         val action = definition.action(
@@ -224,12 +216,11 @@ class IntentConfirmationDefinitionTest {
             paymentMethodType = PaymentMethod.Type.Card
         )
 
-        val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
+        val intentConfirmationInterceptorFactory = FakeIntentConfirmationInterceptorFactory {
             enqueueConfirmStep(confirmParams = confirmParams)
         }
-
         val definition = createIntentConfirmationDefinition(
-            intentConfirmationInterceptor = intentConfirmationInterceptor,
+            intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
         )
 
         val action = definition.action(
@@ -406,11 +397,18 @@ class IntentConfirmationDefinitionTest {
     }
 
     private fun createIntentConfirmationDefinition(
-        intentConfirmationInterceptor: IntentConfirmationInterceptor = FakeIntentConfirmationInterceptor(),
+        intentConfirmationInterceptorFactory: IntentConfirmationInterceptor.Factory =
+            object : IntentConfirmationInterceptor.Factory {
+                override fun create(
+                    initializationMode: PaymentElementLoader.InitializationMode
+                ): IntentConfirmationInterceptor {
+                    return FakeIntentConfirmationInterceptor()
+                }
+            },
         paymentLauncher: PaymentLauncher = FakePaymentLauncher()
     ): IntentConfirmationDefinition {
         return IntentConfirmationDefinition(
-            intentConfirmationInterceptor = intentConfirmationInterceptor,
+            intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
             paymentLauncherFactory = { paymentLauncher }
         )
     }

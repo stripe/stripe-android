@@ -81,13 +81,17 @@ internal interface PaymentElementLoader {
         val initializedViaCompose: Boolean,
     )
 
+    interface IntentFirst {
+        val clientSecret: String
+    }
+
     sealed class InitializationMode : Parcelable {
         abstract fun validate()
 
         @Parcelize
         data class PaymentIntent(
-            val clientSecret: String,
-        ) : InitializationMode() {
+            override val clientSecret: String,
+        ) : InitializationMode(), IntentFirst {
 
             override fun validate() {
                 PaymentIntentClientSecret(clientSecret).validate()
@@ -96,8 +100,8 @@ internal interface PaymentElementLoader {
 
         @Parcelize
         data class SetupIntent(
-            val clientSecret: String,
-        ) : InitializationMode() {
+            override val clientSecret: String,
+        ) : InitializationMode(), IntentFirst {
 
             override fun validate() {
                 SetupIntentClientSecret(clientSecret).validate()
@@ -179,6 +183,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             customPaymentMethods = configuration.customPaymentMethods,
             externalPaymentMethods = configuration.externalPaymentMethods,
             savedPaymentMethodSelectionId = savedPaymentMethodSelection?.id,
+            countryOverride = configuration.userOverrideCountry,
         ).getOrThrow()
 
         // Preemptively prepare Integrity asynchronously if needed, as warm up can take
@@ -310,13 +315,15 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
+        countryOverride: String?,
     ): Result<ElementsSession> {
         return elementsSessionRepository.get(
             initializationMode = initializationMode,
             customer = customer,
             externalPaymentMethods = externalPaymentMethods,
             customPaymentMethods = customPaymentMethods,
-            savedPaymentMethodSelectionId = savedPaymentMethodSelectionId
+            savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
+            countryOverride = countryOverride,
         )
     }
 

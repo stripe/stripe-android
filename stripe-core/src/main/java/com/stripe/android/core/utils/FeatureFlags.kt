@@ -16,6 +16,7 @@ object FeatureFlags {
     val cardScanGooglePayMigration = FeatureFlag("Use Google Payment Card Recognition API for Card Scan")
     val enablePassiveCaptcha = FeatureFlag("Enable Passive Captcha")
     val forceLinkWebAuth = FeatureFlag("Link: Force web auth")
+    val enablePromptPay = FeatureFlag("Enable PromptPay")
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

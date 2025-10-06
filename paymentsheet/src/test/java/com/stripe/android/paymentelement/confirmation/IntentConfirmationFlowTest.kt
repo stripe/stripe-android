@@ -16,16 +16,15 @@ import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
-import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
+import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakePaymentLauncher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -283,24 +282,24 @@ internal class IntentConfirmationFlowTest {
         createIntentCallback: CreateIntentCallback? = null,
     ): IntentConfirmationDefinition {
         return IntentConfirmationDefinition(
-            intentConfirmationInterceptor = DefaultIntentConfirmationInterceptor(
-                allowsManualConfirmation = false,
-                publishableKeyProvider = {
-                    "pk_123"
-                },
-                stripeAccountIdProvider = {
-                    "acct_123"
-                },
-                stripeRepository = FakeStripeRepository(
-                    createPaymentMethodResult = createPaymentMethodResult,
-                    retrieveIntent = intentResult,
-                ),
-                errorReporter = FakeErrorReporter(),
-                intentCreationCallbackProvider = {
-                    createIntentCallback
-                },
-                preparePaymentMethodHandlerProvider = { preparePaymentMethodHandler }
-            ),
+            intentConfirmationInterceptorFactory =
+            object : IntentConfirmationInterceptor.Factory {
+                override fun create(
+                    initializationMode: PaymentElementLoader.InitializationMode
+                ): IntentConfirmationInterceptor {
+                    return createIntentConfirmationInterceptor(
+                        initializationMode = initializationMode,
+                        stripeRepository = FakeStripeRepository(
+                            createPaymentMethodResult = createPaymentMethodResult,
+                            retrieveIntent = intentResult,
+                        ),
+                        intentCreationCallbackProvider = {
+                            createIntentCallback
+                        },
+                        preparePaymentMethodHandlerProvider = { preparePaymentMethodHandler }
+                    )
+                }
+            },
             paymentLauncherFactory = {
                 FakePaymentLauncher()
             }

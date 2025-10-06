@@ -3,11 +3,9 @@ package com.stripe.android.link.confirmation
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
-import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.Address
-import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PassiveCaptchaParams
@@ -15,9 +13,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationOption
@@ -40,22 +36,6 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
     ): Result {
         return confirm {
             newConfirmationArgs(
-                paymentDetails = paymentDetails,
-                linkAccount = linkAccount,
-                cvc = cvc,
-                billingPhone = billingPhone
-            )
-        }
-    }
-
-    override suspend fun confirm(
-        paymentDetails: LinkPaymentDetails,
-        linkAccount: LinkAccount,
-        cvc: String?,
-        billingPhone: String?
-    ): Result {
-        return confirm {
-            confirmationArgs(
                 paymentDetails = paymentDetails,
                 linkAccount = linkAccount,
                 cvc = cvc,
@@ -95,30 +75,6 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
             null -> {
                 logger.error("DefaultLinkConfirmationHandler: Payment confirmation returned null")
                 Result.Failed(R.string.stripe_something_went_wrong.resolvableString)
-            }
-        }
-    }
-
-    private fun confirmationArgs(
-        paymentDetails: LinkPaymentDetails,
-        linkAccount: LinkAccount,
-        cvc: String?,
-        billingPhone: String?
-    ): ConfirmationHandler.Args {
-        return when (paymentDetails) {
-            is LinkPaymentDetails.New -> {
-                newConfirmationArgs(
-                    paymentDetails = paymentDetails.paymentDetails,
-                    linkAccount = linkAccount,
-                    cvc = cvc,
-                    billingPhone = billingPhone
-                )
-            }
-            is LinkPaymentDetails.Saved -> {
-                savedConfirmationArgs(
-                    paymentDetails = paymentDetails,
-                    cvc = cvc
-                )
             }
         }
     }
@@ -184,38 +140,6 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         }
     }
 
-    private fun savedConfirmationArgs(
-        paymentDetails: LinkPaymentDetails.Saved,
-        cvc: String?
-    ): ConfirmationHandler.Args {
-        return ConfirmationHandler.Args(
-            intent = configuration.stripeIntent,
-            confirmationOption = PaymentMethodConfirmationOption.Saved(
-                paymentMethod = PaymentMethod.Builder()
-                    .setId(paymentDetails.paymentDetails.paymentMethodId)
-                    .setCode(paymentDetails.paymentMethodCreateParams.typeCode)
-                    .setCard(
-                        PaymentMethod.Card(
-                            last4 = paymentDetails.paymentDetails.last4,
-                            wallet = Wallet.LinkWallet(paymentDetails.paymentDetails.last4),
-                        )
-                    )
-                    .setType(PaymentMethod.Type.Card)
-                    .build(),
-                optionsParams = PaymentMethodOptionsParams.Card(
-                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
-                    cvc = cvc?.takeIf {
-                        configuration.passthroughModeEnabled.not()
-                    }
-                ),
-                passiveCaptchaParams = passiveCaptchaParams
-            ),
-            appearance = PaymentSheet.Appearance(),
-            initializationMode = configuration.initializationMode,
-            shippingDetails = configuration.shippingDetails
-        )
-    }
-
     class Factory @Inject constructor(
         private val configuration: LinkConfiguration,
         private val passiveCaptchaParams: PassiveCaptchaParams?,
@@ -271,7 +195,6 @@ internal fun computeExpectedPaymentMethodType(
     return when (paymentDetails) {
         is ConsumerPaymentDetails.BankAccount -> computeBankAccountExpectedPaymentMethodType(configuration)
         is ConsumerPaymentDetails.Card -> ConsumerPaymentDetails.Card.TYPE
-        is ConsumerPaymentDetails.Passthrough -> ConsumerPaymentDetails.Card.TYPE
     }
 }
 

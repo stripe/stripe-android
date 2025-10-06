@@ -40,6 +40,7 @@ internal data class WalletUiState(
     val hasAttemptedAutoSelection: Boolean = false,
     val signupToggleEnabled: Boolean,
     val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+    val isValidating: Boolean = false,
 ) {
 
     val selectedItem: ConsumerPaymentDetails.PaymentDetails?
@@ -146,8 +147,7 @@ private fun ConsumerPaymentDetails.PaymentDetails.makeMandateText(
             )
             else -> resolvableString(R.string.stripe_wallet_bank_account_terms)
         }
-        is ConsumerPaymentDetails.Card,
-        is ConsumerPaymentDetails.Passthrough -> when {
+        is ConsumerPaymentDetails.Card -> when {
             signupToggleEnabled -> resolvableString(
                 id = R.string.stripe_paymentsheet_card_mandate_signup_toggle_off,
                 merchantName

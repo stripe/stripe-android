@@ -49,7 +49,6 @@ internal fun WalletPaymentMethodMenu(
 
 private val ConsumerPaymentDetails.PaymentDetails.removeLabel
     get() = when (this) {
-        is ConsumerPaymentDetails.Card,
-        is ConsumerPaymentDetails.Passthrough -> R.string.stripe_paymentsheet_remove_card
+        is ConsumerPaymentDetails.Card -> R.string.stripe_paymentsheet_remove_card
         is ConsumerPaymentDetails.BankAccount -> R.string.stripe_wallet_remove_linked_account
     }

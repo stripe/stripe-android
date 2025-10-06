@@ -7,7 +7,6 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
-import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH
 import com.stripe.android.link.ui.LinkScreenshotSurface
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -107,7 +106,6 @@ internal class WalletScreenScreenshotTest {
                 expiryYear = 1999
             ),
             CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
-            CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
         )
         snapshot(
             state = walletUiState(
@@ -125,13 +123,31 @@ internal class WalletScreenScreenshotTest {
                 cvcCheck = CvcCheck.Fail
             ),
             CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
-            CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
         )
         snapshot(
             state = walletUiState(
                 paymentDetailsList = paymentDetailsList,
                 selectedItem = paymentDetailsList.firstOrNull(),
                 userSetIsExpanded = true,
+            ),
+        )
+    }
+
+    @Test
+    fun testCvcCheckFieldValidatedOnDisabledButtonPress() {
+        val paymentDetailsList = listOf(
+            CONSUMER_PAYMENT_DETAILS_CARD.copy(
+                cvcCheck = CvcCheck.Fail
+            ),
+            CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
+            CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
+        )
+        snapshot(
+            state = walletUiState(
+                paymentDetailsList = paymentDetailsList,
+                selectedItem = paymentDetailsList.firstOrNull(),
+                userSetIsExpanded = false,
+                isValidating = true,
             ),
         )
     }
@@ -228,6 +244,7 @@ internal class WalletScreenScreenshotTest {
         userSetIsExpanded: Boolean = false,
         signupToggleEnabled: Boolean = false,
         paymentSelectionHint: ResolvableString? = null,
+        isValidating: Boolean = false,
     ): WalletUiState {
         return WalletUiState(
             paymentDetailsList = paymentDetailsList,
@@ -251,6 +268,7 @@ internal class WalletScreenScreenshotTest {
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             signupToggleEnabled = signupToggleEnabled,
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+            isValidating = isValidating,
         )
     }
 
@@ -262,6 +280,7 @@ internal class WalletScreenScreenshotTest {
                     onItemSelected = {},
                     onExpandedChanged = {},
                     onPrimaryButtonClick = {},
+                    onDisabledButtonClick = {},
                     onPayAnotherWayClicked = {},
                     onRemoveClicked = {},
                     onUpdateClicked = {},

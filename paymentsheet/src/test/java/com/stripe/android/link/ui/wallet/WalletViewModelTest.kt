@@ -23,7 +23,6 @@ import com.stripe.android.link.NoPaymentMethodOptionsAvailable
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
-import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH
 import com.stripe.android.link.TestFactory.CONSUMER_SHIPPING_ADDRESSES
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.confirmation.DefaultCompleteLinkFlow
@@ -466,7 +465,6 @@ class WalletViewModelTest {
                 paymentDetails = listOf(
                     validCard,
                     CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
-                    CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
                 )
             )
         )

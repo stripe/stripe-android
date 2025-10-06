@@ -246,20 +246,35 @@ data class CheckoutResponse(
 }
 
 @Serializable
-data class ConfirmIntentRequest(
-    @SerialName("client_secret")
-    val clientSecret: String,
-    @SerialName("payment_method_id")
-    val paymentMethodId: String,
-    @SerialName("should_save_payment_method")
-    val shouldSavePaymentMethod: Boolean,
-    @SerialName("merchant_country_code")
-    val merchantCountryCode: String,
-    @SerialName("mode")
-    val mode: String,
-    @SerialName("return_url")
-    val returnUrl: String,
-)
+sealed interface ConfirmIntentRequestParams {
+    @Serializable
+    data class PaymentMethod(
+        @SerialName("client_secret")
+        val clientSecret: String,
+        @SerialName("payment_method_id")
+        val paymentMethodId: String,
+        @SerialName("should_save_payment_method")
+        val shouldSavePaymentMethod: Boolean,
+        @SerialName("merchant_country_code")
+        val merchantCountryCode: String,
+        @SerialName("mode")
+        val mode: String,
+        @SerialName("return_url")
+        val returnUrl: String,
+    ) : ConfirmIntentRequestParams
+
+    @Serializable
+    data class ConfirmationToken(
+        @SerialName("client_secret")
+        val clientSecret: String,
+        @SerialName("confirmation_token_id")
+        val confirmationTokenId: String,
+        @SerialName("merchant_country_code")
+        val merchantCountryCode: String,
+        @SerialName("mode")
+        val mode: String,
+    ) : ConfirmIntentRequestParams
+}
 
 @Serializable
 data class ConfirmIntentResponse(
