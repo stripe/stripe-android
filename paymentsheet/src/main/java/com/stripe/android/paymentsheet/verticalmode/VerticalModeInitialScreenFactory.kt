@@ -32,6 +32,7 @@ internal object VerticalModeInitialScreenFactory {
                         customerStateHolder = customerStateHolder,
                         bankFormInteractor = bankFormInteractor,
                     ),
+                    showsWalletHeader = true,
                 )
             )
         }

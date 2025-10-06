@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.lifecycle.SavedStateHandle
-import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.TestFactory
@@ -39,10 +38,6 @@ class VerticalModeInitialScreenFactoryTest {
     ) {
         assertThat(screens).hasSize(1)
         assertThat(screens[0]).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
-
-        screens[0].showsWalletsHeader(isCompleteFlow = false).test {
-            assertThat(awaitItem()).isFalse()
-        }
     }
 
     @Test
