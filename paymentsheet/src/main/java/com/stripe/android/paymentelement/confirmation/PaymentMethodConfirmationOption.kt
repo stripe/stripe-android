@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation
 
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
@@ -12,6 +13,7 @@ import kotlinx.parcelize.Parcelize
 internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.Option {
     val passiveCaptchaParams: PassiveCaptchaParams?
     val optionsParams: PaymentMethodOptionsParams?
+    val clientAttributionMetadata: ClientAttributionMetadata?
 
     fun updatedForDeferredIntent(
         intentConfiguration: PaymentSheet.IntentConfiguration,
@@ -21,6 +23,7 @@ internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.
     data class Saved(
         val paymentMethod: com.stripe.android.model.PaymentMethod,
         override val optionsParams: PaymentMethodOptionsParams?,
+        override val clientAttributionMetadata: ClientAttributionMetadata?,
         val originatedFromWallet: Boolean = false,
         override val passiveCaptchaParams: PassiveCaptchaParams?,
         val hCaptchaToken: String? = null,
@@ -46,6 +49,10 @@ internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.
         val shouldSave: Boolean,
         override val passiveCaptchaParams: PassiveCaptchaParams?,
     ) : PaymentMethodConfirmationOption {
+
+        override val clientAttributionMetadata: ClientAttributionMetadata?
+            get() = null
+
         override fun updatedForDeferredIntent(
             intentConfiguration: PaymentSheet.IntentConfiguration,
         ): New {

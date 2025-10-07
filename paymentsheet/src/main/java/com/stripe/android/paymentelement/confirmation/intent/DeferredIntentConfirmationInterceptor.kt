@@ -281,7 +281,8 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
                             ?.extraParams,
                         intentConfigSetupFutureUsage = intentConfiguration
                             .mode.setupFutureUse?.toConfirmParamsSetupFutureUsage(),
-                        radarOptions = hCaptchaToken?.let { RadarOptions(it) }
+                        radarOptions = hCaptchaToken?.let { RadarOptions(it) },
+                        clientAttributionMetadata = confirmationOption.clientAttributionMetadata,
                     )
                 }
             }

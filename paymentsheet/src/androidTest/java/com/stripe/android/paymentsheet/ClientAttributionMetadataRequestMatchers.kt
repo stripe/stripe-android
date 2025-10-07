@@ -40,6 +40,39 @@ internal fun clientAttributionMetadataParamsInPaymentMethodData(): RequestMatche
     )
 }
 
+internal fun clientAttributionMetadataParamsForPaymentIntent(): RequestMatcher {
+    return RequestMatchers.composite(
+        bodyPart(
+            urlEncode("client_attribution_metadata[elements_session_config_id]"),
+            urlEncode("elements_session_123")
+        ),
+        bodyPart(
+            urlEncode("client_attribution_metadata[payment_intent_creation_flow]"),
+            urlEncode("standard")
+        ),
+        bodyPart(
+            urlEncode("client_attribution_metadata[payment_method_selection_flow]"),
+            urlEncode("automatic")
+        ),
+        bodyPart(
+            urlEncode("client_attribution_metadata[merchant_integration_source]"),
+            urlEncode("elements")
+        ),
+        bodyPart(
+            urlEncode("client_attribution_metadata[merchant_integration_subtype]"),
+            urlEncode("mobile")
+        ),
+        bodyPart(
+            urlEncode("client_attribution_metadata[merchant_integration_version]"),
+            urlEncode("stripe-android/${StripeSdkVersion.VERSION_NAME}")
+        ),
+        bodyPart(
+            urlEncode("client_attribution_metadata[client_session_id]"),
+            urlEncode(AnalyticsRequestFactory.sessionId.toString())
+        ),
+    )
+}
+
 internal fun clientAttributionMetadataParamsForDeferredIntent(): RequestMatcher {
     return RequestMatchers.composite(
         bodyPart(

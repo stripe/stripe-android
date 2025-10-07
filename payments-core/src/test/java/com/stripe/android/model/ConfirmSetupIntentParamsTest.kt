@@ -74,7 +74,8 @@ class ConfirmSetupIntentParamsTest {
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 clientSecret = CLIENT_SECRET,
                 setAsDefaultPaymentMethod = true,
-                radarOptions = null
+                radarOptions = null,
+                clientAttributionMetadata = null,
             ).toParamMap()
         ).isEqualTo(
             mapOf(
@@ -248,6 +249,23 @@ class ConfirmSetupIntentParamsTest {
     }
 
     @Test
+    fun toParamMap_withClientAttributionMetadata_shouldCreateExpectedMap() {
+        val clientAttributionMetadata = ClientAttributionMetadata(
+            elementsSessionConfigId = "elements_session_123",
+            paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+            paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
+        )
+        val params = ConfirmSetupIntentParams(
+            paymentMethodId = "pm_123",
+            clientSecret = CLIENT_SECRET,
+            clientAttributionMetadata = clientAttributionMetadata,
+        ).toParamMap()
+
+        assertThat(params).containsKey("client_attribution_metadata")
+        assertThat(params["client_attribution_metadata"]).isEqualTo(clientAttributionMetadata.toParamMap())
+    }
+
+    @Test
     fun toParamMap_withSetAsDefaultPaymentMethodAndRadarOptions_shouldCreateExpectedMap() {
         val radarOptions = RadarOptions(hCaptchaToken = "test_token")
         val params = ConfirmSetupIntentParams
@@ -255,7 +273,8 @@ class ConfirmSetupIntentParamsTest {
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 clientSecret = CLIENT_SECRET,
                 setAsDefaultPaymentMethod = true,
-                radarOptions = radarOptions
+                radarOptions = radarOptions,
+                clientAttributionMetadata = null,
             )
             .toParamMap()
 

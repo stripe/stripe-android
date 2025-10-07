@@ -84,7 +84,8 @@ class ConfirmPaymentIntentParamsTest {
                 PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 CLIENT_SECRET,
                 setAsDefaultPaymentMethod = true,
-                radarOptions = null
+                radarOptions = null,
+                clientAttributionMetadata = null
             )
             .toParamMap()
 
@@ -574,7 +575,8 @@ class ConfirmPaymentIntentParamsTest {
                 PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 CLIENT_SECRET,
                 setAsDefaultPaymentMethod = true,
-                radarOptions = radarOptions
+                radarOptions = radarOptions,
+                clientAttributionMetadata = null
             )
             .toParamMap()
 
@@ -583,6 +585,21 @@ class ConfirmPaymentIntentParamsTest {
         assertThat(radarOptionsMap?.get("hcaptcha_token")).isEqualTo("test_token")
     }
 
+    @Test
+    fun toParamMap_withClientAttributionMetadata_shouldCreateExpectedMap() {
+        val clientAttributionMetadata = ClientAttributionMetadata(
+            elementsSessionConfigId = "elements_session_123",
+            paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+            paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
+        )
+        val params = ConfirmPaymentIntentParams(
+            clientSecret = CLIENT_SECRET,
+            clientAttributionMetadata = clientAttributionMetadata,
+        ).toParamMap()
+
+        assertThat(params).containsKey("client_attribution_metadata")
+        assertThat(params["client_attribution_metadata"]).isEqualTo(clientAttributionMetadata.toParamMap())
+    }
     private companion object {
         private const val CLIENT_SECRET = "pi_1CkiBMLENEVhOs7YMtUehLau_secret_s4O8SDh7s6spSmHDw1VaYPGZA"
 

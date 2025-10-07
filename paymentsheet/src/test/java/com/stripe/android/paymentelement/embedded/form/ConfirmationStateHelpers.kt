@@ -13,7 +13,8 @@ internal fun confirmationStateConfirming(selection: PaymentSelection): Confirmat
     val confirmationOption = selection.toConfirmationOption(
         configuration = EmbeddedConfirmationStateFixtures.defaultState().configuration.asCommonConfiguration(),
         linkConfiguration = null,
-        passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+        passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+        clientAttributionMetadata = null,
     )
     return ConfirmationHandler.State.Confirming(requireNotNull(confirmationOption))
 }
