@@ -10,7 +10,6 @@ import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.ConfirmationTokenParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodExtraParams
-import com.stripe.android.model.RadarOptions
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.networking.StripeRepository
@@ -21,7 +20,6 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
 import com.stripe.android.paymentelement.confirmation.utils.ConfirmActionHelper
-import com.stripe.android.paymentelement.confirmation.utils.toConfirmParamsSetupFutureUsage
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DeferredIntentValidator
@@ -164,22 +162,15 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 confirmActionHelper.createNextAction(clientSecret, intent, paymentMethod)
             } else {
                 DeferredIntentValidator.validate(intent, intentConfiguration, allowsManualConfirmation, paymentMethod)
-                confirmActionHelper.createConfirmAction(
+                confirmActionHelper.createDeferredConfirmAction(
                     clientSecret,
                     intent,
                     shippingValues,
-                    isDeferred = true
-                ) {
-                    create(
-                        paymentMethod = paymentMethod,
-                        optionsParams = confirmationOption.optionsParams,
-                        extraParams = (confirmationOption as? PaymentMethodConfirmationOption.New)
-                            ?.extraParams,
-                        intentConfigSetupFutureUsage = intentConfiguration
-                            .mode.setupFutureUse?.toConfirmParamsSetupFutureUsage(),
-                        radarOptions = hCaptchaToken?.let { RadarOptions(it) }
-                    )
-                }
+                    confirmationOption,
+                    paymentMethod,
+                    intentConfiguration,
+                    hCaptchaToken
+                )
             }
         }.getOrElse { error ->
             ConfirmationDefinition.Action.Fail(
