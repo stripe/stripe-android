@@ -146,10 +146,12 @@ class DeferredIntentCallbackRetrieverTest {
             intentCreateIntentWithConfirmationTokenCallback = intentCreationWithConfirmationTokenCallback,
             preparePaymentMethodHandlerProvider = preparePaymentMethodHandlerProvider,
             errorReporter = errorReporter,
-            requestOptions = ApiRequest.Options(
-                apiKey = publishableKeyProvider.get(),
-                stripeAccount = null,
-            ),
+            requestOptionsProvider = {
+                ApiRequest.Options(
+                    apiKey = publishableKeyProvider.get(),
+                    stripeAccount = null,
+                )
+            },
         )
     }
 

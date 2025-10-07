@@ -57,10 +57,10 @@ internal suspend fun createIntentConfirmationInterceptor(
     )
     val deferredIntentCallbackRetriever = DeferredIntentCallbackRetriever(
         intentCreationCallbackProvider = intentCreationCallbackProvider,
-        intentCreateIntentWithConfirmationTokenCallback = Provider { null },
+        intentCreateIntentWithConfirmationTokenCallback = { null },
         preparePaymentMethodHandlerProvider = preparePaymentMethodHandlerProvider,
         errorReporter = errorReporter,
-        requestOptions = requestOptions,
+        requestOptionsProvider = { requestOptions },
     )
     return DefaultIntentConfirmationInterceptorFactory(
         deferredIntentCallbackRetriever = deferredIntentCallbackRetriever,

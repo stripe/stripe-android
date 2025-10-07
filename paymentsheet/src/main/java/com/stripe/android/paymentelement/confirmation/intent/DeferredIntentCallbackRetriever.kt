@@ -23,7 +23,10 @@ internal class DeferredIntentCallbackRetriever @Inject constructor(
     private val intentCreateIntentWithConfirmationTokenCallback: Provider<CreateIntentWithConfirmationTokenCallback?>,
     private val preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?>,
     private val errorReporter: ErrorReporter,
-    private val requestOptions: ApiRequest.Options,
+    // Provider is required to defer ApiRequest.Options creation until after PaymentConfiguration is initialized.
+    // Without it, Dagger would eagerly create ApiRequest.Options during graph construction, causing a crash
+    // if PaymentConfiguration.init() hasn't been called yet.
+    private val requestOptionsProvider: Provider<ApiRequest.Options>,
 ) {
 
     suspend fun waitForDeferredIntentCallback(
@@ -81,7 +84,7 @@ internal class DeferredIntentCallbackRetriever @Inject constructor(
             }
             throw DeferredIntentCallbackNotFoundException(
                 message = errorMessage,
-                resolvableError = if (requestOptions.apiKeyIsLiveMode) {
+                resolvableError = if (requestOptionsProvider.get().apiKeyIsLiveMode) {
                     PaymentsCoreR.string.stripe_internal_error.resolvableString
                 } else {
                     errorMessage.resolvableString
