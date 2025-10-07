@@ -87,17 +87,23 @@ internal data class PaymentElementCallbacks private constructor(
         }
 
         fun build(): PaymentElementCallbacks {
-            setOf(createIntentCallback, createIntentWithConfirmationTokenCallback, preparePaymentMethodHandler)
-                .count { it != null }
-                .let {
-                    if (it > 1) {
-                        throw IllegalArgumentException(
-                            "Only one of createIntentCallback, " +
-                                "createIntentWithConfirmationTokenCallback or " +
-                                "preparePaymentMethodHandler can be set"
-                        )
-                    }
-                }
+            var mutualExclusiveCallbackCount = 0
+            if (createIntentCallback != null) {
+                mutualExclusiveCallbackCount++
+            }
+            if (createIntentWithConfirmationTokenCallback != null) {
+                mutualExclusiveCallbackCount++
+            }
+            if (preparePaymentMethodHandler != null) {
+                mutualExclusiveCallbackCount++
+            }
+            if (mutualExclusiveCallbackCount > 1) {
+                throw IllegalArgumentException(
+                    "Only one of createIntentCallback, " +
+                        "createIntentWithConfirmationTokenCallback or " +
+                        "preparePaymentMethodHandler can be set"
+                )
+            }
 
             return PaymentElementCallbacks(
                 createIntentCallback = createIntentCallback,
