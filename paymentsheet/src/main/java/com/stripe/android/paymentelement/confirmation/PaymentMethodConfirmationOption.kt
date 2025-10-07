@@ -12,6 +12,7 @@ import kotlinx.parcelize.Parcelize
 internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.Option {
     val passiveCaptchaParams: PassiveCaptchaParams?
     val optionsParams: PaymentMethodOptionsParams?
+    val attestationRequired: Boolean
 
     fun updatedForDeferredIntent(
         intentConfiguration: PaymentSheet.IntentConfiguration,
@@ -23,6 +24,7 @@ internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.
         override val optionsParams: PaymentMethodOptionsParams?,
         val originatedFromWallet: Boolean = false,
         override val passiveCaptchaParams: PassiveCaptchaParams?,
+        override val attestationRequired: Boolean,
         val hCaptchaToken: String? = null,
     ) : PaymentMethodConfirmationOption {
         override fun updatedForDeferredIntent(
@@ -45,6 +47,7 @@ internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.
         val extraParams: PaymentMethodExtraParams?,
         val shouldSave: Boolean,
         override val passiveCaptchaParams: PassiveCaptchaParams?,
+        override val attestationRequired: Boolean,
     ) : PaymentMethodConfirmationOption {
         override fun updatedForDeferredIntent(
             intentConfiguration: PaymentSheet.IntentConfiguration,
