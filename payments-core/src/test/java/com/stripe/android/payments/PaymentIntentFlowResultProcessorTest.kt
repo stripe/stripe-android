@@ -60,6 +60,10 @@ internal class PaymentIntentFlowResultProcessorTest {
                 Result.success(PaymentIntentFixtures.CANCELLED)
             )
 
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("No expected to call refresh in this test")
+            )
+
             val paymentIntentResult = createProcessor().processResult(
                 PaymentFlowResult.Unvalidated(
                     clientSecret = "client_secret",
@@ -126,8 +130,8 @@ internal class PaymentIntentFlowResultProcessorTest {
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
                 Result.success(PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE)
             )
-            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenReturn(
-                Result.success(PaymentIntentFixtures.PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE)
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("No expected to call refresh in this test")
             )
 
             val clientSecret = "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq"
@@ -169,7 +173,7 @@ internal class PaymentIntentFlowResultProcessorTest {
                     }
                 },
                 refreshPaymentIntent = {
-                    Result.success(PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE)
+                    throw AssertionError("No expected to call refresh in this test")
                 },
             )
 
@@ -217,7 +221,7 @@ internal class PaymentIntentFlowResultProcessorTest {
                     }
                 },
                 refreshPaymentIntent = {
-                    Result.success(requiresActionIntent)
+                    throw AssertionError("No expected to call refresh in this test")
                 },
             )
 
@@ -270,7 +274,7 @@ internal class PaymentIntentFlowResultProcessorTest {
                         }
                     },
                     refreshPaymentIntent = {
-                        Result.success(requiresActionIntent)
+                        throw AssertionError("No expected to call refresh in this test")
                     },
                 )
 
@@ -343,6 +347,10 @@ internal class PaymentIntentFlowResultProcessorTest {
                 Result.success(intent)
             )
 
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("No expected to call refresh in this test")
+            )
+
             val clientSecret = requireNotNull(
                 intent.clientSecret
             )
@@ -393,6 +401,10 @@ internal class PaymentIntentFlowResultProcessorTest {
             Result.success(succeededIntent),
         )
 
+        whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+            AssertionError("No expected to call refresh in this test")
+        )
+
         val clientSecret = requireNotNull(processingIntent.clientSecret)
         val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
@@ -433,6 +445,10 @@ internal class PaymentIntentFlowResultProcessorTest {
 
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
                 Result.success(requiresActionIntent),
+            )
+
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("No expected to call refresh in this test")
             )
 
             val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
@@ -483,6 +499,10 @@ internal class PaymentIntentFlowResultProcessorTest {
                 Result.success(succeededIntent),
             )
 
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("No expected to call refresh in this test")
+            )
+
             val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
 
             val result = createProcessor().processResult(
@@ -514,6 +534,7 @@ internal class PaymentIntentFlowResultProcessorTest {
 
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
                 Result.success(requiresActionIntent),
+                Result.failure(Exception("Unexpected retrieve call")),
             )
 
             whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenReturn(
@@ -549,6 +570,7 @@ internal class PaymentIntentFlowResultProcessorTest {
 
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
                 Result.success(requiresActionIntent),
+                Result.failure(Exception("Unexpected retrieve call")),
             )
 
             whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenReturn(
@@ -588,6 +610,10 @@ internal class PaymentIntentFlowResultProcessorTest {
 
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
                 Result.success(requiresActionIntent),
+            )
+
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("No expected to call refresh in this test")
             )
 
             val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
@@ -638,6 +664,10 @@ internal class PaymentIntentFlowResultProcessorTest {
                 Result.success(succeededIntent),
             )
 
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("No expected to call refresh in this test")
+            )
+
             val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
 
             val result = createProcessor().processResult(
@@ -668,6 +698,10 @@ internal class PaymentIntentFlowResultProcessorTest {
 
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
                 Result.success(requiresActionIntent),
+            )
+
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("No expected to call refresh in this test")
             )
 
             val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
@@ -716,6 +750,10 @@ internal class PaymentIntentFlowResultProcessorTest {
                 Result.success(succeededIntent),
             )
 
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("No expected to call refresh in this test")
+            )
+
             val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
 
             val result = createProcessor().processResult(
@@ -742,6 +780,10 @@ internal class PaymentIntentFlowResultProcessorTest {
         whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
             Result.success(initialIntent),
             Result.success(refreshedIntent),
+        )
+
+        whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+            AssertionError("No expected to call refresh in this test")
         )
 
         val clientSecret = requireNotNull(initialIntent.clientSecret)
