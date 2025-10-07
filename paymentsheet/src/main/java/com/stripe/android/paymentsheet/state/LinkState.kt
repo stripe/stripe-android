@@ -29,7 +29,7 @@ internal data class LinkState(
             signupMode != null ->
                 LinkSignupModeResult.Enabled(signupMode)
             loginState != LoginState.LoggedOut ->
-                LinkSignupModeResult.NotSignedOut
+                LinkSignupModeResult.AlreadyRegistered
             else ->
                 LinkSignupModeResult.Disabled(emptyList()) // Arbitrary reasons for testing.
         }

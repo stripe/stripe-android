@@ -468,7 +468,7 @@ internal data class PaymentMethodMetadata(
                 linkMode = null,
                 linkStateResult = LinkState(
                     configuration = configuration,
-                    signupModeResult = LinkSignupModeResult.NotSignedOut,
+                    signupModeResult = LinkSignupModeResult.AlreadyRegistered,
                     loginState = LinkState.LoginState.LoggedIn
                 ),
                 paymentMethodIncentive = null,

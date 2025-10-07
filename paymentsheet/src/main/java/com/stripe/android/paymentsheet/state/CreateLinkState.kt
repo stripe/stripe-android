@@ -38,7 +38,7 @@ internal sealed interface LinkSignupModeResult : Parcelable {
     val disabledReasons: List<LinkSignupDisabledReason>?
 
     @Parcelize
-    data object NotSignedOut : LinkSignupModeResult {
+    data object AlreadyRegistered : LinkSignupModeResult {
         override val mode: LinkSignupMode? get() = null
         override val disabledReasons: List<LinkSignupDisabledReason>? get() = null
     }
@@ -154,7 +154,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         linkConfiguration: LinkConfiguration,
     ): LinkSignupModeResult {
         if (accountStatus != AccountStatus.SignedOut) {
-            return LinkSignupModeResult.NotSignedOut
+            return LinkSignupModeResult.AlreadyRegistered
         }
 
         val disabledReasons = getLinkSignupDisabledReasons(
