@@ -5,7 +5,6 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.GenericStripeException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
@@ -16,28 +15,20 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
-import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor.Companion.PROVIDER_FETCH_INTERVAL
-import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor.Companion.PROVIDER_FETCH_TIMEOUT
 import com.stripe.android.paymentelement.confirmation.utils.updatedWithProductUsage
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.withTimeoutOrNull
-import javax.inject.Provider
-import kotlin.time.Duration.Companion.seconds
-import com.stripe.android.R as PaymentsCoreR
 
 @OptIn(SharedPaymentTokenSessionPreview::class)
 internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constructor(
-    @Assisted private val initializationMode: PaymentElementLoader.InitializationMode.DeferredIntent,
-    private val stripeRepository: StripeRepository,
+    @Assisted private val intentConfiguration: PaymentSheet.IntentConfiguration,
+    @Assisted private val handler: PreparePaymentMethodHandler,
     private val errorReporter: ErrorReporter,
-    private val preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?>,
+    private val stripeRepository: StripeRepository,
     private val requestOptions: ApiRequest.Options,
 ) : IntentConfirmationInterceptor {
 
@@ -46,7 +37,6 @@ internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constru
         confirmationOption: PaymentMethodConfirmationOption.New,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): ConfirmationDefinition.Action<Args> {
-        val intentConfiguration = initializationMode.intentConfiguration
         return stripeRepository.createPaymentMethod(
             confirmationOption.createParams.updatedWithProductUsage(intentConfiguration),
             requestOptions
@@ -103,65 +93,23 @@ internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constru
             )
         }
 
-        return waitForPreparePaymentMethodHandler()?.let { handler ->
-            try {
-                handler.onPreparePaymentMethod(
-                    paymentMethod = paymentMethod,
-                    shippingAddress = shippingValues?.toAddressDetails(),
-                )
+        return try {
+            handler.onPreparePaymentMethod(
+                paymentMethod = paymentMethod,
+                shippingAddress = shippingValues?.toAddressDetails(),
+            )
 
-                ConfirmationDefinition.Action.Complete(
-                    intent = intent,
-                    deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
-                    completedFullPaymentFlow = false,
-                )
-            } catch (@Suppress("TooGenericExceptionCaught") exception: Exception) {
-                ConfirmationDefinition.Action.Fail(
-                    cause = exception,
-                    message = exception.errorMessage,
-                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                )
-            }
-        } ?: run {
-            val error = "${PreparePaymentMethodHandler::class.java.simpleName} must be implemented " +
-                "when using IntentConfiguration with shared payment tokens!"
-
-            errorReporter.report(ErrorReporter.ExpectedErrorEvent.PREPARE_PAYMENT_METHOD_HANDLER_NULL)
-
+            ConfirmationDefinition.Action.Complete(
+                intent = intent,
+                deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
+                completedFullPaymentFlow = false,
+            )
+        } catch (@Suppress("TooGenericExceptionCaught") exception: Exception) {
             ConfirmationDefinition.Action.Fail(
-                cause = IllegalStateException(error),
-                message = if (requestOptions.apiKeyIsLiveMode) {
-                    PaymentsCoreR.string.stripe_internal_error.resolvableString
-                } else {
-                    error.resolvableString
-                },
+                cause = exception,
+                message = exception.errorMessage,
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
             )
-        }
-    }
-
-    private fun retrievePreparePaymentMethodHandler(): PreparePaymentMethodHandler? {
-        return preparePaymentMethodHandlerProvider.get()
-    }
-
-    private suspend fun waitForPreparePaymentMethodHandler(): PreparePaymentMethodHandler? {
-        return retrievePreparePaymentMethodHandler() ?: run {
-            val handler = withTimeoutOrNull(PROVIDER_FETCH_TIMEOUT.seconds) {
-                var handler: PreparePaymentMethodHandler? = null
-
-                while (handler == null) {
-                    delay(PROVIDER_FETCH_INTERVAL)
-                    handler = retrievePreparePaymentMethodHandler()
-                }
-
-                handler
-            }
-
-            if (handler != null) {
-                errorReporter.report(ErrorReporter.SuccessEvent.FOUND_PREPARE_PAYMENT_METHOD_HANDLER_WHILE_POLLING)
-            }
-
-            handler
         }
     }
 
@@ -184,7 +132,10 @@ internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constru
 
     @AssistedFactory
     interface Factory {
-        fun create(initializationMode: PaymentElementLoader.InitializationMode.DeferredIntent):
-            SharedPaymentTokenConfirmationInterceptor
+        @OptIn(SharedPaymentTokenSessionPreview::class)
+        fun create(
+            intentConfiguration: PaymentSheet.IntentConfiguration,
+            handler: PreparePaymentMethodHandler
+        ): SharedPaymentTokenConfirmationInterceptor
     }
 }

@@ -36,9 +36,18 @@ internal class IntentConfirmationDefinition(
         confirmationOption: PaymentMethodConfirmationOption,
         confirmationParameters: ConfirmationDefinition.Parameters,
     ): ConfirmationDefinition.Action<Args> {
-        val interceptor = intentConfirmationInterceptorFactory.create(
-            initializationMode = confirmationParameters.initializationMode,
-        )
+        val interceptor: IntentConfirmationInterceptor
+        try {
+            interceptor = intentConfirmationInterceptorFactory.create(
+                initializationMode = confirmationParameters.initializationMode,
+            )
+        } catch (e: DeferredIntentCallbackNotFoundException) {
+            return ConfirmationDefinition.Action.Fail(
+                cause = IllegalStateException(e.message),
+                message = e.resolvableError,
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            )
+        }
         return when (confirmationOption) {
             is PaymentMethodConfirmationOption.New ->
                 interceptor.intercept(

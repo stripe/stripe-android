@@ -399,7 +399,7 @@ class IntentConfirmationDefinitionTest {
     private fun createIntentConfirmationDefinition(
         intentConfirmationInterceptorFactory: IntentConfirmationInterceptor.Factory =
             object : IntentConfirmationInterceptor.Factory {
-                override fun create(
+                override suspend fun create(
                     initializationMode: PaymentElementLoader.InitializationMode
                 ): IntentConfirmationInterceptor {
                     return FakeIntentConfirmationInterceptor()

@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation.intent
 import androidx.annotation.ColorInt
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -30,6 +31,14 @@ internal interface IntentConfirmationModule {
             @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
         ): CreateIntentCallback? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.createIntentCallback
+        }
+
+        @Provides
+        fun providesCreateIntentWithConfirmationTokenCallback(
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+        ): CreateIntentWithConfirmationTokenCallback? {
+            return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]
+                ?.createIntentWithConfirmationTokenCallback
         }
 
         @OptIn(SharedPaymentTokenSessionPreview::class)

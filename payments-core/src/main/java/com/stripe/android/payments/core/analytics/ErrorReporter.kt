@@ -322,6 +322,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         FOUND_CREATE_INTENT_CALLBACK_WHILE_POLLING(
             eventName = "paymentsheet.polling_for_create_intent_callback.found"
         ),
+        FOUND_CREATE_INTENT_WITH_CONFIRMATION_TOKEN_CALLBACK_WHILE_POLLING(
+            eventName = "paymentsheet.polling_for_create_intent_with_confirmation_token_callback.found"
+        ),
         FOUND_PREPARE_PAYMENT_METHOD_HANDLER_WHILE_POLLING(
             eventName = "paymentsheet.polling_for_prepare_payment_method_handler.found"
         ),

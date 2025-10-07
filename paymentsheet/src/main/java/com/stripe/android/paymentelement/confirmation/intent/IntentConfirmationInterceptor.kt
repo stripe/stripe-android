@@ -9,8 +9,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
-import com.stripe.android.paymentsheet.CreateIntentCallback
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject
 
@@ -29,33 +27,44 @@ internal interface IntentConfirmationInterceptor {
     ): ConfirmationDefinition.Action<Args>
 
     interface Factory {
-        fun create(initializationMode: PaymentElementLoader.InitializationMode): IntentConfirmationInterceptor
+        suspend fun create(initializationMode: PaymentElementLoader.InitializationMode): IntentConfirmationInterceptor
     }
 
     companion object {
-        var createIntentCallback: CreateIntentCallback? = null
-
         const val COMPLETE_WITHOUT_CONFIRMING_INTENT = "COMPLETE_WITHOUT_CONFIRMING_INTENT"
-        const val PROVIDER_FETCH_TIMEOUT = 2
-        const val PROVIDER_FETCH_INTERVAL = 5L
     }
 }
 
 @OptIn(SharedPaymentTokenSessionPreview::class)
 internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
+    private val deferredIntentCallbackRetriever: DeferredIntentCallbackRetriever,
     private val intentFirstConfirmationInterceptorFactory: IntentFirstConfirmationInterceptor.Factory,
     private val deferredIntentConfirmationInterceptorFactory: DeferredIntentConfirmationInterceptor.Factory,
     private val sharedPaymentTokenConfirmationInterceptorFactory: SharedPaymentTokenConfirmationInterceptor.Factory,
 ) : IntentConfirmationInterceptor.Factory {
-    override fun create(initializationMode: PaymentElementLoader.InitializationMode): IntentConfirmationInterceptor {
+    override suspend fun create(
+        initializationMode: PaymentElementLoader.InitializationMode
+    ): IntentConfirmationInterceptor {
         return when (initializationMode) {
             is PaymentElementLoader.InitializationMode.DeferredIntent -> {
-                if (initializationMode.intentConfiguration.intentBehavior is
-                    PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken
+                when (
+                    val deferredIntentCallback = deferredIntentCallbackRetriever.waitForDeferredIntentCallback(
+                        initializationMode.intentConfiguration.intentBehavior
+                    )
                 ) {
-                    sharedPaymentTokenConfirmationInterceptorFactory.create(initializationMode)
-                } else {
-                    deferredIntentConfirmationInterceptorFactory.create(initializationMode.intentConfiguration)
+                    is DeferredIntentCallback.ConfirmationToken -> TODO()
+                    is DeferredIntentCallback.PaymentMethod -> {
+                        deferredIntentConfirmationInterceptorFactory.create(
+                            initializationMode.intentConfiguration,
+                            deferredIntentCallback.callback,
+                        )
+                    }
+                    is DeferredIntentCallback.SharedPaymentToken -> {
+                        sharedPaymentTokenConfirmationInterceptorFactory.create(
+                            initializationMode.intentConfiguration,
+                            deferredIntentCallback.handler,
+                        )
+                    }
                 }
             }
             is PaymentElementLoader.InitializationMode.PaymentIntent,

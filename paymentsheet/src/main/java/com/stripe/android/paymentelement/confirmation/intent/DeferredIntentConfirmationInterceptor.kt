@@ -16,11 +16,8 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
-import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor.Companion.PROVIDER_FETCH_INTERVAL
-import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor.Companion.PROVIDER_FETCH_TIMEOUT
 import com.stripe.android.paymentelement.confirmation.utils.ConfirmActionHelper
 import com.stripe.android.paymentelement.confirmation.utils.toConfirmParamsSetupFutureUsage
-import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DeferredIntentValidator
@@ -29,18 +26,12 @@ import com.stripe.android.utils.hasIntentToSetup
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Named
-import javax.inject.Provider
-import kotlin.time.Duration.Companion.seconds
-import com.stripe.android.R as PaymentsCoreR
 
 internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val intentConfiguration: PaymentSheet.IntentConfiguration,
+    @Assisted private val createIntentCallback: CreateIntentCallback,
     private val stripeRepository: StripeRepository,
-    private val errorReporter: ErrorReporter,
-    private val intentCreationCallbackProvider: Provider<CreateIntentCallback?>,
     private val requestOptions: ApiRequest.Options,
     @Named(ALLOWS_MANUAL_CONFIRMATION) private val allowsManualConfirmation: Boolean,
 ) : IntentConfirmationInterceptor {
@@ -87,7 +78,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
             options = requestOptions,
         ).fold(
             onSuccess = { paymentMethod ->
-                handleDeferredIntent(
+                handleDeferredIntentCreationFromPaymentMethod(
                     intent = intent,
                     intentConfiguration = intentConfiguration,
                     paymentMethod = paymentMethod,
@@ -118,7 +109,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         hCaptchaToken: String?
     ): ConfirmationDefinition.Action<Args> {
-        return handleDeferredIntent(
+        return handleDeferredIntentCreationFromPaymentMethod(
             intent = intent,
             intentConfiguration = intentConfiguration,
             paymentMethod = paymentMethod,
@@ -132,72 +123,8 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
         )
     }
 
-    private suspend fun handleDeferredIntent(
-        intent: StripeIntent,
-        intentConfiguration: PaymentSheet.IntentConfiguration,
-        confirmationOption: PaymentMethodConfirmationOption,
-        paymentMethod: PaymentMethod,
-        shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        shouldSavePaymentMethod: Boolean,
-        hCaptchaToken: String?
-    ): ConfirmationDefinition.Action<Args> {
-        return waitForIntentCallback()?.let { callback ->
-            handleDeferredIntentCreationFromPaymentMethod(
-                intent = intent,
-                createIntentCallback = callback,
-                intentConfiguration = intentConfiguration,
-                confirmationOption = confirmationOption,
-                paymentMethod = paymentMethod,
-                shouldSavePaymentMethod = shouldSavePaymentMethod,
-                shippingValues = shippingValues,
-                hCaptchaToken = hCaptchaToken
-            )
-        } ?: run {
-            val error = "${CreateIntentCallback::class.java.simpleName} must be implemented " +
-                "when using IntentConfiguration with PaymentSheet"
-
-            errorReporter.report(ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL)
-
-            return ConfirmationDefinition.Action.Fail(
-                cause = IllegalStateException(error),
-                message = if (requestOptions.apiKeyIsLiveMode) {
-                    PaymentsCoreR.string.stripe_internal_error.resolvableString
-                } else {
-                    error.resolvableString
-                },
-                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-            )
-        }
-    }
-
-    private fun retrieveCallback(): CreateIntentCallback? {
-        return intentCreationCallbackProvider.get()
-    }
-
-    private suspend fun waitForIntentCallback(): CreateIntentCallback? {
-        return retrieveCallback() ?: run {
-            val callback = withTimeoutOrNull(PROVIDER_FETCH_TIMEOUT.seconds) {
-                var intentCallback: CreateIntentCallback? = null
-
-                while (intentCallback == null) {
-                    delay(PROVIDER_FETCH_INTERVAL)
-                    intentCallback = retrieveCallback()
-                }
-
-                intentCallback
-            }
-
-            if (callback != null) {
-                errorReporter.report(ErrorReporter.SuccessEvent.FOUND_CREATE_INTENT_CALLBACK_WHILE_POLLING)
-            }
-
-            callback
-        }
-    }
-
     private suspend fun handleDeferredIntentCreationFromPaymentMethod(
         intent: StripeIntent,
-        createIntentCallback: CreateIntentCallback,
         intentConfiguration: PaymentSheet.IntentConfiguration,
         confirmationOption: PaymentMethodConfirmationOption,
         paymentMethod: PaymentMethod,
@@ -328,6 +255,9 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
 
     @AssistedFactory
     interface Factory {
-        fun create(intentConfiguration: PaymentSheet.IntentConfiguration): DeferredIntentConfirmationInterceptor
+        fun create(
+            intentConfiguration: PaymentSheet.IntentConfiguration,
+            createIntentCallback: CreateIntentCallback
+        ): DeferredIntentConfirmationInterceptor
     }
 }

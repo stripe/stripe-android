@@ -4,8 +4,6 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.isInstanceOf
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -31,8 +29,6 @@ import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
-import kotlinx.coroutines.async
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import javax.inject.Provider
 
@@ -60,49 +56,6 @@ internal fun runInterceptorScenario(
         preparePaymentMethodHandlerProvider = scenario.preparePaymentMethodHandlerProvider,
     )
     test(interceptor)
-}
-
-internal fun testNoProvider(
-    event: ErrorReporter.ErrorEvent,
-    failureMessage: String,
-    userMessage: ResolvableString,
-    interceptCall: suspend (errorReporter: ErrorReporter) ->
-    ConfirmationDefinition.Action<IntentConfirmationDefinition.Args>
-) {
-    val errorReporter = FakeErrorReporter()
-    val dispatcher = StandardTestDispatcher()
-
-    runTest(dispatcher) {
-        val interceptJob = async {
-            interceptCall(errorReporter)
-        }
-
-        assertThat(interceptJob.isActive).isTrue()
-
-        dispatcher.scheduler.advanceTimeBy(1000)
-
-        assertThat(interceptJob.isActive).isTrue()
-
-        dispatcher.scheduler.advanceTimeBy(1000)
-
-        assertThat(interceptJob.isActive).isTrue()
-
-        dispatcher.scheduler.advanceTimeBy(1)
-
-        assertThat(interceptJob.isActive).isFalse()
-
-        val nextStep = interceptJob.await()
-
-        assertThat(nextStep).isInstanceOf<ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>>()
-
-        val failedStep = nextStep as ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>
-
-        assertThat(failedStep.cause).isInstanceOf<IllegalStateException>()
-        assertThat(failedStep.cause.message).isEqualTo(failureMessage)
-        assertThat(failedStep.message).isEqualTo(userMessage)
-
-        assertThat(errorReporter.awaitCall().errorEvent).isEqualTo(event)
-    }
 }
 
 internal suspend fun IntentConfirmationInterceptor.interceptDefaultNewPaymentMethod():

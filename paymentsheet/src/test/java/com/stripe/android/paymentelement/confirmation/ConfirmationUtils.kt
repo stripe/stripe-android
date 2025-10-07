@@ -19,6 +19,7 @@ import com.stripe.android.paymentelement.confirmation.cvc.CvcRecollectionConfirm
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationInterceptorFactory
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentCallbackRetriever
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
@@ -42,7 +43,7 @@ import kotlinx.coroutines.Dispatchers
 import javax.inject.Provider
 
 @OptIn(SharedPaymentTokenSessionPreview::class)
-internal fun createIntentConfirmationInterceptor(
+internal suspend fun createIntentConfirmationInterceptor(
     initializationMode: InitializationMode,
     stripeRepository: StripeRepository = object : AbsFakeStripeRepository() {},
     publishableKeyProvider: () -> String = { "pk" },
@@ -54,7 +55,15 @@ internal fun createIntentConfirmationInterceptor(
         apiKey = publishableKeyProvider(),
         stripeAccount = null,
     )
+    val deferredIntentCallbackRetriever = DeferredIntentCallbackRetriever(
+        intentCreationCallbackProvider = intentCreationCallbackProvider,
+        intentCreateIntentWithConfirmationTokenCallback = { null },
+        preparePaymentMethodHandlerProvider = preparePaymentMethodHandlerProvider,
+        errorReporter = errorReporter,
+        requestOptionsProvider = { requestOptions },
+    )
     return DefaultIntentConfirmationInterceptorFactory(
+        deferredIntentCallbackRetriever = deferredIntentCallbackRetriever,
         intentFirstConfirmationInterceptorFactory = object : IntentFirstConfirmationInterceptor.Factory {
             override fun create(clientSecret: String): IntentFirstConfirmationInterceptor {
                 return IntentFirstConfirmationInterceptor(
@@ -65,13 +74,13 @@ internal fun createIntentConfirmationInterceptor(
         },
         deferredIntentConfirmationInterceptorFactory = object : DeferredIntentConfirmationInterceptor.Factory {
             override fun create(
-                intentConfiguration: PaymentSheet.IntentConfiguration
+                intentConfiguration: PaymentSheet.IntentConfiguration,
+                createIntentCallback: CreateIntentCallback
             ): DeferredIntentConfirmationInterceptor {
                 return DeferredIntentConfirmationInterceptor(
                     intentConfiguration = intentConfiguration,
+                    createIntentCallback = createIntentCallback,
                     stripeRepository = stripeRepository,
-                    errorReporter = errorReporter,
-                    intentCreationCallbackProvider = intentCreationCallbackProvider,
                     allowsManualConfirmation = false,
                     requestOptions = requestOptions,
                 )
@@ -79,13 +88,14 @@ internal fun createIntentConfirmationInterceptor(
         },
         sharedPaymentTokenConfirmationInterceptorFactory = object : SharedPaymentTokenConfirmationInterceptor.Factory {
             override fun create(
-                initializationMode: InitializationMode.DeferredIntent
+                intentConfiguration: PaymentSheet.IntentConfiguration,
+                handler: PreparePaymentMethodHandler
             ): SharedPaymentTokenConfirmationInterceptor {
                 return SharedPaymentTokenConfirmationInterceptor(
-                    initializationMode = initializationMode,
+                    intentConfiguration = intentConfiguration,
+                    handler = handler,
                     stripeRepository = stripeRepository,
                     errorReporter = errorReporter,
-                    preparePaymentMethodHandlerProvider = preparePaymentMethodHandlerProvider,
                     requestOptions = requestOptions,
                 )
             }

@@ -1,7 +1,9 @@
 package com.stripe.android.paymentelement.callbacks
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
+import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import org.junit.Test
@@ -57,8 +59,57 @@ class PaymentElementCallbacksTest {
         }.exceptionOrNull()
 
         assertThat(exception).isInstanceOf(IllegalArgumentException::class.java)
-        assertThat(exception?.message).isEqualTo(
-            "Only one of createIntentCallback or createIntentWithConfirmationTokenCallback can be set"
-        )
+        assertThat(exception?.message).isEqualTo(ERROR_MESSAGE)
+    }
+
+    @Test
+    @OptIn(SharedPaymentTokenSessionPreview::class)
+    fun `build throws when both CreateIntentCallback and PreparePaymentMethodHandler are non-null`() {
+        val intentCallback = CreateIntentCallback { _, _ ->
+            CreateIntentResult.Success("pi_123_secret_456")
+        }
+
+        val preparePaymentMethodHandler = PreparePaymentMethodHandler { _, _ ->
+            CreateIntentResult.Success("pi_123_secret_456")
+        }
+
+        val exception = kotlin.runCatching {
+            PaymentElementCallbacks.Builder()
+                .createIntentCallback(intentCallback)
+                .preparePaymentMethodHandler(preparePaymentMethodHandler)
+                .build()
+        }.exceptionOrNull()
+
+        assertThat(exception).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(exception?.message).isEqualTo(ERROR_MESSAGE)
+    }
+
+    @Test
+    @OptIn(SharedPaymentTokenSessionPreview::class)
+    fun `build throws when both ConfirmationTokenCallback and PreparePaymentMethodHandler are non-null`() {
+        val confirmationTokenCallback = CreateIntentWithConfirmationTokenCallback { _ ->
+            CreateIntentResult.Success("pi_123_secret_456")
+        }
+
+        val preparePaymentMethodHandler = PreparePaymentMethodHandler { _, _ ->
+            CreateIntentResult.Success("pi_123_secret_456")
+        }
+
+        val exception = kotlin.runCatching {
+            PaymentElementCallbacks.Builder()
+                .createIntentCallback(confirmationTokenCallback)
+                .preparePaymentMethodHandler(preparePaymentMethodHandler)
+                .build()
+        }.exceptionOrNull()
+
+        assertThat(exception).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(exception?.message).isEqualTo(ERROR_MESSAGE)
+    }
+
+    companion object {
+
+        private const val ERROR_MESSAGE =
+            "Only one of createIntentCallback, createIntentWithConfirmationTokenCallback " +
+                "or preparePaymentMethodHandler can be set"
     }
 }

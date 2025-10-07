@@ -86,7 +86,7 @@ internal object CustomerSheetTestHelper {
         eventReporter: CustomerSheetEventReporter = mock(),
         intentConfirmationInterceptorFactory: IntentConfirmationInterceptor.Factory =
             object : IntentConfirmationInterceptor.Factory {
-                override fun create(
+                override suspend fun create(
                     initializationMode: PaymentElementLoader.InitializationMode
                 ): IntentConfirmationInterceptor {
                     return FakeIntentConfirmationInterceptor().apply {
