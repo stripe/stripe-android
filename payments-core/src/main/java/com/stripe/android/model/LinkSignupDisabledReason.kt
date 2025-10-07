@@ -8,11 +8,6 @@ import androidx.annotation.RestrictTo
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 enum class LinkSignupDisabledReason(val value: String) {
     /**
-     * Link itself is not enabled.
-     */
-    LinkNotEnabled("link_not_enabled"),
-
-    /**
      * The card funding source is not supported.
      */
     LinkCardNotSupported("link_card_not_supported"),

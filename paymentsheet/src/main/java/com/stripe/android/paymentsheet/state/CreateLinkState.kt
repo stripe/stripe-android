@@ -72,7 +72,8 @@ internal class DefaultCreateLinkState @Inject constructor(
             configuration = configuration
         )
 
-        if (linkDisabledReasons.isNotEmpty()) {
+        val isLinkDisabled = linkDisabledReasons.isNotEmpty()
+        if (isLinkDisabled) {
             return LinkDisabledState(linkDisabledReasons)
         }
 
@@ -94,16 +95,6 @@ internal class DefaultCreateLinkState @Inject constructor(
                 linkConfiguration = linkConfiguration,
             )
         )
-    }
-
-    private fun isLinkEnabled(
-        elementsSession: ElementsSession,
-        configuration: CommonConfiguration,
-    ): Boolean {
-        return getLinkDisabledReasons(
-            elementsSession = elementsSession,
-            configuration = configuration
-        ).isEmpty()
     }
 
     private fun getLinkDisabledReasons(
@@ -136,13 +127,8 @@ internal class DefaultCreateLinkState @Inject constructor(
 
     private fun getLinkSignupDisabledReasons(
         elementsSession: ElementsSession,
-        configuration: CommonConfiguration,
         linkConfiguration: LinkConfiguration,
     ): List<LinkSignupDisabledReason> = buildList {
-        if (!isLinkEnabled(elementsSession, configuration)) {
-            add(LinkSignupDisabledReason.LinkNotEnabled)
-        }
-
         val validFundingSource = elementsSession.stripeIntent.linkFundingSources.contains(PaymentMethod.Type.Card.code)
         if (!validFundingSource) {
             add(LinkSignupDisabledReason.LinkCardNotSupported)
@@ -173,7 +159,6 @@ internal class DefaultCreateLinkState @Inject constructor(
 
         val disabledReasons = getLinkSignupDisabledReasons(
             elementsSession = elementsSession,
-            configuration = configuration,
             linkConfiguration = linkConfiguration,
         )
 
