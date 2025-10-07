@@ -28,7 +28,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import javax.inject.Named
 
-internal open class DeferredIntentConfirmationInterceptor @AssistedInject constructor(
+internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val intentConfiguration: PaymentSheet.IntentConfiguration,
     @Assisted private val createIntentCallback: CreateIntentCallback,
     private val stripeRepository: StripeRepository,
