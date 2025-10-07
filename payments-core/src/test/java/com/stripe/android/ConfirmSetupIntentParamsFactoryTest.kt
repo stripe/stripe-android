@@ -1,17 +1,14 @@
 package com.stripe.android
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.MandateDataParams
-import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.model.RadarOptions
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.SetupIntentFactory
@@ -212,31 +209,6 @@ class ConfirmSetupIntentParamsFactoryTest {
 
         val params = result.asConfirmSetupIntentParams()
         assertThat(params.radarOptions).isEqualTo(radarOptions)
-    }
-
-    @Test
-    fun `create() with clientAttributionMetadata should include clientAttributionMetadata in result`() {
-        val clientAttributionMetadata = ClientAttributionMetadata(
-            elementsSessionConfigId = "elements_session_123",
-            paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
-            paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic
-        )
-        val factoryWithConfig = ConfirmSetupIntentParamsFactory(
-            clientSecret = CLIENT_SECRET,
-            intent = SetupIntentFactory.create(),
-        )
-
-        val result = factoryWithConfig.create(
-            paymentMethod = PaymentMethodFactory.cashAppPay(),
-            optionsParams = null,
-            extraParams = null,
-            intentConfigSetupFutureUsage = null,
-            radarOptions = null,
-            clientAttributionMetadata = clientAttributionMetadata,
-        )
-
-        val params = result.asConfirmSetupIntentParams()
-        assertThat(params.clientAttributionMetadata).isEqualTo(clientAttributionMetadata)
     }
 
     private fun ConfirmStripeIntentParams.asConfirmSetupIntentParams(): ConfirmSetupIntentParams {

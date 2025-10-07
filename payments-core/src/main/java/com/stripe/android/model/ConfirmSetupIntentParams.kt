@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_ATTRIBUTION_METADATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_DATA
@@ -71,9 +70,7 @@ constructor(
 
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val radarOptions: RadarOptions? = null,
 
-    @get:VisibleForTesting
-    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    val clientAttributionMetadata: ClientAttributionMetadata? = null,
+    private val clientAttributionMetadata: ClientAttributionMetadata? = null,
 ) : ConfirmStripeIntentParams {
 
     override fun shouldUseStripeSdk(): Boolean {
