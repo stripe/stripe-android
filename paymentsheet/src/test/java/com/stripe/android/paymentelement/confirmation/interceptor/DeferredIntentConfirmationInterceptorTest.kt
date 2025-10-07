@@ -363,9 +363,6 @@ class DeferredIntentConfirmationInterceptorTest {
         }
 
     companion object {
-        private const val CREATE_INTENT_CALLBACK_MESSAGE =
-            "CreateIntentCallback must be implemented when using IntentConfiguration with PaymentSheet"
-
         internal val DEFAULT_DEFERRED_INTENT = InitializationMode.DeferredIntent(
             intentConfiguration = PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Payment(

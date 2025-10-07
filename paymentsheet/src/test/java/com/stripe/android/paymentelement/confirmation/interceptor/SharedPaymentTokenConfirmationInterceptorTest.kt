@@ -219,10 +219,6 @@ class SharedPaymentTokenConfirmationInterceptorTest {
     }
 
     private companion object {
-        const val PREPARE_PAYMENT_METHOD_HANDLER_MESSAGE =
-            "PreparePaymentMethodHandler must be implemented when using IntentConfiguration with " +
-                "shared payment tokens!"
-
         val DEFAULT_SPT_INTENT = InitializationMode.DeferredIntent(
             intentConfiguration = PaymentSheet.IntentConfiguration(
                 sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(

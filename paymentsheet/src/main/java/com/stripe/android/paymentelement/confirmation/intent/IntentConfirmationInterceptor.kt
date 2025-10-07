@@ -63,7 +63,7 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
                         sharedPaymentTokenConfirmationInterceptorFactory.create(
                             initializationMode.intentConfiguration,
                             deferredIntentCallback.handler,
-                            )
+                        )
                     }
                 }
             }
