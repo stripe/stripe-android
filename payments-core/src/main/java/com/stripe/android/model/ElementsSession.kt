@@ -81,6 +81,9 @@ data class ElementsSession(
     val linkSignUpOptInInitialValue: Boolean
         get() = linkSettings?.linkSignUpOptInInitialValue ?: false
 
+    val enableAttestationOnIntentConfirmation: Boolean
+        get() = flags[Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION] == true
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class LinkSettings(
@@ -228,7 +231,8 @@ data class ElementsSession(
         ELEMENTS_ENABLE_PASSIVE_CAPTCHA("elements_enable_passive_captcha"),
         ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT(
             "elements_mobile_force_setup_future_use_behavior_and_new_mandate_text"
-        )
+        ),
+        ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION("elements_mobile_attest_on_intent_confirmation")
     }
 
     /**
