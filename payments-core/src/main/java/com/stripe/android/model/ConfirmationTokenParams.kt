@@ -9,7 +9,7 @@ import kotlinx.parcelize.Parcelize
 data class ConfirmationTokenParams(
     val paymentMethodId: String? = null,
     val paymentMethodData: PaymentMethodCreateParams? = null,
-    val returnUrl: String? = null,
+    var returnUrl: String? = null,
     val setUpFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null,
     val shipping: ConfirmPaymentIntentParams.Shipping? = null,
     val mandateDataParams: MandateDataParams? = null,

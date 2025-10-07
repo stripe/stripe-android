@@ -164,7 +164,7 @@ internal class PaymentSheetPlaygroundActivity :
 
             val playgroundState by viewModel.state.collectAsState()
 
-            val paymentSheet = remember {
+            val paymentSheet = remember(playgroundState) {
                 PaymentSheet.Builder(viewModel::onPaymentSheetResult)
                     .externalPaymentMethodConfirmHandler(this)
                     .confirmCustomPaymentMethodCallback(this)
