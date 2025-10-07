@@ -9,7 +9,6 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.ConfirmationTokenParams
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.networking.StripeRepository
@@ -22,7 +21,6 @@ import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationD
 import com.stripe.android.paymentelement.confirmation.utils.ConfirmActionHelper
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.paymentsheet.CreateIntentResult
-import com.stripe.android.paymentsheet.DeferredIntentValidator
 import com.stripe.android.paymentsheet.PaymentSheet
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -149,10 +147,6 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             options = requestOptions,
         ).mapCatching { intent ->
             if (intent.isConfirmed) {
-                failIfSetAsDefaultFeatureIsEnabled(
-                    (confirmationOption as? PaymentMethodConfirmationOption.New)?.extraParams
-                )
-
                 ConfirmationDefinition.Action.Complete(
                     intent = intent,
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
@@ -161,7 +155,6 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             } else if (intent.requiresAction()) {
                 confirmActionHelper.createNextAction(clientSecret, intent, paymentMethod)
             } else {
-                DeferredIntentValidator.validate(intent, intentConfiguration, allowsManualConfirmation, paymentMethod)
                 confirmActionHelper.createDeferredConfirmAction(
                     clientSecret,
                     intent,
@@ -177,29 +170,6 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 cause = error,
                 message = error.stripeErrorMessage(),
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-            )
-        }
-    }
-
-    private fun failIfSetAsDefaultFeatureIsEnabled(paymentMethodExtraParams: PaymentMethodExtraParams?) {
-        // Ideally, we would crash anytime the set as default checkbox is shown, rather than just when it is checked.
-        // We could check if it is shown by asserting that setAsDefault != null instead of asserting that it is true.
-        // However, we don't have good end-to-end test coverage of this for now, so if we made a change to start
-        // sending the set as default flag as false more frequently, we could accidentally start failing here more
-        // often as well.
-        val setAsDefaultChecked = when (paymentMethodExtraParams) {
-            is PaymentMethodExtraParams.Card -> paymentMethodExtraParams.setAsDefault == true
-            is PaymentMethodExtraParams.USBankAccount -> paymentMethodExtraParams.setAsDefault == true
-            is PaymentMethodExtraParams.Link -> paymentMethodExtraParams.setAsDefault == true
-            is PaymentMethodExtraParams.SepaDebit -> paymentMethodExtraParams.setAsDefault == true
-            is PaymentMethodExtraParams.BacsDebit, null -> false
-        }
-
-        if (setAsDefaultChecked && !requestOptions.apiKeyIsLiveMode) {
-            throw IllegalStateException(
-                "(Test-mode only error) The default payment methods feature is not yet supported with deferred " +
-                    "server-side confirmation. Please contact us if you'd like to use this feature via a Github " +
-                    "issue on stripe-android."
             )
         }
     }
