@@ -36,12 +36,14 @@ import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.image.getDrawableFromUri
 import com.stripe.android.uicore.image.rememberDrawablePainter
 
+@Suppress("LongMethod")
 @Composable
 internal fun ConsentWelcomeHeader(
     modifier: Modifier = Modifier,
     merchantLogoUri: Uri,
     title: String?,
-    showLogos: Boolean = true
+    showLogos: Boolean = true,
+    showStripeLogo: Boolean = true
 ) {
     if (showLogos) {
         Row(
@@ -78,23 +80,25 @@ internal fun ConsentWelcomeHeader(
                     contentDescription = stringResource(id = R.string.stripe_description_merchant_logo)
                 )
             }
-            Image(
-                painter = painterResource(id = R.drawable.stripe_ellipsis_icon),
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .width(16.dp)
-                    .height(16.dp),
-                contentDescription = stringResource(id = R.string.stripe_description_ellipsis)
-            )
+            if (showStripeLogo) {
+                Image(
+                    painter = painterResource(id = R.drawable.stripe_ellipsis_icon),
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .width(16.dp)
+                        .height(16.dp),
+                    contentDescription = stringResource(id = R.string.stripe_description_ellipsis)
+                )
 
-            Image(
-                painter = painterResource(id = R.drawable.stripe_square),
-                modifier = Modifier
-                    .width(64.dp)
-                    .height(64.dp)
-                    .clip(RoundedCornerShape(10.dp)),
-                contentDescription = stringResource(id = R.string.stripe_description_stripe_logo)
-            )
+                Image(
+                    painter = painterResource(id = R.drawable.stripe_square),
+                    modifier = Modifier
+                        .width(64.dp)
+                        .height(64.dp)
+                        .clip(RoundedCornerShape(10.dp)),
+                    contentDescription = stringResource(id = R.string.stripe_description_stripe_logo)
+                )
+            }
         }
     }
     Text(
