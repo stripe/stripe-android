@@ -23,10 +23,13 @@ internal class ConfirmActionHelper(private val isLiveMode: Boolean) {
     fun createNextAction(
         clientSecret: String,
         intent: StripeIntent,
-        paymentMethod: PaymentMethod
+        paymentMethod: PaymentMethod,
+        isConfirmationToken: Boolean,
     ): ConfirmationDefinition.Action<Args> {
         return runCatching<ConfirmationDefinition.Action<Args>> {
-            DeferredIntentValidator.validatePaymentMethod(intent, paymentMethod)
+            if (!isConfirmationToken) {
+                DeferredIntentValidator.validatePaymentMethod(intent, paymentMethod)
+            }
 
             ConfirmationDefinition.Action.Launch(
                 launcherArguments = Args.NextAction(clientSecret),

@@ -192,7 +192,12 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
                     completedFullPaymentFlow = true,
                 )
             } else if (intent.requiresAction()) {
-                confirmActionHelper.createNextAction(clientSecret, intent, paymentMethod)
+                confirmActionHelper.createNextAction(
+                    clientSecret = clientSecret,
+                    intent = intent,
+                    paymentMethod = paymentMethod,
+                    isConfirmationToken = false,
+                )
             } else {
                 DeferredIntentValidator.validate(intent, intentConfiguration, allowsManualConfirmation, paymentMethod)
                 confirmActionHelper.createConfirmAction(

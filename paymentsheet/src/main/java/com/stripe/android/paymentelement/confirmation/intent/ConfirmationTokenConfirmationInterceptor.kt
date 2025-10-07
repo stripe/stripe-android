@@ -153,7 +153,12 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     completedFullPaymentFlow = true,
                 )
             } else if (intent.requiresAction()) {
-                confirmActionHelper.createNextAction(clientSecret, intent, paymentMethod)
+                confirmActionHelper.createNextAction(
+                    clientSecret = clientSecret,
+                    intent = intent,
+                    paymentMethod = paymentMethod,
+                    isConfirmationToken = true,
+                )
             } else {
                 confirmActionHelper.createDeferredConfirmAction(
                     clientSecret,
