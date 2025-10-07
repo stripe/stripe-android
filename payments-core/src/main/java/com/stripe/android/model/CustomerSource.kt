@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import com.stripe.android.core.model.StripeModel
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -12,7 +13,8 @@ sealed class CustomerPaymentSource : StripeModel {
 }
 
 @Parcelize
-data class CustomerCard(
+@Poko
+class CustomerCard(
     val card: Card
 ) : CustomerPaymentSource() {
     override val id: String? get() = card.id
@@ -24,7 +26,8 @@ data class CustomerCard(
 }
 
 @Parcelize
-data class CustomerBankAccount(
+@Poko
+class CustomerBankAccount(
     val bankAccount: BankAccount
 ) : CustomerPaymentSource() {
     override val id: String? get() = bankAccount.id
@@ -33,7 +36,8 @@ data class CustomerBankAccount(
 }
 
 @Parcelize
-data class CustomerSource(
+@Poko
+class CustomerSource(
     val source: Source
 ) : CustomerPaymentSource() {
     override val id: String? get() = source.id
