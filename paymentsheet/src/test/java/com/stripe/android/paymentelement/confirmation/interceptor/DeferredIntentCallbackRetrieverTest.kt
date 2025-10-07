@@ -40,6 +40,25 @@ class DeferredIntentCallbackRetrieverTest {
     }
 
     @Test
+    fun `retrieve with sharedPaymentToken fails if the handler is not set but CreateIntentCallback is set`() =
+        testNoProvider(
+            event = ErrorReporter.ExpectedErrorEvent.PREPARE_PAYMENT_METHOD_HANDLER_NULL,
+            failureMessage = PREPARE_PAYMENT_METHOD_HANDLER_MESSAGE,
+            userMessage = PREPARE_PAYMENT_METHOD_HANDLER_MESSAGE.resolvableString,
+        ) { errorReporter ->
+            createDefaultRetriever(
+                errorReporter = errorReporter,
+                intentCreationCallbackProvider = Provider {
+                    CreateIntentCallback { _, _ ->
+                        CreateIntentResult.Success(clientSecret = "pi_123")
+                    }
+                },
+            ).waitForDeferredIntentCallback(
+                PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken(null)
+            )
+        }
+
+    @Test
     fun `retrieve with DeferredIntent fails if CreateIntentCallback is not set`() = testNoProvider(
         event = ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL,
         failureMessage = CREATE_INTENT_CALLBACK_MESSAGE,
@@ -49,6 +68,25 @@ class DeferredIntentCallbackRetrieverTest {
             PaymentSheet.IntentConfiguration.IntentBehavior.Default
         )
     }
+
+    @Test
+    fun `retrieve with DeferredIntent fails if the callback is not set but PreparePaymentMethodHandler is set`() =
+        testNoProvider(
+            event = ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL,
+            failureMessage = CREATE_INTENT_CALLBACK_MESSAGE,
+            userMessage = CREATE_INTENT_CALLBACK_MESSAGE.resolvableString,
+        ) { errorReporter ->
+            createDefaultRetriever(
+                errorReporter = errorReporter,
+                preparePaymentMethodHandlerProvider = {
+                    PreparePaymentMethodHandler { _, _ ->
+                        CreateIntentResult.Success(clientSecret = "pi_123")
+                    }
+                }
+            ).waitForDeferredIntentCallback(
+                PaymentSheet.IntentConfiguration.IntentBehavior.Default
+            )
+        }
 
     @Test
     fun `Message for live key when error without confirm callback is user friendly`() = testNoProvider(
@@ -65,7 +103,7 @@ class DeferredIntentCallbackRetrieverTest {
     }
 
     @Test
-    fun `Succeeds if callback is found before timeout time`() {
+    fun `Succeeds if CreateIntentCallback is found before timeout time`() {
         val dispatcher = StandardTestDispatcher()
         var callback: CreateIntentCallback? = null
 
@@ -91,6 +129,69 @@ class DeferredIntentCallbackRetrieverTest {
             assertTrue(retrieveJob.isCompleted)
             assertThat(errorReporter.getLoggedErrors()).containsExactly(
                 ErrorReporter.SuccessEvent.FOUND_CREATE_INTENT_CALLBACK_WHILE_POLLING.eventName,
+            )
+        }
+    }
+
+    @Test
+    fun `Succeeds if CreateIntentWithConfirmationTokenCallback is found before timeout time`() {
+        val dispatcher = StandardTestDispatcher()
+        var callback: CreateIntentWithConfirmationTokenCallback? = null
+
+        runTest(dispatcher) {
+            val errorReporter = FakeErrorReporter()
+            val retrieveJob = async {
+                createDefaultRetriever(
+                    errorReporter = errorReporter,
+                    intentCreationWithConfirmationTokenCallback = Provider { callback },
+                ).waitForDeferredIntentCallback(
+                    PaymentSheet.IntentConfiguration.IntentBehavior.Default
+                )
+            }
+            dispatcher.scheduler.advanceTimeBy(1000)
+            assertTrue(retrieveJob.isActive)
+
+            callback = CreateIntentWithConfirmationTokenCallback { _ ->
+                CreateIntentResult.Success(clientSecret = "pi_123")
+            }
+
+            dispatcher.scheduler.advanceTimeBy(1001)
+            assertFalse(retrieveJob.isActive)
+            assertTrue(retrieveJob.isCompleted)
+            assertThat(errorReporter.getLoggedErrors()).containsExactly(
+                ErrorReporter.SuccessEvent
+                    .FOUND_CREATE_INTENT_WITH_CONFIRMATION_TOKEN_CALLBACK_WHILE_POLLING.eventName,
+            )
+        }
+    }
+
+    @Test
+    fun `Succeeds if PreparePaymentMethodHandler is found before timeout time`() {
+        val dispatcher = StandardTestDispatcher()
+        var callback: PreparePaymentMethodHandler? = null
+
+        runTest(dispatcher) {
+            val errorReporter = FakeErrorReporter()
+            val retrieveJob = async {
+                createDefaultRetriever(
+                    errorReporter = errorReporter,
+                    preparePaymentMethodHandlerProvider = Provider { callback },
+                ).waitForDeferredIntentCallback(
+                    PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken(null)
+                )
+            }
+            dispatcher.scheduler.advanceTimeBy(1000)
+            assertTrue(retrieveJob.isActive)
+
+            callback = PreparePaymentMethodHandler { _, _ ->
+                CreateIntentResult.Success(clientSecret = "pi_123")
+            }
+
+            dispatcher.scheduler.advanceTimeBy(1001)
+            assertFalse(retrieveJob.isActive)
+            assertTrue(retrieveJob.isCompleted)
+            assertThat(errorReporter.getLoggedErrors()).containsExactly(
+                ErrorReporter.SuccessEvent.FOUND_PREPARE_PAYMENT_METHOD_HANDLER_WHILE_POLLING.eventName,
             )
         }
     }

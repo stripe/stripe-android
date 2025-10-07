@@ -96,6 +96,10 @@ internal class DeferredIntentCallbackRetriever @Inject constructor(
     private fun retrieveDeferredIntentCallback(
         behavior: PaymentSheet.IntentConfiguration.IntentBehavior
     ): DeferredIntentCallback? {
+        // We only fetch one of the providers based on the behavior. This ensures that if multiple
+        // providers are set (which would be a misconfiguration), we only use the one that's relevant.
+        // PaymentMethod and ConfirmationToken callbacks are mutually exclusive
+        // and verified in PaymentElementCallbacks.Builder.build()
         when (behavior) {
             is PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken -> {
                 preparePaymentMethodHandlerProvider.get()?.let {
