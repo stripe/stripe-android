@@ -17,6 +17,7 @@ internal data class LinkState(
     val signupModeResult: LinkSignupModeResult
 ) : LinkStateResult {
 
+    // Constructor added for backwards compatibility with existing tests.
     @VisibleForTesting
     constructor(
         configuration: LinkConfiguration,

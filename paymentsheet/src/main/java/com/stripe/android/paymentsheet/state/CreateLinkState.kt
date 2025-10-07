@@ -187,6 +187,8 @@ internal class DefaultCreateLinkState @Inject constructor(
         return LinkSignupModeResult.Enabled(signupMode)
     }
 
+    // Create LinkConfiguration without validating whether Link should be enabled at all.
+    // Validation is done in getLinkDisabledReasons.
     private suspend fun createLinkConfigurationWithoutValidation(
         configuration: CommonConfiguration,
         customer: CustomerRepository.CustomerInfo?,
