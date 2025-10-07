@@ -23,7 +23,7 @@ internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.
     data class Saved(
         val paymentMethod: com.stripe.android.model.PaymentMethod,
         override val optionsParams: PaymentMethodOptionsParams?,
-        override val clientAttributionMetadata: ClientAttributionMetadata?,
+        override val clientAttributionMetadata: ClientAttributionMetadata? = null,
         val originatedFromWallet: Boolean = false,
         override val passiveCaptchaParams: PassiveCaptchaParams?,
         val hCaptchaToken: String? = null,
