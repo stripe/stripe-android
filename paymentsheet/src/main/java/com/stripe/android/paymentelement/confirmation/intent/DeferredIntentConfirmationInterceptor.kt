@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DeferredIntentValidator
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.utils.hasIntentToSetup
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -192,12 +193,20 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
                     completedFullPaymentFlow = true,
                 )
             } else if (intent.requiresAction()) {
-                confirmActionHelper.createNextAction(
-                    clientSecret = clientSecret,
-                    intent = intent,
-                    paymentMethod = paymentMethod,
-                    isConfirmationToken = false,
-                )
+                runCatching<ConfirmationDefinition.Action<Args>> {
+                    DeferredIntentValidator.validatePaymentMethod(intent, paymentMethod)
+                    ConfirmationDefinition.Action.Launch(
+                        launcherArguments = Args.NextAction(clientSecret),
+                        deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                        receivesResultInProcess = false,
+                    )
+                }.getOrElse {
+                    ConfirmationDefinition.Action.Fail(
+                        cause = InvalidDeferredIntentUsageException(),
+                        message = resolvableString(R.string.stripe_paymentsheet_invalid_deferred_intent_usage),
+                        errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    )
+                }
             } else {
                 DeferredIntentValidator.validate(intent, intentConfiguration, allowsManualConfirmation, paymentMethod)
                 confirmActionHelper.createConfirmAction(
