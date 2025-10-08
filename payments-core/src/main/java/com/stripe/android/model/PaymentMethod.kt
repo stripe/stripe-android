@@ -272,7 +272,7 @@ constructor(
             requiresMandate = false,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
-            afterRedirectAction = AfterRedirectAction.Refresh(),
+            afterRedirectAction = AfterRedirectAction.Refresh,
         ),
         P24(
             "p24",
@@ -374,7 +374,7 @@ constructor(
             requiresMandate = false,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
-            afterRedirectAction = AfterRedirectAction.Refresh(pollingDuration = MAX_POLLING_DURATION),
+            afterRedirectAction = AfterRedirectAction.Poll(pollingDuration = MAX_POLLING_DURATION),
         ),
         Klarna(
             "klarna",
@@ -383,7 +383,7 @@ constructor(
             requiresMandate = true,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
-            afterRedirectAction = AfterRedirectAction.Refresh(),
+            afterRedirectAction = AfterRedirectAction.Refresh,
         ),
         Affirm(
             "affirm",
@@ -490,7 +490,7 @@ constructor(
             requiresMandate = true,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
-            afterRedirectAction = AfterRedirectAction.Refresh(),
+            afterRedirectAction = AfterRedirectAction.Refresh,
         ),
         Boleto(
             code = "boleto",
@@ -597,9 +597,12 @@ constructor(
         }
 
         @Parcelize
-        data class Refresh(override val pollingDuration: Long = 0L) : AfterRedirectAction {
+        data object Refresh : AfterRedirectAction {
             @IgnoredOnParcel
             override val shouldRefreshOrRetrieve: Boolean = true
+
+            @IgnoredOnParcel
+            override val pollingDuration: Long = 0L
         }
     }
 

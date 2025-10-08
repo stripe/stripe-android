@@ -66,13 +66,22 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                         failureMessageFactory.create(stripeIntent, result.flowOutcome)
                     )
                 }
-                shouldRefreshIntent(stripeIntent, result.flowOutcome) -> {
-                    val intent = refreshStripeIntentUntilTerminalState(
-                        stripeIntent,
-                        result.clientSecret,
-                        requestOptions,
-                        initialRetrieveIntentStartTime
-                    ).getOrThrow()
+                shouldRefreshOrPollIntent(stripeIntent, result.flowOutcome) -> {
+                    val intent = if (shouldCallRefreshIntent(stripeIntent)) {
+                        refreshStripeIntent(
+                            clientSecret = result.clientSecret,
+                            requestOptions = requestOptions,
+                            expandFields = EXPAND_PAYMENT_METHOD
+                        ).getOrThrow()
+                    } else {
+                        pollStripeIntentUntilTerminalState(
+                            originalIntent = stripeIntent,
+                            clientSecret = result.clientSecret,
+                            requestOptions = requestOptions,
+                            initialRetrieveIntentStartTime = initialRetrieveIntentStartTime
+                        ).getOrThrow()
+                    }
+
                     val flowOutcome = determineFlowOutcome(intent, result.flowOutcome)
                     createStripeIntentResult(
                         intent,
@@ -127,7 +136,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         return shouldCancelSource && stripeIntent.requiresAction()
     }
 
-    private fun shouldRefreshIntent(
+    private fun shouldRefreshOrPollIntent(
         stripeIntent: StripeIntent,
         @StripeIntentResult.Outcome flowOutcome: Int
     ): Boolean {
@@ -190,7 +199,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
     ): Result<T>
 
     /**
-     * Keeps polling refresh endpoint for this [StripeIntent] until its status is no longer
+     * Keeps polling retrieve endpoint for this [StripeIntent] until its status is no longer
      * "requires_action".
      *
      * @param clientSecret for the intent
@@ -199,57 +208,41 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
      *
      * @return a [StripeIntent] object with a deterministic state.
      */
-    private suspend fun refreshStripeIntentUntilTerminalState(
+    private suspend fun pollStripeIntentUntilTerminalState(
         originalIntent: StripeIntent,
         clientSecret: String,
         requestOptions: ApiRequest.Options,
         initialRetrieveIntentStartTime: Long
     ): Result<T> {
-        var timeOfLastRequest = System.currentTimeMillis()
-        var stripeIntentResult = refreshOrRetrieveIntent(originalIntent, clientSecret, requestOptions)
+        var timeOfLastRequest = initialRetrieveIntentStartTime
+        var stripeIntentResult: Result<T>? = null
 
         val timeRemaining = getPollingDurationForPaymentMethod(originalIntent) -
             (System.currentTimeMillis() - initialRetrieveIntentStartTime)
 
         withTimeoutOrNull(timeRemaining) {
+            stripeIntentResult = retrieveStripeIntent(clientSecret, requestOptions, EXPAND_PAYMENT_METHOD)
             while (shouldRetry(stripeIntentResult)) {
                 // We want to delay a maximum of 1s between requests, including the time the request took.
                 // e.g. if the previous request took 250ms, the delay will be 750ms
                 delay(POLLING_DELAY - (System.currentTimeMillis() - timeOfLastRequest))
                 timeOfLastRequest = System.currentTimeMillis()
-                stripeIntentResult = refreshOrRetrieveIntent(originalIntent, clientSecret, requestOptions)
+                stripeIntentResult = retrieveStripeIntent(clientSecret, requestOptions, EXPAND_PAYMENT_METHOD)
             }
         }
 
-        if (shouldRetry(stripeIntentResult)) {
-            stripeIntentResult = refreshOrRetrieveIntent(originalIntent, clientSecret, requestOptions)
+        // Retrieve final time if intent not in terminal state OR result is null which is possible if the initial
+        // request took longer than the polling duration for the payment method. Ensures we always call retrieve
+        // at least once after the polling duration
+        if (shouldRetry(stripeIntentResult) || stripeIntentResult == null) {
+            stripeIntentResult = retrieveStripeIntent(clientSecret, requestOptions, EXPAND_PAYMENT_METHOD)
         }
 
-        return stripeIntentResult
+        return stripeIntentResult as Result<T>
     }
 
     private fun getPollingDurationForPaymentMethod(stripeIntent: StripeIntent): Long {
         return stripeIntent.paymentMethod?.type?.afterRedirectAction?.pollingDuration ?: MAX_POLLING_DURATION
-    }
-
-    private suspend fun refreshOrRetrieveIntent(
-        originalIntent: StripeIntent,
-        clientSecret: String,
-        requestOptions: ApiRequest.Options,
-    ): Result<T> {
-        return if (shouldCallRefreshIntent(originalIntent)) {
-            refreshStripeIntent(
-                clientSecret = clientSecret,
-                requestOptions = requestOptions,
-                expandFields = EXPAND_PAYMENT_METHOD
-            )
-        } else {
-            retrieveStripeIntent(
-                clientSecret = clientSecret,
-                requestOptions = requestOptions,
-                expandFields = EXPAND_PAYMENT_METHOD
-            )
-        }
     }
 
     /**
@@ -268,15 +261,12 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         failureMessage: String?
     ): S
 
-    private fun shouldRetry(stripeIntentResult: Result<StripeIntent>): Boolean {
-        val stripeIntent = stripeIntentResult.getOrNull() ?: return true
+    private fun shouldRetry(stripeIntentResult: Result<StripeIntent>?): Boolean {
+        val stripeIntent = stripeIntentResult?.getOrNull() ?: return true
         val requiresAction = stripeIntent.requiresAction()
         val isCardPaymentProcessing = stripeIntent.status == StripeIntent.Status.Processing &&
             stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card
-        // Payment methods with AfterRedirectAction.Refresh should only call refresh endpoint once
-        val isNotRefreshPm =
-            stripeIntent.paymentMethod?.type?.afterRedirectAction !is PaymentMethod.AfterRedirectAction.Refresh
-        return (requiresAction && isNotRefreshPm) || isCardPaymentProcessing
+        return requiresAction || isCardPaymentProcessing
     }
 
     internal companion object {
