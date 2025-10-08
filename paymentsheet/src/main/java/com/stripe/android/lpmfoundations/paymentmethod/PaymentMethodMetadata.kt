@@ -414,7 +414,14 @@ internal data class PaymentMethodMetadata(
                     .flags[ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT] == true,
                 passiveCaptchaParams = elementsSession.passiveCaptchaParams,
                 openCardScanAutomatically = configuration.opensCardScannerAutomatically,
-                clientAttributionMetadata = null,
+                clientAttributionMetadata = ClientAttributionMetadata(
+                    elementsSessionConfigId = elementsSession.elementsSessionId,
+                    // We omit paymentIntentCreationFlow and paymentMethodSelectionFlow in CustomerSheet, because these
+                    // fields are not meaningful for CustomerSheet (since intent creation is functionally always
+                    // deferred and only a few PMs are supported).
+                    paymentMethodSelectionFlow = null,
+                    paymentIntentCreationFlow = null,
+                ),
             )
         }
 
