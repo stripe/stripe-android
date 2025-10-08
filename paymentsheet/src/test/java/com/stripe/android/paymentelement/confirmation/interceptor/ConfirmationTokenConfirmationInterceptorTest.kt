@@ -13,7 +13,6 @@ import com.stripe.android.model.ConfirmationTokenParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.parsers.ConfirmationTokenJsonParser
-import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -26,14 +25,11 @@ import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationD
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.interceptor.DeferredIntentConfirmationInterceptorTest.Companion.DEFAULT_DEFERRED_INTENT
 import com.stripe.android.paymentsheet.CreateIntentResult
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import kotlinx.coroutines.test.runTest
-import org.json.JSONObject
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -47,6 +43,16 @@ import javax.inject.Provider
 @RunWith(RobolectricTestRunner::class)
 @OptIn(SharedPaymentTokenSessionPreview::class)
 class ConfirmationTokenConfirmationInterceptorTest {
+    private val confirmationTokenParser = ConfirmationTokenJsonParser()
+
+    private val confirmationToken by lazy {
+        confirmationTokenParser.parse(ConfirmationTokenFixtures.CONFIRMATION_TOKEN_JSON)!!
+    }
+
+    private val minimalConfirmationToken by lazy {
+        confirmationTokenParser.parse(ConfirmationTokenFixtures.MINIMAL_CONFIRMATION_TOKEN_JSON)!!
+    }
+
     @Test
     fun `Fails if creating confirmation token did not succeed`() = runTest {
         val invalidRequestException = InvalidRequestException(
@@ -97,10 +103,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
                     options: ApiRequest.Options
                 ): Result<ConfirmationToken> {
                     // Return a minimal confirmation token without payment method preview
-                    val token = ConfirmationTokenJsonParser().parse(
-                        ConfirmationTokenFixtures.MINIMAL_CONFIRMATION_TOKEN_JSON
-                    )
-                    return Result.success(token!!)
+                    return Result.success(minimalConfirmationToken)
                 }
             },
             intentCreationConfirmationTokenCallbackProvider = Provider {
@@ -119,10 +122,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
 
     @Test
     fun `Fails if retrieving intent did not succeed`() = runTest {
-        val confirmationToken = ConfirmationTokenJsonParser().parse(
-            ConfirmationTokenFixtures.CONFIRMATION_TOKEN_JSON
-        )!!
-
         val apiException = APIException(
             requestId = "req_123",
             statusCode = 500,
@@ -219,10 +218,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
                     confirmationTokenParams: ConfirmationTokenParams,
                     options: ApiRequest.Options
                 ): Result<ConfirmationToken> {
-                    val token = ConfirmationTokenJsonParser().parse(
-                        ConfirmationTokenFixtures.CONFIRMATION_TOKEN_JSON
-                    )
-                    return Result.success(token!!)
+                    return Result.success(confirmationToken)
                 }
 
                 override suspend fun retrieveStripeIntent(
@@ -258,10 +254,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
                     confirmationTokenParams: ConfirmationTokenParams,
                     options: ApiRequest.Options
                 ): Result<ConfirmationToken> {
-                    val token = ConfirmationTokenJsonParser().parse(
-                        ConfirmationTokenFixtures.CONFIRMATION_TOKEN_JSON
-                    )
-                    return Result.success(token!!)
+                    return Result.success(confirmationToken)
                 }
 
                 override suspend fun retrieveStripeIntent(
@@ -297,14 +290,11 @@ class ConfirmationTokenConfirmationInterceptorTest {
             initializationMode = DEFAULT_DEFERRED_INTENT,
             scenario = InterceptorTestScenario(
                 stripeRepository = object : AbsFakeStripeRepository() {
-                    val token = ConfirmationTokenJsonParser().parse(
-                        ConfirmationTokenFixtures.CONFIRMATION_TOKEN_JSON
-                    )!!
                     override suspend fun createConfirmationToken(
                         confirmationTokenParams: ConfirmationTokenParams,
                         options: ApiRequest.Options
                     ): Result<ConfirmationToken> {
-                        return Result.success(token)
+                        return Result.success(confirmationToken)
                     }
 
                     override suspend fun retrieveStripeIntent(
@@ -339,11 +329,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
     fun `Returns success as next step if merchant is forcing success`() = runTest {
         val stripeRepository = mock<StripeRepository>()
         whenever(stripeRepository.createConfirmationToken(any(), any()))
-            .thenReturn(
-                Result.success(ConfirmationTokenJsonParser().parse(
-                    ConfirmationTokenFixtures.CONFIRMATION_TOKEN_JSON
-                )!!)
-            )
+            .thenReturn(Result.success(confirmationToken))
 
         val interceptor = createIntentConfirmationInterceptor(
             initializationMode = DEFAULT_DEFERRED_INTENT,
@@ -372,9 +358,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
 
     @Test
     fun `Passes correct confirmation token to CreateIntentWithConfirmationTokenCallback`() = runTest {
-        val confirmationToken = ConfirmationTokenJsonParser().parse(
-            ConfirmationTokenFixtures.CONFIRMATION_TOKEN_JSON
-        )!!
         val observedTokens = mutableListOf<ConfirmationToken>()
 
         val interceptor = createIntentConfirmationInterceptor(
@@ -408,46 +391,43 @@ class ConfirmationTokenConfirmationInterceptorTest {
         assertThat(observedTokens).hasSize(1)
         assertThat(observedTokens[0]).isEqualTo(confirmationToken)
     }
-}
 
-internal fun succeedingCreateIntentWithConfirmationTokenCallback(
-    expectedConfirmationToken: ConfirmationToken,
-): CreateIntentWithConfirmationTokenCallback {
-    return CreateIntentWithConfirmationTokenCallback { confirmationToken ->
-        assertThat(confirmationToken).isEqualTo(expectedConfirmationToken)
-        CreateIntentResult.Success(clientSecret = "pi_123_secret_456")
-    }
-}
+    private fun createFakeStripeRepositoryForConfirmationToken(): StripeRepository {
+        return object : AbsFakeStripeRepository() {
+            override suspend fun createConfirmationToken(
+                confirmationTokenParams: ConfirmationTokenParams,
+                options: ApiRequest.Options
+            ): Result<ConfirmationToken> {
+                return Result.success(confirmationToken)
+            }
 
-private fun failingCreateIntentWithConfirmationTokenCallback(
-    message: String? = null
-): CreateIntentWithConfirmationTokenCallback {
-    return CreateIntentWithConfirmationTokenCallback { _ ->
-        CreateIntentResult.Failure(
-            cause = TestException(message),
-            displayMessage = message
-        )
-    }
-}
-
-private fun createFakeStripeRepositoryForConfirmationToken(): StripeRepository {
-    return object : AbsFakeStripeRepository() {
-        override suspend fun createConfirmationToken(
-            confirmationTokenParams: ConfirmationTokenParams,
-            options: ApiRequest.Options
-        ): Result<ConfirmationToken> {
-            val token = ConfirmationTokenJsonParser().parse(
-                ConfirmationTokenFixtures.CONFIRMATION_TOKEN_JSON
-            )
-            return Result.success(token!!)
+            override suspend fun retrieveStripeIntent(
+                clientSecret: String,
+                options: ApiRequest.Options,
+                expandFields: List<String>
+            ): Result<StripeIntent> {
+                return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
+            }
         }
+    }
 
-        override suspend fun retrieveStripeIntent(
-            clientSecret: String,
-            options: ApiRequest.Options,
-            expandFields: List<String>
-        ): Result<StripeIntent> {
-            return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
+    private fun succeedingCreateIntentWithConfirmationTokenCallback(
+        expectedConfirmationToken: ConfirmationToken,
+    ): CreateIntentWithConfirmationTokenCallback {
+        return CreateIntentWithConfirmationTokenCallback { confirmationToken ->
+            assertThat(confirmationToken).isEqualTo(expectedConfirmationToken)
+            CreateIntentResult.Success(clientSecret = "pi_123_secret_456")
+        }
+    }
+
+    private fun failingCreateIntentWithConfirmationTokenCallback(
+        message: String? = null
+    ): CreateIntentWithConfirmationTokenCallback {
+        return CreateIntentWithConfirmationTokenCallback { _ ->
+            CreateIntentResult.Failure(
+                cause = TestException(message),
+                displayMessage = message
+            )
         }
     }
 }

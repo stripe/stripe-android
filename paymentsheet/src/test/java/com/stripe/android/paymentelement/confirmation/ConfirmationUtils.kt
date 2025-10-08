@@ -1,6 +1,5 @@
 package com.stripe.android.paymentelement.confirmation
 
-import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.PaymentConfiguration
@@ -44,7 +43,6 @@ import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.RecordingLinkStore
 import kotlinx.coroutines.Dispatchers
-import org.mockito.Mockito.mock
 import javax.inject.Provider
 
 @OptIn(SharedPaymentTokenSessionPreview::class)
