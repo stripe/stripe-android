@@ -40,6 +40,7 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
     private val deferredIntentCallbackRetriever: DeferredIntentCallbackRetriever,
     private val intentFirstConfirmationInterceptorFactory: IntentFirstConfirmationInterceptor.Factory,
     private val deferredIntentConfirmationInterceptorFactory: DeferredIntentConfirmationInterceptor.Factory,
+    private val confirmationTokenConfirmationInterceptorFactory: ConfirmationTokenConfirmationInterceptor.Factory,
     private val sharedPaymentTokenConfirmationInterceptorFactory: SharedPaymentTokenConfirmationInterceptor.Factory,
 ) : IntentConfirmationInterceptor.Factory {
     override suspend fun create(
@@ -52,7 +53,12 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
                         initializationMode.intentConfiguration.intentBehavior
                     )
                 ) {
-                    is DeferredIntentCallback.ConfirmationToken -> TODO()
+                    is DeferredIntentCallback.ConfirmationToken -> {
+                        confirmationTokenConfirmationInterceptorFactory.create(
+                            initializationMode.intentConfiguration,
+                            deferredIntentCallback.callback,
+                        )
+                    }
                     is DeferredIntentCallback.PaymentMethod -> {
                         deferredIntentConfirmationInterceptorFactory.create(
                             initializationMode.intentConfiguration,

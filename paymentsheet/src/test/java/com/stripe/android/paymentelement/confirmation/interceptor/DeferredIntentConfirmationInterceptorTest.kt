@@ -374,7 +374,7 @@ class DeferredIntentConfirmationInterceptorTest {
     }
 }
 
-private class TestException(message: String? = null) : Exception(message) {
+internal class TestException(message: String? = null) : Exception(message) {
 
     override fun hashCode(): Int {
         return Objects.hash(message)

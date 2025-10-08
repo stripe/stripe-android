@@ -1,12 +1,14 @@
 package com.stripe.android.payments
 
 import android.content.Context
+import androidx.annotation.RestrictTo
 
 /**
  * The SDK's "default" `return_url`. When a PaymentIntent or SetupIntent is confirmed without
  * a custom `return_url` via the SDK, [value] will be used instead.
  */
-internal data class DefaultReturnUrl(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class DefaultReturnUrl(
     private val packageName: String
 ) {
     /**
@@ -14,6 +16,7 @@ internal data class DefaultReturnUrl(
      */
     val value: String get() = PREFIX + packageName
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         const val PREFIX = "stripesdk://payment_return_url/"
 

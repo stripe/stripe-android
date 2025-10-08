@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.networking.ApiRequest
@@ -12,12 +13,14 @@ import com.stripe.android.link.analytics.FakeLinkAnalyticsHelper
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.cvc.CvcRecollectionConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationDefinition
+import com.stripe.android.paymentelement.confirmation.intent.ConfirmationTokenConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationInterceptorFactory
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentCallbackRetriever
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationInterceptor
@@ -49,6 +52,9 @@ internal suspend fun createIntentConfirmationInterceptor(
     publishableKeyProvider: () -> String = { "pk" },
     errorReporter: ErrorReporter = FakeErrorReporter(),
     intentCreationCallbackProvider: Provider<CreateIntentCallback?> = Provider { null },
+    intentCreationConfirmationTokenCallbackProvider: Provider<CreateIntentWithConfirmationTokenCallback?> = Provider {
+        null
+    },
     preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?> = Provider { null }
 ): IntentConfirmationInterceptor {
     val requestOptions = ApiRequest.Options(
@@ -57,7 +63,7 @@ internal suspend fun createIntentConfirmationInterceptor(
     )
     val deferredIntentCallbackRetriever = DeferredIntentCallbackRetriever(
         intentCreationCallbackProvider = intentCreationCallbackProvider,
-        intentCreateIntentWithConfirmationTokenCallback = { null },
+        intentCreateIntentWithConfirmationTokenCallback = intentCreationConfirmationTokenCallbackProvider,
         preparePaymentMethodHandlerProvider = preparePaymentMethodHandlerProvider,
         errorReporter = errorReporter,
         requestOptionsProvider = { requestOptions },
@@ -82,6 +88,20 @@ internal suspend fun createIntentConfirmationInterceptor(
                     createIntentCallback = createIntentCallback,
                     stripeRepository = stripeRepository,
                     allowsManualConfirmation = false,
+                    requestOptions = requestOptions,
+                )
+            }
+        },
+        confirmationTokenConfirmationInterceptorFactory = object : ConfirmationTokenConfirmationInterceptor.Factory {
+            override fun create(
+                intentConfiguration: PaymentSheet.IntentConfiguration,
+                createIntentCallback: CreateIntentWithConfirmationTokenCallback
+            ): ConfirmationTokenConfirmationInterceptor {
+                return ConfirmationTokenConfirmationInterceptor(
+                    intentConfiguration = intentConfiguration,
+                    createIntentCallback = createIntentCallback,
+                    context = ApplicationProvider.getApplicationContext(),
+                    stripeRepository = stripeRepository,
                     requestOptions = requestOptions,
                 )
             }

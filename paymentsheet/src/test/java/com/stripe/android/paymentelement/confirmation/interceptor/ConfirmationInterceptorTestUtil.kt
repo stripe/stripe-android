@@ -16,6 +16,7 @@ import com.stripe.android.model.RadarOptions
 import com.stripe.android.model.RadarSessionWithHCaptcha
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -38,6 +39,8 @@ internal data class InterceptorTestScenario(
     val publishableKeyProvider: () -> String = { "pk" },
     val errorReporter: ErrorReporter = FakeErrorReporter(),
     val intentCreationCallbackProvider: Provider<CreateIntentCallback?> = Provider { null },
+    val intentCreationConfirmationTokenCallbackProvider: Provider<CreateIntentWithConfirmationTokenCallback?> =
+        Provider { null },
     val preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?> = Provider { null }
 )
 
@@ -53,6 +56,7 @@ internal fun runInterceptorScenario(
         publishableKeyProvider = scenario.publishableKeyProvider,
         errorReporter = scenario.errorReporter,
         intentCreationCallbackProvider = scenario.intentCreationCallbackProvider,
+        intentCreationConfirmationTokenCallbackProvider = scenario.intentCreationConfirmationTokenCallbackProvider,
         preparePaymentMethodHandlerProvider = scenario.preparePaymentMethodHandlerProvider,
     )
     test(interceptor)
