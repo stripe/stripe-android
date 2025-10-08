@@ -43,6 +43,23 @@ class AnalyticsRequestFactoryTest : TestCase() {
     }
 
     @Test
+    fun `when publishable key is a user key, it is redacted`() {
+        val exception = APIException(RuntimeException())
+        val factory = AnalyticsRequestFactory(
+            mock(),
+            null,
+            packageName,
+            { "uk_123" },
+            { "5G" },
+        )
+
+        val params = factory.createRequest(mockEvent, emptyMap()).params
+
+        assertThat(params["publishable_key"])
+            .isEqualTo("[REDACTED_LIVE_KEY]")
+    }
+
+    @Test
     fun getEventLoggingParams_withProductUsage_createsAllFields() {
         val expectedUaName = AnalyticsRequestFactory.ANALYTICS_UA
 
