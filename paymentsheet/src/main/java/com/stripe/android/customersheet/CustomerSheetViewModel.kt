@@ -896,7 +896,7 @@ internal class CustomerSheetViewModel(
             termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
             sellerBusinessName = null,
             forceSetupFutureUseBehavior = false,
-            clientAttributionMetadata = null,
+            clientAttributionMetadata = customerState.value.metadata?.clientAttributionMetadata,
         )
     }
 
@@ -1045,13 +1045,14 @@ internal class CustomerSheetViewModel(
         clientSecret: String,
         paymentMethod: PaymentMethod
     ) {
+        val metadata = customerState.value.metadata
         confirmationHandler.start(
             arguments = ConfirmationHandler.Args(
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
                     paymentMethod = paymentMethod,
                     optionsParams = null,
-                    passiveCaptchaParams = customerState.value.metadata?.passiveCaptchaParams,
-                    clientAttributionMetadata = null,
+                    passiveCaptchaParams = metadata?.passiveCaptchaParams,
+                    clientAttributionMetadata = metadata?.clientAttributionMetadata,
                 ),
                 intent = stripeIntent,
                 initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
