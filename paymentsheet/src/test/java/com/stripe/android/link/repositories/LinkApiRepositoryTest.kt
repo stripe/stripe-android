@@ -350,8 +350,8 @@ class LinkApiRepositoryTest {
         )
 
         @Suppress("UNCHECKED_CAST")
-        val billingDetailsParam = argCaptor.firstValue.toParamMap()["billing_address"] as? Map<String, Any>
-        assertThat(billingDetailsParam!!["country_code"]).isEqualTo(testLocale.country)
+        val billingDetailsParam = argCaptor.firstValue.toParamMap()["billing_address"] as Map<String, Any>
+        assertThat(billingDetailsParam["country_code"]).isEqualTo("CA")
     }
 
     @Test
