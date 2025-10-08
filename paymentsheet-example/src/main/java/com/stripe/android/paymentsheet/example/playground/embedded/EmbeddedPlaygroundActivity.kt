@@ -37,14 +37,12 @@ import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
-import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import com.stripe.android.paymentsheet.example.playground.activity.CustomPaymentMethodActivity
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
-import com.stripe.android.paymentsheet.example.playground.network.PlaygroundRequester
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.ConfirmationTokenSettingsDefinition
@@ -104,12 +102,16 @@ internal class EmbeddedPlaygroundActivity :
         val embeddedBuilder =
             if (playgroundState.snapshot[ConfirmationTokenSettingsDefinition] == true) {
                 EmbeddedPaymentElement.Builder(
-                    createIntentCallback = { _ -> handleCreateIntentCallback() },
+                    createIntentCallback = { _ ->
+                        viewModel.handleCreateIntentCallback(playgroundState, applicationContext)
+                    },
                     resultCallback = ::handleEmbeddedResult,
                 )
             } else {
                 EmbeddedPaymentElement.Builder(
-                    createIntentCallback = { _, _ -> handleCreateIntentCallback() },
+                    createIntentCallback = { _, _ ->
+                        viewModel.handleCreateIntentCallback(playgroundState, applicationContext)
+                    },
                     resultCallback = ::handleEmbeddedResult,
                 )
             }
@@ -165,19 +167,6 @@ internal class EmbeddedPlaygroundActivity :
         }
 
         setupBackPressedCallback()
-    }
-
-    private suspend fun handleCreateIntentCallback(): CreateIntentResult {
-        val playgroundState = playgroundState
-        PlaygroundRequester(playgroundState.snapshot, applicationContext).fetch().fold(
-            onSuccess = { state ->
-                val clientSecret = requireNotNull(state.asPaymentState()).clientSecret
-                return CreateIntentResult.Success(clientSecret)
-            },
-            onFailure = { exception ->
-                return CreateIntentResult.Failure(IllegalStateException(exception))
-            },
-        )
     }
 
     @Composable
