@@ -75,6 +75,7 @@ internal class PaymentSheetTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             clientAttributionMetadataParamsInPaymentMethodData(),
+            clientAttributionMetadataParamsForPaymentIntent(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -109,6 +110,7 @@ internal class PaymentSheetTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             clientAttributionMetadataParamsInPaymentMethodData(),
+            clientAttributionMetadataParamsForPaymentIntent(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -154,6 +156,7 @@ internal class PaymentSheetTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             clientAttributionMetadataParamsInPaymentMethodData(),
+            clientAttributionMetadataParamsForPaymentIntent(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }

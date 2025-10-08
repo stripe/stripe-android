@@ -61,6 +61,7 @@ internal class CustomerSheetTest {
             createPaymentMethodsRequest(),
             cardDetailsParams(),
             billingDetailsParams(),
+            clientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
         }
@@ -205,6 +206,7 @@ internal class CustomerSheetTest {
             createPaymentMethodsRequest(),
             cardDetailsParams(),
             fullBillingDetailsParams(),
+            clientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
         }
@@ -294,6 +296,7 @@ internal class CustomerSheetTest {
             createPaymentMethodsRequest(),
             cardDetailsParams(),
             billingDetailsParams(),
+            clientAttributionMetadataParams(),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
         }

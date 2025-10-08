@@ -11,19 +11,25 @@ import kotlinx.parcelize.Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class ClientAttributionMetadata(
     @get:VisibleForTesting val elementsSessionConfigId: String,
-    @get:VisibleForTesting val paymentIntentCreationFlow: PaymentIntentCreationFlow,
-    @get:VisibleForTesting val paymentMethodSelectionFlow: PaymentMethodSelectionFlow,
+    @get:VisibleForTesting val paymentIntentCreationFlow: PaymentIntentCreationFlow?,
+    @get:VisibleForTesting val paymentMethodSelectionFlow: PaymentMethodSelectionFlow?,
 ) : StripeParamsModel, Parcelable {
 
     override fun toParamMap(): Map<String, Any> {
         return mapOf(
             "elements_session_config_id" to elementsSessionConfigId,
-            "payment_intent_creation_flow" to paymentIntentCreationFlow.paramValue,
-            "payment_method_selection_flow" to paymentMethodSelectionFlow.paramValue,
             "merchant_integration_source" to "elements",
             "merchant_integration_subtype" to "mobile",
             "merchant_integration_version" to "stripe-android/${StripeSdkVersion.VERSION_NAME}",
             "client_session_id" to AnalyticsRequestFactory.sessionId.toString(),
+        ).plus(
+            paymentMethodSelectionFlow?.let {
+                mapOf("payment_method_selection_flow" to it.paramValue)
+            }.orEmpty()
+        ).plus(
+            paymentIntentCreationFlow?.let {
+                mapOf("payment_intent_creation_flow" to it.paramValue)
+            }.orEmpty()
         )
     }
 

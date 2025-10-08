@@ -49,10 +49,8 @@ internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.
         val extraParams: PaymentMethodExtraParams?,
         val shouldSave: Boolean,
         override val passiveCaptchaParams: PassiveCaptchaParams?,
+        override val clientAttributionMetadata: ClientAttributionMetadata? = null,
     ) : PaymentMethodConfirmationOption {
-
-        override val clientAttributionMetadata: ClientAttributionMetadata?
-            get() = null
 
         override fun updatedForDeferredIntent(
             intentConfiguration: PaymentSheet.IntentConfiguration,

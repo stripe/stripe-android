@@ -51,7 +51,12 @@ open class AnalyticsRequestFactory(
     private fun standardParams(): Map<String, Any> = mapOf(
         AnalyticsFields.ANALYTICS_UA to ANALYTICS_UA,
         AnalyticsFields.PUBLISHABLE_KEY to runCatching {
-            publishableKeyProvider.get()
+            val publishableKey = publishableKeyProvider.get()
+            if (publishableKey.startsWith("uk_")) {
+                "[REDACTED_LIVE_KEY]"
+            } else {
+                publishableKey
+            }
         }.getOrDefault(ApiRequest.Options.UNDEFINED_PUBLISHABLE_KEY),
         AnalyticsFields.OS_NAME to Build.VERSION.CODENAME,
         AnalyticsFields.OS_RELEASE to Build.VERSION.RELEASE,

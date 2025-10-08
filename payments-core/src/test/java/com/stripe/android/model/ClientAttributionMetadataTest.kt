@@ -45,4 +45,28 @@ class ClientAttributionMetadataTest {
             "merchant_specified",
         )
     }
+
+    @Test
+    fun `toParamMap() omits paymentIntentCreationFlow if null`() {
+        val clientAttributionMetadataParams = ClientAttributionMetadata(
+            elementsSessionConfigId = "elements_session_123",
+            paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
+            paymentIntentCreationFlow = null,
+        ).toParamMap()
+
+        assertThat(clientAttributionMetadataParams).hasSize(6)
+        assertThat(clientAttributionMetadataParams).doesNotContainKey("payment_intent_creation_flow")
+    }
+
+    @Test
+    fun `toParamMap() omits paymentMethodSelectionFlow if null`() {
+        val clientAttributionMetadataParams = ClientAttributionMetadata(
+            elementsSessionConfigId = "elements_session_123",
+            paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+            paymentMethodSelectionFlow = null,
+        ).toParamMap()
+
+        assertThat(clientAttributionMetadataParams).hasSize(6)
+        assertThat(clientAttributionMetadataParams).doesNotContainKey("payment_method_selection_flow")
+    }
 }
