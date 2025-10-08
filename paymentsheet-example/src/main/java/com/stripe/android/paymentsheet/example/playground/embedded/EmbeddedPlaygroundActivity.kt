@@ -47,6 +47,7 @@ import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.network.PlaygroundRequester
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.ConfirmationTokenSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DropdownSetting
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedRowSelectionBehaviorSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedViewDisplaysMandateSettingDefinition
@@ -100,27 +101,24 @@ internal class EmbeddedPlaygroundActivity :
         this.playgroundState = initialPlaygroundState
         this.playgroundSettings = initialPlaygroundState.snapshot.playgroundSettings()
 
-        val embeddedBuilder = EmbeddedPaymentElement.Builder(
-            createIntentCallback = { _, _ ->
-                val playgroundState = playgroundState
-                PlaygroundRequester(playgroundState.snapshot, applicationContext).fetch().fold(
-                    onSuccess = { state ->
-                        val clientSecret = requireNotNull(state.asPaymentState()).clientSecret
-                        CreateIntentResult.Success(clientSecret)
-                    },
-                    onFailure = { exception ->
-                        CreateIntentResult.Failure(IllegalStateException(exception))
-                    },
+        val embeddedBuilder =
+            if (playgroundState.snapshot[ConfirmationTokenSettingsDefinition] == true) {
+                EmbeddedPaymentElement.Builder(
+                    createIntentCallback = { _ -> handleCreateIntentCallback() },
+                    resultCallback = ::handleEmbeddedResult,
                 )
-            },
-            resultCallback = ::handleEmbeddedResult,
-        )
-            .confirmCustomPaymentMethodCallback(this)
-            .externalPaymentMethodConfirmHandler(this)
-            .analyticEventCallback(this)
-            .rowSelectionBehavior(
-                playgroundSettings[EmbeddedRowSelectionBehaviorSettingsDefinition].value.rowSelectionBehavior
-            )
+            } else {
+                EmbeddedPaymentElement.Builder(
+                    createIntentCallback = { _, _ -> handleCreateIntentCallback() },
+                    resultCallback = ::handleEmbeddedResult,
+                )
+            }
+                .confirmCustomPaymentMethodCallback(this)
+                .externalPaymentMethodConfirmHandler(this)
+                .analyticEventCallback(this)
+                .rowSelectionBehavior(
+                    playgroundSettings[EmbeddedRowSelectionBehaviorSettingsDefinition].value.rowSelectionBehavior
+                )
         val embeddedViewDisplaysMandateText =
             initialPlaygroundState.snapshot[EmbeddedViewDisplaysMandateSettingDefinition]
         setContent {
@@ -167,6 +165,19 @@ internal class EmbeddedPlaygroundActivity :
         }
 
         setupBackPressedCallback()
+    }
+
+    private suspend fun handleCreateIntentCallback(): CreateIntentResult {
+        val playgroundState = playgroundState
+        PlaygroundRequester(playgroundState.snapshot, applicationContext).fetch().fold(
+            onSuccess = { state ->
+                val clientSecret = requireNotNull(state.asPaymentState()).clientSecret
+                return CreateIntentResult.Success(clientSecret)
+            },
+            onFailure = { exception ->
+                return CreateIntentResult.Failure(IllegalStateException(exception))
+            },
+        )
     }
 
     @Composable
