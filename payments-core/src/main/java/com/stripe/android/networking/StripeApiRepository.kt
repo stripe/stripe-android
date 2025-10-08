@@ -1458,32 +1458,28 @@ class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     override suspend fun retrievePaymentMethodMessage(
-        paymentMethods: List<String>,
-        amount: Int,
+        paymentMethods: List<String>?,
+        amount: Long,
         currency: String,
-        country: String,
-        locale: String,
-        logoColor: String,
+        country: String?,
+        locale: String?,
         requestOptions: ApiRequest.Options
     ): Result<PaymentMethodMessage> {
         return fetchStripeModelResult(
             apiRequestFactory.createGet(
-                url = "https://ppm.stripe.com/content",
+                url = "https://ppm.stripe.com/config",
                 options = requestOptions,
-                params = mapOf<String, Any>(
+                params = mapOf<String, Any?>(
                     "amount" to amount,
-                    "client" to "android",
                     "country" to country,
                     "currency" to currency,
                     "locale" to locale,
-                    "logo_color" to logoColor,
-                ) + paymentMethods.mapIndexed { index, paymentMethod ->
-                    Pair("payment_methods[$index]", paymentMethod)
-                }
+                )
             ),
             PaymentMethodMessageJsonParser()
         ) {
             // no-op
+
         }
     }
 

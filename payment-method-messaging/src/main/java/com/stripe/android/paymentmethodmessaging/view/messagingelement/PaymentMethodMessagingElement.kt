@@ -1,36 +1,31 @@
 package com.stripe.android.paymentmethodmessaging.view.messagingelement
 
-import android.app.Activity
+import android.app.Application
 import android.content.Context
-import android.os.Bundle
-import android.os.Parcelable
-import android.os.PersistableBundle
-import android.util.AttributeSet
-import android.view.View
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentmethodmessaging.view.injection.DaggerPaymentMethodMessagingComponent
 import com.stripe.android.uicore.StripeThemeDefaults
-import kotlinx.coroutines.launch
+import dev.drewhamilton.poko.Poko
+import java.util.Locale
+import javax.inject.Inject
 
-class PaymentMethodMessagingElement internal constructor() {
+class PaymentMethodMessagingElement @Inject internal constructor(
+    private val contentHelper: MessagingContentHelper
+) {
 
     /**
      * Call this method to configure [PaymentMethodMessagingElement] or when the [Configuration] values
      * (amount, currency, etc.) change.
      */
     suspend fun configure(
-        configuration: Configuration
+        configuration: Configuration,
     ): Result {
-        // ...
+       return contentHelper.configure(configuration)
     }
 
     /**
@@ -38,7 +33,15 @@ class PaymentMethodMessagingElement internal constructor() {
      */
     @Composable
     fun Content() {
-        // ...
+        contentHelper.Content()
+    }
+
+    companion object {
+        fun create(application: Application): PaymentMethodMessagingElement {
+            return DaggerPaymentMethodMessagingComponent.builder()
+                .application(application)
+                .build().element
+        }
     }
 
     /**
@@ -70,8 +73,9 @@ class PaymentMethodMessagingElement internal constructor() {
         val amount: Long,
         val currency: String,
         val locale: String,
-        val publishableKey: String,
+//        val publishableKey: String,
         val countryCode: String?,
+//        val stripeAccountId: String?,
         val paymentMethodList: List<PaymentMethod.Type>?,
         val referrer: String?,
         val appearance: Appearance?
@@ -81,11 +85,12 @@ class PaymentMethodMessagingElement internal constructor() {
             private var amount: Long? = null
             private var currency: String? = null
             private var locale: String? = null
-            private var publishableKey: String? = null
+//            private var publishableKey: String? = null
+//            private var stripeAccountId: String? = null
             private var countryCode: String? = null
             private var paymentMethodList: List<PaymentMethod.Type>? = null
             private var referrer: String? = null
-            private var appearance: Appearance = Appearance.Builder().build()
+            private var appearance: Appearance? = Appearance.Builder().build()
 
             /**
              * Amount intended to be collected in the smallest currency unit (e.g. 100 cents to charge $1.00).
@@ -111,9 +116,17 @@ class PaymentMethodMessagingElement internal constructor() {
             /**
              * A publishable key from the Dashboard's [API keys](https://dashboard.stripe.com/apikeys) page.
              */
-            fun publishableKey(publishableKey: String) = apply {
-                this.publishableKey = publishableKey
-            }
+//            fun publishableKey(publishableKey: String) = apply {
+//                this.publishableKey = publishableKey
+//            }
+
+            /**
+             * The optional stripe account ID, Connect platforms that create direct charges must identify the connected
+             * account that renders the PaymentMethodMessagingElement.
+             */
+//            fun stripeAccountId(stripeAccountId: String?) = apply {
+//                this.stripeAccountId = stripeAccountId
+//            }
 
             /**
              * Two letter country code of the customer's location. If not provided, country will be determined based
@@ -126,25 +139,31 @@ class PaymentMethodMessagingElement internal constructor() {
             /**
              * The payment methods to request messaging for. Supported values are [PaymentMethod.Type.Affirm],
              * [PaymentMethod.Type.AfterpayClearpay], and [PaymentMethod.Type.Klarna]
+             * If null, uses your preferences from the
+             * [Stripe dashboard](https://dashboard.stripe.com/settings/payment_methods) to show the relevant payment
+             * methods.
+             * See [Dynamic payment methods])https://docs.stripe.com/payments/payment-methods/dynamic-payment-methods)
+             * for more information.
              */
             fun paymentMethodList(paymentMethodList: List<PaymentMethod.Type>?) = apply {
                 this.paymentMethodList = paymentMethodList
             }
 
             /**
-             * TBD
+             * The [Appearance] of the PaymentMethodMessagingElement.Content
              */
-            fun referrer(referrer: String?) = apply {
-                this.referrer = referrer
+            fun appearance(appearance: Appearance?) = apply {
+                this.appearance = appearance
             }
 
             fun build(): Configuration {
                 // Implementation detail: validate that required params are not null, throw exception otherwise.
                 return Configuration(
-                    amount = amount,
-                    currency = currency,
-                    locale = locale,
-                    publishableKey = publishableKey,
+                    amount = amount!!,
+                    currency = currency!!,
+                    locale = locale ?: Locale.getDefault().language,
+//                    publishableKey = publishableKey!!,
+//                    stripeAccountId = stripeAccountId,
                     countryCode = countryCode,
                     paymentMethodList = paymentMethodList,
                     referrer = referrer,
@@ -169,44 +188,86 @@ class PaymentMethodMessagingElement internal constructor() {
             }
 
             @Poko
-            class Font(
-                /**
-                 * The font used in text. This should be a resource ID value.
-                 */
+            class Font internal constructor(
                 @FontRes
                 val fontFamily: Int? = null,
-                /**
-                 * The font size used for the text. This should represent a sp value.
-                 */
                 val fontSizeSp: Float? = null,
-                /**
-                 * The font weight used for the text.
-                 */
                 val fontWeight: Int? = null,
-                /**
-                 * The letter spacing used for the text. This should represent a sp value.
-                 */
                 val letterSpacingSp: Float? = null,
-            )
+            ) {
+                class Builder {
+                    private var fontFamily: Int? = null
+                    private var fontSizeSp: Float? = null
+                    private var fontWeight: Int? = null
+                    private var letterSpacingSp: Float? = null
+
+                    /**
+                     * The font used in text. This should be a resource ID value.
+                     */
+                    fun fontFamily(@FontRes fontFamily: Int?) = apply {
+                        this.fontFamily = fontFamily
+                    }
+
+                    /**
+                     * The font size used for the text. This should represent an sp value.
+                     */
+                    fun fontSizeSp(fontSizeSp: Float?) = apply {
+                        this.fontSizeSp = fontSizeSp
+                    }
+
+                    /**
+                     * The font weight used for the text.
+                     */
+                    fun fontWeight(fontWeight: Int?) = apply {
+                        this.fontWeight = fontWeight
+                    }
+
+                    /**
+                     * The letter spacing used for the text. This should represent an sp value.
+                     */
+                    fun letterSpacingSp(letterSpacingSp: Float?) = apply {
+                        this.letterSpacingSp = letterSpacingSp
+                    }
+
+                    fun build() = Font(
+                        fontFamily = fontFamily,
+                        fontSizeSp = fontSizeSp,
+                        fontWeight = fontWeight,
+                        letterSpacingSp = letterSpacingSp,
+                    )
+                }
+            }
 
             @Poko
-            class Colors(
-                /**
-                 * The color used for the message text.
-                 */
+            class Colors internal constructor(
                 @ColorInt
                 val textColor: Int,
-                /**
-                 * The color used for the "i" information icon.
-                 */
                 @ColorInt
                 val infoIconColor: Int
             ) {
                 internal companion object {
-                    val colorsLight = Colors(
-                        textColor = StripeThemeDefaults.colorsLight.onComponent.toArgb(),
-                        infoIconColor = StripeThemeDefaults.colorsLight.subtitle.toArgb()
-                    )
+                    val colorsLight = Builder().build()
+                }
+
+                class Builder {
+                    private var textColor: Int = StripeThemeDefaults.colorsLight.onComponent.toArgb()
+                    private var infoIconColor: Int = StripeThemeDefaults.colorsLight.subtitle.toArgb()
+
+                    /**
+                     * The color used for the message text.
+                     */
+                    fun textColor(@ColorInt textColor: Int) = apply {
+                        this.textColor = textColor
+                    }
+
+                    /**
+                     * The color used for the "i" information icon.
+                     */
+                    fun infoIconColor(@ColorInt infoIconColor: Int) = apply {
+                        this.infoIconColor = infoIconColor
+                    }
+
+                    fun build() = Colors(textColor, infoIconColor)
                 }
             }
 
@@ -249,47 +310,46 @@ class PaymentMethodMessagingElement internal constructor() {
 }
 
 
-class CheckoutActivity: AppCompateActivity() {
-
-    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
-        super.onCreate(savedInstanceState, persistentState)
-
-        setContent {
-            val pmme = rememberPaymentMethodMessagingElement()
-            val configureResult: PaymentMethodMessagingElement.Result? by remember {
-                mutableStateOf(null)
-            }
-            val coroutineScope = rememberCoroutineScope()
-            coroutineScope.launch {
-                val configuration = PaymentMethodMessagingElement.Configuration.Builder()
-                    .amount(5000L)
-                    .currency("usd")
-                    .locale("en")
-                    .publishableKey("pk_test")
-                    .build()
-
-                pmme.configure(configuration)
-            }
-
-            PaymentMethodMessagingElementView(
-                paymentMethodMessagingElement = pmme,
-                result = configureResult
-            )
-        }
-    }
-
-    @Composable
-    fun PaymentMethodMessagingElementView(
-        paymentMethodMessagingElement: PaymentMethodMessagingElement,
-        result: PaymentMethodMessagingElement.Result?
-    ) {
-        when (result) {
-            is PaymentMethodMessagingElement.Result.Succeeded -> paymentMethodMessagingElement.Content()
-            is PaymentMethodMessagingElement.Result.Failed -> showErrorMessage()
-            is PaymentMethodMessagingElement.Result.NoContent -> {
-                // NO-OP
-            }
-            null -> LoadingScreen()
-        }
-    }
-}
+//class ViewModel : ViewModel() {
+//    val element = PaymentMethodMessagingElement.create()
+//
+//    init {
+//        viewModelScope.launch {
+//            val appearance = PaymentMethodMessagingElement.Configuration.Appearance.Builder()
+//                .colorsLight(
+//                    PaymentMethodMessagingElement.Configuration.Appearance.Colors.Builder()
+//                        .infoIconColor(myIconColor)
+//                        .textColor(myTextColor)
+//                        .build()
+//                )
+//                .build()
+//            val configuration = PaymentMethodMessagingElement.Configuration.Builder()
+//                .amount(5000L)
+//                .currency("usd")
+//                .locale("en")
+//                .publishableKey("pk_test")
+//                .build()
+//            element.configure(configuration)
+//        }
+//    }
+//}
+//
+//class Activity : AppCompatActivity {
+//    private val viewModel = ViewModel()
+//    fun onCreate() {
+//        setContent {
+//            viewModel.element.Content()
+//        }
+//    }
+//}
+//
+//class CheckoutActivity: AppCompateActivity() {
+//
+//    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
+//        super.onCreate(savedInstanceState, persistentState)
+//
+//        setContent {
+//            viewModel.element.Content()
+//        }
+//    }
+//}

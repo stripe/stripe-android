@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
@@ -28,7 +27,6 @@ import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -52,6 +50,8 @@ internal class CompleteFlowActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        viewModel.configurePaymentMethodMessagingElement()
 
         setContent {
             val paymentSheet = rememberPaymentSheet(
@@ -91,9 +91,7 @@ internal class CompleteFlowActivity : AppCompatActivity() {
                     cartState = uiState.cartState,
                 ) {
 
-                    TextWithLogo("logo_here helps you pay")
-                    TextWithLogo("Pay with logo_here")
-                    TextWithLogo("Use logo_here to pay")
+                    viewModel.paymentMethodMessagingElement.Content()
 
                     BuyButton(
                         buyButtonEnabled = !uiState.isProcessing,

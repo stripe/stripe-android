@@ -8,6 +8,7 @@ import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
 import com.github.kittinunf.result.Result
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.paymentmethodmessaging.view.messagingelement.PaymentMethodMessagingElement
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.samples.model.CartState
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutRequest
@@ -30,6 +31,19 @@ internal class CompleteFlowViewModel(
         value = CompleteFlowViewState(cartState = CartState.defaultWithHardcodedPrices),
     )
     val state: StateFlow<CompleteFlowViewState> = _state
+
+    val paymentMethodMessagingElement = PaymentMethodMessagingElement.create(getApplication())
+
+    fun configurePaymentMethodMessagingElement() {
+        viewModelScope.launch {
+            paymentMethodMessagingElement.configure(
+                configuration = PaymentMethodMessagingElement.Configuration.Builder()
+                    .amount(10000L)
+                    .currency("usd")
+                    .build()
+            )
+        }
+    }
 
     fun checkout() {
         viewModelScope.launch(Dispatchers.IO) {

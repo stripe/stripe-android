@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.viewmodels
 
 import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
