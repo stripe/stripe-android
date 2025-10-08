@@ -1253,7 +1253,11 @@ internal class PaymentMethodMetadataTest {
             forceSetupFutureUseBehaviorAndNewMandate = false,
             passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             openCardScanAutomatically = false,
-            clientAttributionMetadata = null,
+            clientAttributionMetadata = ClientAttributionMetadata(
+                elementsSessionConfigId = elementsSession.elementsSessionId,
+                paymentMethodSelectionFlow = null,
+                paymentIntentCreationFlow = null,
+            ),
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
