@@ -148,7 +148,8 @@ class ConfirmSetupIntentParamsFactoryTest {
             optionsParams = null,
             extraParams = null,
             intentConfigSetupFutureUsage = null,
-            radarOptions = null
+            radarOptions = null,
+            clientAttributionMetadata = null,
         )
     }
 
@@ -166,7 +167,8 @@ class ConfirmSetupIntentParamsFactoryTest {
             optionsParams = null,
             extraParams = extraParams,
             intentConfigSetupFutureUsage = null,
-            radarOptions = null
+            radarOptions = null,
+            clientAttributionMetadata = null,
         )
     }
 
@@ -183,7 +185,8 @@ class ConfirmSetupIntentParamsFactoryTest {
             createParams = createParams,
             optionsParams = null,
             extraParams = extraParams,
-            radarOptions = null
+            radarOptions = null,
+            clientAttributionMetadata = null,
         )
     }
 
@@ -200,7 +203,8 @@ class ConfirmSetupIntentParamsFactoryTest {
             optionsParams = null,
             extraParams = null,
             intentConfigSetupFutureUsage = null,
-            radarOptions = radarOptions
+            radarOptions = radarOptions,
+            clientAttributionMetadata = null,
         )
 
         val params = result.asConfirmSetupIntentParams()

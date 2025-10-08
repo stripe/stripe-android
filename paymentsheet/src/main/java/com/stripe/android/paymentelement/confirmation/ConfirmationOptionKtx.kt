@@ -4,6 +4,7 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
@@ -16,14 +17,14 @@ import com.stripe.android.paymentelement.confirmation.shoppay.ShopPayConfirmatio
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
-@SuppressWarnings("UnusedParameter")
 internal fun PaymentSelection.toConfirmationOption(
     configuration: CommonConfiguration,
     linkConfiguration: LinkConfiguration?,
-    passiveCaptchaParams: PassiveCaptchaParams?
+    passiveCaptchaParams: PassiveCaptchaParams?,
+    clientAttributionMetadata: ClientAttributionMetadata?
 ): ConfirmationHandler.Option? {
     return when (this) {
-        is PaymentSelection.Saved -> toConfirmationOption(passiveCaptchaParams)
+        is PaymentSelection.Saved -> toConfirmationOption(passiveCaptchaParams, clientAttributionMetadata)
         is PaymentSelection.ExternalPaymentMethod -> toConfirmationOption()
         is PaymentSelection.CustomPaymentMethod -> toConfirmationOption(configuration)
         is PaymentSelection.New.USBankAccount -> toConfirmationOption(passiveCaptchaParams)
@@ -36,12 +37,14 @@ internal fun PaymentSelection.toConfirmationOption(
 }
 
 private fun PaymentSelection.Saved.toConfirmationOption(
-    passiveCaptchaParams: PassiveCaptchaParams?
+    passiveCaptchaParams: PassiveCaptchaParams?,
+    clientAttributionMetadata: ClientAttributionMetadata?
 ): PaymentMethodConfirmationOption.Saved {
     return PaymentMethodConfirmationOption.Saved(
         paymentMethod = paymentMethod,
         optionsParams = paymentMethodOptionsParams,
-        passiveCaptchaParams = passiveCaptchaParams
+        passiveCaptchaParams = passiveCaptchaParams,
+        clientAttributionMetadata = clientAttributionMetadata,
     )
 }
 
@@ -61,7 +64,8 @@ private fun PaymentSelection.New.USBankAccount.toConfirmationOption(
         PaymentMethodConfirmationOption.Saved(
             paymentMethod = instantDebits.paymentMethod,
             optionsParams = paymentMethodOptionsParams,
-            passiveCaptchaParams = passiveCaptchaParams
+            passiveCaptchaParams = passiveCaptchaParams,
+            clientAttributionMetadata = null,
         )
     } else {
         PaymentMethodConfirmationOption.New(

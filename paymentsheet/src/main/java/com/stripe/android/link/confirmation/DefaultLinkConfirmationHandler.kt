@@ -208,7 +208,8 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                         configuration.passthroughModeEnabled.not()
                     }
                 ),
-                passiveCaptchaParams = passiveCaptchaParams
+                passiveCaptchaParams = passiveCaptchaParams,
+                clientAttributionMetadata = null,
             ),
             appearance = PaymentSheet.Appearance(),
             initializationMode = configuration.initializationMode,

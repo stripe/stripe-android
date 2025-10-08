@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_ATTRIBUTION_METADATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_ID
@@ -67,7 +68,9 @@ constructor(
      */
     val paymentMethodOptions: PaymentMethodOptionsParams? = null,
 
-    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val radarOptions: RadarOptions? = null
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val radarOptions: RadarOptions? = null,
+
+    private val clientAttributionMetadata: ClientAttributionMetadata? = null,
 ) : ConfirmStripeIntentParams {
 
     override fun shouldUseStripeSdk(): Boolean {
@@ -102,7 +105,13 @@ constructor(
             radarOptions?.let {
                 mapOf(PARAM_RADAR_OPTIONS to it.toParamMap())
             }.orEmpty()
-        ).plus(paymentMethodParamMap)
+        ).plus(
+            paymentMethodParamMap
+        ).plus(
+            clientAttributionMetadata?.let {
+                mapOf(PARAM_CLIENT_ATTRIBUTION_METADATA to it.toParamMap())
+            }.orEmpty()
+        )
     }
 
     private val paymentMethodParamMap: Map<String, Any>
@@ -231,7 +240,8 @@ constructor(
                 mandateId = mandateId,
                 mandateData = mandateData,
                 setAsDefaultPaymentMethod = null,
-                radarOptions = null
+                radarOptions = null,
+                clientAttributionMetadata = null,
             )
         }
 
@@ -241,7 +251,8 @@ constructor(
             mandateData: MandateDataParams? = null,
             mandateId: String? = null,
             setAsDefaultPaymentMethod: Boolean?,
-            radarOptions: RadarOptions?
+            radarOptions: RadarOptions?,
+            clientAttributionMetadata: ClientAttributionMetadata?
         ): ConfirmSetupIntentParams {
             return ConfirmSetupIntentParams(
                 clientSecret = clientSecret,
@@ -250,7 +261,8 @@ constructor(
                 mandateData = mandateData,
                 setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
                 paymentMethodCode = paymentMethodCreateParams.code,
-                radarOptions = radarOptions
+                radarOptions = radarOptions,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         }
 
@@ -261,7 +273,8 @@ constructor(
             mandateId: String? = null,
             setAsDefaultPaymentMethod: Boolean?,
             paymentMethodCode: PaymentMethodCode,
-            radarOptions: RadarOptions?
+            radarOptions: RadarOptions?,
+            clientAttributionMetadata: ClientAttributionMetadata?
         ): ConfirmSetupIntentParams {
             return ConfirmSetupIntentParams(
                 paymentMethodId = paymentMethodId,
@@ -270,7 +283,8 @@ constructor(
                 mandateData = mandateData,
                 setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
                 paymentMethodCode = paymentMethodCode,
-                radarOptions = radarOptions
+                radarOptions = radarOptions,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         }
 

@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
 import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_ATTRIBUTION_METADATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
@@ -129,7 +130,9 @@ constructor(
 
     internal val paymentMethodCode: PaymentMethodCode? = paymentMethodCreateParams?.code,
 
-    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val radarOptions: RadarOptions? = null
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val radarOptions: RadarOptions? = null,
+
+    private val clientAttributionMetadata: ClientAttributionMetadata? = null,
 ) : ConfirmStripeIntentParams {
     fun shouldSavePaymentMethod(): Boolean {
         return savePaymentMethod == true
@@ -187,6 +190,10 @@ constructor(
         ).plus(
             receiptEmail?.let {
                 mapOf(PARAM_RECEIPT_EMAIL to it)
+            }.orEmpty()
+        ).plus(
+            clientAttributionMetadata?.let {
+                mapOf(PARAM_CLIENT_ATTRIBUTION_METADATA to it.toParamMap())
             }.orEmpty()
         )
     }
@@ -479,7 +486,8 @@ constructor(
                 shipping = shipping,
                 paymentMethodOptions = paymentMethodOptions,
                 setAsDefaultPaymentMethod = null,
-                radarOptions = null
+                radarOptions = null,
+                clientAttributionMetadata = null,
             )
         }
 
@@ -578,7 +586,8 @@ constructor(
             shipping: Shipping? = null,
             paymentMethodOptions: PaymentMethodOptionsParams? = null,
             setAsDefaultPaymentMethod: Boolean?,
-            radarOptions: RadarOptions?
+            radarOptions: RadarOptions?,
+            clientAttributionMetadata: ClientAttributionMetadata?
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
@@ -591,7 +600,8 @@ constructor(
                 paymentMethodOptions = paymentMethodOptions,
                 setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
                 paymentMethodCode = paymentMethodCreateParams.code,
-                radarOptions = radarOptions
+                radarOptions = radarOptions,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         }
 
@@ -606,7 +616,8 @@ constructor(
             paymentMethodOptions: PaymentMethodOptionsParams? = null,
             setAsDefaultPaymentMethod: Boolean? = null,
             paymentMethodCode: PaymentMethodCode,
-            radarOptions: RadarOptions?
+            radarOptions: RadarOptions?,
+            clientAttributionMetadata: ClientAttributionMetadata?
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 paymentMethodId = paymentMethodId,
@@ -619,7 +630,8 @@ constructor(
                 paymentMethodOptions = paymentMethodOptions,
                 setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
                 paymentMethodCode = paymentMethodCode,
-                radarOptions = radarOptions
+                radarOptions = radarOptions,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         }
 
