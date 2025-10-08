@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
+import java.util.Locale
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed interface ConsumerPaymentDetailsCreateParams : StripeParamsModel, Parcelable {
@@ -111,16 +112,21 @@ fun getConsumerPaymentDetailsAddressFromPaymentMethodCreateParams(
 ): Pair<String, Any>? {
     val billingDetails = cardPaymentMethodCreateParams["billing_details"] as? Map<*, *>
     val address = billingDetails?.get("address") as? Map<*, *>
+
     // The param naming for consumers API is different so we need to map them.
-    return address?.let {
+    return if (address != null) {
         "billing_address" to mapOf(
-            "country_code" to it["country"],
-            "postal_code" to it["postal_code"],
-            "line_1" to it["line1"],
-            "line_2" to it["line2"],
-            "locality" to it["city"],
-            "administrative_area" to it["state"],
+            "country_code" to address["country"],
+            "postal_code" to address["postal_code"],
+            "line_1" to address["line1"],
+            "line_2" to address["line2"],
+            "locality" to address["city"],
+            "administrative_area" to address["state"],
             "name" to billingDetails["name"]
         ).filterValues { it != null && it.toString().isNotEmpty() }
+    } else {
+        "billing_address" to mapOf(
+            "country_code" to Locale.getDefault().country,
+        )
     }
 }
