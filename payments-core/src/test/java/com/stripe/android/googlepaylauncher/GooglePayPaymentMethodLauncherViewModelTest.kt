@@ -175,6 +175,48 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     }
 
     @Test
+    fun `createPaymentDataRequest() with isElements=true should set 'stripe-elements' software id`() {
+        val viewModel = GooglePayPaymentMethodLauncherViewModel(
+            paymentsClient,
+            REQUEST_OPTIONS,
+            ARGS.copy(isElements = true),
+            stripeRepository,
+            googlePayJsonFactory,
+            googlePayRepository,
+            SavedStateHandle()
+        )
+
+        val paymentDataRequest = viewModel.createPaymentDataRequest()
+
+        val softwareInfo = paymentDataRequest
+            .getJSONObject("merchantInfo")
+            .getJSONObject("softwareInfo")
+
+        assertThat(softwareInfo.getString("id")).isEqualTo("android/stripe-elements")
+    }
+
+    @Test
+    fun `createPaymentDataRequest() with isElements=false should set 'stripe-launcher' software id`() {
+        val viewModel = GooglePayPaymentMethodLauncherViewModel(
+            paymentsClient,
+            REQUEST_OPTIONS,
+            ARGS.copy(isElements = false),
+            stripeRepository,
+            googlePayJsonFactory,
+            googlePayRepository,
+            SavedStateHandle()
+        )
+
+        val paymentDataRequest = viewModel.createPaymentDataRequest()
+
+        val softwareInfo = paymentDataRequest
+            .getJSONObject("merchantInfo")
+            .getJSONObject("softwareInfo")
+
+        assertThat(softwareInfo.getString("id")).isEqualTo("android/stripe-launcher")
+    }
+
+    @Test
     fun `Factory gets initialized with fallback when no Injector is available`() {
         scenario.onFragment { fragment ->
             val application = ApplicationProvider.getApplicationContext<Application>()
