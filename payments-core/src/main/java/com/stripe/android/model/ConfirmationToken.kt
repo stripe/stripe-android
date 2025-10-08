@@ -110,8 +110,6 @@ class ConfirmationToken internal constructor(
          */
         @JvmField val type: PaymentMethod.Type,
 
-        @JvmField
-        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val allResponseFields: String
+        @JvmField internal val allResponseFields: String
     ) : StripeModel
 }

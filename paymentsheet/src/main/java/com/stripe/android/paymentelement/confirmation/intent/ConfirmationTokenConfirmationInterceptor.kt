@@ -11,7 +11,6 @@ import com.stripe.android.model.ConfirmationTokenParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.RadarOptions
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -26,7 +25,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import org.json.JSONObject
 
 internal class ConfirmationTokenConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val intentConfiguration: PaymentSheet.IntentConfiguration,
@@ -51,21 +49,18 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             options = requestOptions,
         ).fold(
             onSuccess = { confirmationToken ->
-                val paymentMethodPreview = confirmationToken.paymentMethodPreview
+                val paymentMethodType = confirmationToken.paymentMethodPreview?.type
                     ?: return ConfirmationDefinition.Action.Fail(
-                        cause = IllegalStateException("Failed to fetch PaymentMethod"),
-                        message = "Failed to fetch PaymentMethod".resolvableString,
+                        cause = IllegalStateException("Failed to fetch PaymentMethod Type"),
+                        message = "Failed to fetch PaymentMethod Type".resolvableString,
                         errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
                     )
-                val paymentMethod = PaymentMethodJsonParser().parse(
-                    JSONObject(paymentMethodPreview.allResponseFields)
-                )
                 handleDeferredOnConfirmationTokenCreated(
                     intent = intent,
                     callback = createIntentCallback,
                     confirmationToken = confirmationToken,
                     intentConfiguration = intentConfiguration,
-                    paymentMethod = paymentMethod,
+                    paymentMethodType = paymentMethodType,
                     confirmationOption = updatedConfirmationOption,
                     shippingValues = shippingValues,
                     hCaptchaToken = null,
@@ -94,7 +89,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         callback: CreateIntentWithConfirmationTokenCallback,
         confirmationToken: ConfirmationToken,
         intentConfiguration: PaymentSheet.IntentConfiguration,
-        paymentMethod: PaymentMethod,
+        paymentMethodType: PaymentMethod.Type,
         confirmationOption: PaymentMethodConfirmationOption,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         hCaptchaToken: String?
@@ -113,7 +108,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     handleDeferredIntentCreationSuccess(
                         clientSecret = result.clientSecret,
                         intentConfiguration = intentConfiguration,
-                        paymentMethod = paymentMethod,
+                        paymentMethodType = paymentMethodType,
                         confirmationOption = confirmationOption,
                         shippingValues = shippingValues,
                         hCaptchaToken = hCaptchaToken
@@ -137,7 +132,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         clientSecret: String,
         intentConfiguration: PaymentSheet.IntentConfiguration,
         confirmationOption: PaymentMethodConfirmationOption,
-        paymentMethod: PaymentMethod,
+        paymentMethodType: PaymentMethod.Type,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         hCaptchaToken: String?
     ): ConfirmationDefinition.Action<Args> {
@@ -165,7 +160,8 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     isDeferred = true
                 ) {
                     create(
-                        paymentMethod = paymentMethod,
+                        paymentMethodId = "",
+                        paymentMethodType = paymentMethodType,
                         optionsParams = confirmationOption.optionsParams,
                         extraParams = (confirmationOption as? PaymentMethodConfirmationOption.New)
                             ?.extraParams,

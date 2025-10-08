@@ -117,7 +117,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
 
         val failedStep = nextStep as ConfirmationDefinition.Action.Fail
         assertThat(failedStep.cause).isInstanceOf(IllegalStateException::class.java)
-        assertThat(failedStep.message).isEqualTo("Failed to fetch PaymentMethod".resolvableString)
+        assertThat(failedStep.message).isEqualTo("Failed to fetch PaymentMethod Type".resolvableString)
     }
 
     @Test
