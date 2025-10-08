@@ -149,7 +149,7 @@ internal interface ConfirmationDefinition<
          * An ephemeral key that can be used to make authenticated requests to Stripe. This is generally only
          * required when confirming PaymentIntents or SetupIntents with a customer-attached payment method.
          */
-        val ephemeralKeySecret: String?,
+        val ephemeralKeySecret: String? = null,
     ) : Parcelable
 
     /**

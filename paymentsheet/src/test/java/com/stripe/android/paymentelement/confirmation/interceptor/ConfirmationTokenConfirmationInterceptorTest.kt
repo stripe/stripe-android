@@ -11,6 +11,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.ConfirmationTokenParams
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.parsers.ConfirmationTokenJsonParser
 import com.stripe.android.networking.StripeRepository
@@ -18,6 +19,7 @@ import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallba
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationTokenFixtures
+import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.createIntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.CreateIntentWithConfirmationTokenCallbackFailureException
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
@@ -390,6 +392,66 @@ class ConfirmationTokenConfirmationInterceptorTest {
 
         assertThat(observedTokens).hasSize(1)
         assertThat(observedTokens[0]).isEqualTo(confirmationToken)
+    }
+
+    @Test
+    fun `Saved PM - Fails if payment method has no ID`() = runTest {
+        val interceptor = createIntentConfirmationInterceptor(
+            initializationMode = DEFAULT_DEFERRED_INTENT,
+            stripeRepository = object : AbsFakeStripeRepository() {},
+            intentCreationConfirmationTokenCallbackProvider = Provider {
+                CreateIntentWithConfirmationTokenCallback { _ ->
+                    CreateIntentResult.Success(clientSecret = "pi_123")
+                }
+            },
+        )
+
+        val nextStep = interceptor.intercept(
+            intent = PaymentIntentFactory.create(),
+            confirmationOption = PaymentMethodConfirmationOption.Saved(
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = null),
+                optionsParams = null,
+                passiveCaptchaParams = null,
+                hCaptchaToken = null,
+                ephemeralKeySecret = "ek_test_123",
+            ),
+            shippingValues = null,
+        )
+
+        val failedStep = nextStep as ConfirmationDefinition.Action.Fail
+        assertThat(failedStep.cause).isInstanceOf(IllegalStateException::class.java)
+        assertThat(failedStep.message).isEqualTo("PaymentMethod must have an ID".resolvableString)
+    }
+
+    @Test
+    fun `Saved PM - Fails if ephemeral key secret is missing`() = runTest {
+        val interceptor = createIntentConfirmationInterceptor(
+            initializationMode = DEFAULT_DEFERRED_INTENT,
+            stripeRepository = object : AbsFakeStripeRepository() {},
+            intentCreationConfirmationTokenCallbackProvider = Provider {
+                CreateIntentWithConfirmationTokenCallback { _ ->
+                    CreateIntentResult.Success(clientSecret = "pi_123")
+                }
+            },
+        )
+
+        val nextStep = interceptor.intercept(
+            intent = PaymentIntentFactory.create(),
+            confirmationOption = PaymentMethodConfirmationOption.Saved(
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                optionsParams = null,
+                passiveCaptchaParams = null,
+                hCaptchaToken = null,
+                ephemeralKeySecret = null,
+            ),
+            shippingValues = null,
+        )
+
+        val failedStep = nextStep as ConfirmationDefinition.Action.Fail
+        assertThat(failedStep.cause).isInstanceOf(IllegalStateException::class.java)
+        assertThat(failedStep.message).isEqualTo(
+            "Ephemeral key secret is required to confirm with saved payment method".resolvableString
+        )
     }
 
     private fun createFakeStripeRepositoryForConfirmationToken(): StripeRepository {
