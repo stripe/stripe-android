@@ -267,7 +267,6 @@ def executeTests(appUrl, testUrl, isNightly):
             "Google Pixel 7-13.0",
             "Samsung Galaxy S22-12.0",
             "Google Pixel 5-11.0",
-            "Google Pixel 4 XL-10.0",
             "Samsung Galaxy S9-8.0",
         ]
     else:
