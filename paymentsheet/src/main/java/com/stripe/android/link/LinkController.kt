@@ -81,6 +81,11 @@ class LinkController @Inject internal constructor(
         return interactor.lookupConsumer(email)
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun lookupConsumerWithLinkAuthTokenClientSecret(token: String): LookupConsumerResult {
+        return interactor.lookupConsumerWithLinkAuthTokenClientSecret(token)
+    }
+
     /**
      * Update the phone number associated with the current Link consumer account.
      *

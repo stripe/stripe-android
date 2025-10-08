@@ -64,6 +64,7 @@ internal interface LinkRepository {
         sessionId: String,
         customerId: String?,
         supportedVerificationTypes: List<String>?,
+        linkAuthTokenClientSecret: String?,
     ): Result<ConsumerSessionLookup>
 
     /**

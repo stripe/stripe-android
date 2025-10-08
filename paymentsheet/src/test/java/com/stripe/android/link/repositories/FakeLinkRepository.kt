@@ -91,7 +91,8 @@ internal open class FakeLinkRepository : LinkRepository {
         appId: String,
         sessionId: String,
         customerId: String?,
-        supportedVerificationTypes: List<String>?
+        supportedVerificationTypes: List<String>?,
+        linkAuthTokenClientSecret: String?
     ): Result<ConsumerSessionLookup> {
         mobileLookupCalls.add(
             item = MobileLookupCall(

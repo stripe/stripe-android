@@ -77,6 +77,7 @@ internal open class FakeLinkAccountManager(
     override var cachedShippingAddresses: ConsumerShippingAddresses? = null
 
     var lookupConsumerByAuthIntentResult: Result<LinkAccount?> = Result.success(TestFactory.LINK_ACCOUNT)
+    var lookupConsumerByLinkAuthTokenResult: Result<LinkAccount?> = Result.success(TestFactory.LINK_ACCOUNT)
     var startVerificationResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
     var confirmVerificationResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
     var postConsentUpdateResult: Result<Unit> = Result.success(Unit)
@@ -115,6 +116,7 @@ internal open class FakeLinkAccountManager(
         }
 
     private val lookupByAuthIntentTurbine = Turbine<LookupCallByAuthIntent>()
+    private val lookupByLinkAuthTokenTurbine = Turbine<LookupCallByLinkAuthToken>()
 
     private val updateCardDetailsTurbine = Turbine<ConsumerPaymentDetailsUpdateParams>()
     private val startVerificationTurbine = Turbine<Unit>()
@@ -170,6 +172,16 @@ internal open class FakeLinkAccountManager(
             )
         )
         return lookupConsumerByAuthIntentResult
+    }
+
+    override suspend fun lookupByLinkAuthTokenClientSecret(linkAuthTokenClientSecret: String): Result<LinkAccount?> {
+        lookupByLinkAuthTokenTurbine.add(
+            item = LookupCallByLinkAuthToken(
+                linkAuthTokenClientSecret = linkAuthTokenClientSecret
+            )
+        )
+
+        return lookupConsumerByLinkAuthTokenResult
     }
 
     override suspend fun refreshConsumer(): Result<ConsumerSessionRefresh> {
@@ -299,5 +311,9 @@ internal open class FakeLinkAccountManager(
 
     data class LookupCallByAuthIntent(
         val linkAuthIntentId: String?,
+    )
+
+    data class LookupCallByLinkAuthToken(
+        val linkAuthTokenClientSecret: String?
     )
 }

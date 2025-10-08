@@ -22,6 +22,7 @@ import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.SignUpParams
+import com.stripe.android.model.Token
 import com.stripe.android.model.UpdateAvailableIncentives
 import com.stripe.android.model.VerificationType
 import com.stripe.android.model.parsers.AttachConsumerToLinkAccountSessionJsonParser
@@ -69,7 +70,8 @@ interface ConsumersApiService {
         supportedVerificationTypes: List<String>?,
         requestOptions: ApiRequest.Options,
         sessionId: String,
-        customerId: String?
+        customerId: String?,
+        linkAuthTokenClientSecret: String?
     ): ConsumerSessionLookup
 
     suspend fun refreshConsumerSession(
@@ -254,7 +256,8 @@ class ConsumersApiServiceImpl(
         supportedVerificationTypes: List<String>?,
         requestOptions: ApiRequest.Options,
         sessionId: String,
-        customerId: String?
+        customerId: String?,
+        linkAuthTokenClientSecret: String?
     ): ConsumerSessionLookup {
         return executeRequestWithModelJsonParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
@@ -271,7 +274,8 @@ class ConsumersApiServiceImpl(
                     "email_source" to emailSource?.backendValue,
                     "app_id" to appId,
                     "customer_id" to customerId,
-                    "supported_verification_types" to supportedVerificationTypes
+                    "supported_verification_types" to supportedVerificationTypes,
+                    "link_auth_token_client_secret" to linkAuthTokenClientSecret
                 ).filterValues { it != null }
             ),
             responseJsonParser = ConsumerSessionLookupJsonParser()
