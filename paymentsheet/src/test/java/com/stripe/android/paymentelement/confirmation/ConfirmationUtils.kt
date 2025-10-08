@@ -52,7 +52,9 @@ internal suspend fun createIntentConfirmationInterceptor(
     publishableKeyProvider: () -> String = { "pk" },
     errorReporter: ErrorReporter = FakeErrorReporter(),
     intentCreationCallbackProvider: Provider<CreateIntentCallback?> = Provider { null },
-    intentCreationConfirmationTokenCallbackProvider: Provider<CreateIntentWithConfirmationTokenCallback?> = Provider { null },
+    intentCreationConfirmationTokenCallbackProvider: Provider<CreateIntentWithConfirmationTokenCallback?> = Provider {
+        null
+    },
     preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?> = Provider { null }
 ): IntentConfirmationInterceptor {
     val requestOptions = ApiRequest.Options(
@@ -101,7 +103,6 @@ internal suspend fun createIntentConfirmationInterceptor(
                     context = ApplicationProvider.getApplicationContext(),
                     stripeRepository = stripeRepository,
                     requestOptions = requestOptions,
-                    allowsManualConfirmation = false,
                 )
             }
         },

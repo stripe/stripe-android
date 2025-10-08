@@ -16,6 +16,7 @@ data class DefaultReturnUrl(
      */
     val value: String get() = PREFIX + packageName
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         const val PREFIX = "stripesdk://payment_return_url/"
 

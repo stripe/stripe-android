@@ -39,7 +39,8 @@ internal data class InterceptorTestScenario(
     val publishableKeyProvider: () -> String = { "pk" },
     val errorReporter: ErrorReporter = FakeErrorReporter(),
     val intentCreationCallbackProvider: Provider<CreateIntentCallback?> = Provider { null },
-    val intentCreationConfirmationTokenCallbackProvider: Provider<CreateIntentWithConfirmationTokenCallback?> = Provider { null },
+    val intentCreationConfirmationTokenCallbackProvider: Provider<CreateIntentWithConfirmationTokenCallback?> =
+        Provider { null },
     val preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?> = Provider { null }
 )
 
