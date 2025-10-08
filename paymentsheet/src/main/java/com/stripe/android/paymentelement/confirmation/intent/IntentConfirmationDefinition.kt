@@ -58,7 +58,9 @@ internal class IntentConfirmationDefinition(
             is PaymentMethodConfirmationOption.Saved ->
                 interceptor.intercept(
                     intent = confirmationParameters.intent,
-                    confirmationOption = confirmationOption,
+                    confirmationOption = confirmationOption.copy(
+                        ephemeralKeySecret = confirmationParameters.ephemeralKeySecret,
+                    ),
                     shippingValues = confirmationParameters.shippingDetails?.toConfirmPaymentIntentShipping(),
                 )
         }

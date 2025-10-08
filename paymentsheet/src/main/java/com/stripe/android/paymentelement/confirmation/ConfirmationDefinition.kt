@@ -144,7 +144,12 @@ internal interface ConfirmationDefinition<
          * Shipping details that the customer filled in or the merchant has auto-filled. Can be used to make
          * confirmation flow decisions or behavior changes (ie. providing shipping details on intent confirmation).
          */
-        val shippingDetails: AddressDetails?
+        val shippingDetails: AddressDetails?,
+        /**
+         * An ephemeral key that can be used to make authenticated requests to Stripe. This is generally only
+         * required when confirming PaymentIntents or SetupIntents with a customer-attached payment method.
+         */
+        val ephemeralKeySecret: String?,
     ) : Parcelable
 
     /**

@@ -525,6 +525,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         initializationMode = args.initializationMode,
                         appearance = config.appearance,
                         shippingDetails = config.shippingDetails,
+                        ephemeralKeySecret = customerStateHolder.customer.value?.ephemeralKeySecret,
                     ),
                 )
             } ?: run {
