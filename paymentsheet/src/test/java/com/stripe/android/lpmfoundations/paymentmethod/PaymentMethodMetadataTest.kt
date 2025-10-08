@@ -2161,6 +2161,7 @@ internal class PaymentMethodMetadataTest {
             saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             forceSetupFutureUseBehaviorAndNewMandate = false,
             linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+            disableFundingSources = emptyList(),
         )
     }
 
