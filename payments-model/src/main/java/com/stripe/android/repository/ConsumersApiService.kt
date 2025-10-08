@@ -22,7 +22,6 @@ import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.SignUpParams
-import com.stripe.android.model.Token
 import com.stripe.android.model.UpdateAvailableIncentives
 import com.stripe.android.model.VerificationType
 import com.stripe.android.model.parsers.AttachConsumerToLinkAccountSessionJsonParser

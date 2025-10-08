@@ -27,6 +27,7 @@ import javax.inject.Singleton
  */
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Suppress("TooManyFunctions")
 class LinkController @Inject internal constructor(
     private val interactor: LinkControllerInteractor,
     private val presenterComponentFactory: LinkControllerPresenterComponent.Factory

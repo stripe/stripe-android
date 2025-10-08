@@ -92,7 +92,9 @@ internal class OnrampInteractor @Inject constructor(
     }
 
     suspend fun authenticateUserWithToken(linkAuthTokenClientSecret: String): OnrampAuthenticationResult {
-        return when (val result = linkController.lookupConsumerWithLinkAuthTokenClientSecret(linkAuthTokenClientSecret)) {
+        return when (
+            val result = linkController.lookupConsumerWithLinkAuthTokenClientSecret(linkAuthTokenClientSecret)
+        ) {
             is LinkController.LookupConsumerResult.Success -> {
                 OnrampAuthenticationResult.Completed
             }
