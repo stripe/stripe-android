@@ -51,8 +51,8 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             onSuccess = { confirmationToken ->
                 val paymentMethodType = confirmationToken.paymentMethodPreview?.type
                     ?: return ConfirmationDefinition.Action.Fail(
-                        cause = IllegalStateException("Failed to fetch PaymentMethod Type"),
-                        message = "Failed to fetch PaymentMethod Type".resolvableString,
+                        cause = IllegalStateException(ERROR_MISSING_PAYMENT_METHOD_TYPE),
+                        message = ERROR_MISSING_PAYMENT_METHOD_TYPE.resolvableString,
                         errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
                     )
                 handleDeferredOnConfirmationTokenCreated(
@@ -86,18 +86,18 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 returnUrl = DefaultReturnUrl.create(context).value,
                 paymentMethodId = paymentMethod.id
                     ?: return ConfirmationDefinition.Action.Fail(
-                        cause = IllegalStateException("PaymentMethod must have an ID"),
-                        message = "PaymentMethod must have an ID".resolvableString,
+                        cause = IllegalStateException(ERROR_MISSING_PAYMENT_METHOD_ID),
+                        message = ERROR_MISSING_PAYMENT_METHOD_ID.resolvableString,
                         errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
                     )
             ),
             options = requestOptions.copy(
                 apiKey = confirmationOption.ephemeralKeySecret
-                        ?: return ConfirmationDefinition.Action.Fail(
-                            cause = IllegalStateException("Ephemeral key secret is required to confirm with saved payment method"),
-                            message = "Ephemeral key secret is required to confirm with saved payment method".resolvableString,
-                            errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                        ),
+                    ?: return ConfirmationDefinition.Action.Fail(
+                        cause = IllegalStateException(ERROR_MISSING_EPHEMERAL_KEY_SECRET),
+                        message = ERROR_MISSING_EPHEMERAL_KEY_SECRET.resolvableString,
+                        errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    ),
             ),
         ).fold(
             onSuccess = { confirmationToken ->
@@ -107,8 +107,8 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     intentConfiguration = intentConfiguration,
                     paymentMethodId = paymentMethod.id.orEmpty(),
                     paymentMethodType = paymentMethod.type ?: return ConfirmationDefinition.Action.Fail(
-                        cause = IllegalStateException("Failed to fetch PaymentMethod Type"),
-                        message = "Failed to fetch PaymentMethod Type".resolvableString,
+                        cause = IllegalStateException(ERROR_MISSING_PAYMENT_METHOD_TYPE),
+                        message = ERROR_MISSING_PAYMENT_METHOD_TYPE.resolvableString,
                         errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
                     ),
                     confirmationOption = confirmationOption,
@@ -228,6 +228,13 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             intentConfiguration: PaymentSheet.IntentConfiguration,
             createIntentCallback: CreateIntentWithConfirmationTokenCallback,
         ): ConfirmationTokenConfirmationInterceptor
+    }
+
+    companion object {
+        private const val ERROR_MISSING_PAYMENT_METHOD_ID = "PaymentMethod must have an ID"
+        private const val ERROR_MISSING_PAYMENT_METHOD_TYPE = "Failed to fetch PaymentMethod Type"
+        private const val ERROR_MISSING_EPHEMERAL_KEY_SECRET =
+            "Ephemeral key secret is required to confirm with saved payment method"
     }
 }
 
