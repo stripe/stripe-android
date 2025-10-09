@@ -933,7 +933,9 @@ class DefaultConfirmationHandlerTest {
         val canConfirmCall = someOtherDefinitionScenario.canConfirmCalls.awaitItem()
 
         assertThat(canConfirmCall.option).isEqualTo(SomeOtherConfirmationDefinition.Option)
-        assertThat(canConfirmCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(canConfirmCall.confirmationParameters).isEqualTo(
+            CONFIRMATION_PARAMETERS.copy(confirmationOption = SomeOtherConfirmationDefinition.Option)
+        )
 
         assertThat(someOtherDefinitionScenario.optionCalls.awaitItem().option)
             .isEqualTo(SomeOtherConfirmationDefinition.Option)
@@ -941,7 +943,9 @@ class DefaultConfirmationHandlerTest {
         val actionCall = someOtherDefinitionScenario.actionCalls.awaitItem()
 
         assertThat(actionCall.confirmationOption).isEqualTo(SomeOtherConfirmationDefinition.Option)
-        assertThat(actionCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(actionCall.confirmationParameters).isEqualTo(
+            CONFIRMATION_PARAMETERS.copy(confirmationOption = SomeOtherConfirmationDefinition.Option)
+        )
     }
 
     private suspend fun Scenario.assertSomeOtherDefinitionLaunchCalled() {
@@ -950,7 +954,9 @@ class DefaultConfirmationHandlerTest {
         assertThat(launchCall.launcher).isEqualTo(SomeOtherConfirmationDefinition.Launcher)
         assertThat(launchCall.confirmationOption).isEqualTo(SomeOtherConfirmationDefinition.Option)
         assertThat(launchCall.arguments).isEqualTo(SomeOtherConfirmationDefinition.LauncherArgs)
-        assertThat(launchCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(launchCall.confirmationParameters).isEqualTo(
+            CONFIRMATION_PARAMETERS.copy(confirmationOption = SomeOtherConfirmationDefinition.Option)
+        )
     }
 
     private suspend fun Scenario.assertSomeOtherDefinitionToResultCalled() {
@@ -958,7 +964,9 @@ class DefaultConfirmationHandlerTest {
 
         assertThat(toResultCall.confirmationOption).isEqualTo(SomeOtherConfirmationDefinition.Option)
         assertThat(toResultCall.result).isEqualTo(SomeOtherConfirmationDefinition.LauncherResult)
-        assertThat(toResultCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(toResultCall.confirmationParameters).isEqualTo(
+            CONFIRMATION_PARAMETERS.copy(confirmationOption = SomeOtherConfirmationDefinition.Option)
+        )
     }
 
     private suspend fun TurbineTestContext<ConfirmationHandler.State>.assertIdleState() {
@@ -1125,7 +1133,7 @@ class DefaultConfirmationHandlerTest {
 
         val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
             intent = PAYMENT_INTENT,
-            confirmationOption = FakeConfirmationOption(),
+            confirmationOption = SomeConfirmationDefinition.Option,
             appearance = PaymentSheet.Appearance(),
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123",
