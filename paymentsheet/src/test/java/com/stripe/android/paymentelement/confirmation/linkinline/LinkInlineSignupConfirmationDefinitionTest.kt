@@ -909,6 +909,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
             intent = PAYMENT_INTENT,
             appearance = PaymentSheet.Appearance(),
             shippingDetails = AddressDetails(),
+            confirmationOption = FakeConfirmationOption(),
         )
     }
 }

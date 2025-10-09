@@ -314,6 +314,7 @@ class CvcRecollectionConfirmationDefinitionTest {
     companion object {
         private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
             intent = PaymentIntentFactory.create(),
+            confirmationOption = FakeConfirmationOption(),
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123",
             ),

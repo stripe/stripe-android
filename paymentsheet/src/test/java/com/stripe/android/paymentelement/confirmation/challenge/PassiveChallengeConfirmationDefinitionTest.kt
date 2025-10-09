@@ -477,6 +477,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123",
             ),
+            confirmationOption = FakeConfirmationOption(),
             intent = PAYMENT_INTENT,
             appearance = PaymentSheet.Appearance(),
             shippingDetails = AddressDetails(),

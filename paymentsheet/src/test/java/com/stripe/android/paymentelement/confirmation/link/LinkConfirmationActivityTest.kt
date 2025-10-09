@@ -24,6 +24,7 @@ import com.stripe.android.link.TestFactory
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
+import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.assertComplete
@@ -237,6 +238,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
             ),
             shippingDetails = null,
             intent = PAYMENT_INTENT,
+            confirmationOption = FakeConfirmationOption(),
             appearance = PaymentSheet.Appearance(),
         )
 

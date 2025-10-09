@@ -639,6 +639,7 @@ class ConfirmationMediatorTest {
 
         private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
             intent = INTENT,
+            confirmationOption = FakeConfirmationOption(),
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123",
             ),

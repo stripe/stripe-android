@@ -244,6 +244,7 @@ internal class ShopPayConfirmationDefinitionTest {
             intent = PAYMENT_INTENT,
             appearance = PaymentSheet.Appearance(),
             shippingDetails = AddressDetails(),
+            confirmationOption = FakeConfirmationOption(),
         )
 
         private val SHOP_PAY_CONFIRMATION_OPTION = ShopPayConfirmationOption(

@@ -8,6 +8,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator.Parameters
+import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.runResultTest
@@ -124,6 +125,7 @@ class GooglePayConfirmationFlowTest {
             ),
             shippingDetails = null,
             intent = PAYMENT_INTENT,
+            confirmationOption = FakeConfirmationOption(),
             appearance = PaymentSheet.Appearance()
         )
     }

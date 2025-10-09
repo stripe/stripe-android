@@ -10,6 +10,7 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator.Parameters
+import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -148,6 +149,7 @@ class LinkConfirmationFlowTest {
             ),
             shippingDetails = null,
             intent = PAYMENT_INTENT,
+            confirmationOption = FakeConfirmationOption(),
             appearance = PaymentSheet.Appearance()
         )
 

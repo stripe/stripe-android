@@ -272,6 +272,7 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
 
         private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
             intent = PAYMENT_INTENT,
+            confirmationOption = FakeConfirmationOption(),
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123",
             ),

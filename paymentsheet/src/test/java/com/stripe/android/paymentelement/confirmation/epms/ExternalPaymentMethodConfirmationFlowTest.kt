@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation.epms
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
+import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
 import com.stripe.android.paymentelement.confirmation.runLaunchTest
 import com.stripe.android.paymentelement.confirmation.runResultTest
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -68,6 +69,7 @@ class ExternalPaymentMethodConfirmationFlowTest {
 
         private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
             intent = PAYMENT_INTENT,
+            confirmationOption = FakeConfirmationOption(),
             appearance = PaymentSheet.Appearance(),
             shippingDetails = AddressDetails(),
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(

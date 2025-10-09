@@ -353,6 +353,7 @@ internal class LinkConfirmationDefinitionTest {
             intent = PAYMENT_INTENT,
             appearance = PaymentSheet.Appearance(),
             shippingDetails = AddressDetails(),
+            confirmationOption = FakeConfirmationOption(),
         )
 
         private val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(

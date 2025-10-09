@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation.bacs
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
+import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.runLaunchTest
 import com.stripe.android.paymentelement.confirmation.runResultTest
@@ -63,6 +64,7 @@ class BacsConfirmationFlowTest {
 
         private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
             intent = PAYMENT_INTENT,
+            confirmationOption = FakeConfirmationOption(),
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123"
             ),

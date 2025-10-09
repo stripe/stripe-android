@@ -323,6 +323,7 @@ internal class IntentConfirmationFlowTest {
         return ConfirmationDefinition.Parameters(
             initializationMode = initializationMode,
             intent = intent,
+            confirmationOption = FakeConfirmationOption(),
             shippingDetails = AddressDetails(
                 name = "John Doe",
                 phoneNumber = "1234567890"
@@ -372,6 +373,7 @@ internal class IntentConfirmationFlowTest {
                 )
             ),
             intent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+            confirmationOption = FakeConfirmationOption(),
             shippingDetails = AddressDetails(
                 name = "John Doe",
                 phoneNumber = "1234567890"

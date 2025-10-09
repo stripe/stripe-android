@@ -458,6 +458,7 @@ class IntentConfirmationDefinitionTest {
             ),
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             appearance = PaymentSheet.Appearance(),
+            confirmationOption = FakeConfirmationOption(),
             shippingDetails = AddressDetails(name = "John Doe"),
         )
 

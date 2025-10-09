@@ -6,6 +6,7 @@ import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.RadarOptions
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
+import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.runLaunchTest
 import com.stripe.android.paymentelement.confirmation.runResultTest
@@ -132,6 +133,7 @@ internal class PassiveChallengeConfirmationFlowTest {
 
         private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
             intent = PAYMENT_INTENT,
+            confirmationOption = FakeConfirmationOption(),
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123"
             ),
