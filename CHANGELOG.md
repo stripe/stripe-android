@@ -2,6 +2,10 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.37.5 - 2025-10-09
+
+* [Security][11692](https://github.com/stripe/stripe-android/pull/11692) Improved analytics logger to prevent sending `uk_*` keys to analytics.
+
 ## 20.37.4 - 2024-02-20
 
 * [FIXED][7953](https://github.com/stripe/stripe-android/pull/7953) Improved font rendering in `PaymentSheet`, `CustomerSheet`, and `FinancialConnectionsSheet` when used in Compose 1.6 and above.
