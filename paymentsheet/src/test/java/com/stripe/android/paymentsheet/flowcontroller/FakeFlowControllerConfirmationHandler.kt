@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import app.cash.turbine.Turbine
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,7 +29,7 @@ internal class FakeFlowControllerConfirmationHandler(
         confirmationHandler.register(activityResultCaller, lifecycleOwner)
     }
 
-    override suspend fun start(arguments: ConfirmationHandler.Args) {
+    override suspend fun start(arguments: ConfirmationDefinition.Parameters) {
         confirmationHandler.start(arguments)
     }
 
@@ -40,7 +41,7 @@ internal class FakeFlowControllerConfirmationHandler(
         val handler: FlowControllerConfirmationHandler,
         val confirmationState: MutableStateFlow<ConfirmationHandler.State>,
         val registerTurbine: Turbine<FakeConfirmationHandler.RegisterCall>,
-        val startTurbine: Turbine<ConfirmationHandler.Args>,
+        val startTurbine: Turbine<ConfirmationDefinition.Parameters>,
         val bootstrapTurbine: Turbine<FakeConfirmationHandler.BootstrapCall>
     )
 

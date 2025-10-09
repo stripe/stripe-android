@@ -23,6 +23,7 @@ import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateHolder
@@ -297,7 +298,7 @@ internal class DefaultWalletButtonsInteractor constructor(
     private fun confirmationArgs(
         selection: PaymentSelection,
         arguments: Arguments,
-    ): ConfirmationHandler.Args? {
+    ): ConfirmationDefinition.Parameters? {
         val confirmationOption = selection.toConfirmationOption(
             configuration = arguments.configuration,
             linkConfiguration = arguments.paymentMethodMetadata.linkState?.configuration,
@@ -305,7 +306,7 @@ internal class DefaultWalletButtonsInteractor constructor(
             clientAttributionMetadata = arguments.paymentMethodMetadata.clientAttributionMetadata,
         ) ?: return null
 
-        return ConfirmationHandler.Args(
+        return ConfirmationDefinition.Parameters(
             intent = arguments.paymentMethodMetadata.stripeIntent,
             confirmationOption = confirmationOption,
             initializationMode = arguments.initializationMode,

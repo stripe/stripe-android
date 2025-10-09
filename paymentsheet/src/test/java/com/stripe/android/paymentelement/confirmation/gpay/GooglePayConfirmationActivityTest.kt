@@ -16,6 +16,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
+import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
@@ -282,7 +283,7 @@ internal class GooglePayConfirmationActivityTest {
             passiveCaptchaParams = null
         )
 
-        val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(
+        val CONFIRMATION_ARGUMENTS = ConfirmationDefinition.Parameters(
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123"

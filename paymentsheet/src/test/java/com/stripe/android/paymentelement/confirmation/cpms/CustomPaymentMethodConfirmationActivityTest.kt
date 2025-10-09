@@ -17,6 +17,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
+import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
@@ -165,7 +166,7 @@ internal class CustomPaymentMethodConfirmationActivityTest {
             ),
         )
 
-        val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(
+        val CONFIRMATION_ARGUMENTS = ConfirmationDefinition.Parameters(
             confirmationOption = CONFIRMATION_OPTION,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123"

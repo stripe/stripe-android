@@ -5,6 +5,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
@@ -50,7 +51,7 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
         }
     }
 
-    private fun confirmationArgs(): ConfirmationHandler.Args? {
+    private fun confirmationArgs(): ConfirmationDefinition.Parameters? {
         val confirmationState = confirmationStateHolder.state ?: return null
         val confirmationOption = confirmationState.selection?.toConfirmationOption(
             configuration = confirmationState.configuration.asCommonConfiguration(),
@@ -59,7 +60,7 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
             clientAttributionMetadata = confirmationState.paymentMethodMetadata.clientAttributionMetadata,
         ) ?: return null
 
-        return ConfirmationHandler.Args(
+        return ConfirmationDefinition.Parameters(
             intent = confirmationState.paymentMethodMetadata.stripeIntent,
             confirmationOption = confirmationOption,
             initializationMode = confirmationState.initializationMode,

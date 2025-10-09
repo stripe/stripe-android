@@ -4,6 +4,7 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
@@ -39,7 +40,7 @@ class EmbeddedConfirmationStarterTest {
 
     @Test
     fun `on confirm, should call 'start' on confirmation handler`() = test {
-        val arguments = ConfirmationHandler.Args(
+        val arguments = ConfirmationDefinition.Parameters(
             intent = PaymentIntentFactory.create(
                 paymentMethod = PaymentMethodFactory.card(random = true),
             ),

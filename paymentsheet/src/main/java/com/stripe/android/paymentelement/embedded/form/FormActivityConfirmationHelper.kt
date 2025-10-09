@@ -7,6 +7,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -76,14 +77,14 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
         return null
     }
 
-    private fun confirmationArgs(): ConfirmationHandler.Args? {
+    private fun confirmationArgs(): ConfirmationDefinition.Parameters? {
         val confirmationOption = selectionHolder.selection.value?.toConfirmationOption(
             configuration = configuration.asCommonConfiguration(),
             linkConfiguration = paymentMethodMetadata.linkState?.configuration,
             passiveCaptchaParams = paymentMethodMetadata.passiveCaptchaParams,
             clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
         ) ?: return null
-        return ConfirmationHandler.Args(
+        return ConfirmationDefinition.Parameters(
             intent = paymentMethodMetadata.stripeIntent,
             confirmationOption = confirmationOption,
             appearance = configuration.appearance,

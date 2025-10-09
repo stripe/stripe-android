@@ -14,7 +14,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.assertComplete
 import com.stripe.android.paymentelement.confirmation.assertConfirming
@@ -43,7 +43,7 @@ internal suspend fun assertIntentConfirmed(
         awaitItem().assertIdle()
 
         activity.confirmationHandler.start(
-            ConfirmationHandler.Args(
+            ConfirmationDefinition.Parameters(
                 confirmationOption = option,
                 intent = params.intent,
                 initializationMode = params.initializationMode,

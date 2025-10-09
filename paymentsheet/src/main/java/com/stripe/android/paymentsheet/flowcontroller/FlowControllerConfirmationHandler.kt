@@ -3,8 +3,8 @@ package com.stripe.android.paymentsheet.flowcontroller
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.ConfirmationHandler.Args
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler.State
 import jakarta.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -39,7 +39,7 @@ internal interface FlowControllerConfirmationHandler {
      *
      * @param arguments required set of arguments in order to start the confirmation process
      */
-    suspend fun start(arguments: Args)
+    suspend fun start(arguments: ConfirmationDefinition.Parameters)
 }
 
 internal class DefaultFlowControllerConfirmationHandler @Inject constructor(
@@ -68,7 +68,7 @@ internal class DefaultFlowControllerConfirmationHandler @Inject constructor(
         )
     }
 
-    override suspend fun start(arguments: Args) {
+    override suspend fun start(arguments: ConfirmationDefinition.Parameters) {
         confirmationHandler.start(arguments)
     }
 }

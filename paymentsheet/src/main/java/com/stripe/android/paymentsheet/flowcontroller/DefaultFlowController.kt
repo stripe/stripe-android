@@ -37,6 +37,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
@@ -535,7 +536,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 val stripeIntent = requireNotNull(state.stripeIntent)
 
                 confirmationHandler.start(
-                    arguments = ConfirmationHandler.Args(
+                    arguments = ConfirmationDefinition.Parameters(
                         confirmationOption = option,
                         intent = stripeIntent,
                         initializationMode = initializationMode,

@@ -18,6 +18,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.wallets.Wallet
+import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationOption
@@ -65,7 +66,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
     }
 
     private suspend fun confirm(
-        createArgs: () -> ConfirmationHandler.Args
+        createArgs: () -> ConfirmationDefinition.Parameters
     ): Result {
         return runCatching {
             val args = createArgs()
@@ -104,7 +105,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         linkAccount: LinkAccount,
         cvc: String?,
         billingPhone: String?
-    ): ConfirmationHandler.Args {
+    ): ConfirmationDefinition.Parameters {
         return when (paymentDetails) {
             is LinkPaymentDetails.New -> {
                 newConfirmationArgs(
@@ -128,7 +129,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         linkAccount: LinkAccount,
         cvc: String?,
         billingPhone: String?
-    ): ConfirmationHandler.Args {
+    ): ConfirmationDefinition.Parameters {
         val paymentMethodType = if (configuration.passthroughModeEnabled) {
             computeExpectedPaymentMethodType(configuration, paymentDetails)
         } else {
@@ -162,7 +163,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
             )
         }
 
-        return ConfirmationHandler.Args(
+        return ConfirmationDefinition.Parameters(
             intent = configuration.stripeIntent,
             confirmationOption = confirmationOption,
             appearance = PaymentSheet.Appearance(),
@@ -187,8 +188,8 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
     private fun savedConfirmationArgs(
         paymentDetails: LinkPaymentDetails.Saved,
         cvc: String?
-    ): ConfirmationHandler.Args {
-        return ConfirmationHandler.Args(
+    ): ConfirmationDefinition.Parameters {
+        return ConfirmationDefinition.Parameters(
             intent = configuration.stripeIntent,
             confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethod.Builder()

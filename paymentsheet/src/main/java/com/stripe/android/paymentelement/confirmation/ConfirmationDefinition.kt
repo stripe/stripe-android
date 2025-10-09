@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultCaller
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler.Option
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -131,6 +132,10 @@ internal interface ConfirmationDefinition<
          * also be cases where the intent is not directly confirmed (ie. external payment methods).
          */
         val intent: StripeIntent,
+        /**
+         * The confirmation option used to in order to potentially confirm the intent
+         */
+        val confirmationOption: Option,
         /**
          * The user-defined appearance values that can be passed to confirmation flows in order to style themselves
          * based on the user's appearance value choices (ie. CVC recollection sheet or Bacs mandate sheet).

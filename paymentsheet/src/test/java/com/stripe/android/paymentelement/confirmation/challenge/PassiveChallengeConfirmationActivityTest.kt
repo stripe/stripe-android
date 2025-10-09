@@ -17,7 +17,7 @@ import com.stripe.android.challenge.PassiveChallengeActivityResult
 import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.RadarOptions
-import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -236,7 +236,7 @@ internal class PassiveChallengeConfirmationActivityTest {
             hCaptchaToken = null
         )
 
-        val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(
+        val CONFIRMATION_ARGUMENTS = ConfirmationDefinition.Parameters(
             confirmationOption = CONFIRMATION_OPTION,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123"

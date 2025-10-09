@@ -13,7 +13,7 @@ import androidx.test.espresso.intent.rule.IntentsRule
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethodOptionsParams
-import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
 import com.stripe.android.paymentelement.confirmation.ExtendedPaymentElementConfirmationTestActivity
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -173,7 +173,7 @@ internal class CvcRecollectionConfirmationActivityTest {
             passiveCaptchaParams = null
         )
 
-        val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(
+        val CONFIRMATION_ARGUMENTS = ConfirmationDefinition.Parameters(
             confirmationOption = CONFIRMATION_OPTION,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123"

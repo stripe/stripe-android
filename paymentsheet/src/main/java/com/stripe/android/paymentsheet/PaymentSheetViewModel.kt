@@ -27,6 +27,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
@@ -519,7 +520,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 val stripeIntent = awaitStripeIntent()
 
                 confirmationHandler.start(
-                    arguments = ConfirmationHandler.Args(
+                    arguments = ConfirmationDefinition.Parameters(
                         intent = stripeIntent,
                         confirmationOption = option,
                         initializationMode = args.initializationMode,

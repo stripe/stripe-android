@@ -19,6 +19,7 @@ import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -592,7 +593,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             )
         }
 
-    private fun ConfirmationHandler.Args.assertConfirmationArgs(
+    private fun ConfirmationDefinition.Parameters.assertConfirmationArgs(
         configuration: LinkConfiguration,
         paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         linkAccount: LinkAccount,
@@ -617,7 +618,7 @@ internal class DefaultLinkConfirmationHandlerTest {
         assertThat(initializationMode).isEqualTo(configuration.initializationMode)
     }
 
-    private fun ConfirmationHandler.Args.assertSavedConfirmationArgs(
+    private fun ConfirmationDefinition.Parameters.assertSavedConfirmationArgs(
         configuration: LinkConfiguration,
         paymentDetails: LinkPaymentDetails.Saved,
         cvc: String?,

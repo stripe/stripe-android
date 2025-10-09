@@ -34,6 +34,7 @@ import com.stripe.android.model.PaymentMethodFixtures.US_BANK_ACCOUNT_VERIFIED
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.networking.PaymentAnalyticsEvent
+import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -3295,7 +3296,7 @@ class CustomerSheetViewModelTest {
 
         verify(mockConfirmationHandler).start(any())
 
-        val captor = argumentCaptor<ConfirmationHandler.Args>()
+        val captor = argumentCaptor<ConfirmationDefinition.Parameters>()
         verify(mockConfirmationHandler).start(captor.capture())
 
         val capturedArgs = captor.firstValue

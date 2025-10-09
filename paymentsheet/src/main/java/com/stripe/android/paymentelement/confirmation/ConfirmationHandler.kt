@@ -7,12 +7,8 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.parcelize.Parcelize
 
 /**
  * This interface handles the confirmation process of a [StripeIntent] and/or external payment. This interface is
@@ -45,7 +41,7 @@ internal interface ConfirmationHandler {
      *
      * @param arguments required set of arguments in order to start the confirmation process
      */
-    suspend fun start(arguments: Args)
+    suspend fun start(arguments: ConfirmationDefinition.Parameters)
 
     /**
      * Awaits for the result of a started confirmation process.
@@ -61,37 +57,6 @@ internal interface ConfirmationHandler {
     fun interface Factory {
         fun create(scope: CoroutineScope): ConfirmationHandler
     }
-
-    /**
-     * Defines the set of arguments requires for beginning the confirmation process
-     */
-    @Parcelize
-    data class Args(
-        /**
-         * The [StripeIntent] that is being potentially confirmed by the handler
-         */
-        val intent: StripeIntent,
-
-        /**
-         * The confirmation option used to in order to potentially confirm the intent
-         */
-        val confirmationOption: Option,
-
-        /**
-         * Appearance values to be used when styling the launched activities
-         */
-        val appearance: PaymentSheet.Appearance,
-
-        /**
-         * The mode that a Payment Element product was initialized with
-         */
-        val initializationMode: PaymentElementLoader.InitializationMode,
-
-        /**
-         * The shipping details of the customer that can be attached during the confirmation flow
-         */
-        val shippingDetails: AddressDetails?
-    ) : Parcelable
 
     /**
      * Defines the state types that [ConfirmationHandler] can be in with regards to confirmation.

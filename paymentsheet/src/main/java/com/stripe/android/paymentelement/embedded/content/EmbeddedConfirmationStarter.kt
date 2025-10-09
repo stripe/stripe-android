@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.content
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
@@ -40,7 +41,7 @@ internal class EmbeddedConfirmationStarter @Inject constructor(
         confirmationHandler.register(activityResultCaller, lifecycleOwner)
     }
 
-    fun start(args: ConfirmationHandler.Args) {
+    fun start(args: ConfirmationDefinition.Parameters) {
         coroutineScope.launch {
             confirmationHandler.start(args)
         }

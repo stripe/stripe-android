@@ -836,8 +836,8 @@ class DefaultConfirmationHandlerTest {
         )
     }
 
-    private fun createArguments(option: ConfirmationHandler.Option): ConfirmationHandler.Args {
-        return ConfirmationHandler.Args(
+    private fun createArguments(option: ConfirmationHandler.Option): ConfirmationDefinition.Parameters {
+        return ConfirmationDefinition.Parameters(
             confirmationOption = option,
             intent = CONFIRMATION_PARAMETERS.intent,
             appearance = CONFIRMATION_PARAMETERS.appearance,
@@ -1125,6 +1125,7 @@ class DefaultConfirmationHandlerTest {
 
         val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
             intent = PAYMENT_INTENT,
+            confirmationOption = FakeConfirmationOption(),
             appearance = PaymentSheet.Appearance(),
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123",

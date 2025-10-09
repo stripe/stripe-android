@@ -92,7 +92,7 @@ internal class DefaultConfirmationHandler(
     }
 
     override suspend fun start(
-        arguments: ConfirmationHandler.Args,
+        arguments: ConfirmationDefinition.Parameters,
     ) {
         withContext(coroutineScope.coroutineContext) {
             val currentState = _state.value
@@ -118,16 +118,14 @@ internal class DefaultConfirmationHandler(
     }
 
     private suspend fun confirm(
-        arguments: ConfirmationHandler.Args,
+        arguments: ConfirmationDefinition.Parameters,
     ) {
         val confirmationOption = arguments.confirmationOption
 
         _state.value = ConfirmationHandler.State.Confirming(arguments.confirmationOption)
 
-        val parameters = arguments.toParameters()
-
         val mediator = mediators.find { mediator ->
-            mediator.canConfirm(confirmationOption, parameters)
+            mediator.canConfirm(confirmationOption, arguments)
         } ?: run {
             errorReporter.report(
                 errorEvent = ErrorReporter
@@ -153,7 +151,7 @@ internal class DefaultConfirmationHandler(
             return
         }
 
-        handleMediatorAction(confirmationOption, parameters, mediator)
+        handleMediatorAction(confirmationOption, arguments, mediator)
     }
 
     private suspend fun handleMediatorAction(
@@ -204,7 +202,7 @@ internal class DefaultConfirmationHandler(
                     val parameters = result.parameters
 
                     confirm(
-                        arguments = ConfirmationHandler.Args(
+                        arguments = ConfirmationDefinition.Parameters(
                             intent = parameters.intent,
                             shippingDetails = parameters.shippingDetails,
                             appearance = parameters.appearance,
@@ -258,15 +256,6 @@ internal class DefaultConfirmationHandler(
 
     private fun retrieveIsAwaitingForResultData(): AwaitingConfirmationResultData? {
         return savedStateHandle.get<AwaitingConfirmationResultData>(AWAITING_CONFIRMATION_RESULT_KEY)
-    }
-
-    private fun ConfirmationHandler.Args.toParameters(): ConfirmationDefinition.Parameters {
-        return ConfirmationDefinition.Parameters(
-            appearance = appearance,
-            shippingDetails = shippingDetails,
-            initializationMode = initializationMode,
-            intent = intent
-        )
     }
 
     private suspend inline fun <reified T> Flow<*>.firstInstanceOf(): T {

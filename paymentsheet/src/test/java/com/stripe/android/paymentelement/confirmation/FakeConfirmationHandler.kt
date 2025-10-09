@@ -11,7 +11,7 @@ internal class FakeConfirmationHandler(
     override val state: MutableStateFlow<ConfirmationHandler.State> = MutableStateFlow(ConfirmationHandler.State.Idle)
 ) : ConfirmationHandler {
     val registerTurbine: Turbine<RegisterCall> = Turbine()
-    val startTurbine: Turbine<ConfirmationHandler.Args> = Turbine()
+    val startTurbine: Turbine<ConfirmationDefinition.Parameters> = Turbine()
     val awaitResultTurbine: Turbine<ConfirmationHandler.Result?> = Turbine(null)
     val bootstrapTurbine: Turbine<BootstrapCall> = Turbine()
 
@@ -28,7 +28,7 @@ internal class FakeConfirmationHandler(
         bootstrapTurbine.add(BootstrapCall(paymentMethodMetadata))
     }
 
-    override suspend fun start(arguments: ConfirmationHandler.Args) {
+    override suspend fun start(arguments: ConfirmationDefinition.Parameters) {
         startTurbine.add(arguments)
     }
 
@@ -56,7 +56,7 @@ internal class FakeConfirmationHandler(
         val handler: ConfirmationHandler,
         val confirmationState: MutableStateFlow<ConfirmationHandler.State>,
         val registerTurbine: Turbine<RegisterCall>,
-        val startTurbine: Turbine<ConfirmationHandler.Args>,
+        val startTurbine: Turbine<ConfirmationDefinition.Parameters>,
         val awaitResultTurbine: Turbine<ConfirmationHandler.Result?>,
         val bootstrapTurbine: Turbine<BootstrapCall>
     )
