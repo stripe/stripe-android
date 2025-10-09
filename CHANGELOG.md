@@ -4,7 +4,7 @@
 
 ## 20.37.5 - 2025-10-09
 
-* [Security][11692](https://github.com/stripe/stripe-android/pull/11692) Improved analytics logger to prevent sending `uk_*` keys to analytics.
+* Bug fixes and improvements.
 
 ## 20.37.4 - 2024-02-20
 
