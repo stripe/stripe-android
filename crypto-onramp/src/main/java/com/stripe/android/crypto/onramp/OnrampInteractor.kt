@@ -15,7 +15,6 @@ import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthenticateResult
-import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
@@ -27,6 +26,7 @@ import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
+import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData

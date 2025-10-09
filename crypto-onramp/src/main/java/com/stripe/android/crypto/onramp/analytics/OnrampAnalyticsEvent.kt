@@ -44,7 +44,7 @@ internal sealed class OnrampAnalyticsEvent(
         name = "link_user_authentication_completed"
     )
 
-    data object LinkUserAuthenticationWithTokenCompleted: OnrampAnalyticsEvent(
+    data object LinkUserAuthenticationWithTokenCompleted : OnrampAnalyticsEvent(
         name = "link_user_authentication_with_token_completed"
     )
 
