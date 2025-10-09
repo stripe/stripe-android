@@ -34,7 +34,7 @@ internal class IntentConfirmationDefinition(
 
     override suspend fun action(
         confirmationOption: PaymentMethodConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationParameters: ConfirmationHandler.Args,
     ): ConfirmationDefinition.Action<Args> {
         val interceptor: IntentConfirmationInterceptor
         try {
@@ -80,7 +80,7 @@ internal class IntentConfirmationDefinition(
         launcher: PaymentLauncher,
         arguments: Args,
         confirmationOption: PaymentMethodConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationParameters: ConfirmationHandler.Args,
     ) {
         when (arguments) {
             is Args.Confirm -> launchConfirm(launcher, arguments.confirmNextParams)
@@ -90,7 +90,7 @@ internal class IntentConfirmationDefinition(
 
     override fun toResult(
         confirmationOption: PaymentMethodConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationParameters: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: InternalPaymentResult
     ): ConfirmationDefinition.Result {

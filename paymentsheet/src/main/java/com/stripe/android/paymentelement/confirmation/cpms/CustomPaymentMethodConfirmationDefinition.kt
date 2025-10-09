@@ -10,7 +10,6 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import java.lang.IllegalStateException
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -35,7 +34,7 @@ internal class CustomPaymentMethodConfirmationDefinition @Inject constructor(
 
     override suspend fun action(
         confirmationOption: CustomPaymentMethodConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationParameters: ConfirmationHandler.Args,
     ): ConfirmationDefinition.Action<Unit> {
         val customPaymentMethodId = confirmationOption.customPaymentMethodType.id
         val confirmCustomPaymentMethodCallback = confirmCustomPaymentMethodCallbackProvider.get()
@@ -79,7 +78,7 @@ internal class CustomPaymentMethodConfirmationDefinition @Inject constructor(
         launcher: ActivityResultLauncher<CustomPaymentMethodInput>,
         arguments: Unit,
         confirmationOption: CustomPaymentMethodConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationParameters: ConfirmationHandler.Args,
     ) {
         errorReporter.report(
             ErrorReporter.SuccessEvent.CUSTOM_PAYMENT_METHODS_LAUNCH_SUCCESS,
@@ -99,7 +98,7 @@ internal class CustomPaymentMethodConfirmationDefinition @Inject constructor(
 
     override fun toResult(
         confirmationOption: CustomPaymentMethodConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationParameters: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: InternalCustomPaymentMethodResult
     ): ConfirmationDefinition.Result {

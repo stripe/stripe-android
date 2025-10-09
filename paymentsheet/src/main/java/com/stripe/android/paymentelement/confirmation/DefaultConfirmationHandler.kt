@@ -124,10 +124,8 @@ internal class DefaultConfirmationHandler(
 
         _state.value = ConfirmationHandler.State.Confirming(arguments.confirmationOption)
 
-        val parameters = arguments.toParameters()
-
         val mediator = mediators.find { mediator ->
-            mediator.canConfirm(confirmationOption, parameters)
+            mediator.canConfirm(confirmationOption, arguments)
         } ?: run {
             errorReporter.report(
                 errorEvent = ErrorReporter
@@ -153,12 +151,12 @@ internal class DefaultConfirmationHandler(
             return
         }
 
-        handleMediatorAction(confirmationOption, parameters, mediator)
+        handleMediatorAction(confirmationOption, arguments, mediator)
     }
 
     private suspend fun handleMediatorAction(
         confirmationOption: ConfirmationHandler.Option,
-        parameters: ConfirmationDefinition.Parameters,
+        parameters: ConfirmationHandler.Args,
         mediator: ConfirmationMediator<*, *, *, *>,
     ) {
         val action = withContext(ioContext) {
@@ -258,15 +256,6 @@ internal class DefaultConfirmationHandler(
 
     private fun retrieveIsAwaitingForResultData(): AwaitingConfirmationResultData? {
         return savedStateHandle.get<AwaitingConfirmationResultData>(AWAITING_CONFIRMATION_RESULT_KEY)
-    }
-
-    private fun ConfirmationHandler.Args.toParameters(): ConfirmationDefinition.Parameters {
-        return ConfirmationDefinition.Parameters(
-            appearance = appearance,
-            shippingDetails = shippingDetails,
-            initializationMode = initializationMode,
-            intent = intent
-        )
     }
 
     private suspend inline fun <reified T> Flow<*>.firstInstanceOf(): T {

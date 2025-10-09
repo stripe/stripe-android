@@ -13,13 +13,9 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
-import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.DummyActivityResultCaller
 import kotlinx.coroutines.CoroutineDispatcher
@@ -358,7 +354,6 @@ class DefaultConfirmationHandlerTest {
 
             val canConfirmCall = someDefinitionScenario.canConfirmCalls.awaitItem()
 
-            assertThat(canConfirmCall.option).isEqualTo(SomeConfirmationDefinition.Option)
             assertThat(canConfirmCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
 
             assertThat(someOtherDefinitionScenario.optionCalls.awaitItem().option)
@@ -704,7 +699,6 @@ class DefaultConfirmationHandlerTest {
             )
 
             assertThat(parameters?.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
-            assertThat(parameters?.confirmationOption).isEqualTo(SomeConfirmationDefinition.Option)
             assertThat(parameters?.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
         }
     }
@@ -887,7 +881,6 @@ class DefaultConfirmationHandlerTest {
 
         val canConfirmCall = someDefinitionScenario.canConfirmCalls.awaitItem()
 
-        assertThat(canConfirmCall.option).isEqualTo(SomeConfirmationDefinition.Option)
         assertThat(canConfirmCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
 
         assertThat(someDefinitionScenario.optionCalls.awaitItem().option)
@@ -895,7 +888,6 @@ class DefaultConfirmationHandlerTest {
 
         val actionCall = someDefinitionScenario.actionCalls.awaitItem()
 
-        assertThat(actionCall.confirmationOption).isEqualTo(SomeConfirmationDefinition.Option)
         assertThat(actionCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
     }
 
@@ -903,7 +895,6 @@ class DefaultConfirmationHandlerTest {
         val launchCall = someDefinitionScenario.launchCalls.awaitItem()
 
         assertThat(launchCall.launcher).isEqualTo(SomeConfirmationDefinition.Launcher)
-        assertThat(launchCall.confirmationOption).isEqualTo(SomeConfirmationDefinition.Option)
         assertThat(launchCall.arguments).isEqualTo(SomeConfirmationDefinition.LauncherArgs)
         assertThat(launchCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
     }
@@ -911,7 +902,6 @@ class DefaultConfirmationHandlerTest {
     private suspend fun Scenario.assertSomeDefinitionToResultCalled() {
         val toResultCall = someDefinitionScenario.toResultCalls.awaitItem()
 
-        assertThat(toResultCall.confirmationOption).isEqualTo(SomeConfirmationDefinition.Option)
         assertThat(toResultCall.result).isEqualTo(SomeConfirmationDefinition.LauncherResult)
         assertThat(toResultCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
     }
@@ -932,33 +922,45 @@ class DefaultConfirmationHandlerTest {
 
         val canConfirmCall = someOtherDefinitionScenario.canConfirmCalls.awaitItem()
 
-        assertThat(canConfirmCall.option).isEqualTo(SomeOtherConfirmationDefinition.Option)
-        assertThat(canConfirmCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(canConfirmCall.confirmationParameters).isEqualTo(
+            CONFIRMATION_PARAMETERS.copy(
+                confirmationOption = SomeOtherConfirmationDefinition.Option
+            )
+        )
 
         assertThat(someOtherDefinitionScenario.optionCalls.awaitItem().option)
             .isEqualTo(SomeOtherConfirmationDefinition.Option)
 
         val actionCall = someOtherDefinitionScenario.actionCalls.awaitItem()
 
-        assertThat(actionCall.confirmationOption).isEqualTo(SomeOtherConfirmationDefinition.Option)
-        assertThat(actionCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(actionCall.confirmationParameters).isEqualTo(
+            CONFIRMATION_PARAMETERS.copy(
+                confirmationOption = SomeOtherConfirmationDefinition.Option
+            )
+        )
     }
 
     private suspend fun Scenario.assertSomeOtherDefinitionLaunchCalled() {
         val launchCall = someOtherDefinitionScenario.launchCalls.awaitItem()
 
         assertThat(launchCall.launcher).isEqualTo(SomeOtherConfirmationDefinition.Launcher)
-        assertThat(launchCall.confirmationOption).isEqualTo(SomeOtherConfirmationDefinition.Option)
         assertThat(launchCall.arguments).isEqualTo(SomeOtherConfirmationDefinition.LauncherArgs)
-        assertThat(launchCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(launchCall.confirmationParameters).isEqualTo(
+            CONFIRMATION_PARAMETERS.copy(
+                confirmationOption = SomeOtherConfirmationDefinition.Option
+            )
+        )
     }
 
     private suspend fun Scenario.assertSomeOtherDefinitionToResultCalled() {
         val toResultCall = someOtherDefinitionScenario.toResultCalls.awaitItem()
 
-        assertThat(toResultCall.confirmationOption).isEqualTo(SomeOtherConfirmationDefinition.Option)
         assertThat(toResultCall.result).isEqualTo(SomeOtherConfirmationDefinition.LauncherResult)
-        assertThat(toResultCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(toResultCall.confirmationParameters).isEqualTo(
+            CONFIRMATION_PARAMETERS.copy(
+                confirmationOption = SomeOtherConfirmationDefinition.Option
+            )
+        )
     }
 
     private suspend fun TurbineTestContext<ConfirmationHandler.State>.assertIdleState() {
@@ -1061,7 +1063,7 @@ class DefaultConfirmationHandlerTest {
 
         override fun canConfirm(
             confirmationOption: Option,
-            confirmationParameters: ConfirmationDefinition.Parameters
+            confirmationParameters: ConfirmationHandler.Args
         ): Boolean {
             return isConfirmable
         }
@@ -1121,15 +1123,8 @@ class DefaultConfirmationHandlerTest {
         const val SOME_DEFINITION_PERSISTED_KEY = "SomeParameters"
         const val AWAITING_CONFIRMATION_RESULT_KEY = "AwaitingConfirmationResult"
 
-        val PAYMENT_INTENT = PaymentIntentFactory.create()
-
-        val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
-            intent = PAYMENT_INTENT,
-            appearance = PaymentSheet.Appearance(),
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123",
-            ),
-            shippingDetails = AddressDetails(),
+        val CONFIRMATION_PARAMETERS = com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS.copy(
+            confirmationOption = SomeConfirmationDefinition.Option
         )
 
         val UPDATED_PAYMENT_INTENT = PAYMENT_INTENT.copy(

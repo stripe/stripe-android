@@ -17,7 +17,6 @@ import com.stripe.android.paymentelement.confirmation.interceptor.FakeIntentConf
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
@@ -452,14 +451,11 @@ class IntentConfirmationDefinitionTest {
             passiveCaptchaParams = null
         )
 
-        private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123"
-            ),
-            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            appearance = PaymentSheet.Appearance(),
-            shippingDetails = AddressDetails(name = "John Doe"),
-        )
+        private val CONFIRMATION_PARAMETERS =
+            com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS.copy(
+                intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                shippingDetails = AddressDetails(name = "John Doe")
+            )
 
         private val CONFIRMATION_PARAMETERS_WITH_SI = CONFIRMATION_PARAMETERS.copy(
             intent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD

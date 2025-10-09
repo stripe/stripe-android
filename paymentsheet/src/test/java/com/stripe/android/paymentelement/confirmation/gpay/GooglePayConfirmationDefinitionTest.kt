@@ -18,6 +18,7 @@ import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
+import com.stripe.android.paymentelement.confirmation.PAYMENT_INTENT
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.paymentelement.confirmation.asCanceled
@@ -31,7 +32,6 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.paymentsheet.utils.RecordingGooglePayPaymentMethodLauncherFactory
-import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.utils.DummyActivityResultCaller
@@ -662,19 +662,13 @@ class GooglePayConfirmationDefinitionTest {
             passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
         )
 
-        private val PAYMENT_INTENT = PaymentIntentFactory.create()
-
         private val APPEARANCE = PaymentSheet.Appearance.Builder()
             .colorsDark(PaymentSheet.Colors.defaultLight)
             .build()
 
-        private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
-            intent = PAYMENT_INTENT,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123",
-            ),
-            appearance = APPEARANCE,
-            shippingDetails = null,
-        )
+        private val CONFIRMATION_PARAMETERS =
+            com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS.copy(
+                appearance = APPEARANCE
+            )
     }
 }

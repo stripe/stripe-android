@@ -239,8 +239,9 @@ class CustomPaymentMethodConfirmationDefinitionTest {
     )
 
     companion object {
-        private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
+        private val CONFIRMATION_PARAMETERS = ConfirmationHandler.Args(
             intent = PaymentIntentFactory.create(),
+            confirmationOption = FakeConfirmationOption(),
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123",
             ),

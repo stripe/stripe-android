@@ -27,7 +27,7 @@ internal class ShopPayConfirmationDefinition @Inject constructor(
 
     override fun toResult(
         confirmationOption: ShopPayConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationParameters: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: ShopPayActivityResult
     ): ConfirmationDefinition.Result {
@@ -69,7 +69,7 @@ internal class ShopPayConfirmationDefinition @Inject constructor(
         launcher: ActivityResultLauncher<ShopPayActivityContract.Args>,
         arguments: Unit,
         confirmationOption: ShopPayConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters
+        confirmationParameters: ConfirmationHandler.Args
     ) {
         launcher.launch(
             ShopPayActivityContract.Args(
@@ -83,7 +83,7 @@ internal class ShopPayConfirmationDefinition @Inject constructor(
 
     override suspend fun action(
         confirmationOption: ShopPayConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters
+        confirmationParameters: ConfirmationHandler.Args
     ): ConfirmationDefinition.Action<Unit> {
         return ConfirmationDefinition.Action.Launch(
             launcherArguments = Unit,

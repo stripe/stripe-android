@@ -35,7 +35,7 @@ internal class ConfirmationMediator<
 
     fun canConfirm(
         confirmationOption: ConfirmationHandler.Option,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationParameters: ConfirmationHandler.Args,
     ): Boolean {
         return definition.option(confirmationOption)?.let {
             definition.canConfirm(it, confirmationParameters)
@@ -87,7 +87,7 @@ internal class ConfirmationMediator<
 
     suspend fun action(
         option: ConfirmationHandler.Option,
-        parameters: ConfirmationDefinition.Parameters,
+        parameters: ConfirmationHandler.Args,
     ): Action {
         val confirmationOption = definition.option(option)
             ?: return Action.Fail(
@@ -170,7 +170,7 @@ internal class ConfirmationMediator<
     @Parcelize
     internal data class Parameters<TConfirmationOption : ConfirmationHandler.Option>(
         val confirmationOption: TConfirmationOption,
-        val confirmationParameters: ConfirmationDefinition.Parameters,
+        val confirmationParameters: ConfirmationHandler.Args,
         val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
     ) : Parcelable
 

@@ -12,7 +12,6 @@ import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInput
-import java.lang.IllegalStateException
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -36,7 +35,7 @@ internal class ExternalPaymentMethodConfirmationDefinition @Inject constructor(
 
     override suspend fun action(
         confirmationOption: ExternalPaymentMethodConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationParameters: ConfirmationHandler.Args,
     ): ConfirmationDefinition.Action<Unit> {
         val externalPaymentMethodType = confirmationOption.type
         val externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandlerProvider.get()
@@ -80,7 +79,7 @@ internal class ExternalPaymentMethodConfirmationDefinition @Inject constructor(
         launcher: ActivityResultLauncher<ExternalPaymentMethodInput>,
         arguments: Unit,
         confirmationOption: ExternalPaymentMethodConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationParameters: ConfirmationHandler.Args,
     ) {
         errorReporter.report(
             ErrorReporter.SuccessEvent.EXTERNAL_PAYMENT_METHODS_LAUNCH_SUCCESS,
@@ -98,7 +97,7 @@ internal class ExternalPaymentMethodConfirmationDefinition @Inject constructor(
 
     override fun toResult(
         confirmationOption: ExternalPaymentMethodConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationParameters: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: PaymentResult
     ): ConfirmationDefinition.Result {

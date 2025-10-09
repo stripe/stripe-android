@@ -41,7 +41,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
 
     override suspend fun action(
         confirmationOption: GooglePayConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationParameters: ConfirmationHandler.Args,
     ): ConfirmationDefinition.Action<Unit> {
         if (
             confirmationOption.config.merchantCurrencyCode == null &&
@@ -80,7 +80,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
         launcher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
         arguments: Unit,
         confirmationOption: GooglePayConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationParameters: ConfirmationHandler.Args,
     ) {
         val config = confirmationOption.config
         val intent = confirmationParameters.intent
@@ -105,7 +105,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
 
     override fun toResult(
         confirmationOption: GooglePayConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationParameters: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: GooglePayPaymentMethodLauncher.Result,
     ): ConfirmationDefinition.Result {
@@ -147,7 +147,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
         factory: GooglePayPaymentMethodLauncherFactory,
         activityLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
         config: GooglePayConfirmationOption.Config,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationParameters: ConfirmationHandler.Args,
     ): GooglePayPaymentMethodLauncher {
         return factory.create(
             lifecycleScope = CoroutineScope(Dispatchers.Default),

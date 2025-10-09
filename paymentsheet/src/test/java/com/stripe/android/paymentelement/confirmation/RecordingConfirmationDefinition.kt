@@ -39,7 +39,7 @@ internal class RecordingConfirmationDefinition<
 
     override fun canConfirm(
         confirmationOption: TConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters
+        confirmationParameters: ConfirmationHandler.Args
     ): Boolean {
         canConfirmCalls.add(CanConfirmCall(confirmationOption, confirmationParameters))
 
@@ -48,7 +48,7 @@ internal class RecordingConfirmationDefinition<
 
     override fun toResult(
         confirmationOption: TConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationParameters: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: TLauncherResult
     ): ConfirmationDefinition.Result {
@@ -86,7 +86,7 @@ internal class RecordingConfirmationDefinition<
         launcher: TLauncher,
         arguments: TLauncherArgs,
         confirmationOption: TConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationParameters: ConfirmationHandler.Args,
     ) {
         launchCalls.add(LaunchCall(launcher, arguments, confirmationOption, confirmationParameters))
 
@@ -95,7 +95,7 @@ internal class RecordingConfirmationDefinition<
 
     override suspend fun action(
         confirmationOption: TConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationParameters: ConfirmationHandler.Args,
     ): ConfirmationDefinition.Action<TLauncherArgs> {
         actionCalls.add(ActionCall(confirmationOption, confirmationParameters))
 
@@ -114,12 +114,12 @@ internal class RecordingConfirmationDefinition<
 
     class CanConfirmCall(
         val option: ConfirmationHandler.Option,
-        val confirmationParameters: ConfirmationDefinition.Parameters,
+        val confirmationParameters: ConfirmationHandler.Args,
     )
 
     class ToResultCall<TConfirmationOption : ConfirmationHandler.Option, TLauncherResult>(
         val confirmationOption: TConfirmationOption,
-        val confirmationParameters: ConfirmationDefinition.Parameters,
+        val confirmationParameters: ConfirmationHandler.Args,
         val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         val result: TLauncherResult,
     )
@@ -137,12 +137,12 @@ internal class RecordingConfirmationDefinition<
         val launcher: TLauncher,
         val arguments: TLauncherArgs,
         val confirmationOption: TConfirmationOption,
-        val confirmationParameters: ConfirmationDefinition.Parameters,
+        val confirmationParameters: ConfirmationHandler.Args,
     )
 
     class ActionCall<TConfirmationOption : ConfirmationHandler.Option>(
         val confirmationOption: TConfirmationOption,
-        val confirmationParameters: ConfirmationDefinition.Parameters,
+        val confirmationParameters: ConfirmationHandler.Args,
     )
 
     class BootstrapCall(

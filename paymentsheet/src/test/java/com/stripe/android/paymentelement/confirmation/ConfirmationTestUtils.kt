@@ -6,6 +6,10 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator.Parameters
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.utils.DummyActivityResultCaller
 import kotlinx.coroutines.test.runTest
 import java.util.concurrent.CountDownLatch
@@ -19,7 +23,7 @@ internal fun <
     > runLaunchTest(
     definition: ConfirmationDefinition<TConfirmationOption, TLauncher, TLauncherArgs, TLauncherResult>,
     confirmationOption: ConfirmationHandler.Option,
-    parameters: ConfirmationDefinition.Parameters
+    parameters: ConfirmationHandler.Args
 ) = runTest {
     val savedStateHandle = SavedStateHandle()
     val mediator = ConfirmationMediator(savedStateHandle, definition)
@@ -63,7 +67,7 @@ internal fun <
     > runResultTest(
     definition: ConfirmationDefinition<TConfirmationOption, TLauncher, TLauncherArgs, TLauncherResult>,
     confirmationOption: ConfirmationHandler.Option,
-    parameters: ConfirmationDefinition.Parameters,
+    parameters: ConfirmationHandler.Args,
     launcherResult: TLauncherResult,
     definitionResult: ConfirmationDefinition.Result,
 ) = runTest {
@@ -187,3 +191,15 @@ internal fun ConfirmationHandler.Result?.assertCanceled(): ConfirmationHandler.R
 
     return this as ConfirmationHandler.Result.Canceled
 }
+
+internal val PAYMENT_INTENT = PaymentIntentFactory.create()
+
+internal val CONFIRMATION_PARAMETERS = ConfirmationHandler.Args(
+    initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+        clientSecret = "pi_123_secret_123",
+    ),
+    confirmationOption = FakeConfirmationOption(),
+    shippingDetails = AddressDetails(),
+    intent = PAYMENT_INTENT,
+    appearance = PaymentSheet.Appearance()
+)

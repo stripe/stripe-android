@@ -319,10 +319,11 @@ internal class IntentConfirmationFlowTest {
     private fun defaultConfirmationDefinitionParams(
         initializationMode: PaymentElementLoader.InitializationMode,
         intent: StripeIntent,
-    ): ConfirmationDefinition.Parameters {
-        return ConfirmationDefinition.Parameters(
+    ): ConfirmationHandler.Args {
+        return ConfirmationHandler.Args(
             initializationMode = initializationMode,
             intent = intent,
+            confirmationOption = FakeConfirmationOption(),
             shippingDetails = AddressDetails(
                 name = "John Doe",
                 phoneNumber = "1234567890"
@@ -363,7 +364,7 @@ internal class IntentConfirmationFlowTest {
             passiveCaptchaParams = null
         )
 
-        val DEFERRED_CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
+        val DEFERRED_CONFIRMATION_PARAMETERS = ConfirmationHandler.Args(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Setup(
@@ -371,6 +372,7 @@ internal class IntentConfirmationFlowTest {
                     )
                 )
             ),
+            confirmationOption = FakeConfirmationOption(),
             intent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
             shippingDetails = AddressDetails(
                 name = "John Doe",

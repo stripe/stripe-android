@@ -7,14 +7,12 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator.Parameters
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.asLaunch
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
@@ -139,17 +137,6 @@ class LinkConfirmationFlowTest {
 
     private companion object {
         private val PAYMENT_METHOD = PaymentMethodFactory.card()
-
-        private val PAYMENT_INTENT = PaymentIntentFactory.create()
-
-        private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123",
-            ),
-            shippingDetails = null,
-            intent = PAYMENT_INTENT,
-            appearance = PaymentSheet.Appearance()
-        )
 
         private val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(
             configuration = TestFactory.LINK_CONFIGURATION,

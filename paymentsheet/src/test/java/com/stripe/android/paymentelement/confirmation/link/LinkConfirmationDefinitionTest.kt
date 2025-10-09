@@ -12,6 +12,7 @@ import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.model.PassiveCaptchaParamsFactory
+import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
@@ -21,12 +22,8 @@ import com.stripe.android.paymentelement.confirmation.asFailed
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.paymentelement.confirmation.asSaved
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
@@ -344,17 +341,6 @@ internal class LinkConfirmationDefinitionTest {
     )
 
     private companion object {
-        private val PAYMENT_INTENT = PaymentIntentFactory.create()
-
-        private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123",
-            ),
-            intent = PAYMENT_INTENT,
-            appearance = PaymentSheet.Appearance(),
-            shippingDetails = AddressDetails(),
-        )
-
         private val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(
             configuration = TestFactory.LINK_CONFIGURATION,
             linkExpressMode = LinkExpressMode.ENABLED,

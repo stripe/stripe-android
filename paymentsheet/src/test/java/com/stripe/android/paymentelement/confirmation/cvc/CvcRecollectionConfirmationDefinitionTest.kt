@@ -23,8 +23,6 @@ import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionL
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionContract
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionResult
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.utils.DummyActivityResultCaller
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -312,15 +310,11 @@ class CvcRecollectionConfirmationDefinitionTest {
     }
 
     companion object {
-        private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
-            intent = PaymentIntentFactory.create(),
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123",
-            ),
-            appearance = PaymentSheet.Appearance.Builder()
-                .colorsDark(PaymentSheet.Colors.defaultLight)
-                .build(),
-            shippingDetails = null,
-        )
+        private val CONFIRMATION_PARAMETERS =
+            com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS.copy(
+                appearance = PaymentSheet.Appearance.Builder()
+                    .colorsDark(PaymentSheet.Colors.defaultLight)
+                    .build(),
+            )
     }
 }

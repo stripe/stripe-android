@@ -10,20 +10,18 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.RadarOptions
+import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
+import com.stripe.android.paymentelement.confirmation.PAYMENT_INTENT
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.paymentelement.confirmation.asFail
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakeErrorReporter
-import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeActivityResultLauncher
 import com.stripe.android.utils.FakePassiveChallengeWarmer
@@ -471,17 +469,6 @@ internal class PassiveChallengeConfirmationDefinitionTest {
     }
 
     private companion object {
-        private val PAYMENT_INTENT = PaymentIntentFactory.create()
-
-        private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123",
-            ),
-            intent = PAYMENT_INTENT,
-            appearance = PaymentSheet.Appearance(),
-            shippingDetails = AddressDetails(),
-        )
-
         private val PASSIVE_CAPTCHA_PARAMS = PassiveCaptchaParams(
             siteKey = "site_key",
             rqData = null

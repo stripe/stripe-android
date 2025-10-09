@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
+import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator.Parameters
@@ -12,9 +13,7 @@ import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationO
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.runResultTest
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.utils.RecordingGooglePayPaymentMethodLauncherFactory
-import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.DummyActivityResultCaller
 import kotlinx.coroutines.test.runTest
@@ -115,16 +114,5 @@ class GooglePayConfirmationFlowTest {
         )
 
         private val PAYMENT_METHOD = PaymentMethodFactory.card()
-
-        private val PAYMENT_INTENT = PaymentIntentFactory.create()
-
-        private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123",
-            ),
-            shippingDetails = null,
-            intent = PAYMENT_INTENT,
-            appearance = PaymentSheet.Appearance()
-        )
     }
 }

@@ -6,10 +6,6 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import kotlinx.parcelize.Parcelize
 
 /**
  * Defines a confirmation flow that a user might use during confirmation.
@@ -49,21 +45,21 @@ internal interface ConfirmationDefinition<
      */
     fun canConfirm(
         confirmationOption: TConfirmationOption,
-        confirmationParameters: Parameters,
+        confirmationParameters: ConfirmationHandler.Args,
     ): Boolean = true
 
     /**
      * When the confirmation flow can be used after [option] returns the expected [ConfirmationHandler.Option] type
      * and [canConfirm] returns true, we know must decide what action to take with this confirmation flow. You may
      * decide to simply always use the same action here every time or decide based on the provided
-     * [ConfirmationHandler.Option] and [ConfirmationDefinition.Parameters] instances.
+     * [ConfirmationHandler.Option] and [ConfirmationHandler.Args] instances.
      *
      * @param confirmationOption the expected [ConfirmationHandler.Option] type
      * @param confirmationParameters a set of general confirmation parameters
      */
     suspend fun action(
         confirmationOption: TConfirmationOption,
-        confirmationParameters: Parameters,
+        confirmationParameters: ConfirmationHandler.Args,
     ): Action<TLauncherArgs>
 
     /**
@@ -79,7 +75,7 @@ internal interface ConfirmationDefinition<
         launcher: TLauncher,
         arguments: TLauncherArgs,
         confirmationOption: TConfirmationOption,
-        confirmationParameters: Parameters,
+        confirmationParameters: ConfirmationHandler.Args,
     )
 
     /**
@@ -114,38 +110,12 @@ internal interface ConfirmationDefinition<
      */
     fun toResult(
         confirmationOption: TConfirmationOption,
-        confirmationParameters: Parameters,
+        confirmationParameters: ConfirmationHandler.Args,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: TLauncherResult,
     ): Result
 
     fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {}
-
-    /**
-     * A set of general parameters that can be used to make confirmation decisions
-     */
-    @Parcelize
-    data class Parameters(
-        /**
-         * The intent that is potentially being confirmed. In most cases, this intent will be confirmed but there may
-         * also be cases where the intent is not directly confirmed (ie. external payment methods).
-         */
-        val intent: StripeIntent,
-        /**
-         * The user-defined appearance values that can be passed to confirmation flows in order to style themselves
-         * based on the user's appearance value choices (ie. CVC recollection sheet or Bacs mandate sheet).
-         */
-        val appearance: PaymentSheet.Appearance,
-        /**
-         * The mode that the Payment Element was initialized with (PaymentIntent, SetupIntent, DeferredIntent).
-         */
-        val initializationMode: PaymentElementLoader.InitializationMode,
-        /**
-         * Shipping details that the customer filled in or the merchant has auto-filled. Can be used to make
-         * confirmation flow decisions or behavior changes (ie. providing shipping details on intent confirmation).
-         */
-        val shippingDetails: AddressDetails?
-    ) : Parcelable
 
     /**
      * The general result a [ConfirmationDefinition] may return after launching into a confirmation flow
@@ -195,7 +165,7 @@ internal interface ConfirmationDefinition<
              * A set of general confirmation parameters. Should normally be the same as what was provided by the
              * user
              */
-            val parameters: Parameters,
+            val parameters: ConfirmationHandler.Args,
         ) : Result
 
         /**
