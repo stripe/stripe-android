@@ -965,7 +965,6 @@ class DefaultEventReporterTest {
 
         eventReporter.simulateSuccessfulSetup(
             linkSignupDisabledReasons = listOf(
-                LinkSignupDisabledReason.LinkNotEnabled,
                 LinkSignupDisabledReason.LinkCardNotSupported
             )
         )
@@ -973,8 +972,7 @@ class DefaultEventReporterTest {
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_load_succeeded" &&
-                    req.params["link_signup_disabled_reasons"] ==
-                    "link_not_enabled,link_card_not_supported"
+                    req.params["link_signup_disabled_reasons"] == "link_card_not_supported"
             }
         )
     }
