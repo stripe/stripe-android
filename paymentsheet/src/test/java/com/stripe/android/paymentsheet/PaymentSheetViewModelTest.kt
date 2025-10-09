@@ -31,9 +31,11 @@ import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PassiveCaptchaParamsFactory
@@ -2131,7 +2133,7 @@ internal class PaymentSheetViewModelTest {
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false,
-                    passiveCaptchaParams = null
+                    passiveCaptchaParams = null,
                 )
             )
 
@@ -2170,7 +2172,7 @@ internal class PaymentSheetViewModelTest {
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false,
-                    passiveCaptchaParams = null
+                    passiveCaptchaParams = null,
                 )
             )
 
@@ -2304,7 +2306,7 @@ internal class PaymentSheetViewModelTest {
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false,
-                    passiveCaptchaParams = null
+                    passiveCaptchaParams = null,
                 )
             )
 
@@ -2339,7 +2341,7 @@ internal class PaymentSheetViewModelTest {
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false,
-                    passiveCaptchaParams = null
+                    passiveCaptchaParams = null,
                 )
             )
 
@@ -2374,7 +2376,7 @@ internal class PaymentSheetViewModelTest {
                     paymentMethod = CARD_PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = false,
-                    passiveCaptchaParams = null
+                    passiveCaptchaParams = null,
                 )
             )
 
@@ -2475,6 +2477,37 @@ internal class PaymentSheetViewModelTest {
 
         assertThat(googlePayConfirmationOption.config.customLabel).isEqualTo(expectedLabel)
         assertThat(googlePayConfirmationOption.config.customAmount).isEqualTo(expectedAmount)
+    }
+
+    @Test
+    fun `Launches Google Pay with correct client attribution metadata`() = confirmationTest {
+        val expectedClientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA
+        val args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+            config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
+                .googlePay(
+                    PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                        countryCode = "CA",
+                    )
+                )
+                .build()
+        )
+
+        val viewModel = createViewModel(
+            args = args,
+            isGooglePayReady = true,
+            clientAttributionMetadata = expectedClientAttributionMetadata,
+        )
+
+        viewModel.checkoutWithGooglePay()
+
+        val arguments = startTurbine.awaitItem()
+
+        assertThat(arguments.confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
+
+        val googlePayConfirmationOption = arguments.confirmationOption as GooglePayConfirmationOption
+
+        assertThat(googlePayConfirmationOption.clientAttributionMetadata).isEqualTo(expectedClientAttributionMetadata)
     }
 
     @Test
@@ -2699,7 +2732,8 @@ internal class PaymentSheetViewModelTest {
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
                 ),
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                clientAttributionMetadata = null
             )
         )
 
@@ -2743,7 +2777,8 @@ internal class PaymentSheetViewModelTest {
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
                 ),
-                passiveCaptchaParams = null
+                passiveCaptchaParams = null,
+                clientAttributionMetadata = null
             )
         )
 
@@ -3751,6 +3786,7 @@ internal class PaymentSheetViewModelTest {
         validationError: PaymentSheetLoadingException? = null,
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         passiveCaptchaParams: PassiveCaptchaParams? = null,
+        clientAttributionMetadata: ClientAttributionMetadata? = null,
         paymentElementLoader: PaymentElementLoader = FakePaymentElementLoader(
             stripeIntent = stripeIntent,
             shouldFail = shouldFailLoad,
@@ -3760,7 +3796,8 @@ internal class PaymentSheetViewModelTest {
             isGooglePayAvailable = isGooglePayReady,
             paymentSelection = initialPaymentSelection,
             validationError = validationError,
-            passiveCaptchaParams = passiveCaptchaParams
+            passiveCaptchaParams = passiveCaptchaParams,
+            clientAttributionMetadata = clientAttributionMetadata,
         ),
         errorReporter: ErrorReporter = FakeErrorReporter(),
         eventReporter: EventReporter = this@PaymentSheetViewModelTest.eventReporter,
