@@ -24,7 +24,6 @@ import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
-import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateHolder
@@ -52,6 +51,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import javax.inject.Provider
 
+@OptIn(WalletButtonsPreview::class)
 internal interface WalletButtonsInteractor {
     val state: StateFlow<State>
 
@@ -125,7 +125,10 @@ internal interface WalletButtonsInteractor {
     }
 
     sealed interface ViewAction {
-        data class OnButtonPressed(val button: WalletButton) : ViewAction
+        data class OnButtonPressed constructor(
+            val button: WalletButton,
+            val clickHandler: WalletButtonsViewClickHandler,
+        ) : ViewAction
         data object OnShown : ViewAction
         data object OnHidden : ViewAction
         data object OnResendCode : ViewAction
@@ -143,7 +146,6 @@ internal class DefaultWalletButtonsInteractor constructor(
     private val linkPaymentLauncher: LinkPaymentLauncher,
     private val linkAccountHolder: LinkAccountHolder,
     private val analyticsCallbackProvider: Provider<AnalyticEventCallback?>,
-    private val walletButtonsViewClickHandlerProvider: Provider<WalletButtonsViewClickHandler?>,
     private val onWalletButtonsRenderStateChanged: (isRendered: Boolean) -> Unit
 ) : WalletButtonsInteractor {
 
@@ -231,10 +233,9 @@ internal class DefaultWalletButtonsInteractor constructor(
                     AnalyticEvent.TapsButtonInWalletsButtonsView(action.button.walletType.code)
                 )
 
-                val walletButtonsViewClickHandler = walletButtonsViewClickHandlerProvider.get()
-                val isHandled = walletButtonsViewClickHandler?.onWalletButtonClick(
+                val isHandled = action.clickHandler.onWalletButtonClick(
                     wallet = action.button.walletType.code
-                ) ?: false
+                )
 
                 if (isHandled) {
                     return
@@ -369,10 +370,6 @@ internal class DefaultWalletButtonsInteractor constructor(
                 linkAccountHolder = flowControllerViewModel.flowControllerStateComponent.linkAccountHolder,
                 analyticsCallbackProvider =
                 flowControllerViewModel.flowControllerStateComponent.analyticEventCallbackProvider,
-                walletButtonsViewClickHandlerProvider = Provider {
-                    PaymentElementCallbackReferences[flowControllerViewModel.paymentElementCallbackIdentifier]
-                        ?.walletButtonsViewClickHandler
-                },
                 onWalletButtonsRenderStateChanged = { isRendered ->
                     flowControllerViewModel.walletButtonsRendered = isRendered
                 }
@@ -389,7 +386,6 @@ internal class DefaultWalletButtonsInteractor constructor(
             linkPaymentLauncher: LinkPaymentLauncher,
             linkAccountHolder: LinkAccountHolder,
             analyticsCallbackProvider: Provider<AnalyticEventCallback?>,
-            walletButtonsViewClickHandlerProvider: Provider<WalletButtonsViewClickHandler?>,
         ): WalletButtonsInteractor {
             return DefaultWalletButtonsInteractor(
                 errorReporter = errorReporter,
@@ -414,7 +410,6 @@ internal class DefaultWalletButtonsInteractor constructor(
                 linkPaymentLauncher = linkPaymentLauncher,
                 linkAccountHolder = linkAccountHolder,
                 analyticsCallbackProvider = analyticsCallbackProvider,
-                walletButtonsViewClickHandlerProvider = walletButtonsViewClickHandlerProvider,
                 onWalletButtonsRenderStateChanged = {
                     // No-op, not supported for Embedded
                 }

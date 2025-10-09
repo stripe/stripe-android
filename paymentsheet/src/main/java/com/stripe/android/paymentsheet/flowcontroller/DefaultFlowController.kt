@@ -35,6 +35,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -178,8 +179,8 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     @Composable
-    override fun WalletButtons() {
-        viewModel.flowControllerStateComponent.walletButtonsContent.Content()
+    override fun WalletButtons(clickHandler: WalletButtonsViewClickHandler) {
+        viewModel.flowControllerStateComponent.walletButtonsContent.Content(clickHandler)
     }
 
     override fun configureWithPaymentIntent(

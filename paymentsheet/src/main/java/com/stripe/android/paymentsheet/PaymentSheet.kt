@@ -3516,10 +3516,14 @@ class PaymentSheet internal constructor(
 
         /**
          * Displays a list of wallet buttons that can be used to checkout instantly
+         *
+         * @param clickHandler intercepts wallet buttons view click before primary confirmation occurs. Return true
+         *   if the click has been handled internally or false if the wallet confirmation process should continue. By
+         *   default always returns false.
          */
         @WalletButtonsPreview
         @Composable
-        fun WalletButtons()
+        fun WalletButtons(clickHandler: WalletButtonsViewClickHandler)
 
         /**
          * Configure the FlowController to process a [PaymentIntent].
@@ -3664,15 +3668,6 @@ class PaymentSheet internal constructor(
                 handler: PreparePaymentMethodHandler
             ) = apply {
                 callbacksBuilder.preparePaymentMethodHandler(handler)
-            }
-
-            /**
-             * @param handler Called when a wallet button is clicked. Return true if the action has been
-             * handled and should not continue, or false if the action should continue with default behavior.
-             */
-            @WalletButtonsPreview
-            fun walletButtonsViewClickHandler(handler: WalletButtonsViewClickHandler) = apply {
-                callbacksBuilder.walletButtonsViewClickHandler(handler)
             }
 
             /**

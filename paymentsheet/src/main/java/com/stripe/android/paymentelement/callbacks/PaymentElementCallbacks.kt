@@ -11,7 +11,6 @@ import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
-import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
@@ -33,7 +32,6 @@ internal data class PaymentElementCallbacks private constructor(
     val rowSelectionCallback: InternalRowSelectionCallback?,
     val shopPayHandlers: ShopPayHandlers?,
     val preparePaymentMethodHandler: PreparePaymentMethodHandler?,
-    val walletButtonsViewClickHandler: WalletButtonsViewClickHandler?,
 ) {
     class Builder {
         private var createIntentCallback: CreateIntentCallback? = null
@@ -44,7 +42,6 @@ internal data class PaymentElementCallbacks private constructor(
         private var rowSelectionCallback: InternalRowSelectionCallback? = null
         private var shopPayHandlers: ShopPayHandlers? = null
         private var preparePaymentMethodHandler: PreparePaymentMethodHandler? = null
-        private var walletButtonsViewClickHandler: WalletButtonsViewClickHandler? = null
 
         fun createIntentCallback(createIntentCallback: CreateIntentCallback?) = apply {
             this.createIntentCallback = createIntentCallback
@@ -91,10 +88,6 @@ internal data class PaymentElementCallbacks private constructor(
             this.shopPayHandlers = shopPayHandlers
         }
 
-        fun walletButtonsViewClickHandler(walletButtonsViewClickHandler: WalletButtonsViewClickHandler?) = apply {
-            this.walletButtonsViewClickHandler = walletButtonsViewClickHandler
-        }
-
         fun build(): PaymentElementCallbacks {
             var mutualExclusiveCallbackCount = 0
             if (createIntentCallback != null) {
@@ -123,7 +116,6 @@ internal data class PaymentElementCallbacks private constructor(
                 rowSelectionCallback = rowSelectionCallback,
                 shopPayHandlers = shopPayHandlers,
                 preparePaymentMethodHandler = preparePaymentMethodHandler,
-                walletButtonsViewClickHandler = walletButtonsViewClickHandler,
             )
         }
     }

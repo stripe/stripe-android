@@ -13,6 +13,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.ui.LinkButton
 import com.stripe.android.link.ui.wallet.LinkInline2FASection
+import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction
 import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction.OnButtonPressed
@@ -21,12 +23,15 @@ import com.stripe.android.shoppay.ShopPayButton
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.utils.collectAsState
 
+@OptIn(WalletButtonsPreview::class)
 @Immutable
 internal class WalletButtonsContent(
     private val interactor: WalletButtonsInteractor,
 ) {
     @Composable
-    fun Content() {
+    fun Content(
+        walletButtonsViewClickHandler: WalletButtonsViewClickHandler,
+    ) {
         val state by interactor.state.collectAsState()
 
         DisposableEffect(Unit) {
@@ -46,7 +51,7 @@ internal class WalletButtonsContent(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     LinkOTPSection(state)
-                    WalletButtons(state)
+                    WalletButtons(state, walletButtonsViewClickHandler)
                 }
             }
         }
@@ -67,7 +72,10 @@ internal class WalletButtonsContent(
     }
 
     @Composable
-    private fun WalletButtons(state: WalletButtonsInteractor.State) {
+    private fun WalletButtons(
+        state: WalletButtonsInteractor.State,
+        walletButtonsViewClickHandler: WalletButtonsViewClickHandler,
+    ) {
         state.walletButtons.forEach { button ->
             when (button) {
                 is WalletButtonsInteractor.WalletButton.GooglePay -> GooglePayButton(
@@ -78,7 +86,7 @@ internal class WalletButtonsContent(
                     isEnabled = state.buttonsEnabled,
                     cardBrandFilter = button.cardBrandFilter,
                     onPressed = {
-                        interactor.handleViewAction(OnButtonPressed(button))
+                        interactor.handleViewAction(OnButtonPressed(button, walletButtonsViewClickHandler))
                     },
                 )
                 // Link button is filtered out if the 2FA verification is in progress
@@ -87,11 +95,11 @@ internal class WalletButtonsContent(
                     enabled = state.buttonsEnabled,
                     theme = button.theme,
                     onClick = {
-                        interactor.handleViewAction(OnButtonPressed(button))
+                        interactor.handleViewAction(OnButtonPressed(button, walletButtonsViewClickHandler))
                     },
                 )
                 is WalletButtonsInteractor.WalletButton.ShopPay -> ShopPayButton {
-                    interactor.handleViewAction(OnButtonPressed(button))
+                    interactor.handleViewAction(OnButtonPressed(button, walletButtonsViewClickHandler))
                 }
             }
         }
