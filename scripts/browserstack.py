@@ -277,8 +277,8 @@ def executeTests(appUrl, testUrl, isNightly):
             "Samsung Galaxy S22-12.0",
         ]
 
-    # We only have 25 parallel runs, and we want multiple PRs to run at the same time.
-    numberOfShards = 2.0 if isNightly else 10.0
+    # We only have 45 parallel runs, and we want multiple PRs to run at the same time.
+    numberOfShards = 2.0 if isNightly else 8.0
 
     addedParams = {
         "shards": {
