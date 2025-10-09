@@ -21,6 +21,7 @@
     <ID>LargeClass:CustomerSheetViewModelTest.kt$CustomerSheetViewModelTest</ID>
     <ID>LargeClass:DefaultConfirmationHandlerTest.kt$DefaultConfirmationHandlerTest</ID>
     <ID>LargeClass:DefaultEventReporterTest.kt$DefaultEventReporterTest</ID>
+    <ID>LargeClass:DefaultFlowController.kt$DefaultFlowController : FlowController</ID>
     <ID>LargeClass:DefaultFlowControllerTest.kt$DefaultFlowControllerTest</ID>
     <ID>LargeClass:DefaultPaymentElementLoaderTest.kt$DefaultPaymentElementLoaderTest</ID>
     <ID>LargeClass:InputAddressViewModelTest.kt$InputAddressViewModelTest</ID>

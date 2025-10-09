@@ -1,12 +1,14 @@
 package com.stripe.android.paymentsheet.ui
 
 import com.stripe.android.link.ui.LinkButtonState
+import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 import org.junit.Rule
 import org.junit.Test
 
+@OptIn(WalletButtonsPreview::class)
 class WalletButtonsScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule()
@@ -23,7 +25,7 @@ class WalletButtonsScreenshotTest {
         )
 
         paparazziRule.snapshot {
-            walletButtonsContent.Content()
+            walletButtonsContent.Content { false }
         }
     }
 
@@ -39,7 +41,7 @@ class WalletButtonsScreenshotTest {
         )
 
         paparazziRule.snapshot {
-            walletButtonsContent.Content()
+            walletButtonsContent.Content { false }
         }
     }
 

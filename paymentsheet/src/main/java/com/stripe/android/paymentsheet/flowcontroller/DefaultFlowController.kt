@@ -8,6 +8,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -35,6 +36,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -179,7 +181,16 @@ internal class DefaultFlowController @Inject internal constructor(
 
     @Composable
     override fun WalletButtons() {
-        viewModel.flowControllerStateComponent.walletButtonsContent.Content()
+        viewModel.flowControllerStateComponent.walletButtonsContent.Content(
+            remember {
+                WalletButtonsViewClickHandler { false }
+            }
+        )
+    }
+
+    @Composable
+    override fun WalletButtons(clickHandler: WalletButtonsViewClickHandler) {
+        viewModel.flowControllerStateComponent.walletButtonsContent.Content(clickHandler)
     }
 
     override fun configureWithPaymentIntent(
